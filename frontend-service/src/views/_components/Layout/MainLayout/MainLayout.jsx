@@ -27,7 +27,7 @@ import { UserService } from 'services/UserService';
 
 import { useSocket } from 'views/_components/Layout/MainLayout/_hooks';
 
-export const MainLayout = ({ children, isPublic = false }) => {
+export const MainLayout = ({ bigData, children, isPublic = false }) => {
   const navigate = useNavigate();
 
   const element = document.compatMode === 'CSS1Compat' ? document.documentElement : document.body;
@@ -223,7 +223,7 @@ export const MainLayout = ({ children, isPublic = false }) => {
 
         <Footer leftMargin={margin} />
         <EuFooter leftMargin={margin} />
-        <GlobalNotifications />
+        <GlobalNotifications bigData={bigData} />
       </div>
     </ErrorBoundary>
   );

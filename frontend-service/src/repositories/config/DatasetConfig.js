@@ -24,6 +24,7 @@ export const DatasetConfig = {
   downloadPublicDatasetFile:
     '/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?fileName={:fileName}',
   downloadExportDatasetFile: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
+  downloadExportDatasetFileDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
   downloadExportFile: '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}',
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
@@ -33,6 +34,7 @@ export const DatasetConfig = {
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
+  exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}',
   exportDatasetDataExternal:
     '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}',
   exportTableData: '/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',

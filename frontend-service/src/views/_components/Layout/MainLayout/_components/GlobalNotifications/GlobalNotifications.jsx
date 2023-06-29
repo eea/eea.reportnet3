@@ -10,11 +10,7 @@ import { ValidationService } from 'services/ValidationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
-// import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
-
-// import { MetadataUtils } from 'views/_functions/Utils';
-
-export const GlobalNotifications = () => {
+export const GlobalNotifications = ({ bigData }) => {
   const notificationContext = useContext(NotificationContext);
 
   useEffect(() => {
@@ -214,13 +210,22 @@ export const GlobalNotifications = () => {
     try {
       notificationContext.add({ type: 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD' });
 
-      const { data } = await DatasetService.downloadExportDatasetFile(
-        notification.content.datasetId,
-        notification.content.datasetName
-      );
+      let downloadFile;
 
-      if (data.size !== 0) {
-        DownloadFile(data, notification.content.datasetName);
+      if (bigData) {
+        downloadFile = await DatasetService.downloadExportDatasetFileDL(
+          notification.content.datasetId,
+          notification.content.datasetName
+        );
+      } else {
+        downloadFile = await DatasetService.downloadExportDatasetFile(
+          notification.content.datasetId,
+          notification.content.datasetName
+        );
+      }
+
+      if (downloadFile.data.size !== 0) {
+        DownloadFile(downloadFile.data, notification.content.datasetName);
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadExportDatasetFile.', error);
