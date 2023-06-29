@@ -73,7 +73,7 @@ public class LoadValidationsHelperDL {
 
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
         s3PathResolver.setTableName(S3_VALIDATION);
-        if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION)) {
+        if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)){// && dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION)) {
             List<GroupValidationVO> errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter, typeEntitiesFilter, tableFilter,
                     fieldValueFilter, pageable, headerField, asc, true);
             validation.setErrors(errors);

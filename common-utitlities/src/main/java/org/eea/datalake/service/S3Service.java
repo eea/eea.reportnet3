@@ -98,4 +98,9 @@ public interface S3Service {
      * @return table name query path
      */
     String getTableAsFolderQueryPath(S3PathResolver s3PathResolver, String path);
+
+    /**
+     * @return export Folder path
+     */
+    String getExportFolderPath(S3PathResolver s3PathResolver);
 }

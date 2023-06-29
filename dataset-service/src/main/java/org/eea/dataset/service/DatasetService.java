@@ -533,6 +533,17 @@ public interface DatasetService {
 
 
   /**
+   * Download exported file DL.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws EEAException the EEA exception
+   */
+    File downloadExportedFileDL(Long datasetId, String fileName)
+        throws EEAException;
+
+    /**
    * Check any schema available in public.
    *
    * @param dataflowId the dataflow id
@@ -694,4 +705,9 @@ public interface DatasetService {
    */
   void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType, JobInfoEnum jobInfo);
 
+  /**
+   * Get Data provider id by dataset id
+   * @param datasetId
+   */
+  Long getDataProviderIdById(Long datasetId);
 }

@@ -94,6 +94,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     arePrefilledTablesDeleted: false,
     areUpdatingTables: false,
     availableInPublic: true,
+    bigData: false,
     constraintManagingId: '',
     dashDialogVisible: false,
     dataflowName: '',
@@ -327,6 +328,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     designerDispatch({
       type: 'GET_METADATA',
       payload: {
+        bigData: metaData.dataflow.bigData,
         dataflowName: metaData.dataflow.name,
         dataflowType: metaData.dataflow.type,
         metaData,
@@ -1471,7 +1473,18 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
-          subtitle={designerState.dataflowName}
+          subtitle={
+            designerState.bigData ? (
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                    name: designerState.dataflowName
+                  })
+                }}></p>
+            ) : (
+              designerState.dataflowName
+            )
+          }
           title={`${resourcesContext.messages['datasetSchema']}: ${designerState.datasetSchemaName}`}
         />
         <h4 className={styles.descriptionLabel}>
@@ -1759,6 +1772,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         {renderSwitchView()}
         {!isNil(designerState.webform) && designerState.viewType['webform'] ? (
           <Webforms
+            bigData={designerState.bigData}
             dataflowId={dataflowId}
             datasetId={datasetId}
             options={webformOptions}
@@ -1767,6 +1781,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           />
         ) : (
           <TabsDesigner
+            bigData={designerState.bigData}
             changeMode={changeMode}
             datasetSchema={designerState.datasetSchema}
             datasetSchemas={designerState.datasetSchemas}
@@ -1867,6 +1882,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             style={{ width: '90%' }}
             visible={designerState.isValidationViewerVisible}>
             <ShowValidationsList
+              bigData={designerState.bigData}
               dataflowId={dataflowId}
               datasetId={datasetId}
               datasetName={designerState.datasetSchemaName}

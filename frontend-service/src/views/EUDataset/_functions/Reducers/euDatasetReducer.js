@@ -12,6 +12,7 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'GET_DATAFLOW_DETAILS':
       return {
         ...state,
+        bigData: payload.bigData,
         dataflowName: payload.name,
         dataflowType: payload.dataflowType
       };

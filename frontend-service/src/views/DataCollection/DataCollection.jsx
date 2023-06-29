@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataCollection = () => {
   const navigate = useNavigate();
@@ -246,6 +247,7 @@ export const DataCollection = () => {
 
   const onRenderTabsSchema = (
     <TabsSchema
+      bigData={metadata?.dataflow.bigData}
       dataflowType={dataflowType}
       datasetSchemaId={datasetSchemaId}
       hasCountryCode={true}
@@ -278,7 +280,23 @@ export const DataCollection = () => {
 
   return layout(
     <Fragment>
-      <Title icon="dataCollection" iconSize="3.5rem" subtitle={dataflowName} title={dataCollectionName} />
+      <Title
+        icon="dataCollection"
+        iconSize="3.5rem"
+        subtitle={
+          metadata?.dataflow.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: dataflowName
+                })
+              }}></p>
+          ) : (
+            dataflowName
+          )
+        }
+        title={dataCollectionName}
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">

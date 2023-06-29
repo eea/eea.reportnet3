@@ -10,4 +10,6 @@ public interface S3ConvertService {
     void convertParquetToJSON(File parquetFile, File jsonOutputFile) throws IOException;
 
     void convertParquetToXML(File parquetFile, File xmlOutputFile) throws IOException;
+
+    void convertParquetToExcel(File parquetFile, File xmlOutputFile);
 }

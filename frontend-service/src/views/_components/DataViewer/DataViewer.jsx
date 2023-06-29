@@ -59,6 +59,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataViewer = ({
+  bigData,
   dataProviderId,
   datasetSchemaId,
   hasCountryCode,
@@ -268,6 +269,7 @@ export const DataViewer = ({
 
   const { columns, getTooltipMessage, onShowFieldInfo, originalColumns, selectedHeader, setColumns } = useSetColumns(
     actionTemplate,
+    bigData,
     cellDataEditor,
     colsSchema,
     columnOptions,
@@ -362,19 +364,33 @@ export const DataViewer = ({
     setIsLoading(true);
     try {
       let fields;
+      let data;
       if (!isUndefined(sField) && sField !== null) {
         fields = `${sField}:${sOrder}`;
       }
-      const data = await DatasetService.getTableData({
-        datasetId,
-        tableSchemaId: tableId,
-        pageNum: Math.floor(fRow / nRows),
-        pageSize: nRows,
-        fields,
-        levelError: levelErrorValidationsItems,
-        ruleId: tableId === selectedTableSchemaId ? groupedRules : undefined,
-        value: valueFilter
-      });
+      if (bigData) {
+        data = await DatasetService.getTableDataDL({
+          datasetId,
+          tableSchemaId: tableId,
+          pageNum: Math.floor(fRow / nRows),
+          pageSize: nRows,
+          fields,
+          levelError: levelErrorValidationsItems,
+          ruleId: tableId === selectedTableSchemaId ? groupedRules : undefined,
+          value: valueFilter
+        });
+      } else {
+        data = await DatasetService.getTableData({
+          datasetId,
+          tableSchemaId: tableId,
+          pageNum: Math.floor(fRow / nRows),
+          pageSize: nRows,
+          fields,
+          levelError: levelErrorValidationsItems,
+          ruleId: tableId === selectedTableSchemaId ? groupedRules : undefined,
+          value: valueFilter
+        });
+      }
 
       if (!isEmpty(data.records) && !isUndefined(onLoadTableData)) onLoadTableData(true);
       if (!isUndefined(colsSchema) && !isEmpty(colsSchema) && !isUndefined(data)) {
@@ -1149,6 +1165,7 @@ export const DataViewer = ({
             (hasWebformWritePermissions && hasWritePermissions && !tableReadOnly && !tableFixedNumber) ||
             (hasWritePermissions && isReferenceDataset) ? (
               <Footer
+                bigData={bigData}
                 hasWritePermissions={
                   (hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
                 }

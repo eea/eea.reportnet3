@@ -262,6 +262,9 @@ public final class LiteralConstants {
   /** The Constant S3_EXPORT_PATH: {@value}. */
   public static final String S3_EXPORT_PATH = "%s/%s/%s/export/%s";
 
+  /** The Constant S3_EXPORT_FOLDER_PATH: {@value}. */
+  public static final String S3_EXPORT_FOLDER_PATH = "%s/%s/%s/export";
+
   /** The Constant S3_EXPORT_QUERY_PATH: {@value}. */
   public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"export\".\"%s\"";
 

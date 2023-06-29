@@ -332,6 +332,12 @@ public class DatasetServiceImpl implements DatasetService {
   private int defaultProcessPriority = 20;
 
   /**
+   * The path export DL.
+   */
+  @Value("${exportDLPath}")
+  private String exportDLPath;
+
+  /**
    * Save all records.
    *
    * @param datasetId the dataset id
@@ -2901,6 +2907,31 @@ public class DatasetServiceImpl implements DatasetService {
     return file;
   }
 
+
+  /**
+   * Download exported file DL.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public File downloadExportedFileDL(Long datasetId, String fileName)
+      throws EEAException {
+    // we compound the route and create the file
+    File file =
+        new File(new File(exportDLPath), FilenameUtils.getName(fileName));
+
+    if (!file.exists()) {
+      LOG_ERROR.error(
+          "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName);
+      throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
+    }
+    return file;
+  }
+
   /**
    * Gets the table schema.
    *
@@ -3693,6 +3724,19 @@ public class DatasetServiceImpl implements DatasetService {
     importFileData.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(importFileData);
     releaseImportFailedNotification(datasetId, tableSchemaId, fileName, eventType);
+  }
+
+  /**
+   * Gets the data provider id by dataset id.
+   *
+   * @param datasetId the dataset id
+   *
+   * @return the data provider id
+   */
+  @Override
+  @Cacheable(value = "dataProviderId", key = "#datasetId")
+  public Long getDataProviderIdById(Long datasetId) {
+    return dataSetMetabaseRepository.findDataProviderIdById(datasetId);
   }
 
 }

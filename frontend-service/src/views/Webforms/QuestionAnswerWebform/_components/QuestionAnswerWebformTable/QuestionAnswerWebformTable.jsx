@@ -21,6 +21,7 @@ import { QuestionAnswerWebformTableUtils } from './_functions/Utils/QuestionAnsw
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const QuestionAnswerWebformTable = ({
+  bigData,
   dataProviderId,
   dataflowId,
   datasetId,
@@ -61,14 +62,24 @@ export const QuestionAnswerWebformTable = ({
       const sortFieldSchemaId = !isNil(tables.sortBy)
         ? getFieldSchemaColumnIdByHeader(schemaTables.records, tables.sortBy)
         : undefined;
-
-      const tableData = await DatasetService.getTableData({
-        datasetId,
-        tableSchemaId: schemaTables?.tableSchemaId,
-        pageSize: 100,
-        fields: sortFieldSchemaId !== '' && !isUndefined(sortFieldSchemaId) ? `${sortFieldSchemaId}:${1}` : undefined,
-        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-      });
+      let tableData;
+      if (bigData) {
+        tableData = await DatasetService.getTableDataDL({
+          datasetId,
+          tableSchemaId: schemaTables?.tableSchemaId,
+          pageSize: 100,
+          fields: sortFieldSchemaId !== '' && !isUndefined(sortFieldSchemaId) ? `${sortFieldSchemaId}:${1}` : undefined,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        });
+      } else {
+        tableData = await DatasetService.getTableData({
+          datasetId,
+          tableSchemaId: schemaTables?.tableSchemaId,
+          pageSize: 100,
+          fields: sortFieldSchemaId !== '' && !isUndefined(sortFieldSchemaId) ? `${sortFieldSchemaId}:${1}` : undefined,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+        });
+      }
 
       setData(parseData(tableData.records, tables, schemaTables));
       setSchemaData(tableData);

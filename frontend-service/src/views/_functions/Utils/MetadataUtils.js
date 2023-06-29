@@ -7,6 +7,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
     const dataflowMetadata = await DataflowService.getDetails(dataflowId);
 
     metadata.dataflow = {
+      bigData: dataflowMetadata.bigData,
       dataflowId,
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
