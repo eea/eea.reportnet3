@@ -23,7 +23,7 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
   public void apply(RequestTemplate template) {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Authentication authentication = securityContext.getAuthentication();
-    if (template.url().contains("api/v3/catalog/by-path")) {
+    if (template.url().contains("api/v3/catalog")) {
       return;
     }
     if (authentication instanceof UsernamePasswordAuthenticationToken) {

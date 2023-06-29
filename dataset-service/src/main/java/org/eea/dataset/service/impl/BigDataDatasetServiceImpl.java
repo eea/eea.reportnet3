@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -37,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -50,7 +50,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 
-@Import(org.eea.datalake.service.impl.S3ServiceImpl.class)
+@ImportDataLakeCommons
 @Service
 public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
@@ -93,6 +93,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     public RepresentativeControllerZuul representativeControllerZuul;
+
+    @Autowired
+    public DremioHelperService dremioHelperService;
 
 
     @Override
@@ -233,9 +236,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
             String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
             s3HandlerService.uploadFileToBucket(importPathForParquet, parquetFileNameAndPath.getValue());
-            //promote folder
+            promoteFolder(importFileInDremioInfo, parquetFileNameAndPath.getKey());
         }
         LOG.info("Uploaded parquet files to s3 {}", importFileInDremioInfo);
+    }
+
+    private void promoteFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName){
+        Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
+        String tableSchemaName = fileName.replace(".parquet", "");
+        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
+        dremioHelperService.promoteFolder(s3PathResolver, tableSchemaName);
     }
 
     private String getImportPathForParquet(ImportFileInDremioInfo importFileInDremioInfo, String fileName) throws Exception {
