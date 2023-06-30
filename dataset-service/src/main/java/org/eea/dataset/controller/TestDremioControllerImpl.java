@@ -117,7 +117,7 @@ public class TestDremioControllerImpl {
             File myFile = getFile(filename);
 
             File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".xlsx");
-            s3ConvertService.convertParquetToExcel(myFile, toExport);
+            s3ConvertService.convertParquetToXLSX(myFile, toExport);
 
             download(filename, response, toExport);
         } catch (IOException | ResponseStatusException ex) {
