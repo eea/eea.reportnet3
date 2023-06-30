@@ -102,6 +102,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.zip.*;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class FileTreatmentHelper.
@@ -790,14 +791,14 @@ public class FileTreatmentHelper implements DisposableBean {
                 String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
                 if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
                     File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
-                    File csvFile = new File(exportDLPath + filename.replace(".parquet",".csv"));
+                    File csvFile = new File(exportDLPath + filename.replace(PARQUET_TYPE,CSV_TYPE));
 
                     s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
                 } else if (extension.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                     File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
-                    File xlsxFile = new File(exportDLPath + filename.replace(".parquet",".xlsx"));
+                    File xlsxFile = new File(exportDLPath + filename.replace(PARQUET_TYPE,XLSX_TYPE));
 
-                    s3ConvertService.convertParquetToExcel(parquetFile, xlsxFile);
+                    s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
                 }
             }
         } catch (IOException | NullPointerException e) {
