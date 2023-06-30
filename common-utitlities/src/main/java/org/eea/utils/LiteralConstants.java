@@ -274,6 +274,21 @@ public final class LiteralConstants {
   /** The Constant S3_BUCKET_NAME: {@value}. */
   public static final String S3_BUCKET_NAME = "rn3-dataset";
 
+  /** The Constant JSON_TYPE: {@value}. */
+  public static final String JSON_TYPE = ".json";
+
+  /** The Constant CSV_TYPE: {@value}. */
+  public static final String CSV_TYPE = ".csv";
+
+  /** The Constant XML_TYPE: {@value}. */
+  public static final String XML_TYPE = ".xml";
+
+  /** The Constant XLSX_TYPE: {@value}. */
+  public static final String XLSX_TYPE = ".xlsx";
+
+  /** The Constant PARQUET_TYPE: {@value}. */
+  public static final String PARQUET_TYPE = ".parquet";
+
 
   /**
    * Instantiates a new literal constants.

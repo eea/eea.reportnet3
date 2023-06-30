@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.eea.utils.LiteralConstants.*;
+
 @Service
 public class S3ConvertServiceImpl implements S3ConvertService {
 
@@ -27,7 +29,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     @Override
     public void convertParquetToCSV(File parquetFile, File csvOutputFile) {
-        validateFileFormat(parquetFile, csvOutputFile);
+        validateFileFormat(parquetFile, csvOutputFile, CSV_TYPE);
 
         try (InputStream inputStream = new FileInputStream(parquetFile);
             CSVWriter csvWriter = new CSVWriter(new FileWriter(csvOutputFile),
@@ -67,7 +69,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     @Override
     public void convertParquetToJSON(File parquetFile, File jsonOutputFile) {
-        validateFileFormat(parquetFile, jsonOutputFile);
+        validateFileFormat(parquetFile, jsonOutputFile, JSON_TYPE);
 
         try (InputStream inputStream = new FileInputStream(parquetFile);
             FileWriter fw = new FileWriter(jsonOutputFile, true);
@@ -119,7 +121,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     @Override
     public void convertParquetToXML(File parquetFile, File xmlOutputFile) {
-        validateFileFormat(parquetFile, xmlOutputFile);
+        validateFileFormat(parquetFile, xmlOutputFile, XML_TYPE);
 
         try (InputStream inputStream = new FileInputStream(parquetFile);
             FileWriter fw = new FileWriter(xmlOutputFile, true);
@@ -157,8 +159,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public void convertParquetToExcel(File parquetFile, File excelOutputFile) {
-        validateFileFormat(parquetFile, excelOutputFile);
+    public void convertParquetToXLSX(File parquetFile, File excelOutputFile) {
+        validateFileFormat(parquetFile, excelOutputFile, XLSX_TYPE);
 
         try (InputStream inputStream = new FileInputStream(parquetFile)) {
             ParquetStream parquetStream = new ParquetStream(inputStream);
@@ -196,10 +198,10 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
 
-    private void validateFileFormat(File parquetFile, File csvOutputFile) {
-        Preconditions.checkArgument(parquetFile.getName().endsWith(".parquet"),
+    private void validateFileFormat(File parquetFile, File csvOutputFile, String type) {
+        Preconditions.checkArgument(parquetFile.getName().endsWith(PARQUET_TYPE),
             "parquet file should have .parquet extension");
-        Preconditions.checkArgument(csvOutputFile.getName().endsWith(".csv"),
+        Preconditions.checkArgument(csvOutputFile.getName().endsWith(type),
             "csv file should have .csv extension");
         Preconditions.checkArgument(!csvOutputFile.exists(),
             "Output file " + csvOutputFile.getAbsolutePath() + " already exists");
