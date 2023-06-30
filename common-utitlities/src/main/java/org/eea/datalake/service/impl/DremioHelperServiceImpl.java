@@ -98,6 +98,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 folderId = item.getId();
             }
         }
+        LOG.info("Found folderId {} for folderName {}", folderId, folderName);
         return folderId;
     }
 
