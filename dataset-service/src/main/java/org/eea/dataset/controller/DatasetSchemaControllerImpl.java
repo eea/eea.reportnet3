@@ -1,19 +1,10 @@
 package org.eea.dataset.controller;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.netty.util.internal.StringUtil;
+import io.swagger.annotations.*;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.DesignDatasetService;
+import org.eea.dataset.service.*;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -31,11 +22,7 @@ import org.eea.interfaces.vo.dataset.OrderVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.SimpleDatasetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.*;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
@@ -51,24 +38,18 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.netty.util.internal.StringUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetSchemaControllerImpl.
@@ -1734,5 +1715,56 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @GetMapping(value = "/private/getTableSchemName")
   public String getTableSchemaName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId) {
     return dataschemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
+  }
+
+  /**
+   * Finds table schema
+   * @param tableSchemaId
+   * @param datasetSchemaId
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/getTableSchemaVo")
+  public TableSchemaVO getTableSchemaVO(@RequestParam("tableSchemaId") String tableSchemaId, @RequestParam("datasetSchemaId") String datasetSchemaId) {
+    try {
+      return dataschemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+    } catch (Exception e) {
+      LOG.error("Error retrieving table schema for tableSchemaId {} and datasetSchemaId {}", tableSchemaId, datasetSchemaId);
+      throw e;
+    }
+  }
+
+  /**
+   * Finds field schema
+   * @param datasetSchemaId
+   * @param idFieldSchema
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/getFieldSchemaVo")
+  public FieldSchemaVO getFieldSchema(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("idFieldSchema") String idFieldSchema) {
+    return dataschemaService.getFieldSchema(datasetSchemaId, idFieldSchema);
+  }
+
+  /**
+   * Finds field name
+   * @param datasetSchemaId
+   * @param tableSchemaId
+   * @param parameters
+   * @param ruleReferenceId
+   * @param ruleReferenceFieldSchemaPKId
+   * @return
+   */
+  @Override
+  @GetMapping(value = "/private/getFieldName")
+  public String getFieldName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId,
+                      @RequestParam("parameters") List<String> parameters, @RequestParam("ruleReferenceId") String ruleReferenceId,
+                             @RequestParam(value = "ruleReferenceFieldSchemaPKId", required = false) String ruleReferenceFieldSchemaPKId) {
+    try {
+      return dataschemaService.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleReferenceId, ruleReferenceFieldSchemaPKId);
+    } catch (Exception e) {
+      LOG.error("Error finding field name for datasetSchemaId {}, tableSchemaId {}", datasetSchemaId, tableSchemaId);
+    }
+    return null;
   }
 }

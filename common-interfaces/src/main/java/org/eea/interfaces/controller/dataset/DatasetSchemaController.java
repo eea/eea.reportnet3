@@ -474,4 +474,35 @@ public interface DatasetSchemaController {
   @GetMapping(value = "/private/getTableSchemName")
   String getTableSchemaName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId);
 
+  /**
+   * Finds table schema
+   * @param tableSchemaId
+   * @param datasetSchemaId
+   * @return
+   */
+  @GetMapping(value = "/private/getTableSchemaVo")
+  TableSchemaVO getTableSchemaVO(@RequestParam("tableSchemaId") String tableSchemaId, @RequestParam("datasetSchemaId") String datasetSchemaId);
+
+  /**
+   * Finds field schema
+   * @param datasetSchemaId
+   * @param idFieldSchema
+   * @return
+   */
+  @GetMapping(value = "/private/getFieldSchemaVo")
+  FieldSchemaVO getFieldSchema(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("idFieldSchema") String idFieldSchema);
+
+  /**
+   * Finds field name
+   * @param datasetSchemaId
+   * @param tableSchemaId
+   * @param parameters
+   * @param ruleReferenceId
+   * @param ruleReferenceFieldSchemaPKId
+   * @return
+   */
+  @GetMapping(value = "/private/getFieldName")
+  String getFieldName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId,
+                      @RequestParam("parameters") List<String> parameters, @RequestParam("ruleReferenceId") String ruleReferenceId,
+                      @RequestParam(value = "ruleReferenceFieldSchemaPKId", required = false) String ruleReferenceFieldSchemaPKId);
 }

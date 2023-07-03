@@ -1,9 +1,6 @@
 package org.eea.validation.persistence.repository;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import javax.annotation.CheckForNull;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.utils.LiteralConstants;
@@ -15,7 +12,11 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
-import com.mongodb.client.result.UpdateResult;
+
+import javax.annotation.CheckForNull;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * The Class ExtendedRulesRepositoryImpl.
@@ -570,6 +571,31 @@ public class ExtendedRulesRepositoryImpl implements ExtendedRulesRepository {
         Aggregation.project().and(aggregationOperationContext -> filter)
             .as(LiteralConstants.RULES)),
         RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
+    List<Rule> rules = new ArrayList<>();
+    if (rulesSchema != null && rulesSchema.getRules() != null) {
+      rules = rulesSchema.getRules();
+    }
+    return rules;
+  }
+
+  /**
+   * Finds rules enabled
+   * @param datasetSchemaId the dataset schema id
+   * @return
+   */
+  @Override
+  public List<Rule> findRulesEnabled(ObjectId datasetSchemaId) {
+    Document enabled = new Document("$eq", Arrays.asList("$$rule.enabled", true));
+    Document filterExpression = new Document();
+    filterExpression.append(INPUT, RULES);
+    filterExpression.append("as", "rule");
+    filterExpression.append("cond", new Document("$and", Arrays.asList(enabled)));
+    Document filter = new Document(FILTER, filterExpression);
+    RulesSchema rulesSchema = mongoTemplate.aggregate(Aggregation.newAggregation(
+                    Aggregation.match(Criteria.where(LiteralConstants.ID_DATASET_SCHEMA).is(datasetSchemaId)),
+                    Aggregation.project().and(aggregationOperationContext -> filter)
+                            .as(LiteralConstants.RULES)),
+            RulesSchema.class, RulesSchema.class).getUniqueMappedResult();
     List<Rule> rules = new ArrayList<>();
     if (rulesSchema != null && rulesSchema.getRules() != null) {
       rules = rulesSchema.getRules();

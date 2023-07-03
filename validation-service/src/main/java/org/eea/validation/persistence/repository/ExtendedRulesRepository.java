@@ -234,4 +234,12 @@ public interface ExtendedRulesRepository {
    * @return the list
    */
   List<Rule> findSqlRulesEnabled(ObjectId datasetSchemaId);
+
+  /**
+   * Find rules enabled.
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the list
+   */
+  List<Rule> findRulesEnabled(ObjectId datasetSchemaId);
 }

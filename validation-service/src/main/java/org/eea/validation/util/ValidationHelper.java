@@ -7,10 +7,12 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
@@ -21,6 +23,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -80,6 +83,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
 
 /**
  * The Class ValidationHelper.
@@ -185,9 +190,11 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private TaskMapper taskMapper;
 
-  /** The notification controller zuul. */
   @Autowired
-  private NotificationController.NotificationControllerZuul notificationControllerZuul;
+  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+
+  @Autowired
+  private S3Helper s3Helper;
 
 
   /**
@@ -325,6 +332,50 @@ public class ValidationHelper implements DisposableBean {
     }
     LOG.info("Successfully executed validation for datasetId {}", datasetId);
     dataset = null;
+  }
+
+  @LockMethod(removeWhenFinish = true, isController = false)
+  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver) {
+    initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    LOG.info("Obtaining dataset metabase from datasetId {} to perform validationDL. The schema from the metabase is {}",
+            datasetId, dataset.getDatasetSchema());
+    ProcessVO processVO = processControllerZuul.findById(processId);
+    if (processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+            ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.VALIDATION, processId,
+            processVO.getUser(), 0, released)) {
+
+      //delete previous validation folder
+      if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+        s3Helper.deleleFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+      }
+
+      DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
+      List<Rule> rules =
+              rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
+      schema.getTableSchemas().parallelStream().forEach(tableSchemaVO -> {
+        rules.stream().forEach(rule -> {
+          Map<String, Object> value = new HashMap<>();
+          value.put(LiteralConstants.DATASET_ID, dataset.getId());
+          value.put("uuid", processId);
+          value.put("dataflowId", dataset.getDataflowId());
+          value.put("datasetId", dataset.getId());
+          value.put("user", processesMap.get(processId).getRequestingUser());
+          value.put("dataProviderId", dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0);
+          value.put("datasetSchema", dataset.getDatasetSchema());
+          value.put("ruleId", rule.getRuleId().toString());
+          value.put("tableName", tableSchemaVO.getNameTableSchema());
+          value.put("tableSchemaId", tableSchemaVO.getIdTableSchema());
+          value.put("bigData", "true");
+          Task task;
+          if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint")) {
+            addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
+          } else {
+            addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL, value);
+          }
+        });
+      });
+    }
   }
 
   /**
@@ -533,8 +584,14 @@ public class ValidationHelper implements DisposableBean {
       new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
       rule = (String) (eeaEventVO.getData().get("sqlRule"));
     }
-    ValidationTask validationTask = new ValidationTask(taskId, eeaEventVO, validator, datasetId,
-        getKieBase(processId, datasetId, rule), processId);
+    ValidationTask validationTask;
+    if (eeaEventVO.getData().get("bigData")!=null && eeaEventVO.getData().get("bigData").equals("true")) {
+       validationTask = new ValidationTask(taskId, eeaEventVO, validator, datasetId,
+              null, processId);
+    } else {
+       validationTask = new ValidationTask(taskId, eeaEventVO, validator, datasetId,
+              getKieBase(processId, datasetId, rule), processId);
+    }
 
     // first every task is always queued up to ensure the order
 

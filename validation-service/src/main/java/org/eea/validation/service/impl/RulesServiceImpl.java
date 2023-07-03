@@ -1,20 +1,9 @@
 package org.eea.validation.service.impl;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -44,22 +33,9 @@ import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.validation.mapper.DatasetHistoricRuleMapper;
-import org.eea.validation.mapper.IntegrityMapper;
-import org.eea.validation.mapper.RuleHistoricInfoMapper;
-import org.eea.validation.mapper.RuleMapper;
-import org.eea.validation.mapper.RulesSchemaMapper;
-import org.eea.validation.persistence.repository.AuditRepository;
-import org.eea.validation.persistence.repository.IntegritySchemaRepository;
-import org.eea.validation.persistence.repository.RulesRepository;
-import org.eea.validation.persistence.repository.RulesSequenceRepository;
-import org.eea.validation.persistence.repository.SchemasRepository;
-import org.eea.validation.persistence.repository.UniqueConstraintRepository;
-import org.eea.validation.persistence.schemas.DataSetSchema;
-import org.eea.validation.persistence.schemas.FieldSchema;
-import org.eea.validation.persistence.schemas.IntegritySchema;
-import org.eea.validation.persistence.schemas.TableSchema;
-import org.eea.validation.persistence.schemas.UniqueConstraintSchema;
+import org.eea.validation.mapper.*;
+import org.eea.validation.persistence.repository.*;
+import org.eea.validation.persistence.schemas.*;
 import org.eea.validation.persistence.schemas.audit.Audit;
 import org.eea.validation.persistence.schemas.audit.RuleHistoricInfo;
 import org.eea.validation.persistence.schemas.rule.Rule;
@@ -79,10 +55,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVWriter;
+
+import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class ValidationService.
@@ -2075,6 +2053,15 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
-
+  /**
+   * Finds rule
+   * @param datasetSchemaId
+   * @param ruleId
+   * @return
+   */
+  @Override
+  public RuleVO findRule(String datasetSchemaId, String ruleId) {
+    return ruleMapper.entityToClass(rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId)));
+  }
 
 }

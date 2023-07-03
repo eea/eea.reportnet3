@@ -6,9 +6,9 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 
-import static org.eea.utils.LiteralConstants.S3_BUCKET_NAME;
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 @Service
 public class S3HelperImpl implements S3Helper {
@@ -45,5 +45,17 @@ public class S3HelperImpl implements S3Helper {
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+    }
+
+    /**
+     * Deletes folder from s3
+     * @param s3PathResolver
+     * @param folderPath
+     */
+    @Override
+    public void deleleFolder(S3PathResolver s3PathResolver, String folderPath) {
+        String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
+        result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
     }
 }
