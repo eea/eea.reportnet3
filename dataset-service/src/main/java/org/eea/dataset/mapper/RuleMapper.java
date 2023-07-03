@@ -25,6 +25,7 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
   @Mapping(source = "ruleId", target = "ruleId", ignore = true)
   @Mapping(source = "referenceId", target = "referenceId", ignore = true)
   @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
+  @Mapping(source = "referenceFieldSchemaPKId", target = "referenceFieldSchemaPKId", ignore = true)
   Rule classToEntity(RuleVO ruleVO);
 
   /**
@@ -37,6 +38,7 @@ public interface RuleMapper extends IMapper<Rule, RuleVO> {
   @Mapping(source = "ruleId", target = "ruleId", ignore = true)
   @Mapping(source = "referenceId", target = "referenceId", ignore = true)
   @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
+  @Mapping(source = "referenceFieldSchemaPKId", target = "referenceFieldSchemaPKId", ignore = true)
   RuleVO entityToClass(Rule rule);
 
   /**
