@@ -21,7 +21,6 @@ public class S3HandlerServiceImpl implements S3HandlerService {
     S3Client s3Client;
 
     public void uploadFileToBucket(String filePathInS3, String filePathInReportnet) {
-        //TODO add presigned url
         //TODO handle replace Data
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(LiteralConstants.S3_BUCKET_NAME)

@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataCollection = () => {
   const navigate = useNavigate();
@@ -57,6 +58,9 @@ export const DataCollection = () => {
 
   let exportMenuRef = useRef();
   let growlRef = useRef();
+  let bigDataRef = useRef();
+
+  bigDataRef.current = metadata?.dataflow.bigData;
 
   useBreadCrumbs({ currentPage: CurrentPage.DATA_COLLECTION, dataflowId, dataflowType, isLoading });
 
@@ -122,7 +126,11 @@ export const DataCollection = () => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDatasetData(datasetId, fileType);
+      if (bigDataRef.current) {
+        await DatasetService.exportDatasetDataDL(datasetId, fileType);
+      } else {
+        await DatasetService.exportDatasetData(datasetId, fileType);
+      }
     } catch (error) {
       console.error('DataCollection - onExportDataInternalExtension.', error);
       const {
@@ -246,6 +254,7 @@ export const DataCollection = () => {
 
   const onRenderTabsSchema = (
     <TabsSchema
+      bigData={metadata?.dataflow.bigData}
       dataflowType={dataflowType}
       datasetSchemaId={datasetSchemaId}
       hasCountryCode={true}
@@ -265,7 +274,7 @@ export const DataCollection = () => {
 
   const layout = children => {
     return (
-      <MainLayout leftSideBarConfig={{ buttons: [] }}>
+      <MainLayout bigData={metadata?.dataflow.bigData} leftSideBarConfig={{ buttons: [] }}>
         <Growl ref={growlRef} />
         <div className="rep-container">{children}</div>
       </MainLayout>
@@ -278,7 +287,23 @@ export const DataCollection = () => {
 
   return layout(
     <Fragment>
-      <Title icon="dataCollection" iconSize="3.5rem" subtitle={dataflowName} title={dataCollectionName} />
+      <Title
+        icon="dataCollection"
+        iconSize="3.5rem"
+        subtitle={
+          metadata?.dataflow.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: dataflowName
+                })
+              }}></p>
+          ) : (
+            dataflowName
+          )
+        }
+        title={dataCollectionName}
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">

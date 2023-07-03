@@ -28,6 +28,7 @@ import { TabsUtils } from 'views/_functions/Utils/TabsUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const TabsDesigner = ({
+  bigData,
   changeMode,
   datasetSchema,
   datasetSchemas,
@@ -405,6 +406,7 @@ export const TabsDesigner = ({
                   {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead)) || tabs.length > 1 ? (
                     <FieldsDesigner
                       autoFocus={false}
+                      bigData={bigData}
                       dataflowId={dataflowId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchema.datasetSchemaId}

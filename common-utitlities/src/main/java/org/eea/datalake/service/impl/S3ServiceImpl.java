@@ -135,6 +135,13 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public String getExportFolderPath(S3PathResolver s3PathResolver) {
+        String s3ExportPath = calculateS3DCPath(s3PathResolver, S3_EXPORT_FOLDER_PATH);
+        LOG.info("Method getExportDCPath returns S3 Export Path: {}", s3ExportPath);
+        return s3ExportPath;
+    }
+
+    @Override
     public String getTableNameValidateDCQueryPath(S3PathResolver s3PathResolver) {
         String s3TableNamePath = calculateS3DCPath(s3PathResolver, S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH);
         LOG.info("Method getTableNameValidateDCQueryPath returns S3 Table Name Validate Path: {}", s3TableNamePath);
@@ -223,6 +230,10 @@ public class S3ServiceImpl implements S3Service {
             case S3_EXPORT_QUERY_PATH:
                 path = String.format(path, dataflowFolder,
                     collectionsFolder, dataCollectionFolder, fileName);
+                break;
+            case S3_EXPORT_FOLDER_PATH:
+                path = String.format(path, dataflowFolder,
+                    collectionsFolder, dataCollectionFolder);
                 break;
             default:
                 LOG.info("Wrong type value: {}", path);

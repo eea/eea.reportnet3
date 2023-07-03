@@ -22,6 +22,7 @@ import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformTable = ({
+  bigData,
   calculateSingle,
   dataProviderId,
   dataflowId,
@@ -181,16 +182,29 @@ export const WebformTable = ({
     setIsLoading(true);
     try {
       const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
+      let data;
+      if (bigData) {
+        data = await DatasetService.getTableDataDL({
+          datasetId,
+          tableSchemaId: webform.tableSchemaId,
+          pageNum: '',
+          pageSize: 300,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+          fieldSchemaId: fieldSchema || fieldId,
+          value: selectedTable.pamsId
+        });
+      } else {
+        data = await DatasetService.getTableData({
+          datasetId,
+          tableSchemaId: webform.tableSchemaId,
+          pageNum: '',
+          pageSize: 300,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+          fieldSchemaId: fieldSchema || fieldId,
+          value: selectedTable.pamsId
+        });
+      }
 
-      const data = await DatasetService.getTableData({
-        datasetId,
-        tableSchemaId: webform.tableSchemaId,
-        pageNum: '',
-        pageSize: 300,
-        levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-        fieldSchemaId: fieldSchema || fieldId,
-        value: selectedTable.pamsId
-      });
       if (!isNil(data.records)) {
         const tables = getTableElements(webform);
         const tableSchemaIds = tables.map(table => table.tableSchemaId);
@@ -200,13 +214,23 @@ export const WebformTable = ({
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
           const { fieldSchema, fieldId } = getFieldSchemaId(tables, tableSchemaId);
-          tableData[tableSchemaId] = await DatasetService.getTableData({
-            datasetId,
-            tableSchemaId,
-            levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-            fieldSchemaId: fieldSchema || fieldId,
-            value: selectedTable.pamsId
-          });
+          if (bigData) {
+            tableData[tableSchemaId] = await DatasetService.getTableDataDL({
+              datasetId,
+              tableSchemaId,
+              levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+              fieldSchemaId: fieldSchema || fieldId,
+              value: selectedTable.pamsId
+            });
+          } else {
+            tableData[tableSchemaId] = await DatasetService.getTableData({
+              datasetId,
+              tableSchemaId,
+              levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+              fieldSchemaId: fieldSchema || fieldId,
+              value: selectedTable.pamsId
+            });
+          }
         }
         const records = onParseWebformRecords(data.records, webform, tableData, data.totalRecords);
 

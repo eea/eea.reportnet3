@@ -31,6 +31,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const EUDataset = () => {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ export const EUDataset = () => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
+    bigData: false,
     dataflowName: '',
     dataflowType: '',
     datasetHasData: false,
@@ -113,6 +115,7 @@ export const EUDataset = () => {
       euDatasetDispatch({
         type: 'GET_DATAFLOW_DETAILS',
         payload: {
+          bigData: data.bigData,
           dataflowType: data.type,
           name: data.name
         }
@@ -294,6 +297,7 @@ export const EUDataset = () => {
 
   const renderTabsSchema = () => (
     <TabsSchema
+      bigData={euDatasetState.bigData}
       dataflowType={dataflowType}
       datasetSchemaId={euDatasetState.metaData?.dataset?.datasetSchemaId}
       hasCountryCode={true}
@@ -317,7 +321,23 @@ export const EUDataset = () => {
 
   return renderLayout(
     <Fragment>
-      <Title icon="euDataset" iconSize="3.5rem" subtitle={dataflowName} title={datasetName} />
+      <Title
+        icon="euDataset"
+        iconSize="3.5rem"
+        subtitle={
+          euDatasetState.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: dataflowName
+                })
+              }}></p>
+          ) : (
+            dataflowName
+          )
+        }
+        title={datasetName}
+      />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">

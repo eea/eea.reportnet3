@@ -8,6 +8,8 @@ export const DatasetConfig = {
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
   getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:
+    '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
+  getTableDataDL:
     '/dataset/TableValueDatasetDL/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
   downloadTableDefinitions: '/dataschema/v1/dataset/{:datasetSchemaId}/exportFieldSchemas',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
@@ -22,6 +24,7 @@ export const DatasetConfig = {
   downloadPublicDatasetFile:
     '/dataset/exportPublicFile/dataflow/{:dataflowId}/dataProvider/{:dataProviderId}?fileName={:fileName}',
   downloadExportDatasetFile: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
+  downloadExportDatasetFileDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
   downloadExportFile: '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}',
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
@@ -31,6 +34,7 @@ export const DatasetConfig = {
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
+  exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}',
   exportDatasetDataExternal:
     '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}',
   exportTableData: '/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
@@ -41,10 +45,13 @@ export const DatasetConfig = {
 
   importFileDatasetExternal: '/dataset/v2/importFileData/{:datasetId}?integrationId={:integrationId}',
   importFileTable: '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}',
-  importFileTableUpd: '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}&dataflowId={:dataflowId}',
+  importFileTableUpd:
+    '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}&dataflowId={:dataflowId}',
   importTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
   getShowValidationErrors:
+    '/validation/listGroupValidations/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
+  getShowValidationErrorsDL:
     '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getStatistics: '/datasetmetabase/{:datasetId}/loadStatistics',
   updateFieldOrder: '/dataschema/{:datasetId}/fieldSchema/order',

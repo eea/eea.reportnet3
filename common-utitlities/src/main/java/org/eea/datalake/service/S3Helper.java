@@ -1,6 +1,11 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 public interface S3Helper {
 
@@ -25,4 +30,18 @@ public interface S3Helper {
      * @param folderPath
      */
     void deleleFolder(S3PathResolver s3PathResolver, String folderPath);
+
+    /**
+     * Gets filenames from export folder
+     * @param s3PathResolver
+     * @return
+     */
+    List<S3Object> getFilenamesFromFolderExport(S3PathResolver s3PathResolver);
+
+    /**
+     * Gets file from S3
+     * @param filename
+     * @return
+     */
+    File getFileFromS3(String filename, String datasetName) throws IOException;
 }

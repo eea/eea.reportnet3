@@ -5,9 +5,11 @@ import java.io.IOException;
 
 public interface S3ConvertService {
 
-    void convertParquetToCSV(File parquetFile, File csvOutputFile) throws IOException;
+    void convertParquetToCSV(File parquetFile, File csvOutputFile);
 
-    void convertParquetToJSON(File parquetFile, File jsonOutputFile) throws IOException;
+    void convertParquetToJSON(File parquetFile, File jsonOutputFile);
 
-    void convertParquetToXML(File parquetFile, File xmlOutputFile) throws IOException;
+    void convertParquetToXML(File parquetFile, File xmlOutputFile);
+
+    void convertParquetToXLSX(File parquetFile, File xmlOutputFile);
 }

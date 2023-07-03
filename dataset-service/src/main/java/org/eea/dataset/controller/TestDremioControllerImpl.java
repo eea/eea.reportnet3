@@ -108,6 +108,25 @@ public class TestDremioControllerImpl {
         }
     }
 
+    @GetMapping("/exportExcel")
+    public void exportExcel(@ApiParam(type = "String", value = "filename")
+        @RequestParam("filename") String filename,
+        HttpServletResponse response) {
+
+        try {
+            File myFile = getFile(filename);
+
+            File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".xlsx");
+            s3ConvertService.convertParquetToXLSX(myFile, toExport);
+
+            download(filename, response, toExport);
+        } catch (IOException | ResponseStatusException ex) {
+            LOG.error("IOException/ResponseStatusException ", ex);
+        } catch (S3Exception e) {
+            LOG.error("S3Exception ", e);
+        }
+    }
+
     private void download(String filename, HttpServletResponse response, File toExport)
         throws IOException {
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION,

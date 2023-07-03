@@ -36,6 +36,7 @@ export const designerReducer = (state, { type, payload }) => {
     case 'GET_METADATA':
       return {
         ...state,
+        bigData: payload.bigData,
         dataflowName: payload.dataflowName,
         dataflowType: payload.dataflowType,
         datasetSchemaName: payload.schemaName,

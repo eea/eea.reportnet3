@@ -13,7 +13,9 @@ public enum JobInfoEnum {
 
     ERROR_EMPTY_ZIP("Empty zip file"),
 
-    ERROR_EMPTY_FILENAME("Could not retrieve file name");
+    ERROR_EMPTY_FILENAME("Could not retrieve file name"),
+
+    WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES("Some of the imported files do not match the name of the dataset's tables");
 
     /** The value. */
     private final String value;
