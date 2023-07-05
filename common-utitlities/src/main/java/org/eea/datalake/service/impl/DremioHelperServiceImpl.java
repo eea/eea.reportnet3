@@ -103,8 +103,14 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public void promoteFolder(S3PathResolver s3PathResolver, String folderName) {
-        String directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+    public void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean folderPromote) {
+        String directoryPath;
+        if(folderPromote) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        }
+        else{
+            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_PATH);
+        }
         if(checkFolderPromoted(s3PathResolver, folderName)){
             LOG.info("Folder {} is already promoted", directoryPath);
             return;
@@ -113,11 +119,11 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         DremioFolderPromotionRequestBody requestBody = new DremioFolderPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioFolderPromotionRequestBody.Format(FORMAT_TYPE));
         String folderId = getFolderId(s3PathResolver, folderName);
         try {
-            dremioApiController.promoteFolder(token, folderId, requestBody);
+            dremioApiController.promote(token, folderId, requestBody);
         } catch (FeignException e) {
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                dremioApiController.promoteFolder(token, folderId, requestBody);
+                dremioApiController.promote(token, folderId, requestBody);
             } else {
                 throw e;
             }
@@ -126,19 +132,25 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public void demoteFolder(S3PathResolver s3PathResolver, String folderName) {
-        String directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+    public void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean folderPromote) {
+        String directoryPath;
+        if(folderPromote) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        }
+        else{
+            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_PATH);
+        }
         if(!checkFolderPromoted(s3PathResolver, folderName)){
             LOG.info("Folder {} is not promoted", directoryPath);
             return;
         }
         String folderId = getFolderId(s3PathResolver, folderName);
         try {
-            dremioApiController.demoteFolder(token, folderId);
+            dremioApiController.demote(token, folderId);
         } catch (FeignException e) {
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                dremioApiController.demoteFolder(token, folderId);
+                dremioApiController.demote(token, folderId);
             } else {
                 throw e;
             }

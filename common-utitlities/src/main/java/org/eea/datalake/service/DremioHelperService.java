@@ -13,7 +13,7 @@ public interface DremioHelperService {
 
     String getFolderId(S3PathResolver s3PathResolver, String folderName);
 
-    void promoteFolder(S3PathResolver s3PathResolver, String folderName);
+    void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean folderPromote);
 
-    void demoteFolder(S3PathResolver s3PathResolver, String folderName);
+    void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean folderPromote);
 }

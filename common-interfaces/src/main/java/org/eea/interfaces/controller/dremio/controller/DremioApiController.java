@@ -19,8 +19,8 @@ public interface DremioApiController {
     DremioDirectoryItemsResponse getDirectoryItems(@RequestHeader(value = "Authorization") String token, @PathVariable("path") String path);
 
     @PostMapping(value = "api/v3/catalog/{id}", produces = MediaType.APPLICATION_JSON)
-    void promoteFolder(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String folderId, @RequestBody DremioFolderPromotionRequestBody body);
+    void promote(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String folderId, @RequestBody DremioFolderPromotionRequestBody body);
 
     @DeleteMapping(value = "api/v3/catalog/{id}", produces = MediaType.APPLICATION_JSON)
-    void demoteFolder(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String folderId);
+    void demote(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String folderId);
 }
