@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
@@ -84,6 +85,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
+import static org.eea.utils.LiteralConstants.S3_VALIDATION;
 import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
 
 /**
@@ -195,6 +197,9 @@ public class ValidationHelper implements DisposableBean {
 
   @Autowired
   private S3Helper s3Helper;
+
+  @Autowired
+  private DremioHelperService dremioHelperService;
 
 
   /**
@@ -1169,6 +1174,8 @@ public class ValidationHelper implements DisposableBean {
           // and
           // validation threads inheritances from it. This is a side effect.
           value.put("user", process.getUser());
+          DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+          S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
 
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
@@ -1197,6 +1204,9 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
+                if (!dremioHelperService.checkFolderPromoted(s3PathResolver)) {
+                  dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
+                }
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
@@ -1209,7 +1219,9 @@ public class ValidationHelper implements DisposableBean {
             } else {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
-
+              if (!dremioHelperService.checkFolderPromoted(s3PathResolver)) {
+                dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
+              }
               if (jobId!=null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
               }
