@@ -56,10 +56,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
+    public boolean checkFolderPromoted(S3PathResolver s3PathResolver) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver);
         if (directoryItems!=null) {
-            Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(6).equals(folderName)).findFirst();
+            Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(6).equals(s3PathResolver.getTableName())).findFirst();
             if (itemOptional.isPresent()) {
                 DremioDirectoryItem item = itemOptional.get();
                 if (item.getType().equals(DremioItemTypeEnum.DATASET.getValue()) && item.getDatasetType().equals(PROMOTED)) {
@@ -105,7 +105,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public void promoteFolder(S3PathResolver s3PathResolver, String folderName) {
         String directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
-        if(checkFolderPromoted(s3PathResolver, folderName)){
+        if(checkFolderPromoted(s3PathResolver)){
             LOG.info("Folder {} is already promoted", directoryPath);
             return;
         }
@@ -128,7 +128,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public void demoteFolder(S3PathResolver s3PathResolver, String folderName) {
         String directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
-        if(!checkFolderPromoted(s3PathResolver, folderName)){
+        if(!checkFolderPromoted(s3PathResolver)){
             LOG.info("Folder {} is not promoted", directoryPath);
             return;
         }

@@ -7,7 +7,7 @@ public interface DremioHelperService {
 
     String getAuthToken();
 
-    boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName);
+    boolean checkFolderPromoted(S3PathResolver s3PathResolver);
 
     DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver);
 

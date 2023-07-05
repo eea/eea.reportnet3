@@ -3492,4 +3492,37 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  @Override
+  public TableSchemaVO getTableSchemaVO(String tableSchemaId, String datasetSchemaId) {
+    return tableSchemaMapper.entityToClass(getTableSchema(tableSchemaId, datasetSchemaId));
+  }
+
+  @Override
+  public String getFieldName(String datasetSchemaId, String tableSchemaId, List<String> parameters,
+                             String ruleReferenceId, String ruleReferenceFieldSchemaPKId) throws EEAException {
+    TableSchemaVO tableSchemaVO = this.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+    RecordSchemaVO recordSchemaVO = tableSchemaVO.getRecordSchema();
+    FieldSchemaVO fieldSchemaVO = null;
+    String fieldName = null;
+    Optional<FieldSchemaVO> fieldSchemaOptional = recordSchemaVO.getFieldSchema().stream().filter(fv -> fv.getId().equals(ruleReferenceId)).findFirst();
+    if (fieldSchemaOptional.isPresent()) {
+      fieldSchemaVO = fieldSchemaOptional.get();
+      fieldName = fieldSchemaVO.getName();
+    } else {
+      //if these values are equals then it's a uniqueConstraint rule and these fields point to the tableSchemaId and not the fieldSchemaId
+      if (!ruleReferenceId.equals(ruleReferenceFieldSchemaPKId)) {
+        fieldSchemaOptional = recordSchemaVO.getFieldSchema().stream().filter(fv -> fv.getId().equals(ruleReferenceFieldSchemaPKId)).findFirst();
+        if (fieldSchemaOptional.isPresent()) {
+          fieldSchemaVO = fieldSchemaOptional.get();
+          fieldName = fieldSchemaVO.getName();
+        }
+      } else { //uniqueConstraint
+        UniqueConstraintVO uniqueConstraint = this.getUniqueConstraint(parameters.get(0));
+        String fieldSchemaId = uniqueConstraint.getFieldSchemaIds().get(0);
+        fieldSchemaVO = this.getFieldSchema(uniqueConstraint.getDatasetSchemaId(), fieldSchemaId);
+        fieldName = fieldSchemaVO.getName();
+      }
+    }
+    return fieldName;
+  }
 }

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -15,6 +17,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.multitenancy.DatasetId;
+import org.eea.validation.persistence.schemas.rule.Rule;
 
 /**
  * The Class ValidationService.
@@ -322,4 +325,11 @@ public interface RulesService {
    */
   List<DatasetHistoricRuleVO> getRuleHistoricInfoByDatasetId(Long datasetId);
 
+  /**
+   * Finds rule
+   * @param datasetSchemaId
+   * @param ruleId
+   * @return
+   */
+  RuleVO findRule(String datasetSchemaId, String ruleId);
 }

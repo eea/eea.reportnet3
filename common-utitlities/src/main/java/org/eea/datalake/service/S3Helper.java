@@ -25,6 +25,13 @@ public interface S3Helper {
     boolean checkFolderExist(S3PathResolver s3PathResolver, String path);
 
     /**
+     * Deletes folder from s3
+     * @param s3PathResolver
+     * @param folderPath
+     */
+    void deleleFolder(S3PathResolver s3PathResolver, String folderPath);
+
+    /**
      * Gets filenames from export folder
      * @param s3PathResolver
      * @return

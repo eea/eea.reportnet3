@@ -17,8 +17,8 @@ public interface Validator {
    * @param datasetId the dataset id
    * @param kieBase the kie base
    * @param taskId the task id
-   * @throws EEAException the EEA exception
+   * @throws Exception the exception
    */
   void performValidation(EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase, Long taskId)
-      throws EEAException;
+      throws Exception;
 }

@@ -579,4 +579,23 @@ public interface DatasetSchemaService {
    */
   byte[] exportZipFieldSchemas(Long datasetId) throws EEAException;
 
+  /**
+   * Finds table schema
+   * @param tableSchemaId
+   * @param datasetSchemaId
+   * @return
+   */
+  TableSchemaVO getTableSchemaVO(String tableSchemaId, String datasetSchemaId);
+
+  /**
+   * Finds fieldName based on parameters
+   * @param datasetSchemaId
+   * @param tableSchemaId
+   * @param parameters
+   * @param ruleReferenceId
+   * @param ruleReferenceFieldSchemaPKId
+   * @return
+   */
+  String getFieldName(String datasetSchemaId, String tableSchemaId, List<String> parameters, String ruleReferenceId,
+                      String ruleReferenceFieldSchemaPKId) throws EEAException;
 }

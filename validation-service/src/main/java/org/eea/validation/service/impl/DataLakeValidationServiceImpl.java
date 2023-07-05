@@ -37,6 +37,19 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
         this.validationHelper = validationHelper;
     }
 
+    /**
+     * finds and groups validation results
+     * @param s3PathResolver
+     * @param levelErrorsFilter
+     * @param typeEntitiesFilter
+     * @param tableFilter
+     * @param fieldValueFilter
+     * @param pageable
+     * @param headerField
+     * @param asc
+     * @param paged
+     * @return
+     */
     @Override
     public List<GroupValidationVO> findGroupRecordsByFilter(S3PathResolver s3PathResolver, List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
                                                             String tableFilter, String fieldValueFilter, Pageable pageable, String headerField, Boolean asc, boolean paged) {
