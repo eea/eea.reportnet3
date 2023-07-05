@@ -69,8 +69,12 @@ export const TabsDesigner = ({
   const [initialTabIndexDrag, setInitialTabIndexDrag] = useState();
   const [isEditing, setIsEditing] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
+  const [isWarningDialogVisible, setIsWarningDialogVisible] = useState(false);
   const [scrollFn, setScrollFn] = useState();
   const [tabs, setTabs] = useState([]);
+  const [tabHasErrors, setTabHasErrors] = useState(false);
+  const [warningMessage, setWarningMessage] = useState();
+  const [warningMessageTitle, setWarningMessageTitle] = useState();
 
   useEffect(() => {
     if (!isNil(datasetSchema) && !isEmpty(datasetSchema)) {
@@ -97,6 +101,12 @@ export const TabsDesigner = ({
       renderErrors(errorMessageTitle, errorMessage);
     }
   }, [isErrorDialogVisible]);
+
+  useEffect(() => {
+    if (isWarningDialogVisible) {
+      renderErrors(warningMessageTitle, warningMessage);
+    }
+  }, [isWarningDialogVisible]);
 
   const onChangeFields = (fields, isLinkChange, tabSchemaId) => {
     const inmTabs = [...tabs];
@@ -211,10 +221,20 @@ export const TabsDesigner = ({
     setInitialTabIndexDrag(draggedTabIdx);
   };
 
+  const onTabHasErrors = hasErrors => {
+    setTabHasErrors(hasErrors);
+  };
+
   const onTabNameError = (errorTitle, error) => {
     setErrorMessageTitle(errorTitle);
     setErrorMessage(error);
     setIsErrorDialogVisible(true);
+  };
+
+  const onTabNameLengthWarning = (warningTitle, warning) => {
+    setWarningMessageTitle(warningTitle);
+    setWarningMessage(warning);
+    setIsWarningDialogVisible(true);
   };
 
   const addTable = async (header, tabIndex) => {
@@ -314,7 +334,19 @@ export const TabsDesigner = ({
 
   const errorDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
-      <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => setIsErrorDialogVisible(false)} />
+      <Button
+        icon="check"
+        label={resourcesContext.messages['ok']}
+        onClick={() => {
+          setIsErrorDialogVisible(false);
+        }}
+      />
+    </div>
+  );
+
+  const warningDialogFooter = (
+    <div className="ui-dialog-buttonpane p-clearfix">
+      <Button icon="check" label={resourcesContext.messages['ok']} onClick={() => setIsWarningDialogVisible(false)} />
     </div>
   );
 
@@ -322,12 +354,32 @@ export const TabsDesigner = ({
     return (
       isErrorDialogVisible && (
         <Dialog
+          focusOnShow={false}
           footer={errorDialogFooter}
           header={errorTitle}
           modal={true}
-          onHide={() => setIsErrorDialogVisible(false)}
+          onHide={() => {
+            setIsErrorDialogVisible(false);
+          }}
           visible={isErrorDialogVisible}>
           <div className="p-grid p-fluid">{error}</div>
+        </Dialog>
+      )
+    );
+  };
+
+  const renderWarnings = (warningTitle, warning) => {
+    return (
+      !tabHasErrors &&
+      isWarningDialogVisible && (
+        <Dialog
+          focusOnShow={false}
+          footer={warningDialogFooter}
+          header={warningTitle}
+          modal={true}
+          onHide={() => setIsWarningDialogVisible(false)}
+          visible={isWarningDialogVisible}>
+          <div className="p-grid p-fluid">{warning}</div>
         </Dialog>
       )
     );
@@ -365,6 +417,7 @@ export const TabsDesigner = ({
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
         isErrorDialogVisible={isErrorDialogVisible}
+        isWarningDialogVisible={isWarningDialogVisible}
         maxLength={maxLength}
         name="TabsDesigner"
         onTabAdd={onTabAdd}
@@ -376,7 +429,9 @@ export const TabsDesigner = ({
         onTabDragAndDrop={onTableDragAndDrop}
         onTabDragAndDropStart={onTableDragAndDropStart}
         onTabEditingHeader={onTabEditingHeader}
+        onTabHasErrors={onTabHasErrors}
         onTabNameError={onTabNameError}
+        onTabNameLengthWarning={onTabNameLengthWarning}
         tableSchemaId={tableSchemaId}
         tabs={tabs}
         totalTabs={tabs.length}
@@ -491,6 +546,7 @@ export const TabsDesigner = ({
     <Fragment>
       {renderTabViews()}
       {renderErrors(errorMessageTitle, errorMessage)}
+      {renderWarnings(warningMessageTitle, warningMessage)}
     </Fragment>
   );
 };
