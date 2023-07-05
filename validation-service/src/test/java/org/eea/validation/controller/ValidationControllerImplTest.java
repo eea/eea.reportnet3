@@ -3,8 +3,10 @@ package org.eea.validation.controller;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -77,6 +79,9 @@ public class ValidationControllerImplTest {
   @Mock
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /** The security context. */
   SecurityContext securityContext;
 
@@ -125,6 +130,9 @@ public class ValidationControllerImplTest {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     validationController.validateDataSetData(1L, false, null);
     Mockito.verify(validationHelper, times(1)).executeValidation(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -142,6 +150,9 @@ public class ValidationControllerImplTest {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     try {
       validationController.validateDataSetData(1L, false, null);
     } catch (ResponseStatusException e) {
@@ -157,6 +168,9 @@ public class ValidationControllerImplTest {
     Mockito.when(validationHelper.getPriority(Mockito.any())).thenReturn(60);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataFlowVO);
     doThrow(new EEAException("e")).when(validationHelper).executeValidation(Mockito.anyLong(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.anyBoolean());
     validationController.validateDataSetData(1L, false, null);
