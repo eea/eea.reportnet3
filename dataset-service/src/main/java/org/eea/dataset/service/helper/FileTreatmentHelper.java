@@ -790,15 +790,15 @@ public class FileTreatmentHelper implements DisposableBean {
                 //String filename = new File(key).getName();
                 String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
                 if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
-                    //filename = filename.replace(PARQUET_TYPE,CSV_TYPE);
+                    nameDataset = nameDataset + CSV_TYPE;
                     File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
                     File csvFile = new File(exportDLPath + nameDataset + CSV_TYPE);
 
                     s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
                 } else if (extension.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
-                    //filename = filename.replace(PARQUET_TYPE,XLSX_TYPE);
+                    nameDataset = nameDataset + XLSX_TYPE;
                     File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
-                    File xlsxFile = new File(exportDLPath + nameDataset + XLSX_TYPE);
+                    File xlsxFile = new File(exportDLPath + nameDataset);
 
                     s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
                 }
