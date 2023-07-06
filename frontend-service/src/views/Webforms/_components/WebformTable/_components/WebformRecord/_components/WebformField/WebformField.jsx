@@ -226,11 +226,13 @@ export const WebformField = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        console.error('WebformField - onEditorSubmitValue.', error);
-        if (updateInCascade) {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
-        } else {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
+        if (field.fieldType !== 'DATETIME') {
+          console.error('WebformField - onEditorSubmitValue.', error);
+          if (updateInCascade) {
+            notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
+          } else {
+            notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
+          }
         }
       }
     } finally {
