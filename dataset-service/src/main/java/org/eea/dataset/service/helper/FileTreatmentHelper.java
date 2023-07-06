@@ -800,14 +800,15 @@ public class FileTreatmentHelper implements DisposableBean {
 
                     s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
                 }
+
+                // Send notification
+                NotificationVO notificationVO = NotificationVO.builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).
+                        fileName(filename).build();
+
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
+                    notificationVO);
             }
-
-            // Send notification
-            NotificationVO notificationVO = NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).build();
-
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
-                notificationVO);
         } catch (IOException | NullPointerException e) {
             LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
                 datasetId, mimeType, e.getMessage(), e);
