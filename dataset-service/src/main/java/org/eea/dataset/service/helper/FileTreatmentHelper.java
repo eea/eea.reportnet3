@@ -801,6 +801,13 @@ public class FileTreatmentHelper implements DisposableBean {
                     s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
                 }
             }
+
+            // Send notification
+            NotificationVO notificationVO = NotificationVO.builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).build();
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
+                notificationVO);
         } catch (IOException | NullPointerException e) {
             LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
                 datasetId, mimeType, e.getMessage(), e);
@@ -815,6 +822,10 @@ public class FileTreatmentHelper implements DisposableBean {
                 LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
                     datasetId, e.getMessage(), ex);
             }
+        } catch (EEAException e) {
+            LOG_ERROR.error("Error exporting DL dataset data. datasetId {}, file type {}. Message {}",
+                datasetId, mimeType, e.getMessage(), e);
+            throw new RuntimeException(e);
         }
 
     }

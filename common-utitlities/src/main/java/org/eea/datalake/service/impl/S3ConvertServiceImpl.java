@@ -203,8 +203,6 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             "parquet file should have .parquet extension");
         Preconditions.checkArgument(csvOutputFile.getName().endsWith(type),
             "csv file should have .csv extension");
-        Preconditions.checkArgument(!csvOutputFile.exists(),
-            "Output file " + csvOutputFile.getAbsolutePath() + " already exists");
 
         LOG.info("Converting {} to {}", parquetFile.getName(), csvOutputFile.getName());
     }
