@@ -13,7 +13,7 @@ import javax.sql.DataSource;
 @EnableTransactionManagement
 public class DremioConfiguration {
 
-    @Value("${dremio.url}")
+    @Value("${dremio.arrow.url}")
     private String url;
 
     /**
@@ -37,7 +37,7 @@ public class DremioConfiguration {
     @Bean
     public DataSource dremioDatasource() {
         DriverManagerDataSource dremioDataSource = new DriverManagerDataSource();
-        dremioDataSource.setDriverClassName(driver);
+        dremioDataSource.setDriverClassName("org.apache.arrow.driver.jdbc.ArrowFlightJdbcDriver");
         dremioDataSource.setUrl(url);
         dremioDataSource.setUsername(username);
         dremioDataSource.setPassword(password);
