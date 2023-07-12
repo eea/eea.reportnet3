@@ -418,7 +418,7 @@ public class FKValidationUtils {
    * @param datasetSchemaFK the dataset schema FK
    * @return the id field schema PK
    */
-  private static String getIdFieldSchemaPK(String idFieldSchema, DataSetSchema datasetSchemaFK) {
+  public static String getIdFieldSchemaPK(String idFieldSchema, DataSetSchema datasetSchemaFK) {
     FieldSchema idFieldSchemaPk = getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
 
     String idFieldSchemaPKString = "";
@@ -473,7 +473,7 @@ public class FKValidationUtils {
         fieldsToValidate.add(auxField);
         createFieldValueValidationQuery(fieldsToValidate, pkValidation, errorFields);
         if (pkMustBeUsed.equals(Boolean.FALSE)) {
-          saveFieldValidations(errorFields);
+          saveFieldValidations(errorFields);  
         }
       }
       if (Boolean.TRUE.equals(pkMustBeUsed)) {
@@ -851,7 +851,7 @@ public class FKValidationUtils {
    * @param idFieldSchema the id field schema
    * @return the PK field from FK field
    */
-  private static FieldSchema getPKFieldFromFKField(DataSetSchema schema, String idFieldSchema) {
+  public static FieldSchema getPKFieldFromFKField(DataSetSchema schema, String idFieldSchema) {
 
     FieldSchema pkField = null;
     Boolean locatedPK = false;
