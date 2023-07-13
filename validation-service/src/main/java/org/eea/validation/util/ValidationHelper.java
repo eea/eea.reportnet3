@@ -1215,9 +1215,7 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                if (dataflow.getBigData()!=null && dataflow.getBigData() && !dremioHelperService.checkFolderPromoted(s3PathResolver)) {
-                  dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
-                }
+                checkAndPromoteFolder(s3PathResolver, dataflow);
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
@@ -1230,9 +1228,7 @@ public class ValidationHelper implements DisposableBean {
             } else {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
-              if (dataflow.getBigData()!=null && dataflow.getBigData() && !dremioHelperService.checkFolderPromoted(s3PathResolver)) {
-                dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
-              }
+              checkAndPromoteFolder(s3PathResolver, dataflow);
               if (jobId!=null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
               }
@@ -1259,6 +1255,12 @@ public class ValidationHelper implements DisposableBean {
         }
       }
       return isFinished;
+    }
+  }
+
+  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) {
+    if (dataflow.getBigData()!=null && dataflow.getBigData() && !dremioHelperService.checkFolderPromoted(s3PathResolver)) {
+      dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
     }
   }
 

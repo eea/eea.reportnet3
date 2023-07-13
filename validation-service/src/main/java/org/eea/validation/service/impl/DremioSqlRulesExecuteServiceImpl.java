@@ -108,29 +108,20 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                     Long datasetIdRefered =
                             dataSetControllerZuul.getReferencedDatasetId(datasetId, idFieldSchemaPKString);
 
-                    String pkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
-                    DataSetSchema datasetSchemaPK =
-                            schemasRepository.findByIdDataSetSchema(new ObjectId(pkDatasetSchemaId));
-                    String foreignKey = fkFieldSchema.getHeaderName();
-                    String primaryKey = null, optionalFK = null, optionalPK = null, pkTableName = null;
-                    for (TableSchema tableSchema : datasetSchemaPK.getTableSchemas()) {
-                        for (FieldSchema pKFieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
-                            if (pKFieldSchema.getIdFieldSchema().toString().equals(fkFieldSchema.getReferencedField().getIdPk().toString())) {
-                                pkTableName = tableSchema.getNameTableSchema();
-                                primaryKey = pKFieldSchema.getHeaderName();
-                                ObjectId optionalPKId = fkFieldSchema.getReferencedField().getLinkedConditionalFieldId();
-                                if (optionalPKId!=null) {
-                                    optionalPK = tableSchema.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalPKId.toString())).findFirst().get().getHeaderName();
-                                }
-                                ObjectId optionalFKId = fkFieldSchema.getReferencedField().getMasterConditionalFieldId();
-                                if (optionalFKId!=null) {
-                                    optionalFK = datasetSchemaFK.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(tableSchemaId))
-                                            .findFirst().get().getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalFKId.toString())).findFirst().get().getHeaderName();
-                                }
-                                break;
-                            }
-                        }
+                    DataSetSchema datasetSchemaPK = null;
+                    if (datasetId==datasetIdRefered) {
+                        datasetSchemaPK = datasetSchemaFK;
+                    } else {
+                        String pkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
+                        datasetSchemaPK =
+                                schemasRepository.findByIdDataSetSchema(new ObjectId(pkDatasetSchemaId));
                     }
+                    String foreignKey = fkFieldSchema.getHeaderName();
+                    List<String> pkAndFkDetailsList = getPkAndFkHeaderValues(datasetSchemaPK, datasetSchemaFK, fkFieldSchema, tableSchemaId);
+                    String pkTableName = pkAndFkDetailsList.get(0);
+                    String primaryKey = pkAndFkDetailsList.get(1);
+                    String optionalPK = pkAndFkDetailsList.get(2);
+                    String optionalFK = pkAndFkDetailsList.get(3);
                     S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
                     String pkTablePath = s3Service.getTableAsFolderQueryPath(pkTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
                     recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
@@ -162,6 +153,33 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         }
     }
 
+    private List<String> getPkAndFkHeaderValues(DataSetSchema datasetSchemaPK, DataSetSchema datasetSchemaFK, FieldSchema fkFieldSchema, String tableSchemaId) {
+        String primaryKey = null, optionalFK = null, optionalPK = null, pkTableName = null;
+        List<String> pkAndFkDetailsList = new ArrayList<>();
+        for (TableSchema tableSchema : datasetSchemaPK.getTableSchemas()) {
+            for (FieldSchema pKFieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+                if (pKFieldSchema.getIdFieldSchema().toString().equals(fkFieldSchema.getReferencedField().getIdPk().toString())) {
+                    pkTableName = tableSchema.getNameTableSchema();
+                    primaryKey = pKFieldSchema.getHeaderName();
+                    ObjectId optionalPKId = fkFieldSchema.getReferencedField().getLinkedConditionalFieldId();
+                    if (optionalPKId!=null) {
+                        optionalPK = tableSchema.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalPKId.toString())).findFirst().get().getHeaderName();
+                    }
+                    ObjectId optionalFKId = fkFieldSchema.getReferencedField().getMasterConditionalFieldId();
+                    if (optionalFKId!=null) {
+                        optionalFK = datasetSchemaFK.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(tableSchemaId))
+                                .findFirst().get().getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalFKId.toString())).findFirst().get().getHeaderName();
+                    }
+                    break;
+                }
+            }
+        }
+        pkAndFkDetailsList.add(pkTableName);
+        pkAndFkDetailsList.add(primaryKey);
+        pkAndFkDetailsList.add(optionalPK);
+        pkAndFkDetailsList.add(optionalFK);
+        return pkAndFkDetailsList;
+    }
 }
 
 

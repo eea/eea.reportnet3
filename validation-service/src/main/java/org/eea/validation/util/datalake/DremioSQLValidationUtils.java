@@ -54,7 +54,7 @@ public class DremioSQLValidationUtils {
             if (fkFieldSchema.getIgnoreCaseInLinks() != null && fkFieldSchema.getIgnoreCaseInLinks()) {
                 //FK_SINGLE_WRONG_IGNORE_CASE_LINK
                 query.append("select fk.record_id from ").append(fkTablePath).append(" fk where LOWER(fk.").append(foreignKey).append(") not in (select LOWER(pk.").append(primaryKey)
-                        .append(") from ").append(pkTablePath).append(" pk");
+                        .append(") from ").append(pkTablePath).append(" pk)");
             } else {
                 //FK_SINGLE_WRONG
                 query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(foreignKey).append(" not in (select pk.").append(primaryKey)
