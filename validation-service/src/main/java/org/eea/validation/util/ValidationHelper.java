@@ -25,6 +25,8 @@ import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -358,28 +360,36 @@ public class ValidationHelper implements DisposableBean {
       DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
       List<Rule> rules =
               rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
-      schema.getTableSchemas().parallelStream().forEach(tableSchemaVO -> {
-        rules.stream().forEach(rule -> {
-          Map<String, Object> value = new HashMap<>();
-          value.put(LiteralConstants.DATASET_ID, dataset.getId());
-          value.put("uuid", processId);
-          value.put("dataflowId", dataset.getDataflowId());
-          value.put("datasetId", dataset.getId());
-          value.put("user", processesMap.get(processId).getRequestingUser());
-          value.put("dataProviderId", dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0);
-          value.put("datasetSchema", dataset.getDatasetSchema());
-          value.put("ruleId", rule.getRuleId().toString());
-          value.put("tableName", tableSchemaVO.getNameTableSchema());
-          value.put("tableSchemaId", tableSchemaVO.getIdTableSchema());
-          value.put("bigData", "true");
-          Task task;
-          if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint")) {
-            addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
-          } else {
-            addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL, value);
+      for (Rule rule : rules) {
+        TableSchemaVO tableSchemaVO = null;
+        if (rule.getReferenceFieldSchemaPKId()!=null) {
+          tableSchemaVO = schema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(rule.getReferenceId().toString())).findFirst().get();
+        } else {
+          for (TableSchemaVO t : schema.getTableSchemas()) {
+            List<FieldSchemaVO> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getId().equals(rule.getReferenceId().toString())).collect(Collectors.toList());
+            if (fieldSchemas.size() > 0) {
+              tableSchemaVO = t;
+            }
           }
-        });
-      });
+        }
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.DATASET_ID, dataset.getId());
+        value.put("uuid", processId);
+        value.put("dataflowId", dataset.getDataflowId());
+        value.put("datasetId", dataset.getId());
+        value.put("user", processesMap.get(processId).getRequestingUser());
+        value.put("dataProviderId", dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0);
+        value.put("datasetSchema", dataset.getDatasetSchema());
+        value.put("ruleId", rule.getRuleId().toString());
+        value.put("tableName", tableSchemaVO.getNameTableSchema());
+        value.put("tableSchemaId", tableSchemaVO.getIdTableSchema());
+        value.put("bigData", "true");
+        if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint")) {
+          addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
+        } else {
+          addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL, value);
+        }
+      }
     }
   }
 
@@ -1176,6 +1186,7 @@ public class ValidationHelper implements DisposableBean {
           value.put("user", process.getUser());
           DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
           S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+          DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
 
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
@@ -1204,9 +1215,7 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                if (!dremioHelperService.checkFolderPromoted(s3PathResolver)) {
-                  dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
-                }
+                checkAndPromoteFolder(s3PathResolver, dataflow);
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
@@ -1219,9 +1228,7 @@ public class ValidationHelper implements DisposableBean {
             } else {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
-              if (!dremioHelperService.checkFolderPromoted(s3PathResolver)) {
-                dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
-              }
+              checkAndPromoteFolder(s3PathResolver, dataflow);
               if (jobId!=null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
               }
@@ -1248,6 +1255,12 @@ public class ValidationHelper implements DisposableBean {
         }
       }
       return isFinished;
+    }
+  }
+
+  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) {
+    if (dataflow.getBigData()!=null && dataflow.getBigData() && !dremioHelperService.checkFolderPromoted(s3PathResolver)) {
+      dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
     }
   }
 
