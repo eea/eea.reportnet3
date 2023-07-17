@@ -5,8 +5,8 @@ import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
@@ -39,6 +39,9 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
 @Service
@@ -46,9 +49,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ParquetConverterServiceImpl.class);
 
-    private final static String LINE_SEPARATOR = "\n";
-
-    private final static String MOFIDIED_CSV_SUFFIX = "_modified.csv";
+    private final static String MOFIDIED_CSV_SUFFIX = "_modified_%s.csv";
+    private final static String CSV_EXTENSION = ".csv";
+    private final static String PARQUET_EXTENSION = ".parquet";
 
     @Value("${loadDataDelimiter}")
     private char defaultDelimiter;
@@ -76,100 +79,138 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     public Map<String, String> convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
         Map<String, String> parquetFileNamesAndPaths = new HashMap<>();
         for(File csvFile: csvFiles){
-            String parquetFilePath = csvFile.getPath().replace(".csv",".parquet");
-            String parquetFileName = csvFile.getName().replace(".csv",".parquet");
-            convertCsvToParquetViaDremio(csvFile, parquetFilePath, dataSetSchema, importFileInDremioInfo);
+            String tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
+            String parquetFilePath = csvFile.getPath().replace(CSV_EXTENSION, PARQUET_EXTENSION);
+            String parquetFileName = csvFile.getName().replace(CSV_EXTENSION, PARQUET_EXTENSION);
+            String randomStrForNewFolder = UUID.randomUUID().toString();
+            convertCsvToParquetViaDremio(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName, randomStrForNewFolder);
+
             parquetFileNamesAndPaths.put(parquetFileName, parquetFilePath);
         }
         return parquetFileNamesAndPaths;
     }
 
-    private void convertCsvToParquetViaDremio(File csvFile, String parquetFilePath, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
-
-        LOG.info("For job {} converting csv file {} to parquet file {}", importFileInDremioInfo, csvFile.getPath(), parquetFilePath);
-        File csvFileWithAddedColumns = modifyCsvFile(csvFile, parquetFilePath, dataSetSchema, importFileInDremioInfo);
+    private void convertCsvToParquetViaDremio(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo,
+                                              String tableSchemaName, String randomStrForNewFolder) throws Exception {
+        //if replace Data == true -> remove folder that contains parquet and maybe old csv ?
+        LOG.info("For job {} converting csv file {} to parquet file {}", importFileInDremioInfo, csvFile.getPath());
+        File csvFileWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, randomStrForNewFolder);
         //upload modified csv file to s3 and promote it.
-        String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, csvFileWithAddedColumns.getName());
-        s3HandlerService.uploadFileToBucket(importPathForParquet, csvFileWithAddedColumns.getPath());
-        promoteFolderOrFile(importFileInDremioInfo, csvFileWithAddedColumns.getName(), false);
+        String importPathForModifiedCsv = getImportPathForCsv(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName);
+        s3HandlerService.uploadFileToBucket(importPathForModifiedCsv, csvFileWithAddedColumns.getPath());
+        promoteFolderOrFile(importFileInDremioInfo, csvFileWithAddedColumns.getName(), true, tableSchemaName);
 
         //if folder that we want to create is promoted, first demote it
-        demoteFolderOrFile(importFileInDremioInfo, csvFile.getName().replace(".csv",""), true);
+        //demoteFolderOrFile(importFileInDremioInfo, csvFile.getName().replace(".csv",""), false);
         //convert csv to parquet
-        //String createTableQuery = "CREATE TABLE " + parquetName + " AS SELECT * FROM " + csvName;
-        //dremioJdbcTemplate.execute(createTableQuery);
+        String fileNameWithoutExtension = csvFile.getName().replace(".csv","");
+        String parquetName = getImportQueryPathForFolder(importFileInDremioInfo, fileNameWithoutExtension, false, tableSchemaName);
+        String csvName = getImportQueryPathForFolder(importFileInDremioInfo, fileNameWithoutExtension, true, tableSchemaName);
+        String createTableQuery = "CREATE TABLE " + parquetName + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + csvName;
+        dremioJdbcTemplate.execute(createTableQuery);
 
         //promote folder
-        promoteFolderOrFile(importFileInDremioInfo, csvFile.getName().replace(".csv",""), true);
-
-        LOG.info("Finished writing to Parquet file: {}. {}", parquetFilePath, importFileInDremioInfo);
+        promoteFolderOrFile(importFileInDremioInfo, fileNameWithoutExtension, false, tableSchemaName);
     }
 
-    private File modifyCsvFile(File csvFile, String parquetFilePath, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
-        // add a first column which will be the record id and a last column which will be the data provider code
-        File csvFileWithAddedColumns = new File(csvFile.getPath().replace(".csv", MOFIDIED_CSV_SUFFIX));
-        BufferedReader bufferedReader = null;
-        BufferedWriter bufferedWriter = null;
+    private File modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
         char delimiterChar = defaultDelimiter;
         if (!StringUtils.isBlank(importFileInDremioInfo.getDelimiter())){
             delimiterChar = importFileInDremioInfo.getDelimiter().charAt(0);
         }
 
+        String randomStrForFilename = UUID.randomUUID().toString();
+        String modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MOFIDIED_CSV_SUFFIX, randomStrForFilename);
+        File csvFileWithAddedColumns = new File(modifiedFilePath);
+        BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
+
         List<String> csvHeaders = new ArrayList<>();
         List<FieldSchema> sanitizedHeaders;
+        //Reading csv file
+        try (
+                Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
+                CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT
+                        .withFirstRecordAsHeader().builder()
+                        .setDelimiter(delimiterChar)
+                        .setIgnoreHeaderCase(true)
+                        .setTrim(true).build())) {
+            csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
+            csvHeaders.addAll(csvParser.getHeaderMap().keySet());
+            csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
-        try {
-            bufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile)));
-            bufferedWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(csvFileWithAddedColumns)));
-            String line = null;
-            int lineNum = 0;
-            String dataProviderCode = (importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "";
-            while( (line = bufferedReader.readLine()) != null){
-                lineNum++;
-                String modifiedLine = null;
-                if(lineNum == 1){
-                    // modify headers
-                    modifiedLine = LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER + delimiterChar + line +  delimiterChar + LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER;
+            sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
+            String[] headersForModifiedCSV = sanitizedHeaders.stream().map(x -> x.getHeaderName()).collect(Collectors.toList()).toArray(new String[sanitizedHeaders.size()]);
+            CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(delimiterChar).build());
+
+            for (CSVRecord csvRecord : csvParser) {
+                if(csvRecord.values().length == 0){
+                    LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
+                    throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
                 }
-                else{
-                    String recordIdValue = UUID.randomUUID().toString();
-                    modifiedLine = recordIdValue + delimiterChar + line + delimiterChar + dataProviderCode;
+
+                String recordIdValue = UUID.randomUUID().toString();
+                List<String> row = new ArrayList<>();
+                for (FieldSchema sanitizedHeader : sanitizedHeaders) {
+                    if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)){
+                        row.add(recordIdValue);
+                    }
+                    else if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)){
+                        row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
+                    }
+                    else {
+                        row.add(csvRecord.get(sanitizedHeader.getHeaderName()));
+                    }
                 }
-                bufferedWriter.write(modifiedLine + LINE_SEPARATOR);
+                csvPrinter.printRecord(row);
             }
-        } catch (Exception e) {
+            csvPrinter.flush();
+        } catch (IOException e) {
             LOG.error("Could not read csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
             throw new Exception("Could not read csv file " + csvFile.getPath());
         }
         finally {
-            if(bufferedReader != null)
-                bufferedReader.close();
-            if(bufferedWriter != null)
-                bufferedWriter.close();
+            writer.close();
         }
         return csvFileWithAddedColumns;
     }
 
-    private void promoteFolderOrFile(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean folderPromote){
+    private void promoteFolderOrFile(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean importFolder, String tableSchemaName){
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
-        String tableSchemaName = fileName.replace(".parquet", "");
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
-        dremioHelperService.promoteFolderOrFile(s3PathResolver, tableSchemaName, folderPromote);
+        dremioHelperService.promoteFolderOrFile(s3PathResolver, tableSchemaName, importFolder);
     }
 
-    private void demoteFolderOrFile(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean folderPromote){
+    private void demoteFolderOrFile(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean importFolder, String tableSchemaName){
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
-        String tableSchemaName = fileName.replace(".parquet", "");
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
-        dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, folderPromote);
+        dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, importFolder);
     }
 
 
-    private String getImportPathForParquet(ImportFileInDremioInfo importFileInDremioInfo, String fileName) throws Exception {
+    private String getImportPathForCsv(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName) throws Exception {
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
-        String tableSchemaName = fileName.replace(".parquet", "");
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
-        String pathToS3ForImport = s3Service.getTableNameProviderPath(s3PathResolver);
+        String pathToS3ForImport = null;
+        pathToS3ForImport = s3Service.getImportProviderPath(s3PathResolver);
+        if(StringUtils.isBlank(pathToS3ForImport)){
+            LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);
+            throw new Exception("Could not resolve path to s3 for import");
+        }
+        return pathToS3ForImport;
+    }
+
+    private String getImportQueryPathForFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean importFolder, String tableSchemaName) throws Exception {
+        Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
+        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
+        String pathToS3ForImport = null;
+        if(importFolder) {
+            pathToS3ForImport = s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_IMPORT_QUERY_PATH);
+        }
+        else{
+            pathToS3ForImport = s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+            String randomString = UUID.randomUUID().toString();
+            pathToS3ForImport += ".\"" + randomString + "\"";
+        }
         if(StringUtils.isBlank(pathToS3ForImport)){
             LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);
             throw new Exception("Could not resolve path to s3 for import");
@@ -202,11 +243,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //Reading csv file
         try (
                 Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
-                CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT
-                        .withDelimiter(delimiterChar)
-                        .withFirstRecordAsHeader()
-                        .withIgnoreHeaderCase()
-                        .withTrim())) {
+                CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                        .setDelimiter(delimiterChar)
+                        .setSkipHeaderRecord(true)
+                        .setIgnoreHeaderCase(true)
+                        .setTrim(true).build())) {
             csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);

@@ -25,7 +25,7 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public String getImportProviderPath(S3PathResolver s3PathResolver) {
-        String s3ImportPath = calculateS3ProviderPath(s3PathResolver, S3_IMPORT_PATH);
+        String s3ImportPath = calculateS3ProviderPath(s3PathResolver, S3_IMPORT_FILE_PATH);
         LOG.info("Method getImportProviderPath returns S3 Import Path: {}", s3ImportPath);
         return s3ImportPath;
     }
@@ -172,10 +172,10 @@ public class S3ServiceImpl implements S3Service {
         String fileName = s3PathResolver.getFilename();
 
         switch (path) {
-            case S3_IMPORT_PATH:
+            case S3_IMPORT_FILE_PATH:
             case S3_IMPORT_QUERY_PATH:
                 path = String.format(path, dataflowFolder,
-                    dataProviderFolder, datasetFolder, fileName);
+                    dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), fileName);
                 break;
             case S3_VALIDATION_PATH:
             case S3_VALIDATION_QUERY_PATH:
