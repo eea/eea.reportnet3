@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.impl.S3HelperImpl;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
@@ -54,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
@@ -62,6 +67,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.sql.DataSource;
 import javax.transaction.Transactional;
@@ -80,6 +86,7 @@ import java.util.stream.Stream;
  * The Class JdbcRecordStoreServiceImpl.
  */
 @Service("jdbcRecordStoreServiceImpl")
+@Import({org.eea.datalake.service.impl.S3ServiceImpl.class, S3HelperImpl.class})
 public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
   /** The service instance id. */
@@ -292,6 +299,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * The default release process priority
    */
   private int defaultReleaseProcessPriority = 20;
+
+  /** The S3 Helper */
+  @Autowired
+  private S3Helper s3Helper;
+
+  /** The S3 Service */
+  @Autowired
+  private S3Service s3Service;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -1750,6 +1765,182 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       copyProcess(dataset.getDataflowId(), datasetId, idSnapshot, datasetType, cm, processId, jobId);
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
 
+      updateJobStatusToFinished(jobId);
+
+      if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
+          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
+        releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
+      }
+      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
+        dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+        Map<String, Object> createXls = new HashMap<>();
+        createXls.put(LiteralConstants.DATASET_ID, datasetId);
+        createXls.put(LiteralConstants.USER, user);
+        kafkaSenderUtils.releaseKafkaEvent(
+            EventType.RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT, createXls);
+      }
+      if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+        // We send the notification only when the last eu dataset being filled from the
+        // datacollection,
+        // ordered by id, is done
+        DataSetMetabaseVO ds =
+            dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetIdFromSnapshot);
+        List<DataCollectionVO> dcs = dataCollectionControllerZuul
+            .findDataCollectionIdByDataflowId(ds.getDataflowId()).stream()
+            .sorted(Comparator.comparing(DataCollectionVO::getId)).collect(Collectors.toList());
+        List<Long> idsDc = dcs.stream().sorted(Comparator.comparing(DataCollectionVO::getId))
+            .map(DataCollectionVO::getId).collect(Collectors.toList());
+
+        if (!CollectionUtils.isEmpty(idsDc)
+            && datasetIdFromSnapshot.equals(idsDc.get(idsDc.size() - 1))) {
+          // This last eu dataset ordered by being copied from the Dc in the process "copy data from
+          // dc to eu"
+          // so send the notification
+          Map<String, Object> valueEU = new HashMap<>();
+          valueEU.put(LiteralConstants.DATASET_ID, datasetId);
+          valueEU.put("snapshot_id", idSnapshot);
+          valueEU.put(LiteralConstants.USER, user);
+          kafkaSenderUtils.releaseKafkaEvent(
+              EventType.RESTORE_DATACOLLECTION_SNAPSHOT_COMPLETED_EVENT, valueEU);
+        }
+        dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
+        dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+      }
+
+      LOG.info("Snapshot {} restored for processId {}", idSnapshot, processId);
+    } catch (Exception e) {
+      if (!prefillingReference) {
+        if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+          failEventType = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
+          removeLocksRelatedToPopulateEU(
+              dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId());
+        }
+        LOG_ERROR.error("Error restoring the snapshot data due to error {}.", e.getMessage(), e);
+        releaseNotificableKafkaEvent(failEventType, value, datasetId,
+            "Error restoring the snapshot data");
+        if (EventType.RELEASE_FAILED_EVENT.equals(failEventType)) {
+          LOG_ERROR.error(
+              "Release datasets operation failed during the restoring snapshot with the message: {}",
+              e.getMessage(), e);
+          dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(
+              dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId).getDataflowId(),
+              datasetId);
+          releaseNotificableKafkaEvent(failEventType, value, datasetId,
+              "Error restoring the snapshot data");
+        }
+      } else {
+        LOG_ERROR.error(
+            "Error restoring the snapshot data into the prefilling reference dataset due to error {}.",
+            e.getMessage(), e);
+      }
+    } finally {
+      // Release the lock manually
+      if (null != signature) {
+        Map<String, Object> lockCriteria = new HashMap<>();
+        lockCriteria.put(LiteralConstants.SIGNATURE, signature);
+        lockCriteria.put(LiteralConstants.DATASETID, datasetIdFromSnapshot);
+        lockService.removeLockByCriteria(lockCriteria);
+      }
+    }
+  }
+
+
+  /**
+   * Restore snapshot Data Lakes.
+   *
+   * @param datasetId the dataset id
+   * @param idSnapshot the id snapshot
+   * @param partitionId the partition id
+   * @param datasetType the dataset type
+   * @param isSchemaSnapshot the is schema snapshot
+   * @param deleteData the delete data
+   * @param successEventType the success event type
+   * @param failEventType the fail event type
+   * @param prefillingReference the prefilling reference
+   */
+  private void restoreSnapshotDL(Long datasetId, Long idSnapshot, Long partitionId,
+      DatasetTypeEnum datasetType, Boolean isSchemaSnapshot, Boolean deleteData,
+      EventType successEventType, EventType failEventType, boolean prefillingReference, String processId) {
+
+    String signature = Boolean.TRUE.equals(deleteData)
+        ? Boolean.TRUE.equals(isSchemaSnapshot) ? LockSignature.RESTORE_SCHEMA_SNAPSHOT.getValue()
+        : LockSignature.RESTORE_SNAPSHOT.getValue()
+        : null;
+
+    Long jobId = null;
+    String user = null;
+    ProcessVO processVO = new ProcessVO();
+    if (processId!=null) {
+      jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      processVO = processService.getByProcessId(processId);
+      user = processVO!=null ? processVO.getUser() : SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    Map<String, Object> value = new HashMap<>();
+    value.put(LiteralConstants.DATASET_ID, datasetId);
+    value.put(LiteralConstants.USER, user);
+    ConnectionDataVO conexion =
+        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+    // We get the datasetId from the snapshot
+    Long datasetIdFromSnapshot = Boolean.TRUE.equals(isSchemaSnapshot)
+        ? dataSetSnapshotControllerZuul.getSchemaById(idSnapshot).getDatasetId()
+        : dataSetSnapshotControllerZuul.getById(idSnapshot).getDatasetId();
+
+    try (
+        Connection con = DriverManager.getConnection(conexion.getConnectionString(),
+            conexion.getUser(), conexion.getPassword());
+        Statement stmt = con.createStatement()) {
+      con.setAutoCommit(true);
+
+      //Delete old files
+      Long providerId = jobControllerZuul.findProviderIdById(jobId);
+      Long dataflowId = processVO.getDataflowId();
+      Long reportingDatasetId = processVO.getDatasetId();
+
+      LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
+      DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
+      LOG.info("Init restoring for datasetSchema {}", datasetSchema);
+      datasetSchema.getTableSchemas().stream()
+          .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
+          .forEach(table -> {
+              try {
+                //Delete table name DC folder if exists
+                String nameTableSchema = table.getNameTableSchema();
+                S3PathResolver dataCollectionPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
+                LOG.info("Checking if table name DC folder exist in path {}", dataCollectionPath);
+                if (s3Helper.checkTableNameDCFolderExist(dataCollectionPath)) {
+                  s3Helper.deleleTableNameDCFolder(dataCollectionPath);
+                  LOG.info("Successfully deleted files in path: {}", dataCollectionPath);
+                }
+
+                //Get table name file from S3, save it locally and then upload to DC table name path
+                S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, reportingDatasetId, nameTableSchema);
+                LOG.info("Getting tableNameFilenames for provider path resolver {}", providerPath);
+                List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
+                LOG.info("Table Name Filenames found : {}", tableNameFilenames);
+                tableNameFilenames.stream().forEach(file -> {
+                  String key = file.key();
+                  String filename = new File(key).getName();
+                  try {
+                    LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                    File parquetFile = s3Helper.getFileFromS3(key, filename);
+                    String tableNameProviderPath = s3Service.getTableNameProviderPath(providerPath);
+                    LOG.info("Uploading file to bucket for table name provider path : {}", tableNameProviderPath);
+                    s3Helper.uploadFileToBucket(tableNameProviderPath, parquetFile.getPath());
+                    LOG.info("Uploading finished successfully for {}", tableNameProviderPath);
+                    //s3Helper.promoteFolder(providerPath, tableNameProviderPath);
+                  } catch (IOException e) {
+                    throw new RuntimeException(e);
+                  }
+
+                });
+              } catch (Exception e) {
+                LOG_ERROR.error("Error in delete and copy release process for reportingDatasetId {}, dataflowId {}",
+                    reportingDatasetId, dataflowId, e);
+              }
+          });
+
+      LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
       updateJobStatusToFinished(jobId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
