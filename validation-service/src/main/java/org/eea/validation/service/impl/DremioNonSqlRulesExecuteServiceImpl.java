@@ -60,14 +60,11 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(")");
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
-            switch (ruleMethodName) {
-                case "isMultiSelectCodelistValidate":
+            if (ruleMethodName.equals("isMultiSelectCodelistValidate")) {
                     ruleMethodName = "multiSelectCodelistValidate";
-                    break;
-                case "isCodelistInsensitive":
+            } else if (ruleMethodName.equals("isCodelistInsensitive")) {
                     ruleMethodName = "codelistValidate";
                     parameters.add("false");
-                    break;
             }
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
 

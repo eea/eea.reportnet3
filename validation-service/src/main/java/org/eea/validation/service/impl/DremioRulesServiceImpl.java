@@ -31,8 +31,6 @@ public class DremioRulesServiceImpl implements DremioRulesService {
     public List<String> processRuleMethodParameters(RuleVO ruleVO, int startIndex, int endIndex) {
         String parameterString = ruleVO.getWhenConditionMethod().substring(startIndex +1, endIndex);
         parameterString = parameterString.replace("'","");
-//        parameterString = parameterString.replace("[","");
-//        parameterString = parameterString.replace("]","");
         List<String> parameters = new ArrayList<>(Arrays.asList(parameterString.split(",")));
         return parameters;
     }

@@ -386,6 +386,8 @@ public class ValidationHelper implements DisposableBean {
         value.put("bigData", "true");
         if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint")) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
+        } else if (rule.getWhenCondition().contains("RuleOperators")) {
+          addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EXPRESSION_DL, value);
         } else {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL, value);
         }
