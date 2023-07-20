@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -159,9 +160,13 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         if(jobId != null){
           JobVO jobVO = jobControllerZuul.findJobById(jobId);
           if(jobVO != null) {
-            Map<String, Object> parameters = jobVO.getParameters();
-            if (parameters.containsKey("silentRelease")) {
-              silentRelease = (Boolean) parameters.get("silentRelease");
+            if (!jobVO.getJobStatus().equals(JobStatusEnum.IN_PROGRESS)) {
+              return;
+            } else {
+              Map<String, Object> parameters = jobVO.getParameters();
+              if (parameters.containsKey("silentRelease")) {
+                silentRelease = (Boolean) parameters.get("silentRelease");
+              }
             }
           }
         }
