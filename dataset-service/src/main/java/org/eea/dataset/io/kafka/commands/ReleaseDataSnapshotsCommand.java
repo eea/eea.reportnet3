@@ -331,7 +331,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       Long dataflowId = (dataflowVO != null) ? dataflowVO.getId() : null;
       Long datasetId = (dataflowVO != null) ? dataset.getId() : null;
       LOG_ERROR.error("Unexpected error! Error sending release mail for dataflowId {} and datasetId {}. Message: {}", dataflowId, datasetId, e.getMessage());
-      throw e;
     }
   }
 }
