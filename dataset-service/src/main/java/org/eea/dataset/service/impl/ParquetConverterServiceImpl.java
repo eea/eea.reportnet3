@@ -21,7 +21,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.ParquetConverterService;
-import org.eea.dataset.service.S3HandlerService;
+import org.eea.dataset.service.S3CallsHandlerService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
@@ -72,7 +72,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     private S3ServiceImpl s3Service;
 
     @Autowired
-    S3HandlerService s3HandlerService;
+    S3CallsHandlerService s3CallsHandlerService;
 
 
     @Override
@@ -82,8 +82,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             String tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
             String parquetFilePath = csvFile.getPath().replace(CSV_EXTENSION, PARQUET_EXTENSION);
             String parquetFileName = csvFile.getName().replace(CSV_EXTENSION, PARQUET_EXTENSION);
-            String randomStrForNewFolder = UUID.randomUUID().toString();
-            convertCsvToParquetViaDremio(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName, randomStrForNewFolder);
+            String randomStrForNewFolderSuffix = UUID.randomUUID().toString();
+            convertCsvToParquetViaDremio(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName, randomStrForNewFolderSuffix);
 
             parquetFileNamesAndPaths.put(parquetFileName, parquetFilePath);
         }
@@ -91,36 +91,62 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
 
     private void convertCsvToParquetViaDremio(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo,
-                                              String tableSchemaName, String randomStrForNewFolder) throws Exception {
+                                              String tableSchemaName, String randomStrForNewFolderSuffix) throws Exception {
         //if replace Data == true -> remove folder that contains parquet and maybe old csv ?
         LOG.info("For job {} converting csv file {} to parquet file {}", importFileInDremioInfo, csvFile.getPath());
-        File csvFileWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, randomStrForNewFolder);
-        //upload modified csv file to s3 and promote it.
-        String importPathForModifiedCsv = getImportPathForCsv(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName);
-        s3HandlerService.uploadFileToBucket(importPathForModifiedCsv, csvFileWithAddedColumns.getPath());
-        promoteFolderOrFile(importFileInDremioInfo, csvFileWithAddedColumns.getName(), true, tableSchemaName);
+        File csvFileWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, randomStrForNewFolderSuffix);
 
-        //if folder that we want to create is promoted, first demote it
-        //demoteFolderOrFile(importFileInDremioInfo, csvFile.getName().replace(".csv",""), false);
+        //get paths for folders
+        String importPathForModifiedCsv = getImportPathForCsv(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName);
+        String modifiedFileNameWithoutExtension = csvFileWithAddedColumns.getName().replace(".csv","");
+        String tableFolderPath = getImportQueryPathForFolder(importFileInDremioInfo, modifiedFileNameWithoutExtension, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+        //String parquetFolderPath = getImportQueryPathForFolder(importFileInDremioInfo, modifiedFileNameWithoutExtension, tableSchemaName, LiteralConstants.S3_TABLE_NAME_QUERY_PATH);
+        String csvFolderPath = getImportQueryPathForFolder(importFileInDremioInfo, modifiedFileNameWithoutExtension, tableSchemaName, LiteralConstants.S3_IMPORT_QUERY_PATH);
+        //String csvInnerFolderPath = getImportQueryPathForFolder(importFileInDremioInfo, modifiedFileNameWithoutExtension, tableSchemaName, S3_IMPORT_INNER_FOLDER_QUERY_PATH);
+        S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName);
+        if(importFileInDremioInfo.getReplaceData()){
+            //remove old csv folder
+            Boolean removedTable = dremioHelperService.removeImportRelatedTableFromDremio(s3PathResolver, tableSchemaName, true);
+            if(!removedTable){
+                s3CallsHandlerService.deleteObjectsFromBucket(s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_IMPORT_TABLE_NAME_FOLDER_PATH));
+            }
+        }
+
+        //upload modified csv file to s3 and promote it.
+        s3CallsHandlerService.uploadFileToBucket(importPathForModifiedCsv, csvFileWithAddedColumns.getPath());
+        promoteFolderOrFile(importFileInDremioInfo, csvFileWithAddedColumns.getName(), true, tableSchemaName);
+        //refresh the metadata
+        String refreshImportTableQuery = "ALTER TABLE " + csvFolderPath + " REFRESH METADATA";
+        dremioJdbcTemplate.execute(refreshImportTableQuery);
+
+        //remove old table folder
+        Boolean removedTable;// = dremioHelperService.removeImportRelatedTableFromDremio(s3PathResolver, tableSchemaName, false);
+        removedTable = false;
+        if(!removedTable){
+            s3CallsHandlerService.deleteObjectsFromBucket(s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_TABLE_NAME_FOLDER_PATH));
+        }
+
+        //Thread.sleep(60000);
+
         //convert csv to parquet
-        String fileNameWithoutExtension = csvFile.getName().replace(".csv","");
-        String parquetName = getImportQueryPathForFolder(importFileInDremioInfo, fileNameWithoutExtension, false, tableSchemaName);
-        String csvName = getImportQueryPathForFolder(importFileInDremioInfo, fileNameWithoutExtension, true, tableSchemaName);
-        String createTableQuery = "CREATE TABLE " + parquetName + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + csvName;
+        String createTableQuery = "CREATE TABLE " + tableFolderPath + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + csvFolderPath;
         dremioJdbcTemplate.execute(createTableQuery);
 
         //promote folder
-        promoteFolderOrFile(importFileInDremioInfo, fileNameWithoutExtension, false, tableSchemaName);
+        promoteFolderOrFile(importFileInDremioInfo, tableSchemaName, false, tableSchemaName);
+
+        //refresh the metadata
+        String refreshTableQuery = "ALTER TABLE " + tableFolderPath + " REFRESH METADATA";
+        dremioJdbcTemplate.execute(refreshTableQuery);
     }
 
-    private File modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
+    private File modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String randomStrForNewFolderSuffix) throws Exception {
         char delimiterChar = defaultDelimiter;
         if (!StringUtils.isBlank(importFileInDremioInfo.getDelimiter())){
             delimiterChar = importFileInDremioInfo.getDelimiter().charAt(0);
         }
 
-        String randomStrForFilename = UUID.randomUUID().toString();
-        String modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MOFIDIED_CSV_SUFFIX, randomStrForFilename);
+        String modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MOFIDIED_CSV_SUFFIX, randomStrForNewFolderSuffix);
         File csvFileWithAddedColumns = new File(modifiedFilePath);
         BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
 
@@ -174,42 +200,43 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         return csvFileWithAddedColumns;
     }
 
-    private void promoteFolderOrFile(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean importFolder, String tableSchemaName){
+    private S3PathResolver constructS3PathResolver(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName){
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
+        return s3PathResolver;
+    }
+
+    private void promoteFolderOrFile(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean importFolder, String tableSchemaName){
+        S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, fileName, tableSchemaName);
         dremioHelperService.promoteFolderOrFile(s3PathResolver, tableSchemaName, importFolder);
     }
 
     private void demoteFolderOrFile(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean importFolder, String tableSchemaName){
-        Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
-        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
+        S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, fileName, tableSchemaName);
         dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, importFolder);
     }
 
 
     private String getImportPathForCsv(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName) throws Exception {
-        Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
-        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
+        S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, fileName, tableSchemaName);
         String pathToS3ForImport = null;
         pathToS3ForImport = s3Service.getImportProviderPath(s3PathResolver);
         if(StringUtils.isBlank(pathToS3ForImport)){
-            LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);
+            LOG.error("Could not resolve path to s3 for import {}", importFileInDremioInfo);
             throw new Exception("Could not resolve path to s3 for import");
         }
         return pathToS3ForImport;
     }
 
-    private String getImportQueryPathForFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName, Boolean importFolder, String tableSchemaName) throws Exception {
+    private String getImportQueryPathForFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName, String pathConstant) throws Exception {
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
         String pathToS3ForImport = null;
-        if(importFolder) {
-            pathToS3ForImport = s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_IMPORT_QUERY_PATH);
+        if(pathConstant.equals(LiteralConstants.S3_TABLE_NAME_QUERY_PATH)){
+            pathToS3ForImport = s3Service.getTableNameProviderQueryPath(s3PathResolver);
         }
         else{
-            pathToS3ForImport = s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
-            String randomString = UUID.randomUUID().toString();
-            pathToS3ForImport += ".\"" + randomString + "\"";
+            pathToS3ForImport = s3Service.getTableAsFolderQueryPath(s3PathResolver, pathConstant);
         }
         if(StringUtils.isBlank(pathToS3ForImport)){
             LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);

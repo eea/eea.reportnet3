@@ -65,7 +65,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     DatasetService datasetService;
 
     @Autowired
-    S3HandlerService s3HandlerService;
+    S3CallsHandlerService s3CallsHandlerService;
 
     @Autowired
     ParquetConverterService parquetConverterService;

@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -99,6 +100,13 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public String getTableAsFolderQueryPath(S3PathResolver s3PathResolver) {
+        String s3ImportPath = calculateS3ProviderPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        LOG.info("Method getTableAsFolderQueryPath returns S3 Import Path: {}", s3ImportPath);
+        return s3ImportPath;
+    }
+
+    @Override
     public String getTableNameProviderQueryPath(S3PathResolver s3PathResolver) {
         String s3TableNamePath = calculateS3ProviderPath(s3PathResolver, S3_TABLE_NAME_QUERY_PATH);
         LOG.info("Method getTableNameProviderQueryPath returns S3 Table Name Path: {}", s3TableNamePath);
@@ -174,6 +182,7 @@ public class S3ServiceImpl implements S3Service {
         switch (path) {
             case S3_IMPORT_FILE_PATH:
             case S3_IMPORT_QUERY_PATH:
+            case S3_TABLE_AS_FOLDER_QUERY_PATH:
                 path = String.format(path, dataflowFolder,
                     dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), fileName);
                 break;
@@ -201,6 +210,10 @@ public class S3ServiceImpl implements S3Service {
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
+        if(path.equals(S3_IMPORT_INNER_FOLDER_QUERY_PATH)){
+            return String.format(path, dataflowFolder,
+                    dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), s3PathResolver.getFilename());
+        }
         return String.format(path, dataflowFolder,
                     dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
     }

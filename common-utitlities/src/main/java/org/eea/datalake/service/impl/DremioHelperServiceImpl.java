@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -35,6 +36,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     private DremioApiController dremioApiController;
     @Autowired
     private S3Service s3Service;
+
+    @Autowired
+    JdbcTemplate dremioJdbcTemplate;
     private static final String PROMOTED = "PROMOTED";
     private static final String BEARER = "Bearer ";
     public static String token = null;
@@ -172,5 +176,30 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             }
         }
         LOG.info("Demoted folder {}", directoryPath);
+    }
+
+    @Override
+    public Boolean removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder){
+        String tablePath = null;
+        if(importFolder){
+            tablePath = s3Service.getImportProviderQueryPath(s3PathResolver);
+        }
+        else{
+            tablePath = s3Service.getTableAsFolderQueryPath(s3PathResolver);
+        }
+
+        if(!checkFolderPromoted(s3PathResolver, folderName, importFolder)){
+            LOG.info("The file or folder in path {} is not promoted", tablePath);
+            return false;
+        }
+        String dropTableQuery = "DROP TABLE IF EXISTS " + tablePath;
+        try{
+            dremioJdbcTemplate.execute(dropTableQuery);
+        }
+        catch (Exception e){
+            LOG.error("Could not drop table {}", tablePath);
+            return false;
+        }
+        return true;
     }
 }
