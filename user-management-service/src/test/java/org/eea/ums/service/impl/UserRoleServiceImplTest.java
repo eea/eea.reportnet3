@@ -147,7 +147,7 @@ public class UserRoleServiceImplTest {
         .thenReturn(Arrays.asList(new ReportingDatasetVO()));
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(group);
     Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any())).thenReturn(users);
-    userRoleService.exportUsersByCountry(1L);
+    userRoleService.exportUsersByCountry(1L, null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(
         EventType.EXPORT_USERS_BY_COUNTRY_COMPLETED_EVENT, null, notification);
   }
