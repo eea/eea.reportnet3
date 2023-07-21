@@ -243,14 +243,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
   }
 
-  /**
-   * Gets the user roles by dataflow.
-   *
-   * @param dataflowId the dataflow id
-   * @return the user roles by dataflow
-   */
-  @Override
-  public List<UserRoleVO> getUserRolesByDataflow(Long dataflowId) {
+  private List<UserRoleVO> getUserRoleList(Long dataflowId) {
     List<UserRoleVO> userRoleList = new ArrayList<>();
     HashMap<Long, String> providerIds = new HashMap<>();
 
@@ -271,6 +264,16 @@ public class UserRoleServiceImpl implements UserRoleService {
     return userRoleList;
   }
 
+  /**
+   * Gets the user roles by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the user roles by dataflow
+   */
+  @Override
+  public List<UserRoleVO> getUserRolesByDataflow(Long dataflowId) {
+    return getUserRoleList(dataflowId);
+  }
 
   /**
    * Gets the lead reporters with country.
@@ -383,8 +386,11 @@ public class UserRoleServiceImpl implements UserRoleService {
    */
   @Async
   @Override
-  public void exportUsersByCountry(Long dataflowId) throws IOException, EEAException {
-    String composedFileName = "dataflow-" + dataflowId + "-UsersByCountry";
+  public void exportUsersByCountry(Long dataflowId, Long dataProviderId) throws IOException, EEAException {
+    boolean hasDataProviderId = dataProviderId != null ? true : false;
+
+    String composedFileName = "dataflow-" + dataflowId
+            + (hasDataProviderId == true ? "-UsersList" : "-UsersByCountry");
     String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
     File fileFolder = new File(pathPublicFile, composedFileName);
     String creatingFileError =
@@ -399,16 +405,20 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     StringWriter stringWriter = new StringWriter();
 
-    try (CSVWriter csvWriter =
-        new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+    try (CSVWriter csvWriter = new CSVWriter(
+                         stringWriter,
+                         delimiter,
+                         CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                         CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                         CSVWriter.DEFAULT_LINE_END)
+    ) {
       List<String> headers = new ArrayList<>();
       headers.add(ROLE);
       headers.add(USER);
-      headers.add(COUNTRY);
+      if (!hasDataProviderId) headers.add(COUNTRY);
       csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
-      int nHeaders = 3;
-      fillUserByCountryExportData(csvWriter, dataflowId, nHeaders);
+      int nHeaders = headers.size();
+      fillUserByCountryExportData(csvWriter, dataflowId, nHeaders, dataProviderId);
     } catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_USERS_BY_COUNTRY_FAILED_EVENT,
           null, notificationVO);
@@ -441,15 +451,20 @@ public class UserRoleServiceImpl implements UserRoleService {
    * @param dataflowId the dataflow id
    * @param nHeaders the n headers
    */
-  private void fillUserByCountryExportData(CSVWriter csvWriter, Long dataflowId, int nHeaders) {
-    List<UserRoleVO> userRoles = getUserRolesByDataflow(dataflowId);
+  private void fillUserByCountryExportData(CSVWriter csvWriter, Long dataflowId, int nHeaders, Long dataProviderId) {
+    boolean hasDataProviderId = dataProviderId != null ? true : false;
+
+    List<UserRoleVO> userRoles =
+            hasDataProviderId ?
+                    getUserRolesByDataflowCountry(dataflowId, dataProviderId)
+                    : getUserRolesByDataflow(dataflowId);
     if (userRoles != null) {
       String[] fieldsToWrite;
       for (UserRoleVO userRole : userRoles) {
         fieldsToWrite = new String[nHeaders];
         fieldsToWrite[0] = userRole.getRoles().get(0);
         fieldsToWrite[1] = userRole.getEmail();
-        fieldsToWrite[2] = userRole.getDataProviderName();
+        if (hasDataProviderId == false) fieldsToWrite[2] = userRole.getDataProviderName();
         csvWriter.writeNext(fieldsToWrite);
       }
     }
