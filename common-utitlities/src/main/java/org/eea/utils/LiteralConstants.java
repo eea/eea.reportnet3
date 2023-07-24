@@ -228,7 +228,7 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_VALIDATE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_PATH = "%s/%s/%s/current/%s/%s";
+  public static final String S3_TABLE_NAME_PATH = "/%s/%s/%s/current/%s/%s";
 
   /** The Constant S3_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_FOLDER_PATH = "/%s/%s/%s/current/%s";
