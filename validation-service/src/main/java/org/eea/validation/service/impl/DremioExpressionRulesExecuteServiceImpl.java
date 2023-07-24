@@ -124,48 +124,29 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             if (ruleVO.getType().equals(EntityTypeEnum.FIELD)) {
                 fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             } else {
-                fieldName = null;
+                fieldName = "";
             }
 
             Map<String, List<String>> headerNames = new HashMap<>();
             query.append("select record_id");
-            if (fieldName!=null) {
+            if (!fieldName.equals("")) {
                 query.append(",").append(fieldName);
             }
             if (parameterMethods.size()>0) {
                 parameterMethods.entrySet().forEach(e -> e.getValue().forEach(v -> {
-                    v = v.trim();
-                    if (v.equals("value")) {
-                        List<String> list = headerNames.get(e.getKey());
-                        if (list!=null && !list.contains(fieldName)) {
-                            list.add(fieldName);
-                        } else {
-                            list = new ArrayList<>();
-                            list.add(fieldName);
-                        }
-                        headerNames.put(e.getKey(), list);
-                    } else if (!isNumeric(v)) {
-                        FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, v);
-                        List<String> list = headerNames.get(e.getKey());
-                        if (list!=null) {
-                            list.add(fieldSchema.getName());
-                        } else {
-                            list = new ArrayList<>();
-                            list.add(fieldSchema.getName());
-                        }
-                        headerNames.put(e.getKey(), list);
-                        query.append(",").append(fieldSchema.getName());
-                    }
+                    createHeaderNames(v, e.getKey(), headerNames, fieldName, datasetSchemaId, query);
                 }));
             } else {
                 int idx = ruleMethodName.indexOf("Record");
+                List<String> hNames = new ArrayList<>();
                 if (idx!=-1) {
                     //record type
                     parameters.forEach(p -> {
                         FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, p);
-                        headerNames.put(ruleMethodName, Arrays.asList(fieldSchema.getName()));
+                        hNames.add(fieldSchema.getName());
                         query.append(",").append(fieldSchema.getName());
                     });
+                    headerNames.put(ruleMethodName, hNames);
                 }
             }
 
@@ -185,9 +166,9 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 boolean record = false;
                 for (Map.Entry entry : parameterMethods.entrySet()) {
                     List<String> values = (List<String>) entry.getValue();
+                    record = isRecord(((String) entry.getKey()));
+                    Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
                     if (values.size()>2) {
-                        record = isRecord(record, entry);
-                        Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
                         for (int i = 0; i <= 2;) {
                             List<String> newValues = new ArrayList<>();
                             if (values.size() % 2 == 0) {
@@ -205,9 +186,6 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                             internalResults.add(result);
                         }
                     } else {
-                        Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
-                        record = isRecord(record, entry);
-
                         boolean result = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, values, providerCode);
                         internalResults.add(result);
                     }
@@ -222,6 +200,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                             break;
                     }
                 } else {
+                    record = isRecord(method.getName());
                     isValid = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, method.getName(), method, parameters, providerCode);
                 }
                 if (!isValid) {
@@ -245,8 +224,34 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         }
     }
 
-    private static boolean isRecord(boolean record, Map.Entry entry) {
-        int idx = ((String) entry.getKey()).indexOf("Record");
+    private void createHeaderNames(String parameter, String methodName, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query) {
+        parameter = parameter.trim();
+        if (parameter.equals("value")) {
+            List<String> list = headerNames.get(methodName);
+            if (list!=null && !list.contains(fieldName)) {
+                list.add(fieldName);
+            } else {
+                list = new ArrayList<>();
+                list.add(fieldName);
+            }
+            headerNames.put(methodName, list);
+        } else if (!isNumeric(parameter)) {
+            FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
+            List<String> list = headerNames.get(methodName);
+            if (list!=null) {
+                list.add(fieldSchema.getName());
+            } else {
+                list = new ArrayList<>();
+                list.add(fieldSchema.getName());
+            }
+            headerNames.put(methodName, list);
+            query.append(",").append(fieldSchema.getName());
+        }
+    }
+
+    private static boolean isRecord(String value) {
+        boolean record = false;
+        int idx = value.indexOf("Record");
         if (idx!=-1) {
             //record type
             record = true;
