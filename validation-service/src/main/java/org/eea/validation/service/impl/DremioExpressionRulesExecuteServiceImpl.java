@@ -92,6 +92,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     i++;
                 }
             }
+
             Map<String, List<String>> parameterMethods = new HashMap<>();
             parameters.forEach(parameter -> {
                 if (parameter.contains("RuleOperators")) {
@@ -110,6 +111,11 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     //put in the map the method name as the key and the parameters of the internal RuleOperators methods as value
                     List<String> internals = new ArrayList<>(Arrays.asList(internalParameters.split(",")));
                     internals = internals.stream().map(i -> i.trim()).collect(Collectors.toList());
+                    List<String> existingInternals = parameterMethods.get(parameterMethodName);
+                    if (existingInternals!=null) {
+                        internals.forEach(i -> existingInternals.add(i));
+                        internals = existingInternals;
+                    }
                     parameterMethods.put(parameterMethodName, internals);
                 }
             });
@@ -130,17 +136,14 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 parameterMethods.entrySet().forEach(e -> e.getValue().forEach(v -> {
                     v = v.trim();
                     if (v.equals("value")) {
-                        List<String> pmList = headerNames.get(e.getKey());
-                        if (!pmList.contains(fieldName)) {
-                            List<String> list = headerNames.get(e.getKey());
-                            if (list!=null) {
-                                list.add(fieldName);
-                            } else {
-                                list = new ArrayList<>();
-                                list.add(fieldName);
-                            }
-                            headerNames.put(e.getKey(), list);
+                        List<String> list = headerNames.get(e.getKey());
+                        if (list!=null && !list.contains(fieldName)) {
+                            list.add(fieldName);
+                        } else {
+                            list = new ArrayList<>();
+                            list.add(fieldName);
                         }
+                        headerNames.put(e.getKey(), list);
                     } else if (!isNumeric(v)) {
                         FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, v);
                         List<String> list = headerNames.get(e.getKey());
@@ -181,16 +184,33 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 List<Boolean> internalResults = new ArrayList<>();
                 boolean record = false;
                 for (Map.Entry entry : parameterMethods.entrySet()) {
-                    Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
-                    List<String> pm = (List<String>) entry.getValue();
-                    int idx = ((String) entry.getKey()).indexOf("Record");
-                    if (idx!=-1) {
-                        //record type
-                        record = true;
-                    }
+                    List<String> values = (List<String>) entry.getValue();
+                    if (values.size()>2) {
+                        record = isRecord(record, entry);
+                        Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
+                        for (int i = 0; i <= 2;) {
+                            List<String> newValues = new ArrayList<>();
+                            if (values.size() % 2 == 0) {
+                                newValues.add(values.get(i));
+                                newValues.add(values.get(i+1));
+                                i+=2;
+                            } else {
+                                if (i==2) {
+                                    break;
+                                }
+                                newValues.add(values.get(i));
+                                i++;
+                            }
+                            boolean result = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, newValues, providerCode);
+                            internalResults.add(result);
+                        }
+                    } else {
+                        Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
+                        record = isRecord(record, entry);
 
-                    boolean result = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, pm, providerCode);
-                    internalResults.add(result);
+                        boolean result = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, values, providerCode);
+                        internalResults.add(result);
+                    }
                 }
                 if (internalResults.size()>0) {
                     switch (internalResults.size()) {
@@ -223,6 +243,15 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {}", ruleId, datasetId, tableName);
             throw e;
         }
+    }
+
+    private static boolean isRecord(boolean record, Map.Entry entry) {
+        int idx = ((String) entry.getKey()).indexOf("Record");
+        if (idx!=-1) {
+            //record type
+            record = true;
+        }
+        return record;
     }
 
     private Boolean getMethodExecutionResult(String datasetSchemaId, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Object object,
