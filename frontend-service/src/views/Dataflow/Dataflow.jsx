@@ -679,7 +679,7 @@ export const Dataflow = () => {
     setIsDownloadingUsers(true);
 
     try {
-      await DataflowService.generateUsersByCountryFile(dataflowId);
+      await DataflowService.generateUsersByCountryFile(dataflowId, dataProviderId);
       notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
     } catch (error) {
       console.error('Dataflow - onDownloadUsersByCountry.', error);
@@ -1601,13 +1601,11 @@ export const Dataflow = () => {
           <Dialog
             className="responsiveDialog"
             footer={
-              ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
                 ? renderUserListDialogFooter()
                 : renderDialogFooterCloseBtn('isUserListVisible')
             }
             header={
-              ((isNil(dataProviderId) && isLeadDesigner) || (isNil(representativeId) && isObserver)) &&
               dataflowState.status === config.dataflowStatus.OPEN
                 ? TextByDataflowTypeUtils.getLabelByDataflowType(
                     resourcesContext.messages,
