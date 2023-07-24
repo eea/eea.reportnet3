@@ -112,7 +112,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     List<String> internals = new ArrayList<>(Arrays.asList(internalParameters.split(",")));
                     internals = internals.stream().map(i -> i.trim()).collect(Collectors.toList());
                     List<String> existingInternals = parameterMethods.get(parameterMethodName);
-                    if (existingInternals!=null) {
+                    if (existingInternals!=null) { //whenCondition contains the same method twice e.g. RuleOperators.fieldOr(RuleOperators.fieldNumberEquals(value, 13), RuleOperators.fieldNumberEquals(value, 14))
                         internals.forEach(i -> existingInternals.add(i));
                         internals = existingInternals;
                     }
@@ -127,12 +127,12 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 fieldName = "";
             }
 
-            Map<String, List<String>> headerNames = new HashMap<>();
+            Map<String, List<String>> headerNames = new HashMap<>();  //map of method as key and list of fields that exist as parameters in method as values
             query.append("select record_id");
             if (!fieldName.equals("")) {
                 query.append(",").append(fieldName);
             }
-            if (parameterMethods.size()>0) {
+            if (parameterMethods.size()>0) { //whenCondition contains nested RuleOperators methods
                 parameterMethods.entrySet().forEach(e -> e.getValue().forEach(v -> {
                     createHeaderNames(v, e.getKey(), headerNames, fieldName, datasetSchemaId, query);
                 }));
@@ -141,6 +141,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 List<String> hNames = new ArrayList<>();
                 if (idx!=-1) {
                     //record type
+                    //RuleOperators.recordStringLengthGreaterThanOrEqualsThanRecord("64ac0c0de5f082645bab2f07", "64ac0c1ae5f082645bab2f09")
                     parameters.forEach(p -> {
                         FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, p);
                         hNames.add(fieldSchema.getName());
@@ -168,7 +169,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     List<String> values = (List<String>) entry.getValue();
                     record = isRecord(((String) entry.getKey()));
                     Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
-                    if (values.size()>2) {
+                    if (values.size()>2) { //whenCondition contains the same method twice
                         for (int i = 0; i <= 2;) {
                             List<String> newValues = new ArrayList<>();
                             if (values.size() % 2 == 0) {
@@ -182,11 +183,11 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                                 newValues.add(values.get(i));
                                 i++;
                             }
-                            boolean result = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, newValues, providerCode);
+                            boolean result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, newValues, providerCode);
                             internalResults.add(result);
                         }
                     } else {
-                        boolean result = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, values, providerCode);
+                        boolean result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, values, providerCode);
                         internalResults.add(result);
                     }
                 }
@@ -201,7 +202,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     }
                 } else {
                     record = isRecord(method.getName());
-                    isValid = getMethodExecutionResult(datasetSchemaId, ruleVO, fieldName, headerNames, rs, object, record, method.getName(), method, parameters, providerCode);
+                    isValid = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record, method.getName(), method, parameters, providerCode);
                 }
                 if (!isValid) {
                     if (count != 0) {
@@ -224,6 +225,15 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         }
     }
 
+    /**
+     * Creates headerNames map
+     * @param parameter
+     * @param methodName
+     * @param headerNames
+     * @param fieldName
+     * @param datasetSchemaId
+     * @param query
+     */
     private void createHeaderNames(String parameter, String methodName, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query) {
         parameter = parameter.trim();
         if (parameter.equals("value")) {
@@ -249,6 +259,12 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         }
     }
 
+    /**
+     * Checks if rule method name contains "Record" string
+     * e.g. RuleOperators.recordStringLengthGreaterThanOrEqualsThanRecord("64ac0c0de5f082645bab2f07", "64ac0c1ae5f082645bab2f09")
+     * @param value
+     * @return
+     */
     private static boolean isRecord(String value) {
         boolean record = false;
         int idx = value.indexOf("Record");
@@ -259,7 +275,23 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         return record;
     }
 
-    private Boolean getMethodExecutionResult(String datasetSchemaId, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Object object,
+    /**
+     * Executes method
+     * @param ruleVO
+     * @param fieldName
+     * @param headerNames
+     * @param rs
+     * @param object
+     * @param record
+     * @param methodName
+     * @param md
+     * @param pm
+     * @param providerCode
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private Boolean getMethodExecutionResult(RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Object object,
                                              boolean record, String methodName, Method md, List<String> pm, String providerCode) throws IllegalAccessException, InvocationTargetException {
         List<FieldValue> fields = new ArrayList<>();
         RecordValue recordValue = new RecordValue();
@@ -320,6 +352,11 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         return result;
     }
 
+    /**
+     * Checks if value is numeric
+     * @param value
+     * @return
+     */
     private boolean isNumeric(String value) {
         Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
         if (value == null) {
