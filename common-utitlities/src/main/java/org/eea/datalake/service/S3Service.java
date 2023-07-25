@@ -19,6 +19,11 @@ public interface S3Service {
     String getImportProviderPath(S3PathResolver s3PathResolver);
 
     /**
+     * @return table as folder query path
+     */
+    String getTableAsFolderQueryPath(S3PathResolver s3PathResolver);
+
+    /**
      * @return import provider query path
      */
     String getImportProviderQueryPath(S3PathResolver s3PathResolver);

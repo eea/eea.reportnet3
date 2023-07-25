@@ -7,13 +7,15 @@ public interface DremioHelperService {
 
     String getAuthToken();
 
-    boolean checkFolderPromoted(S3PathResolver s3PathResolver);
+    boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
-    DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver);
+    DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, Boolean importFolder);
 
-    String getFolderId(S3PathResolver s3PathResolver, String folderName);
+    String getFolderId(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
-    void promoteFolder(S3PathResolver s3PathResolver, String folderName);
+    void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
-    void demoteFolder(S3PathResolver s3PathResolver, String folderName);
+    void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
+
+    Boolean removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 }

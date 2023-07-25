@@ -65,7 +65,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     DatasetService datasetService;
 
     @Autowired
-    S3HandlerService s3HandlerService;
+    S3CallsHandlerService s3CallsHandlerService;
 
     @Autowired
     ParquetConverterService parquetConverterService;
@@ -233,11 +233,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         List<File> filesToImport = storeImportFiles(file, importFileInDremioInfo);
         List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
         Map<String, String> parquetFileNamesAndPaths =  parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
-        for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
+        /*for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
             String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
             s3HandlerService.uploadFileToBucket(importPathForParquet, parquetFileNameAndPath.getValue());
             promoteFolder(importFileInDremioInfo, parquetFileNameAndPath.getKey());
-        }
+        }*/
         LOG.info("Uploaded parquet files to s3 {}", importFileInDremioInfo);
     }
 
@@ -245,7 +245,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
         String tableSchemaName = fileName.replace(".parquet", "");
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
-        dremioHelperService.promoteFolder(s3PathResolver, tableSchemaName);
+        dremioHelperService.promoteFolderOrFile(s3PathResolver, tableSchemaName, false);
     }
 
     private String getImportPathForParquet(ImportFileInDremioInfo importFileInDremioInfo, String fileName) throws Exception {

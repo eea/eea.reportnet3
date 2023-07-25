@@ -200,11 +200,20 @@ public final class LiteralConstants {
   /** The Constant S3_COLLECTIONS: {@value}. */
   public static final String S3_COLLECTIONS = "collections";
 
-  /** The Constant S3_CURRENT_PATH: {@value}. */
-  public static final String S3_IMPORT_PATH = "%s/%s/%s/current/import/%s";
+  /** The Constant S3_IMPORT_PATH: {@value}. */
+  public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import";
+
+  /** The Constant S3_IMPORT_TABLE_NAME_FOLDER_PATH: {@value}. */
+  public static final String S3_IMPORT_TABLE_NAME_FOLDER_PATH = "/%s/%s/%s/current/import/%s";
+
+  /** The Constant S3_IMPORT_FILE_PATH: {@value}. */
+  public static final String S3_IMPORT_FILE_PATH = "%s/%s/%s/current/import/%s/%s";
 
   /** The Constant S3_IMPORT_QUERY_PATH: {@value}. */
   public static final String S3_IMPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\"";
+
+  /** The Constant S3_IMPORT_INNER_FOLDER_QUERY_PATH: {@value}. */
+  public static final String S3_IMPORT_INNER_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_PATH: {@value}. */
   public static final String S3_VALIDATION_PATH = "%s/%s/%s/current/validation/%s/%s";
@@ -219,7 +228,7 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_VALIDATE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_PATH = "%s/%s/%s/current/%s/%s";
+  public static final String S3_TABLE_NAME_PATH = "/%s/%s/%s/current/%s/%s";
 
   /** The Constant S3_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_FOLDER_PATH = "/%s/%s/%s/current/%s";
