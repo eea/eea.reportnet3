@@ -679,7 +679,12 @@ export const Dataflow = () => {
     setIsDownloadingUsers(true);
 
     try {
-      await DataflowService.generateUsersByCountryFile(dataflowId, dataProviderId);
+      if (dataProviderId === null) {
+        await DataflowService.generateUsersByCountryFile(dataflowId, undefined);
+      } else {
+        await DataflowService.generateUsersByCountryFile(dataflowId, dataProviderId);
+      }
+
       notificationContext.add({ type: 'DOWNLOAD_USERS_BY_COUNTRY_START' });
     } catch (error) {
       console.error('Dataflow - onDownloadUsersByCountry.', error);
