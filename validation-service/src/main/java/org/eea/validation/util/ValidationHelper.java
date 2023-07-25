@@ -1262,8 +1262,8 @@ public class ValidationHelper implements DisposableBean {
   }
 
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) {
-    if (dataflow.getBigData()!=null && dataflow.getBigData() && !dremioHelperService.checkFolderPromoted(s3PathResolver)) {
-      dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
+    if (dataflow.getBigData()!=null && dataflow.getBigData() && !dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false)) {
+      dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
     }
   }
 
