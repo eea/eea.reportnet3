@@ -3500,20 +3500,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public String getFieldName(String datasetSchemaId, String tableSchemaId, List<String> parameters,
                              String ruleReferenceId, String ruleReferenceFieldSchemaPKId) throws EEAException {
-    TableSchemaVO tableSchemaVO = this.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-    RecordSchemaVO recordSchemaVO = tableSchemaVO.getRecordSchema();
     FieldSchemaVO fieldSchemaVO = null;
     String fieldName = null;
-    Optional<FieldSchemaVO> fieldSchemaOptional = recordSchemaVO.getFieldSchema().stream().filter(fv -> fv.getId().equals(ruleReferenceId)).findFirst();
-    if (fieldSchemaOptional.isPresent()) {
-      fieldSchemaVO = fieldSchemaOptional.get();
+    if (ruleReferenceFieldSchemaPKId==null) {
+      fieldSchemaVO = this.getFieldSchema(datasetSchemaId, ruleReferenceId);
       fieldName = fieldSchemaVO.getName();
     } else {
-      //if these values are equals then it's a uniqueConstraint rule and these fields point to the tableSchemaId and not the fieldSchemaId
-      if (!ruleReferenceId.equals(ruleReferenceFieldSchemaPKId)) {
-        fieldSchemaOptional = recordSchemaVO.getFieldSchema().stream().filter(fv -> fv.getId().equals(ruleReferenceFieldSchemaPKId)).findFirst();
-        if (fieldSchemaOptional.isPresent()) {
-          fieldSchemaVO = fieldSchemaOptional.get();
+      if (!ruleReferenceId.equals(ruleReferenceFieldSchemaPKId)) {  //isFieldFK
+        fieldSchemaVO = this.getFieldSchema(datasetSchemaId, ruleReferenceFieldSchemaPKId);
+        if (fieldSchemaVO!=null) {
           fieldName = fieldSchemaVO.getName();
         }
       } else { //uniqueConstraint

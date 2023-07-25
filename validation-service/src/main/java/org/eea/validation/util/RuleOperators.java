@@ -31,7 +31,7 @@ public class RuleOperators {
   /**
    * Instantiates a new rule operators.
    */
-  private RuleOperators() {}
+  public RuleOperators() {}
 
   /**
    * Sets the entity for RecordValue.
@@ -85,7 +85,7 @@ public class RuleOperators {
    * @param fieldSchemaId the field schema id
    * @return the value
    */
-  private static String getValue(String fieldSchemaId) {
+  public static String getValue(String fieldSchemaId) {
     for (FieldValue field : fields) {
       if (field.getIdFieldSchema().equals(fieldSchemaId)) {
         return field.getValue();
@@ -100,7 +100,7 @@ public class RuleOperators {
    * @param regex the regex
    * @return the string
    */
-  private static String replaceKeywords(String regex) {
+  public static String replaceKeywords(String regex) {
     if (regex.contains("{%R3_COUNTRY_CODE%}")) {
       regex = regex.replace("{%R3_COUNTRY_CODE%}", countryCode);
     }

@@ -367,8 +367,9 @@ public class ValidationHelper implements DisposableBean {
         } else {
           for (TableSchemaVO t : schema.getTableSchemas()) {
             List<FieldSchemaVO> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getId().equals(rule.getReferenceId().toString())).collect(Collectors.toList());
-            if (fieldSchemas.size() > 0) {
+            if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId().toString())) {
               tableSchemaVO = t;
+              break;
             }
           }
         }
@@ -386,6 +387,8 @@ public class ValidationHelper implements DisposableBean {
         value.put("bigData", "true");
         if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint")) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
+        } else if (rule.getWhenCondition().contains("RuleOperators")) {
+          addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EXPRESSION_DL, value);
         } else {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL, value);
         }
