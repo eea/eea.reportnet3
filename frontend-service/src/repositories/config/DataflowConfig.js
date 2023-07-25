@@ -12,7 +12,7 @@ export const DataflowConfig = {
   downloadUsersListFile: '/user/downloadUsersByCountry/{:dataflowId}/?fileName={:fileName}',
   exportSchemas: '/dataschema/export?dataflowId={:dataflowId}',
   generateAllSchemasInfoFile: '/dataflow/exportSchemaInformation/{:dataflowId}',
-  generateUsersByCountryFile: '/user/exportUsersByCountry/dataflow/{:dataflowId}',
+  generateUsersByCountryFile: '/user/exportUsersByCountry/dataflow/{:dataflowId}/?dataProviderId={:dataProviderId}',
   get: '/dataflow/v1/{:dataflowId}',
   getAll: '/dataflow/getDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getAllDataflowsUserList: '/dataflow/getUserRolesAllDataflows',

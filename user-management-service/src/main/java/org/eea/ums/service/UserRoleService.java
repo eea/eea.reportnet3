@@ -35,7 +35,7 @@ public interface UserRoleService {
    * @throws IOException Signals that an I/O exception has occurred.
    * @throws EEAException the EEA exception
    */
-  void exportUsersByCountry(Long dataflowId) throws IOException, EEAException;
+  void exportUsersByCountry(Long dataflowId, Long dataProviderId) throws IOException, EEAException;
 
   /**
    * Download users by country.

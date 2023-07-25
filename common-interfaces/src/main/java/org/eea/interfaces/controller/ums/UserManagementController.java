@@ -369,7 +369,9 @@ public interface UserManagementController {
    * @param dataflowId the dataflow id
    */
   @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
-  void exportUsersByCountry(@PathVariable("dataflowId") Long dataflowId);
+  void exportUsersByCountry(
+          @PathVariable("dataflowId") Long dataflowId,
+          @RequestParam(value = "dataProviderId", required = false) Long dataProviderId);
 
   /**
    * Download users by country.
