@@ -18,6 +18,7 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -31,10 +32,12 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -44,6 +47,7 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
@@ -146,6 +150,18 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.priority.days}")
   private String priorityDays;
 
+  /**
+   * The admin user.
+   */
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  /**
+   * The admin pass.
+   */
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
+
   /** The period days. */
   private List<Long> periodDays;
 
@@ -202,6 +218,12 @@ public class ValidationHelper implements DisposableBean {
 
   @Autowired
   private DremioHelperService dremioHelperService;
+
+  @Autowired
+  private UserManagementControllerZull userManagementControllerZull;
+
+  @Autowired
+  private AdminUserAuthorization adminUserAuthorization;
 
 
   /**
@@ -342,7 +364,7 @@ public class ValidationHelper implements DisposableBean {
   }
 
   @LockMethod(removeWhenFinish = true, isController = false)
-  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver) {
+  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver, JobVO jobVO) {
     initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     LOG.info("Obtaining dataset metabase from datasetId {} to perform validationDL. The schema from the metabase is {}",
@@ -357,6 +379,10 @@ public class ValidationHelper implements DisposableBean {
         s3Helper.deleleFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
+      if (jobVO!=null && jobVO.getParameters().get("userId")!=null) {
+        TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+        adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, jobVO);
+      }
       DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
       List<Rule> rules =
               rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
