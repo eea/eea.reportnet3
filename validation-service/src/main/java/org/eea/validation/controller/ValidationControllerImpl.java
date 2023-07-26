@@ -207,7 +207,7 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
       if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
-        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver);
+        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, jobVO);
       } else {
         validationHelper.executeValidation(datasetId, uuid, released, true);
       }
