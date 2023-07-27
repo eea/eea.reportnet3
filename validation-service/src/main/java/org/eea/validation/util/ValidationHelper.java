@@ -150,18 +150,6 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.priority.days}")
   private String priorityDays;
 
-  /**
-   * The admin user.
-   */
-  @Value("${eea.keycloak.admin.user}")
-  private String adminUser;
-
-  /**
-   * The admin pass.
-   */
-  @Value("${eea.keycloak.admin.password}")
-  private String adminPass;
-
   /** The period days. */
   private List<Long> periodDays;
 
@@ -218,12 +206,6 @@ public class ValidationHelper implements DisposableBean {
 
   @Autowired
   private DremioHelperService dremioHelperService;
-
-  @Autowired
-  private UserManagementControllerZull userManagementControllerZull;
-
-  @Autowired
-  private AdminUserAuthorization adminUserAuthorization;
 
 
   /**
@@ -364,7 +346,7 @@ public class ValidationHelper implements DisposableBean {
   }
 
   @LockMethod(removeWhenFinish = true, isController = false)
-  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver, JobVO jobVO) {
+  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver) {
     initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     LOG.info("Obtaining dataset metabase from datasetId {} to perform validationDL. The schema from the metabase is {}",
@@ -379,10 +361,6 @@ public class ValidationHelper implements DisposableBean {
         s3Helper.deleleFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
-      if (jobVO!=null && jobVO.getParameters().get("userId")!=null) {
-        TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
-        adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, jobVO);
-      }
       DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
       List<Rule> rules =
               rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
