@@ -192,7 +192,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             LOG.info("The file or folder in path {} is not promoted", tablePath);
             return false;
         }
-        String dropTableQuery = "DROP TABLE IF EXISTS " + tablePath;
+        String dropTableQuery = "DROP TABLE " + tablePath;
         try{
             dremioJdbcTemplate.execute(dropTableQuery);
         }

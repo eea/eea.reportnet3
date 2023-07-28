@@ -30,4 +30,12 @@ public interface S3CallsHandlerService {
      * @return
      */
     List<ObjectIdentifier> listObjectsInBucket(String prefix);
+
+    /**
+     * Deletes an object from bucket
+     *
+     * @param fileName the file name
+     * @return
+     */
+    void deleteObjectFromBucket(String fileName);
 }
