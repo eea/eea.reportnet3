@@ -40,6 +40,7 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
   @Mapping(source = "ruleId", target = "ruleId", ignore = true)
   @Mapping(source = "referenceId", target = "referenceId", ignore = true)
   @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
+  @Mapping(source = "referenceFieldSchemaPKId", target = "referenceFieldSchemaPKId", ignore = true)
   public abstract Rule classToEntity(RuleVO ruleVO);
 
   /**
@@ -52,6 +53,7 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
   @Mapping(source = "ruleId", target = "ruleId", ignore = true)
   @Mapping(source = "referenceId", target = "referenceId", ignore = true)
   @Mapping(source = "whenCondition", target = "whenCondition", ignore = true)
+  @Mapping(source = "referenceFieldSchemaPKId", target = "referenceFieldSchemaPKId", ignore = true)
   public abstract RuleVO entityToClass(Rule rule);
 
   /**
@@ -90,10 +92,9 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
   public void afterMapping(Rule rule, @MappingTarget RuleVO ruleVO) {
     ruleVO.setRuleId(rule.getRuleId().toString());
     ruleVO.setReferenceId(rule.getReferenceId().toString());
-    if (AutomaticRuleTypeEnum.FIELD_LINK.equals(rule.getAutomaticType())) {
-      ruleVO.setType(EntityTypeEnum.FIELD);
-      ruleVO.setReferenceId(rule.getWhenCondition().substring(21, 45));
-    }
+    ruleVO.setWhenConditionMethod(rule.getWhenCondition());
+    ruleVO.setReferenceFieldSchemaPKId(rule.getReferenceFieldSchemaPKId()!=null ? rule.getReferenceFieldSchemaPKId().toString() : null);
+
     // We have to convert the rule's when condition, in case of it's a manual and record or field
     // rule
     if (StringUtils.isBlank(ruleVO.getSqlSentence())

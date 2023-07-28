@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,8 +21,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
-import static org.eea.utils.LiteralConstants.S3_BUCKET_NAME;
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
+import static org.eea.utils.LiteralConstants.*;
+import static org.eea.utils.LiteralConstants.*;
 
 @Service
 public class S3HelperImpl implements S3Helper {
@@ -69,6 +70,18 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
+     * Deletes folder from s3
+     * @param s3PathResolver
+     * @param folderPath
+     */
+    @Override
+    public void deleleFolder(S3PathResolver s3PathResolver, String folderPath) {
+        String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
+        result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
+    }
+
+    /**
      * Gets filenames from export folder
      * @param s3PathResolver
      * @return
@@ -96,11 +109,11 @@ public class S3HelperImpl implements S3Helper {
         byte[] data = objectBytes.asByteArray();
 
         // Write the data to a local file.
-        File parquetFile = new File(exportDLPath + datasetName + ".parquet");
+        File parquetFile = new File(exportDLPath + datasetName + PARQUET_TYPE);
         LOG.info("Local file {}", parquetFile);
         OutputStream os = new FileOutputStream(parquetFile);
         os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", datasetName + ".parquet");
+        LOG.info("Successfully obtained bytes from file: {}", datasetName + PARQUET_TYPE);
         os.close();
         return parquetFile;
     }

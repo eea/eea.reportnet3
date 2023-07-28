@@ -77,6 +77,10 @@ public class RuleVO {
   /** The has historic. */
   private boolean hasHistoric;
 
+  private String whenConditionMethod;
+
+  private String referenceFieldSchemaPKId;
+
 
   /**
    * Hash code.

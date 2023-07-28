@@ -15,7 +15,6 @@ public class DremioValidationMapper implements RowMapper<DremioValidationVO> {
     @Override
     public DremioValidationVO mapRow(ResultSet resultSet, int i) throws SQLException {
         DremioValidationVO dremioValidationVO = new DremioValidationVO();
-        dremioValidationVO.setPk(Long.valueOf(resultSet.getString("pk")));
         dremioValidationVO.setRecordId(resultSet.getString("record_id"));
         dremioValidationVO.setValidationLevel(ErrorTypeEnum.valueOf(resultSet.getString("validation_level")));
         dremioValidationVO.setValidationArea(EntityTypeEnum.valueOf(resultSet.getString("validation_area")));

@@ -3492,4 +3492,32 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
   }
 
+  @Override
+  public TableSchemaVO getTableSchemaVO(String tableSchemaId, String datasetSchemaId) {
+    return tableSchemaMapper.entityToClass(getTableSchema(tableSchemaId, datasetSchemaId));
+  }
+
+  @Override
+  public String getFieldName(String datasetSchemaId, String tableSchemaId, List<String> parameters,
+                             String ruleReferenceId, String ruleReferenceFieldSchemaPKId) throws EEAException {
+    FieldSchemaVO fieldSchemaVO = null;
+    String fieldName = null;
+    if (ruleReferenceFieldSchemaPKId==null) {
+      fieldSchemaVO = this.getFieldSchema(datasetSchemaId, ruleReferenceId);
+      fieldName = fieldSchemaVO.getName();
+    } else {
+      if (!ruleReferenceId.equals(ruleReferenceFieldSchemaPKId)) {  //isFieldFK
+        fieldSchemaVO = this.getFieldSchema(datasetSchemaId, ruleReferenceFieldSchemaPKId);
+        if (fieldSchemaVO!=null) {
+          fieldName = fieldSchemaVO.getName();
+        }
+      } else { //uniqueConstraint
+        UniqueConstraintVO uniqueConstraint = this.getUniqueConstraint(parameters.get(0));
+        String fieldSchemaId = uniqueConstraint.getFieldSchemaIds().get(0);
+        fieldSchemaVO = this.getFieldSchema(uniqueConstraint.getDatasetSchemaId(), fieldSchemaId);
+        fieldName = fieldSchemaVO.getName();
+      }
+    }
+    return fieldName;
+  }
 }

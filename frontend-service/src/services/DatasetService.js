@@ -97,6 +97,9 @@ export const DatasetService = {
   downloadExportDatasetFile: async (datasetId, fileName) =>
     await DatasetRepository.downloadExportDatasetFile(datasetId, fileName),
 
+  downloadExportDatasetFileDL: async (datasetId, fileName) =>
+    await DatasetRepository.downloadExportDatasetFileDL(datasetId, fileName),
+
   downloadExportFile: async (datasetId, fileName, providerId) =>
     await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
 
@@ -164,6 +167,8 @@ export const DatasetService = {
   },
 
   exportDatasetData: async (datasetId, fileType) => await DatasetRepository.exportDatasetData(datasetId, fileType),
+
+  exportDatasetDataDL: async (datasetId, fileType) => await DatasetRepository.exportDatasetDataDL(datasetId, fileType),
 
   exportDatasetDataExternal: async (datasetId, integrationId) =>
     await DatasetRepository.exportDatasetDataExternal(datasetId, integrationId),

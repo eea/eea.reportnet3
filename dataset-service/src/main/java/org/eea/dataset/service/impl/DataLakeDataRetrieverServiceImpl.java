@@ -83,7 +83,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
 
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
-        if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) ){//&& dremioHelperService.checkFolderPromoted(s3PathResolver, tableSchemaVO.getNameTableSchema())) {
+        if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
             totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
             pageable = calculatePageable(pageable, totalRecords);
             fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));

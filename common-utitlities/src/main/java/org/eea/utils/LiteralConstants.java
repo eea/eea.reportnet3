@@ -289,6 +289,21 @@ public final class LiteralConstants {
   /** The Constant PARQUET_PROVIDER_CODE_COLUMN_HEADER: {@value}. */
   public static final String PARQUET_PROVIDER_CODE_COLUMN_HEADER = "data_provider_code";
 
+  /** The Constant JSON_TYPE: {@value}. */
+  public static final String JSON_TYPE = ".json";
+
+  /** The Constant CSV_TYPE: {@value}. */
+  public static final String CSV_TYPE = ".csv";
+
+  /** The Constant XML_TYPE: {@value}. */
+  public static final String XML_TYPE = ".xml";
+
+  /** The Constant XLSX_TYPE: {@value}. */
+  public static final String XLSX_TYPE = ".xlsx";
+
+  /** The Constant PARQUET_TYPE: {@value}. */
+  public static final String PARQUET_TYPE = ".parquet";
+
 
   /**
    * Instantiates a new literal constants.

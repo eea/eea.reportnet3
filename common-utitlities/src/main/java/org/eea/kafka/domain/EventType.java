@@ -579,7 +579,25 @@ public enum EventType {
           "fme_import_job_failed_event", true),
 
   EXPORT_FILE_START_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "export_file_start_event", true);
+          "export_file_start_event", true),
+
+  /** The command validate datalake. */
+  COMMAND_VALIDATE_DL(LiteralConstants.COMMAND_TOPIC, "execute_validations_dl_key", false),
+
+  /** The command validated datalake completed. */
+  COMMAND_VALIDATED_DL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_validated_key", true),
+
+  /** The command validate sql datalake. */
+  COMMAND_VALIDATE_SQL_DL(LiteralConstants.COMMAND_TOPIC, "execute_validations_sql_dl_key", false),
+
+  /** The command validated sql datalake completed. */
+  COMMAND_VALIDATED_SQL_DL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_sql_validated_key", true),
+
+  /** The command validate sql datalake. */
+  COMMAND_VALIDATE_EXPRESSION_DL(LiteralConstants.COMMAND_TOPIC, "execute_validations_expression_dl_key", false),
+
+  /** The command validated sql datalake completed. */
+  COMMAND_VALIDATED_EXPRESSION_DL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_expression_validated_key", true);
 
 
   /** The topic. */

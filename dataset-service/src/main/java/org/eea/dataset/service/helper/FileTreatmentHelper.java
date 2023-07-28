@@ -102,6 +102,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.zip.*;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class FileTreatmentHelper.
@@ -786,19 +787,28 @@ public class FileTreatmentHelper implements DisposableBean {
         try {
             for (S3Object myValue : exportFilenames) {
                 String key = myValue.key();
-                String filename = new File(key).getName();
                 String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
                 if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
                     File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
-                    File csvFile = new File(exportDLPath + filename.replace(".parquet",".csv"));
+                    nameDataset = nameDataset + CSV_TYPE;
+                    File csvFile = new File(exportDLPath + nameDataset);
 
                     s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
                 } else if (extension.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                     File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
-                    File xlsxFile = new File(exportDLPath + filename.replace(".parquet",".xlsx"));
+                    nameDataset = nameDataset + XLSX_TYPE;
+                    File xlsxFile = new File(exportDLPath + nameDataset);
 
-                    s3ConvertService.convertParquetToExcel(parquetFile, xlsxFile);
+                    s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
                 }
+
+                // Send notification
+                NotificationVO notificationVO = NotificationVO.builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).
+                        datasetName(nameDataset).build();
+
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
+                    notificationVO);
             }
         } catch (IOException | NullPointerException e) {
             LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
@@ -814,6 +824,10 @@ public class FileTreatmentHelper implements DisposableBean {
                 LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
                     datasetId, e.getMessage(), ex);
             }
+        } catch (EEAException e) {
+            LOG_ERROR.error("Error exporting DL dataset data. datasetId {}, file type {}. Message {}",
+                datasetId, mimeType, e.getMessage(), e);
+            throw new RuntimeException(e);
         }
 
     }

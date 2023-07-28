@@ -8,15 +8,18 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.ValidationController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
@@ -62,6 +65,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import static org.eea.utils.LiteralConstants.S3_VALIDATION;
+
 /**
  * The Class ValidationControllerImpl.
  */
@@ -114,6 +120,9 @@ public class ValidationControllerImpl implements ValidationController {
 
   @Autowired
   private LoadValidationsHelperDL loadValidationsHelperDL;
+
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /**
    * Executes the validation job
@@ -194,8 +203,14 @@ public class ValidationControllerImpl implements ValidationController {
       }
     }
     try {
+      DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
       LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
-      validationHelper.executeValidation(datasetId, uuid, released, true);
+      if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
+        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver);
+      } else {
+        validationHelper.executeValidation(datasetId, uuid, released, true);
+      }
 
       // Add lock to the release process if necessary
       validationHelper.addLockToReleaseProcess(datasetId);
