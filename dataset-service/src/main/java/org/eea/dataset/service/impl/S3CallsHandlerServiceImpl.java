@@ -70,4 +70,14 @@ public class S3CallsHandlerServiceImpl implements S3CallsHandlerService {
 
         DeleteObjectsResponse deleteObjectsResponse = s3Client.deleteObjects(deleteObjectsRequest);
     }
+
+    @Override
+    public void deleteObjectFromBucket(String fileName){
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                .bucket(LiteralConstants.S3_BUCKET_NAME)
+                .key(fileName)
+                .build();
+
+        DeleteObjectResponse deleteObjectResponse = s3Client.deleteObject(deleteObjectRequest);
+    }
 }

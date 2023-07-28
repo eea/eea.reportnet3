@@ -92,7 +92,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     private void convertCsvToParquetViaDremio(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo,
                                               String tableSchemaName, String randomStrForNewFolderSuffix) throws Exception {
-        //if replace Data == true -> remove folder that contains parquet and maybe old csv ?
         LOG.info("For job {} converting csv file {} to parquet file {}", importFileInDremioInfo, csvFile.getPath());
         File csvFileWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, randomStrForNewFolderSuffix);
 
@@ -117,12 +116,16 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String refreshImportTableQuery = "ALTER TABLE " + csvFolderPath + " REFRESH METADATA";
         dremioJdbcTemplate.execute(refreshImportTableQuery);
 
+
+        //use S3 Way
         String uniqueString = UUID.randomUUID().toString();
-        String parquetInnerFolderPath = tableFolderPath + ".\"" + uniqueString + "\"";
+        String parquetInnerFolderPath = tableFolderPath;// + ".\"" + uniqueString + "\"";
         //demote table folder
-        demoteFolderOrFile(importFileInDremioInfo, tableSchemaName, false, tableSchemaName);
+        //demoteFolderOrFile(importFileInDremioInfo, tableSchemaName, false, tableSchemaName);
         //remove old table folder
-        s3CallsHandlerService.deleteObjectsFromBucket(s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_TABLE_NAME_FOLDER_PATH));
+        dremioHelperService.removeImportRelatedTableFromDremio(s3PathResolver, tableSchemaName, false);
+        //s3CallsHandlerService.deleteObjectsFromBucket(s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_TABLE_NAME_FOLDER_PATH));
+        //s3CallsHandlerService.deleteObjectFromBucket(s3Service.getTableAsFolderQueryPath(s3PathResolver, LiteralConstants.S3_TABLE_NAME_FOLDER_PATH));
 
 
 
@@ -139,10 +142,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         */
 
         //promote folder
-        promoteFolderOrFile(importFileInDremioInfo, tableSchemaName, false, tableSchemaName);
+        //promoteFolderOrFile(importFileInDremioInfo, tableSchemaName, false, tableSchemaName);
 
         //refresh the metadata
-        String refreshTableQuery = "ALTER TABLE " + tableFolderPath + " REFRESH METADATA";
+        String refreshTableQuery = "ALTER TABLE " + tableFolderPath + " REFRESH METADATA AUTO PROMOTION";
         dremioJdbcTemplate.execute(refreshTableQuery);
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
