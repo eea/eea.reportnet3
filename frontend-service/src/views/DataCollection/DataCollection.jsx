@@ -79,9 +79,12 @@ export const DataCollection = () => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
-    setExportButtonsList(internalExtensions);
     getMetadata();
   }, []);
+
+  useEffect(() => {
+    getExtensionsList();
+  }, [metadata?.dataflow.bigData]);
 
   useEffect(() => {
     if (!isUndefined(metadata)) {
@@ -108,18 +111,26 @@ export const DataCollection = () => {
     }
   };
 
-  const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(
-    exportType => exportType.code !== 'xlsx+validations'
-  );
+  const getExtensionsList = () => {
+    const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(exportType => {
+      if (bigDataRef.current) {
+        return exportType.code !== 'xlsx+validations';
+      } else {
+        return exportType.code !== 'xlsx+validations' && exportType.code !== 'csv';
+      }
+    });
 
-  const internalExtensions = internalExtensionsList.map(type => {
-    const extensionsTypes = type.code.split('+');
-    return {
-      label: resourcesContext.messages[type.key],
-      icon: extensionsTypes[0],
-      command: () => onExportDataInternalExtension(type.code)
-    };
-  });
+    const internalExtensions = internalExtensionsList.map(type => {
+      const extensionsTypes = type.code.split('+');
+      return {
+        label: resourcesContext.messages[type.key],
+        icon: extensionsTypes[0],
+        command: () => onExportDataInternalExtension(type.code)
+      };
+    });
+
+    setExportButtonsList(internalExtensions);
+  };
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
