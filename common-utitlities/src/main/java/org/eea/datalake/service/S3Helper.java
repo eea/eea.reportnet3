@@ -44,4 +44,12 @@ public interface S3Helper {
      * @return
      */
     File getFileFromS3(String filename, String datasetName) throws IOException;
+
+    /**
+     * Uploads a file in s3
+     * @param filePathInS3
+     * @param filePathInReportnet
+     * @return
+     */
+    void uploadFileToBucket(String filePathInS3, String filePathInReportnet);
 }
