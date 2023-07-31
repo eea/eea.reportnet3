@@ -129,8 +129,8 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                     }
                 });
 
-                if (!dremioHelperService.checkFolderPromoted(s3PathResolver)) {
-                    dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
+                if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION, false)) {
+                    dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
                 }
                 retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), s3PathResolver);
             }
