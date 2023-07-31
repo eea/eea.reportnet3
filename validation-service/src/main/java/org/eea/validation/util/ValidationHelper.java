@@ -1281,6 +1281,7 @@ public class ValidationHelper implements DisposableBean {
       int valIdx = folderName.indexOf("validation");
       int startIdx = valIdx + 10;
       validationSubFolders.forEach(vs -> {
+        LOG.info("Checking rule " + vs);
         if (vs.contains("/0_0_0.parquet")) {
           int endIdx = vs.indexOf("/0_0_0.parquet");
           vs = vs.substring(startIdx, endIdx);
@@ -1289,6 +1290,7 @@ public class ValidationHelper implements DisposableBean {
         }
         if (!rules.contains(vs)) {
           String finalVs = vs;
+          LOG.info("Rule " + vs + " doesn't exist.Proceeding with deletion.");
           s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(finalVs));
         }
       });
