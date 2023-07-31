@@ -172,6 +172,13 @@ public class S3ServiceImpl implements S3Service {
         return s3ExportPath;
     }
 
+    @Override
+    public String getRuleValidationPath(S3PathResolver s3PathResolver) {
+        String s3ValidationPath = calculateS3ProviderPath(s3PathResolver, S3_VALIDATION_RULE_PATH);
+        LOG.info("Method getRuleValidationPath returns S3 Validation Path: {}", s3ValidationPath);
+        return s3ValidationPath;
+    }
+
     private String calculateS3ProviderPath(S3PathResolver s3PathResolver, String path) {
         LOG.info("Method calculateS3Path called with s3Path: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
@@ -195,6 +202,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_QUERY_PATH:
             case S3_TABLE_NAME_VALIDATE_PATH:
             case S3_TABLE_NAME_VALIDATE_QUERY_PATH:
+            case S3_VALIDATION_RULE_PATH:
                 path = String.format(path, dataflowFolder,
                     dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), fileName);
                 break;

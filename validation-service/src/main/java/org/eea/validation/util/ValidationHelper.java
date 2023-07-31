@@ -7,8 +7,9 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
-import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -18,7 +19,6 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -32,12 +32,10 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
-import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -47,7 +45,6 @@ import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
 import org.eea.multitenancy.TenantResolver;
-import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.kafka.command.Validator;
@@ -73,10 +70,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
@@ -91,12 +91,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_VALIDATION;
-import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class ValidationHelper.
  */
+@ImportDataLakeCommons
 @Component
 @RefreshScope
 public class ValidationHelper implements DisposableBean {
@@ -205,7 +205,14 @@ public class ValidationHelper implements DisposableBean {
   private S3Helper s3Helper;
 
   @Autowired
-  private DremioHelperService dremioHelperService;
+  @Qualifier("dremioJdbcTemplate")
+  JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  S3Service s3Service;
+
+  @Autowired
+  S3Client s3Client;
 
 
   /**
@@ -1222,7 +1229,7 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                checkAndPromoteFolder(s3PathResolver, dataflow);
+                checkAndPromoteFolder(s3PathResolver, dataflow, dataset.getDatasetSchema());
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
@@ -1235,7 +1242,7 @@ public class ValidationHelper implements DisposableBean {
             } else {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
-              checkAndPromoteFolder(s3PathResolver, dataflow);
+              checkAndPromoteFolder(s3PathResolver, dataflow, dataset.getDatasetSchema());
               if (jobId!=null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
               }
@@ -1265,9 +1272,29 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) {
-    if (dataflow.getBigData()!=null && dataflow.getBigData() && !dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false)) {
-      dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
+  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow, String datasetSschema) {
+    if (dataflow.getBigData()!=null && dataflow.getBigData()) {
+      String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+      List<String> rules = rulesRepository.findRulesEnabled(new ObjectId(datasetSschema)).stream().map(rule -> rule.getShortCode()).collect(Collectors.toList());
+      List<String> validationSubFolders = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName)).contents().stream()
+              .map(s3Object -> s3Object.key()).collect(Collectors.toList());
+      int valIdx = folderName.indexOf("validation");
+      int startIdx = valIdx + 10;
+      validationSubFolders.forEach(vs -> {
+        if (vs.contains("/0_0_0.parquet")) {
+          int endIdx = vs.indexOf("/0_0_0.parquet");
+          vs = vs.substring(startIdx, endIdx);
+        } else {
+          vs = vs.substring(startIdx);
+        }
+        if (!rules.contains(vs)) {
+          String finalVs = vs;
+          s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(finalVs));
+        }
+      });
+
+      String query = "ALTER TABLE " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
+      dremioJdbcTemplate.execute(query);
     }
   }
 
