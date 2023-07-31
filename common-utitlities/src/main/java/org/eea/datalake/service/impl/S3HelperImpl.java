@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
-import software.amazon.awssdk.services.s3.model.S3Object;
-import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -118,5 +117,21 @@ public class S3HelperImpl implements S3Helper {
         return parquetFile;
     }
 
+    /**
+     * Uploads a file in s3
+     * @param filePathInS3
+     * @param filePathInReportnet
+     * @return
+     */
+    @Override
+    public void uploadFileToBucket(String filePathInS3, String filePathInReportnet) {
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(LiteralConstants.S3_BUCKET_NAME)
+                .key(filePathInS3)
+                .build();
 
+        java.nio.file.Path file = Paths.get(filePathInReportnet);
+
+        PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, file);
+    }
 }
