@@ -21,7 +21,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 
-export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
+export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetId, level, onSetSqlSentence }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -218,7 +218,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
         </div>
         <div className={styles.sqlSentence}>
           <h3 className={styles.title}>
-            {resourcesContext.messages['sqlSentence']}
+            {bigData ? resourcesContext.messages['sqlSentenceBigData'] : resourcesContext.messages['sqlSentence']}
             <Button
               className={`${styles.sqlSentenceInfoBtn} p-button-rounded p-button-secondary-transparent`}
               icon="infoCircle"
