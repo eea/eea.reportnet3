@@ -31,6 +31,10 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +113,25 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             result.setTotalFilteredRecords(Long.valueOf(recordVOS.size()));
             s3PathResolver.setTableName(S3_VALIDATION);
             if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+                String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+                List<String> validationSubFolders = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName)).contents().stream()
+                        .map(s3Object -> s3Object.key()).collect(Collectors.toList());
+                validationSubFolders.forEach(vs -> {
+                    s3PathResolver.setFilename(vs);
+                    Path path = Paths.get(s3Service.getRuleValidationPath(s3PathResolver));
+                    try {
+                        boolean isNotEmptyDirectory = Files.list(path).findAny().isPresent();
+                        if (!isNotEmptyDirectory) {
+                            s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(vs));
+                        }
+                    } catch (IOException e) {
+                        LOG.error("Error handling contents of folder " + vs);
+                    }
+                });
+
+                if (!dremioHelperService.checkFolderPromoted(s3PathResolver)) {
+                    dremioHelperService.promoteFolder(s3PathResolver, S3_VALIDATION);
+                }
                 retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), s3PathResolver);
             }
         } else {

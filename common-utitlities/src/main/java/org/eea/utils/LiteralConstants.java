@@ -209,6 +209,9 @@ public final class LiteralConstants {
   /** The Constant S3_VALIDATION_PATH: {@value}. */
   public static final String S3_VALIDATION_PATH = "%s/%s/%s/current/validation/%s/%s";
 
+  /** The constant S3_VALIDATION_RULE_PATH: {@value}. */
+  public static final String S3_VALIDATION_RULE_PATH = "%s/%s/%s/current/validation/%s";
+
   /** The Constant S3_VALIDATION_PATH: {@value}. */
   public static final String S3_VALIDATION_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\"";
 

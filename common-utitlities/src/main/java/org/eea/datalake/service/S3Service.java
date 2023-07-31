@@ -103,4 +103,11 @@ public interface S3Service {
      * @return export Folder path
      */
     String getExportFolderPath(S3PathResolver s3PathResolver);
+
+    /**
+     *
+     * @param s3PathResolver
+     * @return
+     */
+    String getRuleValidationPath(S3PathResolver s3PathResolver);
 }
