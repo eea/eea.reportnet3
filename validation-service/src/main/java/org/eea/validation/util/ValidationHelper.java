@@ -96,7 +96,6 @@ import static org.eea.utils.LiteralConstants.*;
 /**
  * The Class ValidationHelper.
  */
-@ImportDataLakeCommons
 @Component
 @RefreshScope
 public class ValidationHelper implements DisposableBean {
@@ -210,9 +209,6 @@ public class ValidationHelper implements DisposableBean {
 
   @Autowired
   S3Service s3Service;
-
-  @Autowired
-  S3Client s3Client;
 
 
   /**
@@ -1229,7 +1225,7 @@ public class ValidationHelper implements DisposableBean {
                 executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
                     true);
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                checkAndPromoteFolder(s3PathResolver, dataflow, dataset.getDatasetSchema());
+                checkAndPromoteFolder(s3PathResolver, dataflow);
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
@@ -1242,7 +1238,7 @@ public class ValidationHelper implements DisposableBean {
             } else {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
-              checkAndPromoteFolder(s3PathResolver, dataflow, dataset.getDatasetSchema());
+              checkAndPromoteFolder(s3PathResolver, dataflow);
               if (jobId!=null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
               }
@@ -1272,29 +1268,8 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow, String datasetSschema) {
+  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
-      String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_VALIDATION_TABLE_PATH);
-      List<String> rules = rulesRepository.findRulesEnabled(new ObjectId(datasetSschema)).stream().map(rule -> rule.getShortCode()).collect(Collectors.toList());
-      List<String> validationSubFolders = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName)).contents().stream()
-              .map(s3Object -> s3Object.key()).collect(Collectors.toList());
-      int valIdx = folderName.indexOf("validation");
-      int startIdx = valIdx + 10;
-      validationSubFolders.forEach(vs -> {
-        LOG.info("Checking rule " + vs);
-        if (vs.contains("/0_0_0.parquet")) {
-          int endIdx = vs.indexOf("/0_0_0.parquet");
-          vs = vs.substring(startIdx, endIdx);
-        } else {
-          vs = vs.substring(startIdx);
-        }
-        if (!rules.contains(vs)) {
-          String finalVs = vs;
-          LOG.info("Rule " + vs + " doesn't exist.Proceeding with deletion.");
-          s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(finalVs));
-        }
-      });
-
       String query = "ALTER TABLE " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
       dremioJdbcTemplate.execute(query);
     }
