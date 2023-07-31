@@ -121,7 +121,9 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                     Path path = Paths.get(s3Service.getRuleValidationPath(s3PathResolver));
                     try {
                         boolean isNotEmptyDirectory = Files.list(path).findAny().isPresent();
+                        LOG.info("Folder is empty: " + isNotEmptyDirectory);
                         if (!isNotEmptyDirectory) {
+                            LOG.info("Folder " + vs + " is empty.Proceeding with deletion.");
                             s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(vs));
                         }
                     } catch (IOException e) {
