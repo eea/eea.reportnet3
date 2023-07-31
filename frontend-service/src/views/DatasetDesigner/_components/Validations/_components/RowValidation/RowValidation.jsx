@@ -43,7 +43,7 @@ import { resetValidationRuleCreation } from 'views/DatasetDesigner/_components/V
 import { setExpressionsFieldsTypes } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setExpressionsFieldsTypes';
 import { setValidationExpression } from 'views/DatasetDesigner/_components/Validations/_functions/Utils/setValidationExpression';
 
-export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
+export const RowValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const validationContext = useContext(ValidationContext);
@@ -93,6 +93,7 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
           key="rowExpressionTab"
           leftIcon={showErrorOnExpressionTab ? 'pi pi-exclamation-circle' : ''}>
           <ExpressionSelector
+            bigData={bigData}
             componentName={componentName}
             creationFormState={creationFormState}
             dataflowType={dataflowType}
