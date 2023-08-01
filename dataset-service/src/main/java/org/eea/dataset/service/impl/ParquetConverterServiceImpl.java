@@ -124,7 +124,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         //use S3 Way
         String uniqueString = UUID.randomUUID().toString();
-        String parquetInnerFolderPath = tableFolderPath ;//+ ".\"" + uniqueString + "\"";
+        String parquetInnerFolderPath = tableFolderPath + ".\"" + uniqueString + "\"";
         //demote table folder
         //demoteFolderOrFile(importFileInDremioInfo, tableSchemaName, false, tableSchemaName);
         //remove old table folder
