@@ -236,7 +236,7 @@ public class UniqueValidationUtils {
    * @param idFieldSchema the id field schema
    * @return the table schema from id field schema
    */
-  private static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema datasetSchema,
+  public static TableSchema getTableSchemaFromIdFieldSchema(DataSetSchema datasetSchema,
       String idFieldSchema) {
     for (TableSchema table : datasetSchema.getTableSchemas()) {
       for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {

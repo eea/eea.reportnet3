@@ -366,7 +366,7 @@ public class ValidationHelper implements DisposableBean {
               rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
       for (Rule rule : rules) {
         TableSchemaVO tableSchemaVO = null;
-        if (rule.getReferenceFieldSchemaPKId()!=null) {
+        if (rule.getReferenceFieldSchemaPKId()!=null || rule.getType().equals(EntityTypeEnum.TABLE)) {
           tableSchemaVO = schema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(rule.getReferenceId().toString())).findFirst().get();
         } else {
           for (TableSchemaVO t : schema.getTableSchemas()) {
@@ -389,7 +389,7 @@ public class ValidationHelper implements DisposableBean {
         value.put("tableName", tableSchemaVO.getNameTableSchema());
         value.put("tableSchemaId", tableSchemaVO.getIdTableSchema());
         value.put("bigData", "true");
-        if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint")) {
+        if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint") || rule.getWhenCondition().contains("checkIntegrityConstraint")) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
         } else if (rule.getWhenCondition().contains("RuleOperators")) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EXPRESSION_DL, value);

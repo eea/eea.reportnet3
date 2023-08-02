@@ -129,6 +129,40 @@ public class DremioSQLValidationUtils {
         }
         return recordIds;
     }
+
+    public List<String> checkIntegrityConstraint(long originDatasetId, long referencedDatasetId, String originSchemaId, String referencedSchemaId, String originTablePath,
+                           String referTablePath, List<String> originFields, List<String> referFields, boolean isDoubleReferenced) {
+        List<String> recordIds = new ArrayList<>();
+        StringBuilder query = new StringBuilder();
+        query.append("select ").append("pk.record_id").append(" from ").append(originTablePath).append(" fk ").append("right join ").append(referTablePath).append(" pk on ");
+        for (int i = 0; i < referFields.size(); i++) {
+            if (i != 0) {
+                query.append(" and ");
+            }
+            query.append("pk.").append(referFields.get(i)).append("=").append("fk.").append(originFields.get(i));
+        }
+        query.append(" where fk.").append(originFields.get(0)).append(" is null and pk.").append(referFields.get(0)).append(" is not null");
+        List<String> res = dremioJdbcTemplate.queryForList(query.toString(), String.class);
+        if (res.size()>0) {
+            recordIds.add("OMISSION");
+        }
+        StringBuilder isDoubleReferQuery = new StringBuilder();
+        if (isDoubleReferenced) {
+            isDoubleReferQuery.append("select fk.record_id").append(" from ").append(referTablePath).append(" pk ").append("right join ").append(originTablePath).append(" fk on ");
+            for (int i=0; i<originFields.size(); i++) {
+                if (i!=0) {
+                    isDoubleReferQuery.append(" and ");
+                }
+                isDoubleReferQuery.append("fk.").append(originFields.get(i)).append("=").append("pk.").append(referFields.get(i));
+            }
+            isDoubleReferQuery.append(" where pk.").append(referFields.get(0)).append(" is null and fk.").append(originFields.get(0)).append(" is not null");
+            List<String> rs = dremioJdbcTemplate.queryForList(isDoubleReferQuery.toString(), String.class);
+            if (rs.size()>0) {
+                recordIds.add("COMISSION");
+            }
+        }
+        return recordIds;
+    }
 }
 
 
