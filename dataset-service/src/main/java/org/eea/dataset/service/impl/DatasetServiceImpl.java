@@ -2923,10 +2923,10 @@ public class DatasetServiceImpl implements DatasetService {
     // we compound the route and create the file
     File file =
         new File(new File(exportDLPath), FilenameUtils.getName(fileName));
-
+    LOG.info("File exist {} ", file);
     if (!file.exists()) {
       LOG_ERROR.error(
-          "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName);
+          "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName, e);
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
     return file;
