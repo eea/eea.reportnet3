@@ -1820,6 +1820,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         )}
         {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
           <Validations
+            bigData={designerState.bigData}
             dataflowType={designerState.dataflowType}
             datasetId={datasetId}
             datasetSchema={designerState.datasetSchema}

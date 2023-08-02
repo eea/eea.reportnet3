@@ -15,6 +15,10 @@
   ],
   "exportDatasetTypes": [
     {
+      "key": "exportCsv",
+      "code": "csv"
+    },
+    {
       "key": "exportXlsx",
       "code": "xlsx"
     },

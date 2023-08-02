@@ -16,6 +16,7 @@ import { TableRelationsSelector } from 'views/DatasetDesigner/_components/Valida
 import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 
 export const ExpressionSelector = ({
+  bigData,
   componentName,
   creationFormState,
   dataflowType,
@@ -64,26 +65,44 @@ export const ExpressionSelector = ({
         candidateRule: { fieldType }
       } = creationFormState;
       if (nonSql.includes(fieldType?.toLowerCase())) {
-        return [{ label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }];
+        return bigData
+          ? [{ label: resourcesContext.messages['sqlSentenceBigData'], value: 'sqlSentence' }]
+          : [{ label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }];
       }
-      return [
-        { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldTab' },
-        { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
-      ];
+      return bigData
+        ? [
+            { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldTab' },
+            { label: resourcesContext.messages['sqlSentenceBigData'], value: 'sqlSentence' }
+          ]
+        : [
+            { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldTab' },
+            { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
+          ];
     }
 
     if (validationContext.level === 'row') {
-      return [
-        { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldComparison' },
-        { label: resourcesContext.messages['ifThenLabel'], value: 'ifThenClause' },
-        { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
-      ];
+      return bigData
+        ? [
+            { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldComparison' },
+            { label: resourcesContext.messages['ifThenLabel'], value: 'ifThenClause' },
+            { label: resourcesContext.messages['sqlSentenceBigData'], value: 'sqlSentence' }
+          ]
+        : [
+            { label: resourcesContext.messages['fieldComparisonLabel'], value: 'fieldComparison' },
+            { label: resourcesContext.messages['ifThenLabel'], value: 'ifThenClause' },
+            { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
+          ];
     }
 
-    return [
-      { label: resourcesContext.messages['datasetComparison'], value: 'fieldRelations' },
-      { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
-    ];
+    return bigData
+      ? [
+          { label: resourcesContext.messages['datasetComparison'], value: 'fieldRelations' },
+          { label: resourcesContext.messages['sqlSentenceBigData'], value: 'sqlSentence' }
+        ]
+      : [
+          { label: resourcesContext.messages['datasetComparison'], value: 'fieldRelations' },
+          { label: resourcesContext.messages['sqlSentence'], value: 'sqlSentence' }
+        ];
   };
 
   const {
@@ -182,6 +201,7 @@ export const ExpressionSelector = ({
     if (!isEmpty(expressionType) && expressionType === 'sqlSentence') {
       return (
         <SqlSentence
+          bigData={bigData}
           creationFormState={creationFormState}
           dataflowType={dataflowType}
           datasetId={datasetId}

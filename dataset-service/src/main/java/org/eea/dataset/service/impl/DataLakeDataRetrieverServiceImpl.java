@@ -109,6 +109,9 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             result.setTotalFilteredRecords(Long.valueOf(recordVOS.size()));
             s3PathResolver.setTableName(S3_VALIDATION);
             if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+                if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION, false)) {
+                    dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
+                }
                 retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), s3PathResolver);
             }
         } else {

@@ -21,7 +21,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import static org.eea.utils.LiteralConstants.*;
-import static org.eea.utils.LiteralConstants.*;
 
 @Service
 public class S3HelperImpl implements S3Helper {
@@ -77,7 +76,10 @@ public class S3HelperImpl implements S3Helper {
     public void deleleFolder(S3PathResolver s3PathResolver, String folderPath) {
         String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
-        result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
+        result.contents().forEach(s3Object -> {
+            ListObjectVersionsResponse versions = s3Client.listObjectVersions(builder -> builder.bucket(S3_BUCKET_NAME).prefix(s3Object.key()));
+            versions.versions().forEach(version -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key()).versionId(version.versionId())));
+        });
     }
 
     /**
