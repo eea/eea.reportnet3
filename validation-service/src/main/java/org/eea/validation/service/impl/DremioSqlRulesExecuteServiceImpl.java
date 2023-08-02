@@ -154,11 +154,11 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                     TableSchema originTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(originDatasetSchema, integrityVO.getOriginFields().get(0));
                     TableSchema referencedTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(referDatasetSchema, integrityVO.getReferencedFields().get(0));
                     integrityVO.getOriginFields().forEach(originField -> {
-                        FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, originField);
+                        FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(originSchemaId, originField);
                         origFieldNames.add(fieldSchema.getName());
                     });
                     integrityVO.getReferencedFields().forEach(referField -> {
-                        FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, referField);
+                        FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(referencedSchemaId, referField);
                         referFieldNames.add(fieldSchema.getName());
                     });
                     S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
