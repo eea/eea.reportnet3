@@ -1962,15 +1962,15 @@ public class DatasetControllerImpl implements DatasetController {
         LOG.info("Delete file {} ", file);
         FileUtils.forceDelete(file);
       } catch (Exception e) {
-        LOG.error("Unexpected error! Error in copying large file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+        LOG.error("Unexpected error! Error in copying large file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage(), e);
         throw e;
       }
     } catch (IOException | EEAException e) {
       LOG.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
-          datasetId, fileName, e.getMessage());
+          datasetId, fileName, e.getMessage(), e);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error downloading file {} for datasetId {} Message: {}", fileName, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error downloading file {} for datasetId {} Message: {}", fileName, datasetId, e.getMessage(), e);
       throw e;
     }
   }
