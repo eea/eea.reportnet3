@@ -93,7 +93,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 }
             }
 
-            Map<String, List<String>> parameterMethods = new HashMap<>();
+            LinkedHashMap<String, List<String>> parameterMethods = new LinkedHashMap<>();
             parameters.forEach(parameter -> {
                 if (parameter.contains("RuleOperators")) {
                     //RuleOperators method in when condition contains nested RuleOperators methods
