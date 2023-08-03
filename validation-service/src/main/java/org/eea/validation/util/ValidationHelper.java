@@ -1111,6 +1111,7 @@ public class ValidationHelper implements DisposableBean {
     @Override
     public void run() {
       ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
+      boolean ruleFolderExists = false;
       Long currentTime = System.currentTimeMillis();
       int workingThreads =
           ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
@@ -1127,9 +1128,12 @@ public class ValidationHelper implements DisposableBean {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
         status = ProcessStatusEnum.IN_QUEUE;
+        if (e.getCause().toString().contains("Folder already exists")) {
+          ruleFolderExists = true;
+        }
       } finally {
         try {
-          if (ProcessStatusEnum.IN_QUEUE.equals(status)) {
+          if (ProcessStatusEnum.IN_QUEUE.equals(status) && !ruleFolderExists) {
             cancelTask(validationTask.taskId, new Date());
           } else {
             updateTask(validationTask.taskId, status, new Date());

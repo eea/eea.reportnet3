@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -35,18 +36,20 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
     private ValidationService validationService;
     private DremioRulesService dremioRulesService;
+    private S3Helper s3Helper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioNonSqlRulesExecuteServiceImpl.class);
 
     @Autowired
     public DremioNonSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
-                                               DatasetSchemaControllerZuul datasetSchemaControllerZuul, ValidationService validationService, DremioRulesService dremioRulesService) {
+                                               DatasetSchemaControllerZuul datasetSchemaControllerZuul, ValidationService validationService, DremioRulesService dremioRulesService, S3Helper s3Helper) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
         this.datasetSchemaControllerZuul = datasetSchemaControllerZuul;
         this.validationService = validationService;
         this.dremioRulesService = dremioRulesService;
+        this.s3Helper = s3Helper;
     }
 
     @Override
@@ -56,6 +59,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
+            s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf("(");
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(")");
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);

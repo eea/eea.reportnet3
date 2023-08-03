@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Optional;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -24,6 +26,8 @@ import static org.eea.utils.LiteralConstants.*;
 public class S3HelperImpl implements S3Helper {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3HelperImpl.class);
+    private static final String VALIDATION="validation";
+    private static final String PARQUET_FILE_NAME="/0_0_0.parquet";
 
     private S3Service s3Service;
     private S3Client s3Client;
@@ -124,5 +128,26 @@ public class S3HelperImpl implements S3Helper {
         return parquetFile;
     }
 
-
+    @Override
+    public void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO) {
+        String validationFolderName = s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH);
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(validationFolderName));
+        if (result!=null && result.contents().size()>0) {
+            Optional<S3Object> ruleFile = result.contents().stream().filter(s3Object -> s3Object.key().contains(ruleVO.getShortCode())).findFirst();
+            if (ruleFile.isPresent()) {
+                S3PathResolver ruleResolver = validationResolver;
+                int valIdx = validationFolderName.indexOf(VALIDATION);
+                int startIdx = valIdx + 10;
+                String ruleFolderName = ruleFile.get().key();
+                if (ruleFolderName.contains(PARQUET_FILE_NAME)) {
+                    int endIdx = ruleFolderName.indexOf(PARQUET_FILE_NAME);
+                    ruleFolderName = ruleFolderName.substring(startIdx, endIdx);
+                } else {
+                    ruleFolderName = ruleFolderName.substring(startIdx);
+                }
+                ruleResolver.setTableName(ruleFolderName);
+                this.deleleFolder(ruleResolver, S3_VALIDATION_RULE_PATH);
+            }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -45,12 +46,14 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
     private DremioRulesService dremioRulesService;
     private RepresentativeControllerZuul representativeControllerZuul;
+    private S3Helper s3Helper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioExpressionRulesExecuteServiceImpl.class);
 
     @Autowired
     public DremioExpressionRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService, DatasetSchemaControllerZuul datasetSchemaControllerZuul,
-                                                   DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, DremioRulesService dremioRulesService, RepresentativeControllerZuul representativeControllerZuul) {
+                                                   DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, DremioRulesService dremioRulesService, RepresentativeControllerZuul representativeControllerZuul,
+                                                   S3Helper s3Helper) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -58,6 +61,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.dremioRulesService = dremioRulesService;
         this.representativeControllerZuul = representativeControllerZuul;
+        this.s3Helper = s3Helper;
     }
 
     @Override
@@ -73,6 +77,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             }
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
+            s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
             int parameterStartIndex = ruleVO.getWhenConditionMethod().indexOf("(");
             int parameterEndIndex = ruleVO.getWhenConditionMethod().indexOf(")");
             int pmEndSecOccurrenceIndex = ruleVO.getWhenConditionMethod().indexOf(")", parameterEndIndex+1);

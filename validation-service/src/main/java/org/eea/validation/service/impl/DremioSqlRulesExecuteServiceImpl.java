@@ -1,6 +1,7 @@
 package org.eea.validation.service.impl;
 
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -17,7 +18,6 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
-import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.FKValidationUtils;
 import org.eea.validation.util.UniqueValidationUtils;
 import org.slf4j.Logger;
@@ -45,8 +45,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private S3Service s3Service;
     private RulesService rulesService;
     private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-    private ValidationService validationService;
     private DremioRulesService dremioRulesService;
+    private S3Helper s3Helper;
     private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
     private SchemasRepository schemasRepository;
     private DataSetControllerZuul dataSetControllerZuul;
@@ -55,17 +55,17 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
     @Autowired
     public DremioSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
-                                            DatasetSchemaControllerZuul datasetSchemaControllerZuul, ValidationService validationService, DremioRulesService dremioRulesService,
+                                            DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
                                             DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, SchemasRepository schemasRepository, DataSetControllerZuul dataSetControllerZuul) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
         this.datasetSchemaControllerZuul = datasetSchemaControllerZuul;
-        this.validationService = validationService;
         this.dremioRulesService = dremioRulesService;
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.schemasRepository = schemasRepository;
         this.dataSetControllerZuul = dataSetControllerZuul;
+        this.s3Helper = s3Helper;
     }
 
     @Override
@@ -75,6 +75,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
+            s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf("(");
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(")");
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
