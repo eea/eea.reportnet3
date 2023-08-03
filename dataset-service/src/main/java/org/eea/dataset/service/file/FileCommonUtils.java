@@ -469,9 +469,8 @@ public class FileCommonUtils {
    * @param idTableSchema the id table schema
    * @return the long
    */
-  public Long countRecordsByTableSchema(String idTableSchema,@DatasetId Long datasetId) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    return recordRepository.countByTableSchema(idTableSchema);
+  public Long countRecordsByTableSchema(String idTableSchema, Long datasetId) throws SQLException {
+    return recordRepository.countByTableSchema(datasetId, idTableSchema);
   }
 
   /**

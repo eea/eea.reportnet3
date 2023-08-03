@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -298,7 +299,12 @@ public class ExcelWriterStrategy implements WriterStrategy {
     cs.setWrapText(true);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     LOG.info("Dataset id {} for table.getIdTableSchema {}", datasetId, table.getIdTableSchema());
-    Long totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema(), datasetId);
+    Long totalRecords = 0L;
+    try {
+      totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema(), datasetId);
+    } catch (SQLException e) {
+      LOG.error("Error in countRecordsByTableSchema for datasetId {} and IdTableSchema", datasetId, table.getIdTableSchema(), e);
+    }
     LOG.info("Dataset id {} totalRecords {} for table.getIdTableSchema {}", datasetId, totalRecords, table.getIdTableSchema());
     int batchSize = 50000 / fieldSchemas.size();
     int numSheets = 0;
