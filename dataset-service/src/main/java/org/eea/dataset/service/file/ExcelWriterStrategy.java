@@ -297,7 +297,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
     CellStyle cs = workbook.createCellStyle();
     cs.setWrapText(true);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    Long totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema());
+    LOG.info("Dataset id {} for table.getIdTableSchema {}", datasetId, table.getIdTableSchema());
+    Long totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema(), datasetId);
     LOG.info("Dataset id {} totalRecords {} for table.getIdTableSchema {}", datasetId, totalRecords, table.getIdTableSchema());
     int batchSize = 50000 / fieldSchemas.size();
     int numSheets = 0;
