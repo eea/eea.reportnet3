@@ -118,13 +118,14 @@ public class ExcelWriterStrategy implements WriterStrategy {
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
     LOG.info("Write file for dataset {} with tables {}", dataset, tables.toString());
     TableSchemaVO table = fileCommon.findTableSchemaVO(tableSchemaId, dataset);
-    LOG.info("Write file for dataset {} with table {}", dataset, table.toString());
+    LOG.info("Write file for dataset {} with table {}", dataset, table);
 
     // If the given idTableSchema exists, replace all tables with it
     if (null != table) {
       tables.clear();
       tables.add(table);
     }
+    LOG.info("Write file for tables {}", tables);
 
     try (Workbook workbook = createWorkbook()) {
 
@@ -258,7 +259,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
     String nameSheet = table.getNameTableSchema();
     Sheet sheet =
         createSheetAndHeaders(workbook, table, includeCountryCode, includeValidations, nameSheet);
-    LOG.info("Dataset id {} RecordSchema {}", datasetId, table.getRecordSchema());
+    LOG.info("Dataset id {} RecordSchema {}", datasetId, table);
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
     LOG.info("Dataset id {} fieldSchemas {}", datasetId, fieldSchemas);
     // Used to map each fieldValue with the correct fieldSchema
