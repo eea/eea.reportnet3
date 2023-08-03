@@ -428,7 +428,8 @@ public class FileTreatmentHelper implements DisposableBean {
         String includeCountryCode = getCode(idDataflow, datasetType);
 
         final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
-        LOG.info("End of createFile");
+        LOG.info("End of createFile idDataflow {}, datasetType {}, includeCountryCode {} for datasetId {} and tableSchemaId {}",
+            idDataflow, datasetType, includeCountryCode, datasetId, tableSchemaId);
         return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false,
                 filters);
     }

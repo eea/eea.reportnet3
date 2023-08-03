@@ -1140,6 +1140,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Pageable pageable, ExportFilterVO filters) throws SQLException {
 
     String stringQuery = buildQueryWithExportFilters(datasetId, tableId, pageable, filters);
+    LOG.info("Dataset id {} tableId {}", datasetId, tableId);
 
     int parameterPosition = 1;
     ErrorTypeEnum[] levelErrorsArray = filters.getLevelError();
