@@ -84,7 +84,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                     break;
                 }
             }
-            Object object = cls.newInstance();
+            Method factoryMethod = cls.getDeclaredMethod("getInstance");
+            Object object = factoryMethod.invoke(null, null);
             int parameterLength = method.getParameters().length;
             while (rs.next()) {
                 boolean isValid = false;

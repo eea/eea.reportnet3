@@ -87,7 +87,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
             Class<?> cls = Class.forName("org.eea.validation.util.datalake.DremioSQLValidationUtils");
             Field[] fields = cls.getDeclaredFields();
-            Object object = cls.newInstance();
+            Method factoryMethod = cls.getDeclaredMethod("getInstance");
+            Object object = factoryMethod.invoke(null, null);
             Field field = Arrays.stream(fields).findFirst().get();
             field.setAccessible(true);
             field.set(object, dremioJdbcTemplate);

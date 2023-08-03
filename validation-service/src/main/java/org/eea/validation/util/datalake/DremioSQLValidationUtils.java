@@ -15,7 +15,14 @@ import java.util.*;
 public class DremioSQLValidationUtils {
 
     private JdbcTemplate dremioJdbcTemplate;
+    private static DremioSQLValidationUtils instance;
 
+    public static synchronized DremioSQLValidationUtils getInstance() {
+        if (instance == null) {
+            instance = new DremioSQLValidationUtils();
+        }
+        return instance;
+    }
 
     public List<String> isSQLSentenceWithCode(String sql) {
         StringBuilder query = new StringBuilder();

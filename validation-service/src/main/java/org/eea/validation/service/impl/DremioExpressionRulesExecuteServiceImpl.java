@@ -158,7 +158,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(datasetId, tableName, dataTableResolver, validationResolver, ruleVO, fieldName);
 
             Class<?> cls = Class.forName("org.eea.validation.util.RuleOperators");
-            Object object = cls.newInstance();
+            Method factoryMethod = cls.getDeclaredMethod("getInstance");
+            Object object = factoryMethod.invoke(null, null);
 
             while (rs.next()) {
                 boolean isValid = false;

@@ -1,14 +1,15 @@
 package org.eea.validation.util;
 
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.persistence.data.domain.RecordValue;
+import org.hibernate.Hibernate;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
-import org.eea.validation.persistence.data.domain.FieldValue;
-import org.eea.validation.persistence.data.domain.RecordValue;
-import org.hibernate.Hibernate;
 
 /** The Class RuleOperators. */
 public class RuleOperators {
@@ -26,12 +27,19 @@ public class RuleOperators {
   private static final DateTimeFormatter DATETIME_FORMAT =
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-
+  private static RuleOperators instance;
 
   /**
    * Instantiates a new rule operators.
    */
   public RuleOperators() {}
+
+  public static synchronized RuleOperators getInstance() {
+    if (instance == null) {
+      instance = new RuleOperators();
+    }
+    return instance;
+  }
 
   /**
    * Sets the entity for RecordValue.
