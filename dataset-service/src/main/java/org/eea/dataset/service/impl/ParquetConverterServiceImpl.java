@@ -111,8 +111,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String parquetInnerFolderPath = dremioPathForParquetFolder + ".\"" + uniqueString + "\"";
 
         if(importFileInDremioInfo.getReplaceData()){
-            //remove folders that contain the previous parquet files because data will be replaced
-            //todo demote everything inside import folder
+            //remove tables and folders that contain the previous parquet files because data will be replaced
             List<ObjectIdentifier> csvFilesInS3 = s3Helper.listObjectsInBucket(s3PathForCsvFolder);
             for(ObjectIdentifier csvFileInS3 : csvFilesInS3){
                 String[] csvFileNameSplit = csvFileInS3.key().split("/");
@@ -122,11 +121,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 dremioHelperService.demoteFolderOrFile(s3PathResolver, csvFileName, true);
                 //revert s3PathResolver fileName
                 s3PathResolver.setFilename(tableSchemaName);
-
             }
-
-
-            //dremioHelperService.removeImportRelatedTableFromDremio(s3PathResolver, tableSchemaName, true);
             if (s3Helper.checkFolderExist(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH)) {
                 s3Helper.deleleFolder(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
             }
@@ -191,8 +186,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
             sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
-            //todo test wrong headers
-            //String[] headersForModifiedCSV = sanitizedHeaders.stream().map(x -> x.getHeaderName()).collect(Collectors.toList()).toArray(new String[sanitizedHeaders.size()]);
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(delimiterChar).build());
 
             for (CSVRecord csvRecord : csvParser) {
@@ -370,10 +363,15 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                     header.setType(fieldSchema.getType());
                     header.setReadOnly(
                             fieldSchema.getReadOnly() == null ? Boolean.FALSE : fieldSchema.getReadOnly());
+                    header.setHeaderName(csvHeader);
+                    headers.add(header);
+                }
+                else if(csvHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER) || csvHeader.equals(PARQUET_PROVIDER_CODE_COLUMN_HEADER)){
+                    header.setReadOnly(Boolean.TRUE);
+                    header.setHeaderName(csvHeader);
+                    headers.add(header);
                 }
             }
-            header.setHeaderName(csvHeader);
-            headers.add(header);
         }
 
         if (!atLeastOneFieldSchema) {
