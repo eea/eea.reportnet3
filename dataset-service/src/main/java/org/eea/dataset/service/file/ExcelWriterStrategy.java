@@ -119,14 +119,12 @@ public class ExcelWriterStrategy implements WriterStrategy {
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
     LOG.info("Write file for dataset {} with tables {}", dataset, tables.toString());
     TableSchemaVO table = fileCommon.findTableSchemaVO(tableSchemaId, dataset);
-    LOG.info("Write file for dataset {} with table {}", dataset, table);
 
     // If the given idTableSchema exists, replace all tables with it
     if (null != table) {
       tables.clear();
       tables.add(table);
     }
-    LOG.info("Write file for tables {}", tables);
 
     try (Workbook workbook = createWorkbook()) {
 
@@ -134,7 +132,6 @@ public class ExcelWriterStrategy implements WriterStrategy {
 
       // Add one sheet per table
       for (TableSchemaVO tableSchema : tables) {
-        LOG.info("TableSchemaVO {}", tableSchema);
         writeSheet(workbook, tableSchema, datasetId, includeCountryCode, includeValidations,
             dataset, filters);
       }
@@ -260,9 +257,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
     String nameSheet = table.getNameTableSchema();
     Sheet sheet =
         createSheetAndHeaders(workbook, table, includeCountryCode, includeValidations, nameSheet);
-    LOG.info("Dataset id {} RecordSchema {}", datasetId, table);
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
-    LOG.info("Dataset id {} fieldSchemas {}", datasetId, fieldSchemas);
     // Used to map each fieldValue with the correct fieldSchema
     Map<String, Integer> indexMap = new HashMap<>();
 
@@ -303,7 +298,8 @@ public class ExcelWriterStrategy implements WriterStrategy {
     try {
       totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema(), datasetId);
     } catch (SQLException e) {
-      LOG.error("Error in countRecordsByTableSchema for datasetId {} and IdTableSchema", datasetId, table.getIdTableSchema(), e);
+      LOG.error("Error in countRecordsByTableSchema for datasetId {} and IdTableSchema {}",
+          datasetId, table.getIdTableSchema(), e);
     }
     LOG.info("Dataset id {} totalRecords {} for table.getIdTableSchema {}", datasetId, totalRecords, table.getIdTableSchema());
     int batchSize = 50000 / fieldSchemas.size();
