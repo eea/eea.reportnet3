@@ -920,18 +920,19 @@ public class UserManagementControllerImpl implements UserManagementController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT', 'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE', 'DATAFLOW_NATIONAL_COORDINATOR')")
   @PostMapping("/exportUsersByCountry/dataflow/{dataflowId}")
   @ApiOperation(value = "Export all users by country into a CSV file", hidden = true)
-  public void exportUsersByCountry(@ApiParam(
-      value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId) {
+  public void exportUsersByCountry(
+          @ApiParam(value = "Dataflow id used in the export process.") @PathVariable("dataflowId") Long dataflowId,
+          @RequestParam(value = "dataProviderId", required = false) Long dataProviderId) {
     LOG.info("Export users by country from dataflow {}, with type csv.", dataflowId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDataflowId(dataflowId);
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_USERS_BY_COUNTRY_START",
         userNotificationContentVO);
     try {
-      userRoleService.exportUsersByCountry(dataflowId);
+      userRoleService.exportUsersByCountry(dataflowId, dataProviderId);
     } catch (IOException | EEAException e) {
       LOG_ERROR.error("Error exporting users by country from dataflow {}. Message: {}", dataflowId,
           e.getMessage());
@@ -949,7 +950,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param response the response
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT', 'DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE', 'DATAFLOW_NATIONAL_COORDINATOR')")
   @GetMapping("/downloadUsersByCountry/{dataflowId}")
   @ApiOperation(value = "Download the generated CSV file containing the users by country",
       hidden = true)

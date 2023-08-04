@@ -469,9 +469,8 @@ public class FileCommonUtils {
    * @param idTableSchema the id table schema
    * @return the long
    */
-  public Long countRecordsByTableSchema(String idTableSchema,@DatasetId Long datasetId) {
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    return recordRepository.countByTableSchema(idTableSchema);
+  public Long countRecordsByTableSchema(String idTableSchema, Long datasetId) throws SQLException {
+    return recordRepository.countByTableSchema(datasetId, idTableSchema);
   }
 
   /**
@@ -486,8 +485,13 @@ public class FileCommonUtils {
   public List<RecordValue> getRecordValuesPaginated(@DatasetId Long datasetId, String idTableSchema,
       Pageable pageable, ExportFilterVO filters) {
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    return recordRepository.findOrderedNativeRecord(
-        tableRepository.findIdByIdTableSchema(idTableSchema), datasetId, pageable, filters);
+    Long tableId = 0L;
+    try {
+      tableId = tableRepository.findIdByIdTableSchema(idTableSchema, datasetId);
+    } catch (SQLException e) {
+      LOG.error("Error in findIdByIdTableSchema for datasetId {} and idTableSchema {}", datasetId, idTableSchema, e);
+    }
+    return recordRepository.findOrderedNativeRecord(tableId , datasetId, pageable, filters);
   }
 
   /**

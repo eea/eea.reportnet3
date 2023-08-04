@@ -981,8 +981,8 @@ public class UserManagementControllerImplTest {
     notification.setDataflowId(1L);
     Mockito.lenient().doNothing().when(notificationController)
         .createUserNotificationPrivate("EVENT", notification);
-    userManagementController.exportUsersByCountry(1L);
-    Mockito.verify(userRoleService, times(1)).exportUsersByCountry(1L);
+    userManagementController.exportUsersByCountry(1L, null);
+    Mockito.verify(userRoleService, times(1)).exportUsersByCountry(1L, null);
   }
 
   /**
@@ -994,9 +994,9 @@ public class UserManagementControllerImplTest {
   @Test
   public void exportUsersByCountryExceptionTest() throws IOException, EEAException {
     Mockito.doThrow(IOException.class).when(userRoleService)
-        .exportUsersByCountry(Mockito.anyLong());
-    userManagementController.exportUsersByCountry(1L);
-    Mockito.verify(userRoleService, times(1)).exportUsersByCountry(Mockito.anyLong());
+        .exportUsersByCountry(Mockito.anyLong(), (Long) Mockito.isNull());
+    userManagementController.exportUsersByCountry(1L, null);
+    Mockito.verify(userRoleService, times(1)).exportUsersByCountry(Mockito.anyLong(), (Long) Mockito.isNull());
   }
 
   /**
