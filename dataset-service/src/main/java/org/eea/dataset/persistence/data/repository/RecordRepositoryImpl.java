@@ -1140,6 +1140,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Pageable pageable, ExportFilterVO filters) throws SQLException {
 
     String stringQuery = buildQueryWithExportFilters(datasetId, tableId, pageable, filters);
+    LOG.info("Dataset id {} tableId {}", datasetId, tableId);
 
     int parameterPosition = 1;
     ErrorTypeEnum[] levelErrorsArray = filters.getLevelError();
@@ -1915,5 +1916,41 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     return stringQuery;
+  }
+
+  @Override
+  public Long countByTableSchema(Long datasetId, String idTableSchema) throws SQLException {
+    Connection connection = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    try {
+      String query = "select count(r.id) from dataset_%s.record_value r, dataset_%s.table_value t where "
+          + "t.id = r.id_table and t.id_table_schema=?";
+      connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+      query = String.format(query, datasetId, datasetId);
+      LOG.info("countByTableSchema query: {}", query);
+
+      pstmt = connection.prepareStatement(query);
+      pstmt.setString(1, idTableSchema);
+      LOG.info("countByTableSchema query ps: {}", pstmt);
+
+      rs = pstmt.executeQuery();
+      rs.next();
+
+      return rs.getLong(1);
+    } catch (Exception e) {
+      LOG.error(
+          "Unexpected error! Error in countByTableSchema for datasetId {} with filter_value {}",
+          datasetId, e);
+    } finally {
+      if (rs != null)
+        rs.close();
+      if (pstmt != null)
+        pstmt.close();
+      if (connection != null)
+        connection.close();
+    }
+
+    return 0L;
   }
 }

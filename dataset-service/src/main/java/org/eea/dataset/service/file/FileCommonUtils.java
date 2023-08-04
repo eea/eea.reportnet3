@@ -464,6 +464,16 @@ public class FileCommonUtils {
   }
 
   /**
+   * Count records by table schema.
+   *
+   * @param idTableSchema the id table schema
+   * @return the long
+   */
+  public Long countRecordsByTableSchema(String idTableSchema, Long datasetId) throws SQLException {
+    return recordRepository.countByTableSchema(datasetId, idTableSchema);
+  }
+
+  /**
    * Gets the record values paginated.
    *
    * @param datasetId the dataset id
