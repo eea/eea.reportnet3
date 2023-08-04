@@ -485,12 +485,13 @@ public class FileCommonUtils {
   public List<RecordValue> getRecordValuesPaginated(@DatasetId Long datasetId, String idTableSchema,
       Pageable pageable, ExportFilterVO filters) {
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    TableValue byIdTableSchema = tableRepository.findByIdTableSchema(idTableSchema);
-    Long id = 0L;
-    if (byIdTableSchema != null) {
-      id = byIdTableSchema.getId();
+    Long tableId = 0L;
+    try {
+      tableId = tableRepository.findIdByIdTableSchema(idTableSchema, datasetId);
+    } catch (SQLException e) {
+      LOG.error("Error in findIdByIdTableSchema for datasetId {} and idTableSchema {}", datasetId, idTableSchema, e);
     }
-    return recordRepository.findOrderedNativeRecord(id , datasetId, pageable, filters);
+    return recordRepository.findOrderedNativeRecord(tableId , datasetId, pageable, filters);
   }
 
   /**
