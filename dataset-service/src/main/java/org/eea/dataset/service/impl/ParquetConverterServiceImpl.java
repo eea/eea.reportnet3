@@ -178,6 +178,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         List<String> csvHeaders = new ArrayList<>();
         List<FieldSchema> sanitizedHeaders;
+        List<String> expectedHeaders;
         //Reading csv file
         try (
                 Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
@@ -191,6 +192,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
             sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
+            expectedHeaders = getFieldNames(importFileInDremioInfo.getTableSchemaId(), dataSetSchema, csvFile.getName());
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(delimiterChar).build());
             int recordCounter = 0;
             for (CSVRecord csvRecord : csvParser) {
@@ -201,19 +203,26 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 recordCounter++;
                 if(recordCounter == 1){
                     //for the first loop, add the headers of the file
-                    List<String> row = new ArrayList<>();
-                    sanitizedHeaders.stream().forEach(header -> row.add(header.getHeaderName()));
-                    csvPrinter.printRecord(row);
+                    /*List<String> row = new ArrayList<>();
+                    expectedHeaders.stream().forEach(header -> row.add(header));
+                    sanitizedHeaders.stream().forEach(header -> row.add(header.getHeaderName()));*/
+                    csvPrinter.printRecord(expectedHeaders);
                 }
                 List<String> row = new ArrayList<>();
                 String recordIdValue = UUID.randomUUID().toString();
-                for (FieldSchema sanitizedHeader : sanitizedHeaders) {
-                    if (sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
+                for (String expectedHeader : expectedHeaders) {
+                    if (expectedHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
                         row.add(recordIdValue);
-                    } else if (sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
+                    } else if (expectedHeader.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
                         row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
                     } else {
-                        row.add(csvRecord.get(sanitizedHeader.getHeaderName()));
+                        if(csvRecord.isMapped(expectedHeader)){
+                            row.add(csvRecord.get(expectedHeader));
+                        }
+                        else{
+                            row.add("");
+                        }
+
                     }
                 }
                 csvPrinter.printRecord(row);
@@ -385,7 +394,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         if (!atLeastOneFieldSchema) {
             LOG.error("Error parsing CSV file. No headers matching FieldSchemas: {}. expectedHeaders={}, actualHeaders={}",
-                    importFileInDremioInfo, getFieldNames(tableSchemaId, dataSetSchema), csvHeaders);
+                    importFileInDremioInfo, getFieldNames(tableSchemaId, dataSetSchema, csvFileName), csvHeaders);
             importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
             throw new EEAException(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
         }
@@ -397,10 +406,16 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
      *
      * @param tableSchemaId the table schema id
      * @param dataSetSchema the data set schema
+     * @param fileName the fileName
      * @return the field names
      */
-    private List<String> getFieldNames(String tableSchemaId, DataSetSchema dataSetSchema) {
+    private List<String> getFieldNames(String tableSchemaId, DataSetSchema dataSetSchema, String fileName) throws EEAException {
+        if (StringUtils.isBlank(tableSchemaId)) {
+            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, fileName);
+        }
         List<String> fieldNames = new ArrayList<>();
+        fieldNames.add(PARQUET_RECORD_ID_COLUMN_HEADER);
+        fieldNames.add(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
         if (null != tableSchemaId) {
             for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
