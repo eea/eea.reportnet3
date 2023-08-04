@@ -36,7 +36,7 @@ public interface S3Service {
     /**
      * @return table name provider query path
      */
-    String getTableNameProviderQueryPath(S3PathResolver s3PathResolver);
+    String getTableNameProviderQueryPath(S3PathResolver s3PathResolver, String path);
 
     /**
      * @return table name validation provider path

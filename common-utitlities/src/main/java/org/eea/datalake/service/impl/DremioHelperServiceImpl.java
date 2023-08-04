@@ -64,7 +64,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, importFolder);
         if (directoryItems!=null) {
-            Integer itemPosition = (importFolder == true) ? 7 : 6;
+            Integer itemPosition = (importFolder == true) ? 8 : 6;
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
                 DremioDirectoryItem item = itemOptional.get();
@@ -80,7 +80,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, Boolean importFolder) {
         String directoryPath = null;
         if(importFolder){
-            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_PATH);
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         }
         else{
             directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
@@ -105,7 +105,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         String folderId = null;
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, importFolder);
         if (directoryItems!=null) {
-            Integer itemPosition = (importFolder == true) ? 7 : 6;
+            Integer itemPosition = (importFolder == true) ? 8 : 6;
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
                 DremioDirectoryItem item = itemOptional.get();
@@ -122,7 +122,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         String folderId;
         String formatType;
         if(importFolder) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
             formatType = CSV_FORMAT_TYPE;
         }
         else{
@@ -155,7 +155,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
         String directoryPath;
         if(importFolder) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
         }
         else{
             directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
@@ -179,7 +179,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public Boolean removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder){
+    public void removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder){
         String tablePath = null;
         if(importFolder){
             tablePath = s3Service.getImportProviderQueryPath(s3PathResolver);
@@ -190,7 +190,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
         if(!checkFolderPromoted(s3PathResolver, folderName, importFolder)){
             LOG.info("The file or folder in path {} is not promoted", tablePath);
-            return false;
+            return;
         }
         String dropTableQuery = "DROP TABLE " + tablePath;
         try{
@@ -198,8 +198,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
         catch (Exception e){
             LOG.error("Could not drop table {}", tablePath);
-            return false;
         }
-        return true;
     }
 }

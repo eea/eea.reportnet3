@@ -1,6 +1,7 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.File;
@@ -52,4 +53,13 @@ public interface S3Helper {
      * @return
      */
     void uploadFileToBucket(String filePathInS3, String filePathInReportnet);
+
+
+    /**
+     * Lists object in bucket
+     *
+     * @param prefix the prefix of the file structure
+     * @return
+     */
+    List<ObjectIdentifier> listObjectsInBucket(String prefix);
 }
