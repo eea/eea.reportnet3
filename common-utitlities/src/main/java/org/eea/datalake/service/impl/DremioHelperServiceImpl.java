@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Optional;
 
@@ -120,14 +119,16 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
         String directoryPath;
         String folderId;
-        String formatType;
+        DremioPromotionRequestBody requestBody;
         if(importFolder) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
-            formatType = CSV_FORMAT_TYPE;
+            String[] path = directoryPath.split("/");
+            requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
         }
         else{
             directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
-            formatType = PARQUET_FORMAT_TYPE;
+            String[] path = directoryPath.split("/");
+            requestBody = new DremioParquetPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioParquetPromotionRequestBody.Format(PARQUET_FORMAT_TYPE));
         }
 
         if(checkFolderPromoted(s3PathResolver, folderName, importFolder)){
@@ -136,8 +137,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
         folderId = getFolderId(s3PathResolver, folderName, importFolder);
 
-        String[] path = directoryPath.split("/");
-        DremioFolderPromotionRequestBody requestBody = new DremioFolderPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioFolderPromotionRequestBody.Format(formatType));
         try {
             dremioApiController.promote(token, folderId, requestBody);
         } catch (FeignException e) {

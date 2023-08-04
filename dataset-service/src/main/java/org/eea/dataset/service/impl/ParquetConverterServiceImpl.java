@@ -40,7 +40,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -149,7 +148,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             }
         }
 
-        String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + dremioPathForCsvFile;
+        String createTableQuery = constructCreateTableStatementForParquet(parquetInnerFolderPath, dremioPathForCsvFile);
         dremioJdbcTemplate.execute(createTableQuery);
 
         //promote folder
@@ -159,6 +158,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String refreshTableQuery = "ALTER TABLE " + dremioPathForParquetFolder + " REFRESH METADATA ";
         dremioJdbcTemplate.execute(refreshTableQuery);
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
+    }
+
+    private String constructCreateTableStatementForParquet(String parquetInnerFolderPath, String dremioPathForCsvFile){
+        //String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + dremioPathForCsvFile;
+        String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
+        return createTableQuery;
     }
 
     private File modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String randomStrForNewFolderSuffix) throws Exception {
@@ -187,23 +192,27 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
             sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(delimiterChar).build());
-
+            int recordCounter = 0;
             for (CSVRecord csvRecord : csvParser) {
                 if(csvRecord.values().length == 0){
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
                     throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
                 }
-
-                String recordIdValue = UUID.randomUUID().toString();
+                recordCounter++;
+                if(recordCounter == 1){
+                    //for the first loop, add the headers of the file
+                    List<String> row = new ArrayList<>();
+                    sanitizedHeaders.stream().forEach(header -> row.add(header.getHeaderName()));
+                    csvPrinter.printRecord(row);
+                }
                 List<String> row = new ArrayList<>();
+                String recordIdValue = UUID.randomUUID().toString();
                 for (FieldSchema sanitizedHeader : sanitizedHeaders) {
-                    if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)){
+                    if (sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
                         row.add(recordIdValue);
-                    }
-                    else if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)){
+                    } else if (sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
                         row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
-                    }
-                    else {
+                    } else {
                         row.add(csvRecord.get(sanitizedHeader.getHeaderName()));
                     }
                 }
