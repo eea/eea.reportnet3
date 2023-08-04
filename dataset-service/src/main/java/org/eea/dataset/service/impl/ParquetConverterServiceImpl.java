@@ -74,12 +74,17 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     @Autowired
     private S3Helper s3Helper;
 
-
     @Override
     public Map<String, String> convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
         Map<String, String> parquetFileNamesAndPaths = new HashMap<>();
+        String tableSchemaName;
         for(File csvFile: csvFiles){
-            String tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
+            if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
+                tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
+            }
+            else{
+                tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
+            }
             String parquetFilePath = csvFile.getPath().replace(CSV_EXTENSION, PARQUET_EXTENSION);
             String parquetFileName = csvFile.getName().replace(CSV_EXTENSION, PARQUET_EXTENSION);
             String randomStrForNewFolderSuffix = UUID.randomUUID().toString();
