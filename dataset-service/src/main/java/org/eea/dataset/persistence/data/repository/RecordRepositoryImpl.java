@@ -1923,10 +1923,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     Connection connection = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
+
     try {
       String query = "select count(r.id) from dataset_%s.record_value r, dataset_%s.table_value t where "
           + "t.id = r.id_table and t.id_table_schema=?";
-      connection = DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
+
+      ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+          .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+
+      Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+          connectionDataVO.getUser(), connectionDataVO.getPassword());
       query = String.format(query, datasetId, datasetId);
       LOG.info("countByTableSchema query: {}", query);
 
