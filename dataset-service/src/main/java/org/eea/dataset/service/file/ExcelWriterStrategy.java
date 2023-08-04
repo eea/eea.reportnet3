@@ -117,7 +117,6 @@ public class ExcelWriterStrategy implements WriterStrategy {
     // Get all tablesSchemas for the case the given idTableSchema doesn't exist
     List<TableSchemaVO> tables =
         dataset.getTableSchemas() != null ? dataset.getTableSchemas() : new ArrayList<>();
-    LOG.info("Write file for dataset {} with tables {}", dataset, tables.toString());
     TableSchemaVO table = fileCommon.findTableSchemaVO(tableSchemaId, dataset);
 
     // If the given idTableSchema exists, replace all tables with it
