@@ -1931,7 +1931,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       ConnectionDataVO connectionDataVO = recordStoreControllerZuul
           .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
-      Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+      connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
           connectionDataVO.getUser(), connectionDataVO.getPassword());
       query = String.format(query, datasetId, datasetId);
       LOG.info("countByTableSchema query: {}", query);
