@@ -212,8 +212,8 @@ public final class LiteralConstants {
   /** The Constant S3_IMPORT_QUERY_PATH: {@value}. */
   public static final String S3_IMPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\"";
 
-  /** The Constant S3_IMPORT_INNER_FOLDER_QUERY_PATH: {@value}. */
-  public static final String S3_IMPORT_INNER_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\".\"%s\"";
+  /** The Constant S3_IMPORT_CSV_FILE_QUERY_PATH: {@value}. */
+  public static final String S3_IMPORT_CSV_FILE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_PATH: {@value}. */
   public static final String S3_VALIDATION_PATH = "%s/%s/%s/current/validation/%s/%s";

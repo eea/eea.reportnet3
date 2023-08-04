@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -135,5 +136,25 @@ public class S3HelperImpl implements S3Helper {
         java.nio.file.Path file = Paths.get(filePathInReportnet);
 
         PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, file);
+    }
+
+    @Override
+    public List<ObjectIdentifier> listObjectsInBucket(String prefix){
+        List<ObjectIdentifier> objectKeys = new ArrayList<>();
+        ListObjectsRequest listObjectsRequest = ListObjectsRequest.builder()
+                .bucket(LiteralConstants.S3_BUCKET_NAME)
+                .prefix(prefix)
+                .build();
+        ListObjectsResponse listObjectsResponse;
+        do {
+            listObjectsResponse = s3Client.listObjects(listObjectsRequest);
+            listObjectsResponse.contents().stream().forEach(s3Object -> {
+                ObjectIdentifier objectId = ObjectIdentifier.builder()
+                        .key(s3Object.key())
+                        .build();
+                objectKeys.add(objectId);
+            });
+        } while (listObjectsResponse.isTruncated());
+        return objectKeys;
     }
 }
