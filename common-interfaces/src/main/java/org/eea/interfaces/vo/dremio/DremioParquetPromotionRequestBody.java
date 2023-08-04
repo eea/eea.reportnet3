@@ -5,26 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
-@AllArgsConstructor
 @Getter
 @Setter
-public class DremioFolderPromotionRequestBody {
+public class DremioParquetPromotionRequestBody extends DremioPromotionRequestBody {
 
-    @JsonProperty("entityType")
-    private String entityType;
-
-    @JsonProperty("id")
-    private String id;
-
-    @JsonProperty("path")
-    private String[] path;
-
-    @JsonProperty("type")
-    private String type;
-
-    @JsonProperty("format")
     private Format format;
 
     @AllArgsConstructor
@@ -35,4 +19,8 @@ public class DremioFolderPromotionRequestBody {
         private String type;
     }
 
+    public DremioParquetPromotionRequestBody(String entityType, String id, String[] path, String type, Format format){
+        super(entityType, id, path, type);
+        this.format = format;
+    }
 }

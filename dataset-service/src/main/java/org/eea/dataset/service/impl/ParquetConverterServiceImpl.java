@@ -40,7 +40,6 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -149,7 +148,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             }
         }
 
-        String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + dremioPathForCsvFile;
+        String createTableQuery = constructCreateTableStatementForParquet(parquetInnerFolderPath, dremioPathForCsvFile);
         dremioJdbcTemplate.execute(createTableQuery);
 
         //promote folder
@@ -159,6 +158,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String refreshTableQuery = "ALTER TABLE " + dremioPathForParquetFolder + " REFRESH METADATA ";
         dremioJdbcTemplate.execute(refreshTableQuery);
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
+    }
+
+    private String constructCreateTableStatementForParquet(String parquetInnerFolderPath, String dremioPathForCsvFile){
+        //String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + dremioPathForCsvFile;
+        String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
+        return createTableQuery;
     }
 
     private File modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String randomStrForNewFolderSuffix) throws Exception {
@@ -173,6 +178,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         List<String> csvHeaders = new ArrayList<>();
         List<FieldSchema> sanitizedHeaders;
+        List<String> expectedHeaders;
         //Reading csv file
         try (
                 Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
@@ -186,25 +192,37 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
             sanitizedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
+            expectedHeaders = getFieldNames(importFileInDremioInfo.getTableSchemaId(), dataSetSchema, csvFile.getName());
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(delimiterChar).build());
-
+            int recordCounter = 0;
             for (CSVRecord csvRecord : csvParser) {
                 if(csvRecord.values().length == 0){
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
                     throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
                 }
-
-                String recordIdValue = UUID.randomUUID().toString();
+                recordCounter++;
+                if(recordCounter == 1){
+                    //for the first loop, add the headers of the file
+                    /*List<String> row = new ArrayList<>();
+                    expectedHeaders.stream().forEach(header -> row.add(header));
+                    sanitizedHeaders.stream().forEach(header -> row.add(header.getHeaderName()));*/
+                    csvPrinter.printRecord(expectedHeaders);
+                }
                 List<String> row = new ArrayList<>();
-                for (FieldSchema sanitizedHeader : sanitizedHeaders) {
-                    if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)){
+                String recordIdValue = UUID.randomUUID().toString();
+                for (String expectedHeader : expectedHeaders) {
+                    if (expectedHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
                         row.add(recordIdValue);
-                    }
-                    else if(sanitizedHeader.getHeaderName().equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)){
+                    } else if (expectedHeader.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
                         row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
-                    }
-                    else {
-                        row.add(csvRecord.get(sanitizedHeader.getHeaderName()));
+                    } else {
+                        if(csvRecord.isMapped(expectedHeader)){
+                            row.add(csvRecord.get(expectedHeader));
+                        }
+                        else{
+                            row.add("");
+                        }
+
                     }
                 }
                 csvPrinter.printRecord(row);
@@ -376,7 +394,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         if (!atLeastOneFieldSchema) {
             LOG.error("Error parsing CSV file. No headers matching FieldSchemas: {}. expectedHeaders={}, actualHeaders={}",
-                    importFileInDremioInfo, getFieldNames(tableSchemaId, dataSetSchema), csvHeaders);
+                    importFileInDremioInfo, getFieldNames(tableSchemaId, dataSetSchema, csvFileName), csvHeaders);
             importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
             throw new EEAException(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
         }
@@ -388,10 +406,16 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
      *
      * @param tableSchemaId the table schema id
      * @param dataSetSchema the data set schema
+     * @param fileName the fileName
      * @return the field names
      */
-    private List<String> getFieldNames(String tableSchemaId, DataSetSchema dataSetSchema) {
+    private List<String> getFieldNames(String tableSchemaId, DataSetSchema dataSetSchema, String fileName) throws EEAException {
+        if (StringUtils.isBlank(tableSchemaId)) {
+            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, fileName);
+        }
         List<String> fieldNames = new ArrayList<>();
+        fieldNames.add(PARQUET_RECORD_ID_COLUMN_HEADER);
+        fieldNames.add(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
         if (null != tableSchemaId) {
             for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
