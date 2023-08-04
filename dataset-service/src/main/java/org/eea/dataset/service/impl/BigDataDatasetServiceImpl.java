@@ -323,6 +323,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     private List<File> storeImportFiles(MultipartFile multipartFile, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
         List<File> files = new ArrayList<>();
+        String multipartFileMimeType = datasetService.getMimetype(multipartFile.getOriginalFilename());
 
         // Prepare the folder where files will be stored
         File root = new File(importPath);
@@ -340,48 +341,65 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         try (InputStream input = multipartFile.getInputStream()) {
             //TODO fme handling
 
-            try (ZipInputStream zip = new ZipInputStream(input)) {
-                ZipEntry entry = zip.getNextEntry();
+            if (importFileInDremioInfo.getIntegrationId() == null && multipartFileMimeType.equalsIgnoreCase("zip")) {
+                try (ZipInputStream zip = new ZipInputStream(input)) {
+                    ZipEntry entry = zip.getNextEntry();
+                    while (null != entry) {
+                        String entryName = entry.getName();
+                        String mimeType = datasetService.getMimetype(entryName);
+                        File file = new File(folder, entryName);
+                        String filePath = file.getCanonicalPath();
 
-                while (null != entry) {
-                    String entryName = entry.getName();
-                    String mimeType = datasetService.getMimetype(entryName);
-                    File file = new File(folder, entryName);
-                    String filePath = file.getCanonicalPath();
+                        // Prevent Zip Slip attack or skip if the entry is a directory
+                        if ((entryName.split("/").length > 1)
+                                || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+                                || !filePath.startsWith(saveLocationPath + File.separator)) {
+                            LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                            entry = zip.getNextEntry();
+                            continue;
+                        }
 
-                    // Prevent Zip Slip attack or skip if the entry is a directory
-                    if ((entryName.split("/").length > 1)
-                            || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
-                            || !filePath.startsWith(saveLocationPath + File.separator)) {
-                        LOG.error("Ignored file from ZIP: {}. {}", entryName, importFileInDremioInfo);
+                        // Store the file in the persistence volume
+                        try (FileOutputStream output = new FileOutputStream(file)) {
+                            IOUtils.copyLarge(zip, output);
+                            LOG.info("Stored file {}. {}", file.getPath(), importFileInDremioInfo);
+                        } catch (Exception e) {
+                            LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
+                            throw e;
+                        }
+
                         entry = zip.getNextEntry();
-                        continue;
-                    }
+                        files.add(file);
 
-                    // Store the file in the persistence volume
-                    try (FileOutputStream output = new FileOutputStream(file)) {
-                        IOUtils.copyLarge(zip, output);
-                        LOG.info("Stored file {}. {}", file.getPath(), importFileInDremioInfo);
-                    } catch (Exception e) {
-                        LOG.error("Unexpected error! Error in copyLarge for saveLocationPath {}. {} Message: {}", saveLocationPath, importFileInDremioInfo, e.getMessage());
-                        throw e;
                     }
-
-                    entry = zip.getNextEntry();
-                    files.add(file);
-                }
-                // Queue import tasks for stored files
-                if (!files.isEmpty()) {
-                    return files;
-                } else {
-                    datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_ZIP);
-                    throw new EEAException("Error trying to import a zip file to s3 for datasetId " + importFileInDremioInfo.getDatasetId() + ". Empty zip file");
-                }
-            } catch (Exception e) {
+                } catch (Exception e) {
                 LOG.error("Unexpected error! Error in storeImportFiles {}. Message: {}", importFileInDremioInfo, e.getMessage());
                 throw e;
+                }
             }
+            else{
+                File file = new File(folder, multipartFile.getOriginalFilename());
+
+                // Store the file in the persistence volume
+                try (FileOutputStream output = new FileOutputStream(file)) {
+                    IOUtils.copyLarge(input, output);
+                    files.add(file);
+                    LOG.info("Stored file {} job {}", file.getPath(), importFileInDremioInfo);
+                } catch (Exception e) {
+                    LOG.error("Unexpected error! Error storing file for import job {}. Message: {}", importFileInDremioInfo, e.getMessage());
+                    throw e;
+                }
+            }
+
+            // Queue import tasks for stored files
+            if (!files.isEmpty()) {
+                return files;
+            } else {
+                datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+                jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_ZIP);
+                throw new EEAException("Error trying to import a zip file to s3 for datasetId " + importFileInDremioInfo.getDatasetId() + ". Empty zip file");
+            }
+
         } catch (Exception e) {
             LOG.error("Unexpected error! Error in fileManagement {} Message: {}", importFileInDremioInfo, e.getMessage());
             throw e;
