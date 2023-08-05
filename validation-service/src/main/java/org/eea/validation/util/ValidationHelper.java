@@ -148,6 +148,7 @@ public class ValidationHelper implements DisposableBean {
 
   /** The period days. */
   private List<Long> periodDays;
+  private List<String> dremioSqlRuleMethods = new ArrayList<>(Arrays.asList("isfieldFK","isUniqueConstraint","checkIntegrityConstraint","isTableEmpty"));
 
   /** The table repository. */
   @Autowired
@@ -389,7 +390,7 @@ public class ValidationHelper implements DisposableBean {
         value.put("tableName", tableSchemaVO.getNameTableSchema());
         value.put("tableSchemaId", tableSchemaVO.getIdTableSchema());
         value.put("bigData", "true");
-        if (rule.getSqlSentence()!=null || rule.getWhenCondition().contains("isfieldFK") || rule.getWhenCondition().contains("isUniqueConstraint") || rule.getWhenCondition().contains("checkIntegrityConstraint")) {
+        if (rule.getSqlSentence()!=null || isDremioSqlRuleMethod(rule.getWhenCondition())) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
         } else if (rule.getWhenCondition().contains("RuleOperators")) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EXPRESSION_DL, value);
@@ -398,6 +399,10 @@ public class ValidationHelper implements DisposableBean {
         }
       }
     }
+  }
+
+  private boolean isDremioSqlRuleMethod(String whenCondition) {
+    return dremioSqlRuleMethods.stream().anyMatch(method -> whenCondition.contains(method));
   }
 
   /**
@@ -1111,7 +1116,6 @@ public class ValidationHelper implements DisposableBean {
     @Override
     public void run() {
       ProcessStatusEnum status = ProcessStatusEnum.FINISHED;
-      boolean ruleFolderExists = false;
       Long currentTime = System.currentTimeMillis();
       int workingThreads =
           ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) validationExecutorService)
@@ -1128,12 +1132,9 @@ public class ValidationHelper implements DisposableBean {
         LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
         status = ProcessStatusEnum.IN_QUEUE;
-        if (e.getCause().toString().contains("Folder already exists")) {
-          ruleFolderExists = true;
-        }
       } finally {
         try {
-          if (ProcessStatusEnum.IN_QUEUE.equals(status) && !ruleFolderExists) {
+          if (ProcessStatusEnum.IN_QUEUE.equals(status)) {
             cancelTask(validationTask.taskId, new Date());
           } else {
             updateTask(validationTask.taskId, status, new Date());
@@ -1198,6 +1199,9 @@ public class ValidationHelper implements DisposableBean {
           DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
           S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
           DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+          if (dataflow.getBigData()!=null) {
+            value.put("bigData", dataflow.getBigData());
+          }
 
           kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,

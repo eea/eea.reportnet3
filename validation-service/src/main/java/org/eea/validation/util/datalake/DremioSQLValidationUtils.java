@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Import(DremioConfiguration.class)
 @Component
@@ -104,6 +105,7 @@ public class DremioSQLValidationUtils {
                     }
                     return result;
                 });
+                Map<String, String> pkMapAux = pkWithOptionalMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
                 //FK_QUERY_VALUES
                 StringBuilder fkQuery = new StringBuilder();
                 fkQuery.append("select ").append("record_id").append(",").append(optionalFk).append(",").append(foreignKey).append(" from ").append(fkTablePath);
@@ -115,13 +117,27 @@ public class DremioSQLValidationUtils {
                     fksByOptionalValue.replaceAll(String::trim);
 
                     for (String value : fksByOptionalValue) {
+                        List<String> pksByOptionalValueAux =
+                                new ArrayList<>(Arrays.asList(pkMapAux.get(fkWithOptionalRS.getString(optionalFk)).split(",")));
+                        pksByOptionalValueAux.replaceAll(String::trim);
+
                         if (!pksByOptionalValue.contains("\"" + value + "\"")
                                 && !pksByOptionalValue.contains(value)) {
                             if (!recordIds.contains(fkWithOptionalRS.getString("record_id"))) {
                                 recordIds.add(fkWithOptionalRS.getString("record_id"));
                             }
                         }
+                        if (pksByOptionalValue.contains("\"" + value + "\"")
+                                || pksByOptionalValue.contains(value)) {
+                            pksByOptionalValueAux.remove(value);
+                            pksByOptionalValueAux.remove("\"" + value + "\"");
+                        }
+                        pkMapAux.put(fkWithOptionalRS.getString(optionalFk),
+                                pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());
                     }
+                }
+                if (pkMustBeUsed && !pkMapAux.entrySet().isEmpty()) {
+                    recordIds = new ArrayList<>();
                 }
             } else {
                 //COMPOSE_PK_MUST_BE_USED_LIST

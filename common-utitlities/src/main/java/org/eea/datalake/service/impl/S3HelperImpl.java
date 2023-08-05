@@ -135,7 +135,6 @@ public class S3HelperImpl implements S3Helper {
         if (result!=null && result.contents().size()>0) {
             Optional<S3Object> ruleFile = result.contents().stream().filter(s3Object -> s3Object.key().contains(ruleVO.getShortCode())).findFirst();
             if (ruleFile.isPresent()) {
-                S3PathResolver ruleResolver = validationResolver;
                 int valIdx = validationFolderName.indexOf(VALIDATION);
                 int startIdx = valIdx + 10;
                 String ruleFolderName = ruleFile.get().key();
@@ -145,9 +144,10 @@ public class S3HelperImpl implements S3Helper {
                 } else {
                     ruleFolderName = ruleFolderName.substring(startIdx);
                 }
-                ruleResolver.setTableName(ruleFolderName);
-                this.deleleFolder(ruleResolver, S3_VALIDATION_RULE_PATH);
+                validationResolver.setTableName(ruleFolderName);
+                this.deleleFolder(validationResolver, S3_VALIDATION_RULE_PATH);
             }
+            validationResolver.setTableName(S3_VALIDATION);
         }
     }
 }
