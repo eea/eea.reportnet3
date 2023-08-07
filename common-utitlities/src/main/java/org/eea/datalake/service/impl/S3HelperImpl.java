@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -118,6 +120,8 @@ public class S3HelperImpl implements S3Helper {
 
         // Write the data to a local file.
         File parquetFile = new File(exportDLPath + datasetName + PARQUET_TYPE);
+        Path textFilePath = Paths.get(parquetFile.toString());
+        Files.createFile(textFilePath);
         LOG.info("Local file {}", parquetFile);
         OutputStream os = new FileOutputStream(parquetFile);
         os.write(data);
