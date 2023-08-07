@@ -35,8 +35,6 @@ public class S3HelperImpl implements S3Helper {
 
     private S3Service s3Service;
     private S3Client s3Client;
-    private DremioHelperService dremioHelperService;
-
     /**
      * The path export DL.
      */
@@ -44,11 +42,9 @@ public class S3HelperImpl implements S3Helper {
     private String exportDLPath;
 
     @Autowired
-    public S3HelperImpl(S3Service s3Service, S3Client s3Client, DremioHelperService dremioHelperService) {
+    public S3HelperImpl(S3Service s3Service, S3Client s3Client) {
         this.s3Service = s3Service;
-        this.s3Client = s3Client;
-        this.dremioHelperService = dremioHelperService;
-    }
+        this.s3Client = s3Client;}
 
     /**
      * builds query for counting records
