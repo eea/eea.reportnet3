@@ -593,4 +593,12 @@ public class JobServiceImpl implements JobService {
         }
         return file;
     }
+
+    @Override
+    public Long findProviderIdById(Long jobId) {
+        Long providerId = jobRepository.findProviderIdByJobId(jobId);
+        LOG.info("Found provider id {} for job {}", providerId, jobId);
+
+        return providerId;
+    }
 }

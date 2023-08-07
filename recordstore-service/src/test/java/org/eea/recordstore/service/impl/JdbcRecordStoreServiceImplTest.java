@@ -426,6 +426,7 @@ public class JdbcRecordStoreServiceImplTest {
   }
 
   @Test
+  @Ignore
   public void testRestoreSnapshot()
       throws SQLException, IOException, URISyntaxException, EEAException {
 

@@ -45,6 +45,13 @@ public class S3ServiceImpl implements S3Service {
         return s3TableNamePath;
     }
 
+    @Override
+    public String getTableNameFolderPath(S3PathResolver s3PathResolver) {
+        String s3TableNameFolderPath = calculateS3ProviderPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        LOG.info("Method getTableNameFolderDCPath returns S3 Table Name Path: {}", s3TableNameFolderPath);
+        return s3TableNameFolderPath;
+    }
+
     //Data Collection Paths
     @Override
     public String getValidationDCPath(S3PathResolver s3PathResolver) {
@@ -65,6 +72,13 @@ public class S3ServiceImpl implements S3Service {
         String s3TableNamePath = calculateS3DCPath(s3PathResolver, S3_TABLE_NAME_VALIDATE_DC_PATH);
         LOG.info("Method getTableNameValidateDCPath returns S3 Table Name Validate Path: {}", s3TableNamePath);
         return s3TableNamePath;
+    }
+
+    @Override
+    public String getTableNameFolderDCPath(S3PathResolver s3PathResolver) {
+        String s3TableNameFolderPath = calculateS3DCPath(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH);
+        LOG.info("Method getTableNameFolderDCPath returns S3 Table Name Path: {}", s3TableNameFolderPath);
+        return s3TableNameFolderPath;
     }
 
     //Other
@@ -207,6 +221,10 @@ public class S3ServiceImpl implements S3Service {
                 path = String.format(path, dataflowFolder,
                     dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), fileName);
                 break;
+            case S3_TABLE_NAME_FOLDER_PATH:
+                path = String.format(path, dataflowFolder,
+                    dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
+                break;
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
@@ -231,7 +249,6 @@ public class S3ServiceImpl implements S3Service {
         LOG.info("Method calculateS3DCPath called with s3Path: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String fileName = s3PathResolver.getFilename();
-        String collectionsFolder = S3_COLLECTIONS;
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String dataProviderFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_PROVIDER_PATTERN);
 
@@ -239,23 +256,26 @@ public class S3ServiceImpl implements S3Service {
             case S3_VALIDATION_DC_PATH:
             case S3_VALIDATION_DC_QUERY_PATH:
                 path = String.format(path, dataflowFolder,
-                    collectionsFolder, dataCollectionFolder, s3PathResolver.getValidationId(), dataProviderFolder, fileName);
+                    S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getValidationId(), dataProviderFolder, fileName);
                 break;
             case S3_TABLE_NAME_DC_PATH:
             case S3_TABLE_NAME_DC_QUERY_PATH:
             case S3_TABLE_NAME_VALIDATE_DC_PATH:
             case S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH:
                 path = String.format(path, dataflowFolder,
-                    collectionsFolder, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder, fileName);
+                    S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder, fileName);
                 break;
             case S3_EXPORT_PATH:
             case S3_EXPORT_QUERY_PATH:
                 path = String.format(path, dataflowFolder,
-                    collectionsFolder, dataCollectionFolder, fileName);
+                    S3_COLLECTIONS, dataCollectionFolder, fileName);
                 break;
             case S3_EXPORT_FOLDER_PATH:
                 path = String.format(path, dataflowFolder,
-                    collectionsFolder, dataCollectionFolder);
+                    S3_COLLECTIONS, dataCollectionFolder);
+                break;
+            case S3_TABLE_NAME_DC_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder);
                 break;
             default:
                 LOG.info("Wrong type value: {}", path);

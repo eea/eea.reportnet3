@@ -640,6 +640,16 @@ public class JobControllerImpl implements JobController {
         jobUtils.sendKafkaImportNotification(jobVO, EventType.FME_IMPORT_JOB_FAILED_EVENT, "Fme job failed");
         LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT for jobId {} and fmeJobId {}", jobVO.getId(), jobVO.getFmeJobId());
     }
+
+    /**
+     * Finds provider id by job id
+     * @param jobId
+     * @return
+     */
+    @GetMapping(value = "/findProviderIdById/{jobId}")
+    public Long findProviderIdById(@PathVariable("jobId") Long jobId) {
+        return jobService.findProviderIdById(jobId);
+    }
 }
 
 
