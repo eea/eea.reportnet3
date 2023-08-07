@@ -71,6 +71,4 @@ public interface S3Helper {
      * @param filePathInReportnet
      */
     void uploadFileToBucket(String filePathInS3, String filePathInReportnet);
-
-    void promoteFolder(S3PathResolver s3PathResolver, String fileName);
 }

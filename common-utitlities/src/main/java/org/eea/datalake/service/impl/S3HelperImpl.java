@@ -171,16 +171,4 @@ public class S3HelperImpl implements S3Helper {
 
         PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, file);
     }
-
-
-    /**
-     * Promote
-     * @param s3PathResolver
-     * @param fileName
-     */
-    @Override
-    public void promoteFolder(S3PathResolver s3PathResolver, String fileName){
-        Long providerId = s3PathResolver.getDataProviderId();
-        dremioHelperService.promoteFolder(s3PathResolver, fileName);
-    }
 }
