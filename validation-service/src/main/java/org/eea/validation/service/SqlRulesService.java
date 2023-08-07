@@ -2,6 +2,7 @@ package org.eea.validation.service;
 
 import java.util.List;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.exception.EEAInvalidSQLException;
@@ -97,4 +98,18 @@ public interface SqlRulesService {
    */
   TableValue queryTable(String newQuery, QueryVO queryVO) throws EEAInvalidSQLException;
 
+  /**
+   *
+   * @param dataSetMetabaseVO
+   * @param query
+   * @return
+   */
+  String proccessQuery(DataSetMetabaseVO dataSetMetabaseVO, String query);
+
+  /**
+   * Replaces table names with s3 path
+   * @param sqlCode
+   * @return
+   */
+  String replaceTableNamesWithS3Path(String sqlCode);
 }

@@ -1,17 +1,10 @@
 package org.eea.validation.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -24,13 +17,7 @@ import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetCo
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
-import org.eea.interfaces.vo.dataset.DataCollectionVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.EUDatasetVO;
-import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.dataset.TestDatasetVO;
-import org.eea.interfaces.vo.dataset.ValueVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -65,10 +52,19 @@ import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
 
 /**
  * The Class SqlRulesServiceImpl.
@@ -137,11 +133,17 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
-
-
   /** The rule mapper. */
   @Autowired
   private RuleMapper ruleMapper;
+
+  @Autowired
+  private S3Service s3Service;
+
+  @Autowired
+  @Qualifier("dremioJdbcTemplate")
+  JdbcTemplate dremioJdbcTemplate;
+
 
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
@@ -545,7 +547,19 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         // dataflows
         if (ids.isEmpty()) {
           try {
-            checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
+            DataFlowVO dataflow = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+            if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
+              try {
+                String newQuery = proccessQuery(dataSetMetabaseVO, query);
+                newQuery = this.replaceTableNamesWithS3Path(newQuery);
+                dremioJdbcTemplate.execute(newQuery);
+              } catch (Exception e) {
+                LOG_ERROR.error("SQL is invalid: {}. Exception: {}", query, e.getMessage());
+                throw new EEAInvalidSQLException(e.getCause().getMessage(), e);
+              }
+            } else {
+              checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
+            }
           } catch (EEAInvalidSQLException e) {
             LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", rule.getSqlSentence(),
                 e.getCause().getCause().getMessage()));
@@ -878,7 +892,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param query the query
    * @return the string
    */
-  private String proccessQuery(DataSetMetabaseVO dataSetMetabaseVO, String query) {
+  @Override
+  public String proccessQuery(DataSetMetabaseVO dataSetMetabaseVO, String query) {
 
     if (query.contains(DATASET)) {
       Map<String, Long> datasetSchemasMap = getMapOfDatasetsOnQuery(query);
@@ -1191,4 +1206,44 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     return ids;
   }
 
+  @Override
+  public String replaceTableNamesWithS3Path(String sqlCode) {
+    List<Integer> datasetOccurrences = findOccurrence(sqlCode, DATASET);
+    while (datasetOccurrences.size()>0) {
+      String sqlContainingSchema = sqlCode.substring(datasetOccurrences.get(0)+8);
+      int dotIdx = sqlContainingSchema.indexOf(".");
+      int spaceIdx = sqlContainingSchema.indexOf(" ");
+      String datId = sqlContainingSchema.substring(0,dotIdx);
+      String table = sqlContainingSchema.substring(datId.length()+1,spaceIdx);
+      if (table.contains(".")) {
+        int dtIndex = table.indexOf(".");
+        table = table.substring(0,dtIndex);
+      }
+      String pathToReplace = DATASET+Long.valueOf(datId)+"."+table;
+      table = table.replaceAll("\"","");
+      DataSetMetabaseVO dataSetMetabase = datasetMetabaseController.findDatasetMetabaseById(Long.valueOf(datId));
+      S3PathResolver tableResolver = new S3PathResolver(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId() != null ? dataSetMetabase.getDataProviderId() : 0, dataSetMetabase.getId(), table);
+      String tablePathS3 = s3Service.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+      sqlCode = sqlCode.replace(pathToReplace, tablePathS3);
+      datasetOccurrences = findOccurrence(sqlCode, DATASET);
+    }
+    return sqlCode;
+  }
+
+  private List<Integer> findOccurrence(String textString, String word) {
+    List<Integer> indexes = new ArrayList<>();
+    String lowerCaseTextString = textString.toLowerCase();
+    String lowerCaseWord = word.toLowerCase();
+    int wordLength = 0;
+
+    int index = 0;
+    while(index != -1){
+      index = lowerCaseTextString.indexOf(lowerCaseWord, index + wordLength);
+      if (index != -1) {
+        indexes.add(index);
+      }
+      wordLength = word.length();
+    }
+    return indexes;
+  }
 }

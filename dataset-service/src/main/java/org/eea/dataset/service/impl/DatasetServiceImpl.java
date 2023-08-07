@@ -7,6 +7,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.*;
 import org.eea.dataset.persistence.data.domain.*;
 import org.eea.dataset.persistence.data.repository.*;
@@ -72,6 +75,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -96,6 +100,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class DatasetServiceImpl.
@@ -322,6 +328,16 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private TaskMapper taskMapper;
 
+  @Autowired
+  private S3Helper s3Helper;
+
+  @Autowired
+  private S3Service s3Service;
+
+  @Autowired
+  @Qualifier("dremioJdbcTemplate")
+  JdbcTemplate dremioJdbcTemplate;
+
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
@@ -437,8 +453,13 @@ public class DatasetServiceImpl implements DatasetService {
   private void deleteRecords(Long datasetId, String tableSchemaId, Boolean deletePrefilledTables) {
 
     boolean singleTable = null != tableSchemaId;
+    boolean bigData = false;
     Long dataflowId = getDataFlowIdById(datasetId);
-    TypeStatusEnum dataflowStatus = dataflowControllerZuul.getMetabaseById(dataflowId).getStatus();
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+    TypeStatusEnum dataflowStatus = dataflow.getStatus();
+    if (dataflow.getBigData()!=null && dataflow.getBigData()) {
+      bigData = true;
+    }
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(
         new ObjectId(datasetMetabaseService.findDatasetSchemaIdById(datasetId)));
     DatasetTypeEnum datasetType = getDatasetType(datasetId);
@@ -484,7 +505,7 @@ public class DatasetServiceImpl implements DatasetService {
     }
 
     try {
-      saveStatistics(datasetId);
+      saveStatistics(datasetId, bigData);
     } catch (EEAException e) {
       LOG_ERROR.error(
           "Error saving statistics after deleting all the dataset values. Error message: {}",
@@ -610,12 +631,11 @@ public class DatasetServiceImpl implements DatasetService {
    */
   @Override
   @Transactional
-  public void saveStatistics(final Long datasetId) throws EEAException {
+  public void saveStatistics(final Long datasetId, boolean bigData) throws EEAException {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
 
-    if (dataset.getId() != null && StringUtils.isNotBlank(dataset.getIdDatasetSchema())) {
+    if (dataset!=null && dataset.getId()!=null && StringUtils.isNotBlank(dataset.getIdDatasetSchema()) || bigData) {
       List<Statistics> statsList = Collections.synchronizedList(new ArrayList<>());
-      List<TableValue> allTableValues = dataset.getTableValues();
 
       DataSetMetabase datasetMb =
           dataSetMetabaseRepository.findById(datasetId).orElse(new DataSetMetabase());
@@ -630,21 +650,30 @@ public class DatasetServiceImpl implements DatasetService {
             tableSchema.getNameTableSchema());
       }
 
-      allTableValues.parallelStream().forEach(tableValue -> statsList
-          .addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema)));
-
-      // Check dataset validations
       Boolean datasetErrors = false;
-      if (dataset.getDatasetValidations() != null && !dataset.getDatasetValidations().isEmpty()) {
-        datasetErrors = true;
-      } else {
-        Optional<Statistics> opt = statsList.stream()
-            .filter(s -> "tableErrors".equals(s.getStatName()) && "true".equals(s.getValue()))
-            .findFirst();
-        if (opt.isPresent()) {
+      if (bigData) {
+        S3PathResolver s3PathResolver = new S3PathResolver(datasetMb.getDataflowId(), datasetMb.getDataProviderId()!=null ? datasetMb.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+        if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
           datasetErrors = true;
         }
+        schema.getTableSchemas().parallelStream().forEach(tableSchema -> statsList.addAll(processTableStatsDL(tableSchema, datasetMb)));
+      } else {
+        List<TableValue> allTableValues = dataset.getTableValues();
+        allTableValues.parallelStream().forEach(tableValue -> statsList
+                .addAll(processTableStats(tableValue, datasetId, mapIdNameDatasetSchema)));
+        // Check dataset validations
+        if (dataset.getDatasetValidations() != null && !dataset.getDatasetValidations().isEmpty()) {
+          datasetErrors = true;
+        } else {
+          Optional<Statistics> opt = statsList.stream()
+                  .filter(s -> "tableErrors".equals(s.getStatName()) && "true".equals(s.getValue()))
+                  .findFirst();
+          if (opt.isPresent()) {
+            datasetErrors = true;
+          }
+        }
       }
+
 
       statsList.add(fillStat(datasetId, null, "idDataSetSchema", datasetMb.getDatasetSchema()));
       statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
@@ -2195,6 +2224,50 @@ public class DatasetServiceImpl implements DatasetService {
     reporting.setId(datasetId);
     statsTableErrors.setDataset(reporting);
     if (tableValue.getTableValidations() != null && !tableValue.getTableValidations().isEmpty()) {
+      statsTableErrors.setValue("true");
+    } else {
+      statsTableErrors.setValue(String.valueOf(totalTableErrors > 0));
+    }
+
+    stats.add(statsTableErrors);
+
+    return stats;
+  }
+
+  private List<Statistics> processTableStatsDL(final TableSchema tableSchema, final DataSetMetabase dataset) {
+    Long datasetId = dataset.getId();
+    List<Statistics> stats = new ArrayList<>();
+    S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchema.getNameTableSchema());
+    Long totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+    StringBuilder validationQuery = new StringBuilder();
+    S3PathResolver validationPathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+    validationQuery.append("select count(distinct record_id) from ").append(s3Service.getTableAsFolderQueryPath(validationPathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH)).append(" where table_name='")
+            .append(tableSchema.getNameTableSchema()).append("'");
+    Long totalRecordsWithBlockers = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='BLOCKER'", Long.class);
+    Long totalRecordsWithErrors = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='ERROR'", Long.class);
+    Long totalRecordsWithWarnings = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='WARNING'", Long.class);
+    Long totalRecordsWithInfos = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='INFO'", Long.class);
+    Long tableErrors = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(validationPathResolver)+" where table_name='"+tableSchema.getNameTableSchema()+"' and validation_area='TABLE'", Long.class);
+
+    Long totalTableErrors = totalRecordsWithBlockers + totalRecordsWithErrors + totalRecordsWithWarnings + totalRecordsWithInfos;
+    // Fill different stats
+    String tableSchemaId = tableSchema.getIdTableSchema().toString();
+    stats.add(fillStat(datasetId, tableSchemaId, "idTableSchema", tableSchemaId));
+    stats.add(fillStat(datasetId, tableSchemaId, "nameTableSchema", tableSchema.getNameTableSchema()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalErrors", totalTableErrors.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecords", totalRecords.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithBlockers", totalRecordsWithBlockers.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithErrors", totalRecordsWithErrors.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithWarnings", totalRecordsWithWarnings.toString()));
+    stats.add(fillStat(datasetId, tableSchemaId, "totalRecordsWithInfos", totalRecordsWithInfos.toString()));
+
+    Statistics statsTableErrors = new Statistics();
+    statsTableErrors.setIdTableSchema(tableSchemaId);
+    statsTableErrors.setStatName("tableErrors");
+    ReportingDataset reporting = new ReportingDataset();
+    reporting.setId(datasetId);
+    statsTableErrors.setDataset(reporting);
+    if (tableErrors>0) {
       statsTableErrors.setValue("true");
     } else {
       statsTableErrors.setValue(String.valueOf(totalTableErrors > 0));

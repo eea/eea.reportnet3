@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -22,8 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
-import static org.eea.utils.LiteralConstants.S3_VALIDATION;
+import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
 @Service
@@ -35,27 +35,35 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
     private ValidationService validationService;
     private DremioRulesService dremioRulesService;
+    private S3Helper s3Helper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioNonSqlRulesExecuteServiceImpl.class);
 
     @Autowired
     public DremioNonSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
-                                               DatasetSchemaControllerZuul datasetSchemaControllerZuul, ValidationService validationService, DremioRulesService dremioRulesService) {
+                                               DatasetSchemaControllerZuul datasetSchemaControllerZuul, ValidationService validationService, DremioRulesService dremioRulesService, S3Helper s3Helper) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
         this.datasetSchemaControllerZuul = datasetSchemaControllerZuul;
         this.validationService = validationService;
         this.dremioRulesService = dremioRulesService;
+        this.s3Helper = s3Helper;
     }
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId, Long taskId) throws Exception {
         try {
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
+
+            if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                return;
+            }
+
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
+            s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf("(");
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(")");
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
@@ -84,7 +92,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                     break;
                 }
             }
-            Object object = cls.newInstance();
+            Method factoryMethod = cls.getDeclaredMethod("getInstance");
+            Object object = factoryMethod.invoke(null, null);
             int parameterLength = method.getParameters().length;
             while (rs.next()) {
                 boolean isValid = false;

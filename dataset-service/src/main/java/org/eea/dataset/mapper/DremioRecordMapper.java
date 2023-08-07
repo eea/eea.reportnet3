@@ -35,6 +35,7 @@ public class DremioRecordMapper implements RowMapper<RecordVO> {
         }
         recordVO.setFields(fields);
         recordVO.setId(resultSet.getString("record_id"));
+        recordVO.setDataProviderCode(resultSet.getString("data_provider_code"));
         return recordVO;
     }
 

@@ -26,6 +26,8 @@ public class ValidationDroolsUtils {
    */
   private static final String REG_EXP_PHONE = "^(\\(?\\+?[0-9]*\\)?)?[0-9_\\- \\(\\)]*$";
 
+  private static ValidationDroolsUtils instance;
+
   /**
    * This class checks whether the values are available inside the array of code list items in a
    * sensitive or insenstive way.
@@ -113,6 +115,13 @@ public class ValidationDroolsUtils {
       validationResult = Boolean.TRUE;
     }
     return validationResult;
+  }
+
+  public static synchronized ValidationDroolsUtils getInstance() {
+    if (instance == null) {
+      instance = new ValidationDroolsUtils();
+    }
+    return instance;
   }
 }
 

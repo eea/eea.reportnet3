@@ -30,8 +30,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_VALIDATION;
-import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
 @Component
@@ -82,14 +81,18 @@ public class LoadValidationsHelperDL {
             AtomicReference<Long> totalRecords = new AtomicReference<>(0L);
             tableNames.forEach(name -> {
                 s3PathResolver.setTableName(name);
-                Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-                totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
+                if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                    Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                    totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
+                }
             });
             validation.setTotalRecords(totalRecords.get());
-            validation.setTotalFilteredRecords(
-                    Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
-                                    typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, false)
-                            .size()));
+            if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                validation.setTotalFilteredRecords(
+                        Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
+                                        typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, false)
+                                .size()));
+            }
         }
         LOG.info(
                 "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",

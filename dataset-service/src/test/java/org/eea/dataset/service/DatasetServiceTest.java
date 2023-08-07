@@ -1646,7 +1646,7 @@ DatasetServiceTest {
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.of(dsMetabase));
 
-    datasetService.saveStatistics(1L);
+    datasetService.saveStatistics(1L, false);
     Mockito.verify(statisticsRepository, times(1)).saveAll(Mockito.any());
   }
 
