@@ -2238,16 +2238,26 @@ public class DatasetServiceImpl implements DatasetService {
     Long datasetId = dataset.getId();
     List<Statistics> stats = new ArrayList<>();
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchema.getNameTableSchema());
-    Long totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-    StringBuilder validationQuery = new StringBuilder();
-    S3PathResolver validationPathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
-    validationQuery.append("select count(distinct record_id) from ").append(s3Service.getTableAsFolderQueryPath(validationPathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH)).append(" where table_name='")
-            .append(tableSchema.getNameTableSchema()).append("'");
-    Long totalRecordsWithBlockers = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='BLOCKER'", Long.class);
-    Long totalRecordsWithErrors = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='ERROR'", Long.class);
-    Long totalRecordsWithWarnings = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='WARNING'", Long.class);
-    Long totalRecordsWithInfos = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='INFO'", Long.class);
-    Long tableErrors = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(validationPathResolver)+" where table_name='"+tableSchema.getNameTableSchema()+"' and validation_area='TABLE'", Long.class);
+    Long totalRecords = 0L;
+    Long totalRecordsWithBlockers = 0L;
+    Long totalRecordsWithErrors = 0L;
+    Long totalRecordsWithWarnings = 0L;
+    Long totalRecordsWithInfos = 0L;
+    Long tableErrors = 0L;
+    if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+      totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+    }
+    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+      StringBuilder validationQuery = new StringBuilder();
+      S3PathResolver validationPathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+      validationQuery.append("select count(distinct record_id) from ").append(s3Service.getTableAsFolderQueryPath(validationPathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH)).append(" where table_name='")
+              .append(tableSchema.getNameTableSchema()).append("'");
+      totalRecordsWithBlockers = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='BLOCKER'", Long.class);
+      totalRecordsWithErrors = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='ERROR'", Long.class);
+      totalRecordsWithWarnings = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='WARNING'", Long.class);
+      totalRecordsWithInfos = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='INFO'", Long.class);
+      tableErrors = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(validationPathResolver)+" where table_name='"+tableSchema.getNameTableSchema()+"' and validation_area='TABLE'", Long.class);
+    }
 
     Long totalTableErrors = totalRecordsWithBlockers + totalRecordsWithErrors + totalRecordsWithWarnings + totalRecordsWithInfos + tableErrors;
     // Fill different stats
