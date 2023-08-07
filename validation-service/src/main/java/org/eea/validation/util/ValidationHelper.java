@@ -1275,8 +1275,10 @@ public class ValidationHelper implements DisposableBean {
 
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
-      String query = "ALTER TABLE " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
-      dremioJdbcTemplate.execute(query);
+      if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+        String query = "ALTER TABLE " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
+        dremioJdbcTemplate.execute(query);
+      }
     }
   }
 
