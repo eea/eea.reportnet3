@@ -2249,7 +2249,7 @@ public class DatasetServiceImpl implements DatasetService {
     Long totalRecordsWithInfos = dremioJdbcTemplate.queryForObject(validationQuery+" and validation_level='INFO'", Long.class);
     Long tableErrors = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(validationPathResolver)+" where table_name='"+tableSchema.getNameTableSchema()+"' and validation_area='TABLE'", Long.class);
 
-    Long totalTableErrors = totalRecordsWithBlockers + totalRecordsWithErrors + totalRecordsWithWarnings + totalRecordsWithInfos;
+    Long totalTableErrors = totalRecordsWithBlockers + totalRecordsWithErrors + totalRecordsWithWarnings + totalRecordsWithInfos + tableErrors;
     // Fill different stats
     String tableSchemaId = tableSchema.getIdTableSchema().toString();
     stats.add(fillStat(datasetId, tableSchemaId, "idTableSchema", tableSchemaId));
