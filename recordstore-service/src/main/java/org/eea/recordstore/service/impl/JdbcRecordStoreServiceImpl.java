@@ -938,7 +938,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
             : EventType.RELEASE_FAILED_EVENT;
 
-    restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
+    restoreSnapshotDL(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
         deleteData, successEventType, failEventType, prefillingReference, processId);
 
   }
@@ -1930,9 +1930,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     LOG.info("Uploading finished successfully for {}", tableNameProviderPath);
                     //s3Helper.promoteFolder(providerPath, tableNameProviderPath);
                   } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
+                        reportingDatasetId, dataflowId, e);
                   }
-
                 });
               } catch (Exception e) {
                 LOG_ERROR.error("Error in delete and copy release process for reportingDatasetId {}, dataflowId {}",
