@@ -11,12 +11,14 @@ import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.EUDatasetVO;
@@ -117,7 +119,8 @@ public class SqlRulesServiceImplTest {
   @Mock
   private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
-
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /** The sql rules service impl. */
   @InjectMocks
@@ -146,6 +149,8 @@ public class SqlRulesServiceImplTest {
 
   /** The authentication. */
   private Authentication authentication;
+
+  private DataFlowVO dataFlowVO;
 
   /**
    * Inits the mocks.
@@ -182,6 +187,9 @@ public class SqlRulesServiceImplTest {
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
+
+    dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
   }
 
   /**
@@ -217,6 +225,7 @@ public class SqlRulesServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn("");
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
@@ -246,6 +255,7 @@ public class SqlRulesServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn("");
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
@@ -294,6 +304,7 @@ public class SqlRulesServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn("");
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
@@ -354,6 +365,7 @@ public class SqlRulesServiceImplTest {
 
     Mockito.when(datasetRepository.evaluateSqlRule(Mockito.anyLong(), Mockito.anyString()))
         .thenReturn("");
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     sqlRulesServiceImpl.validateSQLRule(datasetId, datasetSchemaId, rule);
 
@@ -684,6 +696,7 @@ public class SqlRulesServiceImplTest {
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     sqlRulesServiceImpl.validateSQLRules(1L, "5ce524fad31fc52540abae73", true);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
