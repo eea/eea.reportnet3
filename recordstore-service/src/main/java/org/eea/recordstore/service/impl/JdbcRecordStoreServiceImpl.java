@@ -1921,14 +1921,15 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 tableNameFilenames.stream().forEach(file -> {
                   String key = file.key();
                   String filename = new File(key).getName();
+                  providerPath.setFilename(filename);
                   try {
                     LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                     File parquetFile = s3Helper.getFileFromS3(key, filename);
                     String tableNameProviderPath = s3Service.getTableNameProviderPath(providerPath);
-                    LOG.info("Uploading file to bucket for table name provider path : {}", tableNameProviderPath);
+                    LOG.info("Uploading file to bucket for table name provider path : {}, parquetFile : {}", tableNameProviderPath, parquetFile);
+                    LOG.info("Uploading file to bucket arquetFile path : {}", tableNameProviderPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameProviderPath, parquetFile.getPath());
                     LOG.info("Uploading finished successfully for {}", tableNameProviderPath);
-                    //s3Helper.promoteFolder(providerPath, tableNameProviderPath);
                   } catch (IOException e) {
                     LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                         reportingDatasetId, dataflowId, e);

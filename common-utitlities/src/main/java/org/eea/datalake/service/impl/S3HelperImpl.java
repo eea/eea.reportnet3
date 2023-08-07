@@ -121,6 +121,7 @@ public class S3HelperImpl implements S3Helper {
         // Write the data to a local file.
         File parquetFile = new File(exportDLPath + datasetName + PARQUET_TYPE);
         Path textFilePath = Paths.get(parquetFile.toString());
+        LOG.info("textFilePath {}", parquetFile);
         Files.createFile(textFilePath);
         LOG.info("Local file {}", parquetFile);
         OutputStream os = new FileOutputStream(parquetFile);
