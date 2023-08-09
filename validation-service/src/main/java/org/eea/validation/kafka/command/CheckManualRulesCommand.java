@@ -10,8 +10,11 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -31,6 +34,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RuleExpressionService;
+import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.drools.compose.ConditionsDrools;
 import org.eea.validation.util.drools.compose.SchemasDrools;
 import org.eea.validation.util.drools.compose.TypeValidation;
@@ -44,6 +48,8 @@ import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -98,6 +104,16 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
   @Autowired
   private RuleExpressionService ruleExpressionService;
 
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private SqlRulesService sqlRulesService;
+
+  @Autowired
+  @Qualifier("dremioJdbcTemplate")
+  JdbcTemplate dremioJdbcTemplate;
+
   /**
    * Gets the event type.
    *
@@ -122,6 +138,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       Long datasetId =
               Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
       boolean checkNoSQL = (boolean) eeaEventVO.getData().get("checkNoSQL");
+      boolean bigData;
 
       String datasetSchemaId = datasetMetabaseController.findDatasetSchemaIdById(datasetId);
       Long dataflowId = datasetMetabaseController.findDatasetMetabaseById(datasetId).getDataflowId();
@@ -129,10 +146,18 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
       List<Rule> rulesSQLSchema = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
 
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+      if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+        bigData = true;
+      } else {
+        bigData = false;
+      }
+
       if (null != rulesSchema && !rulesSchema.getRules().isEmpty()) {
         rulesSchema.getRules().stream().filter(rule -> !rule.isAutomatic()).forEach(rule -> {
           updateRuleState(errorRulesList, datasetId, checkNoSQL, datasetSchemaId, rulesSQLSchema,
-                  rule);
+                  rule, bigData);
         });
       }
 
@@ -166,14 +191,14 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @param rule the rule
    */
   private void updateRuleState(List<Rule> errorRulesList, Long datasetId, boolean checkNoSQL,
-      String datasetSchemaId, List<Rule> rulesSQLSchema, Rule rule) {
+      String datasetSchemaId, List<Rule> rulesSQLSchema, Rule rule, boolean bigData) {
     try {
       Boolean valid = null;
       if (checkNoSQL && null == rule.getSqlSentence()) {
         valid = validateRule(datasetSchemaId, rule);
       }
       if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()) {
-        valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule);
+        valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule, bigData);
       }
 
       if (Boolean.TRUE.equals(valid)) {
@@ -358,7 +383,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
    * @param rule the rule
    * @return the boolean
    */
-  private Boolean validateSQLRule(String query, Long datasetId, Rule rule) {
+  private Boolean validateSQLRule(String query, Long datasetId, Rule rule, boolean bigData) {
     boolean isSQLCorrect = true;
     // validate query
     if (!StringUtils.isBlank(query)) {
@@ -366,8 +391,13 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       if (checkQuerySyntax(query)) {
         try {
           String preparedquery =
-              query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
-          launchValidationQuery(preparedquery, datasetId, rule);
+                  query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
+          if (bigData) {
+            String sqlCode = sqlRulesService.replaceTableNamesWithS3Path(preparedquery);
+            dremioJdbcTemplate.execute(sqlCode);
+          } else {
+            launchValidationQuery(preparedquery, datasetId, rule);
+          }
         } catch (EEAInvalidSQLException e) {
           LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = false;
