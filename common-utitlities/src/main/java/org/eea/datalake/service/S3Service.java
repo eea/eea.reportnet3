@@ -89,6 +89,11 @@ public interface S3Service {
     String getTableNameFolderDCPath(S3PathResolver s3PathResolver);
 
     /**
+     * @return table name root folder path
+     */
+    String getTableNameRootFolderDCPath(S3PathResolver s3PathResolver);
+
+    /**
      * @return dataflow reference path
      */
     String getDataflowReferencePath(S3PathResolver s3PathResolver);

@@ -3,7 +3,6 @@ package org.eea.datalake.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -77,6 +76,13 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String getTableNameFolderDCPath(S3PathResolver s3PathResolver) {
         String s3TableNameFolderPath = calculateS3DCPath(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH);
+        LOG.info("Method getTableNameFolderDCPath returns S3 Table Name Path: {}", s3TableNameFolderPath);
+        return s3TableNameFolderPath;
+    }
+
+    @Override
+    public String getTableNameRootFolderDCPath(S3PathResolver s3PathResolver) {
+        String s3TableNameFolderPath = calculateS3DCPath(s3PathResolver, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
         LOG.info("Method getTableNameFolderDCPath returns S3 Table Name Path: {}", s3TableNameFolderPath);
         return s3TableNameFolderPath;
     }
@@ -276,6 +282,9 @@ public class S3ServiceImpl implements S3Service {
                 break;
             case S3_TABLE_NAME_DC_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder);
+                break;
+            case S3_TABLE_NAME_ROOT_DC_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName());
                 break;
             default:
                 LOG.info("Wrong type value: {}", path);
