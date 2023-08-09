@@ -61,12 +61,16 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
     @Override
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
-        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, importFolder);
+        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName, importFolder);
         if (directoryItems!=null) {
+            LOG.info("directoryItems : {}", directoryItems.toString());
+            LOG.info("directoryItems getChildren : {}", directoryItems.getChildren());
             Integer itemPosition = (importFolder == true) ? 8 : 6;
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
+                LOG.info("itemOptional : {}", itemOptional.toString());
                 DremioDirectoryItem item = itemOptional.get();
+                LOG.info("item : {}", item);
                 if (item.getType().equals(DremioItemTypeEnum.DATASET.getValue()) && item.getDatasetType().equals(PROMOTED)) {
                     return true;
                 }
@@ -76,15 +80,17 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, Boolean importFolder) {
+    public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
         String directoryPath = null;
-        if(importFolder){
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
-        }
-        else{
+        if(importFolder) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
+                S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+        } else if (S3_TABLE_NAME_DC_FOLDER_PATH.equals(folderName)) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableNameFolderDCPath(s3PathResolver);
+        } else {
             directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
         }
-
+        LOG.info("directoryPath : {}", directoryPath);
         DremioDirectoryItemsResponse directoryItems = null;
         try {
             directoryItems = dremioApiController.getDirectoryItems(token, directoryPath);
@@ -102,7 +108,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public String getFolderId(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
         String folderId = null;
-        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, importFolder);
+        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName, importFolder);
         if (directoryItems!=null) {
             Integer itemPosition = (importFolder == true) ? 8 : 6;
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();

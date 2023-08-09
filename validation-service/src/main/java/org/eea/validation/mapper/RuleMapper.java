@@ -94,7 +94,9 @@ public abstract class RuleMapper implements IMapper<Rule, RuleVO> {
     ruleVO.setReferenceId(rule.getReferenceId().toString());
     ruleVO.setWhenConditionMethod(rule.getWhenCondition());
     ruleVO.setReferenceFieldSchemaPKId(rule.getReferenceFieldSchemaPKId()!=null ? rule.getReferenceFieldSchemaPKId().toString() : null);
-
+    if (AutomaticRuleTypeEnum.FIELD_LINK.equals(rule.getAutomaticType())) {
+      ruleVO.setType(EntityTypeEnum.FIELD);
+    }
     // We have to convert the rule's when condition, in case of it's a manual and record or field
     // rule
     if (StringUtils.isBlank(ruleVO.getSqlSentence())

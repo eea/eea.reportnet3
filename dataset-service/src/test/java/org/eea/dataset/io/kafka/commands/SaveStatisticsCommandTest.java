@@ -66,6 +66,7 @@ public class SaveStatisticsCommandTest {
     eeaEventVO.setEventType(EventType.VALIDATION_FINISHED_EVENT);
     data = new HashMap<>();
     data.put("dataset_id", 1);
+    data.put("bigData",false);
     eeaEventVO.setData(data);
 
     SaveStatisticsCommand spyClass = Mockito.spy(saveStatisticsCommand);

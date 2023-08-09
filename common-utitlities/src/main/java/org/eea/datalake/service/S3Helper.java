@@ -2,6 +2,7 @@ package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.File;
@@ -40,6 +41,14 @@ public interface S3Helper {
     List<S3Object> getFilenamesFromFolderExport(S3PathResolver s3PathResolver);
 
     /**
+     * Gets filenames from table name folders
+     * @param s3PathResolver
+     * @return
+     */
+    List<S3Object> getFilenamesFromTableNames(S3PathResolver s3PathResolver);
+
+    /**
+     * Gets file from S3
      * @param key
      * @param fileName
      * @param path
@@ -64,4 +73,24 @@ public interface S3Helper {
      * @return
      */
     List<ObjectIdentifier> listObjectsInBucket(String prefix);
+
+    /**
+     * Chceks if rule folder exists in s3 validation folder and deletes it
+     * @param validationResolver
+     * @param ruleVO
+     */
+    void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO);
+
+    /**
+     * checks if table names DC fodlers have been created in the s3 storage
+     * @param s3PathResolver
+     * @return
+     */
+    boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver);
+
+    /**
+     * Deletes talbe name DC folder from s3
+     * @param s3PathResolver
+     */
+    void deleleTableNameDCFolder(S3PathResolver s3PathResolver);
 }

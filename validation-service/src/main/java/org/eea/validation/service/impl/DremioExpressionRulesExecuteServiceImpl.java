@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -31,8 +32,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
-import static org.eea.utils.LiteralConstants.S3_VALIDATION;
+import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
 @Service
@@ -45,12 +45,14 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
     private DremioRulesService dremioRulesService;
     private RepresentativeControllerZuul representativeControllerZuul;
+    private S3Helper s3Helper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioExpressionRulesExecuteServiceImpl.class);
 
     @Autowired
     public DremioExpressionRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService, DatasetSchemaControllerZuul datasetSchemaControllerZuul,
-                                                   DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, DremioRulesService dremioRulesService, RepresentativeControllerZuul representativeControllerZuul) {
+                                                   DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, DremioRulesService dremioRulesService, RepresentativeControllerZuul representativeControllerZuul,
+                                                   S3Helper s3Helper) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -58,12 +60,18 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.dremioRulesService = dremioRulesService;
         this.representativeControllerZuul = representativeControllerZuul;
+        this.s3Helper = s3Helper;
     }
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId, Long taskId) throws Exception {
         try {
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
+
+            if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                return;
+            }
+
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             String providerCode = null;
@@ -73,6 +81,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             }
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
+            s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
             int parameterStartIndex = ruleVO.getWhenConditionMethod().indexOf("(");
             int parameterEndIndex = ruleVO.getWhenConditionMethod().indexOf(")");
             int pmEndSecOccurrenceIndex = ruleVO.getWhenConditionMethod().indexOf(")", parameterEndIndex+1);
@@ -93,7 +102,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 }
             }
 
-            Map<String, List<String>> parameterMethods = new HashMap<>();
+            LinkedHashMap<String, List<String>> parameterMethods = new LinkedHashMap<>();
             parameters.forEach(parameter -> {
                 if (parameter.contains("RuleOperators")) {
                     //RuleOperators method in when condition contains nested RuleOperators methods
@@ -158,7 +167,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(datasetId, tableName, dataTableResolver, validationResolver, ruleVO, fieldName);
 
             Class<?> cls = Class.forName("org.eea.validation.util.RuleOperators");
-            Object object = cls.newInstance();
+            Method factoryMethod = cls.getDeclaredMethod("getInstance");
+            Object object = factoryMethod.invoke(null, null);
 
             while (rs.next()) {
                 boolean isValid = false;

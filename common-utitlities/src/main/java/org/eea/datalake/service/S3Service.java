@@ -49,6 +49,11 @@ public interface S3Service {
     String getTableNameValidateProviderQueryPath(S3PathResolver s3PathResolver);
 
     /**
+     * @return table name provider query path
+     */
+    String getTableNameFolderPath(S3PathResolver s3PathResolver);
+
+    /**
      * @return validation DC path
      */
     String getValidationDCPath(S3PathResolver s3PathResolver);
@@ -77,6 +82,11 @@ public interface S3Service {
      * @return table name validation DC query path
      */
     String getTableNameValidateDCQueryPath(S3PathResolver s3PathResolver);
+
+    /**
+     * @return table name folder path
+     */
+    String getTableNameFolderDCPath(S3PathResolver s3PathResolver);
 
     /**
      * @return dataflow reference path

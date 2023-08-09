@@ -240,6 +240,14 @@ public interface JobController {
      */
     @PostMapping(value = "/private/sendFmeImportFailedNotification")
     void sendFmeImportFailedNotification(@RequestBody JobVO jobVO);
+
+    /**
+     * Finds provider id by job id
+     * @param jobId
+     * @return
+     */
+    @GetMapping(value = "/findProviderIdById/{jobId}")
+    Long findProviderIdById(@PathVariable("jobId") Long jobId);
 }
 
 
