@@ -120,10 +120,13 @@ public class S3HelperImpl implements S3Helper {
     /**
      * Gets file
      * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
      * @return
      */
     @Override
-    public File getFileFromS3(String key, String datasetName) throws IOException {
+    public File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException {
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
             .key(key)
@@ -141,9 +144,9 @@ public class S3HelperImpl implements S3Helper {
         LOG.info("Local file {}", parquetFile);
         OutputStream os = new FileOutputStream(parquetFile);
         os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", datasetName + PARQUET_TYPE);
+        LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
         os.close();
-        return parquetFile;
+        return file;
     }
 
     /**

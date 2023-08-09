@@ -203,11 +203,17 @@ public final class LiteralConstants {
   /** The Constant S3_IMPORT_PATH: {@value}. */
   public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import";
 
+  /** The Constant S3_PROVIDER_IMPORT_PATH: {@value}. */
+  public static final String S3_PROVIDER_IMPORT_PATH = "/%s/%s/%s/current/provider_import";
+
   /** The Constant S3_IMPORT_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_IMPORT_TABLE_NAME_FOLDER_PATH = "/%s/%s/%s/current/import/%s";
 
   /** The Constant S3_IMPORT_FILE_PATH: {@value}. */
   public static final String S3_IMPORT_FILE_PATH = "%s/%s/%s/current/import/%s/%s";
+
+  /** The Constant S3_PROVIDER_IMPORT_FILE_PATH: {@value}. */
+  public static final String S3_PROVIDER_IMPORT_FILE_PATH = "%s/%s/%s/current/provider_import/%s";
 
   /** The Constant S3_IMPORT_QUERY_PATH: {@value}. */
   public static final String S3_IMPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"import\".\"%s\"";
@@ -309,6 +315,9 @@ public final class LiteralConstants {
 
   /** The Constant PARQUET_TYPE: {@value}. */
   public static final String PARQUET_TYPE = ".parquet";
+
+  /** The Constant ZIP_TYPE: {@value}. */
+  public static final String ZIP_TYPE = ".zip";
 
 
   /**

@@ -789,13 +789,13 @@ public class FileTreatmentHelper implements DisposableBean {
                 String key = myValue.key();
                 String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
                 if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
+                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                     nameDataset = nameDataset + CSV_TYPE;
                     File csvFile = new File(exportDLPath + nameDataset);
 
                     s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
                 } else if (extension.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset);
+                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                     nameDataset = nameDataset + XLSX_TYPE;
                     File xlsxFile = new File(exportDLPath + nameDataset);
 
