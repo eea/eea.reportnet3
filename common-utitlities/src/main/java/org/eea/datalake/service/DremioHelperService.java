@@ -9,7 +9,7 @@ public interface DremioHelperService {
 
     boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
-    DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, Boolean importFolder);
+    DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
     String getFolderId(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
