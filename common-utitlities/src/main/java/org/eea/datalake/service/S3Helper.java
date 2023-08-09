@@ -40,11 +40,13 @@ public interface S3Helper {
     List<S3Object> getFilenamesFromFolderExport(S3PathResolver s3PathResolver);
 
     /**
-     * Gets file from S3
-     * @param filename
+     * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
      * @return
      */
-    File getFileFromS3(String filename, String datasetName) throws IOException;
+    File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException;
 
     /**
      * Uploads a file in s3

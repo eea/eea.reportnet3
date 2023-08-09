@@ -16,9 +16,10 @@ public interface BigDataDatasetService {
      * @param integrationId the integration id
      * @param delimiter the delimiter
      * @param fmeJobId the fmeJobId
+     * @param filePathInS3 the filePathInS3
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId) throws Exception;
+                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId, String filePathInS3) throws Exception;
 
 }

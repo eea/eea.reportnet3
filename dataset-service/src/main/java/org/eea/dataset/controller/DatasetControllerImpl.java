@@ -308,6 +308,8 @@ public class DatasetControllerImpl implements DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param fmeJobId the fmeJobId
+   * @param filePathInS3 the filePathInS3
    */
   @SneakyThrows
   @Override
@@ -330,7 +332,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "Table schema id",
           example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
               required = false) String tableSchemaId,
-      @ApiParam(value = "File to upload") @RequestParam("file") MultipartFile file,
+      @ApiParam(value = "File to upload") @RequestParam(value = "file", required = false) MultipartFile file,
       @ApiParam(type = "boolean", value = "Replace current data",
           example = "true") @RequestParam(value = "replace", required = false) boolean replace,
       @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
@@ -338,12 +340,15 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "File delimiter",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
       @ApiParam(type = "String", value = "Fme Job Id",
-              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+              example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @ApiParam(type = "String", value = "File path in S3",
+              example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
+      @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
 
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId);
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId, filePathInS3);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -424,6 +429,8 @@ public class DatasetControllerImpl implements DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param fmeJobId the fmeJobId
+   * @param filePathInS3 the filePathInS3
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
@@ -455,10 +462,13 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "File delimiter",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
       @ApiParam(type = "String", value = "Fme Job Id",
-              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @ApiParam(type = "String", value = "File path in S3",
+              example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
+      @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
 
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-            integrationId, delimiter, fmeJobId);
+            integrationId, delimiter, fmeJobId, filePathInS3);
   }
 
   /**
@@ -472,6 +482,8 @@ public class DatasetControllerImpl implements DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param fmeJobId the fmeJobId
+   * @param filePathInS3 the filePathInS3
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
@@ -501,9 +513,12 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "File delimiter",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
       @ApiParam(type = "String", value = "Fme Job Id",
-              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @ApiParam(type = "String", value = "File path in S3",
+              example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
+      @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-        integrationId, delimiter, fmeJobId);
+        integrationId, delimiter, fmeJobId, filePathInS3);
   }
 
   /**

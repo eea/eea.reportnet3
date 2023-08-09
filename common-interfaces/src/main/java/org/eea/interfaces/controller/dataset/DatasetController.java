@@ -530,6 +530,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    * @param fmeJobId the fmeJobId
+   * @param filePathInS3 the filePathInS3
    */
   @PostMapping("/v2/importFileData/{datasetId}")
   void importBigFileData(@PathVariable("datasetId") Long datasetId,
@@ -540,7 +541,8 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
 
   /**
@@ -555,6 +557,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    * @param fmeJobId the fmeJobId
+   * @param filePathInS3 the filePathInS3
    */
   @PostMapping("/v1/{datasetId}/importFileData")
   void importFileData(@PathVariable("datasetId") Long datasetId,
@@ -565,7 +568,8 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
   /**
    * Import file data legacy.
@@ -579,6 +583,7 @@ public interface DatasetController {
    * @param integrationId the integration id
    * @param delimiter the delimiter
    * @param fmeJobId the fmeJobId
+   * @param filePathInS3 the filePathInS3
    */
   @PostMapping("/{datasetId}/importFileData")
   void importFileDataLegacy(@PathVariable("datasetId") Long datasetId,
@@ -589,7 +594,8 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+      @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
 
   /**
