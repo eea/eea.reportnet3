@@ -93,6 +93,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Value("${spring.cloud.consul.discovery.instanceId}")
   private String serviceInstanceId;
 
+  /**
+   * The path export DL.
+   */
+  @Value("${exportDLPath}")
+  private String exportDLPath;
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -1924,7 +1930,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   dataCollectionPath.setFilename(filename);
                   try {
                     LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-                    File parquetFile = s3Helper.getFileFromS3(key, filename);
+                    File parquetFile = s3Helper.getFileFromS3(key, exportDLPath, filename, LiteralConstants.PARQUET_TYPE);
                     String tableNameDCPath = s3Service.getTableNameDCPath(dataCollectionPath);
                     LOG.info("Uploading file to bucket arquetFile path : {}", tableNameDCPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
