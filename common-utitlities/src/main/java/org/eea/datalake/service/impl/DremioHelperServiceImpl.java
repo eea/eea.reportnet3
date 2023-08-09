@@ -58,10 +58,13 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Override
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver);
+        LOG.info("directoryItems ¨{}", directoryItems);
         if (directoryItems!=null) {
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(6).equals(s3PathResolver.getTableName())).findFirst();
+            LOG.info("itemOptional ¨{}", itemOptional);
             if (itemOptional.isPresent()) {
                 DremioDirectoryItem item = itemOptional.get();
+                LOG.info("item ¨{}", item);
                 if (item.getType().equals(DremioItemTypeEnum.DATASET.getValue()) && item.getDatasetType().equals(PROMOTED)) {
                     return true;
                 }

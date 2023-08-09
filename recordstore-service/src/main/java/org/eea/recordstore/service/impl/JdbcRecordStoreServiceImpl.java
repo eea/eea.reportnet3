@@ -1929,6 +1929,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     LOG.info("Uploading file to bucket arquetFile path : {}", tableNameDCPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                     LOG.info("Uploading finished successfully for {}", tableNameDCPath);
+                    //promote folder
                   } catch (IOException e) {
                     LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                         reportingDatasetId, dataflowId, e);
