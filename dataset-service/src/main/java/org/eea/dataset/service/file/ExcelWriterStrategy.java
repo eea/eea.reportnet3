@@ -2,7 +2,7 @@ package org.eea.dataset.service.file;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
@@ -229,7 +229,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
           return new HSSFWorkbook();
         case XLSX:
         case VALIDATIONS:
-          return new XSSFWorkbook();
+          return new SXSSFWorkbook();
         default:
           throw new IOException("Unknow MIME type: " + mimeType);
       }
