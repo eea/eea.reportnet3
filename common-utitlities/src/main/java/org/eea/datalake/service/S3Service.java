@@ -29,4 +29,6 @@ public interface S3Service {
      * @return table name query path
      */
     String getTableAsFolderQueryPath(S3PathResolver s3PathResolver, String path);
+
+    String getTableDCAsFolderQueryPath(S3PathResolver s3PathResolver, String path);
 }
