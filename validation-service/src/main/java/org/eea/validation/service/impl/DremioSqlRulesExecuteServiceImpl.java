@@ -122,36 +122,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                     case 2:
                         recordIds = (List<String>) method.invoke(object, fieldName, tablePath);  //isUniqueConstraint
                         break;
-                    case 8:
-                        String fkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-                        String idFieldSchema = parameters.get(1);
-                        boolean pkMustBeUsed = Boolean.parseBoolean(parameters.get(3));
-                        DataSetSchema datasetSchemaFK =
-                                schemasRepository.findByIdDataSetSchema(new ObjectId(fkDatasetSchemaId));
-                        String idFieldSchemaPKString = FKValidationUtils.getIdFieldSchemaPK(idFieldSchema, datasetSchemaFK);
-                        FieldSchema fkFieldSchema = FKValidationUtils.getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
-                        Long datasetIdRefered =
-                                dataSetControllerZuul.getReferencedDatasetId(datasetId, idFieldSchemaPKString);
-
-                        DataSetSchema datasetSchemaPK = null;
-                        if (datasetId==datasetIdRefered) {
-                            datasetSchemaPK = datasetSchemaFK;
-                        } else {
-                            String pkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
-                            datasetSchemaPK =
-                                    schemasRepository.findByIdDataSetSchema(new ObjectId(pkDatasetSchemaId));
-                        }
-                        String foreignKey = fkFieldSchema.getHeaderName();
-                        List<String> pkAndFkDetailsList = getPkAndFkHeaderValues(datasetSchemaPK, datasetSchemaFK, fkFieldSchema, tableSchemaId);
-                        String pkTableName = pkAndFkDetailsList.get(0);
-                        String primaryKey = pkAndFkDetailsList.get(1);
-                        String optionalPK = pkAndFkDetailsList.get(2);
-                        String optionalFK = pkAndFkDetailsList.get(3);
-                        S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
-                        String pkTablePath = s3Service.getTableAsFolderQueryPath(pkTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-                        recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
-                        break;
-                    case 9:
+                    case 5:
                         List<String> origFieldNames = new ArrayList<>();
                         List<String> referFieldNames = new ArrayList<>();
                         DataSetSchema originDatasetSchema;
@@ -184,8 +155,36 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                         String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
                         S3PathResolver referTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdReferenced, referencedTableSchema.getNameTableSchema());
                         String referTablePath = s3Service.getTableAsFolderQueryPath(referTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-                        recordIds =  (List<String>) method.invoke(object, datasetIdOrigin, datasetIdReferenced, originSchemaId, referencedSchemaId, originTablePath,
-                                referTablePath, origFieldNames, referFieldNames, integrityVO.getIsDoubleReferenced());  //checkIntegrityConstraint
+                        recordIds =  (List<String>) method.invoke(object, originTablePath, referTablePath, origFieldNames, referFieldNames, integrityVO.getIsDoubleReferenced());  //checkIntegrityConstraint
+                        break;
+                    case 8:
+                        String fkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+                        String idFieldSchema = parameters.get(1);
+                        boolean pkMustBeUsed = Boolean.parseBoolean(parameters.get(3));
+                        DataSetSchema datasetSchemaFK =
+                                schemasRepository.findByIdDataSetSchema(new ObjectId(fkDatasetSchemaId));
+                        String idFieldSchemaPKString = FKValidationUtils.getIdFieldSchemaPK(idFieldSchema, datasetSchemaFK);
+                        FieldSchema fkFieldSchema = FKValidationUtils.getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
+                        Long datasetIdRefered =
+                                dataSetControllerZuul.getReferencedDatasetId(datasetId, idFieldSchemaPKString);
+
+                        DataSetSchema datasetSchemaPK = null;
+                        if (datasetId==datasetIdRefered) {
+                            datasetSchemaPK = datasetSchemaFK;
+                        } else {
+                            String pkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
+                            datasetSchemaPK =
+                                    schemasRepository.findByIdDataSetSchema(new ObjectId(pkDatasetSchemaId));
+                        }
+                        String foreignKey = fkFieldSchema.getHeaderName();
+                        List<String> pkAndFkDetailsList = getPkAndFkHeaderValues(datasetSchemaPK, datasetSchemaFK, fkFieldSchema, tableSchemaId);
+                        String pkTableName = pkAndFkDetailsList.get(0);
+                        String primaryKey = pkAndFkDetailsList.get(1);
+                        String optionalPK = pkAndFkDetailsList.get(2);
+                        String optionalFK = pkAndFkDetailsList.get(3);
+                        S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
+                        String pkTablePath = s3Service.getTableAsFolderQueryPath(pkTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                        recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
                         break;
                 }
             }
