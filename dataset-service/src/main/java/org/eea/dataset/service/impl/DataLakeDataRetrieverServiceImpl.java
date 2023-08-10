@@ -99,7 +99,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                 DremioRecordMapper recordMapper = new DremioRecordMapper();
                 recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
                 StringBuilder dataQuery = new StringBuilder();
-                dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
+                dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
                 //filter value
                 if (!fieldValue.equals("")) {
                     buildFilterQuery(fieldValue, fieldIdMap, dataQuery);
