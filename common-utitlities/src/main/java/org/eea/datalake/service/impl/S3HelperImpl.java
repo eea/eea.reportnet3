@@ -133,6 +133,10 @@ public class S3HelperImpl implements S3Helper {
 
         // Write the data to a local file.
         File file = new File(path + fileName + fileType);
+        if(file.exists()){
+            //if a file with the same name exists in the path, delete it so that it will be recreated
+            file.delete();
+        }
         Path textFilePath = Paths.get(file.toString());
         LOG.info("textFilePath {}", textFilePath);
         Files.createFile(textFilePath);
