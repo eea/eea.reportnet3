@@ -10,8 +10,10 @@ import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -95,6 +97,9 @@ public class CheckManualRulesCommandTest {
   @Mock
   private DatasetRepository datasetRepository;
 
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /**
    * The security context.
    */
@@ -104,6 +109,8 @@ public class CheckManualRulesCommandTest {
    * The authentication.
    */
   private Authentication authentication;
+
+  private DataFlowVO dataFlowVO;
 
 
   /**
@@ -116,6 +123,9 @@ public class CheckManualRulesCommandTest {
     securityContext = Mockito.mock(SecurityContext.class);
     securityContext.setAuthentication(authentication);
     SecurityContextHolder.setContext(securityContext);
+
+    dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
 
     MockitoAnnotations.openMocks(this);
   }
@@ -172,6 +182,7 @@ public class CheckManualRulesCommandTest {
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -234,6 +245,7 @@ public class CheckManualRulesCommandTest {
 
     Mockito.when(ruleExpressionService.isDataTypeCompatible(Mockito.anyString(), Mockito.any(),
         Mockito.any())).thenReturn(true);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
@@ -295,6 +307,7 @@ public class CheckManualRulesCommandTest {
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -359,6 +372,7 @@ public class CheckManualRulesCommandTest {
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -442,6 +456,7 @@ public class CheckManualRulesCommandTest {
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
         .thenReturn(schemaVO);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
@@ -524,6 +539,7 @@ public class CheckManualRulesCommandTest {
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
         .thenReturn(schemaVO);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
@@ -606,6 +622,7 @@ public class CheckManualRulesCommandTest {
     Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
         .thenReturn(schemaVO);
     Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
@@ -690,6 +707,7 @@ public class CheckManualRulesCommandTest {
 
     Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
     Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataFlowVO);
 
     CheckManualRulesCommand.execute(eeaEventVO);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
