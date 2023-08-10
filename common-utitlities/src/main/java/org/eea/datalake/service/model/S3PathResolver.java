@@ -28,6 +28,9 @@ public class S3PathResolver {
     /** The validation id. */
     private long validationId;
 
+    /** The path. */
+    private String path;
+
 
     public S3PathResolver(long dataflowId, long dataProviderId, long datasetId) {
         this.dataflowId = dataflowId;
