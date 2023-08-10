@@ -436,7 +436,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           sb = buildWithTableQuery(datasetIds, sb, sqlRule);
         }
 
-        result = datasetRepository.runSqlRule(datasetId, sb.toString());
+        DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+        if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+          String sqlCode = this.replaceTableNamesWithS3Path(sb.toString());
+          sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
+          result = dremioJdbcTemplate.query(sqlCode, (resultSet, i) -> {
+            ++i;
+            List<ValueVO> valueVOList = new ArrayList<>();
+            int columns = resultSet.getMetaData().getColumnCount();
+            for (int j = 2; j < columns - 1; j++) {
+              ValueVO valueVO = new ValueVO();
+              valueVO.setValue(resultSet.getString(j));
+              valueVO.setLabel(resultSet.getMetaData().getColumnName(j));
+              valueVO.setTable("");
+              valueVO.setRow(i);
+              valueVOList.add(valueVO);
+            }
+            return valueVOList;
+          });
+        } else {
+          result = datasetRepository.runSqlRule(datasetId, sb.toString());
+        }
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check.");
