@@ -51,6 +51,8 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_PATH;
+
 
 @ImportDataLakeCommons
 @Service
@@ -278,8 +280,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private String getImportPathForParquet(ImportFileInDremioInfo importFileInDremioInfo, String fileName) throws Exception {
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
         String tableSchemaName = fileName.replace(".parquet", "");
-        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
-        String pathToS3ForImport = s3Service.getTableNameProviderPath(s3PathResolver);
+        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName, S3_TABLE_NAME_PATH);
+        String pathToS3ForImport = s3Service.getProviderPath(s3PathResolver);
         if(StringUtils.isBlank(pathToS3ForImport)){
             LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);
             throw new Exception("Could not resolve path to s3 for import");

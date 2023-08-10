@@ -82,6 +82,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eea.utils.LiteralConstants.*;
+
 /**
  * The Class JdbcRecordStoreServiceImpl.
  */
@@ -1913,14 +1915,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 //Delete table name DC folder if exists
                 String nameTableSchema = table.getNameTableSchema();
                 S3PathResolver dataCollectionPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
+                dataCollectionPath.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
                 LOG.info("Checking if table name DC folder exist in path {}", dataCollectionPath);
-                if (s3Helper.checkTableNameDCFolderExist(dataCollectionPath)) {
+                if (s3Helper.checkTableNameDCProviderFolderExist(dataCollectionPath)) {
                   s3Helper.deleleTableNameDCFolder(dataCollectionPath);
                   LOG.info("Successfully deleted files in path: {}", dataCollectionPath);
                 }
 
                 //Get table name file from S3, save it locally and then upload to DC table name path
                 S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, reportingDatasetId, nameTableSchema);
+                providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
                 LOG.info("Getting tableNameFilenames for provider path resolver {}", providerPath);
                 List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
                 LOG.info("Table Name Filenames found : {}", tableNameFilenames);
@@ -1931,7 +1935,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   try {
                     LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                     File parquetFile = s3Helper.getFileFromS3(key, exportDLPath, filename, LiteralConstants.PARQUET_TYPE);
-                    String tableNameDCPath = s3Service.getTableNameDCPath(dataCollectionPath);
+                    dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
+                    String tableNameDCPath = s3Service.getDCPath(dataCollectionPath);
                     LOG.info("Uploading file to bucket arquetFile path : {}", tableNameDCPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                     LOG.info("Uploading finished successfully for {}", tableNameDCPath);

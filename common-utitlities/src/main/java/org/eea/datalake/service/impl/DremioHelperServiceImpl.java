@@ -86,7 +86,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
                 S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableNameRootFolderDCPath(s3PathResolver);
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getDCPath(s3PathResolver);
         } else {
             directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
         }
@@ -187,10 +187,12 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public void removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder){
         String tablePath = null;
         if(importFolder){
-            tablePath = s3Service.getImportProviderQueryPath(s3PathResolver);
+            s3PathResolver.setPath(S3_IMPORT_QUERY_PATH);
+            tablePath = s3Service.getProviderQueryPath(s3PathResolver);
         }
         else{
-            tablePath = s3Service.getTableAsFolderQueryPath(s3PathResolver);
+            s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+            tablePath = s3Service.getProviderQueryPath(s3PathResolver);
         }
 
         if(!checkFolderPromoted(s3PathResolver, folderName, importFolder)){

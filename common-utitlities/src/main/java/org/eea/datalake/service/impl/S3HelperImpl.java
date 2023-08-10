@@ -1,6 +1,5 @@
 package org.eea.datalake.service.impl;
 
-import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -57,6 +56,19 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
+     * builds query for counting records
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
+    public String buildRecordsCountQueryDC(S3PathResolver s3PathResolver) {
+        StringBuilder query = new StringBuilder();
+        query.append("select count(*) from ");
+        query.append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
+        return query.toString();
+    }
+
+    /**
      * checks if folder validation is created in the s3 storage for the specific dataset
      * @param s3PathResolver
      * @param path
@@ -97,7 +109,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public List<S3Object> getFilenamesFromFolderExport(S3PathResolver s3PathResolver) {
-        String key = s3Service.getExportFolderPath(s3PathResolver);
+        String key = s3Service.getDCQueryPath(s3PathResolver);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
     }
 
@@ -108,7 +120,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public List<S3Object> getFilenamesFromTableNames(S3PathResolver s3PathResolver) {
-        String key = s3Service.getTableNameFolderPath(s3PathResolver);
+        String key = s3Service.getProviderPath(s3PathResolver);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
     }
 
@@ -214,8 +226,21 @@ public class S3HelperImpl implements S3Helper {
      * @return
      */
     @Override
+    public boolean checkTableNameDCProviderFolderExist(S3PathResolver s3PathResolver) {
+        String key = s3Service.getDCPath(s3PathResolver);
+        LOG.info("Table name DC folder exist with key: {}", key);
+        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+    }
+
+    /**
+     * checks if table names DC fodlers have been created in the s3 storage
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
     public boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver) {
-        String key = s3Service.getTableNameFolderDCPath(s3PathResolver);
+        s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
+        String key = s3Service.getDCPath(s3PathResolver);
         LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
@@ -227,7 +252,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void deleleTableNameDCFolder(S3PathResolver s3PathResolver) {
-        String folderName = s3Service.getTableNameFolderDCPath(s3PathResolver);
+        String folderName = s3Service.getDCPath(s3PathResolver);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
     }
