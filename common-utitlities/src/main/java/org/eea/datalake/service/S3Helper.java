@@ -18,6 +18,8 @@ public interface S3Helper {
      */
     String buildRecordsCountQuery(S3PathResolver s3PathResolver);
 
+    String buildRecordsCountQueryDC(S3PathResolver s3PathResolver);
+
     /**
      * checks if folder validation is created in the s3 storage for the specific dataset
      * @param s3PathResolver
@@ -83,6 +85,8 @@ public interface S3Helper {
      * @param s3PathResolver
      * @return
      */
+    boolean checkTableNameDCProviderFolderExist(S3PathResolver s3PathResolver);
+
     boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver);
 
     /**

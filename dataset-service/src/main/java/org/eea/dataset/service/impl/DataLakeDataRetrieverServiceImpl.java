@@ -85,15 +85,11 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             Map<String, FieldSchemaVO> fieldIdMap;
             TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
             LOG.info("For datasetId {} tableSchemaVO : {}", datasetId, tableSchemaVO);
-            S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(),
-                dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 47, datasetId, tableSchemaVO.getNameTableSchema());
-            s3PathResolver.setPath(S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+            S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
             LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
-            LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", s3Helper.checkTableNameDCFolderExist(s3PathResolver));
-            LOG.info("dremioHelperService.checkFolderPromoted(s3PathResolver) : {}",  dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false));
             if (s3Helper.checkTableNameDCFolderExist(s3PathResolver) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false)) {
-                LOG.info("s3Helper.buildRecordsCountQuery(s3PathResolver) : {}",  s3Helper.buildRecordsCountQuery(s3PathResolver));
-                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                LOG.info("s3Helper.buildRecordsCountQueryDC(s3PathResolver) : {}",  s3Helper.buildRecordsCountQueryDC(s3PathResolver));
+                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3PathResolver), Long.class);
                 LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
                 pageable = calculatePageable(pageable, totalRecords);
                 fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));

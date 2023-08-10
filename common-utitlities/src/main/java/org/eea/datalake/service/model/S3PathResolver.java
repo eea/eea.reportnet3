@@ -51,11 +51,11 @@ public class S3PathResolver {
     }
 
     public S3PathResolver(long dataflowId, long dataProviderId, long datasetId,
-        String tableName, String filename, long validationId) {
+        String tableName, String filename, String path) {
         this(dataflowId, dataProviderId, datasetId);
         this.tableName = tableName;
         this.filename = filename;
-        this.validationId = validationId;
+        this.path = path;
     }
 
     public S3PathResolver(long dataflowId) {
@@ -66,5 +66,12 @@ public class S3PathResolver {
                           String tableName) {
         this(dataflowId, dataProviderId, datasetId);
         this.tableName = tableName;
+    }
+
+    public S3PathResolver(long dataflowId, long datasetId,
+        String tableName, String path) {
+        this(dataflowId, datasetId);
+        this.tableName = tableName;
+        this.path = path;
     }
 }
