@@ -69,7 +69,7 @@ public class S3HelperImpl implements S3Helper {
     public String buildRecordsCountQueryDC(S3PathResolver s3PathResolver) {
         StringBuilder query = new StringBuilder();
         query.append("select count(*) from ");
-        query.append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
+        query.append(s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
         return query.toString();
     }
 
