@@ -237,7 +237,6 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver) {
-        s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
         String key = s3Service.getDCPath(s3PathResolver);
         LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
