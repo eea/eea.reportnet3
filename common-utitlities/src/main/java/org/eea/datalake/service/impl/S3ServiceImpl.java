@@ -127,7 +127,7 @@ public class S3ServiceImpl implements S3Service {
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String fileName = s3PathResolver.getFilename();
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
-        String dataProviderFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_PROVIDER_PATTERN);
+        String dataProviderFolder =  formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
         String path = s3PathResolver.getPath();
 
         switch (path) {

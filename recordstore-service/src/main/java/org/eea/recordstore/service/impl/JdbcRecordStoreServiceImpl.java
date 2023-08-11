@@ -1931,7 +1931,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     File parquetFile = s3Helper.getFileFromS3(key, filename);
                     dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
                     String tableNameDCPath = s3Service.getDCPath(dataCollectionPath);
-                    LOG.info("Uploading file to bucket arquetFile path : {}", tableNameDCPath, parquetFile.getPath());
+                    LOG.info("Uploading file to bucket parquetFile path : {}", tableNameDCPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                     LOG.info("Uploading finished successfully for {}", tableNameDCPath);
                     //promote folder
