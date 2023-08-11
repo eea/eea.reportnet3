@@ -132,7 +132,6 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
             LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
             LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH));
-            LOG.info("dremioHelperService.checkFolderPromoted(s3PathResolver) : {}",  dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false));
             if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
                 LOG.info("s3Helper.buildRecordsCountQuery(s3PathResolver) : {}",  s3Helper.buildRecordsCountQuery(s3PathResolver));
                 totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
