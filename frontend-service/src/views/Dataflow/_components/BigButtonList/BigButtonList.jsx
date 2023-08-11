@@ -117,6 +117,8 @@ export const BigButtonList = ({
     disabledRules: 0
   });
 
+  const [emptyTable, setEmptyTable] = useState(false);
+
   const [providerId, setProviderId] = useState(null);
   const [showPublicInfo, setShowPublicInfo] = useState(true);
   const hasExpirationDate = new Date(dataflowState.obligations?.expirationDate) > new Date();
@@ -329,13 +331,21 @@ export const BigButtonList = ({
     const response = notificationContext.hidden.find(notification => notification.key === 'DISABLE_RULES_ERROR_EVENT');
     if (response) {
       const {
-        content: { invalidRules, disabledRules }
+        content: { invalidRules, disabledRules, emptyTable }
       } = response;
       setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
+      setEmptyTable(emptyTable)
       setIsQCsNotValidWarningVisible(true);
       setIsActiveButton(true);
     }
   }, [notificationContext]);
+
+  useEffect(() => {
+    if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
+      setEmptyTable(true)
+      setIsActiveButton(true);
+    }
+  }, [notificationContext.hidden]);
 
   const onShowHistoricReleases = typeView => {
     setIsHistoricReleasesDialogVisible(true);
@@ -807,7 +817,7 @@ export const BigButtonList = ({
         </ConfirmDialog>
       )}
 
-      {isQCsNotValidWarningVisible && (
+      {isQCsNotValidWarningVisible && !emptyTable && (
         <ConfirmDialog
           header={resourcesContext.messages['notValidQCWarningTitle']}
           labelCancel={resourcesContext.messages['no']}
@@ -823,6 +833,39 @@ export const BigButtonList = ({
             invalid: invalidAndDisabledRulesAmount.invalidRules
           })}
         </ConfirmDialog>
+      )}
+
+      {isQCsNotValidWarningVisible && emptyTable && (
+          <ConfirmDialog
+              header={resourcesContext.messages['notValidQCWarningTitleAndEmptyTable']}
+              labelCancel={resourcesContext.messages['no']}
+              labelConfirm={resourcesContext.messages['yes']}
+              onConfirm={onCreateDataCollectionsWithNotValids}
+              onHide={() => {
+                notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
+                setIsQCsNotValidWarningVisible(false);
+              }}
+              visible={isQCsNotValidWarningVisible}>
+            {TextUtils.parseText(resourcesContext.messages['notValidQCWarningAndEmptyTableBody'], {
+              disabled: invalidAndDisabledRulesAmount.disabledRules,
+              invalid: invalidAndDisabledRulesAmount.invalidRules
+            })}
+          </ConfirmDialog>
+      )}
+
+      {!isQCsNotValidWarningVisible && emptyTable && (
+          <ConfirmDialog
+              header={resourcesContext.messages['emptyTableTitle']}
+              labelCancel={resourcesContext.messages['no']}
+              labelConfirm={resourcesContext.messages['yes']}
+              onConfirm={onCreateDataCollectionsWithNotValids}
+              onHide={() => {
+                notificationContext.removeHiddenByKey('EMPTY_TABLE_EVENT');
+                setIsQCsNotValidWarningVisible(false);
+              }}
+              visible={isQCsNotValidWarningVisible}>
+            {TextUtils.parseText(resourcesContext.messages['emptyTableMessage'])}
+          </ConfirmDialog>
       )}
 
       {isImportSchemaVisible && (

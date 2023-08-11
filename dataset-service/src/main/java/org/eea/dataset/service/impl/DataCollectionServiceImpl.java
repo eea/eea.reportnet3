@@ -1,36 +1,16 @@
 package org.eea.dataset.service.impl;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.sql.DataSource;
+import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DataCollectionMapper;
-import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
-import org.eea.dataset.persistence.metabase.domain.DataCollection;
-import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.DesignDataset;
-import org.eea.dataset.persistence.metabase.domain.EUDataset;
-import org.eea.dataset.persistence.metabase.domain.ForeignRelations;
-import org.eea.dataset.persistence.metabase.domain.ReferenceDataset;
-import org.eea.dataset.persistence.metabase.domain.TestDataset;
-import org.eea.dataset.persistence.metabase.repository.ChangesEUDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
-import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
-import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.ForeignRelationsRepository;
-import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
+import org.eea.dataset.persistence.metabase.domain.*;
+import org.eea.dataset.persistence.metabase.repository.*;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataCollectionService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -53,6 +33,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -85,6 +66,14 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
 
 /**
  * The Class DataCollectionServiceImpl.
@@ -257,6 +246,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   @Autowired
   private ChangesEUDatasetRepository changesEUDatasetRepository;
+
+  @Autowired
+  private SchemasRepository schemasRepository;
+
+  @Autowired
+  private S3Helper s3Helper;
 
 
   /**
@@ -479,6 +474,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
       LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation process.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
+      List<Long> emptyDatasetTables = new ArrayList<>();
       designs.stream().forEach(dataset -> {
         recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
         List<RuleVO> rulesSql =
@@ -486,13 +482,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (null != rulesSql && !rulesSql.isEmpty()) {
           rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
               .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
+
+          DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+          if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+            rulesSql.stream().forEach(ruleVO -> {
+              checkIfTablesEmpty(emptyDatasetTables, dataset, ruleVO);
+            });
+          }
         }
       });
       LOG.info(
           "Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
           rulesWithError.size());
       if (stopAndNotifySQLErrors) {
-        rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError);
+        rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError, emptyDatasetTables);
       }
     }
     // remove from the list of designs the ones that are going to be referenceDatasets
@@ -587,6 +590,27 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
   }
 
+  private void checkIfTablesEmpty(List<Long> emptyDatasetTables, DesignDatasetVO dataset, RuleVO ruleVO) {
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(dataset.getId());
+    DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+    String tableName = null;
+    if (ruleVO.getType().equals(EntityTypeEnum.TABLE)) {
+      tableName = dataSetSchema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(ruleVO.getReferenceId())).findFirst().get().getNameTableSchema();
+    } else {
+      for (TableSchema t : dataSetSchema.getTableSchemas()) {
+        List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(ruleVO.getReferenceId())).collect(Collectors.toList());
+        if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().toString().equals(ruleVO.getReferenceId())) {
+          tableName = t.getNameTableSchema();
+          break;
+        }
+      }
+    }
+    S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+    if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+      emptyDatasetTables.add(dataset.getId());
+    }
+  }
+
 
   /**
    * Check links in reference datasets.
@@ -635,7 +659,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @return true, if successful
    */
   private boolean checkSQLRulesErrors(Long dataflowId, boolean rulesOk,
-      List<DesignDatasetVO> designs, List<Boolean> rulesWithError) {
+      List<DesignDatasetVO> designs, List<Boolean> rulesWithError, List<Long> emptyDatasetTables) {
     long errorsCount = rulesWithError.stream().filter(ruleStatus -> Boolean.FALSE).count();
     int disabledRules = rulesControllerZuul.getAllDisabledRules(dataflowId, designs);
     if (errorsCount > 0 || disabledRules > 0) {
@@ -643,7 +667,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           .user(SecurityContextHolder.getContext().getAuthentication().getName())
           .dataflowId(dataflowId)
           .invalidRules(rulesControllerZuul.getAllUncheckedRules(dataflowId, designs))
-          .disabledRules(disabledRules).build();
+          .disabledRules(disabledRules).emptyTable(emptyDatasetTables.size()>0).build();
       LOG.info("Data Collection creation proccess stopped: there are SQL rules containing errors");
       // remove lock
       Map<String, Object> createDataCollection = new HashMap<>();
@@ -654,6 +678,21 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // release notification
       rulesOk = false;
       releaseNotification(EventType.DISABLE_RULES_ERROR_EVENT, notificationVO);
+    } else if (emptyDatasetTables.size()>0) {
+      NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .dataflowId(dataflowId)
+              .emptyTable(true).build();
+      LOG.info("Data Collection creation proccess stopped: empty table(s) found");
+      // remove lock
+      Map<String, Object> createDataCollection = new HashMap<>();
+      createDataCollection.put(LiteralConstants.SIGNATURE,
+              LockSignature.CREATE_DATA_COLLECTION.getValue());
+      createDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
+      lockService.removeLockByCriteria(createDataCollection);
+      // release notification
+      rulesOk = false;
+      releaseNotification(EventType.EMPTY_TABLE_EVENT, notificationVO);
     }
     return rulesOk;
   }

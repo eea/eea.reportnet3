@@ -362,18 +362,17 @@ public class ValidationHelper implements DisposableBean {
         s3Helper.deleleFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
-      DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
-      List<Rule> rules =
-              rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+      List<Rule> rules = rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
       for (Rule rule : rules) {
-        TableSchemaVO tableSchemaVO = null;
+        TableSchema tableSchema = null;
         if (rule.getReferenceFieldSchemaPKId()!=null || rule.getType().equals(EntityTypeEnum.TABLE)) {
-          tableSchemaVO = schema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(rule.getReferenceId().toString())).findFirst().get();
+          tableSchema = schema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(rule.getReferenceId().toString())).findFirst().get();
         } else {
-          for (TableSchemaVO t : schema.getTableSchemas()) {
-            List<FieldSchemaVO> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getId().equals(rule.getReferenceId().toString())).collect(Collectors.toList());
-            if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().equals(rule.getReferenceId().toString())) {
-              tableSchemaVO = t;
+          for (TableSchema t : schema.getTableSchemas()) {
+            List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(rule.getReferenceId().toString())).collect(Collectors.toList());
+            if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().toString().equals(rule.getReferenceId().toString())) {
+              tableSchema = t;
               break;
             }
           }
@@ -387,8 +386,8 @@ public class ValidationHelper implements DisposableBean {
         value.put("dataProviderId", dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0);
         value.put("datasetSchema", dataset.getDatasetSchema());
         value.put("ruleId", rule.getRuleId().toString());
-        value.put("tableName", tableSchemaVO.getNameTableSchema());
-        value.put("tableSchemaId", tableSchemaVO.getIdTableSchema());
+        value.put("tableName", tableSchema.getNameTableSchema());
+        value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
         if (rule.getSqlSentence()!=null || isDremioSqlRuleMethod(rule.getWhenCondition())) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_SQL_DL, value);
