@@ -119,6 +119,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             if(file == null){
+                if(StringUtils.isBlank(filePathInS3)){
+                    throw new EEAException("Empty file and file path");
+                }
                 String[] filePathInS3Split = filePathInS3.split("/");
                 String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
                 String filePathStructure = "/" + datasetId + "/" + fileNameInS3;

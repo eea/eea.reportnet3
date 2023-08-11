@@ -358,6 +358,9 @@ public class DatasetControllerImpl implements DatasetController {
       JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
       Long jobId = null;
       try {
+        if(file == null){
+          throw new EEAException("Empty file and file path");
+        }
         if (dataflowId == null){
           dataflowId = datasetService.getDataFlowIdById(datasetId);
         }
