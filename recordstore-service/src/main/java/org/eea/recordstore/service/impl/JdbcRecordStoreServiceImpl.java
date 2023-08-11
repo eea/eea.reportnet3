@@ -2034,9 +2034,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   }
 
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver) {
-    if (s3Helper.checkFolderExist(s3PathResolver, s3PathResolver.getPath())) {
-        String query = "ALTER TABLE " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
-        dremioJdbcTemplate.execute(query);
+    if (s3Helper.checkTableNameDCProviderFolderExist(s3PathResolver)) {
+      String query = "ALTER TABLE " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
+      dremioJdbcTemplate.execute(query);
     }
   }
 
