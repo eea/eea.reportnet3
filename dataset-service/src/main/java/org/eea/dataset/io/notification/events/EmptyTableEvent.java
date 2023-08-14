@@ -1,15 +1,16 @@
 package org.eea.dataset.io.notification.events;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Component
-public class DisableRulesErrorEvent implements NotificableEventHandler {
+public class EmptyTableEvent implements NotificableEventHandler {
 
   /**
    * Gets the event type.
@@ -18,7 +19,7 @@ public class DisableRulesErrorEvent implements NotificableEventHandler {
    */
   @Override
   public EventType getEventType() {
-    return EventType.DISABLE_RULES_ERROR_EVENT;
+    return EventType.EMPTY_TABLE_EVENT;
   }
 
   /**
@@ -31,14 +32,10 @@ public class DisableRulesErrorEvent implements NotificableEventHandler {
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
     Long dataflowId = notificationVO.getDataflowId();
-    Integer disabledRules = notificationVO.getDisabledRules();
-    Integer invalidRules = notificationVO.getInvalidRules();
 
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", dataflowId);
-    notification.put("disabledRules", disabledRules);
-    notification.put("invalidRules", invalidRules);
     notification.put("error", notificationVO.getError());
     notification.put("emptyTable", notificationVO.isEmptyTable());
     return notification;

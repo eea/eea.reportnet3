@@ -1051,8 +1051,12 @@
     "notValidEmailTooltip": "The email is not valid",
     "notValidQCWarningBody": "You have {:disabled} disabled QCs ({:invalid} invalid). They will be disabled during the data collection creation process. You can also press No and go to the 'QC rules' dialogue to review them.",
     "notValidQCWarningTitle": "There are invalid QC rules",
+    "notValidQCWarningAndEmptyTableBody": "You have {:disabled} disabled QCs ({:invalid} invalid). They will be disabled during the data collection creation process. You can also press No and go to the 'QC rules' dialogue to review them.Also there is one or more empty tables.",
+    "notValidQCWarningTitleAndEmptyTable": "There are invalid QC rules and one or more empty tables",
     "notValidSql": "This is not a valid SQL sentence",
     "notValidSqlQCWarningBody": "You have <strong>{:disabled} disabled </strong> QCs (<strong>{:invalid} invalid</strong>)",
+    "emptyTableTitle": "Empty tables in dataset(s)",
+    "emptyTableMessage": "There is one or more empty tables in dataset(s). Press yes if you want to continue",
     "noUsers": "There are no users yet",
     "noUsersWithSelectedParameters": "There are no user with the selected parameters",
     "noValidationDashboardData": "There is no validation data to show",
@@ -1627,6 +1631,7 @@
     "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
     "canceled_by_admin": "Canceled by admin",
     "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks",
-    "exportFileStartEvent": "Exporting file {:fileName}"
+    "exportFileStartEvent": "Exporting file {:fileName}",
+    "emptyTableEvent": "One or more tables in the design dataset(s) are empty"
   }
 }

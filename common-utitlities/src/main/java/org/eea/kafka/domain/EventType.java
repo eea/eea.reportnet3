@@ -382,6 +382,9 @@ public enum EventType {
   DISABLE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_rules_error_event",
       true),
 
+  EMPTY_TABLE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "empty_table_event",
+          true),
+
   /** The validate rules error event. */
   VALIDATE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validate_rules_error_event",
       true),
