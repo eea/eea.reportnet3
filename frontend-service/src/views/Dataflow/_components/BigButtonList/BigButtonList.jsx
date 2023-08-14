@@ -334,7 +334,7 @@ export const BigButtonList = ({
         content: { invalidRules, disabledRules, emptyTable }
       } = response;
       setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
-      setEmptyTable(emptyTable)
+      setEmptyTable(emptyTable);
       setIsQCsNotValidWarningVisible(true);
       setIsActiveButton(true);
     }
@@ -342,7 +342,8 @@ export const BigButtonList = ({
 
   useEffect(() => {
     if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
-      setEmptyTable(true)
+      setEmptyTable(true);
+      setIsQCsNotValidWarningVisible(false);
       setIsActiveButton(true);
     }
   }, [notificationContext.hidden]);
@@ -486,6 +487,24 @@ export const BigButtonList = ({
       await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
     } catch (error) {
       console.error('BigButtonList - onCreateDataCollectionsWithNotValids.', error);
+      const {
+        dataflow: { name: dataflowName }
+      } = await getMetadata({ dataflowId });
+      notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
+      setIsActiveButton(true);
+    } finally {
+      setIsQCsNotValidWarningVisible(false);
+    }
+  };
+
+  const onCreateDataCollectionsWithEmptyTables = async () => {
+    setIsActiveButton(false);
+
+    try {
+      notificationContext.removeHiddenByKey('EMPTY_TABLE_EVENT');
+      await DataCollectionService.create(dataflowId, getDate(), isManualTechnicalAcceptance, false);
+    } catch (error) {
+      console.error('BigButtonList - onCreateDataCollectionsWithEmptyTables.', error);
       const {
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
@@ -858,7 +877,7 @@ export const BigButtonList = ({
               header={resourcesContext.messages['emptyTableTitle']}
               labelCancel={resourcesContext.messages['no']}
               labelConfirm={resourcesContext.messages['yes']}
-              onConfirm={onCreateDataCollectionsWithNotValids}
+              onConfirm={onCreateDataCollectionsWithEmptyTables}
               onHide={() => {
                 notificationContext.removeHiddenByKey('EMPTY_TABLE_EVENT');
                 setIsQCsNotValidWarningVisible(false);

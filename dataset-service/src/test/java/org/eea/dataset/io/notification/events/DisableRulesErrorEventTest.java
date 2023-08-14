@@ -46,10 +46,9 @@ public class DisableRulesErrorEventTest {
    * @return the map test
    * @throws EEAException the EEA exception
    */
-  @Ignore
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(5, disableRulesErrorEvent
+    Assert.assertEquals(6, disableRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 
@@ -59,10 +58,9 @@ public class DisableRulesErrorEventTest {
    * @return the map test 1
    * @throws EEAException the EEA exception
    */
-  @Ignore
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Assert.assertEquals(5, disableRulesErrorEvent
+    Assert.assertEquals(6, disableRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 }
