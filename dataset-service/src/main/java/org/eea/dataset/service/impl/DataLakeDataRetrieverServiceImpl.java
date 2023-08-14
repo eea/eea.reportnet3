@@ -277,8 +277,11 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     private static void buildFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
         dataQuery.append(" where ");
         List<String> headers = fieldIdMap.values().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
+        LOG.info("headers : {}", headers);
         dataQuery.append(headers.get(0)).append(" like '%").append(fieldValue).append("%'");
+        LOG.info("headers.get(0) : {}", headers.get(0));
         headers.remove(headers.get(0));
+        LOG.info("headers : {}", headers);
         headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
     }
 
