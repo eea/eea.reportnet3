@@ -337,16 +337,12 @@ export const BigButtonList = ({
       setEmptyTable(emptyTable);
       setIsQCsNotValidWarningVisible(true);
       setIsActiveButton(true);
-    }
-  }, [notificationContext]);
-
-  useEffect(() => {
-    if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
+    } else if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
       setEmptyTable(true);
       setIsQCsNotValidWarningVisible(false);
       setIsActiveButton(true);
     }
-  }, [notificationContext.hidden]);
+  }, [notificationContext]);
 
   const onShowHistoricReleases = typeView => {
     setIsHistoricReleasesDialogVisible(true);
