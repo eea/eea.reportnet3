@@ -1908,6 +1908,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
       DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
       LOG.info("Init restoring for datasetSchema {}", datasetSchema);
+      ProcessVO finalProcessVO = processVO;
       datasetSchema.getTableSchemas().stream()
           .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
           .forEach(table -> {
@@ -1947,6 +1948,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                         reportingDatasetId, dataflowId, e);
                   }
                 });
+                processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
+                    ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
+                    finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
               } catch (Exception e) {
                 LOG_ERROR.error("Error in delete and copy release process for reportingDatasetId {}, dataflowId {}",
                     reportingDatasetId, dataflowId, e);
@@ -2046,12 +2050,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       ProcessVO process = processService.getByProcessId(processes.get(0));
       Long datasetId = process.getDatasetId();
       DataSetMetabaseVO dataSetMetabase = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-      LOG.info("Method updateJobStatusToFinished with jobId: {} and processes: {}", jobId, processes);
-      LOG.info("process: {}", process);
       boolean finished = true;
       if (process.getProcessType().equals(ProcessTypeEnum.RELEASE.toString())) {
         List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId());
-        LOG.info("datasetIds: {}", datasetIds);
         if (processes.size()==datasetIds.size()) {
           finished = isFinished(processes, finished);
         } else {
@@ -2059,7 +2060,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
       } else if (process.getProcessType().equals(ProcessTypeEnum.COPY_TO_EU_DATASET.toString())) {
         List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataSetMetabase.getDataflowId());
-        LOG.info("euDatasets: {}", euDatasets);
         if (processes.size()==euDatasets.size()) {
           finished = isFinished(processes, finished);
         } else {
