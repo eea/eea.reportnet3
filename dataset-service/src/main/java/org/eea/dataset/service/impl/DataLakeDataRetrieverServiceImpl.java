@@ -96,6 +96,9 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                 LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
                 pageable = calculatePageable(pageable, totalRecords);
                 fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+                FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
+                fieldSchemaProviderCode.setName("data_provider_code");
+                fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
                 DremioRecordMapper recordMapper = new DremioRecordMapper();
                 recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
                 StringBuilder dataQuery = new StringBuilder();
