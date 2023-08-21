@@ -168,22 +168,33 @@ const useBigButtonListRepresentative = ({
         helpClassName: 'dataflow-dataset-container-help-step',
         infoStatus: dataset.isReleased,
         infoStatusIcon: true,
-        model: [
-          {
-            label: resourcesContext.messages['historicReleases'],
-            command: () => {
-              onShowHistoricReleases('reportingDataset', true);
-              getDataHistoricReleases(dataset.datasetId, dataset.name);
-            }
-          },
-          {
-            label: resourcesContext.messages['releaseSnapshots'],
-            command: () => {
-              onShowReleaseSnapshots('reportingDataset', true);
-              getDataReleaseSnapshots(dataset.datasetId, dataset.name);
-            }
-          }
-        ],
+        model:
+          dataflowState.id === '557'
+            ? [
+                {
+                  label: resourcesContext.messages['historicReleases'],
+                  command: () => {
+                    onShowHistoricReleases('reportingDataset', true);
+                    getDataHistoricReleases(dataset.datasetId, dataset.name);
+                  }
+                },
+                {
+                  label: resourcesContext.messages['releaseSnapshots'],
+                  command: () => {
+                    onShowReleaseSnapshots('reportingDataset', true);
+                    getDataReleaseSnapshots(dataset.datasetId, dataset.name);
+                  }
+                }
+              ]
+            : [
+                {
+                  label: resourcesContext.messages['historicReleases'],
+                  command: () => {
+                    onShowHistoricReleases('reportingDataset', true);
+                    getDataHistoricReleases(dataset.datasetId, dataset.name);
+                  }
+                }
+              ],
         onWheel: getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true),
         technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true

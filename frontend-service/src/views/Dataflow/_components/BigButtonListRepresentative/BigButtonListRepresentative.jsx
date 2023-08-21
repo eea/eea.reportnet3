@@ -110,11 +110,7 @@ export const BigButtonListRepresentative = ({
   };
 
   const onShowReleaseSnapshots = (typeView, value) => {
-    if (dataflowState.id === '557') {
-      bigButtonListRepresentativeDispatch({ type: 'ON_SHOW_RELEASE_SNAPSHOTS', payload: { typeView, value } });
-    } else {
-      notificationContext.add({ type: 'NOT_ALLOWED_FOR_THIS_DATAFLOW' }, true);
-    }
+    bigButtonListRepresentativeDispatch({ type: 'ON_SHOW_RELEASE_SNAPSHOTS', payload: { typeView, value } });
   };
 
   const renderDialogFooter = (
