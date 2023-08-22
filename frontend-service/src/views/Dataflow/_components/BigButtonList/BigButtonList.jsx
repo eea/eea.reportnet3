@@ -490,6 +490,7 @@ export const BigButtonList = ({
       setIsActiveButton(true);
     } finally {
       setIsQCsNotValidWarningVisible(false);
+      setEmptyTable(false);
     }
   };
 
