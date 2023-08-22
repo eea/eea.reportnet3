@@ -338,12 +338,9 @@ export const BigButtonList = ({
       setIsQCsNotValidWarningVisible(true);
       setIsActiveButton(true);
     } else if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
-      console.log("EXECUTING EMPTY TABLE EVENT")
       setEmptyTable(true);
       setIsQCsNotValidWarningVisible(false);
       setIsActiveButton(true);
-      console.log("emptyTable value is " + emptyTable);
-      console.log("sQCsNotValidWarningVisible value is " + isQCsNotValidWarningVisible);
     }
   }, [notificationContext]);
 
@@ -493,6 +490,7 @@ export const BigButtonList = ({
       setIsActiveButton(true);
     } finally {
       setIsQCsNotValidWarningVisible(false);
+      setEmptyTable(false);
     }
   };
 
@@ -862,6 +860,7 @@ export const BigButtonList = ({
               onHide={() => {
                 notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
                 setIsQCsNotValidWarningVisible(false);
+                setEmptyTable(false);
               }}
               visible={isQCsNotValidWarningVisible}>
             {TextUtils.parseText(resourcesContext.messages['notValidQCWarningAndEmptyTableBody'], {
@@ -881,8 +880,8 @@ export const BigButtonList = ({
                 notificationContext.removeHiddenByKey('EMPTY_TABLE_EVENT');
                 setEmptyTable(false);
               }}
-              visible={isQCsNotValidWarningVisible}>
-            {TextUtils.parseText(resourcesContext.messages['emptyTableMessage'])}
+              visible={emptyTable}>
+            {resourcesContext.messages['emptyTableMessage']}
           </ConfirmDialog>
       )}
 
