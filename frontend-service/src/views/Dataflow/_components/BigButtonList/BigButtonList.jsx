@@ -338,9 +338,12 @@ export const BigButtonList = ({
       setIsQCsNotValidWarningVisible(true);
       setIsActiveButton(true);
     } else if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
+      console.log("EXECUTING EMPTY TABLE EVENT")
       setEmptyTable(true);
       setIsQCsNotValidWarningVisible(false);
       setIsActiveButton(true);
+      console.log("emptyTable value is " + emptyTable);
+      console.log("sQCsNotValidWarningVisible value is " + isQCsNotValidWarningVisible);
     }
   }, [notificationContext]);
 
