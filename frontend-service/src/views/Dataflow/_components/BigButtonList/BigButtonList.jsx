@@ -510,7 +510,7 @@ export const BigButtonList = ({
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
       setIsActiveButton(true);
     } finally {
-      setIsQCsNotValidWarningVisible(false);
+      setEmptyTable(false);
     }
   };
 
@@ -879,7 +879,7 @@ export const BigButtonList = ({
               onConfirm={onCreateDataCollectionsWithEmptyTables}
               onHide={() => {
                 notificationContext.removeHiddenByKey('EMPTY_TABLE_EVENT');
-                setIsQCsNotValidWarningVisible(false);
+                setEmptyTable(false);
               }}
               visible={isQCsNotValidWarningVisible}>
             {TextUtils.parseText(resourcesContext.messages['emptyTableMessage'])}
