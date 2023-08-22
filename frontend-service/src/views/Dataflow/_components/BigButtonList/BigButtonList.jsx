@@ -859,6 +859,7 @@ export const BigButtonList = ({
               onHide={() => {
                 notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
                 setIsQCsNotValidWarningVisible(false);
+                setEmptyTable(false);
               }}
               visible={isQCsNotValidWarningVisible}>
             {TextUtils.parseText(resourcesContext.messages['notValidQCWarningAndEmptyTableBody'], {
