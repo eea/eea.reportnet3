@@ -82,6 +82,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
+        LOG.info("checkFolderExist key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
