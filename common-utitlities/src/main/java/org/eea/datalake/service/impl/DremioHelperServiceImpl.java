@@ -88,7 +88,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getDCPath(s3PathResolver);
         } else {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
         }
         LOG.info("directoryPath : {}", directoryPath);
         DremioDirectoryItemsResponse directoryItems = null;
