@@ -132,7 +132,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
         }
         else{
-            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" +  s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
             String[] path = directoryPath.split("/");
             requestBody = new DremioParquetPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioParquetPromotionRequestBody.Format(PARQUET_FORMAT_TYPE));
         }
@@ -140,7 +140,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if(checkFolderPromoted(s3PathResolver, folderName, importFolder)){
             LOG.info("Folder {} is already promoted", directoryPath);
             return;
+        }else {
+            LOG.info("Folder {} is not promoted", directoryPath);
         }
+
         folderId = getFolderId(s3PathResolver, folderName, importFolder);
 
         try {
