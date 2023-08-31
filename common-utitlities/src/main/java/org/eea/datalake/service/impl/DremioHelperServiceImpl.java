@@ -141,7 +141,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             LOG.info("Folder {} is already promoted", directoryPath);
             return;
         }else {
-            LOG.info("Folder {} is not promoted", directoryPath);
+            LOG.info("Folder {} is not promoted ", directoryPath);
         }
 
         folderId = getFolderId(s3PathResolver, folderName, importFolder);
