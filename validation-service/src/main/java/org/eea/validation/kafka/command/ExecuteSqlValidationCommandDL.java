@@ -31,7 +31,7 @@ public class ExecuteSqlValidationCommandDL extends ExecuteValidationCommand {
    */
   @Override
   public EventType getEventType() {
-    return EventType.COMMAND_VALIDATE_SQL_DL;
+    return EventType.COMMAND_VALIDATE_DL_WITH_SQL;
   }
 
   /**
@@ -41,7 +41,7 @@ public class ExecuteSqlValidationCommandDL extends ExecuteValidationCommand {
    */
   @Override
   public EventType getNotificationEventType() {
-    return EventType.COMMAND_VALIDATED_SQL_DL_COMPLETED;
+    return EventType.COMMAND_VALIDATED_DL_WITH_SQL_COMPLETED;
   }
 
   /**
@@ -62,7 +62,7 @@ public class ExecuteSqlValidationCommandDL extends ExecuteValidationCommand {
         dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId);
       };
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error executing event COMMAND_VALIDATE_SQL_DL. Message: {}", e.getMessage());
+      LOG_ERROR.error("Unexpected error! Error executing event COMMAND_VALIDATE_DL_WITH_SQL. Message: {}", e.getMessage());
       throw e;
     }
   }

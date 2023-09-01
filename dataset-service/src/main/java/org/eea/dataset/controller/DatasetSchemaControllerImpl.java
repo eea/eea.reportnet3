@@ -1758,7 +1758,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @GetMapping(value = "/private/getFieldName")
   public String getFieldName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId,
-                      @RequestParam("parameters") List<String> parameters, @RequestParam("ruleReferenceId") String ruleReferenceId,
+                      @RequestParam(value = "parameters", required = false) List<String> parameters, @RequestParam("ruleReferenceId") String ruleReferenceId,
                              @RequestParam(value = "ruleReferenceFieldSchemaPKId", required = false) String ruleReferenceFieldSchemaPKId) {
     try {
       return dataschemaService.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleReferenceId, ruleReferenceFieldSchemaPKId);

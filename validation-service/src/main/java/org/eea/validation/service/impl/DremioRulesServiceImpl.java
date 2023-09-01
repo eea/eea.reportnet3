@@ -40,10 +40,12 @@ public class DremioRulesServiceImpl implements DremioRulesService {
                                                      S3PathResolver validationResolver, RuleVO ruleVO, String fieldName) {
         StringBuilder validationQuery = new StringBuilder();
         int ruleIdLength = ruleVO.getRuleId().length();
+        String message = ruleVO.getThenCondition().get(0);
+        message = message.replace("\'","\"");
         validationQuery.append("create table ").append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_TABLE_AS_FOLDER_QUERY_PATH)).append(".")
                 .append("\"").append(ruleVO.getShortCode()).append("-").append(ruleVO.getRuleId().substring(ruleIdLength-3, ruleIdLength)).append("\"").append(" as (select RIGHT(RANDOM(),15) as pk,record_id as record_id,")
                 .append("'").append(ruleVO.getThenCondition().get(1)).append("'").append(" as validation_level,").append("'").append(ruleVO.getType())
-                .append("'").append(" as validation_area,").append("'").append(ruleVO.getThenCondition().get(0)).append("'").append(" as message,")
+                .append("'").append(" as validation_area,").append("'").append(message).append("'").append(" as message,")
                 .append("'").append(tableName).append("'").append(" as table_name,").append("'").append(fieldName).append("'").append(" as field_name,")
                 .append("'").append(datasetId).append("'").append(" as dataset_id,").append("'").append(ruleVO.getShortCode()).append("'").append(" as qc_code from ")
                 .append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH)).append(" where record_id in ('");
