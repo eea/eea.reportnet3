@@ -40,7 +40,7 @@ public interface S3Helper {
      * @param s3PathResolver
      * @return
      */
-    List<S3Object> getFilenamesFromFolderExport(S3PathResolver s3PathResolver);
+    List<S3Object> getFilenamesForExport(S3PathResolver s3PathResolver);
 
     /**
      * Gets filenames from table name folders

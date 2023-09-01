@@ -770,8 +770,7 @@ public class FileTreatmentHelper implements DisposableBean {
         //get folder files
         Long dataflowId = datasetService.getDataFlowIdById(datasetId);
         S3PathResolver pathResolver = new S3PathResolver(dataflowId, datasetId);
-        pathResolver.setPath(S3_EXPORT_FOLDER_PATH);
-        List<S3Object> exportFilenames = s3Helper.getFilenamesFromFolderExport(pathResolver);
+        List<S3Object> exportFilenames = s3Helper.getFilenamesForExport(pathResolver);
         LOG.info("Exported dataset data for exportFilenames {}", exportFilenames);
 
         // Extension arrive with zip+xlsx, zip+csv or xlsx, but to the backend arrives with empty space.
