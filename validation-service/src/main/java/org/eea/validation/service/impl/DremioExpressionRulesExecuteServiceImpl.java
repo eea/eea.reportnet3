@@ -7,6 +7,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -28,9 +29,12 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -74,89 +78,53 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-            String providerCode = null;
+            String providerCode;
             if (dataset.getDataProviderId()!=null) {
                 DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataset.getDataProviderId());
                 providerCode = provider.getCode();
+            } else {
+                providerCode = null;
             }
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
-            int parameterStartIndex = ruleVO.getWhenConditionMethod().indexOf("(");
-            int parameterEndIndex = ruleVO.getWhenConditionMethod().indexOf(")");
-            int pmEndSecOccurrenceIndex = ruleVO.getWhenConditionMethod().indexOf(")", parameterEndIndex+1);
-            int methodStartIndex = ruleVO.getWhenConditionMethod().indexOf(".");
-            String ruleMethodName = ruleVO.getWhenConditionMethod().substring(methodStartIndex+1, parameterStartIndex);
-            String parameterString = ruleVO.getWhenConditionMethod().substring(parameterStartIndex +1, pmEndSecOccurrenceIndex!=-1 ? pmEndSecOccurrenceIndex : parameterEndIndex);
-            parameterString = parameterString.replace("\"","");
-            String[] params = parameterString.split(",");
-            params = Arrays.stream(params).map(p -> p.trim()).toArray(String[]::new);
-            List<String> parameters = new ArrayList<>();
-            for (int i=0; i<params.length;) {
-                if (params[i].contains("RuleOperators")) {
-                    parameters.add(params[i]+","+params[i+1]);
-                    i+=2;
-                } else {
-                    parameters.add(params[i]);
-                    i++;
-                }
-            }
 
-            LinkedHashMap<String, List<String>> parameterMethods = new LinkedHashMap<>();
-            parameters.forEach(parameter -> {
-                if (parameter.contains("RuleOperators")) {
-                    //RuleOperators method in when condition contains nested RuleOperators methods
-                    // e.g. RuleOperators.recordIfThen(RuleOperators.recordNumberGreaterThanRecord("642d6e2cde03c136f869180e", "642d6e25de03c136f869180d"), RuleOperators.recordNumberGreaterThan("643fecc9b6f2e4cb5f9cb04b", 50))
-                    int methodStartIdx = parameter.indexOf(".");
-                    int startIndex = parameter.indexOf("(");
-                    int endIndex = parameter.indexOf(")");
-                    String parameterMethodName = parameter.substring(methodStartIdx+1, startIndex);
-                    String internalParameters;
-                    if (endIndex!=-1) {
-                        internalParameters = parameter.substring(startIndex+1, endIndex);
-                    } else {
-                        internalParameters = parameter.substring(startIndex+1);
-                    }
-                    //put in the map the method name as the key and the parameters of the internal RuleOperators methods as value
-                    List<String> internals = new ArrayList<>(Arrays.asList(internalParameters.split(",")));
-                    internals = internals.stream().map(i -> i.trim()).collect(Collectors.toList());
-                    List<String> existingInternals = parameterMethods.get(parameterMethodName);
-                    if (existingInternals!=null) { //whenCondition contains the same method twice e.g. RuleOperators.fieldOr(RuleOperators.fieldNumberEquals(value, 13), RuleOperators.fieldNumberEquals(value, 14))
-                        internals.forEach(i -> existingInternals.add(i));
-                        internals = existingInternals;
-                    }
-                    parameterMethods.put(parameterMethodName, internals);
-                }
-            });
-
+            List<Object> parameters = new ArrayList<>();
             String fieldName;
             if (ruleVO.getType().equals(EntityTypeEnum.FIELD)) {
-                fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
+                fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, new ArrayList<>(), ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             } else {
                 fieldName = "";
             }
 
-            Map<String, List<String>> headerNames = new HashMap<>();  //map of method as key and list of fields that exist as parameters in method as values
+            Map<String, List<String>> headerNames = new HashMap<>();  //map of method as key and list of field names (that exist as parameters in method) as values
+            RuleExpressionDTO ruleExpressionDTO = ruleVO.getWhenCondition();
+            String ruleMethodName = ruleExpressionDTO.getOperator().getFunctionName();
+
             query.append("select record_id");
             if (!fieldName.equals("")) {
                 query.append(",").append(fieldName);
             }
-            if (parameterMethods.size()>0) { //whenCondition contains nested RuleOperators methods
-                parameterMethods.entrySet().forEach(e -> e.getValue().forEach(v -> {
-                    createHeaderNames(v, e.getKey(), headerNames, fieldName, datasetSchemaId, query);
-                }));
+
+            int idx = ruleMethodName.indexOf("Record");
+            List<String> hNames = new ArrayList<>();
+            if (idx!=-1) {
+                //record type
+                //RuleOperators.recordStringLengthGreaterThanOrEqualsThanRecord("64ac0c0de5f082645bab2f07", "64ac0c1ae5f082645bab2f09")
+                parameters = ruleExpressionDTO.getParams();
+                parameters.forEach(p -> {
+                    FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, (String) p);
+                    hNames.add(fieldSchema.getName());
+                    query.append(",").append(fieldSchema.getName());
+                });
+                headerNames.put(ruleMethodName, hNames);
             } else {
-                int idx = ruleMethodName.indexOf("Record");
-                List<String> hNames = new ArrayList<>();
-                if (idx!=-1) {
-                    //record type
-                    //RuleOperators.recordStringLengthGreaterThanOrEqualsThanRecord("64ac0c0de5f082645bab2f07", "64ac0c1ae5f082645bab2f09")
-                    parameters.forEach(p -> {
-                        FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, p);
-                        hNames.add(fieldSchema.getName());
-                        query.append(",").append(fieldSchema.getName());
-                    });
-                    headerNames.put(ruleMethodName, hNames);
+                boolean containsExpression = ruleExpressionDTO.getParams().stream().anyMatch(p -> p instanceof RuleExpressionDTO);
+                if (!containsExpression) {
+                    List<Object> finalParameters = parameters;
+                    ruleExpressionDTO.getParams().forEach(p -> finalParameters.add(p));
+                } else {
+                    extractFieldHeaders(ruleExpressionDTO, headerNames, fieldName, datasetSchemaId, query);
                 }
             }
 
@@ -172,36 +140,40 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
             while (rs.next()) {
                 boolean isValid = false;
+                AtomicBoolean nestedExpression = new AtomicBoolean(false);
                 Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
-                List<Boolean> internalResults = new ArrayList<>();
-                boolean record = false;
-                for (Map.Entry entry : parameterMethods.entrySet()) {
-                    List<String> values = (List<String>) entry.getValue();
-                    record = isRecord(((String) entry.getKey()));
-                    Method md = dremioRulesService.getRuleMethodFromClass((String) entry.getKey(), cls);
-                    if (values.size()>2) { //whenCondition contains the same method twice
-                        for (int i = 0; i <= 2;) {
-                            List<String> newValues = new ArrayList<>();
-                            if (values.size() % 2 == 0) {
-                                newValues.add(values.get(i));
-                                newValues.add(values.get(i+1));
-                                i+=2;
+                List<Object> internalResults = new ArrayList<>();
+                AtomicBoolean record = new AtomicBoolean(false);
+                ruleVO.getWhenCondition().getParams().forEach(param -> {
+                    String functionName;
+                    List<Object> params = new ArrayList<>();
+                    if (param instanceof RuleExpressionDTO) {
+                        nestedExpression.set(true);
+                        RuleExpressionDTO ruleExpression = (RuleExpressionDTO) param;
+                        ruleExpression.getParams().forEach(p -> {
+                            Object result;
+                            if (p instanceof RuleExpressionDTO) {
+                                result = getResult(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, record, (RuleExpressionDTO) p);
+                                params.add(result);
                             } else {
-                                if (i==2) {
-                                    break;
-                                }
-                                newValues.add(values.get(i));
-                                i++;
+                                params.add(p);
                             }
-                            boolean result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, newValues, providerCode);
+                        });
+                        functionName = ruleExpression.getOperator().getFunctionName();
+                        record.set(isRecord(functionName));
+                        Method md = dremioRulesService.getRuleMethodFromClass(functionName, cls);
+                        try {
+                            Object result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), functionName, md, params, providerCode);
                             internalResults.add(result);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
                         }
                     } else {
-                        boolean result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record, (String) entry.getKey(), md, values, providerCode);
-                        internalResults.add(result);
+                        internalResults.add(param);
                     }
-                }
-                if (internalResults.size()>0) {
+                });
+
+                if (internalResults.size()>0 && nestedExpression.get()) {
                     switch (internalResults.size()) {
                         case 1:
                             isValid = (boolean) method.invoke(object, internalResults.get(0));
@@ -211,8 +183,9 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                             break;
                     }
                 } else {
-                    record = isRecord(method.getName());
-                    isValid = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record, method.getName(), method, parameters, providerCode);
+                    record.set(isRecord(method.getName()));
+                    parameters = ruleExpressionDTO.getParams();
+                    isValid = (Boolean) getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), method.getName(), method, parameters, providerCode);
                 }
                 if (!isValid) {
                     if (count != 0) {
@@ -235,6 +208,50 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         }
     }
 
+    private Object getResult(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object, AtomicBoolean record, RuleExpressionDTO p) {
+        RuleExpressionDTO ruleExp = p;
+        String functionName = ruleExp.getOperator().getFunctionName();
+        record.set(isRecord(functionName));
+        Method md = dremioRulesService.getRuleMethodFromClass(functionName, cls);
+        List<Object> values = new ArrayList<>();
+        ruleExp.getParams().stream().forEach(pm -> {
+            if (!(pm instanceof RuleExpressionDTO)) {
+                values.add(pm);
+            } else {
+                Object value = getResult(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, record, (RuleExpressionDTO) pm);
+                values.add(value);
+            }
+        });
+        Object result;
+        try {
+            result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), functionName, md, values, providerCode);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+    /**
+     * Extracts field header names
+     * @param ruleExpressionDTO
+     * @param headerNames
+     * @param fieldName
+     * @param datasetSchemaId
+     * @param query
+     */
+    private void extractFieldHeaders(RuleExpressionDTO ruleExpressionDTO, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query) {
+        List<Object> params= ruleExpressionDTO.getParams();
+        params.forEach(p -> {
+            if (p instanceof RuleExpressionDTO) {
+                extractFieldHeaders((RuleExpressionDTO) p, headerNames, fieldName, datasetSchemaId, query);
+            } else {
+                if (p instanceof String) {
+                    createHeaderNames((String) p, ruleExpressionDTO.getOperator().getFunctionName(), headerNames, fieldName, datasetSchemaId, query);
+                }
+            }
+        });
+    }
+
     /**
      * Creates headerNames map
      * @param parameter
@@ -246,7 +263,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      */
     private void createHeaderNames(String parameter, String methodName, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query) {
         parameter = parameter.trim();
-        if (parameter.equals("value")) {
+        if (parameter.equalsIgnoreCase("value")) {
             List<String> list = headerNames.get(methodName);
             if (list!=null && !list.contains(fieldName)) {
                 list.add(fieldName);
@@ -255,7 +272,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 list.add(fieldName);
             }
             headerNames.put(methodName, list);
-        } else if (!isNumeric(parameter)) {
+        } else if (!isNumeric(parameter) && !parameter.startsWith("[")) {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
             List<String> list = headerNames.get(methodName);
             if (list!=null) {
@@ -301,47 +318,45 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private Boolean getMethodExecutionResult(RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Object object,
-                                             boolean record, String methodName, Method md, List<String> pm, String providerCode) throws IllegalAccessException, InvocationTargetException {
+    private Object getMethodExecutionResult(RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Object object,
+                                             boolean record, String methodName, Method md, List<Object> pm, String providerCode) throws IllegalAccessException, InvocationTargetException {
+        Object result = null;
+        if (methodName.equals("recordIfThen") || methodName.equals("recordAnd") || methodName.equals("recordOr") ||
+                methodName.equals("fieldAnd") || methodName.equals("fieldOr")) {
+            switch (pm.size()) {
+                case 1:
+                   return md.invoke(object, pm.get(0));
+                case 2:
+                   return md.invoke(object, pm.get(0), pm.get(1));
+            }
+        }
+
         List<FieldValue> fields = new ArrayList<>();
         RecordValue recordValue = new RecordValue();
         recordValue.setDataProviderCode(providerCode);
-        boolean result = false;
         List<String> intHeaders = headerNames.get(md.getName());
         if (pm.size()==1) {
-            FieldValue fieldValue = new FieldValue();
-            fieldValue.setValue(rs.getString(fieldName));
-            fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
-            fields.add(fieldValue);
-            recordValue.setFields(fields);
-            fieldValue.setRecord(recordValue);
-            RuleOperators.setEntity(fieldValue);
-            RuleOperators.setEntity(recordValue);
-            result = (Boolean) md.invoke(object, pm.get(0).contains("value") ? rs.getString(fieldName) : pm.get(0));
+            createField(ruleVO, fieldName, rs, fields, recordValue);
+            result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).contains("value") ? rs.getString(fieldName) : pm.get(0));
         } else if (pm.size()==2) {
             if (record) {
-                FieldValue fieldValue1 = new FieldValue();
-                fieldValue1.setValue(rs.getString(intHeaders.get(0)));
-                fieldValue1.setIdFieldSchema(pm.get(0));
-                FieldValue fieldValue2 = new FieldValue();
-                fieldValue2.setValue(rs.getString(intHeaders.get(1)));
-                fieldValue2.setIdFieldSchema(pm.get(1));
-                fields.add(fieldValue1);
-                fields.add(fieldValue2);
-                recordValue.setFields(fields);
-                RuleOperators.setEntity(recordValue);
-                result = (Boolean) md.invoke(object, pm.get(0), pm.get(1));
+                creatFields(rs, pm, fields, recordValue, intHeaders);
+                result = md.invoke(object, pm.get(0), pm.get(1));
             } else {
                 String firstValue;
                 FieldValue fieldValue = new FieldValue();
-                if (pm.get(0).contains("value")) {
+                if (pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase("value")) {
                     firstValue = rs.getString(fieldName);
                     fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
                     fieldValue.setValue(firstValue);
-                } else {
-                    firstValue = pm.get(0);
-                    fieldValue.setIdFieldSchema(pm.get(0));
+                } else if (intHeaders!=null && intHeaders.size()>0) {
+                    firstValue = (String) pm.get(0);
+                    fieldValue.setIdFieldSchema((String) pm.get(0));
                     fieldValue.setValue(rs.getString(intHeaders.get(0)));
+                } else {
+                    firstValue = (String) pm.get(0);
+                    fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
+                    fieldValue.setValue(firstValue);
                 }
                 fields.add(fieldValue);
                 recordValue.setFields(fields);
@@ -349,17 +364,41 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 RuleOperators.setEntity(fieldValue);
                 RuleOperators.setEntity(recordValue);
                 if (methodName.contains("Number")) {
-                    result = (Boolean) md.invoke(object, firstValue, Double.parseDouble(pm.get(1)));
+                    result = md.invoke(object, firstValue, pm.get(1));
                 } else if (methodName.contains("Length")) {
-                    result = (Boolean) md.invoke(object, firstValue, Integer.parseInt(pm.get(1)));
+                    result = md.invoke(object, firstValue, pm.get(1));
                 } else if (methodName.contains("Day") || methodName.contains("Month") || methodName.contains("Year")) {
-                    result = (Boolean) md.invoke(object, firstValue, Long.parseLong(pm.get(1)));
+                    result = md.invoke(object, firstValue, pm.get(1));
                 } else {
-                    result = (Boolean) md.invoke(object, firstValue, pm.get(1));
+                    result = md.invoke(object, firstValue, pm.get(1));
                 }
             }
         }
         return result;
+    }
+
+    private static void creatFields(SqlRowSet rs, List<Object> pm, List<FieldValue> fields, RecordValue recordValue, List<String> intHeaders) {
+        FieldValue fieldValue1 = new FieldValue();
+        fieldValue1.setValue(rs.getString(intHeaders.get(0)));
+        fieldValue1.setIdFieldSchema((String) pm.get(0));
+        FieldValue fieldValue2 = new FieldValue();
+        fieldValue2.setValue(rs.getString(intHeaders.get(1)));
+        fieldValue2.setIdFieldSchema((String) pm.get(1));
+        fields.add(fieldValue1);
+        fields.add(fieldValue2);
+        recordValue.setFields(fields);
+        RuleOperators.setEntity(recordValue);
+    }
+
+    private void createField(RuleVO ruleVO, String fieldName, SqlRowSet rs, List<FieldValue> fields, RecordValue recordValue) {
+        FieldValue fieldValue = new FieldValue();
+        fieldValue.setValue(rs.getString(fieldName));
+        fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
+        fields.add(fieldValue);
+        recordValue.setFields(fields);
+        fieldValue.setRecord(recordValue);
+        RuleOperators.setEntity(fieldValue);
+        RuleOperators.setEntity(recordValue);
     }
 
     /**
