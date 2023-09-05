@@ -658,4 +658,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         File folder = new File(root, datasetId);
         Arrays.stream(folder.listFiles((f, p) -> StringUtils.endsWithAny(p, extensionsToDelete))).forEach(File::delete);
     }
+
+    /**
+     * Generate s3 presigned Url for import
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     */
+    @Override
+    public String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId){
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId);
+        s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
+        String filePath = s3Service.getProviderQueryPath(s3PathResolver);
+        return s3Helper.generatePresignedUrl(filePath);
+    }
 }

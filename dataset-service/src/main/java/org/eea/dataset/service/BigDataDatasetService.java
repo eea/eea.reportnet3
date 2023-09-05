@@ -22,4 +22,13 @@ public interface BigDataDatasetService {
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                        MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId, String filePathInS3) throws Exception;
 
+    /**
+     * Generate s3 presigned Url for import
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     */
+    String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId);
+
 }
