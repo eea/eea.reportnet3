@@ -82,4 +82,7 @@ public class NotificationVO implements Serializable {
 
   /** The mime type. */
   private String mimeType;
+
+  /** Empty dataset */
+  private boolean emptyTable;
 }

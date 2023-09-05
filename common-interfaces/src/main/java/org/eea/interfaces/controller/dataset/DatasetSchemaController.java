@@ -503,6 +503,6 @@ public interface DatasetSchemaController {
    */
   @GetMapping(value = "/private/getFieldName")
   String getFieldName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId,
-                      @RequestParam("parameters") List<String> parameters, @RequestParam("ruleReferenceId") String ruleReferenceId,
+                      @RequestParam(value = "parameters", required = false) List<String> parameters, @RequestParam("ruleReferenceId") String ruleReferenceId,
                       @RequestParam(value = "ruleReferenceFieldSchemaPKId", required = false) String ruleReferenceFieldSchemaPKId);
 }

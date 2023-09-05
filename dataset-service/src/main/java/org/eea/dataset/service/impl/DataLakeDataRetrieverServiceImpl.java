@@ -85,21 +85,24 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             Map<String, FieldSchemaVO> fieldIdMap;
             TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
             LOG.info("For datasetId {} tableSchemaVO : {}", datasetId, tableSchemaVO);
-            S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(),
-                dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 47, datasetId, tableSchemaVO.getNameTableSchema());
+            S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
             LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
-            LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", s3Helper.checkTableNameDCFolderExist(s3PathResolver));
-            LOG.info("dremioHelperService.checkFolderPromoted(s3PathResolver) : {}",  dremioHelperService.checkFolderPromoted(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH, false));
-            if (s3Helper.checkTableNameDCFolderExist(s3PathResolver) && dremioHelperService.checkFolderPromoted(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH, false)) {
-                LOG.info("s3Helper.buildRecordsCountQuery(s3PathResolver) : {}",  s3Helper.buildRecordsCountQuery(s3PathResolver));
-                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+            boolean isFolderPromoted = dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false);
+            s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
+            boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
+            if (isFolderPromoted && folderExist) {
+                LOG.info("s3Helper.buildRecordsCountQueryDC(s3PathResolver) : {}",  s3Helper.buildRecordsCountQueryDC(s3PathResolver));
+                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3PathResolver), Long.class);
                 LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
                 pageable = calculatePageable(pageable, totalRecords);
                 fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+                FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
+                fieldSchemaProviderCode.setName("data_provider_code");
+                fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
                 DremioRecordMapper recordMapper = new DremioRecordMapper();
                 recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
                 StringBuilder dataQuery = new StringBuilder();
-                dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
+                dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
                 //filter value
                 if (!fieldValue.equals("")) {
                     buildFilterQuery(fieldValue, fieldIdMap, dataQuery);
@@ -276,8 +279,11 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     private static void buildFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
         dataQuery.append(" where ");
         List<String> headers = fieldIdMap.values().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
+        LOG.info("headers : {}", headers);
         dataQuery.append(headers.get(0)).append(" like '%").append(fieldValue).append("%'");
+        LOG.info("headers.get(0) : {}", headers.get(0));
         headers.remove(headers.get(0));
+        LOG.info("headers : {}", headers);
         headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
     }
 

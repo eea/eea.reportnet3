@@ -5,6 +5,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
@@ -47,7 +48,7 @@ public class DisableRulesErrorEventTest {
    */
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(5, disableRulesErrorEvent
+    Assert.assertEquals(6, disableRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 
@@ -59,7 +60,7 @@ public class DisableRulesErrorEventTest {
    */
   @Test
   public void getMapFromMinimumDataTest() throws EEAException {
-    Assert.assertEquals(5, disableRulesErrorEvent
+    Assert.assertEquals(6, disableRulesErrorEvent
         .getMap(NotificationVO.builder().user("user").dataflowId(1L).build()).size());
   }
 }

@@ -207,7 +207,7 @@ public final class LiteralConstants {
   public static final String S3_PROVIDER_IMPORT_PATH = "/%s/%s/%s/current/provider_import";
 
   /** The Constant S3_IMPORT_TABLE_NAME_FOLDER_PATH: {@value}. */
-  public static final String S3_IMPORT_TABLE_NAME_FOLDER_PATH = "/%s/%s/%s/current/import/%s";
+  public static final String S3_IMPORT_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/current/import/%s";
 
   /** The Constant S3_IMPORT_FILE_PATH: {@value}. */
   public static final String S3_IMPORT_FILE_PATH = "%s/%s/%s/current/import/%s/%s";
@@ -237,13 +237,13 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_VALIDATE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_PATH = "/%s/%s/%s/current/%s/%s";
+  public static final String S3_TABLE_NAME_PATH = "%s/%s/%s/current/%s/%s";
 
   /** The Constant S3_TABLE_NAME_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_FOLDER_PATH = "/%s/%s/%s/current/%s";
+  public static final String S3_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/current/%s";
 
   /** The Constant S3_CURRENT_PATH: {@value}. */
-  public static final String S3_CURRENT_PATH = "/%s/%s/%s/current";
+  public static final String S3_CURRENT_PATH = "%s/%s/%s/current";
 
   /** The Constant S3_TABLE_NAME_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
@@ -252,7 +252,7 @@ public final class LiteralConstants {
   public static final String S3_VALIDATION_DC_PATH = "%s/%s/%s/current/validation/%s/%s/%s";
 
   /** The Constant S3_VALIDATION_TABLE_PATH: {@value}. */
-  public static final String S3_VALIDATION_TABLE_PATH = "/%s/%s/%s/current/validation";
+  public static final String S3_VALIDATION_TABLE_PATH = "%s/%s/%s/current/validation";
 
   /** The Constant S3_VALIDATION_DC_QUERY_PATH: {@value}. */
   public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
@@ -267,10 +267,16 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_DC_PATH = "%s/%s/%s/current/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_DC_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_FOLDER_PATH = "%s/%s/%s/current/%s/%s";
+  public static final String S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH = "%s/%s/%s/current/%s/%s";
+
+  /** The Constant S3_TABLE_NAME_DC_FOLDER_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_DC_FOLDER_PATH = "%s/%s/%s/current/%s";
+
+  /** The Constant S3_TABLE_NAME_ROOT_DC_FOLDER_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_ROOT_DC_FOLDER_PATH = "%s/%s/%s/current";
 
   /** The Constant S3_TABLE_NAME_DC_QUERY_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\".\"%s\"";
+  public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
 
   public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
 

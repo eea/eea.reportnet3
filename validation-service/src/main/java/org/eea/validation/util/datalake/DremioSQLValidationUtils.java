@@ -153,8 +153,7 @@ public class DremioSQLValidationUtils {
         return recordIds;
     }
 
-    public List<String> checkIntegrityConstraint(long originDatasetId, long referencedDatasetId, String originSchemaId, String referencedSchemaId, String originTablePath,
-                           String referTablePath, List<String> originFields, List<String> referFields, boolean isDoubleReferenced) {
+    public List<String> checkIntegrityConstraint(String originTablePath, String referTablePath, List<String> originFields, List<String> referFields, boolean isDoubleReferenced) {
         List<String> recordIds = new ArrayList<>();
         StringBuilder query = new StringBuilder();
         query.append("select ").append("pk.record_id").append(" from ").append(originTablePath).append(" fk ").append("right join ").append(referTablePath).append(" pk on ");

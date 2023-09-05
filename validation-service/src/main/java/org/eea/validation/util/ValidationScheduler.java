@@ -106,7 +106,7 @@ public class ValidationScheduler extends MessageReceiver {
           } catch (EEAException | JsonProcessingException e) {
             LOG_ERROR.error("failed the validation task shedule because of {} ", e);
           } catch (ObjectOptimisticLockingFailureException e) {
-            newDelay = 1L;
+            newDelay = delay;
           }
         }
       }

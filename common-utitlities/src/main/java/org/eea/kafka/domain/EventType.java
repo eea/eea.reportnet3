@@ -382,6 +382,9 @@ public enum EventType {
   DISABLE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "disable_rules_error_event",
       true),
 
+  EMPTY_TABLE_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "empty_table_event",
+          true),
+
   /** The validate rules error event. */
   VALIDATE_RULES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validate_rules_error_event",
       true),
@@ -588,10 +591,10 @@ public enum EventType {
   COMMAND_VALIDATED_DL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_validated_key", true),
 
   /** The command validate sql datalake. */
-  COMMAND_VALIDATE_SQL_DL(LiteralConstants.COMMAND_TOPIC, "execute_validations_sql_dl_key", false),
+  COMMAND_VALIDATE_DL_WITH_SQL(LiteralConstants.COMMAND_TOPIC, "execute_validations_sql_dl_key", false),
 
   /** The command validated sql datalake completed. */
-  COMMAND_VALIDATED_SQL_DL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_sql_validated_key", true),
+  COMMAND_VALIDATED_DL_WITH_SQL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_sql_validated_key", true),
 
   /** The command validate sql datalake. */
   COMMAND_VALIDATE_EXPRESSION_DL(LiteralConstants.COMMAND_TOPIC, "execute_validations_expression_dl_key", false),

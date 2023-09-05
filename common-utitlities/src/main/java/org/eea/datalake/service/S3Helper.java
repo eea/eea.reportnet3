@@ -18,6 +18,8 @@ public interface S3Helper {
      */
     String buildRecordsCountQuery(S3PathResolver s3PathResolver);
 
+    String buildRecordsCountQueryDC(S3PathResolver s3PathResolver);
+
     /**
      * checks if folder validation is created in the s3 storage for the specific dataset
      * @param s3PathResolver
@@ -38,7 +40,7 @@ public interface S3Helper {
      * @param s3PathResolver
      * @return
      */
-    List<S3Object> getFilenamesFromFolderExport(S3PathResolver s3PathResolver);
+    List<S3Object> getFilenamesForExport(S3PathResolver s3PathResolver);
 
     /**
      * Gets filenames from table name folders
@@ -86,6 +88,8 @@ public interface S3Helper {
      * @param s3PathResolver
      * @return
      */
+    boolean checkTableNameDCProviderFolderExist(S3PathResolver s3PathResolver);
+
     boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver);
 
     /**

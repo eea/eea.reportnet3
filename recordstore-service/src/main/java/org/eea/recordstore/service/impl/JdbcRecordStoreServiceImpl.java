@@ -22,6 +22,7 @@ import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetCo
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -57,6 +58,7 @@ import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
@@ -81,6 +83,8 @@ import java.util.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class JdbcRecordStoreServiceImpl.
@@ -313,6 +317,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The S3 Service */
   @Autowired
   private S3Service s3Service;
+
+  @Autowired
+  @Qualifier("dremioJdbcTemplate")
+  JdbcTemplate dremioJdbcTemplate;
 
   /**
    * Creates a schema for each entry in the list. Also releases events to feed the new schemas.
@@ -1906,6 +1914,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
       DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
       LOG.info("Init restoring for datasetSchema {}", datasetSchema);
+      ProcessVO finalProcessVO = processVO;
       datasetSchema.getTableSchemas().stream()
           .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
           .forEach(table -> {
@@ -1913,14 +1922,16 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 //Delete table name DC folder if exists
                 String nameTableSchema = table.getNameTableSchema();
                 S3PathResolver dataCollectionPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
+                dataCollectionPath.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
                 LOG.info("Checking if table name DC folder exist in path {}", dataCollectionPath);
-                if (s3Helper.checkTableNameDCFolderExist(dataCollectionPath)) {
+                if (s3Helper.checkTableNameDCProviderFolderExist(dataCollectionPath)) {
                   s3Helper.deleleTableNameDCFolder(dataCollectionPath);
                   LOG.info("Successfully deleted files in path: {}", dataCollectionPath);
                 }
 
                 //Get table name file from S3, save it locally and then upload to DC table name path
                 S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, reportingDatasetId, nameTableSchema);
+                providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
                 LOG.info("Getting tableNameFilenames for provider path resolver {}", providerPath);
                 List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
                 LOG.info("Table Name Filenames found : {}", tableNameFilenames);
@@ -1931,16 +1942,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   try {
                     LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                     File parquetFile = s3Helper.getFileFromS3(key, filename, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                    String tableNameDCPath = s3Service.getTableNameDCPath(dataCollectionPath);
-                    LOG.info("Uploading file to bucket arquetFile path : {}", tableNameDCPath, parquetFile.getPath());
+                    dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
+                    String tableNameDCPath = s3Service.getDCPath(dataCollectionPath);
+                    LOG.info("Uploading file to bucket parquetFile path : {}", tableNameDCPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                     LOG.info("Uploading finished successfully for {}", tableNameDCPath);
                     //promote folder
+                    checkAndPromoteFolder(dataCollectionPath);
                   } catch (IOException e) {
                     LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                         reportingDatasetId, dataflowId, e);
                   }
                 });
+                processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
+                    ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
+                    finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
               } catch (Exception e) {
                 LOG_ERROR.error("Error in delete and copy release process for reportingDatasetId {}, dataflowId {}",
                     reportingDatasetId, dataflowId, e);
@@ -2027,14 +2043,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
+  private void checkAndPromoteFolder(S3PathResolver s3PathResolver) {
+    if (s3Helper.checkTableNameDCProviderFolderExist(s3PathResolver)) {
+      String query = "ALTER TABLE " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
+      dremioJdbcTemplate.execute(query);
+    }
+  }
+
   private void updateJobStatusToFinished(Long jobId) {
     if (jobId!=null) {
       List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
       ProcessVO process = processService.getByProcessId(processes.get(0));
       Long datasetId = process.getDatasetId();
       DataSetMetabaseVO dataSetMetabase = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-      LOG.info("Method updateJobStatusToFinished with jobId: {} and processes: {}", jobId, processes);
-
       boolean finished = true;
       if (process.getProcessType().equals(ProcessTypeEnum.RELEASE.toString())) {
         List<Long> datasetIds = dataSetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId());
@@ -2051,7 +2072,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           finished = false;
         }
       }
-
+      LOG.info("finished: {}", finished);
       if (finished) {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
         LOG.info("Method updateJobStatusToFinished updated jobId: {} with status {}", jobId, JobStatusEnum.FINISHED);
@@ -2062,6 +2083,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   private boolean isFinished(List<String> processes, boolean release) {
     for (String id : processes) {
       ProcessVO processVO = processService.getByProcessId(id);
+      LOG.info("id {}, processVO: {}", id, processVO);
       if (!processVO.getStatus().equals(ProcessStatusEnum.FINISHED.toString())) {
         release = false;
         break;

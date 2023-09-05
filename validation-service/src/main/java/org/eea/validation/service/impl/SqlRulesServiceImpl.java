@@ -3,6 +3,7 @@ package org.eea.validation.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
@@ -44,6 +45,7 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
+import org.eea.validation.util.SQLValidationUtils;
 import org.eea.validation.util.model.QueryVO;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -65,6 +67,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
+import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
 
 /**
  * The Class SqlRulesServiceImpl.
@@ -142,7 +145,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   @Autowired
   @Qualifier("dremioJdbcTemplate")
-  JdbcTemplate dremioJdbcTemplate;
+  private JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  private S3Helper s3Helper;
 
 
   /** The Constant DATASET_: {@value}. */
@@ -436,7 +442,27 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           sb = buildWithTableQuery(datasetIds, sb, sqlRule);
         }
 
-        result = datasetRepository.runSqlRule(datasetId, sb.toString());
+        DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+        if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+          String sqlCode = this.replaceTableNamesWithS3Path(sb.toString());
+          sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
+          result = dremioJdbcTemplate.query(sqlCode, (resultSet, i) -> {
+            ++i;
+            List<ValueVO> valueVOList = new ArrayList<>();
+            int columns = resultSet.getMetaData().getColumnCount();
+            for (int j = 2; j < columns - 1; j++) {
+              ValueVO valueVO = new ValueVO();
+              valueVO.setValue(resultSet.getString(j));
+              valueVO.setLabel(resultSet.getMetaData().getColumnName(j));
+              valueVO.setTable("");
+              valueVO.setRow(i);
+              valueVOList.add(valueVO);
+            }
+            return valueVOList;
+          });
+        } else {
+          result = datasetRepository.runSqlRule(datasetId, sb.toString());
+        }
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check.");
@@ -550,9 +576,25 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             DataFlowVO dataflow = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
             if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
               try {
-                String newQuery = proccessQuery(dataSetMetabaseVO, query);
-                newQuery = this.replaceTableNamesWithS3Path(newQuery);
-                dremioJdbcTemplate.execute(newQuery);
+                DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+                String tableName = null;
+                if (rule.getType().equals(EntityTypeEnum.TABLE)) {
+                  tableName = dataSetSchema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(rule.getReferenceId().toString())).findFirst().get().getNameTableSchema();
+                } else {
+                  for (TableSchema t : dataSetSchema.getTableSchemas()) {
+                    List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(rule.getReferenceId().toString())).collect(Collectors.toList());
+                    if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().toString().equals(rule.getReferenceId().toString())) {
+                      tableName = t.getNameTableSchema();
+                      break;
+                    }
+                  }
+                }
+                S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+                if (s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                  String newQuery = proccessQuery(dataSetMetabaseVO, query);
+                  newQuery = this.replaceTableNamesWithS3Path(newQuery);
+                  dremioJdbcTemplate.execute(newQuery);
+                }
               } catch (Exception e) {
                 LOG_ERROR.error("SQL is invalid: {}. Exception: {}", query, e.getMessage());
                 throw new EEAInvalidSQLException(e.getCause().getMessage(), e);
