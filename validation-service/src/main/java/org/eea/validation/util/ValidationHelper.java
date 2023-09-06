@@ -387,6 +387,7 @@ public class ValidationHelper implements DisposableBean {
         value.put("tableName", tableSchema.getNameTableSchema());
         value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
+        value.put("createParquetWithSQL", "false");
         if (rule.getSqlSentence()!=null || isDremioSqlRuleMethod(rule.getWhenCondition())) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL_WITH_SQL, value);
         } else if (rule.getWhenCondition().contains("RuleOperators")) {

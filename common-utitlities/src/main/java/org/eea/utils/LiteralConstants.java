@@ -355,6 +355,24 @@ public final class LiteralConstants {
   /** The Constant GET_INSTANCE: {@value}. */
   public static final String GET_INSTANCE = "getInstance";
 
+  /** The Constant VALUE: {@value}. */
+  public static final String VALUE = "value";
+
+  /** The Constant UNDERSCORE: {@value}. */
+  public static final String UNDERSCORE = "_";
+
+  /** The Constant SLASH: {@value}. */
+  public static final String SLASH = "/";
+
+  /** The Constant DASH: {@value}. */
+  public static final String DASH = "-";
+
+  /** The Constant OPEN_PARENTHESIS: {@value}. */
+  public static final String OPEN_PARENTHESIS = "(";
+
+  /** The Constant CLOSE_PARENTHESIS: {@value}. */
+  public static final String CLOSE_PARENTHESIS = ")";
+
   /**
    * Instantiates a new literal constants.
    */

@@ -62,7 +62,9 @@ public class DremioRulesServiceImpl implements DremioRulesService {
     }
 
     @Override
-    public Map<String, String> createValidationParquetHeaderMap(Long datasetId, String tableName, RuleVO ruleVO, String fieldName, String message) {
+    public Map<String, String> createValidationParquetHeaderMap(Long datasetId, String tableName, RuleVO ruleVO, String fieldName) {
+        String message = ruleVO.getThenCondition().get(0);
+        message = message.replace("\'", "\"");
         Map<String, String> headerMap = new LinkedHashMap<>();
         headerMap.put(VALIDATION_LEVEL, ruleVO.getThenCondition().get(1));
         headerMap.put(VALIDATION_AREA, ruleVO.getType().getValue());

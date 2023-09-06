@@ -59,7 +59,8 @@ public class ExecuteValidationCommandDL extends ExecuteValidationCommand {
         final Long dataProviderId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataProviderId")));
         final String datasetSchemaId = String.valueOf(eeaEventVO.getData().get("datasetSchema"));
         final String tableSchemaId = String.valueOf(eeaEventVO.getData().get("tableSchemaId"));
-        dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId);
+        final boolean createParquetWithSQL = Boolean.valueOf(String.valueOf(eeaEventVO.getData().get("createParquetWithSQL")));
+        dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId, createParquetWithSQL);
       };
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event COMMAND_VALIDATE_DL. Message: {}", e.getMessage());

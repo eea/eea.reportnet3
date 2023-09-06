@@ -45,8 +45,7 @@ public interface DremioRulesService {
      * @param tableName
      * @param ruleVO
      * @param fieldName
-     * @param message
      * @return
      */
-    Map<String, String> createValidationParquetHeaderMap(Long datasetId, String tableName, RuleVO ruleVO, String fieldName, String message);
+    Map<String, String> createValidationParquetHeaderMap(Long datasetId, String tableName, RuleVO ruleVO, String fieldName);
 }
