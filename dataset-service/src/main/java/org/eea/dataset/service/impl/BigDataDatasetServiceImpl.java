@@ -1,5 +1,7 @@
 package org.eea.dataset.service.impl;
 
+import feign.FeignException;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
@@ -49,6 +51,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_PATH;
@@ -113,9 +116,34 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         Long jobId = null;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
         File s3File = null;
+        JobVO job = null;
         try {
             if (dataflowId == null){
                 dataflowId = datasetService.getDataFlowIdById(datasetId);
+            }
+
+            if (fmeJobId!=null) {
+                jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
+                job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+                if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
+                    LOG.info("Job {} is cancelled. Exiting import!", job.getId());
+                    return;
+                }
+            }
+            if(job!=null){
+                jobId = job.getId();
+                LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
+            }else{
+                //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+                List<Long> datasetIds = new ArrayList<>();
+                datasetIds.add(datasetId);
+                jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId);
+                if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+                    LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+                    datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
+                    throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
+                }
             }
 
             if(file == null){
@@ -144,18 +172,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 fileName = file.getOriginalFilename();
             }
 
-            JobVO job = null;
-            //TODO fme checks
             //check if there is already an import job with status IN_PROGRESS for the specific datasetId
             List<Long> datasetIds = new ArrayList<>();
             datasetIds.add(datasetId);
-            jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-            jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId);
-            if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
-                LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
-                datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, fileName);
-                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
-            }
             String providerCode = null;
             if(providerId == null){
                 DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -217,8 +236,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         importFileInDremioInfo.setProcessId(processUUID);
 
         DataSetSchema schema = datasetService.getSchemaIfReportable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId());
-        processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
+        Boolean processUpdated = processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
                 SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+        if(!processUpdated){
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_UPDATING_PROCESS);
+            throw new Exception("Could not update process to status IN_QUEUE for processId=" + importFileInDremioInfo.getProcessId() + " and jobId "+ importFileInDremioInfo.getJobId());
+        }
 
         if(importFileInDremioInfo.getJobId() != null && !processExists){
             JobProcessVO jobProcessVO = new JobProcessVO(null, importFileInDremioInfo.getJobId(), processUUID);
@@ -246,31 +269,49 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.IMPORT, importFileInDremioInfo.getProcessId(),
                 SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
 
-        if(!processWasUpdated) {
+        if (!processWasUpdated) {
             jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_UPDATING_PROCESS);
-            throw new Exception("Could not update process to status IN_PROGRESS for processId=" + importFileInDremioInfo.getProcessId() + " and jobId "+ importFileInDremioInfo.getJobId());
+            throw new Exception("Could not update process to status IN_PROGRESS for processId=" + importFileInDremioInfo.getProcessId() + " and jobId " + importFileInDremioInfo.getJobId());
         }
 
         String originalFileName = importFileInDremioInfo.getFileName();
         String mimeType = datasetService.getMimetype(originalFileName);
 
         IntegrationVO integrationVO = null;
-        //TODO fme handling
+        if (importFileInDremioInfo.getIntegrationId() != null) {
+            integrationVO = fileTreatmentHelper.getIntegrationVO(importFileInDremioInfo.getIntegrationId());
+            if (integrationVO == null) {
+                LOG.error("Error. Integration {} not found for job {}", importFileInDremioInfo.getIntegrationId(), importFileInDremioInfo);
+            }
+        }
         List<File> filesToImport = null;
-        if(fileFromApi != null) {
-            filesToImport = storeImportFiles(fileFromApi, importFileInDremioInfo);
+        if (fileFromApi != null) {
+            filesToImport = storeImportFiles(fileFromApi, importFileInDremioInfo, integrationVO, mimeType);
+        } else {
+            filesToImport = handleAlreadyStoredImportFiles(fileFromS3, importFileInDremioInfo, integrationVO, mimeType);
         }
-        else{
-            filesToImport = handleAlreadyStoredImportFiles(fileFromS3, importFileInDremioInfo);
+
+        if (integrationVO != null && filesToImport.size() != 0) {
+            handleFmeRequest(integrationVO, importFileInDremioInfo, filesToImport.get(0), mimeType);
+        } else {
+            List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
+            Map<String, String> parquetFileNamesAndPaths = parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
+            /*for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
+                String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
+                s3HandlerService.uploadFileToBucket(importPathForParquet, parquetFileNameAndPath.getValue());
+                promoteFolder(importFileInDremioInfo, parquetFileNameAndPath.getKey());
+            }*/
         }
-        List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
-        Map<String, String> parquetFileNamesAndPaths =  parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
-        /*for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
-            String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
-            s3HandlerService.uploadFileToBucket(importPathForParquet, parquetFileNameAndPath.getValue());
-            promoteFolder(importFileInDremioInfo, parquetFileNameAndPath.getKey());
-        }*/
-        LOG.info("Uploaded parquet files to s3 {}", importFileInDremioInfo);
+    }
+
+    private void handleFmeRequest(IntegrationVO integrationVO, ImportFileInDremioInfo importFileInDremioInfo, File file, String mimeType) throws EEAException {
+        try {
+            fileTreatmentHelper.prepareFmeFileProcess(importFileInDremioInfo.getDatasetId(), file, integrationVO, mimeType, importFileInDremioInfo.getTableSchemaId(),
+                    false, importFileInDremioInfo.getJobId());
+        }
+        catch (Exception e){
+            throw new EEAException("Could not prepare fme request for job id " + importFileInDremioInfo.getJobId());
+        }
     }
 
     private void promoteFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName){
@@ -354,9 +395,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     }
 
-    private List<File> storeImportFiles(MultipartFile fileFromApi, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
+    private List<File> storeImportFiles(MultipartFile fileFromApi, ImportFileInDremioInfo importFileInDremioInfo, IntegrationVO integrationVO, String multipartFileMimeType) throws Exception {
         List<File> files = new ArrayList<>();
-        String multipartFileMimeType = datasetService.getMimetype(importFileInDremioInfo.getFileName());
 
         // Prepare the folder where files will be stored
         File root = new File(importPath);
@@ -374,7 +414,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         try (InputStream input = fileFromApi.getInputStream()) {
             //TODO fme handling
 
-            if (importFileInDremioInfo.getIntegrationId() == null && multipartFileMimeType.equalsIgnoreCase("zip")) {
+            if (integrationVO == null && multipartFileMimeType.equalsIgnoreCase("zip")) {
                 try (ZipInputStream zip = new ZipInputStream(input)) {
                     ZipEntry entry = zip.getNextEntry();
                     while (null != entry) {
@@ -421,6 +461,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     LOG.error("Unexpected error! Error storing file for import job {}. Message: {}", importFileInDremioInfo, e.getMessage());
                     throw e;
                 }
+
+                if (integrationVO != null && multipartFileMimeType.equalsIgnoreCase("zip")) {
+                    try {
+                        ZipFile zipFile = new ZipFile(file);
+                        if (zipFile.size() == 0) {
+                            zipFile.close();
+                            throw new EEAException("Empty zip file for datasetId " + importFileInDremioInfo.getDatasetId() + " and jobId " + importFileInDremioInfo.getJobId());
+                        }
+                        zipFile.close();
+                    } catch (IOException e) {
+                        throw new EEAException("Empty zip file for datasetId " + importFileInDremioInfo.getDatasetId() + " and jobId " + importFileInDremioInfo.getJobId());
+                    }
+                }
             }
 
             // Queue import tasks for stored files
@@ -439,7 +492,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     }
 
-    private List<File> handleAlreadyStoredImportFiles(File fileFromS3, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
+    private List<File> handleAlreadyStoredImportFiles(File fileFromS3, ImportFileInDremioInfo importFileInDremioInfo, IntegrationVO integrationVO, String multipartFileMimeType) throws Exception {
         List<File> files = new ArrayList<>();
         String fileMimeType = datasetService.getMimetype(importFileInDremioInfo.getFileName());
 
@@ -449,9 +502,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String saveLocationPath = folder.getCanonicalPath();
 
         try (InputStream input = new FileInputStream(fileFromS3)) {
-            //TODO fme handling
 
-            if (importFileInDremioInfo.getIntegrationId() == null && fileMimeType.equalsIgnoreCase("zip")) {
+            if (integrationVO == null && fileMimeType.equalsIgnoreCase("zip")) {
                 try (ZipInputStream zip = new ZipInputStream(input)) {
                     ZipEntry entry = zip.getNextEntry();
                     while (null != entry) {
@@ -488,6 +540,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             } else {
                 files.add(fileFromS3);
+
+                if (integrationVO != null && multipartFileMimeType.equalsIgnoreCase("zip")) {
+                    try {
+                        ZipFile zipFile = new ZipFile(fileFromS3);
+                        if (zipFile.size() == 0) {
+                            zipFile.close();
+                            throw new EEAException("Empty zip file for datasetId " + importFileInDremioInfo.getDatasetId() + " and jobId " + importFileInDremioInfo.getJobId());
+                        }
+                        zipFile.close();
+                    } catch (IOException e) {
+                        throw new EEAException("Empty zip file for datasetId " + importFileInDremioInfo.getDatasetId() + " and jobId " + importFileInDremioInfo.getJobId());
+                    }
+                }
             }
 
             // Queue import tasks for stored files
@@ -592,5 +657,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         File root = new File(importPath);
         File folder = new File(root, datasetId);
         Arrays.stream(folder.listFiles((f, p) -> StringUtils.endsWithAny(p, extensionsToDelete))).forEach(File::delete);
+    }
+
+    /**
+     * Generate s3 presigned Url for import
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     */
+    @Override
+    public String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId){
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId);
+        s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
+        String filePath = s3Service.getProviderQueryPath(s3PathResolver);
+        return s3Helper.generatePresignedUrl(filePath);
     }
 }

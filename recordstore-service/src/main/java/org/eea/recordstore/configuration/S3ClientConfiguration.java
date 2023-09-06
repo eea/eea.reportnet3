@@ -7,6 +7,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import org.springframework.beans.factory.annotation.Value;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 
 import java.net.URI;
@@ -26,6 +27,14 @@ public class S3ClientConfiguration {
     public S3Client getS3Client() {
         AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3AccessKey, s3SecretKey);
         return S3Client.builder().endpointOverride(URI.create(s3Endpoint))
+                .region(s3Region)
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).build();
+    }
+
+    @Bean
+    public S3Presigner getS3Presigner() {
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3AccessKey, s3SecretKey);
+        return S3Presigner.builder().endpointOverride(URI.create(s3Endpoint))
                 .region(s3Region)
                 .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).build();
     }

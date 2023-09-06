@@ -1,6 +1,8 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -97,4 +99,12 @@ public interface S3Helper {
      * @param s3PathResolver
      */
     void deleleTableNameDCFolder(S3PathResolver s3PathResolver);
+
+    /**
+     * Generate s3 presigned Url
+     *
+     * @param filePath the path where the file will be imported into
+     * @return the url
+     */
+    String generatePresignedUrl(String filePath);
 }

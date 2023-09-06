@@ -1236,8 +1236,8 @@ public class FileTreatmentHelper implements DisposableBean {
          * @throws IOException Signals that an I/O exception has occurred.
          * @throws EEAException the EEA exception
          */
-        private void prepareFmeFileProcess (Long datasetId, File file, IntegrationVO integrationVO,
-                String mimeType, String tableSchemaId,boolean replace, Long jobId) throws IOException, EEAException {
+        public void prepareFmeFileProcess (Long datasetId, File file, IntegrationVO integrationVO,
+                String mimeType, String tableSchemaId, boolean replace, Long jobId) throws IOException, EEAException {
 
             LOG.info("Start FME-Import process: datasetId={}, integrationVO={}", datasetId, integrationVO);
             Map<String, String> internalParameters = integrationVO.getInternalParameters();
@@ -1618,7 +1618,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param integrationId the integration id
          * @return the integration VO
          */
-        private IntegrationVO getIntegrationVO (Long integrationId){
+        public IntegrationVO getIntegrationVO (Long integrationId){
             return integrationController.findIntegrationById(integrationId);
         }
 

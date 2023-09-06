@@ -13,14 +13,17 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,10 +40,14 @@ public class S3HelperImpl implements S3Helper {
     private S3Service s3Service;
     private S3Client s3Client;
 
+    private S3Presigner s3Presigner;
+
     @Autowired
-    public S3HelperImpl(S3Service s3Service, S3Client s3Client) {
+    public S3HelperImpl(S3Service s3Service, S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Service = s3Service;
-        this.s3Client = s3Client;}
+        this.s3Client = s3Client;
+        this.s3Presigner = s3Presigner;
+    }
 
     /**
      * builds query for counting records
@@ -255,5 +262,49 @@ public class S3HelperImpl implements S3Helper {
         String folderName = s3Service.getDCPath(s3PathResolver);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
+    }
+
+    /**
+     * Generate s3 presigned Url
+     *
+     * @param filePath the path where the file will be imported into
+     * @return the url
+     */
+    @Override
+    public String generatePresignedUrl(String filePath){
+
+        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                .bucket(S3_BUCKET_NAME)
+                .key(filePath)
+                .build();
+
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(Duration.ofMinutes(10))
+                .putObjectRequest(putObjectRequest)
+                .build();
+
+        PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+        URL url = presignedRequest.url();
+
+        //todo remove the following block of code
+        try{
+            // Create the connection and use it to upload the new object.
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type","text/plain");
+            connection.setRequestProperty("x-amz-meta-author","Mary Doe");
+            connection.setRequestProperty("x-amz-meta-version","1.0.0.0");
+            connection.setRequestMethod("PUT");
+            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+            out.write("This text was uploaded as an object by using a presigned URL.");
+            out.close();
+
+            connection.getResponseCode();
+        }
+        catch (Exception e){
+            LOG.error("Could not upload text using presigned url {}", url.toString());
+        }
+
+        return url.toString();
     }
 }

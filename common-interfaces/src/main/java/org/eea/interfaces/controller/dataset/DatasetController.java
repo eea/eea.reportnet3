@@ -756,4 +756,18 @@ public interface DatasetController {
           @RequestParam(value = "columnName", required = false) String columnName,
           @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
           @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
+
+
+  /**
+   * Generate s3 presigned Url for import
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @GetMapping("/{datasetId}/generateImportPresignedUrl")
+  String generateImportPresignedUrl(@PathVariable("datasetId") Long datasetId,
+                      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                      @RequestParam(value = "providerId", required = false) Long providerId);
+
 }

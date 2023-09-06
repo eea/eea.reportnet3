@@ -2415,4 +2415,27 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
   }
+
+  /**
+   * Generate s3 presigned Url for import
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   */
+  @Override
+  @GetMapping("/{datasetId}/generateImportPresignedUrl")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  public String generateImportPresignedUrl(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId){
+    try{
+      //todo add import job as QUEUED ?
+      return bigDataDatasetService.generateImportPresignedUrl(datasetId, dataflowId, providerId);
+    }
+    catch (Exception e){
+      LOG.error("Could not generate import presigned url for datasetId {}, dataflowId {} and providerId {}", datasetId, dataflowId, providerId);
+      return null;
+    }
+  }
 }
