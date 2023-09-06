@@ -206,7 +206,7 @@ public class S3HelperImpl implements S3Helper {
             Optional<S3Object> ruleFile = result.contents().stream().filter(s3Object -> s3Object.key().contains(ruleVO.getShortCode())).findFirst();
             if (ruleFile.isPresent()) {
                 int valIdx = validationFolderName.indexOf(VALIDATION);
-                int startIdx = valIdx + 10;
+                int startIdx = valIdx + 11;
                 String ruleFolderName = ruleFile.get().key();
                 if (ruleFolderName.contains(PARQUET_FILE_NAME)) {
                     int endIdx = ruleFolderName.indexOf(PARQUET_FILE_NAME);

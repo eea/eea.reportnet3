@@ -15,6 +15,9 @@ import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -208,6 +211,20 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
         catch (Exception e){
             LOG.error("Could not drop table {}", tablePath);
+        }
+    }
+
+    @Override
+    public void deleteFileFromR3IfExists(String parquetFile) throws Exception {
+        // Check that the parquet file exists, if so delete it
+        java.nio.file.Path path = Paths.get(parquetFile);
+        if (Files.exists(path)) {
+            try {
+                Files.delete(path);
+            } catch (IOException e) {
+                LOG.error("Could not delete file {}.", parquetFile);
+                throw new Exception("Could not delete file " + parquetFile);
+            }
         }
     }
 }

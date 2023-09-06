@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -190,7 +191,18 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     private void retrieveValidations(List<RecordVO> recordVOS, String tableName, S3PathResolver s3PathResolver) {
         StringBuilder validationQuery = new StringBuilder();
         validationQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
-        validationQuery.append(" where table_name='").append(tableName).append("'");
+        validationQuery.append(" where table_name='").append(tableName).append("'").append(" and record_id in ('");
+        AtomicInteger count = new AtomicInteger();
+        recordVOS.forEach(recordVO -> {
+            if (count.get() != 0) {
+                validationQuery.append(",'");
+            }
+            validationQuery.append(recordVO.getId()).append("'");
+            if (count.get() == 0) {
+                count.getAndIncrement();
+            }
+        });
+        validationQuery.append(")");
         List<DremioValidationVO> dremioValidationsVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioValidationMapper());
         for (DremioValidationVO dv : dremioValidationsVOS) {
            List<RecordVO> records =  recordVOS.stream().filter(recordVO -> recordVO.getId().equals(dv.getRecordId())).collect(Collectors.toList());

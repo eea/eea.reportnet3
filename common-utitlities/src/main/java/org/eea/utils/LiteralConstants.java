@@ -325,6 +325,35 @@ public final class LiteralConstants {
   /** The Constant ZIP_TYPE: {@value}. */
   public static final String ZIP_TYPE = ".zip";
 
+  /** The Constant VALIDATION_LEVEL: {@value}. */
+  public static final String VALIDATION_LEVEL = "validation_level";
+
+  /** The Constant VALIDATION_AREA: {@value}. */
+  public static final String VALIDATION_AREA = "validation_area";
+
+  /** The Constant MESSAGE: {@value}. */
+  public static final String MESSAGE = "message";
+
+  /** The Constant TABLE_NAME: {@value}. */
+  public static final String TABLE_NAME = "table_name";
+
+  /** The Constant FIELD_NAME: {@value}. */
+  public static final String FIELD_NAME = "field_name";
+
+  /** The Constant QC_CODE: {@value}. */
+  public static final String QC_CODE = "qc_code";
+
+  /** The Constant PK_NOT_USED: {@value}. */
+  public static final String PK_NOT_USED = "pkNotUsed";
+
+  /** The Constant OMISSION: {@value}. */
+  public static final String OMISSION = "OMISSION";
+
+  /** The Constant COMISSION: {@value}. */
+  public static final String COMISSION = "COMISSION";
+
+  /** The Constant GET_INSTANCE: {@value}. */
+  public static final String GET_INSTANCE = "getInstance";
 
   /**
    * Instantiates a new literal constants.
