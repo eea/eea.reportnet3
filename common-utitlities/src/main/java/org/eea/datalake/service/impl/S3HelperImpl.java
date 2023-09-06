@@ -286,6 +286,25 @@ public class S3HelperImpl implements S3Helper {
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
         URL url = presignedRequest.url();
 
+        //todo remove the following block of code
+        try{
+            // Create the connection and use it to upload the new object.
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type","text/plain");
+            connection.setRequestProperty("x-amz-meta-author","Mary Doe");
+            connection.setRequestProperty("x-amz-meta-version","1.0.0.0");
+            connection.setRequestMethod("PUT");
+            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
+            out.write("This text was uploaded as an object by using a presigned URL.");
+            out.close();
+
+            connection.getResponseCode();
+        }
+        catch (Exception e){
+            LOG.error("Could not upload text using presigned url {}", url.toString());
+        }
+
         return url.toString();
     }
 }
