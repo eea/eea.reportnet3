@@ -169,7 +169,7 @@ const useBigButtonListRepresentative = ({
         infoStatus: dataset.isReleased,
         infoStatusIcon: true,
         model:
-          dataflowState.id === '557'
+          dataflowState.id === '557' || dataflowState.id === '615'
             ? [
                 {
                   label: resourcesContext.messages['historicReleases'],
