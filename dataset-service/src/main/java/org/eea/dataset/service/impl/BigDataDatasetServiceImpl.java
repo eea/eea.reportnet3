@@ -110,10 +110,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                              MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId, String filePathInS3) throws Exception {
+                              MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
+                              String fmeJobId, String filePathInS3) throws Exception {
         String fileName = null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
-        Long jobId = null;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
         File s3File = null;
         JobVO job = null;
@@ -122,17 +122,27 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 dataflowId = datasetService.getDataFlowIdById(datasetId);
             }
 
-            if (fmeJobId!=null) {
-                jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
-                job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
-                if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
+            if (fmeJobId != null || jobId != null) {
+                if (fmeJobId != null){
+                    jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
+                    job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+                    if (job != null) {
+                        jobId = job.getId();
+                        LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
+                    }
+                }
+                else{
+                    job = jobControllerZuul.findJobById(jobId);
+                }
+            }
+            if(job != null){
+                if(job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN)) {
                     LOG.info("Job {} is cancelled. Exiting import!", job.getId());
                     return;
                 }
-            }
-            if(job!=null){
-                jobId = job.getId();
-                LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
+                else if(job.getJobStatus().equals(JobStatusEnum.QUEUED)){
+                    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+                }
             }else{
                 //check if there is already an import job with status IN_PROGRESS for the specific datasetId
                 List<Long> datasetIds = new ArrayList<>();
@@ -668,6 +678,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
      */
     @Override
     public String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId){
+        if (dataflowId == null){
+            dataflowId = datasetService.getDataFlowIdById(datasetId);
+        }
+        if (providerId == null){
+            providerId = 0L;
+        }
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId);
         s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
         String filePath = s3Service.getProviderQueryPath(s3PathResolver);

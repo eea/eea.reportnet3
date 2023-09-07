@@ -109,7 +109,7 @@ public interface JobController {
                       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
                        @RequestParam(value = "providerId", required = false) Long providerId,
                        @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
-                       @RequestParam("fileName") String fileName,
+                       @RequestParam(value = "fileName", required = false) String fileName,
                        @RequestParam(value = "replace", required = false) boolean replace,
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
                        @RequestParam(value = "delimiter", required = false) String delimiter,
