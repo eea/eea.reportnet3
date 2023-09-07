@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.eea.utils.LiteralConstants.*;
+
 @Import(DremioConfiguration.class)
 @Component
 public class DremioSQLValidationUtils {
@@ -76,7 +78,7 @@ public class DremioSQLValidationUtils {
                         .append(" pk on fk.").append(foreignKey).append("=pk.").append(primaryKey).append(" where fk.").append(foreignKey).append(" is null");
                 Long pkNotUsed = dremioJdbcTemplate.queryForObject(query.toString(), Long.class);
                 if (pkNotUsed > 0) {
-                    recordIds.add("pkNotUsed");
+                    recordIds.add(PK_NOT_USED);
                 }
             }
         }
@@ -123,8 +125,8 @@ public class DremioSQLValidationUtils {
 
                         if (!pksByOptionalValue.contains("\"" + value + "\"")
                                 && !pksByOptionalValue.contains(value)) {
-                            if (!recordIds.contains(fkWithOptionalRS.getString("record_id"))) {
-                                recordIds.add(fkWithOptionalRS.getString("record_id"));
+                            if (!recordIds.contains(fkWithOptionalRS.getString(PARQUET_RECORD_ID_COLUMN_HEADER))) {
+                                recordIds.add(fkWithOptionalRS.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
                             }
                         }
                         if (pksByOptionalValue.contains("\"" + value + "\"")
@@ -146,7 +148,7 @@ public class DremioSQLValidationUtils {
                         .append("=").append(optionalPk).append(" where fk.").append(foreignKey).append(" is null or fk.").append(optionalFk).append(" is null");
                 List<String> res = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 if (res.size()>0) {
-                    recordIds.add("pkNotUsed");
+                    recordIds.add(PK_NOT_USED);
                 }
             }
         }
@@ -166,7 +168,7 @@ public class DremioSQLValidationUtils {
         query.append(" where fk.").append(originFields.get(0)).append(" is null and pk.").append(referFields.get(0)).append(" is not null");
         List<String> res = dremioJdbcTemplate.queryForList(query.toString(), String.class);
         if (res.size()>0) {
-            recordIds.add("OMISSION");
+            recordIds.add(OMISSION);
         }
         StringBuilder isDoubleReferQuery = new StringBuilder();
         if (isDoubleReferenced) {
@@ -180,7 +182,7 @@ public class DremioSQLValidationUtils {
             isDoubleReferQuery.append(" where pk.").append(referFields.get(0)).append(" is null and fk.").append(originFields.get(0)).append(" is not null");
             List<String> rs = dremioJdbcTemplate.queryForList(isDoubleReferQuery.toString(), String.class);
             if (rs.size()>0) {
-                recordIds.add("COMISSION");
+                recordIds.add(COMISSION);
             }
         }
         return recordIds;

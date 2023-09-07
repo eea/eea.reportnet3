@@ -1,6 +1,14 @@
 package org.eea.validation.service.impl;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.fs.Path;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
@@ -26,14 +34,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -41,7 +50,8 @@ import static org.eea.utils.LiteralConstants.*;
 @Service
 public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteService {
 
-
+    @Value("${parquet.file.path}")
+    private String parquetFilePath;
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
     private RulesService rulesService;
@@ -52,15 +62,22 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private SchemasRepository schemasRepository;
     private DataSetControllerZuul dataSetControllerZuul;
     private SqlRulesService sqlRulesService;
+    private DremioHelperService dremioHelperService;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
-    private static final String DATASET = "dataset_";
+    private static final String IS_TABLE_EMPTY = "isTableEmpty";
+    private static final String TABLE_EMPTY = "tableEmpty";
+    private static final String AS_MESSAGE = " as message";
+    private static final String COMMA_RECORD_ID = ",record_id";
+    private static final String DOUBLE_QUOTATION_MARK = ",\'\'";
+    private static final String DREMIO_SQL_VALIDATION_UTILS = "org.eea.validation.util.datalake.DremioSQLValidationUtils";
+
 
     @Autowired
     public DremioSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
                                             DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
                                             DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, SchemasRepository schemasRepository,
-                                            DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService) {
+                                            DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService, DremioHelperService dremioHelperService) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -71,24 +88,25 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         this.dataSetControllerZuul = dataSetControllerZuul;
         this.s3Helper = s3Helper;
         this.sqlRulesService = sqlRulesService;
+        this.dremioHelperService = dremioHelperService;
     }
 
     @Override
-    public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId, Long taskId) throws Exception {
+    public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId, Long taskId, boolean createParquetWithSQL) throws Exception {
         try {
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
-            int startIndex = ruleVO.getWhenConditionMethod().indexOf("(");
-            int endIndex = ruleVO.getWhenConditionMethod().indexOf(")");
+            int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
+            int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> recordIds = new ArrayList<>();
 
             if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-                if (ruleMethodName.equals("isTableEmpty")) {
-                    recordIds.add("tableEmpty");
+                if (ruleMethodName.equals(IS_TABLE_EMPTY)) {
+                    recordIds.add(TABLE_EMPTY);
                 } else {
                     return;
                 }
@@ -99,96 +117,49 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             if (fieldName==null) {
                 fieldName = "";
             }
-            StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(datasetId, tableName, dataTableResolver, validationResolver, ruleVO, fieldName);
 
-            if (!ruleMethodName.equals("isTableEmpty")) {
-                Class<?> cls = Class.forName("org.eea.validation.util.datalake.DremioSQLValidationUtils");
+            String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode() + PARQUET_TYPE;
+            String parquetFile = parquetFilePath + fileName;
+
+            if (!ruleMethodName.equals(IS_TABLE_EMPTY)) {
+                Class<?> cls = Class.forName(DREMIO_SQL_VALIDATION_UTILS);
                 Field[] fields = cls.getDeclaredFields();
-                Method factoryMethod = cls.getDeclaredMethod("getInstance");
+                Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
                 Object object = factoryMethod.invoke(null, null);
                 Field field = Arrays.stream(fields).findFirst().get();
                 field.setAccessible(true);
                 field.set(object, dremioJdbcTemplate);
                 Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
 
-                int parameterLength = method.getParameters().length;
-                switch (parameterLength) {
-                    case 1:
-                        DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-                        String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
-                        sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
-                        recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
-                        break;
-                    case 2:
-                        recordIds = (List<String>) method.invoke(object, fieldName, tablePath);  //isUniqueConstraint
-                        break;
-                    case 5:
-                        List<String> origFieldNames = new ArrayList<>();
-                        List<String> referFieldNames = new ArrayList<>();
-                        DataSetSchema originDatasetSchema;
-                        DataSetSchema referDatasetSchema;
-                        IntegrityVO integrityVO = rulesService.getIntegrityConstraint(parameters.get(1));
-                        long datasetIdOrigin = datasetId;
-                        String originSchemaId = integrityVO.getOriginDatasetSchemaId();
-                        String referencedSchemaId = integrityVO.getReferencedDatasetSchemaId();
-                        long datasetIdReferenced;
-                        originDatasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(originSchemaId));
-                        if (originSchemaId.equals(referencedSchemaId)) {
-                            datasetIdReferenced = datasetIdOrigin;
-                            referDatasetSchema = originDatasetSchema;
-                        } else {
-                            datasetIdReferenced = dataSetMetabaseControllerZuul.getIntegrityDatasetId(datasetIdOrigin,
-                                    integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
-                            referDatasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(referencedSchemaId));
-                        }
-                        TableSchema originTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(originDatasetSchema, integrityVO.getOriginFields().get(0));
-                        TableSchema referencedTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(referDatasetSchema, integrityVO.getReferencedFields().get(0));
-                        integrityVO.getOriginFields().forEach(originField -> {
-                            FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(originSchemaId, originField);
-                            origFieldNames.add(fieldSchema.getName());
-                        });
-                        integrityVO.getReferencedFields().forEach(referField -> {
-                            FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(referencedSchemaId, referField);
-                            referFieldNames.add(fieldSchema.getName());
-                        });
-                        S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
-                        String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-                        S3PathResolver referTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdReferenced, referencedTableSchema.getNameTableSchema());
-                        String referTablePath = s3Service.getTableAsFolderQueryPath(referTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-                        recordIds =  (List<String>) method.invoke(object, originTablePath, referTablePath, origFieldNames, referFieldNames, integrityVO.getIsDoubleReferenced());  //checkIntegrityConstraint
-                        break;
-                    case 8:
-                        String fkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
-                        String idFieldSchema = parameters.get(1);
-                        boolean pkMustBeUsed = Boolean.parseBoolean(parameters.get(3));
-                        DataSetSchema datasetSchemaFK =
-                                schemasRepository.findByIdDataSetSchema(new ObjectId(fkDatasetSchemaId));
-                        String idFieldSchemaPKString = FKValidationUtils.getIdFieldSchemaPK(idFieldSchema, datasetSchemaFK);
-                        FieldSchema fkFieldSchema = FKValidationUtils.getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
-                        Long datasetIdRefered =
-                                dataSetControllerZuul.getReferencedDatasetId(datasetId, idFieldSchemaPKString);
-
-                        DataSetSchema datasetSchemaPK = null;
-                        if (datasetId==datasetIdRefered) {
-                            datasetSchemaPK = datasetSchemaFK;
-                        } else {
-                            String pkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
-                            datasetSchemaPK =
-                                    schemasRepository.findByIdDataSetSchema(new ObjectId(pkDatasetSchemaId));
-                        }
-                        String foreignKey = fkFieldSchema.getHeaderName();
-                        List<String> pkAndFkDetailsList = getPkAndFkHeaderValues(datasetSchemaPK, datasetSchemaFK, fkFieldSchema, tableSchemaId);
-                        String pkTableName = pkAndFkDetailsList.get(0);
-                        String primaryKey = pkAndFkDetailsList.get(1);
-                        String optionalPK = pkAndFkDetailsList.get(2);
-                        String optionalFK = pkAndFkDetailsList.get(3);
-                        S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
-                        String pkTablePath = s3Service.getTableAsFolderQueryPath(pkTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-                        recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
-                        break;
-                }
+                dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+                recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, recordIds, parameters, fieldName, object, method);
             }
 
+            if (recordIds.size() > 0) {
+                runRuleAndCreateParquet(createParquetWithSQL, parquetFile, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName);
+            }
+        } catch (Exception e) {
+            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {}", ruleId, datasetId, tableName);
+            throw e;
+        }
+    }
+
+    /**
+     * runs rule and creates parquet in S3
+     * @param createParquetWithSQL
+     * @param parquetFile
+     * @param dataTableResolver
+     * @param validationResolver
+     * @param ruleVO
+     * @param recordIds
+     * @param fieldName
+     * @throws IOException
+     */
+    private void runRuleAndCreateParquet(boolean createParquetWithSQL, String parquetFile, S3PathResolver dataTableResolver, S3PathResolver validationResolver, RuleVO ruleVO, List<String> recordIds,
+                                         String fieldName, String fileName) throws Exception {
+        int ruleIdLength = ruleVO.getRuleId().length();
+        if (createParquetWithSQL) {
+            StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), dataTableResolver, validationResolver, ruleVO, fieldName);
             int count = 0;
             for (String recordId : recordIds) {
                 if (count != 0) {
@@ -202,42 +173,71 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             validationQuery.append("))");
             String valQuery = validationQuery.toString();
             if (recordIds.size() > 0) {
-                if (valQuery.contains("pkNotUsed")) {
-                    valQuery = getModifiedQuery(dataTableResolver, valQuery, "('pkNotUsed')");
-                    valQuery = valQuery.replace(",record_id", ",\'\'");
-                    valQuery = valQuery.replace(fieldName, "");
-                } else if (valQuery.contains("tableEmpty")) {
-                    valQuery = getModifiedQuery(dataTableResolver, valQuery, "('tableEmpty')");
-                    valQuery = valQuery.replace(",record_id", ",\'\'");
-                } else if (valQuery.contains("OMISSION")) {
-                    if (valQuery.contains("('OMISSION','COMISSION')")) {
-                        valQuery = getModifiedQuery(dataTableResolver, valQuery, "('OMISSION','COMISSION')");
-                        valQuery = valQuery.replace(",record_id", ",\'\'");
-                        valQuery = valQuery.replace("'" + ruleVO.getThenCondition().get(0) + "'" + " as message", "'" + ruleVO.getThenCondition().get(0) + " (COMISSION)'" + " as message");
-                        dremioJdbcTemplate.execute(valQuery.toString());
-                        int ruleIdLength = ruleVO.getRuleId().length();
-                        String ruleFolderName = ruleVO.getShortCode()+"-"+ruleVO.getRuleId().substring(ruleIdLength-3, ruleIdLength);
-                        valQuery = valQuery.replace(ruleFolderName, ruleFolderName+"-om");
-                        valQuery = valQuery.replace("COMISSION", "OMISSION");
-                        dremioJdbcTemplate.execute(valQuery.toString());
-                        return;
-                    } else if (valQuery.contains("COMISSION")) {
-                        valQuery = getModifiedQuery(dataTableResolver, valQuery, "('COMISSION')");
-                        valQuery = valQuery.replace(",record_id", ",\'\'");
-                        valQuery = valQuery.replace("'" + ruleVO.getThenCondition().get(0) + "'" + " as message", "'" + ruleVO.getThenCondition().get(0) + " (COMISSION)'" + " as message");
-                    } else {
-                        valQuery = getModifiedQuery(dataTableResolver, valQuery, "('OMISSION')");
-                        valQuery = valQuery.replace(",record_id", ",\'\'");
-                        valQuery = valQuery.replace("'" + ruleVO.getThenCondition().get(0) + "'" + " as message", "'" + ruleVO.getThenCondition().get(0) + " (OMISSION)'" + " as message");
-
-                    }
-                }
-                dremioJdbcTemplate.execute(valQuery.toString());
+                valQuery = processValidationQuery(dataTableResolver, ruleVO, fieldName, ruleIdLength, valQuery);
+                dremioJdbcTemplate.execute(valQuery);
             }
-        } catch (Exception e) {
-            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {}", ruleId, datasetId, tableName);
-            throw e;
+        } else {
+            try {
+                //Defining schema
+                List<String> parquetHeaders = Arrays.asList(PK, PARQUET_RECORD_ID_COLUMN_HEADER, VALIDATION_LEVEL, VALIDATION_AREA, MESSAGE, TABLE_NAME, FIELD_NAME, DATASET_ID, QC_CODE);
+                List<Schema.Field> fields = new ArrayList<>();
+                for (String header : parquetHeaders) {
+                    fields.add(new Schema.Field(header, Schema.create(Schema.Type.STRING), null, null));
+                }
+                Schema schema = Schema.createRecord("Data", null, null, false, fields);
+                Map<String, String> headerMap = dremioRulesService.createValidationParquetHeaderMap(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), ruleVO, fieldName);
+                createParquet(parquetFile, ruleVO, recordIds, headerMap, schema);
+                if (recordIds.size()>0) {
+                    StringBuilder pathBuilder = new StringBuilder().append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength));
+                    String s3FilePath = pathBuilder.append(SLASH).append(fileName).toString();
+                    s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
+                }
+            } finally {
+                dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+            }
         }
+    }
+
+    /**
+     * processes validation query
+     * @param dataTableResolver
+     * @param ruleVO
+     * @param fieldName
+     * @param ruleIdLength
+     * @param valQuery
+     * @return
+     */
+    private String processValidationQuery(S3PathResolver dataTableResolver, RuleVO ruleVO, String fieldName, int ruleIdLength, String valQuery) {
+        if (valQuery.contains(PK_NOT_USED)) {
+            valQuery = getModifiedQuery(dataTableResolver, valQuery, "('pkNotUsed')");
+            valQuery = valQuery.replace(COMMA_RECORD_ID, DOUBLE_QUOTATION_MARK);
+            valQuery = valQuery.replace(fieldName, "");
+        } else if (valQuery.contains(TABLE_EMPTY)) {
+            valQuery = getModifiedQuery(dataTableResolver, valQuery, "('tableEmpty')");
+            valQuery = valQuery.replace(COMMA_RECORD_ID, DOUBLE_QUOTATION_MARK);
+        } else if (valQuery.contains(OMISSION)) {
+            if (valQuery.contains("('OMISSION','COMISSION')")) {
+                valQuery = getModifiedQuery(dataTableResolver, valQuery, "('OMISSION','COMISSION')");
+                valQuery = valQuery.replace(COMMA_RECORD_ID, DOUBLE_QUOTATION_MARK);
+                valQuery = valQuery.replace("'" + ruleVO.getThenCondition().get(0) + "'" + AS_MESSAGE, "'" + ruleVO.getThenCondition().get(0) + " (COMISSION)'" + AS_MESSAGE);
+                dremioJdbcTemplate.execute(valQuery);
+                String ruleFolderName = ruleVO.getShortCode()+"-"+ ruleVO.getRuleId().substring(ruleIdLength -3, ruleIdLength);
+                valQuery = valQuery.replace(ruleFolderName, ruleFolderName+"-om");
+                valQuery = valQuery.replace(COMISSION, OMISSION);
+                dremioJdbcTemplate.execute(valQuery);
+                return null;
+            } else if (valQuery.contains(COMISSION)) {
+                valQuery = getModifiedQuery(dataTableResolver, valQuery, "('COMISSION')");
+                valQuery = valQuery.replace(COMMA_RECORD_ID, DOUBLE_QUOTATION_MARK);
+                valQuery = valQuery.replace("'" + ruleVO.getThenCondition().get(0) + "'" + AS_MESSAGE, "'" + ruleVO.getThenCondition().get(0) + " (COMISSION)'" + AS_MESSAGE);
+            } else {
+                valQuery = getModifiedQuery(dataTableResolver, valQuery, "('OMISSION')");
+                valQuery = valQuery.replace(COMMA_RECORD_ID, DOUBLE_QUOTATION_MARK);
+                valQuery = valQuery.replace("'" + ruleVO.getThenCondition().get(0) + "'" + AS_MESSAGE, "'" + ruleVO.getThenCondition().get(0) + " (OMISSION)'" + AS_MESSAGE);
+
+            }
+        }
+        return valQuery;
     }
 
     private String getModifiedQuery(S3PathResolver dataTableResolver, String valQuery, String replace) {
@@ -245,8 +245,198 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         return valQuery;
     }
 
+    /**
+     * Gets recordIds
+     * @param datatableResolver
+     * @param tableSchemaId
+     * @param tablePath
+     * @param ruleVO
+     * @param recordIds
+     * @param parameters
+     * @param fieldName
+     * @param object
+     * @param method
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private List<String> getRecordIds(S3PathResolver datatableResolver, String tableSchemaId, String tablePath, RuleVO ruleVO, List<String> recordIds, List<String> parameters, String fieldName, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+        int parameterLength = method.getParameters().length;
+        switch (parameterLength) {
+            case 1:
+                DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
+                String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
+                sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
+                recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
+                break;
+            case 2:
+                recordIds = (List<String>) method.invoke(object, fieldName, tablePath);  //isUniqueConstraint
+                break;
+            case 5:
+                //checkIntegrityConstraint
+                recordIds = getDheckIntegrityConstraintRecordIds(datatableResolver.getDataflowId(), datatableResolver.getDatasetId(), datatableResolver.getDataProviderId(), parameters, object, method);
+                break;
+            case 8:
+                //isfieldFK
+                recordIds = getIsFieldFKRecordIds(datatableResolver.getDataflowId(), datatableResolver.getDatasetId(), tableSchemaId, datatableResolver.getDataProviderId(), tablePath, parameters, object, method);
+                break;
+        }
+        return recordIds;
+    }
+
+    /**
+     * Gets recordsIds in case of isfieldFK rule
+     * @param dataflowId
+     * @param datasetId
+     * @param tableSchemaId
+     * @param dataProviderId
+     * @param tablePath
+     * @param parameters
+     * @param object
+     * @param method
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private List<String> getIsFieldFKRecordIds(Long dataflowId, Long datasetId, String tableSchemaId, Long dataProviderId, String tablePath, List<String> parameters, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+        List<String> recordIds;
+        String fkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
+        String idFieldSchema = parameters.get(1);
+        boolean pkMustBeUsed = Boolean.parseBoolean(parameters.get(3));
+        DataSetSchema datasetSchemaFK =
+                schemasRepository.findByIdDataSetSchema(new ObjectId(fkDatasetSchemaId));
+        String idFieldSchemaPKString = FKValidationUtils.getIdFieldSchemaPK(idFieldSchema, datasetSchemaFK);
+        FieldSchema fkFieldSchema = FKValidationUtils.getPKFieldFromFKField(datasetSchemaFK, idFieldSchema);
+        Long datasetIdRefered =
+                dataSetControllerZuul.getReferencedDatasetId(datasetId, idFieldSchemaPKString);
+
+        DataSetSchema datasetSchemaPK = null;
+        if (datasetId ==datasetIdRefered) {
+            datasetSchemaPK = datasetSchemaFK;
+        } else {
+            String pkDatasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetIdRefered);
+            datasetSchemaPK =
+                    schemasRepository.findByIdDataSetSchema(new ObjectId(pkDatasetSchemaId));
+        }
+        String foreignKey = fkFieldSchema.getHeaderName();
+        List<String> pkAndFkDetailsList = getPkAndFkHeaderValues(datasetSchemaPK, datasetSchemaFK, fkFieldSchema, tableSchemaId);
+        String pkTableName = pkAndFkDetailsList.get(0);
+        String primaryKey = pkAndFkDetailsList.get(1);
+        String optionalPK = pkAndFkDetailsList.get(2);
+        String optionalFK = pkAndFkDetailsList.get(3);
+        S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
+        String pkTablePath = s3Service.getTableAsFolderQueryPath(pkTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
+        return recordIds;
+    }
+
+    /**
+     * Gets recordIds in case of checkIntegrityConstraint rule
+     * @param dataflowId
+     * @param datasetId
+     * @param dataProviderId
+     * @param parameters
+     * @param object
+     * @param method
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private List<String> getDheckIntegrityConstraintRecordIds(Long dataflowId, Long datasetId, Long dataProviderId, List<String> parameters, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+        List<String> recordIds;
+        List<String> origFieldNames = new ArrayList<>();
+        List<String> referFieldNames = new ArrayList<>();
+        DataSetSchema originDatasetSchema;
+        DataSetSchema referDatasetSchema;
+        IntegrityVO integrityVO = rulesService.getIntegrityConstraint(parameters.get(1));
+        long datasetIdOrigin = datasetId;
+        String originSchemaId = integrityVO.getOriginDatasetSchemaId();
+        String referencedSchemaId = integrityVO.getReferencedDatasetSchemaId();
+        long datasetIdReferenced;
+        originDatasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(originSchemaId));
+        if (originSchemaId.equals(referencedSchemaId)) {
+            datasetIdReferenced = datasetIdOrigin;
+            referDatasetSchema = originDatasetSchema;
+        } else {
+            datasetIdReferenced = dataSetMetabaseControllerZuul.getIntegrityDatasetId(datasetIdOrigin,
+                    integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+            referDatasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(referencedSchemaId));
+        }
+        TableSchema originTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(originDatasetSchema, integrityVO.getOriginFields().get(0));
+        TableSchema referencedTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(referDatasetSchema, integrityVO.getReferencedFields().get(0));
+        integrityVO.getOriginFields().forEach(originField -> {
+            FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(originSchemaId, originField);
+            origFieldNames.add(fieldSchema.getName());
+        });
+        integrityVO.getReferencedFields().forEach(referField -> {
+            FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(referencedSchemaId, referField);
+            referFieldNames.add(fieldSchema.getName());
+        });
+        S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
+        String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver referTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdReferenced, referencedTableSchema.getNameTableSchema());
+        String referTablePath = s3Service.getTableAsFolderQueryPath(referTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        recordIds =  (List<String>) method.invoke(object, originTablePath, referTablePath, origFieldNames, referFieldNames, integrityVO.getIsDoubleReferenced());  //checkIntegrityConstraint
+        return recordIds;
+    }
+
+    /**
+     * creates parquet file
+     * @param parquetFile
+     * @param ruleVO
+     * @param recordIds
+     * @param headerMap
+     * @param schema
+     * @throws IOException
+     */
+    private static void createParquet(String parquetFile, RuleVO ruleVO, List<String> recordIds, Map<String, String> headerMap, Schema schema) throws IOException {
+        try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                .<GenericRecord>builder(new Path(parquetFile))
+                .withSchema(schema)
+                .withCompressionCodec(CompressionCodecName.SNAPPY)
+                .withPageSize(4 * 1024)
+                .withRowGroupSize(16 * 1024)
+                .build()) {
+
+            for (String recordId : recordIds) {
+                GenericRecord record = new GenericData.Record(schema);
+
+                if (recordId.equals(PK_NOT_USED) || recordId.equals(TABLE_EMPTY)) {
+                    recordId = "";
+                } else if (recordId.equals(COMISSION)) {
+                    recordId = "";
+                    headerMap.put(MESSAGE, ruleVO.getThenCondition().get(0) + " (COMISSION)");
+                } else if (recordId.equals(OMISSION)) {
+                    recordId = "";
+                    headerMap.put(MESSAGE, ruleVO.getThenCondition().get(0) + " (OMISSION)");
+                }
+
+                for (Map.Entry<String,String> entry : headerMap.entrySet()) {
+                    record.put(entry.getKey(), entry.getValue());
+                }
+                record.put(PK, UUID.randomUUID().toString());
+                record.put(PARQUET_RECORD_ID_COLUMN_HEADER, recordId);
+                writer.write(record);
+            }
+        } catch (Exception e1) {
+            LOG.error("Error creating parquet file {}", parquetFile);
+            throw e1;
+        }
+    }
+
+    /**
+     * Finds primary key and foreign key field name values
+     * @param datasetSchemaPK
+     * @param datasetSchemaFK
+     * @param fkFieldSchema
+     * @param tableSchemaId
+     * @return
+     */
     private List<String> getPkAndFkHeaderValues(DataSetSchema datasetSchemaPK, DataSetSchema datasetSchemaFK, FieldSchema fkFieldSchema, String tableSchemaId) {
-        String primaryKey = null, optionalFK = null, optionalPK = null, pkTableName = null;
+        String primaryKey = null;
+        String optionalFK = null;
+        String optionalPK = null;
+        String pkTableName = null;
         List<String> pkAndFkDetailsList = new ArrayList<>();
         for (TableSchema tableSchema : datasetSchemaPK.getTableSchemas()) {
             for (FieldSchema pKFieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
@@ -255,12 +445,18 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                     primaryKey = pKFieldSchema.getHeaderName();
                     ObjectId optionalPKId = fkFieldSchema.getReferencedField().getLinkedConditionalFieldId();
                     if (optionalPKId!=null) {
-                        optionalPK = tableSchema.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalPKId.toString())).findFirst().get().getHeaderName();
+                        Optional<FieldSchema> optionalPKValue = tableSchema.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalPKId.toString())).findFirst();
+                        if (optionalPKValue.isPresent()) {
+                            optionalPK = optionalPKValue.get().getHeaderName();
+                        }
                     }
                     ObjectId optionalFKId = fkFieldSchema.getReferencedField().getMasterConditionalFieldId();
                     if (optionalFKId!=null) {
-                        optionalFK = datasetSchemaFK.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(tableSchemaId))
-                                .findFirst().get().getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalFKId.toString())).findFirst().get().getHeaderName();
+                        Optional<FieldSchema> optionalFKValue = datasetSchemaFK.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(tableSchemaId))
+                                .findFirst().get().getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(optionalFKId.toString())).findFirst();
+                        if (optionalFKValue.isPresent()) {
+                            optionalFK = optionalFKValue.get().getHeaderName();
+                        }
                     }
                     break;
                 }
