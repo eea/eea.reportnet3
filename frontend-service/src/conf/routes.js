@@ -6,6 +6,7 @@ export const routes = {
   DATA_COLLECTION: '/dataflow/:dataflowId/dataCollection/:datasetId',
   DATAFLOW_FEEDBACK_CUSTODIAN: '/dataflow/:dataflowId/feedback',
   DATAFLOW_FEEDBACK: '/dataflow/:dataflowId/feedback/:representativeId',
+  DATAFLOW_PROVIDER: '/dataflow/:dataflowId/provider/:providerId',
   DATAFLOW_REPRESENTATIVE: '/dataflow/:dataflowId/provider/:representativeId',
   DATAFLOW: '/dataflow/:dataflowId',
   DATAFLOWS_ERROR: '/dataflows/error/:errorType',

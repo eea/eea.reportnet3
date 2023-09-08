@@ -1,10 +1,15 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './ReleasedDatasetsDashboard.module.css';
 
 import colors from 'conf/colors.json';
+
+import { getUrl } from 'repositories/_utils/UrlUtils';
+
+import { routes } from 'conf/routes';
 
 import { Chart } from 'primereact/chart';
 import { Spinner } from 'views/_components/Spinner';
@@ -16,8 +21,10 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useStatusFilter } from 'views/_components/StatusList/_hooks/useStatusFilter';
 
-export const ReleasedDatasetsDashboard = dataflowId => {
+export const ReleasedDatasetsDashboard = ({ countryDatasets, dataflowId }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const navigate = useNavigate();
 
   const [isLoading, setLoading] = useState(true);
   const [maxValue, setMaxValue] = useState();
@@ -25,13 +32,16 @@ export const ReleasedDatasetsDashboard = dataflowId => {
 
   const { statusDispatcher, updatedState } = useStatusFilter(releasedDashboardData);
 
+  const refCountries = useRef();
+  refCountries.current = countryDatasets;
+
   useEffect(() => {
     onLoadDashboard();
   }, []);
 
   const onLoadDashboard = async () => {
     try {
-      const data = await DataflowService.getDatasetsReleasedStatus(dataflowId.dataflowId);
+      const data = await DataflowService.getDatasetsReleasedStatus(dataflowId);
       setReleasedDashboardData(buildReleasedDashboardObject(data));
     } catch (error) {
       console.error('ReleasedDatasetsDashboard - onLoadDashboard.', error);
@@ -90,6 +100,15 @@ export const ReleasedDatasetsDashboard = dataflowId => {
           gridLines: { display: false }
         }
       ]
+    },
+    onClick: (event, item) => {
+      if (refCountries.current.length !== 0) {
+        const selectedCountry = refCountries.current.find(
+          country => updatedState.dashboardData.labels[item[0]._index] === country.name
+        );
+        const providerId = selectedCountry.providerId;
+        navigate(getUrl(routes.DATAFLOW_PROVIDER, { dataflowId, providerId }, true));
+      }
     }
   };
 
