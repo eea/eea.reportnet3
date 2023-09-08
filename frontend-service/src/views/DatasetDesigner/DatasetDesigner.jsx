@@ -717,9 +717,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     const action = 'DATASET_EXPORT';
     actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
-
     try {
-      await DatasetService.exportDatasetData(datasetId, fileType);
+      if (designerState.bigData) {
+        await DatasetService.exportDatasetDataDL(datasetId, fileType);
+      } else {
+        await DatasetService.exportDatasetData(datasetId, fileType);
+      }
     } catch (error) {
       console.error('DatasetDesigner - onExportDataInternalExtension.', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
@@ -1453,7 +1456,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const layout = children => (
-    <MainLayout>
+    <MainLayout bigData={designerState.bigData}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );

@@ -144,6 +144,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
+  let bigDataRef = useRef();
+
+  bigDataRef.current = metadata?.dataflow.bigData;
 
   useBreadCrumbs({
     currentPage: getCurrentPage(),
@@ -707,7 +710,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
     try {
-      await DatasetService.exportDatasetData(datasetId, fileType);
+      if (bigDataRef.current) {
+        await DatasetService.exportDatasetDataDL(datasetId, fileType);
+      } else {
+        await DatasetService.exportDatasetData(datasetId, fileType);
+      }
     } catch (error) {
       console.error('Dataset - onExportDataInternalExtension.', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
@@ -977,7 +984,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const layout = children => {
     return (
-      <MainLayout>
+      <MainLayout bigData={metadata?.dataflow.bigData}>
         <div className="rep-container">{children}</div>
       </MainLayout>
     );
