@@ -78,11 +78,7 @@ export const InfoTab = ({
       setFieldsDropdown(
         <Dropdown
           appendTo={document.body}
-          disabled={
-            creationFormState.candidateRule.automatic || validationContext.ruleEdit
-              ? true
-              : fieldDropdownOptions.disabled
-          }
+          disabled={creationFormState.candidateRule.automatic ? true : fieldDropdownOptions.disabled}
           filterPlaceholder={fieldDropdownOptions.placeholder}
           id={`${componentName}__field`}
           onChange={fieldDropdownOptions.onChange}
@@ -129,11 +125,7 @@ export const InfoTab = ({
           <label htmlFor="table">{resourcesContext.messages['table']}</label>
           <Dropdown
             appendTo={document.body}
-            disabled={
-              creationFormState.candidateRule.automatic || validationContext.ruleEdit
-                ? true
-                : tableFieldOptions.disabled
-            }
+            disabled={creationFormState.candidateRule.automatic ? true : tableFieldOptions.disabled}
             filterPlaceholder={resourcesContext.messages['table']}
             id={`${componentName}__table`}
             onChange={e => onInfoFieldChange('table', e.value)}
