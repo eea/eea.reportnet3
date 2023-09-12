@@ -18,4 +18,6 @@ public interface DremioHelperService {
     void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
     void removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
+
+    void executeSqlStatement(String sqlStatement);
 }
