@@ -142,7 +142,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         //refresh the metadata for the csv table
         String refreshImportTableQuery = "ALTER TABLE " + dremioPathForCsvFile + " REFRESH METADATA";
-        dremioJdbcTemplate.execute(refreshImportTableQuery);
+        dremioHelperService.executeSqlStatement(refreshImportTableQuery);
 
         //demote table folder
         dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, false);
@@ -156,9 +156,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
         dremioHelperService.executeSqlStatement(createTableQuery);
 
-        //refresh the metadata and promote the folder
+        //we wait for a few seconds so that the next statement will be executed successfully
+        Thread.sleep(1000);
+
+        //refresh the metadata
         String refreshTableQuery = "ALTER TABLE " + dremioPathForParquetFolder + " REFRESH METADATA AUTO PROMOTION";
-        dremioJdbcTemplate.execute(refreshTableQuery);
+        dremioHelperService.executeSqlStatement(refreshTableQuery);
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
 
