@@ -153,23 +153,15 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             }
         }
 
-        String createTableQuery = constructCreateTableStatementForParquet(parquetInnerFolderPath, dremioPathForCsvFile);
-        dremioJdbcTemplate.execute(createTableQuery);
+        String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
+        dremioHelperService.executeSqlStatement(createTableQuery);
 
-        //promote folder
-        dremioHelperService.promoteFolderOrFile(s3PathResolver, tableSchemaName, false);
-
-        //refresh the metadata
-        String refreshTableQuery = "ALTER TABLE " + dremioPathForParquetFolder + " REFRESH METADATA ";
+        //refresh the metadata and promote the folder
+        String refreshTableQuery = "ALTER TABLE " + dremioPathForParquetFolder + " REFRESH METADATA AUTO PROMOTION";
         dremioJdbcTemplate.execute(refreshTableQuery);
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
 
-    private String constructCreateTableStatementForParquet(String parquetInnerFolderPath, String dremioPathForCsvFile){
-        //String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT A as " + PARQUET_RECORD_ID_COLUMN_HEADER + ", B as f1, C as f2, D as " + PARQUET_PROVIDER_CODE_COLUMN_HEADER+ " FROM " + dremioPathForCsvFile;
-        String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
-        return createTableQuery;
-    }
 
     private File modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String randomStrForNewFolderSuffix) throws Exception {
         char delimiterChar = defaultDelimiter;

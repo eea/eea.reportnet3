@@ -1,6 +1,8 @@
 package org.eea.datalake.service.impl;
 
+import com.google.gson.JsonObject;
 import feign.FeignException;
+import netscape.javascript.JSObject;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
@@ -224,6 +226,22 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             } catch (IOException e) {
                 LOG.error("Could not delete file {}.", parquetFile);
                 throw new Exception("Could not delete file " + parquetFile);
+            }
+        }
+    }
+
+    @Override
+    public void executeSqlStatement(String sqlStatement){
+        DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
+        try {
+            dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+        } catch (FeignException e) {
+            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
+                token = this.getAuthToken();
+                dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+            } else {
+                LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
+                throw e;
             }
         }
     }

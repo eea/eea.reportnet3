@@ -257,7 +257,7 @@ public class JobControllerImpl implements JobController {
             @ApiParam(type = "String", value = "Table schema id",
                     example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
                     required = false) String tableSchemaId,
-            @ApiParam(value = "File to upload") @RequestParam("fileName") String fileName,
+            @ApiParam(value = "File to upload") @RequestParam(value = "fileName", required = false) String fileName,
             @ApiParam(type = "boolean", value = "Replace current data",
                     example = "true") @RequestParam(value = "replace", required = false) boolean replace,
             @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(

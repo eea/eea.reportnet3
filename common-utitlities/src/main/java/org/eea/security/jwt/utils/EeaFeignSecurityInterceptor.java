@@ -35,7 +35,7 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
         template.uri(fullUrl);
       }
     }
-    if (template.url().contains("api/v3/catalog")) {
+    if (template.url().contains("api/v3/")) {
       return;
     }
     if (authentication instanceof UsernamePasswordAuthenticationToken) {

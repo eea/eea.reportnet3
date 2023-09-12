@@ -20,4 +20,6 @@ public interface DremioHelperService {
     void removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
 
     void deleteFileFromR3IfExists(String parquetFile) throws Exception;
+
+    void executeSqlStatement(String sqlStatement);
 }

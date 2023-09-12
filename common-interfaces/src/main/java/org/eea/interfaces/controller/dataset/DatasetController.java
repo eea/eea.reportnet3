@@ -4,6 +4,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -529,6 +530,7 @@ public interface DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    * @param filePathInS3 the filePathInS3
    */
@@ -541,6 +543,7 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
+      @RequestParam(value = "jobId", required = false) Long jobId,
       @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
       @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
@@ -556,6 +559,7 @@ public interface DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    * @param filePathInS3 the filePathInS3
    */
@@ -568,6 +572,7 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
+      @RequestParam(value = "jobId", required = false) Long jobId,
       @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
       @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
@@ -582,6 +587,7 @@ public interface DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    * @param filePathInS3 the filePathInS3
    */
@@ -594,6 +600,7 @@ public interface DatasetController {
       @RequestParam(value = "replace", required = false) boolean replace,
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
+      @RequestParam(value = "jobId", required = false) Long jobId,
       @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
       @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
@@ -764,10 +771,19 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaId the tableSchemaId
+   * @param replace the replace
+   * @param integrationId the integrationId
+   * @param delimiter the delimiter
+   *
    */
   @GetMapping("/{datasetId}/generateImportPresignedUrl")
-  String generateImportPresignedUrl(@PathVariable("datasetId") Long datasetId,
-                      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-                      @RequestParam(value = "providerId", required = false) Long providerId);
+  JobPresignedUrlInfo generateImportPresignedUrl(@PathVariable("datasetId") Long datasetId,
+           @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+           @RequestParam(value = "providerId", required = false) Long providerId,
+           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+           @RequestParam(value = "replace", required = false) boolean replace,
+           @RequestParam(value = "integrationId", required = false) Long integrationId,
+           @RequestParam(value = "delimiter", required = false) String delimiter);
 
 }

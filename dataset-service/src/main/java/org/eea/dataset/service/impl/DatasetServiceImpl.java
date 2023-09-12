@@ -3726,7 +3726,7 @@ public class DatasetServiceImpl implements DatasetService {
         throw new Exception("Schema is not reportable for datasetId " + datasetId + " and tableSchemaId " + tableSchemaId);
       }
       boolean guessTableName = null == tableSchemaId;
-      if (guessTableName) {
+      if (guessTableName && originalFileName != null) {
         tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(datasetSchema, originalFileName);
       }
 

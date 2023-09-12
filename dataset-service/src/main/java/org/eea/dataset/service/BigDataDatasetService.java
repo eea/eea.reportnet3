@@ -15,12 +15,13 @@ public interface BigDataDatasetService {
      * @param replace the replace
      * @param integrationId the integration id
      * @param delimiter the delimiter
+     * @param jobId the jobId
      * @param fmeJobId the fmeJobId
      * @param filePathInS3 the filePathInS3
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, String fmeJobId, String filePathInS3) throws Exception;
+                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, String filePathInS3) throws Exception;
 
     /**
      * Generate s3 presigned Url for import
