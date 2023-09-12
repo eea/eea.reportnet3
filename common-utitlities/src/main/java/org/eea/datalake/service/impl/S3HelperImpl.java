@@ -36,11 +36,12 @@ public class S3HelperImpl implements S3Helper {
 
     private S3Service s3Service;
     private S3Client s3Client;
+
     /**
-     * The path export DL.
+     * The path public file.
      */
-    @Value("${exportDLPath}")
-    private String exportDLPath;
+    @Value("${pathPublicFile}")
+    private String pathPublicFile;
 
     @Autowired
     public S3HelperImpl(S3Service s3Service, S3Client s3Client) {
@@ -147,7 +148,7 @@ public class S3HelperImpl implements S3Helper {
         byte[] data = objectBytes.asByteArray();
 
         // Write the data to a local file.
-        File parquetFile = new File(exportDLPath + datasetName + PARQUET_TYPE);
+        File parquetFile = new File(pathPublicFile + datasetName + PARQUET_TYPE);
         Path textFilePath = Paths.get(parquetFile.toString());
         LOG.info("textFilePath {}", parquetFile);
         Files.createFile(textFilePath);
