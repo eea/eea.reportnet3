@@ -40,6 +40,12 @@ public class S3HelperImpl implements S3Helper {
     private S3Service s3Service;
     private S3Client s3Client;
 
+    /**
+     * The path public file.
+     */
+    @Value("${pathPublicFile}")
+    private String pathPublicFile;
+
     private S3Presigner s3Presigner;
 
     @Autowired
