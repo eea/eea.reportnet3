@@ -559,7 +559,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         List<String> intHeaders = headerNames.get(md.getName());
         if (pm.size()==1) {
             createField(ruleVO, fieldName, rs, fields, recordValue);
-            result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).contains(VALUE) ? rs.getString(fieldName) : pm.get(0));
+            result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).toLowerCase().contains(VALUE) ? rs.getString(fieldName) : pm.get(0));
         } else if (pm.size()==2) {
             if (record) {
                 creatFields(rs, pm, fields, recordValue, intHeaders);
@@ -567,7 +567,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             } else {
                 String firstValue;
                 FieldValue fieldValue = new FieldValue();
-                if (pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE)) {
+                if (pm.get(0) instanceof String && ((String) pm.get(0)).toLowerCase().equalsIgnoreCase(VALUE)) {
                     firstValue = rs.getString(fieldName);
                     fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
                     fieldValue.setValue(firstValue);
