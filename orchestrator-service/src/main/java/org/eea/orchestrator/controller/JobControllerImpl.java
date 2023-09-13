@@ -134,7 +134,8 @@ public class JobControllerImpl implements JobController {
     @ApiOperation(value = "Validates dataset data for a given dataset id", hidden = true)
     @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
     public void addValidationJob(@ApiParam(value = "Dataset id whose data is going to be validated", example = "15") @PathVariable("datasetId") Long datasetId,
-                                 @ApiParam(value = "Is the dataset released?", example = "true", required = false) @RequestParam(value = "released", required = false) boolean released) {
+                                 @ApiParam(value = "Is the dataset released?", example = "true", required = false) @RequestParam(value = "released", required = false) boolean released,
+                                 @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         // Set the user name on the thread
         ThreadPropertiesManager.setVariable("user", SecurityContextHolder.getContext().getAuthentication().getName());
@@ -160,6 +161,7 @@ public class JobControllerImpl implements JobController {
             }
             parameters.put("datasetId", datasetId);
             parameters.put("released", released);
+            parameters.put("createParquetWithSQL", createParquetWithSQL);
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
             parameters.put("userId", userId);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.VALIDATION.toString(), dataset.getDataflowId(), dataProvider, Arrays.asList(datasetId), false);

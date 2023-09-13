@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -66,7 +67,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -199,8 +199,7 @@ public class ValidationHelper implements DisposableBean {
   private S3Helper s3Helper;
 
   @Autowired
-  @Qualifier("dremioJdbcTemplate")
-  JdbcTemplate dremioJdbcTemplate;
+  DremioHelperService dremioHelperService;
 
   @Autowired
   S3Service s3Service;
@@ -344,7 +343,7 @@ public class ValidationHelper implements DisposableBean {
   }
 
   @LockMethod(removeWhenFinish = true, isController = false)
-  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver) {
+  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver, boolean createParquetWithSQL) {
     initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     LOG.info("Obtaining dataset metabase from datasetId {} to perform validationDL. The schema from the metabase is {}",
@@ -387,7 +386,7 @@ public class ValidationHelper implements DisposableBean {
         value.put("tableName", tableSchema.getNameTableSchema());
         value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
-        value.put("createParquetWithSQL", "false");
+        value.put("createParquetWithSQL", createParquetWithSQL);
         if (rule.getSqlSentence()!=null || isDremioSqlRuleMethod(rule.getWhenCondition())) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL_WITH_SQL, value);
         } else if (rule.getWhenCondition().contains("RuleOperators")) {
@@ -1275,7 +1274,7 @@ public class ValidationHelper implements DisposableBean {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
         String query = "ALTER TABLE " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
-        dremioJdbcTemplate.execute(query);
+        dremioHelperService.executeSqlStatement(query);
       }
     }
   }

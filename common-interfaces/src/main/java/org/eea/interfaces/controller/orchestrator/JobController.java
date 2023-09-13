@@ -71,7 +71,7 @@ public interface JobController {
      * @return
      */
     @PutMapping(value = "/addValidationJob/{datasetId}")
-    void addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "released", required = false) boolean released);
+    void addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "released", required = false) boolean released, @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL);
 
     /**
      * Adds a release job

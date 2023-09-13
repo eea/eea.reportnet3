@@ -174,7 +174,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String valQuery = validationQuery.toString();
             if (recordIds.size() > 0) {
                 valQuery = processValidationQuery(dataTableResolver, ruleVO, fieldName, ruleIdLength, valQuery);
-                dremioJdbcTemplate.execute(valQuery);
+                dremioHelperService.executeSqlStatement(valQuery);
             }
         } else {
             try {

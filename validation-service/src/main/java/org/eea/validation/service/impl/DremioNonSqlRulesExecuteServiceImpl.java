@@ -156,7 +156,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             }
             if (createRuleFolder) {
                 validationQuery.append("))");
-                dremioJdbcTemplate.execute(validationQuery.toString());
+                dremioHelperService.executeSqlStatement(validationQuery.toString());
             }
         } else {
             Map<String, String> headerMap = dremioRulesService.createValidationParquetHeaderMap(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), ruleVO, fieldName);

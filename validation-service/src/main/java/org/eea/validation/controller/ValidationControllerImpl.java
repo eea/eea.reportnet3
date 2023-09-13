@@ -61,10 +61,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static org.eea.utils.LiteralConstants.S3_VALIDATION;
 
@@ -150,13 +147,24 @@ public class ValidationControllerImpl implements ValidationController {
     LOG.info("Called ValidationControllerImpl.validateDataSetData for datasetId {} and released {} with jobId {}", datasetId, released, jobId);
 
     JobVO jobVO = null;
+    Boolean createParquetWithSQL = false;
     if (jobId!=null) {
       jobVO = jobControllerZuul.findJobById(jobId);
       if (!released) {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
       }
     }
-    String user = jobVO!=null ? jobVO.getCreatorUsername() : SecurityContextHolder.getContext().getAuthentication().getName();
+
+    String user;
+    if (jobVO!=null) {
+      user = jobVO.getCreatorUsername();
+      Map<String, Object> parameters = jobVO.getParameters();
+      if (parameters.containsKey("createParquetWithSQL")) {
+        createParquetWithSQL = (Boolean) parameters.get("createParquetWithSQL");
+      }
+    } else {
+      user = SecurityContextHolder.getContext().getAuthentication().getName();
+    }
 
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user", user);
@@ -207,7 +215,7 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
       if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
-        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver);
+        validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL);
       } else {
         validationHelper.executeValidation(datasetId, uuid, released, true);
       }
