@@ -156,13 +156,28 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
         dremioHelperService.executeSqlStatement(createTableQuery);
 
-        //we wait for a few seconds so that the next statement will be executed successfully
-        Thread.sleep(5000);
-
         //refresh the metadata
-        String refreshTableQuery = "ALTER TABLE " + dremioPathForParquetFolder + " REFRESH METADATA AUTO PROMOTION";
-        dremioHelperService.executeSqlStatement(refreshTableQuery);
+        refreshTableMetadataAndPromote(dremioPathForParquetFolder, s3PathResolver, tableSchemaName);
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
+    }
+
+    private void refreshTableMetadataAndPromote(String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
+        String refreshTableQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
+        Boolean folderWasPromoted = false;
+        //we keep trying to promote the folder for 5 retries
+        for(int i=0; i<5; i++) {
+            dremioHelperService.executeSqlStatement(refreshTableQuery);
+            if(dremioHelperService.checkFolderPromoted(s3PathResolver, tableName, false)) {
+                folderWasPromoted = true;
+                break;
+            }
+            else {
+                Thread.sleep(5000);
+            }
+        }
+        if(!folderWasPromoted) {
+            throw new Exception("Could not promote folder " + tablePath);
+        }
     }
 
 
