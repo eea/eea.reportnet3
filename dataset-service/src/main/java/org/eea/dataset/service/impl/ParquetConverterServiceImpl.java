@@ -157,7 +157,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         dremioHelperService.executeSqlStatement(createTableQuery);
 
         //we wait for a few seconds so that the next statement will be executed successfully
-        Thread.sleep(1000);
+        Thread.sleep(5000);
 
         //refresh the metadata
         String refreshTableQuery = "ALTER TABLE " + dremioPathForParquetFolder + " REFRESH METADATA AUTO PROMOTION";
