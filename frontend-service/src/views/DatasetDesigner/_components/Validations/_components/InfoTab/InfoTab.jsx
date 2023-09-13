@@ -19,6 +19,7 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 export const InfoTab = ({
   componentName,
   creationFormState,
+  descriptionMaxLength = 0,
   onAddToClickedFields,
   onDeleteFromClickedFields,
   onInfoFieldChange,
@@ -201,7 +202,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__description`}>{resourcesContext.messages['description']}</label>
           <InputText
             id={`${componentName}__description`}
-            maxLength={config.INPUT_MAX_LENGTH}
+            maxLength={descriptionMaxLength ? descriptionMaxLength : config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('description', e.target.value)}
             placeholder={resourcesContext.messages['description']}
             value={creationFormState.candidateRule.description}

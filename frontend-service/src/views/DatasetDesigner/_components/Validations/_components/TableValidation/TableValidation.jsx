@@ -80,6 +80,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
+            descriptionMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}
@@ -122,6 +123,7 @@ export const TableValidation = ({ dataflowType, datasetId, datasetSchema, datase
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
+            descriptionMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}
