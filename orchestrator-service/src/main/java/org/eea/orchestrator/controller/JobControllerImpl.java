@@ -197,7 +197,7 @@ public class JobControllerImpl implements JobController {
         @ApiParam(type = "Long", value = "Provider Id", example = "0") @PathVariable(value = "dataProviderId", required = true) Long dataProviderId,
         @ApiParam(type = "boolean", value = "Restric from public", example = "true") @RequestParam(name = "restrictFromPublic", required = true, defaultValue = "false") boolean restrictFromPublic,
         @ApiParam(type = "boolean", value = "Execute validations", example = "true") @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate,
-        @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease) {
+        @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease, @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL) {
 
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         ThreadPropertiesManager.setVariable("user",
@@ -222,6 +222,7 @@ public class JobControllerImpl implements JobController {
             parameters.put("silentRelease", silentRelease);
             String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
             parameters.put("userId", userId);
+            parameters.put("createParquetWithSQL", createParquetWithSQL);
             JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), dataflowId, dataProviderId, datasetIds, true);
 
             LOG.info("Adding release job for dataflowId={}, dataProviderId={}, restrictFromPublic={}, validate={} and creator={} with status {}", dataflowId, dataProviderId, restrictFromPublic, validate, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert);

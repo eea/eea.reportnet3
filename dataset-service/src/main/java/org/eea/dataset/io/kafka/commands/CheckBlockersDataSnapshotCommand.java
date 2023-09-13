@@ -1,5 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -32,15 +34,18 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.*;
 import java.util.*;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -103,6 +108,13 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
+
+  @Autowired
+  @Qualifier("dremioJdbcTemplate")
+  private JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  private S3Helper s3Helper;
 
   /**
    * The Constant LOG.
@@ -168,11 +180,13 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       Collections.sort(datasets);
 
       String dataflowName = null;
+      DataFlowVO dataflow = null;
       try{
-        dataflowName = dataFlowControllerZuul.findDataflowNameById(dataset.getDataflowId());
+        dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
+        dataflowName = dataflow.getName();
       }
       catch (Exception e) {
-        LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataset.getDataflowId(), e);
+        LOG.error("Error when trying to receive dataflow for dataflowId {} ", dataset.getDataflowId(), e);
       }
 
 
@@ -208,26 +222,24 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       // process of releasing
       boolean haveBlockers = false;
       for (Long id : datasets) {
-        setTenant(id);
-        if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
-          haveBlockers = true;
-          // Release the locks
-          datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
-                  dataset.getDataProviderId());
-          LOG_ERROR.error(
-                  "Error in the releasing process of the dataflowId {}, dataProviderId {} and jobId {}, the datasets have blocker errors",
-                  dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
-
-          releaseJob.setJobStatus(JobStatusEnum.FAILED);
-          jobControllerZuul.updateJobStatus(releaseJob.getId(), JobStatusEnum.FAILED);
-
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
-                  NotificationVO.builder()
-                          .user(user)
-                          .datasetId(datasetId)
-                          .error("One or more datasets have blockers errors, Release aborted")
-                          .providerId(dataset.getDataProviderId()).build());
-          break;
+        if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
+          S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), id, S3_VALIDATION);
+          String blockersCountQuery = s3Helper.buildRecordsCountQuery(s3PathResolver) + " where validation_level='BLOCKER'";
+          if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+            Long blockersCount = dremioJdbcTemplate.queryForObject(blockersCountQuery, Long.class);
+            if (blockersCount > 0) {
+              haveBlockers = true;
+              failRelease(datasetId, user, dataset, releaseJob);
+              break;
+            }
+          }
+        } else {
+          setTenant(id);
+          if (validationRepository.existsByLevelError(ErrorTypeEnum.BLOCKER)) {
+            haveBlockers = true;
+            failRelease(datasetId, user, dataset, releaseJob);
+            break;
+          }
         }
       }
       // If none blocker errors has found, we have to release datasets one by one
@@ -270,6 +282,25 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;
     }
+  }
+
+  private void failRelease(Long datasetId, String user, DataSetMetabase dataset, JobVO releaseJob) throws EEAException {
+    // Release the locks
+    datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
+            dataset.getDataProviderId());
+    LOG_ERROR.error(
+            "Error in the releasing process of the dataflowId {}, dataProviderId {} and jobId {}, the datasets have blocker errors",
+            dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
+
+    releaseJob.setJobStatus(JobStatusEnum.FAILED);
+    jobControllerZuul.updateJobStatus(releaseJob.getId(), JobStatusEnum.FAILED);
+
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_BLOCKERS_FAILED_EVENT, null,
+            NotificationVO.builder()
+                    .user(user)
+                    .datasetId(datasetId)
+                    .error("One or more datasets have blockers errors, Release aborted")
+                    .providerId(dataset.getDataProviderId()).build());
   }
 
   private JobVO addReleaseJob(String user, DataSetMetabase dataset, JobVO releaseJob, JobStatusEnum statusToInsert) {
