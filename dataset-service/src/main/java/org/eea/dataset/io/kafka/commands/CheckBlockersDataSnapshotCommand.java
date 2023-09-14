@@ -1,6 +1,7 @@
 package org.eea.dataset.io.kafka.commands;
 
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -38,6 +39,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -115,6 +117,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
   @Autowired
   private S3Helper s3Helper;
+
+  @Autowired
+  private S3Service s3Service;
 
   /**
    * The Constant LOG.
@@ -224,10 +229,12 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       for (Long id : datasets) {
         if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
           S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), id, S3_VALIDATION);
-          String blockersCountQuery = s3Helper.buildRecordsCountQuery(s3PathResolver) + " where validation_level='BLOCKER'";
+          StringBuilder blockersQueryBuilder = new StringBuilder();
+          blockersQueryBuilder.append("select ").append(PARQUET_RECORD_ID_COLUMN_HEADER).append(" from ").append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH))
+                  .append(" where validation_level='BLOCKER' limit 1");
           if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-            Long blockersCount = dremioJdbcTemplate.queryForObject(blockersCountQuery, Long.class);
-            if (blockersCount > 0) {
+            SqlRowSet blockersRowSet = dremioJdbcTemplate.queryForRowSet(blockersQueryBuilder.toString());
+            if (blockersRowSet.next()) {
               haveBlockers = true;
               failRelease(datasetId, user, dataset, releaseJob);
               break;
