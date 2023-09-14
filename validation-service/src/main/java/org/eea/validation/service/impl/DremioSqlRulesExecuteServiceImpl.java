@@ -13,9 +13,11 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
@@ -63,6 +65,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private DataSetControllerZuul dataSetControllerZuul;
     private SqlRulesService sqlRulesService;
     private DremioHelperService dremioHelperService;
+    private RepresentativeControllerZuul representativeControllerZuul;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
     private static final String IS_TABLE_EMPTY = "isTableEmpty";
@@ -77,7 +80,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     public DremioSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
                                             DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
                                             DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, SchemasRepository schemasRepository,
-                                            DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService, DremioHelperService dremioHelperService) {
+                                            DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService, DremioHelperService dremioHelperService,
+                                            RepresentativeControllerZuul representativeControllerZuul) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -89,6 +93,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         this.s3Helper = s3Helper;
         this.sqlRulesService = sqlRulesService;
         this.dremioHelperService = dremioHelperService;
+        this.representativeControllerZuul = representativeControllerZuul;
     }
 
     @Override
@@ -267,6 +272,14 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
                 String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
                 sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
+                String providerCode = "XX";
+                if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
+                    DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
+                    providerCode = provider.getCode();
+                }
+                sqlCode = sqlCode.replace("{%R3_COUNTRY_CODE%}", providerCode);
+                sqlCode = sqlCode.replace("{%R3_COMPANY_CODE%}", providerCode);
+                sqlCode = sqlCode.replace("{%R3_ORGANIZATION_CODE%}", providerCode);
                 recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
                 break;
             case 2:
