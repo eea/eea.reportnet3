@@ -1915,8 +1915,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
           .forEach(table -> {
               try {
-                if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
-                    && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
+                if (DatasetTypeEnum.REPORTING.equals(datasetType)) {
                   //Delete old files
                   Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
                   Long dataflowId = finalProcessVO.getDataflowId();
@@ -1966,7 +1965,39 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   LOG.info("REFERENCE dataset {}", datasetId);
                   dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
 
-                  processService.updateProcess(finalProcessVO.getDatasetId(),  finalProcessVO.getDataflowId(),
+                  Long dataflowId = finalProcessVO.getDataflowId();
+                  Long reportingDatasetId = finalProcessVO.getDatasetId();
+                  String nameTableSchema = table.getNameTableSchema();
+                  S3PathResolver referencePath = new S3PathResolver(dataflowId);
+
+                  //Get table name file from S3, save it locally and then upload to DC table name path
+                  S3PathResolver providerPath = new S3PathResolver(dataflowId, 0L, reportingDatasetId, nameTableSchema);
+                  providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                  LOG.info("Getting tableNameFilenames for reference path resolver {}", providerPath);
+                  List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
+                  LOG.info("Table Name Filenames found : {}", tableNameFilenames);
+                  tableNameFilenames.stream().forEach(file -> {
+                    String key = file.key();
+                    String filename = new File(key).getName();
+                    referencePath.setFilename(filename);
+                    referencePath.setPath(S3_DATAFLOW_REFERENCE_PATH);
+                    referencePath.setParquetFolder(key.split("/")[5]);
+                    try {
+                      LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                      File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                      String tableNameDCPath = s3Service.getDCPath(referencePath);
+                      LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
+                      s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
+                      LOG.info("Uploading finished successfully for {}", tableNameDCPath);
+                      //promote folder
+                      checkAndPromoteFolder(referencePath);
+                    } catch (IOException e) {
+                      LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
+                          reportingDatasetId, dataflowId, e);
+                    }
+                  });
+
+                  processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
                       ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
                       finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
 
