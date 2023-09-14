@@ -450,7 +450,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             ++i;
             List<ValueVO> valueVOList = new ArrayList<>();
             int columns = resultSet.getMetaData().getColumnCount();
-            for (int j = 2; j < columns - 1; j++) {
+            for (int j = 1; j <= columns; j++) {
               ValueVO valueVO = new ValueVO();
               valueVO.setValue(resultSet.getString(j));
               valueVO.setLabel(resultSet.getMetaData().getColumnName(j));

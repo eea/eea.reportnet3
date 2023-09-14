@@ -113,29 +113,31 @@ public class DremioSQLValidationUtils {
                 fkQuery.append("select ").append("record_id").append(",").append(optionalFk).append(",").append(foreignKey).append(" from ").append(fkTablePath);
                 SqlRowSet fkWithOptionalRS = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
                 while (fkWithOptionalRS.next()) {
-                    List<String> pksByOptionalValue = Arrays.asList(pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk)).split(","));
-                    List<String> fksByOptionalValue = Arrays.asList(fkWithOptionalRS.getString(foreignKey).split(";"));
-                    pksByOptionalValue.replaceAll(String::trim);
-                    fksByOptionalValue.replaceAll(String::trim);
+                    if (pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk))!=null) {
+                        List<String> pksByOptionalValue = Arrays.asList(pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk)).split(","));
+                        List<String> fksByOptionalValue = Arrays.asList(fkWithOptionalRS.getString(foreignKey).split(";"));
+                        pksByOptionalValue.replaceAll(String::trim);
+                        fksByOptionalValue.replaceAll(String::trim);
 
-                    for (String value : fksByOptionalValue) {
-                        List<String> pksByOptionalValueAux =
-                                new ArrayList<>(Arrays.asList(pkMapAux.get(fkWithOptionalRS.getString(optionalFk)).split(",")));
-                        pksByOptionalValueAux.replaceAll(String::trim);
+                        for (String value : fksByOptionalValue) {
+                            List<String> pksByOptionalValueAux =
+                                    new ArrayList<>(Arrays.asList(pkMapAux.get(fkWithOptionalRS.getString(optionalFk)).split(",")));
+                            pksByOptionalValueAux.replaceAll(String::trim);
 
-                        if (!pksByOptionalValue.contains("\"" + value + "\"")
-                                && !pksByOptionalValue.contains(value)) {
-                            if (!recordIds.contains(fkWithOptionalRS.getString(PARQUET_RECORD_ID_COLUMN_HEADER))) {
-                                recordIds.add(fkWithOptionalRS.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+                            if (!pksByOptionalValue.contains("\"" + value + "\"")
+                                    && !pksByOptionalValue.contains(value)) {
+                                if (!recordIds.contains(fkWithOptionalRS.getString(PARQUET_RECORD_ID_COLUMN_HEADER))) {
+                                    recordIds.add(fkWithOptionalRS.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+                                }
                             }
+                            if (pksByOptionalValue.contains("\"" + value + "\"")
+                                    || pksByOptionalValue.contains(value)) {
+                                pksByOptionalValueAux.remove(value);
+                                pksByOptionalValueAux.remove("\"" + value + "\"");
+                            }
+                            pkMapAux.put(fkWithOptionalRS.getString(optionalFk),
+                                    pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());
                         }
-                        if (pksByOptionalValue.contains("\"" + value + "\"")
-                                || pksByOptionalValue.contains(value)) {
-                            pksByOptionalValueAux.remove(value);
-                            pksByOptionalValueAux.remove("\"" + value + "\"");
-                        }
-                        pkMapAux.put(fkWithOptionalRS.getString(optionalFk),
-                                pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());
                     }
                 }
                 if (pkMustBeUsed && !pkMapAux.entrySet().isEmpty()) {
