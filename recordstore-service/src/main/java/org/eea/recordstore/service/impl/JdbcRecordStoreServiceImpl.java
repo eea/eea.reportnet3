@@ -1933,12 +1933,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   String key = file.key();
                   String filename = new File(key).getName();
                   dataCollectionPath.setFilename(filename);
+                  dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
+                  dataCollectionPath.setParquetFolder(key.split("/")[5]);
                   try {
                     LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                     File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                    dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
                     String tableNameDCPath = s3Service.getDCPath(dataCollectionPath);
-                    LOG.info("Uploading file to bucket parquetFile path : {}", tableNameDCPath, parquetFile.getPath());
+                    LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                     LOG.info("Uploading finished successfully for {}", tableNameDCPath);
                     //promote folder
