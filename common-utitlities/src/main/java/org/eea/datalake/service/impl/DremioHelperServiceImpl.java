@@ -68,7 +68,15 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if (directoryItems!=null) {
             LOG.info("directoryItems : {}", directoryItems.toString());
             LOG.info("directoryItems getChildren : {}", directoryItems.getChildren());
-            Integer itemPosition = (importFolder == true) ? 8 : 6;
+            Integer itemPosition;
+            if (importFolder) {
+                itemPosition = 8;
+            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 5;
+            } else {
+                itemPosition = 6;
+            }
+
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
                 LOG.info("itemOptional : {}", itemOptional.toString());

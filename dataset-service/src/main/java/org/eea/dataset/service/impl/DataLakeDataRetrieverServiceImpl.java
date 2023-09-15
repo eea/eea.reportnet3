@@ -136,7 +136,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
             if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
                 s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
-            } else if (REPORTING.equals(dataset.getDatasetTypeEnum())) {
+            } else {
                 s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
             }
             LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
@@ -148,7 +148,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                     LOG.info("s3Helper.getRecordsCountQuery(s3PathResolver) : {}",  s3Helper.getRecordsCountQuery(s3PathResolver));
                     totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
                     dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver));
-                } else if (REPORTING.equals(dataset.getDatasetTypeEnum())) {
+                } else {
                     LOG.info("s3Helper.buildRecordsCountQuery(s3PathResolver) : {}",  s3Helper.buildRecordsCountQuery(s3PathResolver));
                     totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
                     dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
