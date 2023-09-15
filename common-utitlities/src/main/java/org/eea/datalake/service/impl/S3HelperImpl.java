@@ -68,6 +68,19 @@ public class S3HelperImpl implements S3Helper {
      * @return
      */
     @Override
+    public String getRecordsCountQuery(S3PathResolver s3PathResolver) {
+        StringBuilder query = new StringBuilder();
+        query.append("select count(*) from ");
+        query.append(s3Service.getTableAsFolderQueryPath(s3PathResolver));
+        return query.toString();
+    }
+
+    /**
+     * builds query for counting records
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
     public String buildRecordsCountQueryDC(S3PathResolver s3PathResolver) {
         StringBuilder query = new StringBuilder();
         query.append("select count(*) from ");
@@ -84,6 +97,18 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
+        LOG.info("checkFolderExist key: {}", key);
+        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+    }
+
+    /**
+     * checks if folder validation is created in the s3 storage for the specific dataset
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
+    public boolean checkFolderExist(S3PathResolver s3PathResolver) {
+        String key = s3Service.getTableAsFolderQueryPath(s3PathResolver);
         LOG.info("checkFolderExist key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }

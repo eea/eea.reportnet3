@@ -286,6 +286,12 @@ public final class LiteralConstants {
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s/%s/%s";
 
+  /** The Constant S3_DATAFLOW_REFERENCE_FOLDER_PATH: {@value}. */
+  public static final String S3_DATAFLOW_REFERENCE_FOLDER_PATH = "%s/reference/%s";
+
+  /** The Constant S3_REFERENCE_FOLDER_PATH: {@value}. */
+  public static final String S3_REFERENCE_FOLDER_PATH = "%s/reference";
+
   /** The Constant S3_DATAFLOW_REFERENCE_QUERY_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"reference\".\"%s\"";
 
