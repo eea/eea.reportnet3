@@ -1951,7 +1951,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                       LOG.info("Uploading finished successfully for {}", tableNameDCPath);
                       //promote folder
-                      checkAndPromoteFolder(dataCollectionPath);
+                      checkAndPromoteFolder(dataCollectionPath, S3_TABLE_NAME_DC_QUERY_PATH);
                     } catch (IOException e) {
                       LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                           reportingDatasetId, dataflowId, e);
@@ -1963,7 +1963,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
                 } else if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
                   LOG.info("REFERENCE dataset {}", datasetId);
-                  dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+                  //dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
 
                   Long dataflowId = finalProcessVO.getDataflowId();
                   Long reportingDatasetId = finalProcessVO.getDatasetId();
@@ -1991,7 +1991,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                       LOG.info("Uploading finished successfully for {}", tableNameDCPath);
                       //promote folder
-                      checkAndPromoteFolder(referencePath);
+                      checkAndPromoteFolder(referencePath, S3_DATAFLOW_REFERENCE_QUERY_PATH);
                     } catch (IOException e) {
                       LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                           reportingDatasetId, dataflowId, e);
@@ -2018,14 +2018,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
-      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
+/*      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
         Map<String, Object> createXls = new HashMap<>();
         createXls.put(LiteralConstants.DATASET_ID, datasetId);
         createXls.put(LiteralConstants.USER, user);
         kafkaSenderUtils.releaseKafkaEvent(
             EventType.RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT, createXls);
-      }
+      }*/
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
         // We send the notification only when the last eu dataset being filled from the
         // datacollection,
@@ -2091,9 +2091,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
   }
 
-  private void checkAndPromoteFolder(S3PathResolver s3PathResolver) {
+  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, String path) {
     if (s3Helper.checkTableNameDCProviderFolderExist(s3PathResolver)) {
-      String query = "ALTER TABLE " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
+      String query = "ALTER TABLE " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, path) + " REFRESH METADATA AUTO PROMOTION";
       dremioJdbcTemplate.execute(query);
     }
   }
