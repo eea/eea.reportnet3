@@ -20,6 +20,13 @@ public interface S3Helper {
      */
     String buildRecordsCountQuery(S3PathResolver s3PathResolver);
 
+    /**
+     * get query for counting records
+     * @param s3PathResolver
+     * @return
+     */
+    String getRecordsCountQuery(S3PathResolver s3PathResolver);
+
     String buildRecordsCountQueryDC(S3PathResolver s3PathResolver);
 
     /**
@@ -29,6 +36,12 @@ public interface S3Helper {
      * @return
      */
     boolean checkFolderExist(S3PathResolver s3PathResolver, String path);
+    /**
+     * checks if folder validation is created in the s3 storage for the specific dataset
+     * @param s3PathResolver
+     * @return
+     */
+    boolean checkFolderExist(S3PathResolver s3PathResolver);
 
     /**
      * Deletes folder from s3
