@@ -119,7 +119,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_DC_QUERY_PATH:
                 return String.format(path, dataflowFolder, S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
-                return String.format(path, dataflowFolder, s3PathResolver.getTableName(), s3PathResolver.getParquetFolder(), s3PathResolver.getFilename());
+                return String.format(path, dataflowFolder, s3PathResolver.getTableName());
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
