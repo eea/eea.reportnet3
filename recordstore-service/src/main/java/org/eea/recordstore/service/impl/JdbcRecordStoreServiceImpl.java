@@ -1980,6 +1980,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     String key = file.key();
                     String filename = new File(key).getName();
                     referencePath.setFilename(filename);
+                    referencePath.setTableName(nameTableSchema);
                     referencePath.setPath(S3_DATAFLOW_REFERENCE_PATH);
                     referencePath.setParquetFolder(key.split("/")[5]);
                     try {
