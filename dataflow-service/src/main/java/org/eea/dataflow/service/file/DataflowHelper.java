@@ -427,7 +427,17 @@ public class DataflowHelper {
           nColumnQC++;
           rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getDescription());
           nColumnQC++;
-          rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getExpressionText());
+          String expression = "";
+          if (ruleVO.getSqlSentence() != null) {
+            expression = ruleVO.getSqlSentence().startsWith("=")
+                    ? " " + ruleVO.getSqlSentence()
+                    : ruleVO.getSqlSentence();
+          } else if (ruleVO.getExpressionText() != null) {
+            expression = ruleVO.getExpressionText().startsWith("=")
+                    ? " " + ruleVO.getExpressionText()
+                    : ruleVO.getExpressionText();
+          }
+          rowheadQC.createCell(nColumnQC).setCellValue(expression);
           nColumnQC++;
           rowheadQC.createCell(nColumnQC).setCellValue(ruleVO.getType().getValue());
           nColumnQC++;
