@@ -200,6 +200,9 @@ public final class LiteralConstants {
   /** The Constant S3_COLLECTIONS: {@value}. */
   public static final String S3_COLLECTIONS = "collections";
 
+  /** The Constant S3_REFERENCE: {@value}. */
+  public static final String S3_REFERENCE = "reference";
+
   /** The Constant S3_IMPORT_PATH: {@value}. */
   public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import";
 
@@ -281,7 +284,7 @@ public final class LiteralConstants {
   public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
 
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
-  public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s/%s";
+  public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s/%s/%s";
 
   /** The Constant S3_DATAFLOW_REFERENCE_QUERY_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"reference\".\"%s\"";
