@@ -72,7 +72,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             if (importFolder) {
                 itemPosition = 8;
             } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
-                itemPosition = 5;
+                itemPosition = 4;
             } else {
                 itemPosition = 6;
             }
