@@ -72,6 +72,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId, Long taskId, boolean createParquetWithSQL) throws Exception {
         try {
+            //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
             if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                 return;
@@ -140,6 +141,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         if (createParquetWithSQL) {
             int count = 0;
             boolean createRuleFolder = false;
+            //if the dataset to validate is of reference type, then the validation path should be changed
             StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), dataTableResolver, validationResolver, ruleVO, fieldName);
             while (rs.next()) {
                 boolean isValid = isRecordValid(parameters, fieldName, rs, method, object);
@@ -162,6 +164,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             Map<String, String> headerMap = dremioRulesService.createValidationParquetHeaderMap(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), ruleVO, fieldName);
             StringBuilder pathBuilder = new StringBuilder();
             int ruleIdLength = ruleVO.getRuleId().length();
+            //if the dataset to validate is of reference type, then the validation path should be changed
             String s3FilePath = pathBuilder.append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength))
                     .append(SLASH).append(fileName).toString();
             String parquetFile = parquetFilePath + fileName;
