@@ -10,6 +10,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -66,8 +67,7 @@ import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
-import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class SqlRulesServiceImpl.
@@ -149,6 +149,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   @Autowired
   private S3Helper s3Helper;
+
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
 
 
   /** The Constant DATASET_: {@value}. */
@@ -1265,7 +1268,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       table = table.replaceAll("\"","");
       DataSetMetabaseVO dataSetMetabase = datasetMetabaseController.findDatasetMetabaseById(Long.valueOf(datId));
       S3PathResolver tableResolver = new S3PathResolver(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId() != null ? dataSetMetabase.getDataProviderId() : 0, dataSetMetabase.getId(), table);
-      String tablePathS3 = s3Service.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+      String tablePathS3 = s3Service.getTablePathByDatasetType(dataSetMetabase.getDataflowId(), dataSetMetabase.getId(), table, tableResolver);
       sqlCode = sqlCode.replace(pathToReplace, tablePathS3);
       datasetOccurrences = findOccurrence(sqlCode, DATASET);
     }

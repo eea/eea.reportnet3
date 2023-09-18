@@ -3,8 +3,11 @@ package org.eea.datalake.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -12,6 +15,9 @@ import static org.eea.utils.LiteralConstants.*;
 
 @Service
 public class S3ServiceImpl implements S3Service {
+
+    @Autowired
+    private DataSetControllerZuul dataSetControllerZuul;
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
 
@@ -205,5 +211,18 @@ public class S3ServiceImpl implements S3Service {
         String idStr = String.valueOf(id);
         String providerFolder = StringUtils.leftPad(idStr, S3_NAME_PATTERN_LENGTH, S3_LEFT_PAD);
         return String.format(pattern, providerFolder);
+    }
+
+    @Override
+    public String getTablePathByDatasetType(Long dataflowId, Long datasetId, String tableName, S3PathResolver tableResolver) {
+        DatasetTypeEnum datasetTypeEnum = dataSetControllerZuul.getDatasetType(datasetId);
+        String tablePath = null;
+        if (datasetTypeEnum.equals(DatasetTypeEnum.REFERENCE)) {
+            String dataflowFolder = formatFolderName(dataflowId, S3_DATAFLOW_PATTERN);
+            tablePath = String.format(S3_DATAFLOW_REFERENCE_QUERY_PATH, dataflowFolder, tableName);
+        } else {
+            tablePath = this.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        }
+        return tablePath;
     }
 }

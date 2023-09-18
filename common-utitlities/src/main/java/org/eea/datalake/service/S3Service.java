@@ -37,4 +37,14 @@ public interface S3Service {
     String getTableAsFolderQueryPath(S3PathResolver s3PathResolver);
 
     String getTableDCAsFolderQueryPath(S3PathResolver s3PathResolver, String path);
+
+    /**
+     * Gets table path by datasetType
+     * @param dataflowId
+     * @param datasetId
+     * @param tableName
+     * @param tableResolver
+     * @return
+     */
+    String getTablePathByDatasetType(Long dataflowId, Long datasetId, String tableName, S3PathResolver tableResolver);
 }
