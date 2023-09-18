@@ -946,8 +946,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 : EventType.RESTORE_DATASET_SNAPSHOT_FAILED_EVENT
             : EventType.RELEASE_FAILED_EVENT;
 
-    restoreSnapshotDL(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
-        deleteData, successEventType, failEventType, prefillingReference, processId);
+    //Check if dataflow is Big Data
+    Long dataflowId = datasetControllerZuul.getDataFlowIdById(idReportingDataset);
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+
+    if (dataflow.getBigData()) {
+      restoreSnapshotDL(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
+          deleteData, successEventType, failEventType, prefillingReference, processId);
+    } else {
+      restoreSnapshot(idReportingDataset, idSnapshot, partitionId, datasetType, isSchemaSnapshot,
+          deleteData, successEventType, failEventType, prefillingReference, processId);
+    }
 
   }
 

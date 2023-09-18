@@ -498,9 +498,12 @@ public class JdbcRecordStoreServiceImplTest {
     datasetMetabase.setDataProviderId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
         .thenReturn(datasetMetabase);
-    DataFlowVO dfVO = new DataFlowVO();
-    dfVO.setName("dfName");
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setId(1L);
+    dataflow.setBigData(Boolean.FALSE);
+    //Mockito.when(datasetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(any())).thenReturn(dataflow);
 
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.EUDATASET, false, true,
         false, null);
