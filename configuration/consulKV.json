@@ -1982,5 +1982,9 @@
   {
     "key": "config/application/dremio.username",
     "value": "bWFyaWE="
+  },
+  {
+    "key": "config/dataset/dremio.parquetConverter.custom",
+    "value": "bWFyaWE="
   }
 ]
