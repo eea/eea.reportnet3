@@ -230,6 +230,7 @@ public class S3HelperImpl implements S3Helper {
         } while (listObjectsResponse.isTruncated());
         return objectKeys;
     }
+
     @Override
     public void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO) {
         String validationFolderName = s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH);
@@ -254,7 +255,7 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
-     * checks if table names DC fodlers have been created in the s3 storage
+     * checks if table names DC folders have been created in the s3 storage
      * @param s3PathResolver
      * @return
      */
@@ -311,24 +312,6 @@ public class S3HelperImpl implements S3Helper {
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
         URL url = presignedRequest.url();
 
-        //todo remove the following block of code
-        try{
-            // Create the connection and use it to upload the new object.
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type","text/plain");
-            connection.setRequestProperty("x-amz-meta-author","Mary Doe");
-            connection.setRequestProperty("x-amz-meta-version","1.0.0.0");
-            connection.setRequestMethod("PUT");
-            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-            out.write("This text was uploaded as an object by using a presigned URL.");
-            out.close();
-
-            connection.getResponseCode();
-        }
-        catch (Exception e){
-            LOG.error("Could not upload text using presigned url {}", url.toString());
-        }
 
         return url.toString();
     }

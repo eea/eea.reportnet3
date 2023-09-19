@@ -221,12 +221,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             throw e;
         }
-
-        /*
-         * Part 7:
-         *
-         * Case where we get notification from s3 that zip file has been uploaded (queued import job must be added)
-         * */
     }
 
     private void importDatasetDataToDremio(ImportFileInDremioInfo importFileInDremioInfo, MultipartFile fileFromApi, File fileFromS3) throws Exception {
@@ -241,7 +235,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //if there is already a process created for the import then it should be updated instead of creating a new one
         String processUUID = null;
         Boolean processExists = false;
-        //TODO fme check if process exists
         processUUID = UUID.randomUUID().toString();
         importFileInDremioInfo.setProcessId(processUUID);
 
@@ -305,12 +298,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             handleFmeRequest(integrationVO, importFileInDremioInfo, filesToImport.get(0), mimeType);
         } else {
             List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
-            Map<String, String> parquetFileNamesAndPaths = parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
-            /*for (Map.Entry<String, String> parquetFileNameAndPath : parquetFileNamesAndPaths.entrySet()) {
-                String importPathForParquet = getImportPathForParquet(importFileInDremioInfo, parquetFileNameAndPath.getKey());
-                s3HandlerService.uploadFileToBucket(importPathForParquet, parquetFileNameAndPath.getValue());
-                promoteFolder(importFileInDremioInfo, parquetFileNameAndPath.getKey());
-            }*/
+            parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
         }
     }
 
@@ -322,25 +310,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         catch (Exception e){
             throw new EEAException("Could not prepare fme request for job id " + importFileInDremioInfo.getJobId());
         }
-    }
-
-    private void promoteFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName){
-        Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
-        String tableSchemaName = fileName.replace(".parquet", "");
-        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName);
-        dremioHelperService.promoteFolderOrFile(s3PathResolver, tableSchemaName, false);
-    }
-
-    private String getImportPathForParquet(ImportFileInDremioInfo importFileInDremioInfo, String fileName) throws Exception {
-        Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
-        String tableSchemaName = fileName.replace(".parquet", "");
-        S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName, S3_TABLE_NAME_PATH);
-        String pathToS3ForImport = s3Service.getProviderPath(s3PathResolver);
-        if(StringUtils.isBlank(pathToS3ForImport)){
-            LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);
-            throw new Exception("Could not resolve path to s3 for import");
-        }
-        return pathToS3ForImport;
     }
 
     private List<File> checkCsvFiles(ImportFileInDremioInfo importFileInDremioInfo, DataSetSchema schema, List<File> files, IntegrationVO integrationVO, String mimeType)
@@ -422,7 +391,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         try (InputStream input = fileFromApi.getInputStream()) {
-            //TODO fme handling
 
             if (integrationVO == null && multipartFileMimeType.equalsIgnoreCase("zip")) {
                 try (ZipInputStream zip = new ZipInputStream(input)) {
