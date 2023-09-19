@@ -46,18 +46,22 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int size = 0;
             GenericRecord record;
             while ((record = r.read()) != null) {
+                LOG.info("Record : {} and counter {}", record.toString(), counter);
                 if (counter == 0 ) {
                     size = record.getSchema().getFields().size();
+                    LOG.info("size {}", size);
                     List<String> headers = record.getSchema().getFields().stream()
                         .map(Schema.Field::name)
                         .collect(Collectors.toList());
                     csvWriter.writeNext(headers.toArray(String[]::new), false);
                     counter++;
+                    LOG.info("counter {}", counter);
                 } else {
                     String[] columns = new String[size];
+                    LOG.info("columns {}", columns);
                     for (int i = 0; i < size; i++) {
+                        LOG.info("record.get(i).toString() {}", record.get(i).toString());
                         columns[i] = record.get(i).toString();
-
                     }
                     csvWriter.writeNext(columns, false);
                 }
@@ -182,8 +186,10 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             }
 
             while ((record = r.read()) != null) {
+                LOG.info("record: {}", record.toString());
                 row = sheet.createRow(counter++);
                 for (int i = 0; i < size; i++) {
+                    LOG.info("record.get(i).toString(): {}",record.get(i).toString());
                     row.createCell(i).setCellValue(record.get(i).toString());
                 }
             }
