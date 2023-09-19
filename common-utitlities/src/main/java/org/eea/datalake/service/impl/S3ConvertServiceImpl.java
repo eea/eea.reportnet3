@@ -186,8 +186,10 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             }
 
             while ((record = r.read()) != null) {
+                LOG.info("record: {}", record.toString());
                 row = sheet.createRow(counter++);
                 for (int i = 0; i < size; i++) {
+                    LOG.info("record.get(i).toString(): {}",record.get(i).toString());
                     row.createCell(i).setCellValue(record.get(i).toString());
                 }
             }
