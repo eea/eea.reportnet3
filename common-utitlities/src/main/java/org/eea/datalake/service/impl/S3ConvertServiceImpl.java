@@ -57,19 +57,17 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
             List<S3Object> exportFilenames = s3Helper.getFilenamesForExport(s3PathResolver);
             LOG.info("Exported dataset data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
+            int size = 0;
+            int counter = 0;
 
             for (int i = 0; i < exportFilenames.size(); i++) {
                 File parquetFile = s3Helper.getFileFromS3(exportFilenames.get(i).key(), nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-
                 InputStream inputStream = new FileInputStream(parquetFile);
                 ParquetStream parquetStream = new ParquetStream(inputStream);
                 ParquetReader<GenericRecord> r =
                     AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
 
                 GenericRecord record;
-                int size = 0;
-                int counter = 0;
-
                 while ((record = r.read()) != null) {
                     if (i == 0 && counter == 0) {
                         size = record.getSchema().getFields().size();
