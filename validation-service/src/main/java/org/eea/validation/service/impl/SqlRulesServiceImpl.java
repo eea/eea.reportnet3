@@ -46,7 +46,6 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
-import org.eea.validation.util.SQLValidationUtils;
 import org.eea.validation.util.model.QueryVO;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -1257,19 +1256,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     while (datasetOccurrences.size()>0) {
       String sqlContainingSchema = sqlCode.substring(datasetOccurrences.get(0)+8);
       int dotIdx = sqlContainingSchema.indexOf(DOT);
-      int spaceIdx = sqlContainingSchema.indexOf(" ");
+      int spaceIdx = sqlContainingSchema.indexOf(SPACE);
       String datId = sqlContainingSchema.substring(0,dotIdx);
       String table = sqlContainingSchema.substring(datId.length()+1,spaceIdx);
-      if (table.contains(DOT)) {
-        int dtIndex = table.indexOf(DOT);
-        table = table.substring(0,dtIndex);
-      }
-      if (table.contains(CLOSE_PARENTHESIS)) {
-        table = table.replace(CLOSE_PARENTHESIS,EMPTY_VALUE);
-      }
-      if (table.contains(COMMA)) {
-        table = table.replace(COMMA, EMPTY_VALUE);
-      }
+      table = processTableName(table);
       String pathToReplace = DATASET+Long.valueOf(datId)+DOT+table;
       table = table.replaceAll(QUOTATION_MARK,EMPTY_VALUE);
       DataSetMetabaseVO dataSetMetabase = datasetMetabaseController.findDatasetMetabaseById(Long.valueOf(datId));
@@ -1279,6 +1269,24 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       datasetOccurrences = findOccurrence(sqlCode, DATASET);
     }
     return sqlCode;
+  }
+
+  private static String processTableName(String table) {
+    if (table.contains(NEW_LINE)) {
+      int lcIdx = table.indexOf(NEW_LINE);
+      table = table.substring(0, lcIdx);
+    }
+    if (table.contains(DOT)) {
+      int dtIndex = table.indexOf(DOT);
+      table = table.substring(0,dtIndex);
+    }
+    if (table.contains(CLOSE_PARENTHESIS)) {
+      table = table.replace(CLOSE_PARENTHESIS,EMPTY_VALUE);
+    }
+    if (table.contains(COMMA)) {
+      table = table.replace(COMMA, EMPTY_VALUE);
+    }
+    return table;
   }
 
   private List<Integer> findOccurrence(String textString, String word) {

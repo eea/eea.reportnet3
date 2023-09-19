@@ -394,6 +394,12 @@ public final class LiteralConstants {
   /** The Constant QUOTATION_MARK: {@value}. */
   public static final String QUOTATION_MARK = "\"";
 
+  /** The Constant LINE_CHANGE: {@value}. */
+  public static final String NEW_LINE = "\n";
+
+  /** The Constant SPACE: {@value}. */
+  public static final String SPACE = " ";
+
   /**
    * Instantiates a new literal constants.
    */
