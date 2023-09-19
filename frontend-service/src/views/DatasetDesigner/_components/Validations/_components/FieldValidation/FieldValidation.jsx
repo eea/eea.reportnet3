@@ -85,6 +85,7 @@ export const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
             componentName={componentName}
             creationFormState={creationFormState}
             descriptionMaxLength={5000}
+            errorMessageMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}
@@ -125,6 +126,7 @@ export const FieldValidation = ({ dataflowType, datasetId, tabs }) => {
             componentName={componentName}
             creationFormState={creationFormState}
             descriptionMaxLength={5000}
+            errorMessageMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}
