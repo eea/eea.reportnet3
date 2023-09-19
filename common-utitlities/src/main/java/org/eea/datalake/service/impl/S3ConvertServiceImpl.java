@@ -10,10 +10,18 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.eea.datalake.service.S3ConvertService;
+import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.ParquetStream;
+import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.services.s3.model.S3Object;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +34,62 @@ import static org.eea.utils.LiteralConstants.*;
 public class S3ConvertServiceImpl implements S3ConvertService {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ConvertServiceImpl.class);
+
+    /** The big data dataset service */
+    @Autowired
+    private S3Helper s3Helper;
+
+    /**
+     * The path export DL.
+     */
+    @Value("${exportDLPath}")
+    private String exportDLPath;
+
+    @Override
+    public void convert(S3PathResolver s3PathResolver, String nameDataset)
+        throws IOException {
+
+        File csvFile = new File(exportDLPath + nameDataset + CSV_TYPE);
+
+        try (CSVWriter csvWriter =
+            new CSVWriter(new FileWriter(csvFile), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+
+            List<S3Object> exportFilenames = s3Helper.getFilenamesForExport(s3PathResolver);
+            LOG.info("Exported dataset data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
+
+            for (int i = 0; i < exportFilenames.size(); i++) {
+                File parquetFile = s3Helper.getFileFromS3(exportFilenames.get(i).key(), nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+
+                InputStream inputStream = new FileInputStream(parquetFile);
+                ParquetStream parquetStream = new ParquetStream(inputStream);
+                ParquetReader<GenericRecord> r =
+                    AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
+
+                GenericRecord record;
+                int size = 0;
+                int counter = 0;
+
+                while ((record = r.read()) != null) {
+                    if (i == 0 && counter == 0) {
+                        size = record.getSchema().getFields().size();
+                        List<String> headers =
+                            record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+                        csvWriter.writeNext(headers.toArray(String[]::new), false);
+                        counter++;
+                    }
+                    String[] columns = new String[size];
+                    for (int j = 0; j < size; j++) {
+                        columns[j] = record.get(j).toString();
+                    }
+                    csvWriter.writeNext(columns, false);
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error in convert method for csvOutputFile {}, s3PathResolver {} and nameDataset {}", csvFile, s3PathResolver, nameDataset);
+        }
+    }
+
 
     @Override
     public void convertParquetToCSV(File parquetFile, File csvOutputFile) {

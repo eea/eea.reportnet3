@@ -634,10 +634,13 @@ public class FileTreatmentHelper implements DisposableBean {
                 dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableName);
             s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
 
-            List<S3Object> exportFilenames = s3Helper.getFilenamesForExport(s3PathResolver);
-            LOG.info("Exported dataset data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
+            if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
+                String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
+                s3ConvertService.convert(s3PathResolver, nameDataset);
+            }
 
-            for (S3Object myValue : exportFilenames) {
+
+            /*for (S3Object myValue : exportFilenames) {
                 String key = myValue.key();
                 String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
                 if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
@@ -665,7 +668,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
                     s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
                 }
-            }
+            }*/
         } catch (IOException e) {
             LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
                     tableSchemaId);
