@@ -1256,16 +1256,22 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     List<Integer> datasetOccurrences = findOccurrence(sqlCode, DATASET);
     while (datasetOccurrences.size()>0) {
       String sqlContainingSchema = sqlCode.substring(datasetOccurrences.get(0)+8);
-      int dotIdx = sqlContainingSchema.indexOf(".");
+      int dotIdx = sqlContainingSchema.indexOf(DOT);
       int spaceIdx = sqlContainingSchema.indexOf(" ");
       String datId = sqlContainingSchema.substring(0,dotIdx);
       String table = sqlContainingSchema.substring(datId.length()+1,spaceIdx);
-      if (table.contains(".")) {
-        int dtIndex = table.indexOf(".");
+      if (table.contains(DOT)) {
+        int dtIndex = table.indexOf(DOT);
         table = table.substring(0,dtIndex);
       }
-      String pathToReplace = DATASET+Long.valueOf(datId)+"."+table;
-      table = table.replaceAll("\"","");
+      if (table.contains(CLOSE_PARENTHESIS)) {
+        table = table.replace(CLOSE_PARENTHESIS,EMPTY_VALUE);
+      }
+      if (table.contains(COMMA)) {
+        table = table.replace(COMMA, EMPTY_VALUE);
+      }
+      String pathToReplace = DATASET+Long.valueOf(datId)+DOT+table;
+      table = table.replaceAll(QUOTATION_MARK,EMPTY_VALUE);
       DataSetMetabaseVO dataSetMetabase = datasetMetabaseController.findDatasetMetabaseById(Long.valueOf(datId));
       S3PathResolver tableResolver = new S3PathResolver(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId() != null ? dataSetMetabase.getDataProviderId() : 0, dataSetMetabase.getId(), table);
       String tablePathS3 = s3Service.getTablePathByDatasetType(dataSetMetabase.getDataflowId(), dataSetMetabase.getId(), table, tableResolver);

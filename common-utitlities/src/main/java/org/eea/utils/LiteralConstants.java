@@ -382,6 +382,18 @@ public final class LiteralConstants {
   /** The Constant CLOSE_PARENTHESIS: {@value}. */
   public static final String CLOSE_PARENTHESIS = ")";
 
+  /** The Constant COMMA: {@value}. */
+  public static final String COMMA = ",";
+
+  /** The Constant EMPTY_VALUE: {@value}. */
+  public static final String EMPTY_VALUE = "";
+
+  /** The Constant DOT: {@value}. */
+  public static final String DOT = ".";
+
+  /** The Constant QUOTATION_MARK: {@value}. */
+  public static final String QUOTATION_MARK = "\"";
+
   /**
    * Instantiates a new literal constants.
    */
