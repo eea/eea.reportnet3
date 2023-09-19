@@ -435,7 +435,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-        datasetRepository.validateQuery("explain " + sqlRule, datasetId);
+        DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+
+        if (dataFlowVO!=null && ((dataFlowVO.getBigData()!=null && !dataFlowVO.getBigData()) || dataFlowVO.getBigData()==null)) {
+          datasetRepository.validateQuery("explain " + sqlRule, datasetId);
+        }
         if (showInternalFields) {
           sb.append("SELECT * FROM (");
           sb.append(sqlRule);
@@ -444,7 +448,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           sb = buildWithTableQuery(datasetIds, sb, sqlRule);
         }
 
-        DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
         if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
           String sqlCode = this.replaceTableNamesWithS3Path(sb.toString());
           sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
