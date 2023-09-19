@@ -20,6 +20,7 @@ export const InfoTab = ({
   componentName,
   creationFormState,
   descriptionMaxLength = 0,
+  errorMessageMaxLength = 0,
   onAddToClickedFields,
   onDeleteFromClickedFields,
   onInfoFieldChange,
@@ -239,7 +240,7 @@ export const InfoTab = ({
           <InputText
             id={`${componentName}__errorMessage`}
             keyfilter="noDoubleQuote"
-            maxLength={config.INPUT_MAX_LENGTH}
+            maxLength={errorMessageMaxLength ? errorMessageMaxLength : config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
             placeholder={resourcesContext.messages['ruleErrorMessage']}
             value={creationFormState.candidateRule.errorMessage}
