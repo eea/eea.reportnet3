@@ -24,7 +24,10 @@ public enum FileTypeEnum {
   XLSX("xlsx"),
 
   /** The validations. */
-  VALIDATIONS("validations");
+  VALIDATIONS("validations"),
+
+  /** The json. */
+  JSON("json");
 
   /** The value. */
   private final String value;
