@@ -994,7 +994,52 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
-
+  /**
+   * Export file DL.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param mimeType the mime type
+   * @param exportFilterVO the export filter VO
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/exportFileDL")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @ApiOperation(value = "Export file with data", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully export"),
+      @ApiResponse(code = 400, message = "Id table schema is incorrect"),
+      @ApiResponse(code = 500, message = "Error exporting file")})
+  public void exportFileDL(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @RequestParam("datasetId") Long datasetId,
+      @ApiParam(type = "String", value = "table schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+              required = false) String tableSchemaId,
+      @ApiParam(type = "String", value = "mimeType (file extension)",
+          example = "csv") @RequestParam("mimeType") String mimeType,
+      @RequestBody ExportFilterVO exportFilterVO) {
+    String tableName =
+        null != tableSchemaId ? datasetSchemaService.getTableSchemaName(null, tableSchemaId)
+            : datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
+    if (null == tableName) {
+      LOG_ERROR.error("tableSchemaId not found: {}", tableSchemaId);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.IDTABLESCHEMA_INCORRECT);
+    }
+    try {
+      LOG.info("Exporting table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+      fileTreatmentHelper.exportFileDL(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
+      LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+    } catch (EEAException | IOException e) {
+      LOG_ERROR.info("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          EEAErrorMessage.EXECUTION_ERROR);
+    } catch (Exception e) {
+      LOG_ERROR.error("Unexpected error! Error exporting file for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
 
   /**
    * Export file through integration.
