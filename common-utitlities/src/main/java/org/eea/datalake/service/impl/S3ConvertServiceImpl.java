@@ -46,25 +46,19 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int size = 0;
             GenericRecord record;
             while ((record = r.read()) != null) {
-                LOG.info("Record : {} and counter {}", record.toString(), counter);
                 if (counter == 0 ) {
                     size = record.getSchema().getFields().size();
-                    LOG.info("size {}", size);
                     List<String> headers = record.getSchema().getFields().stream()
                         .map(Schema.Field::name)
                         .collect(Collectors.toList());
                     csvWriter.writeNext(headers.toArray(String[]::new), false);
                     counter++;
-                    LOG.info("counter {}", counter);
-                } else {
-                    String[] columns = new String[size];
-                    LOG.info("columns {}", columns);
-                    for (int i = 0; i < size; i++) {
-                        LOG.info("record.get(i).toString() {}", record.get(i).toString());
-                        columns[i] = record.get(i).toString();
-                    }
-                    csvWriter.writeNext(columns, false);
                 }
+                String[] columns = new String[size];
+                for (int i = 0; i < size; i++) {
+                    columns[i] = record.get(i).toString();
+                }
+                csvWriter.writeNext(columns, false);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,8 +89,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 headers.add(record.get(i).toString());
             }
             int counter = 0;
-            while ((record = r.read()) != null) {
-                if (counter == 0 ) {
+            do {
+                if (counter == 0) {
                     bw.write("{");
                     counter++;
                 } else {
@@ -105,18 +99,19 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 for (int i = 0; i < size; i++) {
                     String recordValue = record.get(i).toString();
                     boolean isNumeric = pattern.matcher(recordValue).matches();
-                    bw.write("\""+headers.get(i)+"\":");
+                    bw.write("\"" + headers.get(i) + "\":");
                     if (isNumeric) {
                         bw.write(recordValue);
                     } else {
-                        bw.write("\""+recordValue+"\"");
+                        bw.write("\"" + recordValue + "\"");
                     }
                     if (i < size - 1) {
                         bw.write(",");
                     }
                 }
                 bw.write("}");
-            }
+            } while ((record = r.read()) == null);
+
             bw.write("\n]}");
         } catch (IOException e) {
             e.printStackTrace();
@@ -146,16 +141,18 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             for (int i = 0; i < size; i++) {
                 headers.add(record.get(i).toString());
             }
-            while ((record = r.read()) != null) {
+
+            do {
                 bw.write("<Record>");
                 for (int i = 0; i < size; i++) {
                     String recordValue = record.get(i).toString();
-                    bw.write("<"+headers.get(i)+">");
+                    bw.write("<" + headers.get(i) + ">");
                     bw.write(recordValue);
-                    bw.write("</"+headers.get(i)+">");
+                    bw.write("</" + headers.get(i) + ">");
                 }
                 bw.write("</Record>\n");
-            }
+            } while ((record = r.read()) == null);
+
             bw.write("</Records>");
         } catch (IOException e) {
             e.printStackTrace();
