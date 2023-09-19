@@ -208,6 +208,19 @@ public interface DatasetController {
    * @param mimeType the mime type
    * @param exportFilterVO the export filter VO
    */
+  @GetMapping(value = "/exportFileDL", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  void exportFileDL(@RequestParam("datasetId") Long datasetId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+      @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
+
+  /**
+   * Export file DL.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the table schema id
+   * @param mimeType the mime type
+   * @param exportFilterVO the export filter VO
+   */
   @GetMapping(value = "/exportFile", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   void exportFile(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
