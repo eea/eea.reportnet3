@@ -167,7 +167,7 @@ public class S3ServiceImpl implements S3Service {
 
         switch (path) {
             case S3_TABLE_NAME_DC_QUERY_PATH:
-                return String.format(path, dataflowFolder, S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName());
+                return String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
                 return String.format(path, dataflowFolder, s3PathResolver.getTableName());
             default:
