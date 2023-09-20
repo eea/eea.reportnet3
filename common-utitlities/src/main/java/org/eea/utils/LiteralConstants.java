@@ -200,6 +200,9 @@ public final class LiteralConstants {
   /** The Constant S3_COLLECTIONS: {@value}. */
   public static final String S3_COLLECTIONS = "collections";
 
+  /** The Constant S3_REFERENCE: {@value}. */
+  public static final String S3_REFERENCE = "reference";
+
   /** The Constant S3_IMPORT_PATH: {@value}. */
   public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import";
 
@@ -264,7 +267,7 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_PATH = "%s/%s/%s/current/%s/%s/%s";
+  public static final String S3_TABLE_NAME_DC_PATH = "%s/%s/%s/current/%s/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_DC_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH = "%s/%s/%s/current/%s/%s";
@@ -281,7 +284,13 @@ public final class LiteralConstants {
   public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
 
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
-  public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s";
+  public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s/%s/%s";
+
+  /** The Constant S3_DATAFLOW_REFERENCE_FOLDER_PATH: {@value}. */
+  public static final String S3_DATAFLOW_REFERENCE_FOLDER_PATH = "%s/reference/%s";
+
+  /** The Constant S3_REFERENCE_FOLDER_PATH: {@value}. */
+  public static final String S3_REFERENCE_FOLDER_PATH = "%s/reference";
 
   /** The Constant S3_DATAFLOW_REFERENCE_QUERY_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"reference\".\"%s\"";
@@ -372,6 +381,24 @@ public final class LiteralConstants {
 
   /** The Constant CLOSE_PARENTHESIS: {@value}. */
   public static final String CLOSE_PARENTHESIS = ")";
+
+  /** The Constant COMMA: {@value}. */
+  public static final String COMMA = ",";
+
+  /** The Constant EMPTY_VALUE: {@value}. */
+  public static final String EMPTY_VALUE = "";
+
+  /** The Constant DOT: {@value}. */
+  public static final String DOT = ".";
+
+  /** The Constant QUOTATION_MARK: {@value}. */
+  public static final String QUOTATION_MARK = "\"";
+
+  /** The Constant LINE_CHANGE: {@value}. */
+  public static final String NEW_LINE = "\n";
+
+  /** The Constant SPACE: {@value}. */
+  public static final String SPACE = " ";
 
   /**
    * Instantiates a new literal constants.

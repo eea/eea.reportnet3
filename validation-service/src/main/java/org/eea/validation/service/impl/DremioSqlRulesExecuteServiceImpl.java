@@ -13,9 +13,11 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
@@ -63,6 +65,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private DataSetControllerZuul dataSetControllerZuul;
     private SqlRulesService sqlRulesService;
     private DremioHelperService dremioHelperService;
+    private RepresentativeControllerZuul representativeControllerZuul;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
     private static final String IS_TABLE_EMPTY = "isTableEmpty";
@@ -77,7 +80,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     public DremioSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
                                             DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
                                             DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, SchemasRepository schemasRepository,
-                                            DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService, DremioHelperService dremioHelperService) {
+                                            DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService, DremioHelperService dremioHelperService,
+                                            RepresentativeControllerZuul representativeControllerZuul) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -89,11 +93,13 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         this.s3Helper = s3Helper;
         this.sqlRulesService = sqlRulesService;
         this.dremioHelperService = dremioHelperService;
+        this.representativeControllerZuul = representativeControllerZuul;
     }
 
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId, Long taskId, boolean createParquetWithSQL) throws Exception {
         try {
+            //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
@@ -159,6 +165,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                                          String fieldName, String fileName) throws Exception {
         int ruleIdLength = ruleVO.getRuleId().length();
         if (createParquetWithSQL) {
+            //if the dataset to validate is of reference type, then the validation path should be changed
             StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), dataTableResolver, validationResolver, ruleVO, fieldName);
             int count = 0;
             for (String recordId : recordIds) {
@@ -174,7 +181,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String valQuery = validationQuery.toString();
             if (recordIds.size() > 0) {
                 valQuery = processValidationQuery(dataTableResolver, ruleVO, fieldName, ruleIdLength, valQuery);
-                dremioJdbcTemplate.execute(valQuery);
+                dremioHelperService.executeSqlStatement(valQuery);
             }
         } else {
             try {
@@ -188,6 +195,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 Map<String, String> headerMap = dremioRulesService.createValidationParquetHeaderMap(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), ruleVO, fieldName);
                 createParquet(parquetFile, ruleVO, recordIds, headerMap, schema);
                 if (recordIds.size()>0) {
+                    //if the dataset to validate is of reference type, then the validation path should be changed
                     StringBuilder pathBuilder = new StringBuilder().append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength));
                     String s3FilePath = pathBuilder.append(SLASH).append(fileName).toString();
                     s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
@@ -267,6 +275,14 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
                 String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
                 sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
+                String providerCode = "XX";
+                if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
+                    DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
+                    providerCode = provider.getCode();
+                }
+                sqlCode = sqlCode.replace("{%R3_COUNTRY_CODE%}", providerCode);
+                sqlCode = sqlCode.replace("{%R3_COMPANY_CODE%}", providerCode);
+                sqlCode = sqlCode.replace("{%R3_ORGANIZATION_CODE%}", providerCode);
                 recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
                 break;
             case 2:
@@ -325,7 +341,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         String optionalPK = pkAndFkDetailsList.get(2);
         String optionalFK = pkAndFkDetailsList.get(3);
         S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
-        String pkTablePath = s3Service.getTableAsFolderQueryPath(pkTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String pkTablePath = s3Service.getTablePathByDatasetType(dataflowId, datasetIdRefered, pkTableName, pkTableResolver);
         recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
         return recordIds;
     }
@@ -373,9 +389,10 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             referFieldNames.add(fieldSchema.getName());
         });
         S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
+        //if the dataset to validate is of reference type, then the table path should be changed
         String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         S3PathResolver referTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdReferenced, referencedTableSchema.getNameTableSchema());
-        String referTablePath = s3Service.getTableAsFolderQueryPath(referTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String referTablePath = s3Service.getTablePathByDatasetType(dataflowId, datasetIdReferenced, referencedTableSchema.getNameTableSchema(), referTableResolver);
         recordIds =  (List<String>) method.invoke(object, originTablePath, referTablePath, origFieldNames, referFieldNames, integrityVO.getIsDoubleReferenced());  //checkIntegrityConstraint
         return recordIds;
     }

@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -28,6 +29,7 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -66,7 +68,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -199,8 +200,7 @@ public class ValidationHelper implements DisposableBean {
   private S3Helper s3Helper;
 
   @Autowired
-  @Qualifier("dremioJdbcTemplate")
-  JdbcTemplate dremioJdbcTemplate;
+  DremioHelperService dremioHelperService;
 
   @Autowired
   S3Service s3Service;
@@ -344,7 +344,7 @@ public class ValidationHelper implements DisposableBean {
   }
 
   @LockMethod(removeWhenFinish = true, isController = false)
-  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver) {
+  public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver, boolean createParquetWithSQL) {
     initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     LOG.info("Obtaining dataset metabase from datasetId {} to perform validationDL. The schema from the metabase is {}",
@@ -387,7 +387,7 @@ public class ValidationHelper implements DisposableBean {
         value.put("tableName", tableSchema.getNameTableSchema());
         value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
-        value.put("createParquetWithSQL", "false");
+        value.put("createParquetWithSQL", createParquetWithSQL);
         if (rule.getSqlSentence()!=null || isDremioSqlRuleMethod(rule.getWhenCondition())) {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL_WITH_SQL, value);
         } else if (rule.getWhenCondition().contains("RuleOperators")) {
@@ -1201,13 +1201,17 @@ public class ValidationHelper implements DisposableBean {
             value.put("bigData", dataflow.getBigData());
           }
 
-          kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+          if (dataflow.getBigData()!=null && !dataflow.getBigData() || dataflow.getBigData()==null) {
+            kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
+          }
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
               ProcessTypeEnum.VALIDATION, processId,
               process.getUser(), 0, null)) {
 
             Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
             value.put("validation_job_id", jobId);
+
+            checkAndPromoteFolder(s3PathResolver, dataflow);
 
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
               ProcessVO nextProcess = null;
@@ -1225,10 +1229,25 @@ public class ValidationHelper implements DisposableBean {
                 nextProcess = processControllerZuul.getNextProcess(processId);
               }
               if (null != nextProcess) {
-                executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
-                    true);
+                if (dataflow.getBigData()!=null && dataflow.getBigData()) {
+                  S3PathResolver nextS3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), nextProcess.getDatasetId(), S3_VALIDATION);
+                  JobVO jobVO = null;
+                  Boolean createParquetWithSQL = false;
+                  if (jobId != null) {
+                    jobVO = jobControllerZuul.findJobById(jobId);
+                    if (jobVO != null) {
+                      Map<String, Object> parameters = jobVO.getParameters();
+                      if (parameters.containsKey("createParquetWithSQL")) {
+                        createParquetWithSQL = (Boolean) parameters.get("createParquetWithSQL");
+                      }
+                    }
+                    executeValidationDL(nextProcess.getDatasetId(), nextProcess.getProcessId(), true, nextS3PathResolver, createParquetWithSQL);
+                  }
+                } else {
+                  executeValidation(nextProcess.getDatasetId(), nextProcess.getProcessId(), true,
+                          true);
+                }
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                checkAndPromoteFolder(s3PathResolver, dataflow);
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
@@ -1275,7 +1294,7 @@ public class ValidationHelper implements DisposableBean {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
         String query = "ALTER TABLE " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
-        dremioJdbcTemplate.execute(query);
+        dremioHelperService.executeSqlStatement(query);
       }
     }
   }

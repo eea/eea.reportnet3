@@ -1,6 +1,8 @@
 package org.eea.datalake.service.impl;
 
+import com.google.gson.JsonObject;
 import feign.FeignException;
+import netscape.javascript.JSObject;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
@@ -68,7 +70,15 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if (directoryItems!=null) {
             LOG.info("directoryItems : {}", directoryItems.toString());
             LOG.info("directoryItems getChildren : {}", directoryItems.getChildren());
-            Integer itemPosition = (importFolder == true) ? 8 : 6;
+            Integer itemPosition;
+            if (importFolder) {
+                itemPosition = 8;
+            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 4;
+            } else {
+                itemPosition = 6;
+            }
+
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
                 LOG.info("itemOptional : {}", itemOptional.toString());
@@ -90,6 +100,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getDCPath(s3PathResolver);
+        } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
         } else {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
         }
@@ -224,6 +236,22 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             } catch (IOException e) {
                 LOG.error("Could not delete file {}.", parquetFile);
                 throw new Exception("Could not delete file " + parquetFile);
+            }
+        }
+    }
+
+    @Override
+    public void executeSqlStatement(String sqlStatement){
+        DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
+        try {
+            dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+        } catch (FeignException e) {
+            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
+                token = this.getAuthToken();
+                dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+            } else {
+                LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
+                throw e;
             }
         }
     }

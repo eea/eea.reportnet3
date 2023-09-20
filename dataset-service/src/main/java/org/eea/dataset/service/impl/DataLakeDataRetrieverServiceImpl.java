@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.COLLECTION;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.*;
 import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
@@ -134,18 +134,31 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
             LOG.info("For datasetId {} tableSchemaVO : {}", datasetId, tableSchemaVO);
             S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
+            if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+                s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+            } else {
+                s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+            }
             LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
-            LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH));
-            if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
-                LOG.info("s3Helper.buildRecordsCountQuery(s3PathResolver) : {}",  s3Helper.buildRecordsCountQuery(s3PathResolver));
-                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+            LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", s3Helper.checkFolderExist(s3PathResolver));
+            if (s3Helper.checkFolderExist(s3PathResolver) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
+                StringBuilder dataQuery = new StringBuilder();
+                if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+                    s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
+                    LOG.info("s3Helper.getRecordsCountQuery(s3PathResolver) : {}",  s3Helper.getRecordsCountQuery(s3PathResolver));
+                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
+                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver));
+                } else {
+                    LOG.info("s3Helper.buildRecordsCountQuery(s3PathResolver) : {}",  s3Helper.buildRecordsCountQuery(s3PathResolver));
+                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+                }
+
                 LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
                 pageable = calculatePageable(pageable, totalRecords);
                 fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
                 DremioRecordMapper recordMapper = new DremioRecordMapper();
                 recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
-                StringBuilder dataQuery = new StringBuilder();
-                dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
                 //filter value
                 if (!fieldValue.equals("")) {
                     buildFilterQuery(fieldValue, fieldIdMap, dataQuery);

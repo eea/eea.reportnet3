@@ -33,6 +33,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
@@ -308,6 +309,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    * @param filePathInS3 the filePathInS3
    */
@@ -339,6 +341,8 @@ public class DatasetControllerImpl implements DatasetController {
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "Long", value = "Job Id",
+              example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
       @ApiParam(type = "String", value = "Fme Job Id",
               example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
       @ApiParam(type = "String", value = "File path in S3",
@@ -348,7 +352,7 @@ public class DatasetControllerImpl implements DatasetController {
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, fmeJobId, filePathInS3);
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, jobId, fmeJobId, filePathInS3);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -356,7 +360,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     else{
       JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
-      Long jobId = null;
+      jobId = null;
       try {
         if(file == null){
           throw new EEAException("Empty file and file path");
@@ -432,6 +436,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    * @param filePathInS3 the filePathInS3
    */
@@ -464,6 +469,8 @@ public class DatasetControllerImpl implements DatasetController {
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "Long", value = "Job Id",
+              example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
       @ApiParam(type = "String", value = "Fme Job Id",
               example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
       @ApiParam(type = "String", value = "File path in S3",
@@ -471,7 +478,7 @@ public class DatasetControllerImpl implements DatasetController {
       @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
 
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-            integrationId, delimiter, fmeJobId, filePathInS3);
+            integrationId, delimiter, jobId, fmeJobId, filePathInS3);
   }
 
   /**
@@ -485,6 +492,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param replace the replace
    * @param integrationId the integration id
    * @param delimiter the delimiter
+   * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    * @param filePathInS3 the filePathInS3
    */
@@ -515,13 +523,15 @@ public class DatasetControllerImpl implements DatasetController {
           value = "integrationId", required = false) Long integrationId,
       @ApiParam(type = "String", value = "File delimiter",
           example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+      @ApiParam(type = "Long", value = "Job Id",
+              example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
       @ApiParam(type = "String", value = "Fme Job Id",
               example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
       @ApiParam(type = "String", value = "File path in S3",
               example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
       @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-        integrationId, delimiter, fmeJobId, filePathInS3);
+        integrationId, delimiter, jobId, fmeJobId, filePathInS3);
   }
 
   /**
@@ -2467,20 +2477,48 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaId the tableSchemaId
+   * @param replace the replace
+   * @param integrationId the integrationId
+   * @param delimiter the delimiter
+   *
    */
   @Override
   @GetMapping("/{datasetId}/generateImportPresignedUrl")
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
-  public String generateImportPresignedUrl(@PathVariable("datasetId") Long datasetId,
-                                    @RequestParam(value = "dataflowId", required = false) Long dataflowId,
-                                    @RequestParam(value = "providerId", required = false) Long providerId){
+  public JobPresignedUrlInfo generateImportPresignedUrl (
+          @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(name = "datasetId") @PathVariable("datasetId") Long datasetId,
+          @ApiParam(type = "Long", value = "Dataflow id", example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
+          @ApiParam(type = "Long", value = "Provider id", example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Table schema id", example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+          @ApiParam(type = "boolean", value = "Replace current data", example = "true") @RequestParam(value = "replace", required = false) boolean replace,
+          @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(value = "integrationId", required = false) Long integrationId,
+          @ApiParam(type = "String", value = "File delimiter", example = ",") @RequestParam(value = "delimiter", required = false) String delimiter){
+    JobPresignedUrlInfo info = null;
     try{
-      //todo add import job as QUEUED ?
-      return bigDataDatasetService.generateImportPresignedUrl(datasetId, dataflowId, providerId);
+      String presignedUrl = bigDataDatasetService.generateImportPresignedUrl(datasetId, dataflowId, providerId);
+      LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {}", dataflowId, datasetId, providerId);
+
+      //check eligibility of job and add new import job
+      List<Long> datasetIds = new ArrayList<>();
+      datasetIds.add(datasetId);
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      if(jobStatus == JobStatusEnum.IN_PROGRESS){
+        //if this endpoint is called we want to iniatialize an import job with status QUEUED instead of IN_PROGRESS
+        jobStatus = JobStatusEnum.QUEUED;
+      }
+      Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null);
+      if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+        LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+        datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, null);
+        throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
+      }
+      info = new JobPresignedUrlInfo(jobId, presignedUrl);
     }
     catch (Exception e){
       LOG.error("Could not generate import presigned url for datasetId {}, dataflowId {} and providerId {}", datasetId, dataflowId, providerId);
-      return null;
+      throw e;
     }
+    return info;
   }
 }

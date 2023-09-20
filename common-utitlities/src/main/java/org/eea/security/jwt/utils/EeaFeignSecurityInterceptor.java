@@ -26,7 +26,7 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     Authentication authentication = securityContext.getAuthentication();
     if (template.url().contains(DREMIO_PROMOTE_BY_PATH_CONSTANT)){
-      //TODO this is done to encode the path of the folder for promoting. It needs to be enhanced
+      //this is done to encode the path of the folder for promoting. It needs to be enhanced
       String[] urlInParts = template.url().split(DREMIO_PROMOTE_BY_PATH_CONSTANT);
       if(urlInParts.length == 2) {
         String dremioPath = urlInParts[1];
@@ -35,7 +35,7 @@ public class EeaFeignSecurityInterceptor implements RequestInterceptor {
         template.uri(fullUrl);
       }
     }
-    if (template.url().contains("api/v3/catalog")) {
+    if (template.url().contains("api/v3/")) {
       return;
     }
     if (authentication instanceof UsernamePasswordAuthenticationToken) {

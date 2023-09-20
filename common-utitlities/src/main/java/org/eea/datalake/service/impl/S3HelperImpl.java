@@ -68,6 +68,19 @@ public class S3HelperImpl implements S3Helper {
      * @return
      */
     @Override
+    public String getRecordsCountQuery(S3PathResolver s3PathResolver) {
+        StringBuilder query = new StringBuilder();
+        query.append("select count(*) from ");
+        query.append(s3Service.getTableAsFolderQueryPath(s3PathResolver));
+        return query.toString();
+    }
+
+    /**
+     * builds query for counting records
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
     public String buildRecordsCountQueryDC(S3PathResolver s3PathResolver) {
         StringBuilder query = new StringBuilder();
         query.append("select count(*) from ");
@@ -84,6 +97,18 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
+        LOG.info("checkFolderExist key: {}", key);
+        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+    }
+
+    /**
+     * checks if folder validation is created in the s3 storage for the specific dataset
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
+    public boolean checkFolderExist(S3PathResolver s3PathResolver) {
+        String key = s3Service.getTableAsFolderQueryPath(s3PathResolver);
         LOG.info("checkFolderExist key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
@@ -194,6 +219,7 @@ public class S3HelperImpl implements S3Helper {
         } while (listObjectsResponse.isTruncated());
         return objectKeys;
     }
+
     @Override
     public void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO) {
         String validationFolderName = s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH);
@@ -218,7 +244,7 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
-     * checks if table names DC fodlers have been created in the s3 storage
+     * checks if table names DC folders have been created in the s3 storage
      * @param s3PathResolver
      * @return
      */
@@ -275,24 +301,6 @@ public class S3HelperImpl implements S3Helper {
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
         URL url = presignedRequest.url();
 
-        //todo remove the following block of code
-        try{
-            // Create the connection and use it to upload the new object.
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type","text/plain");
-            connection.setRequestProperty("x-amz-meta-author","Mary Doe");
-            connection.setRequestProperty("x-amz-meta-version","1.0.0.0");
-            connection.setRequestMethod("PUT");
-            OutputStreamWriter out = new OutputStreamWriter(connection.getOutputStream());
-            out.write("This text was uploaded as an object by using a presigned URL.");
-            out.close();
-
-            connection.getResponseCode();
-        }
-        catch (Exception e){
-            LOG.error("Could not upload text using presigned url {}", url.toString());
-        }
 
         return url.toString();
     }

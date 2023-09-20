@@ -95,6 +95,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     @Override
     public void execute(Long dataflowId, Long datasetId, String datasetSchemaId, String tableName, String tableSchemaId, String ruleId, Long dataProviderId, Long taskId, boolean createParquetWithSQL) throws Exception {
         try {
+            //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
 
             if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
@@ -157,6 +158,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         if (createParquetWithSQL) {
             int count = 0;
             boolean createRuleFolder = false;
+            //if the dataset to validate is of reference type, then the validation path should be changed
             StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), dataTableResolver, validationResolver, ruleVO, fieldName);
             while (rs.next()) {
                 boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
@@ -173,11 +175,12 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             }
             if (createRuleFolder) {
                 validationQuery.append("))");
-                dremioJdbcTemplate.execute(validationQuery.toString());
+                dremioHelperService.executeSqlStatement(validationQuery.toString());
             }
         } else {
             Map<String, String> headerMap = dremioRulesService.createValidationParquetHeaderMap(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), ruleVO, fieldName);
             StringBuilder pathBuilder = new StringBuilder();
+            //if the dataset to validate is of reference type, then the validation path should be changed
             String s3FilePath = pathBuilder.append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength))
                     .append(SLASH).append(fileName).toString();
             createParquetAndUploadToS3(parquetFile, providerCode, ruleVO, fieldName, s3FilePath, headerMap, headerNames, rs, cls, object);
@@ -559,7 +562,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         List<String> intHeaders = headerNames.get(md.getName());
         if (pm.size()==1) {
             createField(ruleVO, fieldName, rs, fields, recordValue);
-            result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).contains(VALUE) ? rs.getString(fieldName) : pm.get(0));
+            result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE) ? rs.getString(fieldName) : pm.get(0));
         } else if (pm.size()==2) {
             if (record) {
                 creatFields(rs, pm, fields, recordValue, intHeaders);

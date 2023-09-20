@@ -20,4 +20,7 @@ public interface DremioApiController {
 
     @DeleteMapping(value = "api/v3/catalog/{id}", produces = MediaType.APPLICATION_JSON)
     void demote(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String folderId);
+
+    @PostMapping(value = "api/v3/sql", produces = MediaType.APPLICATION_JSON)
+    void sqlQuery(@RequestHeader(value = "Authorization") String token, @RequestBody DremioSqlRequestBody body);
 }
