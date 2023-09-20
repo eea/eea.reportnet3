@@ -123,6 +123,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //upload csv file
         uploadCsvFileAndPromoteIt(s3PathResolver, tableSchemaName, s3PathForModifiedCsv, csvFileWithAddedColumns.getPath(), csvFileWithAddedColumns.getName(), dremioPathForCsvFile);
         if(convertParquetWithCustomWay){
+            LOG.info("For import job {} the conversion of the csv to parquet will use the custom implementation", importFileInDremioInfo);
             String parquetFilePathInReportNet = csvFileWithAddedColumns.getPath().replace(CSV_EXTENSION, PARQUET_EXTENSION);
             convertCsvToParquetCustom(csvFileWithAddedColumns, parquetFilePathInReportNet, importFileInDremioInfo);
             //upload parquet file
@@ -131,6 +132,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
         }
         else{
+            LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
             String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
             dremioHelperService.executeSqlStatement(createTableQuery);
         }
