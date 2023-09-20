@@ -38,13 +38,6 @@ public interface S3Helper {
     void deleleFolder(S3PathResolver s3PathResolver, String folderPath);
 
     /**
-     * Gets filenames from export folder
-     * @param s3PathResolver
-     * @return
-     */
-    List<S3Object> getFilenamesForExport(S3PathResolver s3PathResolver);
-
-    /**
      * Gets filenames from table name folders
      * @param s3PathResolver
      * @return

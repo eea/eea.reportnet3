@@ -46,8 +46,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     private String exportDLPath;
 
     @Override
-    public void convert(S3PathResolver s3PathResolver, String nameDataset)
-        throws IOException {
+    public void convertParquetToCSV(S3PathResolver s3PathResolver, String nameDataset) {
 
         File csvFile = new File(exportDLPath + nameDataset + CSV_TYPE);
 
@@ -55,7 +54,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             new CSVWriter(new FileWriter(csvFile), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
                 CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            List<S3Object> exportFilenames = s3Helper.getFilenamesForExport(s3PathResolver);
+            List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
             LOG.info("Exported dataset data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
             int size = 0;
             int counter = 0;
@@ -85,45 +84,6 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             }
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {}, s3PathResolver {} and nameDataset {}", csvFile, s3PathResolver, nameDataset);
-        }
-    }
-
-
-    @Override
-    public void convertParquetToCSV(File parquetFile, File csvOutputFile) {
-        validateFileFormat(parquetFile, csvOutputFile, CSV_TYPE);
-
-        try (InputStream inputStream = new FileInputStream(parquetFile);
-            CSVWriter csvWriter = new CSVWriter(new FileWriter(csvOutputFile),
-                CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
-
-            ParquetStream parquetStream = new ParquetStream(inputStream);
-            ParquetReader<GenericRecord> r = AvroParquetReader
-                .<GenericRecord>builder(parquetStream)
-                .disableCompatibility()
-                .build();
-
-            int counter = 0;
-            int size = 0;
-            GenericRecord record;
-            while ((record = r.read()) != null) {
-                if (counter == 0 ) {
-                    size = record.getSchema().getFields().size();
-                    List<String> headers = record.getSchema().getFields().stream()
-                        .map(Schema.Field::name)
-                        .collect(Collectors.toList());
-                    csvWriter.writeNext(headers.toArray(String[]::new), false);
-                    counter++;
-                }
-                String[] columns = new String[size];
-                for (int i = 0; i < size; i++) {
-                    columns[i] = record.get(i).toString();
-                }
-                csvWriter.writeNext(columns, false);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

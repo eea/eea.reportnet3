@@ -9,7 +9,6 @@ import java.util.List;
 
 public interface S3ConvertService {
 
-    void convertParquetToCSV(File parquetFile, File csvOutputFile);
 
     void convertParquetToJSON(File parquetFile, File jsonOutputFile);
 
@@ -17,5 +16,5 @@ public interface S3ConvertService {
 
     void convertParquetToXLSX(File parquetFile, File xmlOutputFile);
 
-    void convert(S3PathResolver s3PathResolver, String nameDataset) throws IOException;
+    void convertParquetToCSV(S3PathResolver s3PathResolver, String nameDataset) throws IOException;
 }

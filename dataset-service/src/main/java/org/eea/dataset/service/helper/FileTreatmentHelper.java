@@ -607,19 +607,28 @@ public class FileTreatmentHelper implements DisposableBean {
                 .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId)
                 .error("Error exporting table data").build();
         File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
-        String.format("Failed generating file from datasetId {} with schema {}.", datasetId,
-                tableSchemaId);
         fileFolder.mkdirs();
 
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId());
         try {
-            //get folder files
-/*            DatasetTypeEnum datasetType = null;
-            switch (datasetType) {
+            switch (dataset.getDatasetTypeEnum()) {
                 case REPORTING:
+                    s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                    s3PathResolver.setDataProviderId(dataset.getDataProviderId());
+                    s3PathResolver.setDatasetId(datasetId);
+                    s3PathResolver.setTableName(tableName);
                     break;
                 case DESIGN:
+                    s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                    s3PathResolver.setDataProviderId(0L);
+                    s3PathResolver.setDatasetId(datasetId);
+                    s3PathResolver.setTableName(tableName);
                     break;
                 case COLLECTION:
+                    s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
+                    s3PathResolver.setDatasetId(datasetId);
+                    s3PathResolver.setTableName(tableName);
                     break;
                 case TEST:
                     break;
@@ -627,48 +636,36 @@ public class FileTreatmentHelper implements DisposableBean {
                     break;
                 case REFERENCE:
                     break;
-            }*/
-
-            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-            S3PathResolver s3PathResolver = new S3PathResolver(
-                dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableName);
-            s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                default:
+                    LOG.info("Dataset Type not exist!");
+            }
 
             if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
                 String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
-                s3ConvertService.convert(s3PathResolver, nameDataset);
-            }
+                s3ConvertService.convertParquetToCSV(s3PathResolver, nameDataset);
+            } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + XLSX_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
 
+                s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
+            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + JSON_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
 
-            /*for (S3Object myValue : exportFilenames) {
-                String key = myValue.key();
-                String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
-                if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                    nameDataset = nameDataset + CSV_TYPE;
-                    File csvFile = new File(exportDLPath + nameDataset);
+                s3ConvertService.convertParquetToJSON(parquetFile, xlsxFile);
+            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.XML.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + XML_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
 
-                    s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
-                } else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                    nameDataset = nameDataset + XLSX_TYPE;
-                    File xlsxFile = new File(exportDLPath + nameDataset);
-
-                    s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
-                } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                    nameDataset = nameDataset + JSON_TYPE;
-                    File xlsxFile = new File(exportDLPath + nameDataset);
-
-                    s3ConvertService.convertParquetToJSON(parquetFile, xlsxFile);
-                } else if (mimeType.equalsIgnoreCase(FileTypeEnum.XML.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                    nameDataset = nameDataset + XML_TYPE;
-                    File xlsxFile = new File(exportDLPath + nameDataset);
-
-                    s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
-                }
+                s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
             }*/
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
+                null, notificationVO);
+            LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
         } catch (IOException e) {
             LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
                     tableSchemaId);
@@ -850,12 +847,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     }
 
-    /**
-     * Export dataset file.
-     *
-     * @param datasetId the dataset id
-     * @param mimeType  the mime type
-     */
+/*
     @Async
     public void exportDatasetFileDL(Long datasetId, String mimeType) {
         //get folder files
@@ -921,7 +913,7 @@ public class FileTreatmentHelper implements DisposableBean {
             throw new RuntimeException(e);
         }
 
-    }
+    }*/
 
     /**
      * Release lock releasing process.

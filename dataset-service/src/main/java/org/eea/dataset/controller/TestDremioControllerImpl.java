@@ -50,26 +50,6 @@ public class TestDremioControllerImpl {
         }
     }
 
-
-    @GetMapping("/exportCSV")
-    public void exportCSV(@ApiParam(type = "String", value = "filename")
-        @RequestParam("filename") String filename,
-        HttpServletResponse response) {
-
-        try {
-            File myFile = getFile(filename);
-
-            File toExport = new File("/reportnet3-data/input/importFiles/"+filename+".csv");
-            s3ConvertService.convertParquetToCSV(myFile, toExport);
-
-            download(filename, response, toExport);
-        } catch (IOException | ResponseStatusException ex) {
-            LOG.error("IOException/ResponseStatusException ", ex);
-        } catch (S3Exception e) {
-            LOG.error("S3Exception ", e);
-        }
-    }
-
     @GetMapping("/exportJSON")
     public void exportJSON(@ApiParam(type = "String", value = "filename")
         @RequestParam("filename") String filename,

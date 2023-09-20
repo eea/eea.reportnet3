@@ -111,17 +111,6 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
-     * Gets filenames from export folder
-     * @param s3PathResolver
-     * @return
-     */
-    @Override
-    public List<S3Object> getFilenamesForExport(S3PathResolver s3PathResolver) {
-        String key = s3Service.getProviderQueryPath(s3PathResolver);
-        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
-    }
-
-    /**
      * Gets filenames from table name folders
      * @param s3PathResolver
      * @return
