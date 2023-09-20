@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.3-ARCHITECTURE_DATALAKES</api-gateway.version>
-    <communication.version>v3.3-ARCHITECTURE_DATALAKES</communication.version>
-    <collaboration.version>v3.3-ARCHITECTURE_DATALAKES</collaboration.version>
-    <dataflow.version>v3.3-ARCHITECTURE_DATALAKES</dataflow.version>
-    <dataset.version>v3.3-ARCHITECTURE_DATALAKES</dataset.version>
-    <document.version>v3.3-ARCHITECTURE_DATALAKES</document.version>
-    <frontend.version>v3.3-ARCHITECTURE_DATALAKES</frontend.version>
-    <indexsearch.version>v3.3-ARCHITECTURE_DATALAKES</indexsearch.version>
-    <inspire.version>v3.3-ARCHITECTURE_DATALAKES</inspire.version>
-    <recordstore.version>v3.3-ARCHITECTURE_DATALAKES</recordstore.version>
-    <ums.version>v3.3-ARCHITECTURE_DATALAKES</ums.version>
-    <validation.version>v3.3-ARCHITECTURE_DATALAKES</validation.version>
-    <common-interfaces.version>v3.3-ARCHITECTURE_DATALAKES</common-interfaces.version>
-    <common-utitlities.version>v3.3-ARCHITECTURE_DATALAKES</common-utitlities.version>
-    <rod.version>v3.3-ARCHITECTURE_DATALAKES</rod.version>
-    <orchestrator.version>v3.3-ARCHITECTURE_DATALAKES</orchestrator.version>
+    <api-gateway.version>v3.3-EXPORT-TABLE-DATA-UI</api-gateway.version>
+    <communication.version>v3.3-EXPORT-TABLE-DATA-UI</communication.version>
+    <collaboration.version>v3.3-EXPORT-TABLE-DATA-UI</collaboration.version>
+    <dataflow.version>v3.3-EXPORT-TABLE-DATA-UI</dataflow.version>
+    <dataset.version>v3.3-EXPORT-TABLE-DATA-UI</dataset.version>
+    <document.version>v3.3-EXPORT-TABLE-DATA-UI</document.version>
+    <frontend.version>v3.3-EXPORT-TABLE-DATA-UI</frontend.version>
+    <indexsearch.version>v3.3-EXPORT-TABLE-DATA-UI</indexsearch.version>
+    <inspire.version>v3.3-EXPORT-TABLE-DATA-UI</inspire.version>
+    <recordstore.version>v3.3-EXPORT-TABLE-DATA-UI</recordstore.version>
+    <ums.version>v3.3-EXPORT-TABLE-DATA-UI</ums.version>
+    <validation.version>v3.3-EXPORT-TABLE-DATA-UI</validation.version>
+    <common-interfaces.version>v3.3-EXPORT-TABLE-DATA-UI</common-interfaces.version>
+    <common-utitlities.version>v3.3-EXPORT-TABLE-DATA-UI</common-utitlities.version>
+    <rod.version>v3.3-EXPORT-TABLE-DATA-UI</rod.version>
+    <orchestrator.version>v3.3-EXPORT-TABLE-DATA-UI</orchestrator.version>
   </properties>
 </project>
