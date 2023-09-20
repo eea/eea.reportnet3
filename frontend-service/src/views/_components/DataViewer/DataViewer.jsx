@@ -1118,6 +1118,7 @@ export const DataViewer = ({
   return (
     <SnapshotContext.Provider>
       <ActionsToolbar
+        bigData={bigData}
         colsSchema={colsSchema}
         dataflowId={dataflowId}
         datasetId={datasetId}

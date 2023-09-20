@@ -246,7 +246,9 @@ export const GlobalNotifications = ({ bigData }) => {
       notificationContext.add({ type: 'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD' });
 
       const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
-      const { data } = await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
+      const { data } = bigData
+        ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName)
+        : await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
 
       if (data.size !== 0) {
         DownloadFile(data, downloadFileName);

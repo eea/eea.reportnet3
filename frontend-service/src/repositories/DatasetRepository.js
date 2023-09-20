@@ -103,6 +103,11 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.downloadTableData, { datasetId, fileName })
     }),
 
+  downloadTableDataDL: async (datasetId, fileName) =>
+    await HTTPRequester.download({
+      url: getUrl(DatasetConfig.downloadTableDataDL, { datasetId, fileName })
+    }),
+
   downloadTableDefinitions: async datasetSchemaId =>
     await HTTPRequester.download({ url: getUrl(DatasetConfig.downloadTableDefinitions, { datasetSchemaId }) }),
 
@@ -136,6 +141,26 @@ export const DatasetRepository = {
   ) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.exportTableData, { datasetId, fileType, tableSchemaId }),
+      data: {
+        fieldValue: isExportFilteredCsv ? filterValue : '',
+        idRules: isExportFilteredCsv ? selectedRuleId : '',
+        levelError: isExportFilteredCsv && isFilterValidationsActive ? levelErrorValidations : []
+      },
+      headers: { 'Content-Type': 'application/json' }
+    }),
+
+  exportTableDataDL: async (
+    datasetId,
+    tableSchemaId,
+    fileType,
+    filterValue,
+    levelErrorValidations,
+    selectedRuleId,
+    isExportFilteredCsv,
+    isFilterValidationsActive
+  ) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId }),
       data: {
         fieldValue: isExportFilteredCsv ? filterValue : '',
         idRules: isExportFilteredCsv ? selectedRuleId : '',

@@ -114,6 +114,8 @@ export const DatasetService = {
 
   downloadTableData: async (datasetId, fileName) => await DatasetRepository.downloadTableData(datasetId, fileName),
 
+  downloadTableDataDL: async (datasetId, fileName) => await DatasetRepository.downloadTableDataDL(datasetId, fileName),
+
   getStatistics: async (datasetId, tableSchemaNames) => {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
 
@@ -184,6 +186,27 @@ export const DatasetService = {
     isFilterValidationsActive
   ) =>
     await DatasetRepository.exportTableData(
+      datasetId,
+      tableSchemaId,
+      fileType,
+      filterValue,
+      levelErrorValidations,
+      selectedRuleId,
+      isExportFilteredCsv,
+      isFilterValidationsActive
+    ),
+
+  exportTableDataDL: async (
+    datasetId,
+    tableSchemaId,
+    fileType,
+    filterValue,
+    levelErrorValidations,
+    selectedRuleId,
+    isExportFilteredCsv,
+    isFilterValidationsActive
+  ) =>
+    await DatasetRepository.exportTableDataDL(
       datasetId,
       tableSchemaId,
       fileType,

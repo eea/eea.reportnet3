@@ -35,6 +35,7 @@ import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ActionsToolbar = ({
+  bigData,
   colsSchema,
   dataflowId,
   datasetId,
@@ -120,16 +121,29 @@ export const ActionsToolbar = ({
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
     try {
       const isExportFilteredCsv = TextUtils.areEquals(type.key, 'exportFilteredCsv');
-      await DatasetService.exportTableData(
-        datasetId,
-        tableId,
-        type.code,
-        isFilteredByValue ? filter.valueFilter : '',
-        levelErrorValidations.map(levelError => levelError.toUpperCase()),
-        selectedRuleId,
-        isExportFilteredCsv,
-        isFilterValidationsActive
-      );
+      if (bigData) {
+        await DatasetService.exportTableDataDL(
+          datasetId,
+          tableId,
+          type.code,
+          isFilteredByValue ? filter.valueFilter : '',
+          levelErrorValidations.map(levelError => levelError.toUpperCase()),
+          selectedRuleId,
+          isExportFilteredCsv,
+          isFilterValidationsActive
+        );
+      } else {
+        await DatasetService.exportTableData(
+          datasetId,
+          tableId,
+          type.code,
+          isFilteredByValue ? filter.valueFilter : '',
+          levelErrorValidations.map(levelError => levelError.toUpperCase()),
+          selectedRuleId,
+          isExportFilteredCsv,
+          isFilterValidationsActive
+        );
+      }
     } catch (error) {
       console.error('ActionsToolbar - onExportTableData.', error);
       const {
