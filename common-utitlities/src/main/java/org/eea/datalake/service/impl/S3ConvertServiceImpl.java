@@ -14,6 +14,7 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.ParquetStream;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,23 +40,19 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     @Autowired
     private S3Helper s3Helper;
 
-    /**
-     * The path export DL.
-     */
+    /**  The path export DL */
     @Value("${exportDLPath}")
     private String exportDLPath;
 
     @Override
-    public void convertParquetToCSV(S3PathResolver s3PathResolver, String nameDataset) {
+    public void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset) {
 
         File csvFile = new File(exportDLPath + nameDataset + CSV_TYPE);
 
-        try (CSVWriter csvWriter =
-            new CSVWriter(new FileWriter(csvFile), CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
+            CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
-            LOG.info("Exported dataset data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
             int size = 0;
             int counter = 0;
 
@@ -83,7 +80,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {}, s3PathResolver {} and nameDataset {}", csvFile, s3PathResolver, nameDataset);
+            LOG.error("Error in convert method for csvOutputFile {} and nameDataset {}", csvFile, nameDataset);
         }
     }
 

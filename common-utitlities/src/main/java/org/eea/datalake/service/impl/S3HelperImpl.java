@@ -142,7 +142,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public List<S3Object> getFilenamesFromTableNames(S3PathResolver s3PathResolver) {
-        String key = s3Service.getProviderPath(s3PathResolver);
+        String key = s3Service.getS3Path(s3PathResolver);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
     }
 
@@ -250,7 +250,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public boolean checkTableNameDCProviderFolderExist(S3PathResolver s3PathResolver) {
-        String key = s3Service.getDCPath(s3PathResolver);
+        String key = s3Service.getS3Path(s3PathResolver);
         LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
@@ -262,7 +262,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver) {
-        String key = s3Service.getDCPath(s3PathResolver);
+        String key = s3Service.getS3Path(s3PathResolver);
         LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
@@ -274,7 +274,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void deleleTableNameDCFolder(S3PathResolver s3PathResolver) {
-        String folderName = s3Service.getDCPath(s3PathResolver);
+        String folderName = s3Service.getS3Path(s3PathResolver);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
     }

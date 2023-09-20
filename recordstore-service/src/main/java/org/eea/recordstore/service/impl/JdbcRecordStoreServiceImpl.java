@@ -1955,7 +1955,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     try {
                       LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                       File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                      String tableNameDCPath = s3Service.getDCPath(dataCollectionPath);
+                      String tableNameDCPath = s3Service.getS3Path(dataCollectionPath);
                       LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
                       s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                       LOG.info("Uploading finished successfully for {}", tableNameDCPath);
@@ -1995,7 +1995,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     try {
                       LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                       File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                      String tableNameDCPath = s3Service.getDCPath(referencePath);
+                      String tableNameDCPath = s3Service.getS3Path(referencePath);
                       LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
                       s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
                       LOG.info("Uploading finished successfully for {}", tableNameDCPath);

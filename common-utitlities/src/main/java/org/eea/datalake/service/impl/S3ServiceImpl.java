@@ -22,31 +22,10 @@ public class S3ServiceImpl implements S3Service {
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
 
     @Override
-    public String getProviderPath(S3PathResolver s3PathResolver) {
-        String s3ValidationPath = calculateS3ProviderPath(s3PathResolver);
-        LOG.info("Method getProviderPath returns S3 Validation Path: {}", s3ValidationPath);
-        return s3ValidationPath;
-    }
-
-    @Override
-    public String getDCPath(S3PathResolver s3PathResolver) {
-        String s3ValidationPath = calculateS3DCPath(s3PathResolver);
-        LOG.info("Method getDCPath returns S3 Validation Path: {}", s3ValidationPath);
-        return s3ValidationPath;
-    }
-
-    @Override
-    public String getProviderQueryPath(S3PathResolver s3PathResolver) {
-        String s3ImportPath = calculateS3ProviderPath(s3PathResolver);
-        LOG.info("Method getImportProviderQueryPath returns S3 Import Path: {}", s3ImportPath);
-        return s3ImportPath;
-    }
-
-    @Override
-    public String getDCQueryPath(S3PathResolver s3PathResolver) {
-        String s3ValidationPath = calculateS3DCPath(s3PathResolver);
-        LOG.info("Method getValidationDCQueryPath returns S3 Validation Path: {}", s3ValidationPath);
-        return s3ValidationPath;
+    public String getS3Path(S3PathResolver s3PathResolver) {
+        String s3Path = calculateS3Path(s3PathResolver);
+        LOG.info("Method calculateS3Path returns Path: {}", s3Path);
+        return s3Path;
     }
 
     @Override
@@ -70,13 +49,15 @@ public class S3ServiceImpl implements S3Service {
         return s3TableNamePath;
     }
 
-    private String calculateS3ProviderPath(S3PathResolver s3PathResolver) {
-        LOG.info("Method calculateS3Path called with s3Path: {}", s3PathResolver);
+    private String calculateS3Path(S3PathResolver s3PathResolver) {
+        LOG.info("Method calculateS3Path called with s3PathResolver: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
         String fileName = s3PathResolver.getFilename();
         String path = s3PathResolver.getPath();
+        String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
+        String parquetFolder = s3PathResolver.getParquetFolder();
 
         switch (path) {
             case S3_IMPORT_FILE_PATH:
@@ -103,10 +84,42 @@ public class S3ServiceImpl implements S3Service {
             case S3_PROVIDER_IMPORT_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
                 break;
+            case S3_VALIDATION_DC_PATH:
+            case S3_VALIDATION_DC_QUERY_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getValidationId(), dataProviderFolder, fileName);
+                break;
+            case S3_TABLE_NAME_DC_PATH:
+            case S3_TABLE_NAME_VALIDATE_DC_PATH:
+            case S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder, parquetFolder, fileName);
+                break;
+            case S3_EXPORT_PATH:
+            case S3_EXPORT_QUERY_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder, fileName);
+                break;
+            case S3_EXPORT_FOLDER_PATH:
+            case S3_TABLE_NAME_ROOT_DC_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder);
+                break;
+            case S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder);
+                break;
+            case S3_TABLE_NAME_DC_FOLDER_PATH:
+            case S3_TABLE_NAME_DC_QUERY_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName());
+                break;
+            case S3_DATAFLOW_REFERENCE_PATH:
+                path = String.format(path, dataflowFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
+                break;
+            case S3_DATAFLOW_REFERENCE_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, s3PathResolver.getTableName());
+                break;
             default:
                 LOG.info("Wrong type value: {}", path);
+                path = null;
                 break;
         }
+
         return path;
     }
 
@@ -143,6 +156,7 @@ public class S3ServiceImpl implements S3Service {
                 LOG.info("Wrong type value: {}", path);
                 break;
         }
+
         return null;
     }
 
@@ -161,54 +175,6 @@ public class S3ServiceImpl implements S3Service {
                 break;
         }
         return null;
-    }
-
-    private String calculateS3DCPath(S3PathResolver s3PathResolver) {
-        LOG.info("Method calculateS3DCPath called with s3Path: {}", s3PathResolver);
-        String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
-        String fileName = s3PathResolver.getFilename();
-        String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
-        String dataProviderFolder =  formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
-        String path = s3PathResolver.getPath();
-        String parquetFolder = s3PathResolver.getParquetFolder();
-
-        switch (path) {
-            case S3_VALIDATION_DC_PATH:
-            case S3_VALIDATION_DC_QUERY_PATH:
-                path = String.format(path, dataflowFolder,
-                    S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getValidationId(), dataProviderFolder, fileName);
-                break;
-            case S3_TABLE_NAME_DC_PATH:
-            case S3_TABLE_NAME_VALIDATE_DC_PATH:
-            case S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH:
-                path = String.format(path, dataflowFolder,
-                    S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder, parquetFolder, fileName);
-                break;
-            case S3_EXPORT_PATH:
-            case S3_EXPORT_QUERY_PATH:
-                path = String.format(path, dataflowFolder,
-                    S3_COLLECTIONS, dataCollectionFolder, fileName);
-                break;
-            case S3_EXPORT_FOLDER_PATH:
-            case S3_TABLE_NAME_ROOT_DC_FOLDER_PATH:
-                path = String.format(path, dataflowFolder,
-                    S3_COLLECTIONS, dataCollectionFolder);
-                break;
-            case S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH:
-                path = String.format(path, dataflowFolder, S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder);
-                break;
-            case S3_TABLE_NAME_DC_FOLDER_PATH:
-            case S3_TABLE_NAME_DC_QUERY_PATH:
-                path = String.format(path, dataflowFolder, S3_COLLECTIONS, dataCollectionFolder, s3PathResolver.getTableName());
-                break;
-            case S3_DATAFLOW_REFERENCE_PATH:
-                path = String.format(path, dataflowFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
-                break;
-            default:
-                LOG.info("Wrong type value: {}", path);
-                break;
-        }
-        return path;
     }
 
     private String formatFolderName(Long id, String pattern) {

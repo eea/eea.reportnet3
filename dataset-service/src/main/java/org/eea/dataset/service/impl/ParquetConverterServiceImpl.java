@@ -145,7 +145,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     private String getImportS3PathForParquet(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName) throws Exception {
         Long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName, S3_TABLE_NAME_PATH);
-        String pathToS3ForImport = s3Service.getProviderPath(s3PathResolver);
+        String pathToS3ForImport = s3Service.getS3Path(s3PathResolver);
         if(StringUtils.isBlank(pathToS3ForImport)){
             LOG.error("Could not resolve path to s3 for import for providerId {} {}", providerId, importFileInDremioInfo);
             throw new Exception("Could not resolve path to s3 for import");
@@ -283,7 +283,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     private String getImportPathForCsv(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName) throws Exception {
         S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, fileName, tableSchemaName);
         String pathToS3ForImport = null;
-        pathToS3ForImport = s3Service.getProviderPath(s3PathResolver);
+        pathToS3ForImport = s3Service.getS3Path(s3PathResolver);
         if(StringUtils.isBlank(pathToS3ForImport)){
             LOG.error("Could not resolve path to s3 for import {}", importFileInDremioInfo);
             throw new Exception("Could not resolve path to s3 for import");
@@ -296,7 +296,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         S3PathResolver s3PathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaName, fileName, pathConstant);
         String pathToS3ForImport = null;
         if(pathConstant.equals(LiteralConstants.S3_TABLE_NAME_QUERY_PATH) || pathConstant.equals(LiteralConstants.S3_IMPORT_CSV_FILE_QUERY_PATH)){
-            pathToS3ForImport = s3Service.getProviderQueryPath(s3PathResolver);
+            pathToS3ForImport = s3Service.getS3Path(s3PathResolver);
         }
         else{
             pathToS3ForImport = s3Service.getTableAsFolderQueryPath(s3PathResolver, pathConstant);

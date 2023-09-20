@@ -610,39 +610,40 @@ public class FileTreatmentHelper implements DisposableBean {
         fileFolder.mkdirs();
 
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId());
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
         try {
             switch (dataset.getDatasetTypeEnum()) {
                 case REPORTING:
                     s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
                     s3PathResolver.setDataProviderId(dataset.getDataProviderId());
                     s3PathResolver.setDatasetId(datasetId);
-                    s3PathResolver.setTableName(tableName);
                     break;
                 case DESIGN:
                     s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
                     s3PathResolver.setDataProviderId(0L);
                     s3PathResolver.setDatasetId(datasetId);
-                    s3PathResolver.setTableName(tableName);
                     break;
                 case COLLECTION:
                     s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
                     s3PathResolver.setDatasetId(datasetId);
-                    s3PathResolver.setTableName(tableName);
                     break;
                 case TEST:
                     break;
                 case EUDATASET:
                     break;
                 case REFERENCE:
+                    s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
                     break;
                 default:
-                    LOG.info("Dataset Type not exist!");
+                    LOG.info("Dataset Type does not exist!");
+                    break;
             }
+            List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+            LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
             if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
                 String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
-                s3ConvertService.convertParquetToCSV(s3PathResolver, nameDataset);
+                s3ConvertService.convertParquetToCSV(exportFilenames, nameDataset);
             } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;
@@ -665,8 +666,8 @@ public class FileTreatmentHelper implements DisposableBean {
 
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT,
                 null, notificationVO);
-            LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
-        } catch (IOException e) {
+            LOG.info("Successfully exported table data for S3PathResolver {} and tableSchemaId {}", s3PathResolver, tableSchemaId);
+        } catch (Exception e) {
             LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
                     tableSchemaId);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null,

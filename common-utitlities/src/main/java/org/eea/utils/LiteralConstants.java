@@ -252,34 +252,34 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_DC_PATH: {@value}. */
-  public static final String S3_VALIDATION_DC_PATH = "%s/%s/%s/current/validation/%s/%s/%s";
+  public static final String S3_VALIDATION_DC_PATH = "%s/collections/%s/current/validation/%s/%s/%s";
 
   /** The Constant S3_VALIDATION_TABLE_PATH: {@value}. */
   public static final String S3_VALIDATION_TABLE_PATH = "%s/%s/%s/current/validation";
 
   /** The Constant S3_VALIDATION_DC_QUERY_PATH: {@value}. */
-  public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
+  public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/%s/%s/current/%s_validate/%s/%s";
+  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/collections/%s/current/%s_validate/%s/%s";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
+  public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_PATH = "%s/%s/%s/current/%s/%s/%s/%s";
+  public static final String S3_TABLE_NAME_DC_PATH = "%s/collections/%s/current/%s/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_DC_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH = "%s/%s/%s/current/%s/%s";
+  public static final String S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH = "%s/collections/%s/current/%s/%s";
 
   /** The Constant S3_TABLE_NAME_DC_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_FOLDER_PATH = "%s/%s/%s/current/%s";
+  public static final String S3_TABLE_NAME_DC_FOLDER_PATH = "%s/collections/%s/current/%s";
 
   /** The Constant S3_TABLE_NAME_ROOT_DC_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_ROOT_DC_FOLDER_PATH = "%s/%s/%s/current";
+  public static final String S3_TABLE_NAME_ROOT_DC_FOLDER_PATH = "%s/collections/%s/current";
 
   /** The Constant S3_TABLE_NAME_DC_QUERY_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
+  public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"current\".\"%s\"";
 
   public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
 
@@ -296,13 +296,13 @@ public final class LiteralConstants {
   public static final String S3_DATAFLOW_REFERENCE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"reference\".\"%s\"";
 
   /** The Constant S3_EXPORT_PATH: {@value}. */
-  public static final String S3_EXPORT_PATH = "%s/%s/%s/export/%s";
+  public static final String S3_EXPORT_PATH = "%s/collections/%s/export/%s";
 
   /** The Constant S3_EXPORT_FOLDER_PATH: {@value}. */
-  public static final String S3_EXPORT_FOLDER_PATH = "%s/%s/%s/export";
+  public static final String S3_EXPORT_FOLDER_PATH = "%s/collections/%s/export";
 
   /** The Constant S3_EXPORT_QUERY_PATH: {@value}. */
-  public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"export\".\"%s\"";
+  public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"export\".\"%s\"";
 
   /** The Constant S3_VALIDATION: {@value}. */
   public static final String S3_VALIDATION = "validation";

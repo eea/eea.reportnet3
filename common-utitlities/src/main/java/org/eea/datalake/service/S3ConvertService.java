@@ -1,6 +1,7 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.File;
@@ -16,5 +17,5 @@ public interface S3ConvertService {
 
     void convertParquetToXLSX(File parquetFile, File xmlOutputFile);
 
-    void convertParquetToCSV(S3PathResolver s3PathResolver, String nameDataset) throws IOException;
+    void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset);
 }
