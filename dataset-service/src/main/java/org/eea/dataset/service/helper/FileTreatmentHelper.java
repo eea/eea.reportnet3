@@ -907,8 +907,10 @@ public class FileTreatmentHelper implements DisposableBean {
             DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
             DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
 
+            File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+            datasetFolder.mkdirs();
             File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
-            fileWriteZip.mkdirs();
+
             ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
             for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                 convertParquetFileZip(datasetId, mimeType, tableSchema.getIdTableSchema().toString(), out);
