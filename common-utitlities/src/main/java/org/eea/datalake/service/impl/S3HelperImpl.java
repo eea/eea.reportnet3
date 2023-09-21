@@ -183,6 +183,43 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
+     * Gets file for export
+     * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
+     * @return
+     */
+    @Override
+    public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(key)
+            .bucket(S3_BUCKET_NAME)
+            .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        byte[] data = objectBytes.asByteArray();
+
+        // Write the data to a local file.
+        File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
+
+        if(file.exists()){
+            //if a file with the same name exists in the path, delete it so that it will be recreated
+            file.delete();
+        }
+        Path textFilePath = Paths.get(file.toString());
+        LOG.info("textFilePath {}", textFilePath);
+        Files.createFile(textFilePath);
+        LOG.info("Local file {}", file);
+        OutputStream os = new FileOutputStream(file);
+        os.write(data);
+        LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
+        os.close();
+        return file;
+    }
+
+    /**
      * Uploads a file in s3
      * @param filePathInS3
      * @param filePathInReportnet

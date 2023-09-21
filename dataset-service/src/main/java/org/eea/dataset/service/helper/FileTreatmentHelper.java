@@ -606,7 +606,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
                 .fileName(tableName).mimeType(mimeType).datasetSchemaId(tableSchemaId)
                 .error("Error exporting table data").build();
-        File fileFolder = new File(pathPublicFile, "dataset-" + datasetId);
+        File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
         fileFolder.mkdirs();
 
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -642,8 +642,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
             if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
-                String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
-                s3ConvertService.convertParquetToCSV(exportFilenames, nameDataset);
+                s3ConvertService.convertParquetToCSV(exportFilenames, tableName, datasetId);
             } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;

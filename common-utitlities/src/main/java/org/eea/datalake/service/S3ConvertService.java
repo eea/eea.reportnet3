@@ -17,5 +17,5 @@ public interface S3ConvertService {
 
     void convertParquetToXLSX(File parquetFile, File xmlOutputFile);
 
-    void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset);
+    void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset, Long datasetId);
 }
