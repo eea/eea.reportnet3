@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.io.FileUtils;
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -74,8 +75,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             // Adding the xlsx/csv file to the zip
             ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
             out.putNextEntry(e);
-            byte[] bytes = csvFile.toString().getBytes();
-            out.write(bytes, 0, bytes.length);
+            out.write(FileUtils.readFileToByteArray(csvFile));
             out.closeEntry();
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName);
