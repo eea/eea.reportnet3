@@ -74,7 +74,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             // Adding the xlsx/csv file to the zip
             ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
             out.putNextEntry(e);
-            out.write(csvFile.toString().getBytes(), 0, csvFile.toString().length());
+            byte[] bytes = csvFile.toString().getBytes();
+            out.write(bytes, 0, bytes.length);
             out.closeEntry();
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName);
