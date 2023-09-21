@@ -697,8 +697,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-    private void setUpS3PathResolver(Long datasetId, DataSetMetabaseVO dataset,
-        S3PathResolver s3PathResolver) {
+    private void setUpS3PathResolver(Long datasetId, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver) {
         switch (dataset.getDatasetTypeEnum()) {
             case REPORTING:
                 s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
@@ -913,7 +912,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
             ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
             for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
-                convertParquetFileZip(datasetId, mimeType, tableSchema.getIdTableSchema().toString(), out);
+                convertParquetFileZip(datasetId, mimeType, tableSchema.getNameTableSchema(), out);
             }
 
             NotificationVO notificationVO = NotificationVO.builder()
