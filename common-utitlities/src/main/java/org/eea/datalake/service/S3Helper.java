@@ -68,6 +68,16 @@ public interface S3Helper {
     File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException;
 
     /**
+     * Gets file from S3 for export
+     * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
+     * @return
+     */
+    File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException;
+
+    /**
      * Uploads a file in s3
      * @param filePathInS3
      * @param filePathInReportnet

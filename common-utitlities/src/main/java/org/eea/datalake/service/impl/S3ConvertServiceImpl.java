@@ -45,9 +45,10 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     private String exportDLPath;
 
     @Override
-    public void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset) {
+    public void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId) {
 
-        File csvFile = new File(exportDLPath + nameDataset + CSV_TYPE);
+        File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        LOG.info("Creating file for export: {}", csvFile);
 
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
@@ -57,7 +58,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int counter = 0;
 
             for (int i = 0; i < exportFilenames.size(); i++) {
-                File parquetFile = s3Helper.getFileFromS3(exportFilenames.get(i).key(), nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
                 InputStream inputStream = new FileInputStream(parquetFile);
                 ParquetStream parquetStream = new ParquetStream(inputStream);
                 ParquetReader<GenericRecord> r =
@@ -80,7 +81,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {} and nameDataset {}", csvFile, nameDataset);
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName);
         }
     }
 
