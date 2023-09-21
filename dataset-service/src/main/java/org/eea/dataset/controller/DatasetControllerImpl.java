@@ -1943,11 +1943,10 @@ public class DatasetControllerImpl implements DatasetController {
         userNotificationContentVO);
 
     try {
-      //fileTreatmentHelper.exportDatasetFileDL(datasetId, mimeType);
+      fileTreatmentHelper.exportDatasetFileDL(datasetId, mimeType);
       LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());
-      throw e;
     }
   }
 
