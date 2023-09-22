@@ -903,21 +903,35 @@ public class FileTreatmentHelper implements DisposableBean {
     @Async
     public void exportDatasetFileDL(Long datasetId, String mimeType) throws EEAException {
         try {
-            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-            DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-
-            File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
-            datasetFolder.mkdirs();
-            File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
-
-            ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
-            for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
-                convertParquetFileZip(datasetId, mimeType, tableSchema.getNameTableSchema(), out);
+            String[] type = mimeType.split(" ");
+            String extension = "";
+            if (type.length > 1) {
+                extension = type[1];
+            } else {
+                extension = type[0];
             }
 
-            NotificationVO notificationVO = NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).
-                    datasetName(dataset.getDataSetName()).build();
+            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+            if (ZIP.equals(extension)) {
+                DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+                File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+                datasetFolder.mkdirs();
+                File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
+
+                ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
+                for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+                    convertParquetFileZip(datasetId, mimeType, tableSchema.getNameTableSchema(), out);
+                }
+            }
+
+            NotificationVO notificationVO = NotificationVO
+                .builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId)
+                .mimeType(extension)
+                .datasetName(dataset.getDataSetName())
+                .error("Error exporting table data")
+                .build();
 
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
                 notificationVO);
