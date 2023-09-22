@@ -104,6 +104,7 @@ import java.util.stream.Collectors;
 import java.util.zip.*;
 
 import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REPORTING;
+import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
 import static org.eea.utils.LiteralConstants.*;
 
 /**
@@ -636,7 +637,7 @@ public class FileTreatmentHelper implements DisposableBean {
             List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
-            if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
+            if (mimeType.equalsIgnoreCase(CSV.getValue())) {
                 s3ConvertService.convertParquetToCSV(exportFilenames, tableName, datasetId);
             } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
@@ -671,7 +672,7 @@ public class FileTreatmentHelper implements DisposableBean {
             List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
-            if (mimeType.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
+            if (mimeType.equalsIgnoreCase(CSV.getValue())) {
                 s3ConvertService.convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, out);
             } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
@@ -858,7 +859,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
         try {
             Map<String, byte[]> contents = new HashMap<>();
-            if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
+            if (extension.equalsIgnoreCase(CSV.getValue())) {
                 List<TableSchema> tablesSchema = getTables(datasetId);
                 List<byte[]> dataFile =
                         context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
@@ -905,36 +906,37 @@ public class FileTreatmentHelper implements DisposableBean {
         try {
             String[] type = mimeType.split(" ");
             String extension = "";
+            boolean isZip = false;
             if (type.length > 1) {
                 extension = type[1];
+                isZip = true;
             } else {
                 extension = type[0];
             }
 
             DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-            if (ZIP.equals(extension)) {
-                DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+            NotificationVO notificationVO = NotificationVO
+                .builder()
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId)
+                .datasetName(dataset.getDataSetName())
+                .error("Error exporting table data")
+                .build();
+
+            if (isZip && CSV.equals(extension)) {
+                notificationVO.setMimeType(ZIP);
                 File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
                 datasetFolder.mkdirs();
                 File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
 
+                DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
                 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
                 for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                     convertParquetFileZip(datasetId, mimeType, tableSchema.getNameTableSchema(), out);
                 }
             }
 
-            NotificationVO notificationVO = NotificationVO
-                .builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId)
-                .mimeType(extension)
-                .datasetName(dataset.getDataSetName())
-                .error("Error exporting table data")
-                .build();
-
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
-                notificationVO);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
         } catch (Exception e) {
             LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
                 datasetId, mimeType, e.getMessage(), e);
@@ -1260,7 +1262,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
                 // Prevent Zip Slip attack or skip if the entry is a directory
                 if ((entryName.split("/").length > 1)
-                        || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+                        || !CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
                         || !filePath.startsWith(saveLocationPath + File.separator)) {
                     LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
                     entry = zip.getNextEntry();
@@ -1896,7 +1898,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 // Get the partition for the partiton id
                 final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
 
-                if (FileTypeEnum.getEnum(mimeType.toLowerCase()) == FileTypeEnum.CSV) {
+                if (FileTypeEnum.getEnum(mimeType.toLowerCase()) == CSV) {
 
 
                     BufferedReader reader = new BufferedReader(new FileReader(filePath));
