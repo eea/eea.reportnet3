@@ -334,6 +334,9 @@ public final class LiteralConstants {
   /** The Constant ZIP_TYPE: {@value}. */
   public static final String ZIP_TYPE = ".zip";
 
+  /** The Constant ZIP_TYPE: {@value}. */
+  public static final String ZIP = "zip";
+
   /** The Constant VALIDATION_LEVEL: {@value}. */
   public static final String VALIDATION_LEVEL = "validation_level";
 
