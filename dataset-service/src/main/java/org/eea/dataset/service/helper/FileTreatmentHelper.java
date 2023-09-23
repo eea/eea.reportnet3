@@ -920,6 +920,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info(extension);
             LOG.info(String.valueOf(isZip));
             LOG.info(String.valueOf(CSV.equals(extension)));
+            LOG.info(String.valueOf(CSV.getValue().equals(extension)));
 
             DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
             NotificationVO notificationVO = NotificationVO
