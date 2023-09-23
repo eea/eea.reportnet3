@@ -914,14 +914,6 @@ public class FileTreatmentHelper implements DisposableBean {
                 extension = type[0];
             }
 
-            LOG.info(String.valueOf(type.length));
-            LOG.info(type[0]);
-            LOG.info(type[1]);
-            LOG.info(extension);
-            LOG.info(String.valueOf(isZip));
-            LOG.info(String.valueOf(CSV.equals(extension)));
-            LOG.info(String.valueOf(CSV.getValue().equals(extension)));
-
             DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
             NotificationVO notificationVO = NotificationVO
                 .builder()
@@ -931,7 +923,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 .error("Error exporting table data")
                 .build();
 
-            if (isZip && CSV.equals(extension)) {
+            if (isZip && CSV.getValue().equals(extension)) {
                 notificationVO.setMimeType(ZIP);
                 File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
                 datasetFolder.mkdirs();
