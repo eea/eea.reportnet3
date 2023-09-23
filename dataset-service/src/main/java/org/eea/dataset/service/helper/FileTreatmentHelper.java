@@ -914,6 +914,13 @@ public class FileTreatmentHelper implements DisposableBean {
                 extension = type[0];
             }
 
+            LOG.info(String.valueOf(type.length));
+            LOG.info(type[0]);
+            LOG.info(type[1]);
+            LOG.info(extension);
+            LOG.info(String.valueOf(isZip));
+            LOG.info(String.valueOf(CSV.equals(extension)));
+
             DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
             NotificationVO notificationVO = NotificationVO
                 .builder()
