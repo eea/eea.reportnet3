@@ -915,16 +915,16 @@ public class FileTreatmentHelper implements DisposableBean {
             }
 
             DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-            NotificationVO notificationVO = NotificationVO
-                .builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId)
-                .datasetName(dataset.getDataSetName())
-                .error("Error exporting table data")
-                .build();
-
             if (isZip && CSV.getValue().equals(extension)) {
-                notificationVO.setMimeType(ZIP);
+                NotificationVO notificationVO = NotificationVO
+                    .builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .datasetId(datasetId)
+                    .datasetName(dataset.getDataSetName())
+                    .mimeType(ZIP)
+                    .error("Error exporting table data")
+                    .build();
+
                 File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
                 datasetFolder.mkdirs();
                 File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
@@ -934,9 +934,8 @@ public class FileTreatmentHelper implements DisposableBean {
                 for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                     convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
                 }
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
             }
-
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
         } catch (Exception e) {
             LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
                 datasetId, mimeType, e.getMessage(), e);
