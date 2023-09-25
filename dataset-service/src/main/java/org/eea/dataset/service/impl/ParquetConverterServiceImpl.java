@@ -123,15 +123,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             removeCsvFilesThatWillBeReplaced(s3PathResolver, tableSchemaName, s3PathForCsvFolder);
         }
 
-        //demote table folder
-        dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, false);
-        if (importFileInDremioInfo.getReplaceData()) {
-            //remove folders that contain the previous parquet files because data will be replaced
-            if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-                s3Helper.deleleFolder(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
-            }
-        }
-        //todo check what should not be inside for loop
+        Boolean needToDemoteTable = true;
+
         for(File csvFileWithAddedColumns: csvFilesWithAddedColumns) {
 
             String csvFileName = csvFileWithAddedColumns.getName().replace(CSV_EXTENSION, "");
@@ -146,6 +139,18 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
             //upload csv file
             uploadCsvFileAndPromoteIt(s3PathResolver, tableSchemaName, s3PathForModifiedCsv, csvFileWithAddedColumns.getPath(), csvFileWithAddedColumns.getName(), dremioPathForCsvFile);
+
+            if(needToDemoteTable) {
+                //demote table folder
+                dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, false);
+                if (importFileInDremioInfo.getReplaceData()) {
+                    //remove folders that contain the previous parquet files because data will be replaced
+                    if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                        s3Helper.deleleFolder(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+                    }
+                }
+                needToDemoteTable = false;
+            }
 
             //create parquet file
             if (convertParquetWithCustomWay) {
