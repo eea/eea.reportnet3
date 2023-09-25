@@ -81,6 +81,8 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
+            descriptionMaxLength={5000}
+            errorMessageMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}
@@ -129,6 +131,8 @@ export const RowValidation = ({ dataflowType, datasetId, tabs }) => {
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
+            descriptionMaxLength={5000}
+            errorMessageMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}
