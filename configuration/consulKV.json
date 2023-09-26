@@ -1990,5 +1990,9 @@
   {
     "key": "config/dataset/dremio.parquetConverter.custom.maxCsvLinesPerFile",
     "value": "bWFyaWE="
+  },
+  {
+    "key": "config/dataset/dremio.promote.numberOfRetries",
+    "value": "bWFyaWE="
   }
 ]
