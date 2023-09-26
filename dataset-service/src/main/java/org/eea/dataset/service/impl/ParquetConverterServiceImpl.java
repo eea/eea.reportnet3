@@ -65,7 +65,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     private Boolean convertParquetWithCustomWay;
 
     @Value("${dremio.parquetConverter.custom.maxCsvLinesPerFile}")
-    private Integer MAX_NUMBER_OF_CSV_RECORDS;
+    private Integer maxCsvLinesPerFile;
+
+    @Value("${dremio.promote.numberOfRetries}")
+    private Integer numberOfRetriesForPromoting;
 
     @Autowired
     private FileCommonUtils fileCommonUtils;
@@ -215,9 +218,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     private void refreshTableMetadataAndPromote(String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
         String refreshTableQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
         Boolean folderWasPromoted = false;
-        Integer maximumNumberOfRetries = 5;
-        //we keep trying to promote the folder for 5 retries
-        for(int i=0; i<maximumNumberOfRetries; i++) {
+        //we keep trying to promote the folder for a number of retries
+        for(int i=0; i < numberOfRetriesForPromoting; i++) {
             dremioHelperService.executeSqlStatement(refreshTableQuery);
             if(dremioHelperService.checkFolderPromoted(s3PathResolver, tableName, false)) {
                 folderWasPromoted = true;
@@ -369,7 +371,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 }
                 csvPrinter.printRecord(row);
                 recordCounter++;
-                if(recordCounter == MAX_NUMBER_OF_CSV_RECORDS){
+                if(recordCounter == maxCsvLinesPerFile){
                     csvPrinter.flush();
                     writer.close();
                     recordCounter = 0;
