@@ -1371,6 +1371,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
           accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
+          bigData={metadata?.dataflow.bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogHeader={selectedCustomImportIntegration.name}

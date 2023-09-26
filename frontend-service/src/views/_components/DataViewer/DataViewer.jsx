@@ -1278,6 +1278,7 @@ export const DataViewer = ({
       {isAttachFileVisible && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
+          bigData={bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogHeader={`${resourcesContext.messages['uploadAttachment']}`}
