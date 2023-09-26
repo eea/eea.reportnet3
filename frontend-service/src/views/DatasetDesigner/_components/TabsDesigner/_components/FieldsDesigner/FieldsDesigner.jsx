@@ -1011,6 +1011,7 @@ export const FieldsDesigner = ({
         {designerState.isImportTableSchemaDialogVisible && (
           <CustomFileUpload
             accept=".csv"
+            bigData={bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
