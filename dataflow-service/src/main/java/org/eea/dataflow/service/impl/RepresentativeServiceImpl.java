@@ -569,7 +569,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       fieldsToWrite[0] = countryCode;
       fieldsToWrite[1] = email.toLowerCase();
       fieldsToWrite[2] = addLeadReporter(countryCodeList, countryCode, dataProviderList, dataflowId,
-          email, representativeList, user);
+          email.toLowerCase(), representativeList, user);
       csvWriter.writeNext(fieldsToWrite);
     }
     return representativeList;

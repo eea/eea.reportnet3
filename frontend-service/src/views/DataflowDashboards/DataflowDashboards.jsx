@@ -34,6 +34,7 @@ export const DataflowDashboards = () => {
   const [dataflowName, setDataflowName] = useState('');
   const [dataflowType, setDataflowType] = useState('');
   const [dataSchema, setDataSchema] = useState();
+  const [countryDatasets, setCountryDatasets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOW_DASHBOARDS, dataflowId, dataflowType, isLoading });
@@ -58,6 +59,15 @@ export const DataflowDashboards = () => {
   const onLoadDataSchemas = async () => {
     try {
       const data = await DataflowService.get(dataflowId);
+
+      const editedCountryDatasets = data.datasets.map(dataset => {
+        return {
+          name: dataset.datasetSchemaName,
+          providerId: dataset.dataProviderId
+        };
+      });
+
+      setCountryDatasets(editedCountryDatasets);
       setDataSchema(data.designDatasets);
       setDashboardInitialValues(
         data.designDatasets.forEach(schema => (dashboardInitialValues[schema.datasetSchemaId] = true))
@@ -147,7 +157,7 @@ export const DataflowDashboards = () => {
 
       <div className={styles.releasedChartWrap}>
         <h2 className={styles.dashboardType}>{resourcesContext.messages['releaseDashboard']}</h2>
-        <ReleasedDatasetsDashboard dataflowId={dataflowId} />
+        <ReleasedDatasetsDashboard countryDatasets={countryDatasets} dataflowId={dataflowId} />
       </div>
     </Fragment>
   );
