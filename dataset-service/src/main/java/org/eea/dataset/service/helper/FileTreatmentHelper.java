@@ -934,6 +934,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                     convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
                 }
+                out.close();
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
             }
         } catch (Exception e) {
