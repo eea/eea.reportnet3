@@ -31,6 +31,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const CustomFileUpload = ({
   accept = undefined,
   auto = false,
+  bigData = false,
   cancelLabel = 'Reset',
   chooseLabel = 'Choose',
   className = null,
@@ -98,6 +99,15 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (state.isUploadClicked) upload();
   }, [state.isUploadClicked]);
+
+  useEffect(() => {
+    if (state.progress === 100 && bigData) {
+      const timer = setTimeout(() => {
+        onUpload();
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [state.progress]);
 
   useEffect(() => {
     if (!isNil(draggedFiles)) {
@@ -293,7 +303,7 @@ export const CustomFileUpload = ({
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
 
         if (xhr.status >= 200 && xhr.status < 300) {
-          if (onUpload) {
+          if (onUpload && !bigData) {
             onUpload({ xhr: xhr, files: _files.current });
           }
         } else {
