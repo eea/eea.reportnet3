@@ -694,7 +694,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
             }*/
         } catch (Exception e) {
-            LOG_ERROR.info("Error exporting table data from dataset Id {} with tableName {}.", datasetId, tableName);
+            LOG_ERROR.info("Error exporting table data from dataset Id {} with tableName {}.", datasetId, tableName, e);
         }
     }
 

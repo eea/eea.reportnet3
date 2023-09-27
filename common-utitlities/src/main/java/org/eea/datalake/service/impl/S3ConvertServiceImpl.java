@@ -59,7 +59,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
             csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
         } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName);
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
     }
 
@@ -83,9 +83,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             while ((length = fis.read(buffer)) >= 0) {
                 out.write(buffer, 0, length);
             }
-            out.closeEntry();
         } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName);
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
     }
 
