@@ -930,11 +930,11 @@ public class FileTreatmentHelper implements DisposableBean {
                 File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
 
                 DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-                ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()));
-                for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
-                    convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
+                try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+                    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
+                    }
                 }
-                out.close();
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
             }
         } catch (Exception e) {
