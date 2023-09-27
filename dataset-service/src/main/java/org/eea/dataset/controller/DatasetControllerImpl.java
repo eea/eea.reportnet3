@@ -2028,10 +2028,6 @@ public class DatasetControllerImpl implements DatasetController {
         // copy from in to out
         IOUtils.copyLarge(in, out);
         out.close();
-        in.close();
-        // delete the file after downloading it
-        LOG.info("Delete file {} ", file);
-        FileUtils.forceDelete(file);
       } catch (Exception e) {
         LOG.error("Unexpected error! Error in copying large file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage(), e);
         throw e;
