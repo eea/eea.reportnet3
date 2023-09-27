@@ -4,6 +4,7 @@ import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -69,13 +70,14 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+            FileInputStream inputStream = new FileInputStream(csvFile)) {
 
             csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
-            // Adding the xlsx/csv file to the zip
+            // Adding the csv file to the zip
             ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
             out.putNextEntry(e);
-            out.write(FileUtils.readFileToByteArray(csvFile));
+            IOUtils.copyLarge(inputStream, out);
             out.closeEntry();
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName);
