@@ -85,7 +85,6 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             String datasetSchemaId = dataset.getDatasetSchema();
             Map<String, FieldSchemaVO> fieldIdMap;
             TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
-            LOG.info("For datasetId {} tableSchemaVO : {}", datasetId, tableSchemaVO);
             S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
             LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
             boolean isFolderPromoted = dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false);
@@ -132,7 +131,6 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             String datasetSchemaId = dataset.getDatasetSchema();
             Map<String, FieldSchemaVO> fieldIdMap;
             TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
-            LOG.info("For datasetId {} tableSchemaVO : {}", datasetId, tableSchemaVO);
             S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
             if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
                 s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
