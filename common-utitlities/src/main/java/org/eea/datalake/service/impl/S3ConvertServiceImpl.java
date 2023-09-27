@@ -74,18 +74,24 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
             ZipOutputStream outOne = new ZipOutputStream(new FileOutputStream(zipFile.toString()));
+            FileInputStream fis2 = new FileInputStream(csvFile);
             FileInputStream fis = new FileInputStream(csvFile)) {
 
             csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
             // Adding the csv file to the zip
-            LOG.info("Adding zip entry for tablename {}", tableName);
             ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
+            int length = fis.readAllBytes().length;
+            e.setSize(length);
+            LOG.info("Adding zip entry for tablename {} with bytes {}", tableName, length);
             out.putNextEntry(e);
             IOUtils.copyLarge(fis, out);
 
             ZipEntry entry = new ZipEntry(tableName + CSV_TYPE);
+            length = fis2.readAllBytes().length;
+            entry.setSize(length);
+            LOG.info("Adding zip entry for tablename {} with bytes {}", tableName, length);
             outOne.putNextEntry(entry);
-            IOUtils.copyLarge(fis, outOne);
+            IOUtils.copyLarge(fis2, outOne);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
