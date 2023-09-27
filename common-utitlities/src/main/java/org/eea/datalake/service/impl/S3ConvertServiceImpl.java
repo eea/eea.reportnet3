@@ -77,7 +77,6 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             // Adding the csv file to the zip
             ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
             out.putNextEntry(e);
-            IOUtils.copyLarge(fis,out);
 
             int length;
             byte[] buffer = new byte[1024];
