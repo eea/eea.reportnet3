@@ -117,7 +117,6 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                 }
                 LOG.info("For datasetId {} dataQuery.toString() : {}", datasetId, dataQuery);
                 List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
-                LOG.info("For datasetId {} recordVOS : {}", datasetId, recordVOS);
                 result.setIdTableSchema(idTableSchema);
                 result.setRecords(recordVOS);
                 result.setTotalFilteredRecords(Long.valueOf(recordVOS.size()));
@@ -171,7 +170,6 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                 }
                 LOG.info("For datasetId {} dataQuery.toString() : {}", datasetId, dataQuery);
                 List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
-                LOG.info("For datasetId {} recordVOS : {}", datasetId, recordVOS);
                 result.setIdTableSchema(idTableSchema);
                 result.setRecords(recordVOS);
                 result.setTotalFilteredRecords(Long.valueOf(recordVOS.size()));
