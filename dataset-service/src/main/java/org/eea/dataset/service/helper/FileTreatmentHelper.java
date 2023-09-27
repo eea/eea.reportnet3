@@ -935,8 +935,10 @@ public class FileTreatmentHelper implements DisposableBean {
                         LOG.info("Exporting tableSchema {}", tableSchema);
                         convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
                     }
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
+                } catch (Exception e) {
+                    LOG_ERROR.error("Error creating zip file for datasetId {}, file type {}", datasetId, mimeType, e);
                 }
-                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
             }
         } catch (Exception e) {
             LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
