@@ -932,6 +932,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
                 try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+                        LOG.info("Exporting tableSchema {}", tableSchema);
                         convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
                     }
                 }
