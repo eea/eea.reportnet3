@@ -73,7 +73,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
             csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
-            FileInputStream fis = new FileInputStream(csvFile)
+            FileInputStream fis = new FileInputStream(csvFile);
             // Adding the csv file to the zip
             ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
             out.putNextEntry(e);
