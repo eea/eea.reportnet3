@@ -3,6 +3,7 @@ VOLUME /tmp
 COPY target/*.jar ApiGatewayApplication.jar
 
 
+
 # Monitoring
 RUN wget https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.6.1-linux-x86_64.tar.gz
 RUN tar -xzf filebeat-6.6.1-linux-x86_64.tar.gz
