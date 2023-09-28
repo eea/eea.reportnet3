@@ -343,6 +343,7 @@ export const ActionsToolbar = ({
 
   const renderImportTableDataButton = () => (
     <ImportTableDataDialog
+      bigData={bigData}
       colsSchema={colsSchema}
       dataflowId={dataflowId}
       datasetId={datasetId}
