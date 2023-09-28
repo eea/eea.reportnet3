@@ -50,6 +50,30 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     @Override
     public void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+        createCSVFile(exportFilenames, tableName, datasetId);
+    }
+
+    @Override
+    public void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, ZipOutputStream out) {
+        File csvFile = createCSVFile(exportFilenames, tableName, datasetId);
+
+        try (FileInputStream fis = new FileInputStream(csvFile)) {
+            // Adding the csv file to the zip
+            ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
+            out.putNextEntry(e);
+            int length;
+            byte[] buffer = new byte[1024];
+
+            while ((length = fis.read(buffer)) != -1) {
+                out.write(buffer,0, length);
+            }
+            out.closeEntry();
+        } catch (Exception e) {
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
+        }
+    }
+
+    private File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
         File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         LOG.info("Creating file for export: {}", csvFile);
 
@@ -58,37 +82,12 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
             csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
-        } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
-        }
-    }
-
-    @Override
-    public void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, ZipOutputStream out) {
-        File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
-        LOG.info("Creating file for export: {}", csvFile);
-
-        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
-            CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-            FileInputStream fis = new FileInputStream(csvFile)) {
-
-            csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
-            // Adding the csv file to the zip
-            ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
-            out.putNextEntry(e);
-
-            int length;
-            byte[] buffer = new byte[1024];
-
-            while ((length = fis.read(buffer)) != -1) {
-                out.write(buffer,0, length);
-            }
-            out.closeEntry();
 
         } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile,
+                tableName, e);
         }
+        return csvFile;
     }
 
     private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
