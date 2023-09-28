@@ -9,12 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
 @Service
@@ -61,5 +59,20 @@ public class DremioRulesServiceImpl implements DremioRulesService {
             method = Arrays.stream(methods).filter(m -> m.getName().equals(ruleMethodName)).findFirst().get();
         }
         return method;
+    }
+
+    @Override
+    public Map<String, String> createValidationParquetHeaderMap(Long datasetId, String tableName, RuleVO ruleVO, String fieldName) {
+        String message = ruleVO.getThenCondition().get(0);
+        message = message.replace("\'", "\"");
+        Map<String, String> headerMap = new LinkedHashMap<>();
+        headerMap.put(VALIDATION_LEVEL, ruleVO.getThenCondition().get(1));
+        headerMap.put(VALIDATION_AREA, ruleVO.getType().getValue());
+        headerMap.put(MESSAGE, message);
+        headerMap.put(TABLE_NAME, tableName);
+        headerMap.put(FIELD_NAME, fieldName);
+        headerMap.put(DATASET_ID, datasetId.toString());
+        headerMap.put(QC_CODE, ruleVO.getShortCode());
+        return headerMap;
     }
 }

@@ -200,6 +200,9 @@ public final class LiteralConstants {
   /** The Constant S3_COLLECTIONS: {@value}. */
   public static final String S3_COLLECTIONS = "collections";
 
+  /** The Constant S3_REFERENCE: {@value}. */
+  public static final String S3_REFERENCE = "reference";
+
   /** The Constant S3_IMPORT_PATH: {@value}. */
   public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import";
 
@@ -249,51 +252,57 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_DC_PATH: {@value}. */
-  public static final String S3_VALIDATION_DC_PATH = "%s/%s/%s/current/validation/%s/%s/%s";
+  public static final String S3_VALIDATION_DC_PATH = "%s/collections/%s/current/validation/%s/%s/%s";
 
   /** The Constant S3_VALIDATION_TABLE_PATH: {@value}. */
   public static final String S3_VALIDATION_TABLE_PATH = "%s/%s/%s/current/validation";
 
   /** The Constant S3_VALIDATION_DC_QUERY_PATH: {@value}. */
-  public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
+  public static final String S3_VALIDATION_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/%s/%s/current/%s_validate/%s/%s";
+  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/collections/%s/current/%s_validate/%s/%s";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
+  public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_PATH = "%s/%s/%s/current/%s/%s/%s";
+  public static final String S3_TABLE_NAME_DC_PATH = "%s/collections/%s/current/%s/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_DC_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH = "%s/%s/%s/current/%s/%s";
+  public static final String S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH = "%s/collections/%s/current/%s/%s";
 
   /** The Constant S3_TABLE_NAME_DC_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_FOLDER_PATH = "%s/%s/%s/current/%s";
+  public static final String S3_TABLE_NAME_DC_FOLDER_PATH = "%s/collections/%s/current/%s";
 
   /** The Constant S3_TABLE_NAME_ROOT_DC_FOLDER_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_ROOT_DC_FOLDER_PATH = "%s/%s/%s/current";
+  public static final String S3_TABLE_NAME_ROOT_DC_FOLDER_PATH = "%s/collections/%s/current";
 
   /** The Constant S3_TABLE_NAME_DC_QUERY_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
+  public static final String S3_TABLE_NAME_DC_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"current\".\"%s\"";
 
   public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
 
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
-  public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s";
+  public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s/%s/%s";
+
+  /** The Constant S3_DATAFLOW_REFERENCE_FOLDER_PATH: {@value}. */
+  public static final String S3_DATAFLOW_REFERENCE_FOLDER_PATH = "%s/reference/%s";
+
+  /** The Constant S3_REFERENCE_FOLDER_PATH: {@value}. */
+  public static final String S3_REFERENCE_FOLDER_PATH = "%s/reference";
 
   /** The Constant S3_DATAFLOW_REFERENCE_QUERY_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"reference\".\"%s\"";
 
   /** The Constant S3_EXPORT_PATH: {@value}. */
-  public static final String S3_EXPORT_PATH = "%s/%s/%s/export/%s";
+  public static final String S3_EXPORT_PATH = "%s/collections/%s/export/%s";
 
   /** The Constant S3_EXPORT_FOLDER_PATH: {@value}. */
-  public static final String S3_EXPORT_FOLDER_PATH = "%s/%s/%s/export";
+  public static final String S3_EXPORT_FOLDER_PATH = "%s/collections/%s/export";
 
   /** The Constant S3_EXPORT_QUERY_PATH: {@value}. */
-  public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"export\".\"%s\"";
+  public static final String S3_EXPORT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"export\".\"%s\"";
 
   /** The Constant S3_VALIDATION: {@value}. */
   public static final String S3_VALIDATION = "validation";
@@ -325,6 +334,74 @@ public final class LiteralConstants {
   /** The Constant ZIP_TYPE: {@value}. */
   public static final String ZIP_TYPE = ".zip";
 
+  /** The Constant ZIP_TYPE: {@value}. */
+  public static final String ZIP = "zip";
+
+  /** The Constant VALIDATION_LEVEL: {@value}. */
+  public static final String VALIDATION_LEVEL = "validation_level";
+
+  /** The Constant VALIDATION_AREA: {@value}. */
+  public static final String VALIDATION_AREA = "validation_area";
+
+  /** The Constant MESSAGE: {@value}. */
+  public static final String MESSAGE = "message";
+
+  /** The Constant TABLE_NAME: {@value}. */
+  public static final String TABLE_NAME = "table_name";
+
+  /** The Constant FIELD_NAME: {@value}. */
+  public static final String FIELD_NAME = "field_name";
+
+  /** The Constant QC_CODE: {@value}. */
+  public static final String QC_CODE = "qc_code";
+
+  /** The Constant PK_NOT_USED: {@value}. */
+  public static final String PK_NOT_USED = "pkNotUsed";
+
+  /** The Constant OMISSION: {@value}. */
+  public static final String OMISSION = "OMISSION";
+
+  /** The Constant COMISSION: {@value}. */
+  public static final String COMISSION = "COMISSION";
+
+  /** The Constant GET_INSTANCE: {@value}. */
+  public static final String GET_INSTANCE = "getInstance";
+
+  /** The Constant VALUE: {@value}. */
+  public static final String VALUE = "value";
+
+  /** The Constant UNDERSCORE: {@value}. */
+  public static final String UNDERSCORE = "_";
+
+  /** The Constant SLASH: {@value}. */
+  public static final String SLASH = "/";
+
+  /** The Constant DASH: {@value}. */
+  public static final String DASH = "-";
+
+  /** The Constant OPEN_PARENTHESIS: {@value}. */
+  public static final String OPEN_PARENTHESIS = "(";
+
+  /** The Constant CLOSE_PARENTHESIS: {@value}. */
+  public static final String CLOSE_PARENTHESIS = ")";
+
+  /** The Constant COMMA: {@value}. */
+  public static final String COMMA = ",";
+
+  /** The Constant EMPTY_VALUE: {@value}. */
+  public static final String EMPTY_VALUE = "";
+
+  /** The Constant DOT: {@value}. */
+  public static final String DOT = ".";
+
+  /** The Constant QUOTATION_MARK: {@value}. */
+  public static final String QUOTATION_MARK = "\"";
+
+  /** The Constant LINE_CHANGE: {@value}. */
+  public static final String NEW_LINE = "\n";
+
+  /** The Constant SPACE: {@value}. */
+  public static final String SPACE = " ";
 
   /**
    * Instantiates a new literal constants.

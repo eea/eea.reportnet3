@@ -33,11 +33,13 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}',
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
+  downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',
   exportDatasetData: '/dataset/{:datasetId}/exportDatasetFile?mimeType={:fileType}',
   exportDatasetDataDL: '/dataset/{:datasetId}/exportDatasetFileDL?mimeType={:fileType}',
   exportDatasetDataExternal:
     '/dataset/exportFileThroughIntegration?datasetId={:datasetId}&integrationId={:integrationId}',
   exportTableData: '/dataset/exportFile?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
+  exportTableDataDL: '/dataset/exportFileDL?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   exportTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/exportFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}&mimeType={:fileType}',
   importFileDataset: '/dataset/v2/importFileData/{:datasetId}?delimiter={:delimiter}',

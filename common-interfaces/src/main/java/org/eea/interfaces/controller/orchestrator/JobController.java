@@ -71,7 +71,8 @@ public interface JobController {
      * @return
      */
     @PutMapping(value = "/addValidationJob/{datasetId}")
-    void addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "released", required = false) boolean released);
+    void addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "released", required = false) boolean released,
+                          @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL);
 
     /**
      * Adds a release job
@@ -88,7 +89,8 @@ public interface JobController {
                        @RequestParam(name = "restrictFromPublic", required = true,
                                defaultValue = "false") boolean restrictFromPublic,
                        @RequestParam(name = "validate", required = false, defaultValue = "true") boolean validate,
-                       @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease);
+                       @RequestParam(name = "silentRelease", required = false, defaultValue = "false") boolean silentRelease,
+                       @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL);
 
     /**
      * Adds an import job

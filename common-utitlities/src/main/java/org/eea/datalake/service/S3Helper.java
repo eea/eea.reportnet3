@@ -20,6 +20,13 @@ public interface S3Helper {
      */
     String buildRecordsCountQuery(S3PathResolver s3PathResolver);
 
+    /**
+     * get query for counting records
+     * @param s3PathResolver
+     * @return
+     */
+    String getRecordsCountQuery(S3PathResolver s3PathResolver);
+
     String buildRecordsCountQueryDC(S3PathResolver s3PathResolver);
 
     /**
@@ -29,6 +36,12 @@ public interface S3Helper {
      * @return
      */
     boolean checkFolderExist(S3PathResolver s3PathResolver, String path);
+    /**
+     * checks if folder validation is created in the s3 storage for the specific dataset
+     * @param s3PathResolver
+     * @return
+     */
+    boolean checkFolderExist(S3PathResolver s3PathResolver);
 
     /**
      * Deletes folder from s3
@@ -36,13 +49,6 @@ public interface S3Helper {
      * @param folderPath
      */
     void deleleFolder(S3PathResolver s3PathResolver, String folderPath);
-
-    /**
-     * Gets filenames from export folder
-     * @param s3PathResolver
-     * @return
-     */
-    List<S3Object> getFilenamesForExport(S3PathResolver s3PathResolver);
 
     /**
      * Gets filenames from table name folders
@@ -60,6 +66,16 @@ public interface S3Helper {
      * @return
      */
     File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException;
+
+    /**
+     * Gets file from S3 for export
+     * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
+     * @return
+     */
+    File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException;
 
     /**
      * Uploads a file in s3

@@ -654,7 +654,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId);
         s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
-        String filePath = s3Service.getProviderQueryPath(s3PathResolver);
+        String filePath = s3Service.getS3Path(s3PathResolver);
         return s3Helper.generatePresignedUrl(filePath);
     }
 }

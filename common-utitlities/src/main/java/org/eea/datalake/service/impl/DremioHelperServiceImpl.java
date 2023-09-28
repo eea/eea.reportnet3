@@ -17,6 +17,9 @@ import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -67,7 +70,15 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if (directoryItems!=null) {
             LOG.info("directoryItems : {}", directoryItems.toString());
             LOG.info("directoryItems getChildren : {}", directoryItems.getChildren());
-            Integer itemPosition = (importFolder == true) ? 8 : 6;
+            Integer itemPosition;
+            if (importFolder) {
+                itemPosition = 8;
+            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 4;
+            } else {
+                itemPosition = 6;
+            }
+
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
                 LOG.info("itemOptional : {}", itemOptional.toString());
@@ -88,7 +99,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
                 S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getDCPath(s3PathResolver);
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getS3Path(s3PathResolver);
+        } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
         } else {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
         }
@@ -193,11 +206,11 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         String tablePath = null;
         if(importFolder){
             s3PathResolver.setPath(S3_IMPORT_QUERY_PATH);
-            tablePath = s3Service.getProviderQueryPath(s3PathResolver);
+            tablePath = s3Service.getS3Path(s3PathResolver);
         }
         else{
             s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
-            tablePath = s3Service.getProviderQueryPath(s3PathResolver);
+            tablePath = s3Service.getS3Path(s3PathResolver);
         }
 
         if(!checkFolderPromoted(s3PathResolver, folderName, importFolder)){
@@ -210,6 +223,20 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
         catch (Exception e){
             LOG.error("Could not drop table {}", tablePath);
+        }
+    }
+
+    @Override
+    public void deleteFileFromR3IfExists(String parquetFile) throws Exception {
+        // Check that the parquet file exists, if so delete it
+        java.nio.file.Path path = Paths.get(parquetFile);
+        if (Files.exists(path)) {
+            try {
+                Files.delete(path);
+            } catch (IOException e) {
+                LOG.error("Could not delete file {}.", parquetFile);
+                throw new Exception("Could not delete file " + parquetFile);
+            }
         }
     }
 

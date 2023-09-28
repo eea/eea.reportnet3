@@ -210,22 +210,16 @@ export const GlobalNotifications = ({ bigData }) => {
     try {
       notificationContext.add({ type: 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD' });
 
-      let downloadFile;
+      const downloadFileName = bigData
+        ? `${notification.content.datasetName}.${notification.content.mimeType}`
+        : notification.content.datasetName;
 
-      if (bigData) {
-        downloadFile = await DatasetService.downloadExportDatasetFileDL(
-          notification.content.datasetId,
-          notification.content.datasetName
-        );
-      } else {
-        downloadFile = await DatasetService.downloadExportDatasetFile(
-          notification.content.datasetId,
-          notification.content.datasetName
-        );
-      }
+      const { data } = bigData
+        ? await DatasetService.downloadExportDatasetFileDL(notification.content.datasetId, downloadFileName)
+        : await DatasetService.downloadExportDatasetFile(notification.content.datasetId, downloadFileName);
 
-      if (downloadFile.data.size !== 0) {
-        DownloadFile(downloadFile.data, notification.content.datasetName);
+      if (data.size !== 0) {
+        DownloadFile(data, downloadFileName);
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadExportDatasetFile.', error);
@@ -246,7 +240,9 @@ export const GlobalNotifications = ({ bigData }) => {
       notificationContext.add({ type: 'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD' });
 
       const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
-      const { data } = await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
+      const { data } = bigData
+        ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName)
+        : await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
 
       if (data.size !== 0) {
         DownloadFile(data, downloadFileName);

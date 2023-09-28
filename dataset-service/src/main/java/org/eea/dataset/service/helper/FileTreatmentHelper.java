@@ -102,6 +102,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 import java.util.zip.*;
+
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REPORTING;
+import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
 import static org.eea.utils.LiteralConstants.*;
 
 /**
@@ -587,6 +590,144 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     /**
+     * Export file DL.
+     *
+     * @param datasetId     the dataset id
+     * @param mimeType      the mime type
+     * @param tableSchemaId the table schema id
+     * @param tableName     the table name
+     * @param filters       the filters
+     * @throws EEAException the EEA exception
+     * @throws IOException  Signals that an I/O exception has occurred.
+     */
+    @Async
+    public void exportFileDL(Long datasetId, String mimeType, String tableSchemaId, String tableName,
+                           ExportFilterVO filters) throws EEAException, IOException {
+
+        NotificationVO notificationVO = NotificationVO
+            .builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .datasetId(datasetId)
+            .fileName(tableName)
+            .mimeType(mimeType)
+            .datasetSchemaId(tableSchemaId)
+            .error("Error exporting table data")
+            .build();
+
+        File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+        fileFolder.mkdirs();
+
+        try {
+            convertParquetFile(datasetId, mimeType, tableSchemaId, tableName);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT, null, notificationVO);
+            LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+
+        } catch (Exception e) {
+            LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null, notificationVO);
+        }
+    }
+
+    private void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName) {
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
+
+        try {
+            setUpS3PathResolver(datasetId, dataset, s3PathResolver);
+            List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+            LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
+
+            if (mimeType.equalsIgnoreCase(CSV.getValue())) {
+                s3ConvertService.convertParquetToCSV(exportFilenames, tableName, datasetId);
+            } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + XLSX_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
+
+                s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
+            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + JSON_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
+
+                s3ConvertService.convertParquetToJSON(parquetFile, xlsxFile);
+            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.XML.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + XML_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
+
+                s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
+            }*/
+        } catch (Exception e) {
+            LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
+        }
+    }
+
+    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out) {
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
+
+        try {
+            setUpS3PathResolver(datasetId, dataset, s3PathResolver);
+            List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+            LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
+
+            if (mimeType.equalsIgnoreCase(CSV.getValue())) {
+                s3ConvertService.convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, out);
+            } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + XLSX_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
+
+                s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
+            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + JSON_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
+
+                s3ConvertService.convertParquetToJSON(parquetFile, xlsxFile);
+            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.XML.getValue())) {
+                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
+                nameDataset = nameDataset + XML_TYPE;
+                File xlsxFile = new File(exportDLPath + nameDataset);
+
+                s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
+            }*/
+        } catch (Exception e) {
+            LOG_ERROR.info("Error exporting table data from dataset Id {} with tableName {}.", datasetId, tableName, e);
+        }
+    }
+
+    private void setUpS3PathResolver(Long datasetId, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver) {
+        switch (dataset.getDatasetTypeEnum()) {
+            case REPORTING:
+                s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                s3PathResolver.setDataProviderId(dataset.getDataProviderId());
+                s3PathResolver.setDatasetId(datasetId);
+                break;
+            case DESIGN:
+                s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                s3PathResolver.setDataProviderId(0L);
+                s3PathResolver.setDatasetId(datasetId);
+                break;
+            case COLLECTION:
+                s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
+                s3PathResolver.setDatasetId(datasetId);
+                break;
+            case TEST:
+                break;
+            case EUDATASET:
+                break;
+            case REFERENCE:
+                s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+                break;
+            default:
+                LOG.info("Dataset Type does not exist!");
+                break;
+        }
+    }
+
+    /**
      * Gets the tables.
      *
      * @param datasetId the dataset id
@@ -718,7 +859,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
         try {
             Map<String, byte[]> contents = new HashMap<>();
-            if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
+            if (extension.equalsIgnoreCase(CSV.getValue())) {
                 List<TableSchema> tablesSchema = getTables(datasetId);
                 List<byte[]> dataFile =
                         context.fileListWriter(dataflowId, datasetId, includeCountryCode, false);
@@ -759,77 +900,55 @@ public class FileTreatmentHelper implements DisposableBean {
 
     }
 
-    /**
-     * Export dataset file.
-     *
-     * @param datasetId the dataset id
-     * @param mimeType  the mime type
-     */
+
     @Async
-    public void exportDatasetFileDL(Long datasetId, String mimeType) {
-        //get folder files
-        Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-        S3PathResolver pathResolver = new S3PathResolver(dataflowId, datasetId);
-        List<S3Object> exportFilenames = s3Helper.getFilenamesForExport(pathResolver);
-        LOG.info("Exported dataset data for exportFilenames {}", exportFilenames);
-
-        // Extension arrive with zip+xlsx, zip+csv or xlsx, but to the backend arrives with empty space.
-        // Split the extensions to know
-        // if its a zip or only xlsx
-        String[] type = mimeType.split(" ");
-        String extension = "";
-        if (type.length > 1) {
-            extension = type[1];
-        } else {
-            extension = type[0];
-        }
-
+    public void exportDatasetFileDL(Long datasetId, String mimeType) throws EEAException {
         try {
-            for (S3Object myValue : exportFilenames) {
-                String key = myValue.key();
-                String nameDataset = datasetMetabaseService.findDatasetMetabase(datasetId).getDataSetName();
-                if (extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                    nameDataset = nameDataset + CSV_TYPE;
-                    File csvFile = new File(exportDLPath + nameDataset);
-
-                    s3ConvertService.convertParquetToCSV(parquetFile, csvFile);
-                } else if (extension.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
-                    File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                    nameDataset = nameDataset + XLSX_TYPE;
-                    File xlsxFile = new File(exportDLPath + nameDataset);
-
-                    s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
-                }
-
-                // Send notification
-                NotificationVO notificationVO = NotificationVO.builder()
-                    .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).
-                        datasetName(nameDataset).build();
-
-                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null,
-                    notificationVO);
+            String[] type = mimeType.split(" ");
+            String extension = "";
+            boolean isZip = false;
+            if (type.length > 1) {
+                extension = type[1];
+                isZip = true;
+            } else {
+                extension = type[0];
             }
-        } catch (IOException | NullPointerException e) {
+
+            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+            if (isZip && CSV.getValue().equals(extension)) {
+                NotificationVO notificationVO = NotificationVO
+                    .builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .datasetId(datasetId)
+                    .datasetName(dataset.getDataSetName())
+                    .mimeType(ZIP)
+                    .error("Error exporting table data")
+                    .build();
+
+                File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
+                datasetFolder.mkdirs();
+                File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
+
+                DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+                try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+                    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+                        LOG.info("Exporting tableSchema {}", tableSchema);
+                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
+                    }
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
+                } catch (Exception e) {
+                    LOG_ERROR.error("Error creating zip file for datasetId {}, file type {}", datasetId, mimeType, e);
+                }
+            }
+        } catch (Exception e) {
             LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
                 datasetId, mimeType, e.getMessage(), e);
-            // Send notification
             NotificationVO notificationVO = NotificationVO.builder()
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
                 .error("Error exporting dataset data").build();
-            try {
-                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
-                    notificationVO);
-            } catch (EEAException ex) {
-                LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
-                    datasetId, e.getMessage(), ex);
-            }
-        } catch (EEAException e) {
-            LOG_ERROR.error("Error exporting DL dataset data. datasetId {}, file type {}. Message {}",
-                datasetId, mimeType, e.getMessage(), e);
-            throw new RuntimeException(e);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
+                notificationVO);
         }
-
     }
 
     /**
@@ -1146,7 +1265,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
                 // Prevent Zip Slip attack or skip if the entry is a directory
                 if ((entryName.split("/").length > 1)
-                        || !FileTypeEnum.CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
+                        || !CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
                         || !filePath.startsWith(saveLocationPath + File.separator)) {
                     LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
                     entry = zip.getNextEntry();
@@ -1391,7 +1510,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         if (numberOfWrongFiles == files.size()) {
                             errorWrongFilename = false;
                             DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
-                            EventType eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                            EventType eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                                     ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                                     : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
 
@@ -1458,15 +1577,15 @@ public class FileTreatmentHelper implements DisposableBean {
                 JobStatusEnum jobStatus;
                 if (null != error) {
                     if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
-                        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                        eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                                 ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                                 : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
                     } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(error)) {
-                        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                        eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                                 ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
                                 : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;
                     } else {
-                        eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                        eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                                 ? EventType.IMPORT_REPORTING_FAILED_EVENT
                                 : EventType.IMPORT_DESIGN_FAILED_EVENT;
                     }
@@ -1482,7 +1601,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                             DatasetRunningStatusEnum.IMPORTED);
 
-                    eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                    eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
                             : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
 
@@ -1543,16 +1662,16 @@ public class FileTreatmentHelper implements DisposableBean {
             if (null != error) {
                 if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
-                    eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                    eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
                 } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(error)) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING);
-                    eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                    eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;
                 } else {
-                    eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                    eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_EVENT;
                 }
@@ -1573,7 +1692,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         ProcessStatusEnum.FINISHED, ProcessTypeEnum.IMPORT, processId,
                         SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
 
-                eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_COMPLETED_EVENT
                         : EventType.IMPORT_DESIGN_COMPLETED_EVENT;
 
@@ -1782,7 +1901,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 // Get the partition for the partiton id
                 final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
 
-                if (FileTypeEnum.getEnum(mimeType.toLowerCase()) == FileTypeEnum.CSV) {
+                if (FileTypeEnum.getEnum(mimeType.toLowerCase()) == CSV) {
 
 
                     BufferedReader reader = new BufferedReader(new FileReader(filePath));

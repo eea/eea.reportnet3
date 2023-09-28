@@ -1118,6 +1118,7 @@ export const DataViewer = ({
   return (
     <SnapshotContext.Provider>
       <ActionsToolbar
+        bigData={bigData}
         colsSchema={colsSchema}
         dataflowId={dataflowId}
         datasetId={datasetId}
@@ -1277,6 +1278,7 @@ export const DataViewer = ({
       {isAttachFileVisible && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
+          bigData={bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogHeader={`${resourcesContext.messages['uploadAttachment']}`}

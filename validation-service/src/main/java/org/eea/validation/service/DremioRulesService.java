@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 public interface DremioRulesService {
 
@@ -37,4 +38,14 @@ public interface DremioRulesService {
      * @return
      */
     Method getRuleMethodFromClass(String ruleMethodName, Class<?> cls);
+
+    /**
+     * Creates header map
+     * @param datasetId
+     * @param tableName
+     * @param ruleVO
+     * @param fieldName
+     * @return
+     */
+    Map<String, String> createValidationParquetHeaderMap(Long datasetId, String tableName, RuleVO ruleVO, String fieldName);
 }

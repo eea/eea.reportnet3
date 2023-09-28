@@ -68,6 +68,19 @@ public class S3HelperImpl implements S3Helper {
      * @return
      */
     @Override
+    public String getRecordsCountQuery(S3PathResolver s3PathResolver) {
+        StringBuilder query = new StringBuilder();
+        query.append("select count(*) from ");
+        query.append(s3Service.getTableAsFolderQueryPath(s3PathResolver));
+        return query.toString();
+    }
+
+    /**
+     * builds query for counting records
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
     public String buildRecordsCountQueryDC(S3PathResolver s3PathResolver) {
         StringBuilder query = new StringBuilder();
         query.append("select count(*) from ");
@@ -84,6 +97,18 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
+        LOG.info("checkFolderExist key: {}", key);
+        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+    }
+
+    /**
+     * checks if folder validation is created in the s3 storage for the specific dataset
+     * @param s3PathResolver
+     * @return
+     */
+    @Override
+    public boolean checkFolderExist(S3PathResolver s3PathResolver) {
+        String key = s3Service.getTableAsFolderQueryPath(s3PathResolver);
         LOG.info("checkFolderExist key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
@@ -111,24 +136,13 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
-     * Gets filenames from export folder
-     * @param s3PathResolver
-     * @return
-     */
-    @Override
-    public List<S3Object> getFilenamesForExport(S3PathResolver s3PathResolver) {
-        String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
-        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
-    }
-
-    /**
      * Gets filenames from table name folders
      * @param s3PathResolver
      * @return
      */
     @Override
     public List<S3Object> getFilenamesFromTableNames(S3PathResolver s3PathResolver) {
-        String key = s3Service.getProviderPath(s3PathResolver);
+        String key = s3Service.getS3Path(s3PathResolver);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
     }
 
@@ -153,6 +167,43 @@ public class S3HelperImpl implements S3Helper {
 
         // Write the data to a local file.
         File file = new File(path + fileName + fileType);
+        if(file.exists()){
+            //if a file with the same name exists in the path, delete it so that it will be recreated
+            file.delete();
+        }
+        Path textFilePath = Paths.get(file.toString());
+        LOG.info("textFilePath {}", textFilePath);
+        Files.createFile(textFilePath);
+        LOG.info("Local file {}", file);
+        OutputStream os = new FileOutputStream(file);
+        os.write(data);
+        LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
+        os.close();
+        return file;
+    }
+
+    /**
+     * Gets file for export
+     * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
+     * @return
+     */
+    @Override
+    public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(key)
+            .bucket(S3_BUCKET_NAME)
+            .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        byte[] data = objectBytes.asByteArray();
+
+        // Write the data to a local file.
+        File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
+
         if(file.exists()){
             //if a file with the same name exists in the path, delete it so that it will be recreated
             file.delete();
@@ -214,7 +265,7 @@ public class S3HelperImpl implements S3Helper {
             Optional<S3Object> ruleFile = result.contents().stream().filter(s3Object -> s3Object.key().contains(ruleVO.getShortCode())).findFirst();
             if (ruleFile.isPresent()) {
                 int valIdx = validationFolderName.indexOf(VALIDATION);
-                int startIdx = valIdx + 10;
+                int startIdx = valIdx + 11;
                 String ruleFolderName = ruleFile.get().key();
                 if (ruleFolderName.contains(PARQUET_FILE_NAME)) {
                     int endIdx = ruleFolderName.indexOf(PARQUET_FILE_NAME);
@@ -236,7 +287,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public boolean checkTableNameDCProviderFolderExist(S3PathResolver s3PathResolver) {
-        String key = s3Service.getDCPath(s3PathResolver);
+        String key = s3Service.getS3Path(s3PathResolver);
         LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
@@ -248,7 +299,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver) {
-        String key = s3Service.getDCPath(s3PathResolver);
+        String key = s3Service.getS3Path(s3PathResolver);
         LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
@@ -260,7 +311,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void deleleTableNameDCFolder(S3PathResolver s3PathResolver) {
-        String folderName = s3Service.getDCPath(s3PathResolver);
+        String folderName = s3Service.getS3Path(s3PathResolver);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
     }

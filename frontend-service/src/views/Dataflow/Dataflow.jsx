@@ -1594,6 +1594,7 @@ export const Dataflow = () => {
         {dataflowState.isImportLeadReportersVisible && (
           <CustomFileUpload
             accept={getImportExtensions}
+            bigData={dataflowState.data.bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             dialogHeader={`${resourcesContext.messages['importLeadReporters']}`}
             dialogOnHide={() => manageDialogs('isImportLeadReportersVisible', false)}

@@ -10,6 +10,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -45,7 +46,6 @@ import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.SqlRulesService;
-import org.eea.validation.util.SQLValidationUtils;
 import org.eea.validation.util.model.QueryVO;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -66,8 +66,7 @@ import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
-import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class SqlRulesServiceImpl.
@@ -149,6 +148,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
 
   @Autowired
   private S3Helper s3Helper;
+
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
 
 
   /** The Constant DATASET_: {@value}. */
@@ -433,7 +435,11 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-        datasetRepository.validateQuery("explain " + sqlRule, datasetId);
+        DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+
+        if (dataFlowVO!=null && ((dataFlowVO.getBigData()!=null && !dataFlowVO.getBigData()) || dataFlowVO.getBigData()==null)) {
+          datasetRepository.validateQuery("explain " + sqlRule, datasetId);
+        }
         if (showInternalFields) {
           sb.append("SELECT * FROM (");
           sb.append(sqlRule);
@@ -442,7 +448,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
           sb = buildWithTableQuery(datasetIds, sb, sqlRule);
         }
 
-        DataFlowVO dataFlowVO = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
         if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
           String sqlCode = this.replaceTableNamesWithS3Path(sb.toString());
           sqlCode = sqlCode.replace("OFFSET 0 LIMIT 10", "LIMIT 10 OFFSET 0");
@@ -450,7 +455,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             ++i;
             List<ValueVO> valueVOList = new ArrayList<>();
             int columns = resultSet.getMetaData().getColumnCount();
-            for (int j = 2; j < columns - 1; j++) {
+            for (int j = 1; j <= columns; j++) {
               ValueVO valueVO = new ValueVO();
               valueVO.setValue(resultSet.getString(j));
               valueVO.setLabel(resultSet.getMetaData().getColumnName(j));
@@ -1253,23 +1258,38 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     List<Integer> datasetOccurrences = findOccurrence(sqlCode, DATASET);
     while (datasetOccurrences.size()>0) {
       String sqlContainingSchema = sqlCode.substring(datasetOccurrences.get(0)+8);
-      int dotIdx = sqlContainingSchema.indexOf(".");
-      int spaceIdx = sqlContainingSchema.indexOf(" ");
+      int dotIdx = sqlContainingSchema.indexOf(DOT);
+      int spaceIdx = sqlContainingSchema.indexOf(SPACE);
       String datId = sqlContainingSchema.substring(0,dotIdx);
       String table = sqlContainingSchema.substring(datId.length()+1,spaceIdx);
-      if (table.contains(".")) {
-        int dtIndex = table.indexOf(".");
-        table = table.substring(0,dtIndex);
-      }
-      String pathToReplace = DATASET+Long.valueOf(datId)+"."+table;
-      table = table.replaceAll("\"","");
+      table = processTableName(table);
+      String pathToReplace = DATASET+Long.valueOf(datId)+DOT+table;
+      table = table.replaceAll(QUOTATION_MARK,EMPTY_VALUE);
       DataSetMetabaseVO dataSetMetabase = datasetMetabaseController.findDatasetMetabaseById(Long.valueOf(datId));
       S3PathResolver tableResolver = new S3PathResolver(dataSetMetabase.getDataflowId(), dataSetMetabase.getDataProviderId() != null ? dataSetMetabase.getDataProviderId() : 0, dataSetMetabase.getId(), table);
-      String tablePathS3 = s3Service.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+      String tablePathS3 = s3Service.getTablePathByDatasetType(dataSetMetabase.getDataflowId(), dataSetMetabase.getId(), table, tableResolver);
       sqlCode = sqlCode.replace(pathToReplace, tablePathS3);
       datasetOccurrences = findOccurrence(sqlCode, DATASET);
     }
     return sqlCode;
+  }
+
+  private static String processTableName(String table) {
+    if (table.contains(NEW_LINE)) {
+      int lcIdx = table.indexOf(NEW_LINE);
+      table = table.substring(0, lcIdx);
+    }
+    if (table.contains(DOT)) {
+      int dtIndex = table.indexOf(DOT);
+      table = table.substring(0,dtIndex);
+    }
+    if (table.contains(CLOSE_PARENTHESIS)) {
+      table = table.replace(CLOSE_PARENTHESIS,EMPTY_VALUE);
+    }
+    if (table.contains(COMMA)) {
+      table = table.replace(COMMA, EMPTY_VALUE);
+    }
+    return table;
   }
 
   private List<Integer> findOccurrence(String textString, String word) {
