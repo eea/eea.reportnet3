@@ -104,7 +104,7 @@ export const CustomFileUpload = ({
     if (state.progress === 100 && bigData) {
       const timer = setTimeout(() => {
         onUpload();
-      }, 3000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [state.progress]);
