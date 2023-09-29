@@ -24,7 +24,7 @@
 		<projectlombok.version>1.18.0</projectlombok.version>
 		<mockito.version>3.11.2</mockito.version>
 		<json.version>2.10.5</json.version>
-		<json.databinding.version>2.10.5.1</json.databinding.version>
+		<json.databinding.version>2.12.7.1</json.databinding.version>
 		<log4j2.version>2.16.0</log4j2.version>
 	</properties>
 	<dependencies>
