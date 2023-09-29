@@ -119,7 +119,7 @@ public class S3HelperImpl implements S3Helper {
      * @param folderPath
      */
     @Override
-    public void deleleFolder(S3PathResolver s3PathResolver, String folderPath) {
+    public void deleteFolder(S3PathResolver s3PathResolver, String folderPath) {
         String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         GetBucketVersioningResponse bucketVersioning = s3Client.getBucketVersioning(builder -> builder.bucket(S3_BUCKET_NAME));
@@ -274,7 +274,7 @@ public class S3HelperImpl implements S3Helper {
                     ruleFolderName = ruleFolderName.substring(startIdx);
                 }
                 validationResolver.setTableName(ruleFolderName);
-                this.deleleFolder(validationResolver, S3_VALIDATION_RULE_PATH);
+                this.deleteFolder(validationResolver, S3_VALIDATION_RULE_PATH);
             }
             validationResolver.setTableName(S3_VALIDATION);
         }
@@ -310,7 +310,7 @@ public class S3HelperImpl implements S3Helper {
      * @param s3PathResolver
      */
     @Override
-    public void deleleTableNameDCFolder(S3PathResolver s3PathResolver) {
+    public void deleteTableNameDCFolder(S3PathResolver s3PathResolver) {
         String folderName = s3Service.getS3Path(s3PathResolver);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));

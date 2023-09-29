@@ -114,10 +114,12 @@ public class DeleteHelper {
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
-    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
-        ? EventType.DELETE_TABLE_COMPLETED_EVENT
-        : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
 
+    //remove locks and send notification
+    releaseDeleteTableDataLocksAndSendNotification(datasetId, tableSchemaId);
+  }
+
+  public void releaseDeleteTableDataLocksAndSendNotification(final Long datasetId, String tableSchemaId){
     // Release the lock manually
     Map<String, Object> deleteImportTable = new HashMap<>();
     deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
@@ -126,15 +128,18 @@ public class DeleteHelper {
     lockService.removeLockByCriteria(deleteImportTable);
 
     // after the table has been deleted, an event is sent to notify it
+    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+            ? EventType.DELETE_TABLE_COMPLETED_EVENT
+            : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
     Map<String, Object> value = new HashMap<>();
     NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .tableSchemaId(tableSchemaId).build();
+            .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+            .tableSchemaId(tableSchemaId).build();
     DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
     notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
     notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
     notificationVO.setDataflowName(
-        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+            dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
     value.put(LiteralConstants.DATASET_ID, datasetId);
 
@@ -143,7 +148,6 @@ public class DeleteHelper {
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
     }
-    LOG.info("Successfully deleted table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
   }
 
   /**
@@ -162,14 +166,19 @@ public class DeleteHelper {
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
+
+    releaseDeleteDatasetDataLocksAndSendNotification(datasetId, technicallyAccepted);
+  }
+
+  public void releaseDeleteDatasetDataLocksAndSendNotification(final Long datasetId, boolean technicallyAccepted){
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
-        ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
-        : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
+            ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
+            : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
 
     // Release the lock manually
     Map<String, Object> deleteDatasetValues = new HashMap<>();
     deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-        LockSignature.DELETE_DATASET_VALUES.getValue());
+            LockSignature.DELETE_DATASET_VALUES.getValue());
     deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
     lockService.removeLockByCriteria(deleteDatasetValues);
 
@@ -178,13 +187,13 @@ public class DeleteHelper {
       // after the dataset values have been deleted, an event is sent to notify it
       Map<String, Object> value = new HashMap<>();
       NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetId(datasetId).build();
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetId(datasetId).build();
       DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
       notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
       notificationVO.setDataflowName(
-          dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+              dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
 
       value.put(LiteralConstants.DATASET_ID, datasetId);
 
@@ -194,7 +203,6 @@ public class DeleteHelper {
         LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
       }
     }
-    LOG.info("Successfully deleted dataset data for datasetId {}", datasetId);
   }
 
 

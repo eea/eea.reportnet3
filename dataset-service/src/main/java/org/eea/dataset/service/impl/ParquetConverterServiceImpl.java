@@ -149,7 +149,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 if (importFileInDremioInfo.getReplaceData()) {
                     //remove folders that contain the previous parquet files because data will be replaced
                     if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-                        s3Helper.deleleFolder(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+                        s3Helper.deleteFolder(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
                     }
                 }
                 needToDemoteTable = false;
@@ -199,19 +199,20 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         dremioHelperService.executeSqlStatement(refreshImportTableQuery);
     }
 
-    private void removeCsvFilesThatWillBeReplaced(S3PathResolver s3PathResolver, String tableSchemaName, String s3PathForCsvFolder){
+    @Override
+    public void removeCsvFilesThatWillBeReplaced(S3PathResolver s3PathResolver, String tableSchemaName, String s3PathForCsvFolder){
         List<ObjectIdentifier> csvFilesInS3 = s3Helper.listObjectsInBucket(s3PathForCsvFolder);
         for(ObjectIdentifier csvFileInS3 : csvFilesInS3){
             String[] csvFileNameSplit = csvFileInS3.key().split("/");
             String csvFileName = csvFileNameSplit[csvFileNameSplit.length - 1];
-            //set up temporary s3PathResolver fileName so that the csv file will be promoted
+            //set up temporary s3PathResolver fileName so that the csv file will be demoted
             s3PathResolver.setFilename(csvFileName);
             dremioHelperService.demoteFolderOrFile(s3PathResolver, csvFileName, true);
             //revert s3PathResolver fileName
             s3PathResolver.setFilename(tableSchemaName);
         }
         if (s3Helper.checkFolderExist(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH)) {
-            s3Helper.deleleFolder(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+            s3Helper.deleteFolder(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         }
     }
 

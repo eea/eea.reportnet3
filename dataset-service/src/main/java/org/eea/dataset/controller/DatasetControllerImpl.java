@@ -741,6 +741,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param providerId the provider id
    * @param deletePrefilledTables the delete prefilled tables
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
@@ -774,16 +775,28 @@ public class DatasetControllerImpl implements DatasetController {
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG_ERROR.error(errorMessage);
+      LOG.error(errorMessage);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+      if (dataflowId == null) {
+        dataflowId = datasetService.getDataFlowIdById(datasetId);
+      }
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if (dataFlowVO.getBigData()) {
+        LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId);
+        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
+      }
+      else {
+        LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+        deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+      }
       LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }
   }
@@ -795,6 +808,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param dataflowId the dataflow id
    * @param technicallyAccepted the technically accepted
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = true)
@@ -821,8 +835,20 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+      if (dataflowId == null) {
+        dataflowId = datasetService.getDataFlowIdById(datasetId);
+      }
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if (dataFlowVO.getBigData()) {
+        LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null);
+        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
+      }
+      else {
+        LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+        deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+      }
       LOG.info("Successfully privately deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error privately deleting dataset data for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
@@ -868,6 +894,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @LockMethod(removeWhenFinish = false)
@@ -900,18 +927,30 @@ public class DatasetControllerImpl implements DatasetController {
     // Rest API only: Check if the dataflow belongs to the dataset
     if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
-          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
-      LOG_ERROR.error(errorMessage);
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG.error(errorMessage);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+
     try {
-      LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-      // This method will release the lock
-      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+      if (dataflowId == null) {
+        dataflowId = datasetService.getDataFlowIdById(datasetId);
+      }
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+      if (dataFlowVO.getBigData()) {
+        LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, null);
+        deleteHelper.releaseDeleteTableDataLocksAndSendNotification(datasetId, tableSchemaId);
+      }
+      else {
+        LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+        // This method will release the lock
+        deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+      }
       LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
     }
   }
