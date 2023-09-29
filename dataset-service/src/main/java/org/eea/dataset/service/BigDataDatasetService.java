@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import org.eea.exception.EEAException;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BigDataDatasetService {
@@ -31,5 +32,25 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      */
     String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId);
+
+    /**
+     * Delete table data
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaId the table schema id
+     * @param tableSchemaName the table schema id
+     */
+    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName) throws Exception;
+
+    /**
+     * Delete dataset data
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     */
+    void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId) throws Exception;
 
 }

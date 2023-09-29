@@ -48,7 +48,7 @@ public interface S3Helper {
      * @param s3PathResolver
      * @param folderPath
      */
-    void deleleFolder(S3PathResolver s3PathResolver, String folderPath);
+    void deleteFolder(S3PathResolver s3PathResolver, String folderPath);
 
     /**
      * Gets filenames from table name folders
@@ -114,7 +114,7 @@ public interface S3Helper {
      * Deletes talbe name DC folder from s3
      * @param s3PathResolver
      */
-    void deleleTableNameDCFolder(S3PathResolver s3PathResolver);
+    void deleteTableNameDCFolder(S3PathResolver s3PathResolver);
 
     /**
      * Generate s3 presigned Url

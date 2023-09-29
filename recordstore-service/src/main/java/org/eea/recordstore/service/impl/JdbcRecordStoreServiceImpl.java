@@ -1936,7 +1936,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   dataCollectionPath.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
                   LOG.info("Checking if table name DC folder exist in path {}", dataCollectionPath);
                   if (s3Helper.checkTableNameDCProviderFolderExist(dataCollectionPath)) {
-                    s3Helper.deleleTableNameDCFolder(dataCollectionPath);
+                    s3Helper.deleteTableNameDCFolder(dataCollectionPath);
                     LOG.info("Successfully deleted files in path: {}", dataCollectionPath);
                   }
 
