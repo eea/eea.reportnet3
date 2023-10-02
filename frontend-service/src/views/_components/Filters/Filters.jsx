@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { noWait, useRecoilCallback } from 'recoil';
 
 import isNil from 'lodash/isNil';
@@ -61,7 +61,11 @@ export const Filters = ({
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
+  const [isMyJobsPushed, setIsMyJobsPushed] = useState(false);
   const [viewDate, setViewData] = useState(undefined);
+
+  const pushRef = useRef();
+  pushRef.current = isMyJobsPushed;
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
@@ -76,17 +80,9 @@ export const Filters = ({
         const response = await Promise.all(
           filterByKeys.map(key => snapshot.getPromise(filterByStore(`${key}_${recoilId}`)))
         );
-
-        const filterBy = Object.assign({}, ...response);
-
-        set(filterByCustomFilterStore(recoilId), filterBy);
-      },
-    [recoilId]
-  );
-  const getFilterByProviderJobs = useRecoilCallback(
-    ({ snapshot, set }) =>
-      async () => {
-        const filterBy = { creatorUsername: providerUsername };
+        const filterBy = pushRef.current
+          ? Object.assign({}, ...response, { creatorUsername: [providerUsername] })
+          : Object.assign({}, ...response);
 
         set(filterByCustomFilterStore(recoilId), filterBy);
       },
@@ -98,7 +94,8 @@ export const Filters = ({
     await onFilter();
   };
   const onApplyProvidersJobsFilters = async () => {
-    await getFilterByProviderJobs();
+    setIsMyJobsPushed(true);
+    await getFilterBy();
     await onFilter();
   };
 
@@ -156,6 +153,7 @@ export const Filters = ({
   const onResetFilters = useRecoilCallback(
     ({ snapshot, reset }) =>
       async () => {
+        setIsMyJobsPushed(false);
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
         reset(searchByStore(recoilId));
