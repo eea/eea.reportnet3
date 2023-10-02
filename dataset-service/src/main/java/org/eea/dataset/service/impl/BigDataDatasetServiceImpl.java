@@ -116,7 +116,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
                               String fmeJobId, String filePathInS3) throws Exception {
-        String fileName = null;
+        String fileName = (file != null) ? file.getOriginalFilename() : null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
         File s3File = null;
@@ -152,10 +152,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 List<Long> datasetIds = new ArrayList<>();
                 datasetIds.add(datasetId);
                 jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId);
+                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId);
                 if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
                     LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
-                    datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
+                    datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, fileName);
                     throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
                 }
             }
@@ -181,9 +181,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
                 //todo handle other extensions
                 //delete objects ?
-            }
-            else{
-                fileName = file.getOriginalFilename();
             }
 
             //check if there is already an import job with status IN_PROGRESS for the specific datasetId
