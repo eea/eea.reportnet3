@@ -227,7 +227,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 break;
             }
             else {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
             }
         }
         if(!folderWasPromoted) {
