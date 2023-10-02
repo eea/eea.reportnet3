@@ -112,4 +112,12 @@ public interface SqlRulesService {
    * @return
    */
   String replaceTableNamesWithS3Path(String sqlCode);
+
+  /**
+   * Finds table name by rule
+   * @param rule
+   * @param dataSetSchemaId
+   * @return
+   */
+  String getTableNameByRule(Rule rule, String dataSetSchemaId);
 }

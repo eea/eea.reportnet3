@@ -1,14 +1,11 @@
 package org.eea.validation.kafka.command;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.transaction.Transactional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.drools.template.ObjectDataCompiler;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
@@ -52,6 +49,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
 
 /**
  * The Class CheckManualRulesCommand.
@@ -112,7 +117,10 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
 
   @Autowired
   @Qualifier("dremioJdbcTemplate")
-  JdbcTemplate dremioJdbcTemplate;
+  private JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  private S3Helper s3Helper;
 
   /**
    * Gets the event type.
@@ -393,8 +401,13 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
           String preparedquery =
                   query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
           if (bigData) {
-            String sqlCode = sqlRulesService.replaceTableNamesWithS3Path(preparedquery);
-            dremioJdbcTemplate.execute(sqlCode);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+            String tableName = sqlRulesService.getTableNameByRule(rule, dataSetMetabaseVO.getDatasetSchema());
+            S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+            if (s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+              String sqlCode = sqlRulesService.replaceTableNamesWithS3Path(preparedquery);
+              dremioJdbcTemplate.execute(sqlCode);
+            }
           } else {
             launchValidationQuery(preparedquery, datasetId, rule);
           }

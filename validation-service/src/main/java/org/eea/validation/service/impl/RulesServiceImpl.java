@@ -446,21 +446,29 @@ public class RulesServiceImpl implements RulesService {
     rule.setActivationGroup(null);
     rule.setVerified(null);
 
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    boolean bigData = false;
+    if (dataflow.getBigData()!=null && dataflow.getBigData()) {
+      bigData = true;
+    }
     if (rule.getSqlSentence() != null) {
       try {
-        rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+        if (!bigData) {
+          rule.setSqlCost(sqlRulesService.evaluateSqlRule(datasetId, rule.getSqlSentence()));
+        } else {
+          rule.setSqlCost(null);
+        }
       } catch (ParseException | EEAException e) {
         rule.setSqlCost(null);
       }
     }
 
     if (null == ruleVO.getWhenCondition()) {
-      rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule);
+      rulesWhenConditionNull(datasetId, ruleVO, datasetSchemaId, rule, bigData);
     } else {
       createRule(datasetSchemaId, rule);
       kieBaseManager.validateRule(datasetSchemaId, rule);
     }
-    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
     if (TypeStatusEnum.DRAFT.equals(dataflow.getStatus())) {
       addHistoricRuleInfo(rule, null, datasetId, null);
     }
@@ -477,7 +485,7 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private void rulesWhenConditionNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
-      Rule rule) throws EEAException {
+      Rule rule, boolean bigData) throws EEAException {
     // we create the whencondition Integrity for the rule
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
       ObjectId integrityConstraintId = new ObjectId();
@@ -517,7 +525,9 @@ public class RulesServiceImpl implements RulesService {
           .append(
               "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
           .append(")").toString());
-      recordStoreController.createUpdateQueryView(datasetId, false);
+      if (!bigData) {
+        recordStoreController.createUpdateQueryView(datasetId, false);
+      }
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     createRule(datasetSchemaId, rule);
@@ -824,7 +834,7 @@ public class RulesServiceImpl implements RulesService {
     DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
     TypeStatusEnum dataflowStatus = dataflow.getStatus();
     if (null == ruleVO.getWhenCondition()) {
-      ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule, dataflowStatus);
+      ruleWhenCondtionUpdateNull(datasetId, ruleVO, datasetSchemaId, rule, dataflow);
     } else {
       validateRule(rule);
       if (!rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule)) {
@@ -846,11 +856,12 @@ public class RulesServiceImpl implements RulesService {
    * @param ruleVO the rule VO
    * @param datasetSchemaId the dataset schema id
    * @param rule the rule
-   * @param dataflowStatus the dataflow status
+   * @param dataFlowVO the dataflowVO
    * @throws EEAException the EEA exception
    */
   private void ruleWhenCondtionUpdateNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
-      Rule rule, TypeStatusEnum dataflowStatus) throws EEAException {
+      Rule rule, DataFlowVO dataFlowVO) throws EEAException {
+    TypeStatusEnum dataflowStatus = dataFlowVO.getStatus();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
 
       IntegritySchema integritySchema = integrityMapper.classToEntity(ruleVO.getIntegrityVO());
@@ -880,7 +891,9 @@ public class RulesServiceImpl implements RulesService {
               "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
           .append(")").toString());
       if (!TypeStatusEnum.DRAFT.equals(dataflowStatus)) {
-        recordStoreController.createUpdateQueryView(datasetId, false);
+        if (dataFlowVO.getBigData()==null || (dataFlowVO.getBigData()!=null && !dataFlowVO.getBigData())) {
+          recordStoreController.createUpdateQueryView(datasetId, false);
+        }
       }
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }

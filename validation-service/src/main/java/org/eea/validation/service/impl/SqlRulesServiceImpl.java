@@ -10,7 +10,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
@@ -149,9 +148,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   @Autowired
   private S3Helper s3Helper;
 
-  @Autowired
-  private DataSetControllerZuul dataSetControllerZuul;
-
 
   /** The Constant DATASET_: {@value}. */
   private static final String DATASET = "dataset_";
@@ -177,12 +173,13 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         .user(SecurityContextHolder.getContext().getAuthentication().getName())
         .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode())
         .error("The QC Rule is disabled").build();
-
+    boolean bigData = false;
     try {
       DataSetMetabaseVO dataSetMetabaseVO =
           datasetMetabaseController.findDatasetMetabaseById(datasetId);
       query = proccessQuery(dataSetMetabaseVO, rule.getSqlSentence());
-      sqlError = validateRule(query, dataSetMetabaseVO, rule);
+      bigData = isBigData(dataSetMetabaseVO.getDataflowId());
+      sqlError = validateRule(query, dataSetMetabaseVO, rule, bigData);
     } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
       sqlError = "Syntax not allowed";
     }
@@ -203,7 +200,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
             "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
         .append(")").toString());
 
-    if (StringUtils.isNotBlank(query) && StringUtils.isBlank(sqlError)) {
+    if (StringUtils.isNotBlank(query) && StringUtils.isBlank(sqlError) && !bigData) {
       try {
         rule.setSqlCost(evaluateSqlRule(datasetId, query));
       } catch (ParseException | EEAException e) {
@@ -232,7 +229,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         datasetMetabaseController.findDatasetMetabaseById(datasetId);
     String query = proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
     boolean verifAndEnabled = true;
-    if (!StringUtils.isBlank(validateRule(query, dataSetMetabaseVO, rule))) {
+    boolean bigData = isBigData(dataSetMetabaseVO.getDataflowId());
+    if (!StringUtils.isBlank(validateRule(query, dataSetMetabaseVO, rule, bigData))) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
       rule.setEnabled(verifAndEnabled);
@@ -353,7 +351,8 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     if (null != rulesSql && !rulesSql.isEmpty()) {
       rulesSql.stream().forEach(ruleVO -> {
         Rule rule = ruleMapper.classToEntity(ruleVO);
-        String sqlError = validateRule(ruleVO.getSqlSentence(), dataSetMetabaseVO, rule);
+        boolean bigData = isBigData(dataSetMetabaseVO.getDataflowId());
+        String sqlError = validateRule(ruleVO.getSqlSentence(), dataSetMetabaseVO, rule, bigData);
         if (StringUtils.isBlank(sqlError)) {
           rule.setVerified(true);
         } else {
@@ -563,7 +562,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
    * @param rule the rule
    * @return the boolean
    */
-  private String validateRule(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule) {
+  private String validateRule(String query, DataSetMetabaseVO dataSetMetabaseVO, Rule rule, boolean bigData) {
     String isSQLCorrect = "";
     // validate query
     if (!StringUtils.isBlank(query)) {
@@ -578,22 +577,9 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         // dataflows
         if (ids.isEmpty()) {
           try {
-            DataFlowVO dataflow = dataFlowController.getMetabaseById(dataSetMetabaseVO.getDataflowId());
-            if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
+            if (bigData) {
               try {
-                DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
-                String tableName = null;
-                if (rule.getType().equals(EntityTypeEnum.TABLE)) {
-                  tableName = dataSetSchema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(rule.getReferenceId().toString())).findFirst().get().getNameTableSchema();
-                } else {
-                  for (TableSchema t : dataSetSchema.getTableSchemas()) {
-                    List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(rule.getReferenceId().toString())).collect(Collectors.toList());
-                    if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().toString().equals(rule.getReferenceId().toString())) {
-                      tableName = t.getNameTableSchema();
-                      break;
-                    }
-                  }
-                }
+                String tableName = this.getTableNameByRule(rule, dataSetMetabaseVO.getDatasetSchema());
                 S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
                 if (s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                   String newQuery = proccessQuery(dataSetMetabaseVO, query);
@@ -1307,5 +1293,36 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       wordLength = word.length();
     }
     return indexes;
+  }
+
+  /**
+   * checks if dataflow is big data dataflow
+   * @param dataflowId
+   * @return
+   */
+  private boolean isBigData(Long dataflowId) {
+    DataFlowVO dataflow = dataFlowController.getMetabaseById(dataflowId);
+    if (dataflow.getBigData()!=null && dataflow.getBigData()) {
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public String getTableNameByRule(Rule rule, String dataSetSchemaId) {
+    String tableName = null;
+    DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetSchemaId));
+    if (rule.getType().equals(EntityTypeEnum.TABLE)) {
+      tableName = dataSetSchema.getTableSchemas().stream().filter(t -> t.getIdTableSchema().toString().equals(rule.getReferenceId().toString())).findFirst().get().getNameTableSchema();
+    } else {
+      for (TableSchema t : dataSetSchema.getTableSchemas()) {
+        List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema().stream().filter(f -> f.getIdFieldSchema().toString().equals(rule.getReferenceId().toString())).collect(Collectors.toList());
+        if (fieldSchemas.size() > 0 || t.getRecordSchema().getIdRecordSchema().toString().equals(rule.getReferenceId().toString())) {
+          tableName = t.getNameTableSchema();
+          break;
+        }
+      }
+    }
+    return tableName;
   }
 }
