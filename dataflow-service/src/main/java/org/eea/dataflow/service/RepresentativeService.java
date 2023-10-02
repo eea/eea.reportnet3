@@ -25,11 +25,16 @@ public interface RepresentativeService {
   Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO) throws EEAException;
 
   /**
-   * Delete dataflow representative.
-   *
-   * @param representativeId the representative id
-   * @throws EEAException the EEA exception
+   * @param dataProviderVO the data provider to be created
    */
+  void createProvider(DataProviderVO dataProviderVO) throws Exception;
+
+    /**
+     * Delete dataflow representative.
+     *
+     * @param representativeId the representative id
+     * @throws EEAException the EEA exception
+     */
   void deleteDataflowRepresentative(Long representativeId) throws EEAException;
 
   /**

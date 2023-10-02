@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -60,6 +61,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,6 +70,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
 import io.jsonwebtoken.lang.Collections;
+import org.springframework.web.server.ResponseStatusException;
 
 /** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
@@ -857,6 +861,32 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     }
     return isReleased;
+  }
+
+  /**
+   * @param dataProviderVO the data provider to be created
+   * @return the created data provider
+   * @throws EEAException
+   */
+  public void createProvider(DataProviderVO dataProviderVO) throws Exception {
+    List<DataProvider> dataProviderList = dataProviderRepository.findAllByDataProviderGroup_id(dataProviderVO.getGroupId());
+    String code = dataProviderVO.getCode();
+
+    if (dataProviderList.stream().anyMatch(dataProvider -> dataProvider.getCode().equals(code))) {
+      LOG_ERROR.error("Could not create data provider. Data provider with name: " + dataProviderVO.getLabel() + " and code: " + dataProviderVO.getCode() + " in group id: " + dataProviderVO.getGroupId() + " already exists.");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_PROVIDER_CODE);
+    }
+    if (StringUtils.isEmpty(dataProviderVO.getLabel()) || StringUtils.isEmpty(code) || dataProviderVO.getGroupId() == null) {
+      LOG_ERROR.error("Could not create data provider. Label, code, and groupId must not be empty or null");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EMPTY_PROVIDER_DETAILS);
+    }
+
+    try {
+      dataProviderRepository.saveDataProvider(dataProviderVO.getLabel(), dataProviderVO.getCode(), dataProviderVO.getGroupId());
+    } catch (Exception e) {
+      LOG_ERROR.error("Could not create data provider with name: " + dataProviderVO.getLabel() + " and code: " + dataProviderVO.getCode() + " in group id: " + dataProviderVO.getGroupId() + ". Message: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CREATING_PROVIDER);
+    }
   }
 
   /**

@@ -106,6 +106,36 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
+   * Creates a provider.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderVO the provider to be created
+   */
+  @Override
+  @LockMethod
+  @HystrixCommand
+  @PostMapping("/provider/create")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_STEWARD_SUPPORT')")
+  @ApiOperation(value = "Create the list of providers", response = DataProviderVO.class, hidden = true)
+  public void createProvider(
+      @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Object", value = "Data Provider Object") @RequestBody DataProviderVO dataProviderVO) throws Exception {
+
+    try {
+      representativeService.createProvider(dataProviderVO);
+    } catch (EEAException e) {
+      LOG_ERROR.error("Error creating new data provider for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.CREATING_PROVIDER);
+    } catch(Exception e){
+      String dataProviderName = (dataProviderVO != null) ? dataProviderVO.getLabel() : null;
+      String dataProviderCode = (dataProviderVO != null) ? dataProviderVO.getCode() : null;
+      LOG_ERROR.error("Unexpected error! Could not create data provider with name {} and code {} for dataflowId {} Message: {}", dataProviderName, dataProviderCode, dataflowId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
    * Find all data provider by group id.
    *
    * @param groupId the group id

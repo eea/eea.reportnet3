@@ -11,9 +11,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+
 import org.eea.dataflow.mapper.DataProviderGroupMapper;
 import org.eea.dataflow.mapper.DataProviderMapper;
 import org.eea.dataflow.mapper.FMEUserMapper;
@@ -65,6 +67,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 public class RepresentativeServiceImplTest {
 
@@ -976,5 +979,59 @@ public class RepresentativeServiceImplTest {
     Mockito.when(leadReporterRepository.save(Mockito.any())).thenReturn(leadReporter);
     representativeServiceImpl.createLeadReporter(1L, leadReporterVO);
     assertTrue(leadReporter.getInvalid() == true);
+  }
+
+  @Test
+  public void testCreateProvider_Success() throws Exception {
+    // given
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setLabel("TestLabel");
+    dataProviderVO.setCode("TestCode");
+    dataProviderVO.setGroupId(1L);
+
+    when(dataProviderRepository.findAllByDataProviderGroup_id(1L)).thenReturn(new ArrayList<>());
+    doNothing().when(dataProviderRepository).saveDataProvider(Mockito.any(), Mockito.any(), Mockito.any());
+
+    // when
+    representativeServiceImpl.createProvider(dataProviderVO);
+
+    // then
+    Mockito.verify(dataProviderRepository).findAllByDataProviderGroup_id(1L);
+    Mockito.verify(dataProviderRepository).saveDataProvider("TestLabel", "TestCode", 1L);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testCreateProvider_CodeAlreadyExists() throws Exception {
+    // given
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setLabel("TestLabel");
+    dataProviderVO.setCode("TestCode");
+    dataProviderVO.setGroupId(1L);
+
+    DataProvider dataProvider = new DataProvider();
+    dataProvider.setLabel("TestLabel");
+    dataProvider.setCode("TestCode");
+    DataProviderGroup dataProviderGroup = new DataProviderGroup();
+    dataProviderGroup.setId(1L);
+    dataProvider.setDataProviderGroup(dataProviderGroup);
+
+    // when
+    when(dataProviderRepository.findAllByDataProviderGroup_id(Mockito.eq(1L)))
+            .thenReturn(Collections.singletonList(dataProvider));
+
+    // then
+    representativeServiceImpl.createProvider(dataProviderVO);
+  }
+
+  @Test(expected = ResponseStatusException.class)
+  public void testCreateProvider_InvalidInput() throws Exception {
+    // given
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setLabel("");
+    dataProviderVO.setCode("TestCode");
+    dataProviderVO.setGroupId(1L);
+
+    // when (method called) then throw exception
+    representativeServiceImpl.createProvider(dataProviderVO);
   }
 }

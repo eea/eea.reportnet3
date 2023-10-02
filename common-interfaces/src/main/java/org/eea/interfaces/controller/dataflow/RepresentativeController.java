@@ -39,6 +39,16 @@ public interface RepresentativeController {
       @RequestBody RepresentativeVO representativeVO);
 
   /**
+   * Creates a provider.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderVO the provider to be created
+   */
+  @PostMapping("/create-provider")
+  void createProvider(@RequestParam("dataflowId") final Long dataflowId,
+      @RequestBody DataProviderVO dataProviderVO) throws Exception;
+
+  /**
    * Find all data provider by group id.
    *
    * @param groupId the group id

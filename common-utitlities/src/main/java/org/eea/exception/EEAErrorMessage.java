@@ -482,6 +482,18 @@ public final class EEAErrorMessage {
   public static final String CREATING_REPRESENTATIVE =
       "An unknown error happenned while creating a representative.";
 
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String CREATING_PROVIDER =
+      "An unknown error happenned while creating a representative.";
+
+  /** The Constant DUPLICATE_PROVIDER_CODE: {@value}. */
+  public static final String DUPLICATE_PROVIDER_CODE =
+      "Code provided already exists.";
+
+  /** The Constant EMPTY_PROVIDER_DETAILS: {@value}. */
+  public static final String EMPTY_PROVIDER_DETAILS =
+      "Label, code, and groupId must not be empty or null";
+
   /** The Constant EXPORT_LEAD_REPORTERS: {@value}. */
   public static final String EXPORT_LEAD_REPORTERS =
       "An unknown error happenned while exporting the lead reporters.";
