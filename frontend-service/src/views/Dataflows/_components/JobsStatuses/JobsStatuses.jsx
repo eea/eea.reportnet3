@@ -50,6 +50,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const userContext = useContext(UserContext);
   const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
+  const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
+  const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
 
   const [expandedRows, setExpandedRows] = useState(null);
   const [filteredRecords, setFilteredRecords] = useState(0);
@@ -139,15 +141,24 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const filterOptions = [
     {
-      nestedOptions: [
-        { key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint' },
-        { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
-        { key: 'dataflowName', label: resourcesContext.messages['dataflowNameTwoWords'] },
-        { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
-        { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
-        { key: 'providerId', label: resourcesContext.messages['providerId'] },
-        { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
-      ],
+      nestedOptions:
+        isAdmin || isCustodian
+          ? [
+              { key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint' },
+              { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
+              { key: 'dataflowName', label: resourcesContext.messages['dataflowNameTwoWords'] },
+              { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
+              { key: 'datasetName', label: resourcesContext.messages['datasetName'] },
+              { key: 'providerId', label: resourcesContext.messages['providerId'] },
+              { key: 'creatorUsername', label: resourcesContext.messages['creatorUsername'] }
+            ]
+          : [
+              { key: 'jobId', label: resourcesContext.messages['jobId'], keyfilter: 'pint' },
+              { key: 'dataflowId', label: resourcesContext.messages['dataflowId'] },
+              { key: 'dataflowName', label: resourcesContext.messages['dataflowNameTwoWords'] },
+              { key: 'datasetId', label: resourcesContext.messages['datasetId'] },
+              { key: 'datasetName', label: resourcesContext.messages['datasetName'] }
+            ],
       type: 'INPUT'
     },
     {
@@ -221,73 +232,124 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   ];
 
   const getTableColumns = () => {
-    const columns = [
-      {
-        key: 'expanderColumn',
-        style: { width: '3em' },
-        className: styles.smallColumn
-      },
-      {
-        key: 'jobId',
-        header: resourcesContext.messages['jobId'],
-        template: getJobIdTemplate,
-        className: styles.smallColumn
-      },
-      {
-        key: 'fmeJobId',
-        header: resourcesContext.messages['fmeJobId'],
-        template: getFmeJobIdTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'dataflowId',
-        header: resourcesContext.messages['dataflowId'],
-        template: getDataflowIdTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'datasetId',
-        header: resourcesContext.messages['datasetId'],
-        template: getDatasetIdTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'providerId',
-        header: resourcesContext.messages['providerId'],
-        template: getProviderIdTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'creatorUsername',
-        header: resourcesContext.messages['creatorUsername'],
-        template: getJobCreatorUsernameTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'jobType',
-        header: resourcesContext.messages['jobType'],
-        template: getJobTypeTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'jobStatus',
-        header: resourcesContext.messages['jobStatus'],
-        template: getJobStatusTemplate,
-        className: styles.middleColumn
-      },
-      {
-        key: 'dateAdded',
-        header: resourcesContext.messages['dateAdded'],
-        template: job => getDateAddedTemplate(job, 'dateAdded'),
-        className: styles.smallColumn
-      },
-      {
-        key: 'dateStatusChanged',
-        header: resourcesContext.messages['dateStatusChanged'],
-        template: job => getDateStatusChangedTemplate(job, 'dateStatusChanged'),
-        className: styles.smallColumn
-      }
-    ];
+    const columns =
+      isAdmin || isCustodian
+        ? [
+            {
+              key: 'expanderColumn',
+              style: { width: '3em' },
+              className: styles.smallColumn
+            },
+            {
+              key: 'jobId',
+              header: resourcesContext.messages['jobId'],
+              template: getJobIdTemplate,
+              className: styles.smallColumn
+            },
+            {
+              key: 'fmeJobId',
+              header: resourcesContext.messages['fmeJobId'],
+              template: getFmeJobIdTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'dataflowId',
+              header: resourcesContext.messages['dataflowId'],
+              template: getDataflowIdTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'datasetId',
+              header: resourcesContext.messages['datasetId'],
+              template: getDatasetIdTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'providerId',
+              header: resourcesContext.messages['providerId'],
+              template: getProviderIdTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'creatorUsername',
+              header: resourcesContext.messages['creatorUsername'],
+              template: getJobCreatorUsernameTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'jobType',
+              header: resourcesContext.messages['jobType'],
+              template: getJobTypeTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'jobStatus',
+              header: resourcesContext.messages['jobStatus'],
+              template: getJobStatusTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'dateAdded',
+              header: resourcesContext.messages['dateAdded'],
+              template: job => getDateAddedTemplate(job, 'dateAdded'),
+              className: styles.smallColumn
+            },
+            {
+              key: 'dateStatusChanged',
+              header: resourcesContext.messages['dateStatusChanged'],
+              template: job => getDateStatusChangedTemplate(job, 'dateStatusChanged'),
+              className: styles.smallColumn
+            }
+          ]
+        : [
+            {
+              key: 'expanderColumn',
+              style: { width: '3em' },
+              className: styles.smallColumn
+            },
+            {
+              key: 'jobId',
+              header: resourcesContext.messages['jobId'],
+              template: getJobIdTemplate,
+              className: styles.smallColumn
+            },
+            {
+              key: 'dataflowId',
+              header: resourcesContext.messages['dataflowId'],
+              template: getDataflowIdTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'datasetId',
+              header: resourcesContext.messages['datasetId'],
+              template: getDatasetIdTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'jobType',
+              header: resourcesContext.messages['jobType'],
+              template: getJobTypeTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'jobStatus',
+              header: resourcesContext.messages['jobStatus'],
+              template: getJobStatusTemplate,
+              className: styles.middleColumn
+            },
+            {
+              key: 'dateAdded',
+              header: resourcesContext.messages['dateAdded'],
+              template: job => getDateAddedTemplate(job, 'dateAdded'),
+              className: styles.smallColumn
+            },
+            {
+              key: 'dateStatusChanged',
+              header: resourcesContext.messages['dateStatusChanged'],
+              template: job => getDateStatusChangedTemplate(job, 'dateStatusChanged'),
+              className: styles.smallColumn
+            }
+          ];
 
     if (isAdmin) {
       columns.push({
@@ -335,17 +397,17 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   );
 
   const getJobStatusTemplate = job => (
-     <div
-     className={styles.statusBox}
-     onClick={() => {
-       setIsStatusInfoDialogVisible(true);
-       setJobStatus(job);
-     }}>
-    <LevelError
-      className={config.jobRunningStatus[job.jobStatus].label}
-      type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
-    />
-     </div>
+    <div
+      className={styles.statusBox}
+      onClick={() => {
+        setIsStatusInfoDialogVisible(true);
+        setJobStatus(job);
+      }}>
+      <LevelError
+        className={config.jobRunningStatus[job.jobStatus].label}
+        type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
+      />
+    </div>
   );
 
   const getJobIdTemplate = job => <p>{job.id}</p>;
@@ -491,9 +553,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <Filters
       className="lineItems"
       isLoading={loadingStatus === 'pending'}
+      isProvider={isProvider}
       onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       onReset={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
       options={filterOptions}
+      providerUsername={userContext.preferredUsername}
       recoilId="jobsStatuses"
     />
   );

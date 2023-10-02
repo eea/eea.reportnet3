@@ -958,6 +958,7 @@
     "multiselectCodelistEditorMessage": "Enter multiple select items",
     "multiselectCodelists": "Multiple select items",
     "multiselectCodelistSelection": "No multiple select item selected",
+    "myJobs": "My jobs",
     "name": "Name",
     "nameExistsError": "Name is repeated",
     "nameIsEmptyError": "Name is empty",

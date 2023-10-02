@@ -264,7 +264,7 @@ export const Dataflows = () => {
     const adminJobsStatusBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'laptop',
-      isVisible: isAdmin || isCustodian,
+      isVisible: true,
       label: 'jobsStatus',
       onClick: () => manageDialogs('isJobStatusDialogVisible', true),
       title: 'jobsMonitoring'

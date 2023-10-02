@@ -49,12 +49,14 @@ const components = {
 export const Filters = ({
   className,
   isLoading,
+  isProvider,
   isStrictModeVisible,
   onFilter,
   onReset = () => {},
   onSort,
   options = [],
   panelClassName,
+  providerUsername,
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -81,9 +83,22 @@ export const Filters = ({
       },
     [recoilId]
   );
+  const getFilterByProviderJobs = useRecoilCallback(
+    ({ snapshot, set }) =>
+      async () => {
+        const filterBy = { creatorUsername: providerUsername };
+
+        set(filterByCustomFilterStore(recoilId), filterBy);
+      },
+    [recoilId]
+  );
 
   const onApplyFilters = async () => {
     await getFilterBy();
+    await onFilter();
+  };
+  const onApplyProvidersJobsFilters = async () => {
+    await getFilterByProviderJobs();
     await onFilter();
   };
 
@@ -192,13 +207,31 @@ export const Filters = ({
     }
 
     return (
-      <div className={`${styles.filterButton}`}>
+      <div className={`${isProvider ? styles.jobsFilterButton : styles.filterButton}`}>
         <Button
           className={`p-button-primary p-button-rounded p-button-animated-blink`}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
           onClick={onApplyFilters}
+        />
+      </div>
+    );
+  };
+
+  const renderMyJobsFiltersButton = () => {
+    if (!hasCustomSort || !isProvider) {
+      return null;
+    }
+
+    return (
+      <div className={`${styles.myJobsButton}`}>
+        <Button
+          className={`p-button-primary p-button-rounded p-button-animated-blink`}
+          disabled={isLoading}
+          icon="filter"
+          label={resourcesContext.messages['myJobs']}
+          onClick={onApplyProvidersJobsFilters}
         />
       </div>
     );
@@ -211,7 +244,8 @@ export const Filters = ({
 
       <div className={styles.buttonWrapper}>
         {renderCustomFiltersButton()}
-        <div className={`${styles.resetButton}`}>
+        {renderMyJobsFiltersButton()}
+        <div className={`${isProvider ? styles.jobsResetButton : styles.resetButton}`}>
           <Button
             className="p-button-secondary p-button-rounded p-button-animated-blink"
             disabled={isLoading}
