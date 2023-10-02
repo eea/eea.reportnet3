@@ -356,7 +356,7 @@ public class ValidationHelper implements DisposableBean {
 
       //delete previous validation folder
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-        s3Helper.deleleFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+        s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));

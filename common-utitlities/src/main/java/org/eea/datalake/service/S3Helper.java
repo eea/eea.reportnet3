@@ -48,7 +48,7 @@ public interface S3Helper {
      * @param s3PathResolver
      * @param folderPath
      */
-    void deleleFolder(S3PathResolver s3PathResolver, String folderPath);
+    void deleteFolder(S3PathResolver s3PathResolver, String folderPath);
 
     /**
      * Gets filenames from table name folders
@@ -66,6 +66,16 @@ public interface S3Helper {
      * @return
      */
     File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException;
+
+    /**
+     * Gets file from S3 for export
+     * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
+     * @return
+     */
+    File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException;
 
     /**
      * Uploads a file in s3
@@ -104,7 +114,7 @@ public interface S3Helper {
      * Deletes talbe name DC folder from s3
      * @param s3PathResolver
      */
-    void deleleTableNameDCFolder(S3PathResolver s3PathResolver);
+    void deleteTableNameDCFolder(S3PathResolver s3PathResolver);
 
     /**
      * Generate s3 presigned Url

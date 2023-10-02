@@ -119,7 +119,7 @@ public class S3HelperImpl implements S3Helper {
      * @param folderPath
      */
     @Override
-    public void deleleFolder(S3PathResolver s3PathResolver, String folderPath) {
+    public void deleteFolder(S3PathResolver s3PathResolver, String folderPath) {
         String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         GetBucketVersioningResponse bucketVersioning = s3Client.getBucketVersioning(builder -> builder.bucket(S3_BUCKET_NAME));
@@ -167,6 +167,43 @@ public class S3HelperImpl implements S3Helper {
 
         // Write the data to a local file.
         File file = new File(path + fileName + fileType);
+        if(file.exists()){
+            //if a file with the same name exists in the path, delete it so that it will be recreated
+            file.delete();
+        }
+        Path textFilePath = Paths.get(file.toString());
+        LOG.info("textFilePath {}", textFilePath);
+        Files.createFile(textFilePath);
+        LOG.info("Local file {}", file);
+        OutputStream os = new FileOutputStream(file);
+        os.write(data);
+        LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
+        os.close();
+        return file;
+    }
+
+    /**
+     * Gets file for export
+     * @param key
+     * @param fileName
+     * @param path
+     * @param fileType
+     * @return
+     */
+    @Override
+    public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(key)
+            .bucket(S3_BUCKET_NAME)
+            .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        byte[] data = objectBytes.asByteArray();
+
+        // Write the data to a local file.
+        File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
+
         if(file.exists()){
             //if a file with the same name exists in the path, delete it so that it will be recreated
             file.delete();
@@ -237,7 +274,7 @@ public class S3HelperImpl implements S3Helper {
                     ruleFolderName = ruleFolderName.substring(startIdx);
                 }
                 validationResolver.setTableName(ruleFolderName);
-                this.deleleFolder(validationResolver, S3_VALIDATION_RULE_PATH);
+                this.deleteFolder(validationResolver, S3_VALIDATION_RULE_PATH);
             }
             validationResolver.setTableName(S3_VALIDATION);
         }
@@ -273,7 +310,7 @@ public class S3HelperImpl implements S3Helper {
      * @param s3PathResolver
      */
     @Override
-    public void deleleTableNameDCFolder(S3PathResolver s3PathResolver) {
+    public void deleteTableNameDCFolder(S3PathResolver s3PathResolver) {
         String folderName = s3Service.getS3Path(s3PathResolver);
         ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
         result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));

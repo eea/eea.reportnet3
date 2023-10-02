@@ -7,6 +7,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 
 public interface S3ConvertService {
 
@@ -17,5 +18,7 @@ public interface S3ConvertService {
 
     void convertParquetToXLSX(File parquetFile, File xmlOutputFile);
 
-    void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset);
+    void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset, Long datasetId);
+
+    void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String nameDataset, Long datasetId, ZipOutputStream out);
 }

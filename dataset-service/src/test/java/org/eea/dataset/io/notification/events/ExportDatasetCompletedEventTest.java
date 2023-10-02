@@ -41,7 +41,7 @@ public class ExportDatasetCompletedEventTest {
 
   @Test
   public void getMapTest() throws EEAException {
-    Assert.assertEquals(6, exportDatasetSchemaCompletedEvent.getMap(
+    Assert.assertEquals(7, exportDatasetSchemaCompletedEvent.getMap(
         NotificationVO.builder().user("user").dataflowId(1L).dataflowName("dataflowName").build())
         .size());
   }
@@ -51,7 +51,7 @@ public class ExportDatasetCompletedEventTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
         .thenReturn(new DataFlowVO());
-    Assert.assertEquals(6, exportDatasetSchemaCompletedEvent
+    Assert.assertEquals(7, exportDatasetSchemaCompletedEvent
         .getMap(NotificationVO.builder().user("user").datasetId(1L).build()).size());
   }
 

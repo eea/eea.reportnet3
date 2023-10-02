@@ -1914,6 +1914,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
             accept={DatasetUtils.getValidExtensions({ validExtensions: designerState.selectedImportExtension })}
+            bigData={designerState.bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogHeader={selectedCustomImportIntegration.name}

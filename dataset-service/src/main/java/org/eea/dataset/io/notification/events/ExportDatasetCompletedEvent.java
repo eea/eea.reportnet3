@@ -63,7 +63,7 @@ public class ExportDatasetCompletedEvent implements NotificableEventHandler {
     notification.put("datasetId", notificationVO.getDatasetId());
     notification.put("datasetName", notificationVO.getDatasetName());
     notification.put("datasetType", notificationVO.getDatasetType());
-
+    notification.put("mimeType", notificationVO.getMimeType());
 
     return notification;
   }
