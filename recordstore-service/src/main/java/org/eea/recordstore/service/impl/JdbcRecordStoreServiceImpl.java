@@ -619,7 +619,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
         List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
         tableNameFilenames.stream()
-          .filter(path -> !path.key().contains("/import/") || !path.key().contains("/validation/"))
+          .filter(path -> !path.key().contains("/import/") && !path.key().contains("/validation/"))
           .collect(Collectors.toList())
           .forEach(file -> {
             String key = file.key();
@@ -636,7 +636,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
               LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
               //promote folder
-              checkAndPromoteFolder(snapshotPath, S3_PROVIDER_SNAPSHOT_QUERY_PATH);
+              //checkAndPromoteFolder(snapshotPath, S3_PROVIDER_SNAPSHOT_QUERY_PATH);
             } catch (IOException e) {
               LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                   idDataset, dataflowId, e);
