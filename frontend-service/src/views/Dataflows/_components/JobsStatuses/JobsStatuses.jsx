@@ -94,7 +94,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         providerId: filterBy.providerId,
         datasetId: filterBy.datasetId,
         datasetName: filterBy.datasetName,
-        creatorUsername: filterBy.creatorUsername,
+        creatorUsername: isProvider ? userContext.preferredUsername : filterBy.creatorUsername,
         jobStatus: filterBy.jobStatus?.join()
       });
 
