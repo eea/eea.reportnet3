@@ -65,6 +65,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [jobsStatuses, setJobsStatusesList] = useState([]);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
+  const [providersTotalRecords, setProvidersTotalRecords] = useState(0);
   const [remainingJobs, setRemainingJobs] = useState(0);
   const [sort, setSort] = useState({ field: 'dateAdded', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
@@ -98,11 +99,20 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         jobStatus: filterBy.jobStatus?.join()
       });
 
+      if (isProvider && !providersTotalRecords) {
+        setProvidersTotalRecords(data.filteredRecords);
+      }
+
+      if (isProvider && Object.keys(filterBy).length === 1) {
+        setIsFiltered(FiltersUtils.getIsFiltered({}));
+      } else {
+        setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
+      }
+
       setTotalRecords(data.totalRecords);
       setJobsStatusesList(data.jobsList);
       setFilteredRecords(data.filteredRecords);
       setRemainingJobs(data.remainingJobs);
-      setIsFiltered(FiltersUtils.getIsFiltered(isProvider ? userContext.preferredUsername : filterBy));
       setData(data.jobsList);
       setLoadingStatus('success');
     } catch (error) {
@@ -635,10 +645,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           paginator={true}
           paginatorRight={
             <PaginatorRecordsCount
-              dataLength={totalRecords}
+              dataLength={isProvider ? providersTotalRecords : totalRecords}
               filteredDataLength={filteredRecords}
-              remainingJobsLength={remainingJobs}
               isFiltered={isFiltered}
+              remainingJobsLength={remainingJobs}
             />
           }
           reorderableColumns={true}
@@ -648,7 +658,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           rowsPerPageOptions={[5, 10, 15]}
           sortField={sort.field}
           sortOrder={sort.order}
-          totalRecords={isFiltered ? filteredRecords : totalRecords}
+          totalRecords={isFiltered ? filteredRecords : isProvider ? providersTotalRecords : totalRecords}
           value={jobsStatuses}>
           {getTableColumns()}
         </DataTable>
