@@ -253,6 +253,9 @@ public class JdbcRecordStoreServiceImplTest {
     dfVO.setName("dfName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
         Mockito.anyString())).thenReturn(connection);
@@ -294,6 +297,14 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
 
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(0L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong())).thenReturn(dataset);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
         Mockito.any(PreparedStatementSetter.class), Mockito.any(ResultSetExtractor.class));
@@ -326,16 +337,17 @@ public class JdbcRecordStoreServiceImplTest {
     datasetMetabaseVO.setDataProviderId(1L);
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(1L))
         .thenReturn(datasetMetabaseVO);
-    DataFlowVO dfVO = new DataFlowVO();
-    dfVO.setName("dfName");
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
-
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
         Mockito.anyString())).thenReturn(connection);
 
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    dataflow.setName("dfName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
 
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
@@ -367,15 +379,17 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(1L))
         .thenReturn(datasetMetabaseVO);
     Mockito.doNothing().when(dataSetSnapshotControllerZuul).releaseLocksFromReleaseDatasets(1L, 1L);
-    DataFlowVO dfVO = new DataFlowVO();
-    dfVO.setName("dfName");
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
         Mockito.anyString())).thenReturn(connection);
 
     Mockito.when(jdbcTemplate.query(Mockito.anyString(), Mockito.any(PreparedStatementSetter.class),
         Mockito.any(ResultSetExtractor.class))).thenReturn(datasets);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    dataflow.setName("dfName");
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
 
     jdbcRecordStoreService.createDataSnapshot(1L, 1L, 1L, new Date().toString(), false, null);
     Mockito.verify(jdbcTemplate, Mockito.times(1)).query(Mockito.anyString(),
@@ -412,6 +426,7 @@ public class JdbcRecordStoreServiceImplTest {
         .thenReturn(datasetMetabaseVO);
     DataFlowVO dfVO = new DataFlowVO();
     dfVO.setName("dfName");
+    dfVO.setBigData(false);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
     driverManager.when(() -> DriverManager.getConnection(Mockito.anyString(), Mockito.anyString(),
@@ -505,6 +520,15 @@ public class JdbcRecordStoreServiceImplTest {
     //Mockito.when(datasetControllerZuul.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     Mockito.when(dataflowControllerZuul.getMetabaseById(any())).thenReturn(dataflow);
 
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(0L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong())).thenReturn(dataset);
+
+    SnapshotVO snapshot = new SnapshotVO();
+    snapshot.setRelease(true);
+    Mockito.when(dataSetSnapshotControllerZuul.getById(Mockito.anyLong())).thenReturn(snapshot);
+
+
     jdbcRecordStoreService.restoreDataSnapshot(1L, 1L, 1L, DatasetTypeEnum.EUDATASET, false, true,
         false, null);
     Mockito.verify(lockService, Mockito.times(2)).removeLockByCriteria(Mockito.any());
@@ -552,12 +576,12 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Test
   public void updateMaterializedQueryViewTest() {
-    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
-    datasetMetabaseVO.setDataflowId(1L);
-    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
-    datasetMetabaseVO.setDataProviderId(1L);
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetMetabaseVO);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    dataset.setDatasetTypeEnum(DatasetTypeEnum.REPORTING);
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong())).thenReturn(dataset);
+
     ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
     reportingDatasetVO.setId(1L);
     List<ReportingDatasetVO> reportings = new ArrayList<>();
@@ -566,18 +590,19 @@ public class JdbcRecordStoreServiceImplTest {
         .when(datasetMetabaseControllerZuul
             .findReportingDataSetIdByDataflowIdAndProviderId(Mockito.any(), Mockito.any()))
         .thenReturn(reportings);
+
     jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void updateMaterializedQueryViewTestDatasetTest() {
-    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
-    datasetMetabaseVO.setDataflowId(1L);
-    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.TEST);
-    datasetMetabaseVO.setDataProviderId(1L);
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetMetabaseVO);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    dataset.setDatasetTypeEnum(DatasetTypeEnum.TEST);
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong())).thenReturn(dataset);
+
     TestDatasetVO reportingDatasetVO = new TestDatasetVO();
     reportingDatasetVO.setId(1L);
     List<TestDatasetVO> reportings = new ArrayList<>();
@@ -590,30 +615,30 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Test
   public void updateMaterializedQueryViewCollectionTest() {
-    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
-    datasetMetabaseVO.setDataflowId(1L);
-    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
-    datasetMetabaseVO.setDataProviderId(1L);
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetMetabaseVO);
     DataCollectionVO reportingDatasetVO = new DataCollectionVO();
     reportingDatasetVO.setId(1L);
     List<DataCollectionVO> reportings = new ArrayList<>();
     reportings.add(reportingDatasetVO);
     Mockito.when(dataCollectionControllerZuul.findDataCollectionIdByDataflowId(Mockito.any()))
         .thenReturn(reportings);
+
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    dataset.setDatasetTypeEnum(DatasetTypeEnum.COLLECTION);
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong())).thenReturn(dataset);
+
     jdbcRecordStoreService.updateMaterializedQueryView(1L, "user", true, "processId");
     Mockito.verify(kafkaSender, Mockito.times(1)).releaseKafkaEvent(Mockito.any(), Mockito.any());
   }
 
   @Test
   public void updateMaterializedQueryViewEUTest() {
-    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
-    datasetMetabaseVO.setDataflowId(1L);
-    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
-    datasetMetabaseVO.setDataProviderId(1L);
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetMetabaseVO);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    dataset.setDatasetTypeEnum(DatasetTypeEnum.EUDATASET);
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong())).thenReturn(dataset);
     EUDatasetVO reportingDatasetVO = new EUDatasetVO();
     reportingDatasetVO.setId(1L);
     List<EUDatasetVO> reportings = new ArrayList<>();
@@ -626,12 +651,11 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Test
   public void updateMaterializedQueryViewReferenceTest() {
-    DataSetMetabaseVO datasetMetabaseVO = new DataSetMetabaseVO();
-    datasetMetabaseVO.setDataflowId(1L);
-    datasetMetabaseVO.setDatasetTypeEnum(DatasetTypeEnum.REFERENCE);
-    datasetMetabaseVO.setDataProviderId(1L);
-    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.any()))
-        .thenReturn(datasetMetabaseVO);
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    dataset.setDatasetTypeEnum(DatasetTypeEnum.REFERENCE);
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong())).thenReturn(dataset);
     ReferenceDatasetVO reportingDatasetVO = new ReferenceDatasetVO();
     reportingDatasetVO.setId(1L);
     List<ReferenceDatasetVO> reportings = new ArrayList<>();
