@@ -7,6 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static org.eea.utils.LiteralConstants.*;
 
 
@@ -71,6 +74,8 @@ public class S3ServiceImpl implements S3Service {
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
         String fileName = s3PathResolver.getFilename();
         String path = s3PathResolver.getPath();
+        String snapshotFolder = formatSnapshotFolder();
+        String parquetFolder = s3PathResolver.getParquetFolder();
 
         switch (path) {
             case S3_IMPORT_FILE_PATH:
@@ -96,6 +101,9 @@ public class S3ServiceImpl implements S3Service {
                 break;
             case S3_PROVIDER_IMPORT_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
+                break;
+            case S3_PROVIDER_SNAPSHOT_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, snapshotFolder, parquetFolder, s3PathResolver.getTableName(), fileName);
                 break;
             default:
                 LOG.info("Wrong type value: {}", path);
@@ -209,5 +217,11 @@ public class S3ServiceImpl implements S3Service {
         String idStr = String.valueOf(id);
         String providerFolder = StringUtils.leftPad(idStr, S3_NAME_PATTERN_LENGTH, S3_LEFT_PAD);
         return String.format(pattern, providerFolder);
+    }
+
+    private String formatSnapshotFolder() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String date = dateFormat.format(new Date());
+        return String.format(S3_SNAPSHOT_PATTERN, date);
     }
 }
