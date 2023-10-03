@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import { noWait, useRecoilCallback } from 'recoil';
 
 import isNil from 'lodash/isNil';
@@ -49,17 +49,23 @@ const components = {
 export const Filters = ({
   className,
   isLoading,
+  isProvider,
   isStrictModeVisible,
   onFilter,
   onReset = () => {},
   onSort,
   options = [],
   panelClassName,
+  providerUsername,
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
+  const [isMyJobsPushed, setIsMyJobsPushed] = useState(false);
   const [viewDate, setViewData] = useState(undefined);
+
+  const pushRef = useRef();
+  pushRef.current = isMyJobsPushed;
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
@@ -74,8 +80,9 @@ export const Filters = ({
         const response = await Promise.all(
           filterByKeys.map(key => snapshot.getPromise(filterByStore(`${key}_${recoilId}`)))
         );
-
-        const filterBy = Object.assign({}, ...response);
+        const filterBy = pushRef.current
+          ? Object.assign({}, ...response, { creatorUsername: [providerUsername] })
+          : Object.assign({}, ...response);
 
         set(filterByCustomFilterStore(recoilId), filterBy);
       },
@@ -83,6 +90,11 @@ export const Filters = ({
   );
 
   const onApplyFilters = async () => {
+    await getFilterBy();
+    await onFilter();
+  };
+  const onApplyProvidersJobsFilters = async () => {
+    setIsMyJobsPushed(true);
     await getFilterBy();
     await onFilter();
   };
@@ -141,6 +153,7 @@ export const Filters = ({
   const onResetFilters = useRecoilCallback(
     ({ snapshot, reset }) =>
       async () => {
+        setIsMyJobsPushed(false);
         const filterByKeys = await snapshot.getPromise(filterByAllKeys(recoilId));
 
         reset(searchByStore(recoilId));
@@ -192,13 +205,31 @@ export const Filters = ({
     }
 
     return (
-      <div className={`${styles.filterButton}`}>
+      <div className={`${isProvider ? styles.jobsFilterButton : styles.filterButton}`}>
         <Button
           className={`p-button-primary p-button-rounded p-button-animated-blink`}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
           onClick={onApplyFilters}
+        />
+      </div>
+    );
+  };
+
+  const renderMyJobsFiltersButton = () => {
+    if (!hasCustomSort || !isProvider) {
+      return null;
+    }
+
+    return (
+      <div className={`${styles.myJobsButton}`}>
+        <Button
+          className={`p-button-primary p-button-rounded p-button-animated-blink`}
+          disabled={isLoading}
+          icon="filter"
+          label={resourcesContext.messages['myJobs']}
+          onClick={onApplyProvidersJobsFilters}
         />
       </div>
     );
@@ -211,7 +242,8 @@ export const Filters = ({
 
       <div className={styles.buttonWrapper}>
         {renderCustomFiltersButton()}
-        <div className={`${styles.resetButton}`}>
+        {renderMyJobsFiltersButton()}
+        <div className={`${isProvider ? styles.jobsResetButton : styles.resetButton}`}>
           <Button
             className="p-button-secondary p-button-rounded p-button-animated-blink"
             disabled={isLoading}
