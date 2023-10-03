@@ -86,6 +86,7 @@ public class S3ServiceImpl implements S3Service {
                     dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
                 break;
             case S3_PROVIDER_IMPORT_PATH:
+            case S3_CURRENT_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
                 break;
             case S3_VALIDATION_DC_PATH:

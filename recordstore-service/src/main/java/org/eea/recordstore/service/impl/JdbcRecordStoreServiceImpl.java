@@ -618,7 +618,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         providerPath.setPath(S3_CURRENT_PATH);
         LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
         List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-        LOG.info("Table Name Filenames found : {}", tableNameFilenames);
         tableNameFilenames.stream()
           .filter(path -> !path.key().contains("/import/") || !path.key().contains("/validation/"))
           .collect(Collectors.toList())
@@ -637,7 +636,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
               LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
               //promote folder
-              checkAndPromoteFolder(snapshotPath, S3_DATAFLOW_REFERENCE_QUERY_PATH);
+              checkAndPromoteFolder(snapshotPath, S3_PROVIDER_SNAPSHOT_QUERY_PATH);
             } catch (IOException e) {
               LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                   idDataset, dataflowId, e);
@@ -1999,7 +1998,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
                   LOG.info("Getting tableNameFilenames for provider path resolver {}", providerPath);
                   List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-                  LOG.info("Table Name Filenames found : {}", tableNameFilenames);
                   tableNameFilenames.stream().forEach(file -> {
                     String key = file.key();
                     String filename = new File(key).getName();
@@ -2037,7 +2035,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
                   LOG.info("Getting tableNameFilenames for reference path resolver {}", providerPath);
                   List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-                  LOG.info("Table Name Filenames found : {}", tableNameFilenames);
                   tableNameFilenames.stream().forEach(file -> {
                     String key = file.key();
                     String filename = new File(key).getName();
