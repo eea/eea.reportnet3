@@ -102,7 +102,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setJobsStatusesList(data.jobsList);
       setFilteredRecords(data.filteredRecords);
       setRemainingJobs(data.remainingJobs);
-      setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
+      setIsFiltered(FiltersUtils.getIsFiltered(isProvider ? userContext.preferredUsername : filterBy));
       setData(data.jobsList);
       setLoadingStatus('success');
     } catch (error) {
