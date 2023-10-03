@@ -519,6 +519,13 @@ public class JdbcRecordStoreServiceImplTest {
     Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Mockito.anyLong()))
         .thenReturn(datasetSchemaVO);
 
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    dataSetMetabaseVO.setDataflowId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(dataSetMetabaseVO);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+
     jdbcRecordStoreService.createUpdateQueryView(1L, true);
     Mockito.verify(jdbcTemplate, Mockito.times(4)).execute(Mockito.anyString());
   }
@@ -531,6 +538,13 @@ public class JdbcRecordStoreServiceImplTest {
     datasetSchemaVO.setTableSchemas(tableSchemas);
     Mockito.when(datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(Mockito.anyLong()))
         .thenReturn(datasetSchemaVO);
+
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    dataSetMetabaseVO.setDataflowId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(dataSetMetabaseVO);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
 
     jdbcRecordStoreService.createUpdateQueryView(1L, false);
     Mockito.verify(jdbcTemplate, Mockito.times(4)).execute(Mockito.anyString());
