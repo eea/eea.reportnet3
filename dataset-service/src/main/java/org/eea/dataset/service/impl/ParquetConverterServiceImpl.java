@@ -123,6 +123,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         if (importFileInDremioInfo.getReplaceData()) {
             //remove tables and folders that contain the previous csv files because data will be replaced
+            LOG.info("Removing csv files for job {}", importFileInDremioInfo);
             removeCsvFilesThatWillBeReplaced(s3PathResolver, tableSchemaName, s3PathForCsvFolder);
         }
 
@@ -147,6 +148,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 //demote table folder
                 dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, false);
                 if (importFileInDremioInfo.getReplaceData()) {
+                    LOG.info("Removing parquet files for job {}", importFileInDremioInfo);
                     //remove folders that contain the previous parquet files because data will be replaced
                     if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                         s3Helper.deleleFolder(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
