@@ -34,6 +34,7 @@ import { ShareRights } from 'views/_components/ShareRights';
 import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 import { UserList } from 'views/_components/UserList';
+import { Organization } from 'views/_components/Organization';
 
 import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
@@ -87,6 +88,7 @@ export const Dataflow = () => {
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
     id: dataflowId,
+    isAddOrganizationVisible: false,
     isApiKeyDialogVisible: false,
     isAutomaticReportingDeletion: false,
     isBusinessDataflowDialogVisible: false,
@@ -107,6 +109,7 @@ export const Dataflow = () => {
     isManageRolesDialogVisible: false,
     isNationalCoordinator: false,
     isObserver: false,
+    isOrganizationDialogVisible:false,
     isPageLoading: true,
     isPropertiesDialogVisible: false,
     isReceiptLoading: false,
@@ -301,15 +304,17 @@ export const Dataflow = () => {
     }
   ];
 
-  const manageDialogs = (dialog, value, secondDialog, secondValue) =>
+  const manageDialogs = (dialog, value, secondDialog, secondValue) =>{
     dataflowDispatch({
       type: 'MANAGE_DIALOGS',
       payload: { dialog, value, secondDialog, secondValue, deleteInput: '' }
     });
+  }
 
   const getLeftSidebarButtonsVisibility = () => {
     if (isEmpty(dataflowState.data)) {
       return {
+        addOrganizationBtn:false,
         apiKeyBtn: false,
         datasetsInfoBtn: false,
         editBtn: false,
@@ -345,7 +350,8 @@ export const Dataflow = () => {
         isNationalCoordinatorOfCountry ||
         isReporterOfCountry ||
         isObserver,
-      automaticDeleteBtn: !isDesign && isLeadDesigner && dataflowState.data.manualAcceptance
+      automaticDeleteBtn: !isDesign && isLeadDesigner && dataflowState.data.manualAcceptance,
+      addOrganizationBtn: hasCustodianPermissions || isLeadReporterOfCountry
     };
   };
 
@@ -405,6 +411,10 @@ export const Dataflow = () => {
     manageDialogs('isUserRightManagementDialogVisible', isVisible);
   };
 
+  const setIsOrganizationDialogVisible = isVisible =>{
+    manageDialogs('isOrganizationDialogVisible', isVisible);
+  }
+
   const renderValidateReportersButton = usersType => {
     if (usersType === usersTypes.REPORTERS) {
       return (
@@ -457,6 +467,46 @@ export const Dataflow = () => {
         />
       </div>
     );
+  };
+
+  const addOrganizationDialogFooter = usersType => {
+  
+    const renderAddButtonShareRights = () => {
+      const isAddButtonHidden = isBusinessDataflow && usersType === usersTypes.REQUESTERS && !isAdmin && !isSteward;
+  
+      if (!isAddButtonHidden) {
+        return (
+          <Button
+            className={`${styles.buttonLeft} p-button-animated-blink`}
+            icon="plus"
+            label={resourcesContext.messages['add']}
+            onClick={() => manageDialogs('isOrganizationDialogVisible', true)}
+          />
+        );
+      }
+    };
+
+    return (
+      <div className={styles.buttonsRolesFooter}>
+        {renderAddButtonShareRights()}
+        {renderValidateReportersButton(usersType)}
+        <Button
+          className={`p-button-secondary p-button-animated-blink`}
+          icon="cancel"
+          label={resourcesContext.messages['close']}
+          onClick={() => {
+            resetShareRightsFiltersState();
+            manageDialogs('isAddOrganizationVisible', false);
+            if (dataflowState.isRightPermissionsChanged) {
+              onLoadReportingDataflow();
+              setIsPageLoading(true);
+              onRefreshToken();
+            }
+          }}
+        />
+      </div>
+    );
+
   };
 
   const setDataProviderSelected = value => dataflowDispatch({ type: 'SET_DATA_PROVIDER_SELECTED', payload: value });
@@ -1628,6 +1678,49 @@ export const Dataflow = () => {
               dataflowId={dataflowId}
               dataflowType={dataflowState.dataflowType}
               representativeId={isObserver ? representativeId : dataProviderId}
+            />
+          </Dialog>
+        )}
+
+        {dataflowState.isAddOrganizationVisible && (
+          <Dialog
+            className="responsiveDialog"
+            header={
+              dataflowState.status === config.dataflowStatus.OPEN
+                ? TextByDataflowTypeUtils.getLabelByDataflowType(
+                    resourcesContext.messages,
+                    dataflowState.dataflowType,
+                    'addOrganizationHeader'
+                  )
+                : resourcesContext.messages['addOrganization']
+            }
+            onHide={() => {
+              manageDialogs('isAddOrganizationVisible', false);
+              resetUserListFiltersState();
+            }}
+            footer={addOrganizationDialogFooter(usersTypes.REQUESTERS)}
+            visible={dataflowState.isAddOrganizationVisible}>
+          <Organization
+              addConfirmHeader={resourcesContext.messages['addOrganization']}
+              addErrorNotificationKey={'ADD_REQUESTER_ERROR'}
+              columnHeader={resourcesContext.messages['organization']}
+              dataflowId={dataflowId}
+              dataProviderId={dataProviderId}
+              deleteConfirmHeader={resourcesContext.messages['requestersRightsDialogConfirmDeleteHeader']}
+              deleteConfirmMessage={resourcesContext.messages['requestersRightsDialogConfirmDeleteQuestion']}
+              deleteErrorNotificationKey={'DELETE_REQUESTER_ERROR'}
+              editConfirmHeader={resourcesContext.messages['editRequesterConfirmHeader']}
+              getErrorNotificationKey={'GET_REQUESTERS_ERROR'}
+              isAdmin={isAdmin}
+              isOrganizationDialogVisible={dataflowState.isOrganizationDialogVisible}
+              placeholder={resourcesContext.messages['manageRolesRequesterDialogInputPlaceholder']}
+              representativeId={representativeId}
+              roleOptions={isOpenStatus ? requesterRoleOptionsOpenStatus : requesterRoleOptions}
+              saveErrorNotificationKey={'IMPOSSIBLE_REQUESTER_ROLE_ERROR'}
+              setIsOrganizationDialogVisible={setIsOrganizationDialogVisible}
+              setRightPermissionsChange={setRightPermissionsChange}
+              updateErrorNotificationKey={'UPDATE_REQUESTER_ERROR'}
+              userType="requester"
             />
           </Dialog>
         )}
