@@ -514,15 +514,18 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       if (!ids.isEmpty() || ids.contains(datasetId.toString())) {
         throw new EEAException();
       } else {
-        datasetRepository.validateQuery("explain " + sqlRule, datasetId);
-        sb.append("EXPLAIN (FORMAT JSON) ");
-        sb.append(sqlRule);
-        String result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
-        JSONParser parser = new JSONParser();
-        JSONArray jsonArray = (JSONArray) parser.parse(result);
-        JSONObject jsonObject = (JSONObject) jsonArray.get(0);
-        JSONObject plan = (JSONObject) jsonObject.get("Plan");
-        sqlCost = Double.parseDouble(String.valueOf(plan.get("Total Cost")));
+        boolean bigData = isBigData(dataSetMetabaseVO.getDataflowId());
+        if (!bigData) {
+          datasetRepository.validateQuery("explain " + sqlRule, datasetId);
+          sb.append("EXPLAIN (FORMAT JSON) ");
+          sb.append(sqlRule);
+          String result = datasetRepository.evaluateSqlRule(datasetId, sb.toString());
+          JSONParser parser = new JSONParser();
+          JSONArray jsonArray = (JSONArray) parser.parse(result);
+          JSONObject jsonObject = (JSONObject) jsonArray.get(0);
+          JSONObject plan = (JSONObject) jsonObject.get("Plan");
+          sqlCost = Double.parseDouble(String.valueOf(plan.get("Total Cost")));
+        }
       }
     } catch (StringIndexOutOfBoundsException e) {
       throw new StringIndexOutOfBoundsException("SQL sentence has wrong format, please check it");
@@ -578,7 +581,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
         if (ids.isEmpty()) {
           try {
             if (bigData) {
-              try {
                 String tableName = this.getTableNameByRule(rule, dataSetMetabaseVO.getDatasetSchema());
                 S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
                 if (s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
@@ -586,14 +588,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
                   newQuery = this.replaceTableNamesWithS3Path(newQuery);
                   dremioJdbcTemplate.execute(newQuery);
                 }
-              } catch (Exception e) {
-                LOG_ERROR.error("SQL is invalid: {}. Exception: {}", query, e.getMessage());
-                throw new EEAInvalidSQLException(e.getCause().getMessage(), e);
-              }
             } else {
               checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
             }
-          } catch (EEAInvalidSQLException e) {
+          } catch (Exception e) {
             LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", rule.getSqlSentence(),
                 e.getCause().getCause().getMessage()));
             isSQLCorrect = e.getCause().getCause().getMessage();

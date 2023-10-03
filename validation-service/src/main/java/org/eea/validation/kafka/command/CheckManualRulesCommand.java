@@ -411,7 +411,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
           } else {
             launchValidationQuery(preparedquery, datasetId, rule);
           }
-        } catch (EEAInvalidSQLException e) {
+        } catch (Exception e) {
           LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = false;
         }
