@@ -611,7 +611,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       if (dataflow.getBigData()) {
         LOG.info("Create data snapshot dataset {}", idDataset);
-        S3PathResolver snapshotPath = new S3PathResolver(dataflowId);
+        S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
 
         //Get table name file from S3, save it locally and then upload to DC table name path
         S3PathResolver providerPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
