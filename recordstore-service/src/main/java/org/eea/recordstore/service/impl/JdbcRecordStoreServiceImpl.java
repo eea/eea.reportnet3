@@ -632,7 +632,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             try {
               LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
               File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-              String tableNameSnapshotPath = s3Service.getProviderPath(snapshotPath);
+              String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
               LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
               s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
               LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
