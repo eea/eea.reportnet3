@@ -1039,6 +1039,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
     LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
         isMaterialized);
+    DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+    if (dataFlowVO!=null && dataFlowVO.getBigData()) {
+      LOG.info("Skipping createUpdateView. Dataset {} belongs to big dataflow {}", datasetId, dataFlowVO.getId());
+      return;
+    }
+
     DataSetSchemaVO datasetSchema =
         datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
     // delete all views because some names can be changed
@@ -1414,6 +1421,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Async
   public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
       boolean released, Long datasetId, String processId) {
+    DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+    if (dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+      return;
+    }
     datasetIds.forEach(id -> {
       if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(id))) {
         datasetControllerZuul.updateCheckView(id, true);
