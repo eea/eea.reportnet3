@@ -123,6 +123,9 @@ public class S3ServiceImpl implements S3Service {
             case S3_PROVIDER_SNAPSHOT_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, snapshotFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
                 break;
+            case S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
+                break;
             default:
                 LOG.info("Wrong type value: {}", path);
                 path = null;
