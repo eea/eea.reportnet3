@@ -198,7 +198,7 @@ public final class LiteralConstants {
   public static final String S3_DATA_COLLECTION_PATTERN = "dc-%s";
 
   /** The Constant S3_SNAPSHOT_PATTERN: {@value}. */
-  public static final String S3_SNAPSHOT_PATTERN = "snap-%s";
+  public static final String S3_SNAPSHOT_PATTERN = "snap-%s-%s";
 
   /** The Constant S3_COLLECTIONS: {@value}. */
   public static final String S3_COLLECTIONS = "collections";
