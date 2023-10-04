@@ -87,6 +87,7 @@ public class S3ServiceImpl implements S3Service {
                 break;
             case S3_PROVIDER_IMPORT_PATH:
             case S3_CURRENT_PATH:
+            case S3_SNAPSHOT_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
                 break;
             case S3_VALIDATION_DC_PATH:
@@ -178,6 +179,8 @@ public class S3ServiceImpl implements S3Service {
                 return String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
                 return String.format(path, dataflowFolder, s3PathResolver.getTableName());
+            case S3_TABLE_AS_FOLDER_QUERY_PATH:
+                return String.format(path, dataflowFolder, s3PathResolver.getDataProviderId(), s3PathResolver.getDatasetId(), s3PathResolver.getTableName());
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
