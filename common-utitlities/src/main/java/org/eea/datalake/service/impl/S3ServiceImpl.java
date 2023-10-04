@@ -173,6 +173,8 @@ public class S3ServiceImpl implements S3Service {
         LOG.info("Method calculateS3TableDCAsFolderPath called with s3Path: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
+        String dataProviderId =  formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
+        String datasetId =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
 
         switch (path) {
             case S3_TABLE_NAME_DC_QUERY_PATH:
@@ -180,7 +182,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
                 return String.format(path, dataflowFolder, s3PathResolver.getTableName());
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
-                return String.format(path, dataflowFolder, s3PathResolver.getDataProviderId(), s3PathResolver.getDatasetId(), s3PathResolver.getTableName());
+                return String.format(path, dataflowFolder, dataProviderId, datasetId, s3PathResolver.getTableName());
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
