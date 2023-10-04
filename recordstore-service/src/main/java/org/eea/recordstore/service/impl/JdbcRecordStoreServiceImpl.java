@@ -1983,7 +1983,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               try {
                 if (DatasetTypeEnum.REPORTING.equals(datasetType) && RELEASE_COMPLETED_EVENT.equals(successEventType)) {
                   //Delete old files
-                  Long providerId = dataset.getDataProviderId();
+                  Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
                   Long reportingDatasetId = finalProcessVO.getDatasetId();
 
                   //Delete table name DC folder if exists
@@ -2052,7 +2052,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       String filename = new File(key).getName();
                       snapshotPath.setFilename(filename);
                       snapshotPath.setTableName(nameTableSchema);
-                      snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
+                      snapshotPath.setPath(S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH);
                       snapshotPath.setParquetFolder(key.split("/")[6]);
                       snapshotPath.setSnapshotId(idSnapshot);
                       try {
