@@ -635,6 +635,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     snapshotPath.setTableName(key.split("/")[4]);
                     snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
                     snapshotPath.setParquetFolder(key.split("/")[5]);
+                    snapshotPath.setSnapshotId(idSnapshot);
                     try {
                       LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                       File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);

@@ -61,7 +61,7 @@ public class S3ServiceImpl implements S3Service {
         String path = s3PathResolver.getPath();
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String parquetFolder = s3PathResolver.getParquetFolder();
-        String snapshotFolder = formatSnapshotFolder();
+        String snapshotFolder = formatSnapshotFolder(s3PathResolver.getSnapshotId());
 
         switch (path) {
             case S3_IMPORT_FILE_PATH:
@@ -204,9 +204,9 @@ public class S3ServiceImpl implements S3Service {
         return tablePath;
     }
 
-    private String formatSnapshotFolder() {
+    private String formatSnapshotFolder(Long snapshotId) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         String date = dateFormat.format(new Date());
-        return String.format(S3_SNAPSHOT_PATTERN, date);
+        return String.format(S3_SNAPSHOT_PATTERN, snapshotId, date);
     }
 }
