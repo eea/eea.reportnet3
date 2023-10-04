@@ -305,10 +305,7 @@ public final class LiteralConstants {
   public static final String S3_PROVIDER_SNAPSHOT_FOLDER_PATH = "%s/%s/%s/snapshots/%s/%s";
 
   /** The Constant S3_SNAPSHOT_FOLDER_PATH: {@value}. */
-  public static final String S3_SNAPSHOT_FOLDER_PATH = "%s/%s/%s/snapshots/%s";
-
-  /** The Constant S3_PROVIDER_SNAPSHOT_QUERY_PATH: {@value}. */
-  public static final String S3_PROVIDER_SNAPSHOT_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"%s\".\"%s\".\"snapshots\".\"%s\".\"%s\"";
+  public static final String S3_SNAPSHOT_FOLDER_PATH = "%s/%s/%s/snapshots";
 
   /** The Constant S3_EXPORT_PATH: {@value}. */
   public static final String S3_EXPORT_PATH = "%s/collections/%s/export/%s";

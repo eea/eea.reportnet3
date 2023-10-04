@@ -84,6 +84,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eea.kafka.domain.EventType.*;
 import static org.eea.utils.LiteralConstants.*;
 
 /**
@@ -646,8 +647,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       //promote folder
                       //checkAndPromoteFolder(snapshotPath, S3_PROVIDER_SNAPSHOT_QUERY_PATH);
                     } catch (IOException e) {
-                      LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
-                          idDataset, dataflowId, e);
+                      LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
                     }
                   });
             } else {
@@ -980,9 +980,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
-            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RELEASE_COMPLETED_EVENT;
+            ? RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+            : RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : RELEASE_COMPLETED_EVENT;
     EventType failEventType =
         Boolean.TRUE.equals(deleteData)
             ? Boolean.TRUE.equals(isSchemaSnapshot)
@@ -1840,7 +1840,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       updateJobStatusToFinished(jobId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
-          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
+          && !successEventType.equals(RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
       if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
@@ -1969,20 +1969,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Init restoring for prefillingReference {}", prefillingReference);
       LOG.info("Init restoring for successEventType {}", successEventType);
 
-      LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
+      LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of processId {}, isschemaSnapshot {}", idSnapshot, datasetId, processId, isSchemaSnapshot);
       DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
       LOG.info("Init restoring for datasetSchema {}", datasetSchema);
       ProcessVO finalProcessVO = processVO;
       Long finalJobId = jobId;
+      DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+      Long dataflowId = finalProcessVO.getDataflowId();
 
       datasetSchema.getTableSchemas().stream()
           .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
           .forEach(table -> {
               try {
-                if (DatasetTypeEnum.REPORTING.equals(datasetType)) {
+                if (DatasetTypeEnum.REPORTING.equals(datasetType) && RELEASE_COMPLETED_EVENT.equals(successEventType)) {
                   //Delete old files
-                  Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
-                  Long dataflowId = finalProcessVO.getDataflowId();
+                  Long providerId = dataset.getDataProviderId();
                   Long reportingDatasetId = finalProcessVO.getDatasetId();
 
                   //Delete table name DC folder if exists
@@ -2020,14 +2021,56 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                           reportingDatasetId, dataflowId, e);
                     }
                   });
-                  processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
-                      ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
-                      finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
+                } else if (DatasetTypeEnum.REPORTING.equals(datasetType)
+                    && (RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT.equals(successEventType)
+                    || RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT.equals(successEventType) )) {
 
+                  LOG.info("Restore data snapshot dataset {}", datasetId);
+                  Long providerId = dataset.getDataProviderId();
+                  //Delete table name DC folder if exists
+                  String nameTableSchema = table.getNameTableSchema();
+                  S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
+                  providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                  LOG.info("Checking if table name provider exist in path {}", providerPath);
+                  if (s3Helper.checkTableNameDCProviderFolderExist(providerPath)) {
+                    s3Helper.deleteTableNameDCFolder(providerPath);
+                    LOG.info("Successfully deleted files in path: {}", providerPath);
+                  }
+
+                  providerPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
+
+                  //Get table name file from S3 snapshots folder based on snapshotid, save it locally and then upload to Provider table name path
+                  S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), datasetId);
+                  LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
+                  List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
+                  LOG.info("Getting tableNameFilenames for path result {}", tableNameFilenames);
+                  tableNameFilenames.stream()
+                    .filter(path -> path.key().contains("-"+idSnapshot) && path.key().contains("/"+nameTableSchema+"/"))
+                    .collect(Collectors.toList())
+                    .forEach(file -> {
+                      String key = file.key();
+                      String filename = new File(key).getName();
+                      snapshotPath.setFilename(filename);
+                      snapshotPath.setTableName(nameTableSchema);
+                      snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
+                      snapshotPath.setParquetFolder(key.split("/")[6]);
+                      snapshotPath.setSnapshotId(idSnapshot);
+                      try {
+                        LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                        File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                        String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
+                        LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
+                        s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                        LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
+                        //promote folder
+                        checkAndPromoteFolder(providerPath, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                      } catch (IOException e) {
+                        LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", datasetId, dataflowId, e);
+                      }
+                    });
                 } else if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
                   LOG.info("REFERENCE dataset {}", datasetId);
 
-                  Long dataflowId = finalProcessVO.getDataflowId();
                   Long reportingDatasetId = finalProcessVO.getDatasetId();
                   String nameTableSchema = table.getNameTableSchema();
                   S3PathResolver referencePath = new S3PathResolver(dataflowId);
@@ -2058,25 +2101,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                           reportingDatasetId, dataflowId, e);
                     }
                   });
-
-                  processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
-                      ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
-                      finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
-
                 } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
 
                 }
+                processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
+                    ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
+                    finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
               } catch (Exception e) {
                 LOG_ERROR.error("Error in delete and copy release process for finalJobId {}, dataflowId {}",
                     finalJobId, datasetId, e);
               }
           });
-
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
       updateJobStatusToFinished(jobId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
-          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
+          && !successEventType.equals(RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
 /*      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
@@ -2478,7 +2518,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String error) {
 
     String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
-    if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
+    if (!RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
         NotificationVO notificationVO = NotificationVO.builder()
             .user(user)
