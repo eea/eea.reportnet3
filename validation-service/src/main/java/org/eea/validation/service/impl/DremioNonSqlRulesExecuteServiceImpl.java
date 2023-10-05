@@ -221,7 +221,6 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             if (parquetRecordCount > 0) {
                 writer.close();
                 uploadParquetToS3(ruleVO, validationResolver, subFile, ruleVO.getRuleId().length(), parquetFile);
-                dremioHelperService.deleteFileFromR3IfExists(parquetFile);
             }
         } catch (Exception e) {
             LOG.error("Error creating parquet file {},{}", parquetFile, e.getMessage());
@@ -230,6 +229,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             if (writer!=null) {
                 writer.close();
             }
+            dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }
     }
 

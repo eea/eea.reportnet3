@@ -238,7 +238,6 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             if (parquetRecordCount > 0) {
                 writer.close();
                 uploadParquetToS3(subFile, ruleVO, validationResolver, ruleVO.getRuleId().length(), parquetFile);
-                dremioHelperService.deleteFileFromR3IfExists(parquetFile);
             }
         } catch (Exception e) {
             LOG.error("Error creating parquet file {}", parquetFile);
@@ -247,6 +246,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             if (writer!=null) {
                 writer.close();
             }
+            dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }
     }
 
