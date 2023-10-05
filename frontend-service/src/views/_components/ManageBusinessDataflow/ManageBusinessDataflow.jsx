@@ -54,21 +54,22 @@ export const ManageBusinessDataflow = ({
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [bigData, setBigData] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [selectedGroup, setSelectedGroup] = useState(null);
-  const [selectedFmeUser, setSelectedFmeUser] = useState(null);
   const [description, setDescription] = useState(isEditing ? state.description : '');
-  const [groupOfCompanies, setGroupOfCompanies] = useState([]);
-  const [fmeUsers, setFmeUsers] = useState([]);
   const [errors, setErrors] = useState({
     description: { hasErrors: false, message: '' },
     name: { hasErrors: false, message: '' }
   });
+  const [fmeUsers, setFmeUsers] = useState([]);
+  const [groupOfCompanies, setGroupOfCompanies] = useState([]);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [name, setName] = useState(isEditing ? state.name : '');
+  const [selectedFmeUser, setSelectedFmeUser] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [pinDataflow, setPinDataflow] = useState(false);
 
   const deleteInputRef = useRef(null);
@@ -199,7 +200,8 @@ export const ManageBusinessDataflow = ({
           obligation.id,
           name,
           selectedGroup.dataProviderGroupId,
-          selectedFmeUser.id
+          selectedFmeUser.id,
+          bigData
         );
         manageDialogs(dialogName, false);
         onEditDataflow(name, description);
@@ -209,7 +211,8 @@ export const ManageBusinessDataflow = ({
           description,
           obligation.id,
           selectedGroup.dataProviderGroupId,
-          selectedFmeUser.id
+          selectedFmeUser.id,
+          bigData
         );
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
@@ -274,12 +277,36 @@ export const ManageBusinessDataflow = ({
       }
     };
 
+    const renderBigDataStorage = () => {
+      if (!isEditing) {
+        return (
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              ariaLabel={resourcesContext.messages['bigDataStorage']}
+              checked={bigData}
+              id="bigDataCheckbox"
+              inputId="bigDataCheckbox"
+              onChange={() => setBigData(!bigData)}
+              role="checkbox"
+            />
+            <label>
+              <span onClick={() => setBigData(!bigData)}>{resourcesContext.messages['bigDataStorage']}</span>
+            </label>
+            <TooltipButton
+              message={resourcesContext.messages['bigDataStorageMessage']}
+              uniqueIdentifier="bigDataStorage"></TooltipButton>
+          </div>
+        );
+      }
+    };
+
     return (
       <Fragment>
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
           {renderCheckBoxPinned()}
         </div>
+        <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         <Button
           className={`p-button-primary ${
             !isEmpty(name) &&
@@ -301,7 +328,7 @@ export const ManageBusinessDataflow = ({
           }
           icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
           label={isEditing ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
-          onClick={() => onManageBusinessDataflow()}
+          onClick={() => (isSending ? {} : onManageBusinessDataflow())}
         />
         <Button
           className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}

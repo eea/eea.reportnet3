@@ -5,7 +5,7 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const BusinessDataflowRepository = {
-  create: async (name, description, obligationId, dataProviderGroupId, fmeUserId) =>
+  create: async (name, description, obligationId, dataProviderGroupId, fmeUserId, bigData) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -15,7 +15,8 @@ export const BusinessDataflowRepository = {
         releasable: true,
         type: 'BUSINESS',
         dataProviderGroupId,
-        fmeUserId
+        fmeUserId,
+        bigData
       }
     }),
 
@@ -25,7 +26,7 @@ export const BusinessDataflowRepository = {
       data: { ...filterBy }
     }),
 
-  update: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId) =>
+  update: async (dataflowId, description, obligationId, name, dataProviderGroupId, fmeUserId, bigData) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -35,7 +36,8 @@ export const BusinessDataflowRepository = {
         name,
         type: 'BUSINESS',
         dataProviderGroupId,
-        fmeUserId
+        fmeUserId,
+        bigData
       }
     })
 };
