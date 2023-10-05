@@ -61,7 +61,7 @@ public class S3ServiceImpl implements S3Service {
         String path = s3PathResolver.getPath();
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String parquetFolder = s3PathResolver.getParquetFolder();
-        String snapshotFolder = formatSnapshotFolder();
+        String snapshotFolder = formatSnapshotFolder(s3PathResolver.getSnapshotId());
 
         switch (path) {
             case S3_IMPORT_FILE_PATH:
@@ -87,6 +87,7 @@ public class S3ServiceImpl implements S3Service {
                 break;
             case S3_PROVIDER_IMPORT_PATH:
             case S3_CURRENT_PATH:
+            case S3_SNAPSHOT_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
                 break;
             case S3_VALIDATION_DC_PATH:
@@ -121,6 +122,9 @@ public class S3ServiceImpl implements S3Service {
                 break;
             case S3_PROVIDER_SNAPSHOT_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, snapshotFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
+                break;
+            case S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
                 break;
             default:
                 LOG.info("Wrong type value: {}", path);
@@ -172,12 +176,16 @@ public class S3ServiceImpl implements S3Service {
         LOG.info("Method calculateS3TableDCAsFolderPath called with s3Path: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
+        String dataProviderId =  formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
+        String datasetId =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
 
         switch (path) {
             case S3_TABLE_NAME_DC_QUERY_PATH:
                 return String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
                 return String.format(path, dataflowFolder, s3PathResolver.getTableName());
+            case S3_TABLE_AS_FOLDER_QUERY_PATH:
+                return String.format(path, dataflowFolder, dataProviderId, datasetId, s3PathResolver.getTableName());
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
@@ -204,9 +212,9 @@ public class S3ServiceImpl implements S3Service {
         return tablePath;
     }
 
-    private String formatSnapshotFolder() {
+    private String formatSnapshotFolder(Long snapshotId) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         String date = dateFormat.format(new Date());
-        return String.format(S3_SNAPSHOT_PATTERN, date);
+        return String.format(S3_SNAPSHOT_PATTERN, snapshotId, date);
     }
 }
