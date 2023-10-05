@@ -84,7 +84,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
-            s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
+            deleteRuleFolderIfExists(validationResolver, ruleVO);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
@@ -120,6 +120,18 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {},{}", ruleId, datasetId, tableName, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
         }
+    }
+
+    /**
+     * Deletes rule folder if exists
+     * @param validationResolver
+     * @param ruleVO
+     */
+    private void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO) {
+        int ruleIdLength = ruleVO.getRuleId().length();
+        String ruleFolderName = ruleVO.getShortCode() + DASH + ruleVO.getRuleId().substring(ruleIdLength-3, ruleIdLength);
+        validationResolver.setFilename(ruleFolderName);
+        s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
     }
 
     /**
@@ -207,6 +219,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                 }
             }
             if (parquetRecordCount > 0) {
+                writer.close();
                 uploadParquetToS3(ruleVO, validationResolver, subFile, ruleVO.getRuleId().length(), parquetFile);
                 dremioHelperService.deleteFileFromR3IfExists(parquetFile);
             }

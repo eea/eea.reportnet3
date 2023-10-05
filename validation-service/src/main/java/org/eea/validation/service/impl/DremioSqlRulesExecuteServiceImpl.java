@@ -109,7 +109,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
-            s3Helper.deleteRuleFolderIfExists(validationResolver, ruleVO);
+            deleteRuleFolderIfExists(validationResolver, ruleVO);
             int startIndex = ruleVO.getWhenConditionMethod().indexOf(OPEN_PARENTHESIS);
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
@@ -151,6 +151,18 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {},{}", ruleId, datasetId, tableName, e.getMessage());
             throw new DremioValidationException(e.getMessage());
         }
+    }
+
+    /**
+     * Deletes rule folder if exists
+     * @param validationResolver
+     * @param ruleVO
+     */
+    private void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO) {
+        int ruleIdLength = ruleVO.getRuleId().length();
+        String ruleFolderName = ruleVO.getShortCode() + DASH + ruleVO.getRuleId().substring(ruleIdLength-3, ruleIdLength);
+        validationResolver.setFilename(ruleFolderName);
+        s3Helper.deleteFolder(validationResolver, S3_TABLE_NAME_PATH);
     }
 
     /**
