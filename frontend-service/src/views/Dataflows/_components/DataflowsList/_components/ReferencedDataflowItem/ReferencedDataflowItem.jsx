@@ -10,6 +10,7 @@ import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
 export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }) => {
@@ -56,7 +57,18 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
       </div>
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
-        <h3 className={`${styles.title}`}>{dataflow.name}</h3>
+        <h3 className={`${styles.title}`}>
+          {dataflow.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: dataflow.name
+                })
+              }}></p>
+          ) : (
+            dataflow.name
+          )}
+        </h3>
         <p>{dataflow.description}</p>
       </div>
 

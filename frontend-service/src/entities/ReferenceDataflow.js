@@ -1,5 +1,6 @@
 export class ReferenceDataflow {
   constructor({
+    bigData,
     creationDate,
     dataCollections,
     datasets,
@@ -20,6 +21,7 @@ export class ReferenceDataflow {
     type,
     userRole
   } = {}) {
+    this.bigData = bigData;
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.datasets = datasets;

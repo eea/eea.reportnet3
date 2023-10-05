@@ -13,6 +13,7 @@ const parseBusinessDataflowDTO = businessDataflowDTO => {
   dayjs.extend(utc);
 
   return new BusinessDataflow({
+    bigData: businessDataflowDTO.bigData,
     creationDate:
       businessDataflowDTO.creationDate > 0 ? dayjs(businessDataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     description: businessDataflowDTO.description,
