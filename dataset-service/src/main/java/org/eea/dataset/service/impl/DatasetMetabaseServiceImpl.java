@@ -341,12 +341,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     message.setProviderId(datasetMetabase.getDataProviderId());
     message.setAutomatic(true);
 
-    // Send message to provider
+    // Send message to providers and custodian
     Optional<DesignDataset> designDataset =
         designDatasetRepository.findFirstByDatasetSchema(datasetMetabase.getDatasetSchema());
     collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message, SecurityContextHolder.getContext().getAuthentication().getName(), null);
     collaborationControllerZuul.notifyNewMessages(datasetStatusMessageVO.getDataflowId(),
-        datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
+        datasetMetabase.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), datasetMetabase.getId(), datasetMetabase.getStatus(),
         designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
         EventType.UPDATED_DATASET_STATUS.toString());
     LOG.info("Automatic feedback message created for dataflowId {}. Message: {}",

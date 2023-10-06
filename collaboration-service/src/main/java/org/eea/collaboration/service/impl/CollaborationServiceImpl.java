@@ -211,7 +211,7 @@ public class CollaborationServiceImpl implements CollaborationService {
           fileName, contentType, message.getId());
 
       String eventType = EventType.RECEIVED_MESSAGE.toString();
-      collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null,
+      collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null,
           eventType);
 
       LOG.info("Message created: message={}", message);
