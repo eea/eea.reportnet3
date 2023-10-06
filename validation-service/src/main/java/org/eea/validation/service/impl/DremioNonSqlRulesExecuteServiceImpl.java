@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import com.google.common.collect.Lists;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -216,44 +217,42 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private void createSplitParquetFilesAndUploadToS3(RuleVO ruleVO, S3PathResolver validationResolver, String fileName, List<String> parameters, String fieldName, Map<String,
             String> headerMap, SqlRowSet rs, Method method, Object object) throws Exception {
         Schema schema = getSchema();
+        int ruleIdLength = ruleVO.getRuleId().length();
+        List<String> recordIds = new ArrayList<>();
+        while (rs.next()) {
+            boolean isValid = isRecordValid(parameters, fieldName, rs, method, object);
+            if (!isValid) {
+                recordIds.add(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+            }
+        }
         int count = 1;
-        String subFile = fileName + UNDERSCORE + count + PARQUET_TYPE;
-        String parquetFile = parquetFilePath + subFile;
-        int parquetRecordCount = 0;
-        ParquetWriter<GenericRecord> writer = null;
-        try {
-            dremioHelperService.deleteFileFromR3IfExists(parquetFile);
-            writer = getParquetWriter(schema, parquetFile);
-            while (rs.next()) {
-                boolean isValid = isRecordValid(parameters, fieldName, rs, method, object);
-                if (!isValid) {
-                    if (parquetRecordCount == validationParquetMaxFileSize) {
-                        parquetRecordCount = 0;
-                        writer.close();
-                        uploadParquetToS3(ruleVO, validationResolver, subFile, ruleVO.getRuleId().length(), parquetFile);
-                        dremioHelperService.deleteFileFromR3IfExists(parquetFile);
-                        count++;
-                        subFile = fileName + UNDERSCORE + count + PARQUET_TYPE;
-                        parquetFile = parquetFilePath + subFile;
-                        dremioHelperService.deleteFileFromR3IfExists(parquetFile);
-                        writer = getParquetWriter(schema, parquetFile);
+        for (List<String> recordSubList : Lists.partition(recordIds, validationParquetMaxFileSize)) {
+            String subFile = fileName + "_" + count + PARQUET_TYPE;
+            String parquetFile = parquetFilePath + subFile;
+            try {
+                dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+                try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                        .<GenericRecord>builder(new Path(parquetFile))
+                        .withSchema(schema)
+                        .withCompressionCodec(CompressionCodecName.SNAPPY)
+                        .build()) {
+
+                    for (String recordId : recordSubList) {
+                        GenericRecord record = createParquetGenericRecord(headerMap, recordId, schema);
+                        writer.write(record);
                     }
-                    parquetRecordCount++;
-                    createParquetGenericRecord(headerMap, rs, schema, writer);
+                } catch (Exception e1) {
+                    LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
+                    throw e1;
                 }
+                //if the dataset to validate is of reference type, then the validation path should be changed
+                StringBuilder pathBuilder = new StringBuilder().append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength));
+                String s3FilePath = pathBuilder.append(SLASH).append(subFile).toString();
+                s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
+                count++;
+            } finally {
+                dremioHelperService.deleteFileFromR3IfExists(parquetFile);
             }
-            if (parquetRecordCount > 0) {
-                writer.close();
-                uploadParquetToS3(ruleVO, validationResolver, subFile, ruleVO.getRuleId().length(), parquetFile);
-            }
-        } catch (Exception e) {
-            LOG.error("Error creating parquet file {},{}", parquetFile, e.getMessage());
-            throw e;
-        } finally {
-            if (writer!=null) {
-                writer.close();
-            }
-            dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }
     }
 
@@ -285,7 +284,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                     if (parquetRecordCount==0) {
                         parquetRecordCount++;
                     }
-                    createParquetGenericRecord(headerMap, rs, schema, writer);
+                    GenericRecord record = createParquetGenericRecord(headerMap, rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER), schema);
+                    writer.write(record);
                 }
             }
             if (parquetRecordCount > 0) {
@@ -344,18 +344,16 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      * @param headerMap
      * @param rs
      * @param schema
-     * @param writer
      * @return
-     * @throws IOException
      */
-    private void createParquetGenericRecord(Map<String, String> headerMap, SqlRowSet rs, Schema schema, ParquetWriter<GenericRecord> writer) throws IOException {
+    private GenericRecord createParquetGenericRecord(Map<String, String> headerMap, String recordId, Schema schema) {
         GenericRecord record = new GenericData.Record(schema);
         for (Map.Entry<String, String> entry : headerMap.entrySet()) {
             record.put(entry.getKey(), entry.getValue());
         }
         record.put(PK, UUID.randomUUID().toString());
-        record.put(PARQUET_RECORD_ID_COLUMN_HEADER, rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
-        writer.write(record);
+        record.put(PARQUET_RECORD_ID_COLUMN_HEADER, recordId);
+        return record;
     }
 
     /**
