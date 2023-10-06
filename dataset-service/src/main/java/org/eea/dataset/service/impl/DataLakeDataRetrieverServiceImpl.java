@@ -119,8 +119,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
         LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
-        boolean isFolderPromoted = dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false);
-        if (folderExist && isFolderPromoted) {
+        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
             StringBuilder dataQuery = new StringBuilder();
             if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
                 s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);

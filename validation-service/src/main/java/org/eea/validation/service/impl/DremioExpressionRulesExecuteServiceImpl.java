@@ -54,6 +54,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private String parquetFilePath;
     @Value("${validation.parquet.max.file.size}")
     private Integer validationParquetMaxFileSize;
+    @Value("${validation.split.parquet}")
+    private boolean validationSplitParquet;
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
     private RulesService rulesService;
@@ -208,11 +210,34 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      */
     private void createParquetAndUploadToS3(String fileName, String providerCode, RuleVO ruleVO, String fieldName, Map<String, String> headerMap, Map<String, List<String>> headerNames,
                                             SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
-        Schema schema = getSchema();
+        if (validationSplitParquet) {
+            createSplitParquetFilesAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver);
+        } else {
+            createParquetFileAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver);
+        }
+    }
+
+    /**
+     * Creates split parquet files
+     * @param fileName
+     * @param providerCode
+     * @param ruleVO
+     * @param fieldName
+     * @param headerMap
+     * @param headerNames
+     * @param rs
+     * @param cls
+     * @param object
+     * @param validationResolver
+     * @throws Exception
+     */
+    private void createSplitParquetFilesAndUploadToS3(String fileName, String providerCode, RuleVO ruleVO, String fieldName, Map<String, String> headerMap, Map<String, List<String>> headerNames,
+                                                      SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
+        int parquetRecordCount = 0;
         int count = 1;
+        Schema schema = getSchema();
         String subFile = fileName + UNDERSCORE + count + PARQUET_TYPE;
         String parquetFile = parquetFilePath + subFile;
-        int parquetRecordCount = 0;
         ParquetWriter<GenericRecord> writer = null;
         try {
             dremioHelperService.deleteFileFromR3IfExists(parquetFile);
@@ -246,6 +271,50 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             if (writer!=null) {
                 writer.close();
             }
+            dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+        }
+    }
+
+    /**
+     * Creates parquet file
+     * @param fileName
+     * @param providerCode
+     * @param ruleVO
+     * @param fieldName
+     * @param headerMap
+     * @param headerNames
+     * @param rs
+     * @param cls
+     * @param object
+     * @param validationResolver
+     * @throws Exception
+     */
+    private void createParquetFileAndUploadToS3(String fileName, String providerCode, RuleVO ruleVO, String fieldName, Map<String, String> headerMap, Map<String, List<String>> headerNames,
+                                                SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
+        Schema schema = getSchema();
+        String file = fileName + PARQUET_TYPE;
+        String parquetFile = parquetFilePath + file;
+        dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+        try (ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord>builder(new Path(parquetFile)).withSchema(schema)
+                .withCompressionCodec(CompressionCodecName.SNAPPY).withPageSize(4 * 1024).withRowGroupSize(16 * 1024).build()) {
+            int parquetRecordCount = 0;
+            while (rs.next()) {
+                boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
+                if (!isValid) {
+                    if (parquetRecordCount==0) {
+                        parquetRecordCount++;
+                    }
+                    createParquetGenericRecord(headerMap, rs, schema, writer);
+                }
+            }
+            if (parquetRecordCount > 0) {
+                writer.close();
+                uploadParquetToS3(file, ruleVO, validationResolver, ruleVO.getRuleId().length(), parquetFile);
+            }
+        } catch (Exception e) {
+            LOG.error("Error creating parquet file {}", parquetFile);
+            throw e;
+        } finally {
             dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }
     }

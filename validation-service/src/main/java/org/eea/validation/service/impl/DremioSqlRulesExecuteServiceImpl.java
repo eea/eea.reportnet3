@@ -58,6 +58,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private String parquetFilePath;
     @Value("${validation.parquet.max.file.size}")
     private Integer validationParquetMaxFileSize;
+    @Value("${validation.split.parquet}")
+    private boolean validationSplitParquet;
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
     private RulesService rulesService;
@@ -413,6 +415,25 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      */
     private void createParquetAndUploadToS3(RuleVO ruleVO, List<String> recordIds, Map<String, String> headerMap, Schema schema, String fileName,
                                             S3PathResolver validationResolver) throws Exception {
+        if (validationSplitParquet) {
+            createSplitParquetFilesAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver);
+        } else {
+            createParquetFileAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver);
+        }
+    }
+
+    /**
+     * Creates split parquet files
+     * @param ruleVO
+     * @param recordIds
+     * @param headerMap
+     * @param schema
+     * @param fileName
+     * @param validationResolver
+     * @throws Exception
+     */
+    private void createSplitParquetFilesAndUploadToS3(RuleVO ruleVO, List<String> recordIds, Map<String, String> headerMap, Schema schema, String fileName,
+                                                      S3PathResolver validationResolver) throws Exception {
         int count = 1;
         int ruleIdLength = ruleVO.getRuleId().length();
         for (List<String> recordSubList : Lists.partition(recordIds, validationParquetMaxFileSize)) {
@@ -444,6 +465,48 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             } finally {
                 dremioHelperService.deleteFileFromR3IfExists(parquetFile);
             }
+        }
+    }
+
+    /**
+     * Creates parquet file
+     * @param ruleVO
+     * @param recordIds
+     * @param headerMap
+     * @param schema
+     * @param fileName
+     * @param validationResolver
+     * @throws Exception
+     */
+    private void createParquetFileAndUploadToS3(RuleVO ruleVO, List<String> recordIds, Map<String, String> headerMap, Schema schema, String fileName,
+                                                S3PathResolver validationResolver) throws Exception {
+        String file = fileName + PARQUET_TYPE;
+        String parquetFile = parquetFilePath + file;
+        int ruleIdLength = ruleVO.getRuleId().length();
+        try {
+            dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+            try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                    .<GenericRecord>builder(new Path(parquetFile))
+                    .withSchema(schema)
+                    .withCompressionCodec(CompressionCodecName.SNAPPY)
+                    .withPageSize(4 * 1024)
+                    .withRowGroupSize(16 * 1024)
+                    .build()) {
+
+                for (String recordId : recordIds) {
+                    GenericRecord record = createParquetGenericRecord(ruleVO, headerMap, schema, recordId);
+                    writer.write(record);
+                }
+            } catch (Exception e1) {
+                LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
+                throw e1;
+            }
+            //if the dataset to validate is of reference type, then the validation path should be changed
+            StringBuilder pathBuilder = new StringBuilder().append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength));
+            String s3FilePath = pathBuilder.append(SLASH).append(file).toString();
+            s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
+        } finally {
+            dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }
     }
 
