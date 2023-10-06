@@ -330,19 +330,10 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         return schema;
     }
 
-    private static ParquetWriter<GenericRecord> getParquetWriter(Schema schema, String parquetFile) throws IOException {
-        ParquetWriter<GenericRecord> writer = AvroParquetWriter
-                .<GenericRecord>builder(new Path(parquetFile))
-                .withSchema(schema)
-                .withCompressionCodec(CompressionCodecName.SNAPPY)
-                .build();
-        return writer;
-    }
-
     /**
      * creates parquet generic record
      * @param headerMap
-     * @param rs
+     * @param recordId
      * @param schema
      * @return
      */

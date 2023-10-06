@@ -346,25 +346,9 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     }
 
     /**
-     * Creates parquet writer
-     * @param schema
-     * @param parquetFile
-     * @return
-     * @throws IOException
-     */
-    private static ParquetWriter<GenericRecord> getParquetWriter(Schema schema, String parquetFile) throws IOException {
-        ParquetWriter<GenericRecord> writer = AvroParquetWriter
-                .<GenericRecord>builder(new Path(parquetFile))
-                .withSchema(schema)
-                .withCompressionCodec(CompressionCodecName.SNAPPY)
-                .build();
-        return writer;
-    }
-
-    /**
      * creates parquet generic record
      * @param headerMap
-     * @param rs
+     * @param recordId
      * @param schema
      * @return
      */
