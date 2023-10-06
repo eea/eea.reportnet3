@@ -329,6 +329,7 @@ public class CollaborationControllerImpl implements CollaborationController {
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param custodianUserName the custodian's userName
    * @param modifiedDatasetId the modified dataset id
    * @param datasetStatus the dataset status
    * @param datasetName the dataset name
@@ -340,6 +341,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   @ApiOperation(value = "Notifies about a new message", hidden = true)
   public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
       @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+      @ApiParam(value = "Custodian User Name", example = "user") @RequestParam(value = "custodianUserName", required = false) String custodianUserName,
       @ApiParam(value = "Modified Dataset Id",
           example = "0") @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
       @ApiParam(value = "The Dataset Status",
@@ -348,7 +350,7 @@ public class CollaborationControllerImpl implements CollaborationController {
           example = "Im A Dataset") @RequestParam("datasetName") String datasetName,
       @ApiParam(value = "Event type") @RequestParam("eventType") String eventType) {
     try {
-      collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, modifiedDatasetId,
+      collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, custodianUserName, modifiedDatasetId,
               datasetStatus, datasetName, eventType);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error releasing new message notifications for dataflowId {} providerId {} modifiedDatasetId {} and eventType {}. Message: {}", dataflowId, providerId, modifiedDatasetId, eventType, e.getMessage());

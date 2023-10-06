@@ -796,7 +796,7 @@ public class DatasetMetabaseServiceTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     datasetMetabaseService.updateDatasetStatus(dsMetabaseVO);
     Mockito.verify(collaborationControllerZuul, times(1)).notifyNewMessages(Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
