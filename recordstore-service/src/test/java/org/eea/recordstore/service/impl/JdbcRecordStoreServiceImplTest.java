@@ -668,6 +668,14 @@ public class JdbcRecordStoreServiceImplTest {
 
   @Test
   public void deleteSnapshotTest() throws SQLException, IOException {
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    dataset.setDataProviderId(1L);
+    Mockito.when(datasetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(dataset);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(anyLong())).thenReturn(dataflow);
 
     jdbcRecordStoreService.deleteDataSnapshot(1L, 1L);
     File file = new File("./snapshot_" + 1L + "-dataset_" + 1L + "_table_DatasetValue.snap");

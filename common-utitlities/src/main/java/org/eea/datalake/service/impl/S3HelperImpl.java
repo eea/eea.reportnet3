@@ -293,6 +293,19 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
+     * Deletes snapshot folder from s3
+     * @param s3PathResolver
+     */
+    @Override
+    public void deleteSnapshotFolder(S3PathResolver s3PathResolver) {
+        String folderName = s3Service.getS3Path(s3PathResolver);
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
+        result.contents().stream()
+            .filter(path -> path.key().contains("/snap-"+s3PathResolver.getSnapshotId()+"-"))
+            .forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
+    }
+
+    /**
      * Generate s3 presigned Url
      *
      * @param filePath the path where the file will be imported into
