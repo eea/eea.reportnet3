@@ -1014,27 +1014,37 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
-    String nameFileDatasetValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
-    String nameFileTableValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
-    String nameFileRecordValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
-    String nameFileFieldValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
-    String nameAttachmentValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX;
+    //Check if dataflow is Big Data
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(idReportingDataset);
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
 
-    Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
-    Files.deleteIfExists(path1);
-    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
-    Files.deleteIfExists(path2);
-    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
-    Files.deleteIfExists(path3);
-    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
-    Files.deleteIfExists(path4);
-    Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
-    Files.deleteIfExists(path5);
+    if (dataflow.getBigData()) {
+      S3PathResolver snapshotPath = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), idReportingDataset);
+      snapshotPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
+      snapshotPath.setSnapshotId(idSnapshot);
+      LOG.info("Checking if table name DC folder exist in path {}", snapshotPath);
+      if (s3Helper.checkTableNameDCProviderFolderExist(snapshotPath)) {
+        s3Helper.deleteSnapshotFolder(snapshotPath);
+        LOG.info("Successfully deleted files in path: {}", snapshotPath);
+      }
+    } else {
+      String nameFileDatasetValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+      String nameFileTableValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+      String nameFileRecordValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+      String nameFileFieldValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
+      String nameAttachmentValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX;
+
+      Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
+      Files.deleteIfExists(path1);
+      Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
+      Files.deleteIfExists(path2);
+      Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
+      Files.deleteIfExists(path3);
+      Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
+      Files.deleteIfExists(path4);
+      Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
+      Files.deleteIfExists(path5);
+    }
   }
 
   /**

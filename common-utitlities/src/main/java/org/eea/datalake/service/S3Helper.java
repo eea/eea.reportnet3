@@ -117,6 +117,12 @@ public interface S3Helper {
     void deleteTableNameDCFolder(S3PathResolver s3PathResolver);
 
     /**
+     * Deletes snapshot folder from s3
+     * @param s3PathResolver
+     */
+    void deleteSnapshotFolder(S3PathResolver s3PathResolver);
+
+    /**
      * Generate s3 presigned Url
      *
      * @param filePath the path where the file will be imported into
