@@ -1,10 +1,7 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.File;
@@ -93,13 +90,6 @@ public interface S3Helper {
      * @return
      */
     List<ObjectIdentifier> listObjectsInBucket(String prefix);
-
-    /**
-     * Chceks if rule folder exists in s3 validation folder and deletes it
-     * @param validationResolver
-     * @param ruleVO
-     */
-    void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO);
 
     /**
      * checks if table names DC fodlers have been created in the s3 storage
