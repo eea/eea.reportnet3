@@ -357,8 +357,6 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 .<GenericRecord>builder(new Path(parquetFile))
                 .withSchema(schema)
                 .withCompressionCodec(CompressionCodecName.SNAPPY)
-                .withPageSize(4 * 1024)
-                .withRowGroupSize(16 * 1024)
                 .build();
         return writer;
     }

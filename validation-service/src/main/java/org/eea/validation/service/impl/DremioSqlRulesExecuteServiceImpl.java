@@ -445,8 +445,6 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                         .<GenericRecord>builder(new Path(parquetFile))
                         .withSchema(schema)
                         .withCompressionCodec(CompressionCodecName.SNAPPY)
-                        .withPageSize(4 * 1024)
-                        .withRowGroupSize(16 * 1024)
                         .build()) {
 
                     for (String recordId : recordSubList) {
