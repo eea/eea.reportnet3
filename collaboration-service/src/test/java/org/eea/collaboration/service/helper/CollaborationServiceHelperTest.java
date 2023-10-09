@@ -68,7 +68,7 @@ public class CollaborationServiceHelperTest {
         .thenReturn(datasetIds);
     Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.anyString()))
         .thenReturn(users);
-    collaborationServiceHelper.notifyNewMessages(1L, 1L, null, null, null,
+    collaborationServiceHelper.notifyNewMessages(1L, 1L,  null,null, null, null,
         EventType.RECEIVED_MESSAGE.toString());
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -87,7 +87,7 @@ public class CollaborationServiceHelperTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.anyString()))
         .thenReturn(users);
-    collaborationServiceHelper.notifyNewMessages(1L, 1L, null, null, null,
+    collaborationServiceHelper.notifyNewMessages(1L, 1L,null, null, null, null,
         EventType.RECEIVED_MESSAGE.toString());
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());

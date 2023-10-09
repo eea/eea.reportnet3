@@ -49,13 +49,14 @@ public class CollaborationServiceHelper {
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param custodianUserName the custodian username
    * @param modifiedDatasetId the modified dataset id
    * @param datasetStatus the dataset status
    * @param datasetName the dataset name
    * @param eventType the event type
    */
   @Async
-  public void notifyNewMessages(Long dataflowId, Long providerId, Long modifiedDatasetId,
+  public void notifyNewMessages(Long dataflowId, Long providerId, String custodianUserName, Long modifiedDatasetId,
       DatasetStatusEnum datasetStatus, String datasetName, String eventType) {
     EventType event = EventType.valueOf(eventType);
     Collection<? extends GrantedAuthority> authorities =
@@ -85,6 +86,11 @@ public class CollaborationServiceHelper {
         addUsers(set, userManagementControllerZull.getUsersByGroup(reporterRead));
         addUsers(set, userManagementControllerZull.getUsersByGroup(reporterWrite));
       }
+    }
+
+    //add the custodian's username so that he also receives the notification
+    if(custodianUserName != null){
+      set.add(custodianUserName);
     }
 
     try {

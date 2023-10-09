@@ -108,6 +108,7 @@ public interface CollaborationController {
    *
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param custodianUserName the custodian's userName
    * @param modifiedDatasetId the modified dataset id
    * @param datasetStatus the dataset status
    * @param datasetName the dataset name
@@ -116,6 +117,7 @@ public interface CollaborationController {
   @GetMapping("/private/notifyNewMessages")
   void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
+      @RequestParam(value = "custodianUserName", required = false) String custodianUserName,
       @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
       @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
       @RequestParam("datasetName") String datasetName, @RequestParam("eventType") String eventType);

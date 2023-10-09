@@ -22,6 +22,15 @@ export const useLeftSideBar = (
     if (!isEmpty(dataflowState.userRoles) || dataflowState.isAdmin) {
       const buttonsVisibility = getLeftSidebarButtonsVisibility();
 
+      const addOrganizationBtn = {
+        className: 'dataflow-properties-help-step',
+        icon: 'plus',
+        isVisible: buttonsVisibility.addOrganizationBtn,
+        label: 'addOrganizationBtn',
+        onClick: () => manageDialogs('isAddOrganizationVisible', true),
+        title: 'addOrganizationBtn'
+      };
+
       const apiKeyBtn = {
         className: 'dataflow-api-key-help-step',
         icon: 'settings',
@@ -163,7 +172,8 @@ export const useLeftSideBar = (
         manageReportersBtn,
         userListBtn,
         datasetsInfoBtn,
-        automaticDeleteBtn
+        automaticDeleteBtn,
+        addOrganizationBtn
       ];
 
       leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
