@@ -880,12 +880,16 @@ public class RulesServiceImplTest {
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
     dataset.setDatasetSchema("5e44110d6a9e3a270ce13fac");
+    dataset.setDataflowId(1L);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(rulesRepository.createNewRule(Mockito.any(), Mockito.any())).thenReturn(false);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
     RuleVO ruleVO = new RuleVO();
     ruleVO.setWhenCondition(new RuleExpressionDTO());
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, ruleVO);
     } catch (EEAException e) {
@@ -916,6 +920,9 @@ public class RulesServiceImplTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {
@@ -947,6 +954,9 @@ public class RulesServiceImplTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {
@@ -977,6 +987,9 @@ public class RulesServiceImplTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {
@@ -1006,6 +1019,9 @@ public class RulesServiceImplTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {
@@ -1034,6 +1050,9 @@ public class RulesServiceImplTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {
@@ -1055,11 +1074,15 @@ public class RulesServiceImplTest {
     rule.setDescription("description");
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
+    dataset.setDataflowId(1L);
     dataset.setDatasetSchema("5e44110d6a9e3a270ce13fac");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
 
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {
@@ -1086,6 +1109,9 @@ public class RulesServiceImplTest {
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(rule);
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {
@@ -1104,10 +1130,14 @@ public class RulesServiceImplTest {
 
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setId(1L);
+    dataset.setDataflowId(1L);
     dataset.setDatasetSchema("5e44110d6a9e3a270ce13fac");
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
     Mockito.when(ruleMapper.classToEntity(Mockito.any())).thenReturn(new Rule());
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
     try {
       rulesServiceImpl.createNewRule(1L, new RuleVO());
     } catch (EEAException e) {

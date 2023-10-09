@@ -5,6 +5,7 @@ import { DatasetUtils } from 'services/_utils/DatasetUtils';
 const parseReferenceDataflowDTO = referenceDataflowDTO =>
   new ReferenceDataflow({
     anySchemaAvailableInPublic: referenceDataflowDTO.anySchemaAvailableInPublic,
+    bigData: referenceDataflowDTO.bigData,
     creationDate: referenceDataflowDTO.creationDate,
     datasets: DatasetUtils.parseDatasetListDTO(referenceDataflowDTO.reportingDatasets),
     description: referenceDataflowDTO.description,

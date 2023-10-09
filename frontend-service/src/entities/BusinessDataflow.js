@@ -1,5 +1,6 @@
 export class BusinessDataflow {
   constructor({
+    bigData,
     creationDate,
     dataCollections,
     datasets,
@@ -23,6 +24,7 @@ export class BusinessDataflow {
     userRole,
     webLinks
   } = {}) {
+    this.bigData = bigData;
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.datasets = datasets;

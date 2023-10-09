@@ -34,6 +34,9 @@ public class S3PathResolver {
     /** The parquet folder. */
     private String parquetFolder;
 
+    /** The snapshot id. */
+    private long snapshotId;
+
 
     public S3PathResolver(long dataflowId, long dataProviderId, long datasetId) {
         this.dataflowId = dataflowId;

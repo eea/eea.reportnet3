@@ -37,6 +37,8 @@ import { useLeftSideBar } from './_functions/Hooks/useLeftSideBar';
 import { CurrentPage } from 'views/_functions/Utils';
 import { Dialog } from 'views/_components/Dialog';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 
 export const ReferenceDataflow = () => {
@@ -48,6 +50,7 @@ export const ReferenceDataflow = () => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
+    bigData: false,
     data: {},
     dataflowType: '',
     description: '',
@@ -245,6 +248,7 @@ export const ReferenceDataflow = () => {
       dataflowDispatch({
         type: 'LOADING_SUCCESS',
         payload: {
+          bigData: referenceDataflow.bigData,
           data: referenceDataflow,
           dataflowType: referenceDataflow.type,
           description: referenceDataflow.description,
@@ -340,7 +344,18 @@ export const ReferenceDataflow = () => {
         <Title
           icon="clone"
           iconSize="4rem"
-          subtitle={resourcesContext.messages['referenceDataflowCrumbLabel']}
+          subtitle={
+            dataflowState.bigData ? (
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                    name: resourcesContext.messages['referenceDataflowCrumbLabel']
+                  })
+                }}></p>
+            ) : (
+              resourcesContext.messages['referenceDataflowCrumbLabel']
+            )
+          }
           title={dataflowState.name}
         />
       </div>

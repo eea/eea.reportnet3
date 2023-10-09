@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import static org.eea.utils.LiteralConstants.*;
 
 
@@ -58,6 +61,7 @@ public class S3ServiceImpl implements S3Service {
         String path = s3PathResolver.getPath();
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String parquetFolder = s3PathResolver.getParquetFolder();
+        String snapshotFolder = formatSnapshotFolder(s3PathResolver.getSnapshotId());
 
         switch (path) {
             case S3_IMPORT_FILE_PATH:
@@ -82,6 +86,8 @@ public class S3ServiceImpl implements S3Service {
                     dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
                 break;
             case S3_PROVIDER_IMPORT_PATH:
+            case S3_CURRENT_PATH:
+            case S3_SNAPSHOT_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
                 break;
             case S3_VALIDATION_DC_PATH:
@@ -114,6 +120,12 @@ public class S3ServiceImpl implements S3Service {
             case S3_DATAFLOW_REFERENCE_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, s3PathResolver.getTableName());
                 break;
+            case S3_PROVIDER_SNAPSHOT_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, snapshotFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
+                break;
+            case S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
+                break;
             default:
                 LOG.info("Wrong type value: {}", path);
                 path = null;
@@ -129,7 +141,7 @@ public class S3ServiceImpl implements S3Service {
         String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
 
-        if(path.equals(S3_IMPORT_FILE_PATH) || path.equals(S3_IMPORT_CSV_FILE_QUERY_PATH)){
+        if(path.equals(S3_IMPORT_FILE_PATH) || path.equals(S3_IMPORT_CSV_FILE_QUERY_PATH) || path.equals(S3_TABLE_NAME_PATH)){
             return String.format(path, dataflowFolder,
                     dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), s3PathResolver.getFilename());
         } else if (path.equals(S3_REFERENCE_FOLDER_PATH)) {
@@ -164,12 +176,16 @@ public class S3ServiceImpl implements S3Service {
         LOG.info("Method calculateS3TableDCAsFolderPath called with s3Path: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
+        String dataProviderId =  formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
+        String datasetId =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
 
         switch (path) {
             case S3_TABLE_NAME_DC_QUERY_PATH:
                 return String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
                 return String.format(path, dataflowFolder, s3PathResolver.getTableName());
+            case S3_TABLE_AS_FOLDER_QUERY_PATH:
+                return String.format(path, dataflowFolder, dataProviderId, datasetId, s3PathResolver.getTableName());
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;
@@ -194,5 +210,11 @@ public class S3ServiceImpl implements S3Service {
             tablePath = this.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         }
         return tablePath;
+    }
+
+    private String formatSnapshotFolder(Long snapshotId) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String date = dateFormat.format(new Date());
+        return String.format(S3_SNAPSHOT_PATTERN, snapshotId, date);
     }
 }

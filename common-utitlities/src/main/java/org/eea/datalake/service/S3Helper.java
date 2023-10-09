@@ -1,10 +1,7 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.File;
@@ -48,7 +45,7 @@ public interface S3Helper {
      * @param s3PathResolver
      * @param folderPath
      */
-    void deleleFolder(S3PathResolver s3PathResolver, String folderPath);
+    void deleteFolder(S3PathResolver s3PathResolver, String folderPath);
 
     /**
      * Gets filenames from table name folders
@@ -95,13 +92,6 @@ public interface S3Helper {
     List<ObjectIdentifier> listObjectsInBucket(String prefix);
 
     /**
-     * Chceks if rule folder exists in s3 validation folder and deletes it
-     * @param validationResolver
-     * @param ruleVO
-     */
-    void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO);
-
-    /**
      * checks if table names DC fodlers have been created in the s3 storage
      * @param s3PathResolver
      * @return
@@ -114,7 +104,13 @@ public interface S3Helper {
      * Deletes talbe name DC folder from s3
      * @param s3PathResolver
      */
-    void deleleTableNameDCFolder(S3PathResolver s3PathResolver);
+    void deleteTableNameDCFolder(S3PathResolver s3PathResolver);
+
+    /**
+     * Deletes snapshot folder from s3
+     * @param s3PathResolver
+     */
+    void deleteSnapshotFolder(S3PathResolver s3PathResolver);
 
     /**
      * Generate s3 presigned Url

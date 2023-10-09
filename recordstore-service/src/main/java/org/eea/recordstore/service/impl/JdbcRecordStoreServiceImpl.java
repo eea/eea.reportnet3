@@ -84,6 +84,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eea.kafka.domain.EventType.*;
 import static org.eea.utils.LiteralConstants.*;
 
 /**
@@ -604,186 +605,229 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String dateRelease, boolean prefillingReference, String processId)
       throws SQLException, IOException, EEAException {
 
-    ConnectionDataVO connectionDataVO =
-        getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
-    String type = SNAPSHOT;
-    try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-        connectionDataVO.getUser(), connectionDataVO.getPassword())) {
-      type = checkType(idDataset, idSnapshot);
-      CopyManager cm = new CopyManager((BaseConnection) con);
+        ConnectionDataVO connectionDataVO =
+            getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
+        String type = SNAPSHOT;
+        try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+              connectionDataVO.getUser(), connectionDataVO.getPassword())) {
+            type = checkType(idDataset, idSnapshot);
 
-      // Copy dataset_value
-      String nameFileDatasetValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX);
-      String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_" + idDataset
-          + ".dataset_value) to STDOUT";
+            //Check if dataflow is Big Data
+            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
+            Long dataflowId = dataset.getDataflowId();
+            DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
-      printToFile(nameFileDatasetValue, copyQueryDataset, cm);
-      // Copy table_value
-      String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
+            if (dataflow.getBigData()) {
+              LOG.info("Create data snapshot dataset {}", idDataset);
+              S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
 
-      String copyQueryTable = "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_"
-          + idDataset + ".table_value) to STDOUT";
+              //Get table name file from S3, save it locally and then upload to DC table name path
+              S3PathResolver providerPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
+              providerPath.setPath(S3_CURRENT_PATH);
+              LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
+              List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
+              tableNameFilenames.stream()
+                  .filter(path -> !path.key().contains("/import/") && !path.key().contains("/validation/"))
+                  .collect(Collectors.toList())
+                  .forEach(file -> {
+                    String key = file.key();
+                    String filename = new File(key).getName();
+                    snapshotPath.setFilename(filename);
+                    snapshotPath.setTableName(key.split("/")[4]);
+                    snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
+                    snapshotPath.setParquetFolder(key.split("/")[5]);
+                    snapshotPath.setSnapshotId(idSnapshot);
+                    try {
+                      LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                      File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                      String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
+                      LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
+                      s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                      LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
+                      //promote folder
+                      //checkAndPromoteFolder(snapshotPath, S3_PROVIDER_SNAPSHOT_QUERY_PATH);
+                    } catch (IOException e) {
+                      LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
+                    }
+                  });
+            } else {
+              CopyManager cm = new CopyManager((BaseConnection) con);
 
-      printToFile(nameFileTableValue, copyQueryTable, cm);
+              // Copy dataset_value
+              String nameFileDatasetValue =
+                  pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX);
+              String copyQueryDataset = "COPY (SELECT id, id_dataset_schema FROM dataset_" + idDataset
+                  + ".dataset_value) to STDOUT";
 
-      DatasetTypeEnum typeDataset = datasetControllerZuul.getDatasetType(idDataset);
-      String copyQueryRecord;
-      String copyQueryField;
-      // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
-      // all the values from the DC, no matter what partitionId has the origin, but we need to put
-      // in the file the partitionId of the EUDataset destination
-      String copyQueryAttachment =
-          "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
-              + idDataset + ".attachment_value at) to STDOUT";
-      if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
-        String providersCode = getProvidersCode(idDataset);
-        copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
-            + ",data_provider_code FROM dataset_" + idDataset
-            + ".record_value WHERE data_provider_code in (" + providersCode
-            + ") order by data_position) to STDOUT";
-        copyQueryField =
-            "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
-                + idDataset + ".field_value fv, dataset_" + idDataset
-                + ".record_value rv WHERE fv.id_record = rv.id " + "AND rv.data_provider_code in ("
-                + providersCode + ")) to STDOUT";
-        copyQueryAttachment =
-            "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
-                + idDataset + ".attachment_value at, dataset_" + idDataset
-                + ".field_value fv, dataset_" + idDataset
-                + ".record_value rv WHERE at.field_value_id = fv.id AND fv.id_record = rv.id "
-                + "AND rv.data_provider_code in (" + providersCode + ")) to STDOUT";
-      } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset)
-          && Boolean.TRUE.equals(prefillingReference)) {
-        copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
-            + ",data_provider_code FROM dataset_" + idDataset
-            + ".record_value order by data_position) to STDOUT";
-        copyQueryField =
-            "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
-                + idDataset + ".field_value fv) to STDOUT";
-      } else {
-        copyQueryRecord =
-            "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id, data_provider_code FROM dataset_"
-                + idDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
-                + " order by data_position) to STDOUT";
-        copyQueryField =
-            "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
-                + idDataset + ".field_value fv inner join dataset_" + idDataset
-                + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
-                + idPartitionDataset + ") to STDOUT";
-      }
+              printToFile(nameFileDatasetValue, copyQueryDataset, cm);
+              // Copy table_value
+              String nameFileTableValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+                  LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX);
 
-      // Copy record_value
-      String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
+              String copyQueryTable =
+                  "COPY (SELECT id, id_table_schema, dataset_id FROM dataset_" + idDataset + ".table_value) to STDOUT";
 
-      printToFile(nameFileRecordValue, copyQueryRecord, cm);
+              printToFile(nameFileTableValue, copyQueryTable, cm);
 
-      // Copy field_value
-      String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+              DatasetTypeEnum typeDataset = datasetControllerZuul.getDatasetType(idDataset);
+              String copyQueryRecord;
+              String copyQueryField;
+              // Special case to make the snapshot to copy from DataCollection to EUDataset. The sql copy
+              // all the values from the DC, no matter what partitionId has the origin, but we need to put
+              // in the file the partitionId of the EUDataset destination
+              String copyQueryAttachment =
+                  "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+                      + idDataset + ".attachment_value at) to STDOUT";
+              if (DatasetTypeEnum.COLLECTION.equals(typeDataset)) {
+                String providersCode = getProvidersCode(idDataset);
+                copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
+                    + ",data_provider_code FROM dataset_" + idDataset
+                    + ".record_value WHERE data_provider_code in (" + providersCode
+                    + ") order by data_position) to STDOUT";
+                copyQueryField =
+                    "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+                        + idDataset + ".field_value fv, dataset_" + idDataset
+                        + ".record_value rv WHERE fv.id_record = rv.id " + "AND rv.data_provider_code in ("
+                        + providersCode + ")) to STDOUT";
+                copyQueryAttachment =
+                    "COPY (SELECT at.id, at.file_name, at.content, at.field_value_id from dataset_"
+                        + idDataset + ".attachment_value at, dataset_" + idDataset
+                        + ".field_value fv, dataset_" + idDataset
+                        + ".record_value rv WHERE at.field_value_id = fv.id AND fv.id_record = rv.id "
+                        + "AND rv.data_provider_code in (" + providersCode + ")) to STDOUT";
+              } else if (!DatasetTypeEnum.COLLECTION.equals(typeDataset) && Boolean.TRUE.equals(
+                  prefillingReference)) {
+                copyQueryRecord = "COPY (SELECT id, id_record_schema, id_table, " + idPartitionDataset
+                    + ",data_provider_code FROM dataset_" + idDataset
+                    + ".record_value order by data_position) to STDOUT";
+                copyQueryField =
+                    "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+                        + idDataset + ".field_value fv) to STDOUT";
+              } else {
+                copyQueryRecord =
+                    "COPY (SELECT id, id_record_schema, id_table, dataset_partition_id, data_provider_code FROM dataset_"
+                        + idDataset + ".record_value WHERE dataset_partition_id=" + idPartitionDataset
+                        + " order by data_position) to STDOUT";
+                copyQueryField =
+                    "COPY (SELECT fv.id, fv.type, fv.value, fv.id_field_schema, fv.id_record from dataset_"
+                        + idDataset + ".field_value fv inner join dataset_" + idDataset
+                        + ".record_value rv on fv.id_record = rv.id where rv.dataset_partition_id="
+                        + idPartitionDataset + ") to STDOUT";
+              }
 
-      printToFile(nameFileFieldValue, copyQueryField, cm);
+              // Copy record_value
+              String nameFileRecordValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+                  LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX);
 
-      // Copy attachment_value
-      String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
-          LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+              printToFile(nameFileRecordValue, copyQueryRecord, cm);
 
-      printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
+              // Copy field_value
+              String nameFileFieldValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+                  LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
 
-      LOG.info("Snapshot {} data files created for datasetId {}, processId {}", idSnapshot, idDataset, processId);
+              printToFile(nameFileFieldValue, copyQueryField, cm);
 
-      // Check if the snapshot is completed. If it is an schema snapshot, check the rules file.
-      // Otherwise check the attachment file
-      long startTime = System.currentTimeMillis();
-      String nameFileRules =
-          String.format("rulesSnapshot_%s-DesignDataset_%s", idSnapshot, idDataset)
-              + LiteralConstants.SNAPSHOT_EXTENSION;
-      if (DatasetTypeEnum.DESIGN.equals(typeDataset) && Boolean.FALSE.equals(prefillingReference)) {
-        while ((System.currentTimeMillis() - startTime) < 30000) {
-          try {
-            documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
-            break;
-          } catch (FeignException e) {
-            LOG.info(
-                "Document: {} still not created from dataset: {} and snapshot: {}, processId {} wait {} milliseconds",
-                nameFileRules, idDataset, idSnapshot, processId, timeToWaitBeforeReleasingNotification);
-            Thread.sleep(timeToWaitBeforeReleasingNotification);
+              // Copy attachment_value
+              String nameFileAttachmentValue =
+                  pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot, LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX);
+
+              printToFile(nameFileAttachmentValue, copyQueryAttachment, cm);
+
+              LOG.info("Snapshot {} data files created for datasetId {}, processId {}", idSnapshot,
+                  idDataset, processId);
+
+              // Check if the snapshot is completed. If it is an schema snapshot, check the rules file.
+              // Otherwise check the attachment file
+              long startTime = System.currentTimeMillis();
+              String nameFileRules =
+                  String.format("rulesSnapshot_%s-DesignDataset_%s", idSnapshot, idDataset)
+                      + LiteralConstants.SNAPSHOT_EXTENSION;
+              if (DatasetTypeEnum.DESIGN.equals(typeDataset) && Boolean.FALSE.equals(
+                  prefillingReference)) {
+                while ((System.currentTimeMillis() - startTime) < 30000) {
+                  try {
+                    documentControllerZuul.getSnapshotDocument(idDataset, nameFileRules);
+                    break;
+                  } catch (FeignException e) {
+                    LOG.info(
+                        "Document: {} still not created from dataset: {} and snapshot: {}, processId {} wait {} milliseconds",
+                        nameFileRules, idDataset, idSnapshot, processId,
+                        timeToWaitBeforeReleasingNotification);
+                    Thread.sleep(timeToWaitBeforeReleasingNotification);
+                  }
+                }
+              } else {
+                while ((System.currentTimeMillis() - startTime) < 30000) {
+                  try {
+                    FileUtils.touch(new File(nameFileAttachmentValue));
+                    break;
+                  } catch (IOException e) {
+                    LOG.info(
+                        "Waiting to finish the snapshot {} from dataset {}, processId {} to complete before sending the notification",
+                        idSnapshot, idDataset, processId);
+                    Thread.sleep(timeToWaitBeforeReleasingNotification);
+                  }
+                }
+              }
+            }
+
+          notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease,
+              prefillingReference, processId);
+          // release snapshot when the user press create+release
+          } catch (Exception e) {
+          if (e instanceof InterruptedException) {
+            Thread.currentThread().interrupt();
+          }
+          EventType eventType = null;
+          switch (type) {
+            case SNAPSHOT:
+              eventType = EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT;
+              // Remove the locks just in case there is a releasing datasets process
+              DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
+              dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(dataset.getDataflowId(),
+                  dataset.getDataProviderId());
+              break;
+            case COLLECTION:
+              removeLocksRelatedToPopulateEU(
+                  dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset).getDataflowId());
+              eventType = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
+              break;
+            case SCHEMA:
+              eventType = EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT;
+              break;
+            default:
+              break;
+          }
+          LOG_ERROR.error("Error creating snapshot for dataset {}, processId {}", idDataset, processId,
+              e);
+          Map<String, Object> value = new HashMap<>();
+          ProcessVO processVO = null;
+          if (processId != null) {
+            processVO = processService.getByProcessId(processId);
+            value.put(LiteralConstants.USER, processVO.getUser());
+          }
+          value.put(LiteralConstants.DATASET_ID, idDataset);
+          releaseNotificableKafkaEvent(eventType, value, idDataset, e.getMessage());
+
+        } finally {
+          // Release the lock manually
+          if (SNAPSHOT.equals(type)) {
+            SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
+            Map<String, Object> createSnapshot = new HashMap<>();
+            createSnapshot.put(LiteralConstants.SIGNATURE, LockSignature.CREATE_SNAPSHOT.getValue());
+            createSnapshot.put(LiteralConstants.DATASETID, idDataset);
+            createSnapshot.put(LiteralConstants.RELEASED, snapshot.getRelease());
+            lockService.removeLockByCriteria(createSnapshot);
+          }
+          if (SCHEMA.equals(type)) {
+            Map<String, Object> createSchemaSnapshot = new HashMap<>();
+            createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
+                LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
+            createSchemaSnapshot.put(LiteralConstants.DATASETID, idDataset);
+            lockService.removeLockByCriteria(createSchemaSnapshot);
           }
         }
-      } else {
-        while ((System.currentTimeMillis() - startTime) < 30000) {
-          try {
-            FileUtils.touch(new File(nameFileAttachmentValue));
-            break;
-          } catch (IOException e) {
-            LOG.info(
-                "Waiting to finish the snapshot {} from dataset {}, processId {} to complete before sending the notification",
-                idSnapshot, idDataset, processId);
-            Thread.sleep(timeToWaitBeforeReleasingNotification);
-          }
-        }
-      }
-
-      notificationCreateAndCheckRelease(idDataset, idSnapshot, type, dateRelease,
-          prefillingReference, processId);
-
-      // release snapshot when the user press create+release
-    } catch (Exception e) {
-      if (e instanceof InterruptedException) {
-        Thread.currentThread().interrupt();
-      }
-      EventType eventType = null;
-      switch (type) {
-        case SNAPSHOT:
-          eventType = EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT;
-          // Remove the locks just in case there is a releasing datasets process
-          DataSetMetabaseVO dataset =
-              dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
-          dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(dataset.getDataflowId(),
-              dataset.getDataProviderId());
-          break;
-        case COLLECTION:
-          removeLocksRelatedToPopulateEU(
-              dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset).getDataflowId());
-          eventType = EventType.COPY_DATA_TO_EUDATASET_FAILED_EVENT;
-          break;
-        case SCHEMA:
-          eventType = EventType.ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT;
-          break;
-        default:
-          break;
-      }
-      LOG_ERROR.error("Error creating snapshot for dataset {}, processId {}", idDataset, processId, e);
-      Map<String, Object> value = new HashMap<>();
-      ProcessVO processVO = null;
-      if (processId!=null) {
-        processVO = processService.getByProcessId(processId);
-        value.put(LiteralConstants.USER, processVO.getUser());
-      }
-      value.put(LiteralConstants.DATASET_ID, idDataset);
-      releaseNotificableKafkaEvent(eventType, value, idDataset, e.getMessage());
-
-    } finally {
-      // Release the lock manually
-      if (SNAPSHOT.equals(type)) {
-        SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        Map<String, Object> createSnapshot = new HashMap<>();
-        createSnapshot.put(LiteralConstants.SIGNATURE, LockSignature.CREATE_SNAPSHOT.getValue());
-        createSnapshot.put(LiteralConstants.DATASETID, idDataset);
-        createSnapshot.put(LiteralConstants.RELEASED, snapshot.getRelease());
-        lockService.removeLockByCriteria(createSnapshot);
-      }
-      if (SCHEMA.equals(type)) {
-        Map<String, Object> createSchemaSnapshot = new HashMap<>();
-        createSchemaSnapshot.put(LiteralConstants.SIGNATURE,
-            LockSignature.CREATE_SCHEMA_SNAPSHOT.getValue());
-        createSchemaSnapshot.put(LiteralConstants.DATASETID, idDataset);
-        lockService.removeLockByCriteria(createSchemaSnapshot);
-      }
     }
-  }
 
   /**
    * Creates the snapshot to clone.
@@ -936,9 +980,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
     EventType successEventType = Boolean.TRUE.equals(deleteData)
         ? Boolean.TRUE.equals(isSchemaSnapshot)
-            ? EventType.RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
-            : EventType.RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
-        : EventType.RELEASE_COMPLETED_EVENT;
+            ? RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT
+            : RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT
+        : RELEASE_COMPLETED_EVENT;
     EventType failEventType =
         Boolean.TRUE.equals(deleteData)
             ? Boolean.TRUE.equals(isSchemaSnapshot)
@@ -970,27 +1014,37 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Override
   public void deleteDataSnapshot(Long idReportingDataset, Long idSnapshot) throws IOException {
 
-    String nameFileDatasetValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
-    String nameFileTableValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
-    String nameFileRecordValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
-    String nameFileFieldValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
-    String nameAttachmentValue =
-        SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX;
+    //Check if dataflow is Big Data
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(idReportingDataset);
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
 
-    Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
-    Files.deleteIfExists(path1);
-    Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
-    Files.deleteIfExists(path2);
-    Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
-    Files.deleteIfExists(path3);
-    Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
-    Files.deleteIfExists(path4);
-    Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
-    Files.deleteIfExists(path5);
+    if (dataflow.getBigData()) {
+      S3PathResolver snapshotPath = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), idReportingDataset);
+      snapshotPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
+      snapshotPath.setSnapshotId(idSnapshot);
+      LOG.info("Checking if table name DC folder exist in path {}", snapshotPath);
+      if (s3Helper.checkTableNameDCProviderFolderExist(snapshotPath)) {
+        s3Helper.deleteSnapshotFolder(snapshotPath);
+        LOG.info("Successfully deleted files in path: {}", snapshotPath);
+      }
+    } else {
+      String nameFileDatasetValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
+      String nameFileTableValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX;
+      String nameFileRecordValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_RECORD_SUFFIX;
+      String nameFileFieldValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX;
+      String nameAttachmentValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_ATTACHMENT_SUFFIX;
+
+      Path path1 = Paths.get(pathSnapshot + nameFileDatasetValue);
+      Files.deleteIfExists(path1);
+      Path path2 = Paths.get(pathSnapshot + nameFileTableValue);
+      Files.deleteIfExists(path2);
+      Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
+      Files.deleteIfExists(path3);
+      Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
+      Files.deleteIfExists(path4);
+      Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
+      Files.deleteIfExists(path5);
+    }
   }
 
   /**
@@ -1039,6 +1093,13 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
     LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
         isMaterialized);
+    DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+    if (dataFlowVO!=null && dataFlowVO.getBigData()) {
+      LOG.info("Skipping createUpdateView. Dataset {} belongs to big dataflow {}", datasetId, dataFlowVO.getId());
+      return;
+    }
+
     DataSetSchemaVO datasetSchema =
         datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
     // delete all views because some names can be changed
@@ -1304,8 +1365,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String processId) {
     LOG.info(" Update Materialized Views from Dataset id: {}", datasetId);
 
-    DataSetMetabaseVO datasetMetabaseVO =
-        dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DataSetMetabaseVO datasetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Long dataflowId = datasetMetabaseVO.getDataflowId();
     try {
       switch (datasetMetabaseVO.getDatasetTypeEnum()) {
@@ -1414,6 +1474,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   @Async
   public void refreshMaterializedQuery(List<Long> datasetIds, boolean continueValidation,
       boolean released, Long datasetId, String processId) {
+    DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+    if (dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+      return;
+    }
     datasetIds.forEach(id -> {
       if (!Boolean.TRUE.equals(datasetControllerZuul.getCheckView(id))) {
         datasetControllerZuul.updateCheckView(id, true);
@@ -1785,7 +1850,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       updateJobStatusToFinished(jobId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
-          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
+          && !successEventType.equals(RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
       if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
@@ -1914,20 +1979,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Init restoring for prefillingReference {}", prefillingReference);
       LOG.info("Init restoring for successEventType {}", successEventType);
 
-      LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
+      LOG.info("Init restoring the snapshot files from Snapshot {} and datasetId {} of processId {}, isschemaSnapshot {}", idSnapshot, datasetId, processId, isSchemaSnapshot);
       DataSetSchemaVO datasetSchema = datasetSchemaController.findDataSchemaByDatasetIdPrivate(datasetId);
       LOG.info("Init restoring for datasetSchema {}", datasetSchema);
       ProcessVO finalProcessVO = processVO;
       Long finalJobId = jobId;
+      DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+      Long dataflowId = finalProcessVO.getDataflowId();
 
       datasetSchema.getTableSchemas().stream()
           .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
           .forEach(table -> {
               try {
-                if (DatasetTypeEnum.REPORTING.equals(datasetType)) {
+                if (DatasetTypeEnum.REPORTING.equals(datasetType) && RELEASE_COMPLETED_EVENT.equals(successEventType)) {
                   //Delete old files
                   Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
-                  Long dataflowId = finalProcessVO.getDataflowId();
                   Long reportingDatasetId = finalProcessVO.getDatasetId();
 
                   //Delete table name DC folder if exists
@@ -1936,7 +2002,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   dataCollectionPath.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
                   LOG.info("Checking if table name DC folder exist in path {}", dataCollectionPath);
                   if (s3Helper.checkTableNameDCProviderFolderExist(dataCollectionPath)) {
-                    s3Helper.deleleTableNameDCFolder(dataCollectionPath);
+                    s3Helper.deleteTableNameDCFolder(dataCollectionPath);
                     LOG.info("Successfully deleted files in path: {}", dataCollectionPath);
                   }
 
@@ -1945,7 +2011,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
                   LOG.info("Getting tableNameFilenames for provider path resolver {}", providerPath);
                   List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-                  LOG.info("Table Name Filenames found : {}", tableNameFilenames);
                   tableNameFilenames.stream().forEach(file -> {
                     String key = file.key();
                     String filename = new File(key).getName();
@@ -1966,15 +2031,56 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                           reportingDatasetId, dataflowId, e);
                     }
                   });
-                  processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
-                      ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
-                      finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
+                } else if (DatasetTypeEnum.REPORTING.equals(datasetType)
+                    && (RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT.equals(successEventType)
+                    || RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT.equals(successEventType) )) {
 
+                  LOG.info("Restore data snapshot dataset {}", datasetId);
+                  Long providerId = dataset.getDataProviderId();
+                  //Delete table name DC folder if exists
+                  String nameTableSchema = table.getNameTableSchema();
+                  S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
+                  providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                  LOG.info("Checking if table name provider exist in path {}", providerPath);
+                  if (s3Helper.checkTableNameDCProviderFolderExist(providerPath)) {
+                    s3Helper.deleteTableNameDCFolder(providerPath);
+                    LOG.info("Successfully deleted files in path: {}", providerPath);
+                  }
+
+                  providerPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
+
+                  //Get table name file from S3 snapshots folder based on snapshotid, save it locally and then upload to Provider table name path
+                  S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), datasetId);
+                  LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
+                  List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
+                  LOG.info("Getting tableNameFilenames for path result {}", tableNameFilenames);
+                  tableNameFilenames.stream()
+                    .filter(path -> path.key().contains("-"+idSnapshot) && path.key().contains("/"+nameTableSchema+"/"))
+                    .collect(Collectors.toList())
+                    .forEach(file -> {
+                      String key = file.key();
+                      String filename = new File(key).getName();
+                      snapshotPath.setFilename(filename);
+                      snapshotPath.setTableName(nameTableSchema);
+                      snapshotPath.setPath(S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH);
+                      snapshotPath.setParquetFolder(key.split("/")[6]);
+                      snapshotPath.setSnapshotId(idSnapshot);
+                      try {
+                        LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                        File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                        String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
+                        LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
+                        s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                        LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
+                        //promote folder
+                        checkAndPromoteFolder(providerPath, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                      } catch (IOException e) {
+                        LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", datasetId, dataflowId, e);
+                      }
+                    });
                 } else if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
                   LOG.info("REFERENCE dataset {}", datasetId);
-                  //dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
 
-                  Long dataflowId = finalProcessVO.getDataflowId();
                   Long reportingDatasetId = finalProcessVO.getDatasetId();
                   String nameTableSchema = table.getNameTableSchema();
                   S3PathResolver referencePath = new S3PathResolver(dataflowId);
@@ -1984,7 +2090,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
                   LOG.info("Getting tableNameFilenames for reference path resolver {}", providerPath);
                   List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-                  LOG.info("Table Name Filenames found : {}", tableNameFilenames);
                   tableNameFilenames.stream().forEach(file -> {
                     String key = file.key();
                     String filename = new File(key).getName();
@@ -2006,25 +2111,22 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                           reportingDatasetId, dataflowId, e);
                     }
                   });
-
-                  processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
-                      ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
-                      finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
-
                 } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
 
                 }
+                processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
+                    ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
+                    finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
               } catch (Exception e) {
                 LOG_ERROR.error("Error in delete and copy release process for finalJobId {}, dataflowId {}",
                     finalJobId, datasetId, e);
               }
           });
-
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
       updateJobStatusToFinished(jobId);
 
       if (!DatasetTypeEnum.EUDATASET.equals(datasetType)
-          && !successEventType.equals(EventType.RELEASE_COMPLETED_EVENT) && !prefillingReference) {
+          && !successEventType.equals(RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
 /*      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
@@ -2426,7 +2528,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String error) {
 
     String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
-    if (!EventType.RELEASE_COMPLETED_EVENT.equals(event)) {
+    if (!RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
         NotificationVO notificationVO = NotificationVO.builder()
             .user(user)
