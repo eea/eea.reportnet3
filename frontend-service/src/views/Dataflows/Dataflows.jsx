@@ -82,6 +82,7 @@ export const Dataflows = () => {
     dataflowsCountFirstLoad: false,
     filteredRecords: 0,
     goToPage: 1,
+    isAddOrganizationDialogVisible: false,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
@@ -96,6 +97,7 @@ export const Dataflows = () => {
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
+    isShowOrganizationsDialogVisible: false,
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
     isValidationStatusDialogVisible: false,
@@ -167,12 +169,13 @@ export const Dataflows = () => {
 
   const filterBy = useRecoilValue(filterByCustomFilterStore(tabId));
 
-  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
-  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
-  const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
-  const { resetFilterState: resetJobsStatusesFilterState } = useApplyFilters('jobsStatuses');
   const { resetFilterState: resetControlStatusesFilterState } = useApplyFilters('controlStatuses');
+  const { resetFilterState: resetJobsStatusesFilterState } = useApplyFilters('jobsStatuses');
   const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
+  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+  const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
+  const { resetFilterState: resetShowOrganizationsFilterState } = useApplyFilters('showOrganizations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -189,6 +192,15 @@ export const Dataflows = () => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
+
+    const addOrganizationBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'folderPlus',
+      isVisible: isAdmin || isCustodian,
+      label: 'addOrganization',
+      onClick: () => manageDialogs('isShowOrganizationsDialogVisible', true),
+      title: 'addOrganization'
+    };
 
     const createReportingDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
@@ -290,6 +302,7 @@ export const Dataflows = () => {
 
     leftSideBarContext.addModels(
       [
+        addOrganizationBtn,
         adminCreateNewPermissionsBtn,
         adminManageNationalCoordinatorsBtn,
         adminControlStatusBtn,
@@ -911,6 +924,34 @@ export const Dataflows = () => {
     }
   };
 
+  const addOrganizationDialogFooter = () => {
+    const renderAddButton = () => {
+      return (
+        <Button
+          className={`${styles.buttonLeft} p-button-animated-blink`}
+          icon="plus"
+          label={resourcesContext.messages['add']}
+          onClick={() => manageDialogs('isAddOrganizationDialogVisible', true)}
+        />
+      );
+    };
+
+    return (
+      <div className={styles.buttonsRolesFooter}>
+        {renderAddButton()}
+        <Button
+          className={`p-button-secondary p-button-animated-blink`}
+          icon="cancel"
+          label={resourcesContext.messages['close']}
+          onClick={() => {
+            resetShowOrganizationsFilterState();
+            manageDialogs('isShowOrganizationsDialogVisible', false);
+          }}
+        />
+      </div>
+    );
+  };
+
   const renderPaginator = () => {
     if (totalRecords > 0) {
       return (
@@ -1089,6 +1130,18 @@ export const Dataflows = () => {
           visible={dataflowsState.isReportingObligationsDialogVisible}>
           <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
         </Dialog>
+      )}
+
+      {dataflowsState.isShowOrganizationsDialogVisible && (
+        <Dialog
+          className="responsiveDialog"
+          footer={addOrganizationDialogFooter()}
+          header={resourcesContext.messages['addOrganization']}
+          onHide={() => {
+            manageDialogs('isShowOrganizationsDialogVisible', false);
+            resetShowOrganizationsFilterState();
+          }}
+          visible={dataflowsState.isShowOrganizationsDialogVisible}></Dialog>
       )}
     </div>
   );
