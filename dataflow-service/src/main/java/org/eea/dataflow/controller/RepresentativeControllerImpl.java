@@ -136,6 +136,22 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
+   * Find all data providers.
+   *
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataProvider", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Find all DataProviders  by their Group Id",
+          produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
+          responseContainer = "List", hidden = true)
+  public List<DataProviderVO> findAllDataProviders() {
+    return representativeService.getAllDataProviders();
+  }
+
+  /**
    * Find all data provider by group id.
    *
    * @param groupId the group id

@@ -57,6 +57,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.expression.EeaSecurityExpressionRoot;
 import org.eea.security.jwt.utils.EntityAccessService;
+import org.glassfish.jersey.internal.guava.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -302,6 +303,18 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     LOG.info("Obtaining the representatives for the dataflow : {}", dataflowId);
     return representativeMapper
         .entityListToClass(representativeRepository.findAllByDataflow_Id(dataflowId));
+  }
+
+  /**
+   * Gets the all data providers
+   *
+   * @return the all data providers
+   */
+  @Override
+  public List<DataProviderVO> getAllDataProviders() {
+    Iterable<DataProvider> providersIterable = dataProviderRepository.findAll();
+    List<DataProvider> providersList = Lists.newArrayList(providersIterable);
+    return dataProviderMapper.entityListToClass(providersList);
   }
 
   /**

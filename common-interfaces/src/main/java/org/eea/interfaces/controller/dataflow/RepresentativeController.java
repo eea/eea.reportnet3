@@ -49,6 +49,14 @@ public interface RepresentativeController {
       @RequestBody DataProviderVO dataProviderVO) throws Exception;
 
   /**
+   * Find all data providers
+   *
+   * @return the list
+   */
+  @GetMapping(value = "/dataProvider", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataProviderVO> findAllDataProviders();
+
+  /**
    * Find all data provider by group id.
    *
    * @param groupId the group id

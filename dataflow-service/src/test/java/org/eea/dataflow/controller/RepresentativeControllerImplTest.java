@@ -1,8 +1,7 @@
 package org.eea.dataflow.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -712,5 +711,23 @@ public class RepresentativeControllerImplTest {
     } catch (ResponseStatusException e) {
       assert e.getStatus() == HttpStatus.BAD_REQUEST;
     }
+  }
+
+  @Test
+  public void testFindAllDataProviders_Success() {
+    List<DataProviderVO> expectedDataProviderVOS = new ArrayList<>();
+    DataProviderVO dataProviderVO = new DataProviderVO(1L, "TestGroup1", "TestLabel1", "TestCode1", 1L);
+    expectedDataProviderVOS.add(dataProviderVO);
+    dataProviderVO = new DataProviderVO(2L, "TestGroup2", "TestLabel2", "TestCode2", 2L);
+    expectedDataProviderVOS.add(dataProviderVO);
+    dataProviderVO = new DataProviderVO(3L, "TestGroup3", "TestLabel3", "TestCode3", 3L);
+    expectedDataProviderVOS.add(dataProviderVO);
+
+    when(representativeService.getAllDataProviders()).thenReturn(expectedDataProviderVOS);
+
+    List<DataProviderVO> result = representativeControllerImpl.findAllDataProviders();
+
+    verify(representativeService).getAllDataProviders();
+    assertThat(result, is(expectedDataProviderVOS));
   }
 }
