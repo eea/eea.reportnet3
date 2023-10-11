@@ -920,6 +920,7 @@
         { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" },
         { "key": "GET_VALIDATIONS_STATUSES_ERROR" },
         { "key": "GET_JOBS_STATUSES_ERROR" },
+        { "key": "GET_ORGANIZATIONS_ERROR" },
         { "key": "GET_CONTROL_STATUSES_ERROR" },
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
@@ -1256,7 +1257,7 @@
         { "key": "RECEIVED_MESSAGE" },
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
         { "key": "EXPORT_TABLE_DATA_START" },
-        { "key": "EXPORT_FILE_START_EVENT"},
+        { "key": "EXPORT_FILE_START_EVENT" },
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" },
         { "key": "EXTERNAL_EXPORT_DESIGN_INIT" },
         {

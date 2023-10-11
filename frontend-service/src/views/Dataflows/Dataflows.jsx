@@ -61,6 +61,7 @@ import { CurrentPage, ErrorUtils } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { AddOrganizations } from './_components/AddOrganizations';
 
 const { permissions } = config;
 
@@ -97,7 +98,7 @@ export const Dataflows = () => {
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
-    isShowOrganizationsDialogVisible: false,
+    isShowAddOrganizationsDialogVisible: false,
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
     isValidationStatusDialogVisible: false,
@@ -175,7 +176,7 @@ export const Dataflows = () => {
   const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
-  const { resetFilterState: resetShowOrganizationsFilterState } = useApplyFilters('showOrganizations');
+  const { resetFilterState: resetShowAddOrganizationsFilterState } = useApplyFilters('addOrganizations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -198,7 +199,7 @@ export const Dataflows = () => {
       icon: 'folderPlus',
       isVisible: isAdmin || isCustodian,
       label: 'addOrganization',
-      onClick: () => manageDialogs('isShowOrganizationsDialogVisible', true),
+      onClick: () => manageDialogs('isShowAddOrganizationsDialogVisible', true),
       title: 'addOrganization'
     };
 
@@ -944,12 +945,17 @@ export const Dataflows = () => {
           icon="cancel"
           label={resourcesContext.messages['close']}
           onClick={() => {
-            resetShowOrganizationsFilterState();
-            manageDialogs('isShowOrganizationsDialogVisible', false);
+            resetShowAddOrganizationsFilterState();
+            manageDialogs('isShowAddOrganizationsDialogVisible', false);
           }}
         />
       </div>
     );
+  };
+
+  const hideAddOrganizationsDialog = () => {
+    manageDialogs('isShowAddOrganizationsDialogVisible', false);
+    resetShowAddOrganizationsFilterState();
   };
 
   const renderPaginator = () => {
@@ -1132,16 +1138,12 @@ export const Dataflows = () => {
         </Dialog>
       )}
 
-      {dataflowsState.isShowOrganizationsDialogVisible && (
-        <Dialog
-          className="responsiveDialog"
-          footer={addOrganizationDialogFooter()}
-          header={resourcesContext.messages['addOrganization']}
-          onHide={() => {
-            manageDialogs('isShowOrganizationsDialogVisible', false);
-            resetShowOrganizationsFilterState();
-          }}
-          visible={dataflowsState.isShowOrganizationsDialogVisible}></Dialog>
+      {dataflowsState.isShowAddOrganizationsDialogVisible && (
+        <AddOrganizations
+          addOrganizationDialogFooter={addOrganizationDialogFooter}
+          isDialogVisible={dataflowsState.isShowAddOrganizationsDialogVisible}
+          onCloseDialog={hideAddOrganizationsDialog}
+        />
       )}
     </div>
   );
