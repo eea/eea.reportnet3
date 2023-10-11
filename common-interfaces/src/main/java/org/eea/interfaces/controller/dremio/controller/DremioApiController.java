@@ -22,5 +22,8 @@ public interface DremioApiController {
     void demote(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String folderId);
 
     @PostMapping(value = "api/v3/sql", produces = MediaType.APPLICATION_JSON)
-    void sqlQuery(@RequestHeader(value = "Authorization") String token, @RequestBody DremioSqlRequestBody body);
+    DremioSqlResponse sqlQuery(@RequestHeader(value = "Authorization") String token, @RequestBody DremioSqlRequestBody body);
+
+    @GetMapping(value = "api/v3/job/{id}", produces = MediaType.APPLICATION_JSON)
+    DremioJobStatusResponse pollForJobStatus(@RequestHeader(value = "Authorization") String token, @PathVariable("id") String id);
 }
