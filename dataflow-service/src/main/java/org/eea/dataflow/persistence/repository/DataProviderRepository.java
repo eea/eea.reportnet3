@@ -5,6 +5,7 @@ import org.eea.dataflow.persistence.domain.DataProvider;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
 import javax.transaction.Transactional;
@@ -12,7 +13,7 @@ import javax.transaction.Transactional;
 /**
  * The Interface DataProviderRepository.
  */
-public interface DataProviderRepository extends CrudRepository<DataProvider, Long> {
+public interface DataProviderRepository extends PagingAndSortingRepository<DataProvider, Long>, DataProviderExtendedRepository {
 
   /**
    * Find all by data provider group id.

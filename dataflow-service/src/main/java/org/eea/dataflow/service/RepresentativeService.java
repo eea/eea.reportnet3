@@ -3,12 +3,11 @@ package org.eea.dataflow.service;
 import java.io.IOException;
 import java.util.List;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.FMEUserVO;
-import org.eea.interfaces.vo.dataflow.LeadReporterVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.*;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
+import org.eea.interfaces.vo.orchestrator.JobsVO;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /** The Interface RepresentativeService. */
@@ -46,11 +45,15 @@ public interface RepresentativeService {
   Long updateDataflowRepresentative(RepresentativeVO representativeVO);
 
   /**
-   * Gets the all data providers
-   *
-   * @return the all data providers
+   * Find all data providers
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
    */
-  List<DataProviderVO> getAllDataProviders();
+  DataProvidersVO getAllDataProviders(Pageable pageable, boolean asc, String sortedColumn, String providerCode, Integer groupId, String label);
 
   /**
    * Gets DataProviderGroup names based on TypeDataProviderEnum

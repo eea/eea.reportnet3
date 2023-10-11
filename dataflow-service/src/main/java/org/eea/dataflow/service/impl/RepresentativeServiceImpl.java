@@ -36,11 +36,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.FMEUserVO;
-import org.eea.interfaces.vo.dataflow.LeadReporterVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.*;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
@@ -57,12 +53,11 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.expression.EeaSecurityExpressionRoot;
 import org.eea.security.jwt.utils.EntityAccessService;
-import org.glassfish.jersey.internal.guava.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
@@ -306,15 +301,24 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
-   * Gets the all data providers
-   *
-   * @return the all data providers
+   * Find all data providers
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
    */
   @Override
-  public List<DataProviderVO> getAllDataProviders() {
-    Iterable<DataProvider> providersIterable = dataProviderRepository.findAll();
-    List<DataProvider> providersList = Lists.newArrayList(providersIterable);
-    return dataProviderMapper.entityListToClass(providersList);
+  public DataProvidersVO getAllDataProviders(Pageable pageable, boolean asc, String sortedColumn, String providerCode, Integer groupId, String label) {
+
+    List<DataProvider> providersPaginated = dataProviderRepository.findProvidersPaginated(pageable, asc, sortedColumn, providerCode, groupId, label);
+    List<DataProviderVO> providersVOPaginated = dataProviderMapper.entityListToClass(providersPaginated);
+    DataProvidersVO dataProvidersVO = new DataProvidersVO();
+    dataProvidersVO.setTotalRecords(dataProviderRepository.count());
+    dataProvidersVO.setFilteredRecords(dataProviderRepository.countProvidersPaginated(asc, sortedColumn, providerCode, groupId, label));
+    dataProvidersVO.setProvidersList(providersVOPaginated);
+    return dataProvidersVO;
   }
 
   /**

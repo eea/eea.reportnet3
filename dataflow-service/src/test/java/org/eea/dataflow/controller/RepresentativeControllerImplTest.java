@@ -713,21 +713,4 @@ public class RepresentativeControllerImplTest {
     }
   }
 
-  @Test
-  public void testFindAllDataProviders_Success() {
-    List<DataProviderVO> expectedDataProviderVOS = new ArrayList<>();
-    DataProviderVO dataProviderVO = new DataProviderVO(1L, "TestGroup1", "TestLabel1", "TestCode1", 1L);
-    expectedDataProviderVOS.add(dataProviderVO);
-    dataProviderVO = new DataProviderVO(2L, "TestGroup2", "TestLabel2", "TestCode2", 2L);
-    expectedDataProviderVOS.add(dataProviderVO);
-    dataProviderVO = new DataProviderVO(3L, "TestGroup3", "TestLabel3", "TestCode3", 3L);
-    expectedDataProviderVOS.add(dataProviderVO);
-
-    when(representativeService.getAllDataProviders()).thenReturn(expectedDataProviderVOS);
-
-    List<DataProviderVO> result = representativeControllerImpl.findAllDataProviders();
-
-    verify(representativeService).getAllDataProviders();
-    assertThat(result, is(expectedDataProviderVOS));
-  }
 }

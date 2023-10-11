@@ -2,6 +2,7 @@
 package org.eea.dataflow.controller;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,11 +11,7 @@ import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController;
-import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.FMEUserVO;
-import org.eea.interfaces.vo.dataflow.LeadReporterVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.*;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.lock.annotation.LockCriteria;
@@ -22,6 +19,8 @@ import org.eea.lock.annotation.LockMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -67,6 +66,9 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   /** The Constant EMAIL_REGEX: {@value}. */
   private static final String EMAIL_REGEX =
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
+
+  /** The valid columns. */
+  List<String> validColumns = Arrays.asList("code", "group_id", "label");
 
 
   /** The representative service. */
@@ -136,9 +138,15 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
-   * Find all data providers.
-   *
-   * @return the list
+   * Find all data providers
+   * @param pageNum
+   * @param pageSize
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
    */
   @Override
   @HystrixCommand
@@ -147,8 +155,25 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @ApiOperation(value = "Find all DataProviders  by their Group Id",
           produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
           responseContainer = "List", hidden = true)
-  public List<DataProviderVO> findAllDataProviders() {
-    return representativeService.getAllDataProviders();
+  public DataProvidersVO findAllDataProviders(@RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+                                              @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+                                              @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+                                              @RequestParam(value = "sortedColumn", defaultValue = "providerCode") String sortedColumn,
+                                              @RequestParam(value = "providerCode", required = false) String providerCode,
+                                              @RequestParam(value = "groupId", required = false) Integer groupId,
+                                              @RequestParam(value = "label", required = false) String label) {
+    try {
+
+      Pageable pageable = PageRequest.of(pageNum, pageSize);
+      if (!validColumns.contains(sortedColumn)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Wrong sorting header provided.");
+      }
+      return representativeService.getAllDataProviders(pageable, asc, sortedColumn, providerCode, groupId, label);
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve all providers");
+      throw e;
+    }
+
   }
 
   /**
