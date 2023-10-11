@@ -2,6 +2,7 @@ package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.vo.dremio.DremioDirectoryItemsResponse;
+import org.eea.interfaces.vo.dremio.DremioJobStatusResponse;
 
 public interface DremioHelperService {
 
@@ -21,5 +22,7 @@ public interface DremioHelperService {
 
     void deleteFileFromR3IfExists(String parquetFile) throws Exception;
 
-    void executeSqlStatement(String sqlStatement);
+    String executeSqlStatement(String sqlStatement);
+
+    DremioJobStatusResponse pollForJobStatus(String id);
 }
