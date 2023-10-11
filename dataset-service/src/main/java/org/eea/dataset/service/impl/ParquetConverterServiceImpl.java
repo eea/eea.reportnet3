@@ -238,7 +238,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 return false;
             }
             else {
-                Thread.sleep(5000);
+                Thread.sleep(10000);
             }
         }
         return false;
