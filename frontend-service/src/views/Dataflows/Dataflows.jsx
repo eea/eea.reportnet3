@@ -83,7 +83,6 @@ export const Dataflows = () => {
     dataflowsCountFirstLoad: false,
     filteredRecords: 0,
     goToPage: 1,
-    isAddOrganizationDialogVisible: false,
     isAdmin: null,
     isBusinessDataflowDialogVisible: false,
     isCitizenScienceDataflowDialogVisible: false,
@@ -925,34 +924,6 @@ export const Dataflows = () => {
     }
   };
 
-  const addOrganizationDialogFooter = () => {
-    const renderAddButton = () => {
-      return (
-        <Button
-          className={`${styles.buttonLeft} p-button-animated-blink`}
-          icon="plus"
-          label={resourcesContext.messages['add']}
-          onClick={() => manageDialogs('isAddOrganizationDialogVisible', true)}
-        />
-      );
-    };
-
-    return (
-      <div className={styles.buttonsRolesFooter}>
-        {renderAddButton()}
-        <Button
-          className={`p-button-secondary p-button-animated-blink`}
-          icon="cancel"
-          label={resourcesContext.messages['close']}
-          onClick={() => {
-            resetShowAddOrganizationsFilterState();
-            manageDialogs('isShowAddOrganizationsDialogVisible', false);
-          }}
-        />
-      </div>
-    );
-  };
-
   const hideAddOrganizationsDialog = () => {
     manageDialogs('isShowAddOrganizationsDialogVisible', false);
     resetShowAddOrganizationsFilterState();
@@ -1140,7 +1111,6 @@ export const Dataflows = () => {
 
       {dataflowsState.isShowAddOrganizationsDialogVisible && (
         <AddOrganizations
-          addOrganizationDialogFooter={addOrganizationDialogFooter}
           isDialogVisible={dataflowsState.isShowAddOrganizationsDialogVisible}
           onCloseDialog={hideAddOrganizationsDialog}
         />

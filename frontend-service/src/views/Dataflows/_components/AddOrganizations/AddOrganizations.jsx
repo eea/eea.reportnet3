@@ -21,11 +21,16 @@ import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/
 import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
+
+import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { Spinner } from 'views/_components/Spinner';
 import { DataTable } from 'views/_components/DataTable';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { InputText } from 'views/_components/InputText';
+import { Dropdown } from 'views/_components/Dropdown';
 
-export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible, onCloseDialog }) => {
+export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('addOrganizations'));
 
   const resourcesContext = useContext(ResourcesContext);
@@ -33,6 +38,7 @@ export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible,
 
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [isAddOrganizationDialogVisible, setIsAddOrganizationDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
@@ -96,27 +102,27 @@ export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible,
       multiSelectOptions: [
         {
           type: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
-          value: config.providerGroup.EEA_MEMBER_COUNTRIES.key
+          value: 1
         },
         {
           type: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
-          value: config.providerGroup.ALL_COUNTRIES.key
+          value: 2
         },
         {
           type: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
-          value: config.providerGroup.MAP_MY_TREE_PROVIDERS.key
+          value: 3
         },
         {
           type: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
-          value: config.providerGroup.COMPANY_GROUP_1.key
+          value: 4
         },
         {
           type: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
-          value: config.providerGroup.LDV_MANUFACTURERS.key
+          value: 5
         },
         {
           type: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
-          value: config.providerGroup.COUNTRIES.key
+          value: 6
         }
       ],
       template: 'groupId',
@@ -145,7 +151,7 @@ export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible,
         className: styles.middleColumn
       },
       {
-        key: 'group',
+        key: 'group_id',
         header: resourcesContext.messages['group'],
         template: getProviderGroupTemplate,
         className: styles.middleColumn
@@ -157,11 +163,10 @@ export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible,
         body={column.template}
         className={column.className ? column.className : ''}
         columnResizeMode="expand"
-        expander={column.key === 'expanderColumn'}
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'buttonsUniqueId' && column.key !== 'expanderColumn'}
+        sortable={column.key !== 'id'}
         style={column.style}
       />
     ));
@@ -179,10 +184,68 @@ export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible,
     return <p>{resourcesContext.messages[config.providerGroup[groupKey].label]}</p>;
   };
 
+  const renderAddOrganizationForm = () => {
+    return (
+      <div className={styles.manageDialog}>
+        <div className={styles.inputWrapper}>
+          <label className={styles.label} htmlFor="organizationNameInput">
+            {resourcesContext.messages['organizationName']}
+          </label>
+          <InputText
+            // className={hasError ? styles.error : ''}
+            // disabled={!userRight.isNew}
+            id="organizationNameInput"
+            // onChange={event => onSetAccount(event.target.value)}
+            // placeholder={placeholder}
+            // ref={inputRef}
+            style={{ margin: '0.3rem 0' }}
+            // value={userRight.account}
+          />
+        </div>
+        <div className={styles.inputWrapper}>
+          <label className={styles.label} htmlFor="rolesDropdown">
+            {resourcesContext.messages['role']}
+          </label>
+          <Dropdown
+            appendTo={document.body}
+            id="rolesDropdown"
+            // onChange={event => onRoleChange(event.target.value.role)}
+            // onKeyPress={event => onEnterKey(event.key, userRight)}
+            optionLabel="label"
+            // options={roleOptions}
+            placeholder={resourcesContext.messages['selectRole']}
+            // ref={dropdownRef}
+            style={{ margin: '0.3rem 0' }}
+            // value={first(roleOptions.filter(option => option.role === userRight.role))}
+          />
+        </div>
+      </div>
+    );
+  };
+
   const onRefresh = () => {
     setIsRefreshing(true);
     getOrganizations();
   };
+
+  const dialogFooter = (
+    <div className={styles.footer}>
+      <Button
+        className={`${styles.buttonLeft} p-button-animated-blink`}
+        icon="plus"
+        label={resourcesContext.messages['add']}
+        onClick={() => setIsAddOrganizationDialogVisible(true)}
+      />
+
+      <Button
+        className={`p-button-secondary ${styles.buttonPushRight}`}
+        disabled={loadingStatus === 'pending'}
+        icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
+        label={resourcesContext.messages['refresh']}
+        onClick={onRefresh}
+      />
+    </div>
+  );
 
   const renderFilters = () => (
     <Filters
@@ -209,7 +272,7 @@ export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible,
         <div className={styles.dialogContent}>
           {renderFilters()}
           <div className={styles.noDataContent}>
-            <p>{resourcesContext.messages['jobsStatusesNotMatchingFilter']}</p>
+            <p>{resourcesContext.messages['addOrganizationsNotMatchingFilter']}</p>
           </div>
         </div>
       );
@@ -264,15 +327,41 @@ export const AddOrganizations = ({ addOrganizationDialogFooter, isDialogVisible,
   };
 
   return (
-    <Dialog
-      blockScroll={false}
-      className="responsiveDialog"
-      footer={addOrganizationDialogFooter()}
-      header={resourcesContext.messages['addOrganization']}
-      modal={true}
-      onHide={onCloseDialog}
-      visible={isDialogVisible}>
-      {renderDialogContent()}
-    </Dialog>
+    <Fragment>
+      <Dialog
+        blockScroll={false}
+        className="responsiveDialog"
+        footer={dialogFooter}
+        header={resourcesContext.messages['addOrganization']}
+        modal={true}
+        onHide={onCloseDialog}
+        visible={isDialogVisible}>
+        {renderDialogContent()}
+      </Dialog>
+
+      {isAddOrganizationDialogVisible && (
+        <ConfirmDialog
+          // confirmTooltip={getTooltipMessage(userRight)}
+          dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
+          // disabledConfirm={
+          //   hasEmptyData(userRight) ||
+          //   isLoadingButton ||
+          //   (!userRight.isNew && !isRoleChanged(userRight)) ||
+          //   shareRightsState.accountHasError
+          // }
+          header={resourcesContext.messages['addOrganization']}
+          // iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['save']}
+          // onConfirm={updateUserRight}
+          // onHide={() => {
+          //   onResetAll();
+          //   onCloseManagementDialog();
+          // }}
+          visible={isAddOrganizationDialogVisible}>
+          {renderAddOrganizationForm()}
+        </ConfirmDialog>
+      )}
+    </Fragment>
   );
 };
