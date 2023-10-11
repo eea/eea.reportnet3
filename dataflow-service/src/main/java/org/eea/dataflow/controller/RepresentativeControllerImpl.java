@@ -158,7 +158,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   public DataProvidersVO findAllDataProviders(@RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
                                               @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
                                               @RequestParam(value = "asc", defaultValue = "true") boolean asc,
-                                              @RequestParam(value = "sortedColumn", defaultValue = "providerCode") String sortedColumn,
+                                              @RequestParam(value = "sortedColumn", defaultValue = "code") String sortedColumn,
                                               @RequestParam(value = "providerCode", required = false) String providerCode,
                                               @RequestParam(value = "groupId", required = false) Integer groupId,
                                               @RequestParam(value = "label", required = false) String label) {
