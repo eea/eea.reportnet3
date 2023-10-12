@@ -251,7 +251,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         for(int i=0; i < numberOfRetriesForPromoting; i++) {
             dremioHelperService.executeSqlStatement(refreshTableAndPromoteQuery);
             if(dremioHelperService.checkFolderPromoted(s3PathResolver, tableName, false)) {
-                LOG.info("For job {} promoted table {} in retry #{}", importFileInDremioInfo, tablePath, i);
+                LOG.info("For job {} promoted table {} in retry #{}", importFileInDremioInfo, tablePath, i+1);
                 folderWasPromoted = true;
                 break;
             }
