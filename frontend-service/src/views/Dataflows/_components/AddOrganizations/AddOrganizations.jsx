@@ -79,11 +79,11 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         sortOrder: sort.order,
         sortField: sort.field,
         providerCode: filterBy.code,
-        groupId: filterBy.groupId,
+        groupId: !filterBy.groupId ? filterBy.groupId : filterBy.groupId.value,
         label: filterBy.label
       });
 
-      setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
+      setIsFiltered(filterBy ? (filterBy.label || filterBy.code || filterBy.groupId ? true : false) : false);
       setTotalRecords(data.totalRecords);
       setFilteredRecords(data.filteredRecords);
       setOrganizationsList(data.providersList);
@@ -100,49 +100,6 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   };
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
-
-  const filterOptions = [
-    {
-      nestedOptions: [
-        { key: 'label', label: resourcesContext.messages['label'] },
-        { key: 'code', label: resourcesContext.messages['code'] }
-      ],
-
-      type: 'INPUT'
-    },
-    {
-      key: 'groupId',
-      label: resourcesContext.messages['group'],
-      multiSelectOptions: [
-        {
-          type: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
-          value: 1
-        },
-        {
-          type: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
-          value: 2
-        },
-        {
-          type: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
-          value: 3
-        },
-        {
-          type: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
-          value: 4
-        },
-        {
-          type: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
-          value: 5
-        },
-        {
-          type: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
-          value: 6
-        }
-      ],
-      template: 'groupId',
-      type: 'MULTI_SELECT'
-    }
-  ];
 
   const groupOptions = [
     {
@@ -168,6 +125,49 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     {
       label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
       group: 6
+    }
+  ];
+
+  const filterOptions = [
+    {
+      nestedOptions: [
+        { key: 'label', label: resourcesContext.messages['label'] },
+        { key: 'code', label: resourcesContext.messages['code'] }
+      ],
+
+      type: 'INPUT'
+    },
+    {
+      key: 'groupId',
+      label: resourcesContext.messages['group'],
+      dropdownOptions: [
+        {
+          label: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
+          value: 1
+        },
+        {
+          label: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
+          value: 2
+        },
+        {
+          label: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
+          value: 3
+        },
+        {
+          label: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
+          value: 4
+        },
+        {
+          label: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
+          value: 5
+        },
+        {
+          label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
+          value: 6
+        }
+      ],
+      template: 'groupId',
+      type: 'DROPDOWN'
     }
   ];
 
