@@ -132,3 +132,19 @@ h6 {
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+.addDialog {
+  display: flex;
+  flex-direction: column;
+  div {
+    padding: 0 0.5rem;
+    width: 100%;
+
+    .label {
+      font-size: 1rem;
+    }
+  }
+  .inputWrapper {
+    margin-bottom: 1rem;
+  }
+}

@@ -20,7 +20,9 @@ import { Filters } from 'views/_components/Filters';
 import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
+
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
+import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
@@ -37,6 +39,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const notificationContext = useContext(NotificationContext);
 
   const [filteredRecords, setFilteredRecords] = useState(0);
+  const [group, setGroup] = useState();
   const [isFiltered, setIsFiltered] = useState(false);
   const [isAddOrganizationDialogVisible, setIsAddOrganizationDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -44,6 +47,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [organizationsList, setOrganizationsList] = useState([]);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
+  const [organizationName, setOrganizationName] = useState();
   const [sort, setSort] = useState({ field: 'label', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -51,9 +55,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const { firstRow, numberRows, pageNum } = pagination;
 
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  console.log(group);
   useEffect(() => {
     getOrganizations();
   }, [pagination, sort]);
+
+  useInputTextFocus(isAddOrganizationDialogVisible, inputRef);
 
   const getOrganizations = async () => {
     setLoadingStatus('pending');
@@ -130,6 +140,33 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     }
   ];
 
+  const groupOptions = [
+    {
+      label: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
+      group: 1
+    },
+    {
+      label: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
+      group: 2
+    },
+    {
+      label: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
+      group: 3
+    },
+    {
+      label: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
+      group: 4
+    },
+    {
+      label: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
+      group: 5
+    },
+    {
+      label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
+      group: 6
+    }
+  ];
+
   const getTableColumns = () => {
     const columns = [
       {
@@ -186,7 +223,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const renderAddOrganizationForm = () => {
     return (
-      <div className={styles.manageDialog}>
+      <div className={styles.addDialog}>
         <div className={styles.inputWrapper}>
           <label className={styles.label} htmlFor="organizationNameInput">
             {resourcesContext.messages['organizationName']}
@@ -195,28 +232,28 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
             // className={hasError ? styles.error : ''}
             // disabled={!userRight.isNew}
             id="organizationNameInput"
-            // onChange={event => onSetAccount(event.target.value)}
-            // placeholder={placeholder}
-            // ref={inputRef}
+            onChange={event => setOrganizationName(event.target.value)}
+            placeholder={resourcesContext.messages['organizationNameDots']}
+            ref={inputRef}
             style={{ margin: '0.3rem 0' }}
-            // value={userRight.account}
+            value={organizationName}
           />
         </div>
         <div className={styles.inputWrapper}>
-          <label className={styles.label} htmlFor="rolesDropdown">
-            {resourcesContext.messages['role']}
+          <label className={styles.label} htmlFor="groupsDropdown">
+            {resourcesContext.messages['group']}
           </label>
           <Dropdown
             appendTo={document.body}
-            id="rolesDropdown"
-            // onChange={event => onRoleChange(event.target.value.role)}
-            // onKeyPress={event => onEnterKey(event.key, userRight)}
+            id="groupsDropdown"
+            onChange={event => setGroup(event.target.value)}
+            onKeyPress={event => onEnterKey(event.key)}
             optionLabel="label"
-            // options={roleOptions}
-            placeholder={resourcesContext.messages['selectRole']}
-            // ref={dropdownRef}
+            options={groupOptions}
+            placeholder={resourcesContext.messages['selectGroupOfCompanies']}
+            ref={dropdownRef}
             style={{ margin: '0.3rem 0' }}
-            // value={first(roleOptions.filter(option => option.role === userRight.role))}
+            value={group}
           />
         </div>
       </div>
@@ -226,6 +263,37 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const onRefresh = () => {
     setIsRefreshing(true);
     getOrganizations();
+  };
+
+  const onResetAll = () => {
+    setIsRefreshing(true);
+
+    getOrganizations();
+  };
+
+  const onCloseAddDialog = () => {
+    setIsAddOrganizationDialogVisible(false);
+  };
+
+  const createNewProvider = async () => {
+    try {
+      await AddOrganizationsService.createProvider({
+        group: group.label,
+        label: organizationName,
+        code: organizationName,
+        groupId: group.group
+      });
+    } catch (error) {
+      console.error('AddOrganizations - createNewProvider.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
+    }
+  };
+
+  const onEnterKey = key => {
+    if (key === 'Enter') {
+      createNewProvider();
+    }
   };
 
   const dialogFooter = (
@@ -353,11 +421,11 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
           // iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
-          // onConfirm={updateUserRight}
-          // onHide={() => {
-          //   onResetAll();
-          //   onCloseManagementDialog();
-          // }}
+          onConfirm={createNewProvider}
+          onHide={() => {
+            onResetAll();
+            onCloseAddDialog();
+          }}
           visible={isAddOrganizationDialogVisible}>
           {renderAddOrganizationForm()}
         </ConfirmDialog>
