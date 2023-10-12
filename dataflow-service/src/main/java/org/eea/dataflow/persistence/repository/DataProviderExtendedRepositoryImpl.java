@@ -106,9 +106,9 @@ public class DataProviderExtendedRepositoryImpl implements DataProviderExtendedR
      */
     private void addFilters(StringBuilder query, String providerCode, Integer groupId, String label) {
         query.append(" where 1=1 ");
-        query.append(StringUtils.isNotBlank(providerCode) ? " and data_provider.code = :providerCode " : "");
+        query.append(StringUtils.isNotBlank(providerCode) ? " and LOWER(data_provider.code) like LOWER(CONCAT('%',:providerCode,'%')) " : "");
         query.append((groupId != null) ? " and data_provider.group_id= :groupId " : "");
-        query.append(StringUtils.isNotBlank(label) ? " and data_provider.label = :label " : "");
+        query.append(StringUtils.isNotBlank(label) ? " and LOWER(data_provider.label) like LOWER(CONCAT('%',:label,'%')) " : "");
     }
 
     /**

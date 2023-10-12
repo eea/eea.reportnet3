@@ -688,7 +688,7 @@ public class RepresentativeControllerImplTest {
     // when
     doNothing().when(representativeService).createProvider(any());
 
-    representativeControllerImpl.createProvider(1L, dataProviderVO);
+    representativeControllerImpl.createProvider(dataProviderVO);
 
     // then
     verify(representativeService).createProvider(dataProviderVO);
@@ -707,7 +707,7 @@ public class RepresentativeControllerImplTest {
 
     // then
     try {
-      representativeControllerImpl.createProvider(1L, dataProviderVO);
+      representativeControllerImpl.createProvider(dataProviderVO);
     } catch (ResponseStatusException e) {
       assert e.getStatus() == HttpStatus.BAD_REQUEST;
     }
