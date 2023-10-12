@@ -40,6 +40,10 @@
   }
 }
 
+.buttonLeft {
+  float: left;
+}
+
 .paginator {
   background-color: var(--dataflows-list-paginator-bg-color) !important;
   border-radius: 5px;

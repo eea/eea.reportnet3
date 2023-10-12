@@ -1,8 +1,7 @@
 package org.eea.dataflow.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -689,7 +688,7 @@ public class RepresentativeControllerImplTest {
     // when
     doNothing().when(representativeService).createProvider(any());
 
-    representativeControllerImpl.createProvider(1L, dataProviderVO);
+    representativeControllerImpl.createProvider(dataProviderVO);
 
     // then
     verify(representativeService).createProvider(dataProviderVO);
@@ -708,9 +707,10 @@ public class RepresentativeControllerImplTest {
 
     // then
     try {
-      representativeControllerImpl.createProvider(1L, dataProviderVO);
+      representativeControllerImpl.createProvider(dataProviderVO);
     } catch (ResponseStatusException e) {
       assert e.getStatus() == HttpStatus.BAD_REQUEST;
     }
   }
+
 }

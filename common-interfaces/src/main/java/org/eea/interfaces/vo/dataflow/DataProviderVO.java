@@ -1,13 +1,14 @@
 package org.eea.interfaces.vo.dataflow;
 
 import java.io.Serializable;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+
+import lombok.*;
 
 /**
  * The Class DataProviderVO.
  */
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString

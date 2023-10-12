@@ -3,7 +3,6 @@
     "key": "business",
     "value": "BUSINESS",
     "labels": {
-      "addOrganizationHeader":"addOrganization",
       "breadCrumbs": "businessDataflowCrumbLabel",
       "dataViewerProviderCodeColumnHeader": "companyCode",
       "datasetsInfoDataProviderColumnHeader": "companyCC",
@@ -26,7 +25,6 @@
     "key": "citizenScience",
     "value": "CITIZEN_SCIENCE",
     "labels": {
-      "addOrganizationHeader":"addOrganization",
       "breadCrumbs": "citizenScienceDataflowsCrumbLabel",
       "dataViewerProviderCodeColumnHeader": "organizationCode",
       "datasetsInfoDataProviderColumnHeader": "organizationOC",
@@ -54,7 +52,6 @@
     "key": "reporting",
     "value": "REPORTING",
     "labels": {
-      "addOrganizationHeader":"addOrganization",
       "breadCrumbs": "dataflow",
       "dataViewerProviderCodeColumnHeader": "countryCode",
       "datasetsInfoDataProviderColumnHeader": "countriesCC",
@@ -72,7 +69,6 @@
       "userListDataProviderColumnHeader": "countries",
       "userListDataProviderFilterLabel": "countries",
       "userListDialogHeader": "dataflowUsersByCountryList"
-      
     }
   }
 }
