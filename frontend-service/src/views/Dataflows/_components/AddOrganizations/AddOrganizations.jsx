@@ -1,10 +1,9 @@
-import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 
 import { Column } from 'primereact/column';
 
 import { useRecoilValue } from 'recoil';
 
-import isNil from 'lodash/isNil';
 import isEmpty from 'lodash/isEmpty';
 
 import styles from './AddOrganizations.module.scss';
@@ -32,6 +31,9 @@ import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { InputText } from 'views/_components/InputText';
 import { Dropdown } from 'views/_components/Dropdown';
 
+import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
+import { TextUtils } from 'repositories/_utils/TextUtils';
+
 export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('addOrganizations'));
 
@@ -43,6 +45,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const [isFiltered, setIsFiltered] = useState(false);
   const [isAddOrganizationDialogVisible, setIsAddOrganizationDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
   const [organizationsList, setOrganizationsList] = useState([]);
@@ -58,12 +61,13 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-  console.log(group);
   useEffect(() => {
     getOrganizations();
   }, [pagination, sort]);
 
   useInputTextFocus(isAddOrganizationDialogVisible, inputRef);
+
+  const isValidOrganizationName = () => RegularExpressions['nonSymbols'].test(organizationName);
 
   const getOrganizations = async () => {
     setLoadingStatus('pending');
@@ -75,7 +79,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         sortOrder: sort.order,
         sortField: sort.field,
         providerCode: filterBy.code,
-        groupId: filterBy.groupId?.join(),
+        groupId: filterBy.groupId,
         label: filterBy.label
       });
 
@@ -222,6 +226,8 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   };
 
   const renderAddOrganizationForm = () => {
+    const hasError = !isEmpty(organizationName) && (isRepeatedOrganization() || !isValidOrganizationName());
+
     return (
       <div className={styles.addDialog}>
         <div className={styles.inputWrapper}>
@@ -229,14 +235,26 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
             {resourcesContext.messages['organizationName']}
           </label>
           <InputText
-            // className={hasError ? styles.error : ''}
-            // disabled={!userRight.isNew}
+            className={hasError ? styles.error : ''}
             id="organizationNameInput"
             onChange={event => setOrganizationName(event.target.value)}
             placeholder={resourcesContext.messages['organizationNameDots']}
             ref={inputRef}
             style={{ margin: '0.3rem 0' }}
             value={organizationName}
+          />
+        </div>
+        <div className={styles.inputWrapper}>
+          <label className={styles.label} htmlFor="codeInput">
+            {resourcesContext.messages['code']}
+          </label>
+          <InputText
+            disabled={true}
+            id="codeInput"
+            placeholder={resourcesContext.messages['organizationNameDots']}
+            ref={inputRef}
+            style={{ margin: '0.3rem 0' }}
+            value={organizationName ? organizationName.replaceAll(' ', '').substring(0, 20).toUpperCase() : null}
           />
         </div>
         <div className={styles.inputWrapper}>
@@ -260,6 +278,8 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     );
   };
 
+  const hasEmptyData = () => isEmpty(organizationName) || isEmpty(group);
+
   const onRefresh = () => {
     setIsRefreshing(true);
     getOrganizations();
@@ -276,17 +296,21 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   };
 
   const createNewProvider = async () => {
+    setIsLoadingButton(true);
     try {
       await AddOrganizationsService.createProvider({
         group: group.label,
         label: organizationName,
-        code: organizationName,
+        code: organizationName.replaceAll(' ', '').substring(0, 20).toUpperCase(),
         groupId: group.group
       });
+      onCloseAddDialog();
     } catch (error) {
       console.error('AddOrganizations - createNewProvider.', error);
       setLoadingStatus('error');
       notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
+    } finally {
+      setIsLoadingButton(false);
     }
   };
 
@@ -294,6 +318,13 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     if (key === 'Enter') {
       createNewProvider();
     }
+  };
+
+  const isRepeatedOrganization = () => {
+    const sameOrganizations = organizationsList.filter(organization =>
+      TextUtils.areEquals(organization.label, organizationName)
+    );
+    return sameOrganizations.length > 0;
   };
 
   const dialogFooter = (
@@ -325,6 +356,18 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       recoilId="addOrganizations"
     />
   );
+
+  const getTooltipMessage = () => {
+    if (hasEmptyData()) {
+      return resourcesContext.messages['incompleteDataTooltip'];
+    } else if (isRepeatedOrganization()) {
+      return resourcesContext.messages['organizationAlreadyExists'];
+    } else if (!isValidOrganizationName()) {
+      return resourcesContext.messages['notValidOrganizationNameTooltip'];
+    } else {
+      return null;
+    }
+  };
 
   const renderDialogContent = () => {
     if (isLoading) {
@@ -409,16 +452,11 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
       {isAddOrganizationDialogVisible && (
         <ConfirmDialog
-          // confirmTooltip={getTooltipMessage(userRight)}
+          confirmTooltip={getTooltipMessage()}
           dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
-          // disabledConfirm={
-          //   hasEmptyData(userRight) ||
-          //   isLoadingButton ||
-          //   (!userRight.isNew && !isRoleChanged(userRight)) ||
-          //   shareRightsState.accountHasError
-          // }
+          disabledConfirm={hasEmptyData() || isLoadingButton || isRepeatedOrganization() || !isValidOrganizationName()}
           header={resourcesContext.messages['addOrganization']}
-          // iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
+          iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
           onConfirm={createNewProvider}
