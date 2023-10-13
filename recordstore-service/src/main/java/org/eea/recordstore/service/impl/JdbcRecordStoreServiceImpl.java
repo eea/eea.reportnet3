@@ -617,9 +617,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           Long dataflowId = dataset.getDataflowId();
           DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
+          LOG.info("eudataset dataflow: {}",dataflow);
+          LOG.info("eudataset dataset: {}",dataset);
           if (dataflow.getBigData()) {
             ProcessVO processVO = processService.getByProcessId(processId);
-            if (COPY_TO_EU_DATASET.equals(processVO.getProcessType())) {
+            LOG.info("eudataset processVO: {}",processVO);
+            if (COPY_TO_EU_DATASET.toString().equals(processVO.getProcessType())) {
               LOG.info("Create data snapshot for EU dataset {}", idDataset);
               S3PathResolver euPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
               S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset);
