@@ -9,6 +9,15 @@ const parseSortField = sortField => {
   return sortField;
 };
 
+const parseGroupId = groupId => {
+  if (isNil(groupId)) {
+    return undefined;
+  }
+
+  return groupId;
+};
+
 export const AddOrganizationsUtils = {
+  parseGroupId,
   parseSortField
 };
