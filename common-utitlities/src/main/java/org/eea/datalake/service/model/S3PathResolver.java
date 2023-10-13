@@ -85,4 +85,10 @@ public class S3PathResolver {
         this.tableName = tableName;
         this.path = path;
     }
+
+    public S3PathResolver(Long dataflowId, Long datasetId, String path) {
+        this.dataflowId = dataflowId;
+        this.datasetId = datasetId;
+        this.path = path;
+    }
 }
