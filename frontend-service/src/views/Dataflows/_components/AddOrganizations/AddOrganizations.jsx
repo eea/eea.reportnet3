@@ -287,6 +287,8 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const onResetAll = () => {
     setIsRefreshing(true);
+    setOrganizationName(null);
+    setGroup(null);
 
     getOrganizations();
   };
