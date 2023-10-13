@@ -8,6 +8,7 @@ export const AddOrganizationsService = {
     await AddOrganizationsRepository.createProvider(group, label, code, groupId),
   getOrganizations: async ({ pageNum, numberRows, sortOrder, sortField, providerCode, groupId, label }) => {
     const parsedSortField = AddOrganizationsUtils.parseSortField(sortField);
+    const parsedGroupId = AddOrganizationsUtils.parseGroupId(groupId);
 
     const response = await AddOrganizationsRepository.getOrganizations({
       pageNum,
@@ -15,7 +16,7 @@ export const AddOrganizationsService = {
       sortOrder: ServiceUtils.getSortOrder(sortOrder),
       sortField: parsedSortField,
       providerCode,
-      groupId,
+      groupId: parsedGroupId,
       label
     });
 
