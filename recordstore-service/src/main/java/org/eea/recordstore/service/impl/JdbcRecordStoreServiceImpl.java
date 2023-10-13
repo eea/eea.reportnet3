@@ -624,8 +624,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             LOG.info("eudataset processVO: {}",processVO);
             if (COPY_TO_EU_DATASET.toString().equals(processVO.getProcessType())) {
               LOG.info("Create data snapshot for EU dataset {}", idDataset);
-              S3PathResolver euPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
-              S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset);
+              S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+              S3PathResolver euPath = new S3PathResolver(dataflowId, idDataset);
 
               LOG.info("Getting tableNameFilenames for path resolver {}", dcPath);
               List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(dcPath);
