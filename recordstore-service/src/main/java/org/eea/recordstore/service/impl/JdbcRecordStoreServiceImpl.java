@@ -617,11 +617,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           Long dataflowId = dataset.getDataflowId();
           DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
-          LOG.info("eudataset dataflow: {}",dataflow);
-          LOG.info("eudataset dataset: {}",dataset);
           if (dataflow.getBigData()) {
             ProcessVO processVO = processService.getByProcessId(processId);
-            LOG.info("eudataset processVO: {}",processVO);
             if (COPY_TO_EU_DATASET.toString().equals(processVO.getProcessType())) {
               LOG.info("Create data snapshot for EU dataset {}", idDataset);
               S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
@@ -640,7 +637,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 euPath.setSnapshotId(idSnapshot);
                 try {
                   LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-                  File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                  File parquetFile = s3Helper.getFileFromS3(key, filename + idDataset, pathSnapshot, LiteralConstants.PARQUET_TYPE);
                   String tableNameSnapshotPath = s3Service.getS3Path(euPath);
                   LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
                   s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
@@ -677,8 +674,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                         tableNameSnapshotPath, parquetFile.getPath());
                     s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
                     LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
-                    //promote folder
-                    //checkAndPromoteFolder(snapshotPath, S3_PROVIDER_SNAPSHOT_QUERY_PATH);
+                    parquetFile.delete();
                   } catch (IOException e) {
                     LOG_ERROR.error(
                         "Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
