@@ -308,7 +308,7 @@ public final class LiteralConstants {
   public static final String S3_PROVIDER_SNAPSHOT_PATH = "%s/%s/%s/snapshots/%s/%s/%s/%s";
 
   /** The Constant S3_EU_SNAPSHOT_PATH: {@value}. */
-  public static final String S3_EU_SNAPSHOT_PATH = "%s/collections/%s/%s/%s/%s";
+  public static final String S3_EU_SNAPSHOT_PATH = "%s/collections/%s/%s/%s/%s/%s";
 
   /** The Constant S3_SNAPSHOT_FOLDER_PATH: {@value}. */
   public static final String S3_SNAPSHOT_FOLDER_PATH = "%s/%s/%s/snapshots";
