@@ -635,7 +635,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 euPath.setFilename(filename);
                 euPath.setTableName(key.split("/")[4]);
                 euPath.setPath(S3_EU_SNAPSHOT_PATH);
-                euPath.setParquetFolder(key.split("/")[5]);
+                euPath.setDataProviderName(key.split("/")[5]);
+                euPath.setParquetFolder(key.split("/")[6]);
                 euPath.setSnapshotId(idSnapshot);
                 try {
                   LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
@@ -643,6 +644,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   String tableNameSnapshotPath = s3Service.getS3Path(euPath);
                   LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
                   s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                  parquetFile.delete();
                   LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
                 } catch (IOException e) {
                   LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);

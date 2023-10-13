@@ -55,7 +55,9 @@ public class S3ServiceImpl implements S3Service {
     private String calculateS3Path(S3PathResolver s3PathResolver) {
         LOG.info("Method calculateS3Path called with s3PathResolver: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
-        String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
+        String dataProviderFolder = (s3PathResolver.getDataProviderName() == null)
+            ? formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN)
+            : s3PathResolver.getDataProviderName();
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
         String fileName = s3PathResolver.getFilename();
         String path = s3PathResolver.getPath();
@@ -128,7 +130,7 @@ public class S3ServiceImpl implements S3Service {
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
                 break;
             case S3_EU_SNAPSHOT_PATH:
-                path = String.format(path, dataflowFolder, euDatasetFolder, s3PathResolver.getTableName(), parquetFolder, fileName);
+                path = String.format(path, dataflowFolder, euDatasetFolder, s3PathResolver.getTableName(), dataProviderFolder, parquetFolder, fileName);
                 break;
             default:
                 LOG.info("Wrong type value: {}", path);
