@@ -1095,6 +1095,7 @@
     "organization": "Organization",
     "organizationAlreadyExists": "Organization already exists",
     "organizationCode": "Organization code",
+    "organizationCodeDots": "Organization code...",
     "organizationCodeAcronym": "OC",
     "organizationName": "Organization name",
     "organizationNameDots": "Organization name...",

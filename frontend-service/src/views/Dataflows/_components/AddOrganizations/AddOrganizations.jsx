@@ -48,9 +48,9 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
+  const [organizationName, setOrganizationName] = useState();
   const [organizationsList, setOrganizationsList] = useState([]);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
-  const [organizationName, setOrganizationName] = useState();
   const [sort, setSort] = useState({ field: 'label', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -60,6 +60,8 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+
+  let organizationCode = organizationName?.replaceAll(' ', '').substring(0, 20).toUpperCase();
 
   useEffect(() => {
     getOrganizations();
@@ -251,10 +253,9 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
           <InputText
             disabled={true}
             id="codeInput"
-            placeholder={resourcesContext.messages['organizationNameDots']}
-            ref={inputRef}
+            placeholder={resourcesContext.messages['organizationCodeDots']}
             style={{ margin: '0.3rem 0' }}
-            value={organizationName ? organizationName.replaceAll(' ', '').substring(0, 20).toUpperCase() : null}
+            value={organizationCode}
           />
         </div>
         <div className={styles.inputWrapper}>
@@ -303,7 +304,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       await AddOrganizationsService.createProvider({
         group: group.label,
         label: organizationName,
-        code: organizationName.replaceAll(' ', '').substring(0, 20).toUpperCase(),
+        code: organizationCode,
         groupId: group.group
       });
       onCloseAddDialog();
