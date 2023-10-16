@@ -2180,7 +2180,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         createXls.put(LiteralConstants.USER, user);
         kafkaSenderUtils.releaseKafkaEvent(
             EventType.RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT, createXls);
-      }*/
+      }
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
         // We send the notification only when the last eu dataset being filled from the
         // datacollection,
@@ -2207,7 +2207,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
         dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
-      }
+      }*/
 
       LOG.info("Snapshot {} restored for processId {}", idSnapshot, processId);
     } catch (Exception e) {
