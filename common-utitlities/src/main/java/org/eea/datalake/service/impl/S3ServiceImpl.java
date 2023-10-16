@@ -136,9 +136,6 @@ public class S3ServiceImpl implements S3Service {
             case S3_EU_SNAPSHOT_ROOT_PATH:
                 path = String.format(path, dataflowFolder, euDatasetFolder);
                 break;
-            case S3_EU_SNAPSHOT_FOLDER_PATH:
-                path = String.format(path, dataflowFolder, euDatasetFolder, tableName);
-                break;
             default:
                 LOG.info("Wrong type value: {}", path);
                 path = null;

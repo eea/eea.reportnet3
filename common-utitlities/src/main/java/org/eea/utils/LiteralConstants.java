@@ -313,9 +313,6 @@ public final class LiteralConstants {
   /** The Constant S3_EU_SNAPSHOT_ROOT_PATH: {@value}. */
   public static final String S3_EU_SNAPSHOT_ROOT_PATH = "%s/collections/%s";
 
-  /** The Constant S3_EU_SNAPSHOT_FOLDER_PATH: {@value}. */
-  public static final String S3_EU_SNAPSHOT_FOLDER_PATH = "%s/collections/%s/%s";
-
   /** The Constant S3_TABLE_NAME_EU_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_EU_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"%s\"";
 
