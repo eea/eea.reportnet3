@@ -243,16 +243,31 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public void executeSqlStatement(String sqlStatement){
+    public String executeSqlStatement(String sqlStatement){
         DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
         try {
-            dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+            return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
         } catch (FeignException e) {
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+                return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
             } else {
                 LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    public DremioJobStatusResponse pollForJobStatus(String id){
+        try {
+            return dremioApiController.pollForJobStatus(token, id);
+        } catch (FeignException e) {
+            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
+                token = this.getAuthToken();
+                return dremioApiController.pollForJobStatus(token, id);
+            } else {
+                LOG.error("Could not retrieve dremio job status for id {}", id);
                 throw e;
             }
         }

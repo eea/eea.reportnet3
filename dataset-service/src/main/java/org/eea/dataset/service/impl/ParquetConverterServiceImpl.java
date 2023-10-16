@@ -29,6 +29,8 @@ import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dremio.DremioJobStatusEnum;
+import org.eea.interfaces.vo.dremio.DremioJobStatusResponse;
 import org.eea.kafka.domain.EventType;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -69,6 +71,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     @Value("${dremio.promote.numberOfRetries}")
     private Integer numberOfRetriesForPromoting;
+
+    @Value("${dremio.jobPolling.numberOfRetries}")
+    private Integer numberOfRetriesForJobPolling;
 
     @Autowired
     private FileCommonUtils fileCommonUtils;
@@ -169,11 +174,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             } else {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
                 String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
-                dremioHelperService.executeSqlStatement(createTableQuery);
+                String processId = dremioHelperService.executeSqlStatement(createTableQuery);
+                if(!dremioProcessFinishedSuccessfully(processId)){
+                    throw new Exception("For jobId " + importFileInDremioInfo.getJobId() + " parquet table was not created successfully");
+                }
             }
         }
         //refresh the metadata
-        refreshTableMetadataAndPromote(dremioPathForParquetFolder, s3PathResolver, tableSchemaName);
+        refreshTableMetadataAndPromote(importFileInDremioInfo, dremioPathForParquetFolder, s3PathResolver, tableSchemaName);
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
 
@@ -218,13 +226,32 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
     }
 
-    private void refreshTableMetadataAndPromote(String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
-        String refreshTableQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
+
+    private Boolean dremioProcessFinishedSuccessfully(String processId) throws Exception {
+        for(int i=0; i < numberOfRetriesForJobPolling; i++) {
+            DremioJobStatusResponse response = dremioHelperService.pollForJobStatus(processId);
+            String jobState = response.getJobState().getValue();
+            if(jobState.equals(DremioJobStatusEnum.COMPLETED.getValue())) {
+                return true;
+            }
+            else if(jobState.equals(DremioJobStatusEnum.CANCELED.getValue()) || jobState.equals(DremioJobStatusEnum.FAILED.getValue())){
+                return false;
+            }
+            else {
+                Thread.sleep(10000);
+            }
+        }
+        return false;
+    }
+
+    private void refreshTableMetadataAndPromote(ImportFileInDremioInfo importFileInDremioInfo, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
+        String refreshTableAndPromoteQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
         Boolean folderWasPromoted = false;
         //we keep trying to promote the folder for a number of retries
         for(int i=0; i < numberOfRetriesForPromoting; i++) {
-            dremioHelperService.executeSqlStatement(refreshTableQuery);
+            dremioHelperService.executeSqlStatement(refreshTableAndPromoteQuery);
             if(dremioHelperService.checkFolderPromoted(s3PathResolver, tableName, false)) {
+                LOG.info("For job {} promoted table {} in retry #{}", importFileInDremioInfo, tablePath, i+1);
                 folderWasPromoted = true;
                 break;
             }

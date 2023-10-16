@@ -55,6 +55,7 @@ export const ManageReferenceDataflow = ({
   ]);
   const isLeadDesigner = isSteward || isCustodian;
 
+  const [bigData, setBigData] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
   const [description, setDescription] = useState(isEditing ? metadata.description : '');
   const [errors, setErrors] = useState({
@@ -144,11 +145,11 @@ export const ManageReferenceDataflow = ({
     try {
       setIsSending(true);
       if (isEditing) {
-        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE');
+        await ReferenceDataflowService.update(dataflowId, description, name, 'REFERENCE', bigData);
         manageDialogs(dialogName, false);
         onEditDataflow(name, description);
       } else {
-        const { data } = await ReferenceDataflowService.create(name, description, 'REFERENCE');
+        const { data } = await ReferenceDataflowService.create(name, description, 'REFERENCE', bigData);
         if (pinDataflow) {
           const inmUserProperties = { ...userContext.userProps };
           inmUserProperties.pinnedDataflows.push(data.toString());
@@ -211,6 +212,26 @@ export const ManageReferenceDataflow = ({
         )}
         {renderDeleteDataflowButton()}
       </div>
+      <div className="p-toolbar-group-left">
+        {!isEditing && (
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              ariaLabel={resourcesContext.messages['bigDataStorage']}
+              checked={bigData}
+              id="bigDataCheckbox"
+              inputId="bigDataCheckbox"
+              onChange={() => setBigData(!bigData)}
+              role="checkbox"
+            />
+            <label>
+              <span onClick={() => setBigData(!bigData)}>{resourcesContext.messages['bigDataStorage']}</span>
+            </label>
+            <TooltipButton
+              message={resourcesContext.messages['bigDataStorageMessage']}
+              uniqueIdentifier="bigDataStorage"></TooltipButton>
+          </div>
+        )}
+      </div>
       <Button
         className={`p-button-primary ${
           !isEmpty(name) && !isEmpty(description) && !isSending && 'p-button-animated-blink'
@@ -218,7 +239,7 @@ export const ManageReferenceDataflow = ({
         disabled={isEmpty(name) || isEmpty(description) || isSending}
         icon={isSending ? 'spinnerAnimate' : isEditing ? 'check' : 'plus'}
         label={isEditing ? resourcesContext.messages['save'] : resourcesContext.messages['create']}
-        onClick={() => onManageReferenceDataflow()}
+        onClick={() => (isSending ? {} : onManageReferenceDataflow())}
       />
       <Button
         className={`p-button-secondary button-right-aligned p-button-animated-blink ${styles.cancelButton}`}

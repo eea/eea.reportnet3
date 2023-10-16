@@ -4,11 +4,9 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.utils.LiteralConstants;
-import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -17,8 +15,10 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
-import java.io.*;
-import java.net.HttpURLConnection;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +26,6 @@ import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -255,29 +254,6 @@ public class S3HelperImpl implements S3Helper {
             });
         } while (listObjectsResponse.isTruncated());
         return objectKeys;
-    }
-
-    @Override
-    public void deleteRuleFolderIfExists(S3PathResolver validationResolver, RuleVO ruleVO) {
-        String validationFolderName = s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH);
-        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(validationFolderName));
-        if (result!=null && result.contents().size()>0) {
-            Optional<S3Object> ruleFile = result.contents().stream().filter(s3Object -> s3Object.key().contains(ruleVO.getShortCode())).findFirst();
-            if (ruleFile.isPresent()) {
-                int valIdx = validationFolderName.indexOf(VALIDATION);
-                int startIdx = valIdx + 11;
-                String ruleFolderName = ruleFile.get().key();
-                if (ruleFolderName.contains(PARQUET_FILE_NAME)) {
-                    int endIdx = ruleFolderName.indexOf(PARQUET_FILE_NAME);
-                    ruleFolderName = ruleFolderName.substring(startIdx, endIdx);
-                } else {
-                    ruleFolderName = ruleFolderName.substring(startIdx);
-                }
-                validationResolver.setTableName(ruleFolderName);
-                this.deleteFolder(validationResolver, S3_VALIDATION_RULE_PATH);
-            }
-            validationResolver.setTableName(S3_VALIDATION);
-        }
     }
 
     /**
