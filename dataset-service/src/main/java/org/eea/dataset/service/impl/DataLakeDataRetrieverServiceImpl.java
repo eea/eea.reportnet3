@@ -204,8 +204,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
      * @return
      */
     private Long getEUTotalRecords(Long datasetId, String idTableSchema, Pageable pageable, String fields, String fieldValue, TableVO result, Long totalRecords, DataSetMetabaseVO dataset, String datasetSchemaId, TableSchemaVO tableSchemaVO, DremioRecordMapper recordMapper) {
-        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema());
-        s3PathResolver.setPath(S3_EU_SNAPSHOT_FOLDER_PATH);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_EU_SNAPSHOT_FOLDER_PATH);
         boolean isFolderPromoted = dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false);
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
