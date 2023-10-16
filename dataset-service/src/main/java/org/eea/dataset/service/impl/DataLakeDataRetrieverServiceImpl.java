@@ -39,8 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.COLLECTION;
-import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.*;
 import static org.eea.utils.LiteralConstants.*;
 
 @ImportDataLakeCommons
@@ -87,6 +86,8 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
         if (COLLECTION.equals(dataset.getDatasetTypeEnum())) {
             totalRecords = getDCTotalRecords(datasetId, idTableSchema, pageable, fields, fieldValue, result, totalRecords, dataset, datasetSchemaId, tableSchemaVO, recordMapper);
+        } else if (EUDATASET.equals(dataset.getDatasetTypeEnum())) {
+            totalRecords = getEUTotalRecords(datasetId, idTableSchema, pageable, fields, fieldValue, result, totalRecords, dataset, datasetSchemaId, tableSchemaVO, recordMapper);
         } else {
             totalRecords = getDatasetTotalRecords(datasetId, idTableSchema, pageable, fields, fieldValue, result, totalRecords, dataset, datasetSchemaId, tableSchemaVO, recordMapper);
         }
@@ -180,6 +181,46 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
             StringBuilder dataQuery = new StringBuilder();
             dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
+            buildQueriesAndGetRecords(datasetId, idTableSchema, pageable, fields, fieldValue, result, datasetSchemaId, fieldIdMap, recordMapper, dataQuery);
+        } else {
+            setEmptyResults(result);
+        }
+        return totalRecords;
+    }
+
+    /**
+     * Finds EU dataset total records
+     * @param datasetId
+     * @param idTableSchema
+     * @param pageable
+     * @param fields
+     * @param fieldValue
+     * @param result
+     * @param totalRecords
+     * @param dataset
+     * @param datasetSchemaId
+     * @param tableSchemaVO
+     * @param recordMapper
+     * @return
+     */
+    private Long getEUTotalRecords(Long datasetId, String idTableSchema, Pageable pageable, String fields, String fieldValue, TableVO result, Long totalRecords, DataSetMetabaseVO dataset, String datasetSchemaId, TableSchemaVO tableSchemaVO, DremioRecordMapper recordMapper) {
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_EU_SNAPSHOT_ROOT_PATH);
+        boolean isFolderPromoted = dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false);
+        s3PathResolver.setPath(S3_EU_SNAPSHOT_FOLDER_PATH);
+        boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
+        LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
+        LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
+        if (isFolderPromoted && folderExist) {
+            s3PathResolver.setPath(S3_TABLE_NAME_EU_QUERY_PATH);
+            totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
+            LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
+            pageable = calculatePageable(pageable, totalRecords);
+            Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+            FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
+            fieldSchemaProviderCode.setName("data_provider_code");
+            fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
+            StringBuilder dataQuery = new StringBuilder();
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver));
             buildQueriesAndGetRecords(datasetId, idTableSchema, pageable, fields, fieldValue, result, datasetSchemaId, fieldIdMap, recordMapper, dataQuery);
         } else {
             setEmptyResults(result);
