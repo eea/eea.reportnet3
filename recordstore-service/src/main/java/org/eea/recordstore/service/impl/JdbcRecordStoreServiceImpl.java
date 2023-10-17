@@ -621,7 +621,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
           LOG.info("dataset {}", dataset);
           if (dataflow.getBigData()) {
-            /*if (REPORTING.toString().equals(dataset.getDatasetTypeEnum())) {
+            if (DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
               LOG.info("Create data snapshot for EU dataset {}", idDataset);
               S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
 
@@ -658,7 +658,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
                 }
               });
-            } else {*/
+            } else {
               LOG.info("Create data snapshot dataset {}", idDataset);
               S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
 
@@ -692,7 +692,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                         idDataset, dataflowId, e);
                   }
                 });
-              //}
+              }
             } else {
               CopyManager cm = new CopyManager((BaseConnection) con);
 
