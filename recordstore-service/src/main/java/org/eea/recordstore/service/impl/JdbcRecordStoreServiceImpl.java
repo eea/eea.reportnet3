@@ -84,6 +84,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.EUDATASET;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REPORTING;
 import static org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum.COPY_TO_EU_DATASET;
 import static org.eea.kafka.domain.EventType.*;
 import static org.eea.utils.LiteralConstants.*;
@@ -618,8 +620,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
           if (dataflow.getBigData()) {
-            ProcessVO processVO = processService.getByProcessId(processId);
-            if (COPY_TO_EU_DATASET.toString().equals(processVO.getProcessType())) {
+            if (!REPORTING.toString().equals(dataset.getDatasetTypeEnum())) {
               LOG.info("Create data snapshot for EU dataset {}", idDataset);
               S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
 
@@ -1060,13 +1061,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
 
     if (dataflow.getBigData()) {
-      S3PathResolver snapshotPath = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), idReportingDataset);
-      snapshotPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
-      snapshotPath.setSnapshotId(idSnapshot);
-      LOG.info("Checking if table name DC folder exist in path {}", snapshotPath);
-      if (s3Helper.checkTableNameDCProviderFolderExist(snapshotPath)) {
-        s3Helper.deleteSnapshotFolder(snapshotPath);
-        LOG.info("Successfully deleted files in path: {}", snapshotPath);
+      if (!EUDATASET.equals(dataset.getDatasetTypeEnum())) {
+        S3PathResolver snapshotPath =
+            new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(),
+                idReportingDataset);
+        snapshotPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
+        snapshotPath.setSnapshotId(idSnapshot);
+        LOG.info("Checking if table name folder exist in path {}", snapshotPath);
+        if (s3Helper.checkTableNameDCProviderFolderExist(snapshotPath)) {
+          s3Helper.deleteSnapshotFolder(snapshotPath);
+          LOG.info("Successfully deleted files in path: {}", snapshotPath);
+        }
       }
     } else {
       String nameFileDatasetValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
