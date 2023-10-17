@@ -2174,7 +2174,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           && !successEventType.equals(RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
-/*      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
+      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
         Map<String, Object> createXls = new HashMap<>();
         createXls.put(LiteralConstants.DATASET_ID, datasetId);
@@ -2208,7 +2208,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         }
         dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
-      }*/
+      }
 
       LOG.info("Snapshot {} restored for processId {}", idSnapshot, processId);
     } catch (Exception e) {
