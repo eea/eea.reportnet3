@@ -2162,7 +2162,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   LOG.warn("EUDATASET dataset {}", datasetId);
                   S3PathResolver euPath = new S3PathResolver(dataflowId, datasetId);
                   euPath.setTableName(table.getNameTableSchema());
-                  euPath.setPath(S3_EU_SNAPSHOT_PATH);
+                  euPath.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
                   checkAndPromoteFolder(euPath, S3_TABLE_NAME_EU_QUERY_PATH);
                 }
                 processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
