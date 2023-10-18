@@ -1062,7 +1062,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
 
     if (dataflow.getBigData()) {
-      if (!EUDATASET.equals(dataset.getDatasetTypeEnum())) {
+      if (!DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
         S3PathResolver snapshotPath =
             new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(),
                 idReportingDataset);
