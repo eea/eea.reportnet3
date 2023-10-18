@@ -621,7 +621,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
           LOG.info("dataset {}", dataset);
           if (dataflow.getBigData()) {
-            if (DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
+            if (DatasetTypeEnum.COLLECTION.toString().equals(dataset.getDatasetTypeEnum())) {
               LOG.info("Create data snapshot for EU dataset {}", idDataset);
               S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
 
