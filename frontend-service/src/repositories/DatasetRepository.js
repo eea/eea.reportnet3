@@ -156,9 +156,11 @@ export const DatasetRepository = {
                 datasetSchemaId,
                 fieldSchemaId,
                 resultsNumber: resultsNumber !== '' ? resultsNumber : undefined,
-                searchToken: searchToken !== '' ? searchToken : undefined
+                searchToken: encodeURIComponent(searchToken) !== '' ?  encodeURIComponent(searchToken) : undefined
             })
         }),
+
+
 
     getShowValidationErrors: async (
         datasetId,
