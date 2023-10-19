@@ -200,6 +200,9 @@ public final class LiteralConstants {
   /** The Constant S3_SNAPSHOT_PATTERN: {@value}. */
   public static final String S3_SNAPSHOT_PATTERN = "snap-%s-%s";
 
+  /** The Constant S3_EU_DATASET_PATTERN: {@value}. */
+  public static final String S3_EU_DATASET_PATTERN = "eu-%s";
+
   /** The Constant S3_COLLECTIONS: {@value}. */
   public static final String S3_COLLECTIONS = "collections";
 
@@ -304,8 +307,17 @@ public final class LiteralConstants {
   /** The Constant S3_PROVIDER_SNAPSHOT_PATH: {@value}. */
   public static final String S3_PROVIDER_SNAPSHOT_PATH = "%s/%s/%s/snapshots/%s/%s/%s/%s";
 
-  /** The Constant S3_PROVIDER_SNAPSHOT_FOLDER_PATH: {@value}. */
-  public static final String S3_PROVIDER_SNAPSHOT_FOLDER_PATH = "%s/%s/%s/snapshots/%s/%s";
+  /** The Constant S3_EU_SNAPSHOT_PATH: {@value}. */
+  public static final String S3_EU_SNAPSHOT_PATH = "%s/collections/%s/%s/%s/%s/%s";
+
+  /** The Constant S3_EU_SNAPSHOT_ROOT_PATH: {@value}. */
+  public static final String S3_EU_SNAPSHOT_ROOT_PATH = "%s/collections/%s";
+
+  /** The Constant S3_EU_SNAPSHOT_TABLE_PATH: {@value}. */
+  public static final String S3_EU_SNAPSHOT_TABLE_PATH = "%s/collections/%s/%s";
+
+  /** The Constant S3_TABLE_NAME_EU_QUERY_PATH: {@value}. */
+  public static final String S3_TABLE_NAME_EU_QUERY_PATH = S3_DEFAULT_BUCKET + ".\"%s\".\"collections\".\"%s\".\"%s\"";
 
   /** The Constant S3_SNAPSHOT_FOLDER_PATH: {@value}. */
   public static final String S3_SNAPSHOT_FOLDER_PATH = "%s/%s/%s/snapshots";

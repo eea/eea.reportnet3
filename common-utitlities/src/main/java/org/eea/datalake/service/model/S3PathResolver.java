@@ -37,6 +37,8 @@ public class S3PathResolver {
     /** The snapshot id. */
     private long snapshotId;
 
+    /** The data provider name. */
+    private String dataProviderName;
 
     public S3PathResolver(long dataflowId, long dataProviderId, long datasetId) {
         this.dataflowId = dataflowId;
@@ -83,6 +85,12 @@ public class S3PathResolver {
         String tableName, String path) {
         this(dataflowId, datasetId);
         this.tableName = tableName;
+        this.path = path;
+    }
+
+    public S3PathResolver(Long dataflowId, Long datasetId, String path) {
+        this.dataflowId = dataflowId;
+        this.datasetId = datasetId;
         this.path = path;
     }
 }

@@ -84,6 +84,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.EUDATASET;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REPORTING;
+import static org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum.COPY_TO_EU_DATASET;
 import static org.eea.kafka.domain.EventType.*;
 import static org.eea.utils.LiteralConstants.*;
 
@@ -605,19 +608,57 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       String dateRelease, boolean prefillingReference, String processId)
       throws SQLException, IOException, EEAException {
 
-        ConnectionDataVO connectionDataVO =
-            getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
+        ConnectionDataVO connectionDataVO = getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + idDataset);
         String type = SNAPSHOT;
         try (Connection con = DriverManager.getConnection(connectionDataVO.getConnectionString(),
               connectionDataVO.getUser(), connectionDataVO.getPassword())) {
-            type = checkType(idDataset, idSnapshot);
+          type = checkType(idDataset, idSnapshot);
 
-            //Check if dataflow is Big Data
-            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
-            Long dataflowId = dataset.getDataflowId();
-            DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+          //Check if dataflow is Big Data
+          DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(idDataset);
+          Long dataflowId = dataset.getDataflowId();
+          DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
-            if (dataflow.getBigData()) {
+          LOG.info("dataset {}", dataset);
+          if (dataflow.getBigData()) {
+            if (DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
+              LOG.info("Create data snapshot for EU dataset {}", idDataset);
+              S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+
+              List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
+              Long euDatasetId = 0L;
+              for (EUDatasetVO euDataset: euDatasets) {
+                LOG.info("euDataset {}", euDataset);
+                if (euDataset.getDatasetSchema().equals(dataset.getDatasetSchema())) {
+                  euDatasetId = euDataset.getId();
+                }
+              }
+              S3PathResolver euPath = new S3PathResolver(dataflowId, euDatasetId);
+
+              LOG.info("Getting tableNameFilenames for path resolver {}", dcPath);
+              List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(dcPath);
+              tableNameFilenames.forEach(file -> {
+                String key = file.key();
+                String filename = new File(key).getName();
+                euPath.setFilename(filename);
+                euPath.setTableName(key.split("/")[4]);
+                euPath.setPath(S3_EU_SNAPSHOT_PATH);
+                euPath.setDataProviderName(key.split("/")[5]);
+                euPath.setParquetFolder(key.split("/")[6]);
+                euPath.setSnapshotId(idSnapshot);
+                try {
+                  LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                  File parquetFile = s3Helper.getFileFromS3(key, filename + idDataset, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                  String tableNameSnapshotPath = s3Service.getS3Path(euPath);
+                  LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
+                  s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                  parquetFile.delete();
+                  LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
+                } catch (IOException e) {
+                  LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
+                }
+              });
+            } else {
               LOG.info("Create data snapshot dataset {}", idDataset);
               S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
 
@@ -626,30 +667,32 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               providerPath.setPath(S3_CURRENT_PATH);
               LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
               List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-              tableNameFilenames.stream()
-                  .filter(path -> !path.key().contains("/import/") && !path.key().contains("/validation/"))
-                  .collect(Collectors.toList())
-                  .forEach(file -> {
-                    String key = file.key();
-                    String filename = new File(key).getName();
-                    snapshotPath.setFilename(filename);
-                    snapshotPath.setTableName(key.split("/")[4]);
-                    snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
-                    snapshotPath.setParquetFolder(key.split("/")[5]);
-                    snapshotPath.setSnapshotId(idSnapshot);
-                    try {
-                      LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-                      File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                      String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
-                      LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
-                      s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
-                      LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
-                      //promote folder
-                      //checkAndPromoteFolder(snapshotPath, S3_PROVIDER_SNAPSHOT_QUERY_PATH);
-                    } catch (IOException e) {
-                      LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
-                    }
-                  });
+              tableNameFilenames.stream().filter(path -> !path.key().contains("/import/") && !path.key().contains("/validation/"))
+                .collect(Collectors.toList()).forEach(file -> {
+                  String key = file.key();
+                  String filename = new File(key).getName();
+                  snapshotPath.setFilename(filename);
+                  snapshotPath.setTableName(key.split("/")[4]);
+                  snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
+                  snapshotPath.setParquetFolder(key.split("/")[5]);
+                  snapshotPath.setSnapshotId(idSnapshot);
+                  try {
+                    LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                    File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot,
+                        LiteralConstants.PARQUET_TYPE);
+                    String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
+                    LOG.info("Uploading file to bucket parquetFile path : {} in path: {}",
+                        tableNameSnapshotPath, parquetFile.getPath());
+                    s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                    LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
+                    parquetFile.delete();
+                  } catch (IOException e) {
+                    LOG_ERROR.error(
+                        "Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
+                        idDataset, dataflowId, e);
+                  }
+                });
+              }
             } else {
               CopyManager cm = new CopyManager((BaseConnection) con);
 
@@ -1019,13 +1062,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
 
     if (dataflow.getBigData()) {
-      S3PathResolver snapshotPath = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), idReportingDataset);
-      snapshotPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
-      snapshotPath.setSnapshotId(idSnapshot);
-      LOG.info("Checking if table name DC folder exist in path {}", snapshotPath);
-      if (s3Helper.checkTableNameDCProviderFolderExist(snapshotPath)) {
-        s3Helper.deleteSnapshotFolder(snapshotPath);
-        LOG.info("Successfully deleted files in path: {}", snapshotPath);
+      if (!DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
+        S3PathResolver snapshotPath =
+            new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(),
+                idReportingDataset);
+        snapshotPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
+        snapshotPath.setSnapshotId(idSnapshot);
+        LOG.info("Checking if table name folder exist in path {}", snapshotPath);
+        if (s3Helper.checkTableNameDCProviderFolderExist(snapshotPath)) {
+          s3Helper.deleteSnapshotFolder(snapshotPath);
+          LOG.info("Successfully deleted files in path: {}", snapshotPath);
+        }
       }
     } else {
       String nameFileDatasetValue = SNAPSHOT_QUERY + idSnapshot + LiteralConstants.SNAPSHOT_FILE_DATASET_SUFFIX;
@@ -2112,7 +2159,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     }
                   });
                 } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-
+                  LOG.warn("EUDATASET dataset {}", datasetId);
+                  S3PathResolver euPath = new S3PathResolver(dataflowId, datasetId);
+                  euPath.setTableName(table.getNameTableSchema());
+                  euPath.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
+                  checkAndPromoteFolder(euPath, S3_TABLE_NAME_EU_QUERY_PATH);
                 }
                 processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
                     ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
@@ -2129,14 +2180,14 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           && !successEventType.equals(RELEASE_COMPLETED_EVENT) && !prefillingReference) {
         releaseNotificableKafkaEvent(successEventType, value, datasetId, null);
       }
-/*      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
+      if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
         Map<String, Object> createXls = new HashMap<>();
         createXls.put(LiteralConstants.DATASET_ID, datasetId);
         createXls.put(LiteralConstants.USER, user);
         kafkaSenderUtils.releaseKafkaEvent(
             EventType.RESTORE_PREFILLING_REFERENCE_SNAPSHOT_COMPLETED_EVENT, createXls);
-      }*/
+      }
       if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
         // We send the notification only when the last eu dataset being filled from the
         // datacollection,
@@ -2223,7 +2274,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         } else {
           finished = false;
         }
-      } else if (process.getProcessType().equals(ProcessTypeEnum.COPY_TO_EU_DATASET.toString())) {
+      } else if (process.getProcessType().equals(COPY_TO_EU_DATASET.toString())) {
         List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataSetMetabase.getDataflowId());
         if (processes.size()==euDatasets.size()) {
           finished = isFinished(processes, finished);
@@ -2741,7 +2792,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               TaskType taskType = null;
               if (processTypeEnum.equals(ProcessTypeEnum.RELEASE.toString())){
                 taskType = TaskType.RELEASE_TASK;
-              } else if (processTypeEnum.equals(ProcessTypeEnum.COPY_TO_EU_DATASET.toString())) {
+              } else if (processTypeEnum.equals(COPY_TO_EU_DATASET.toString())) {
                 taskType = TaskType.COPY_TO_EU_DATASET_TASK;
               } else if (processTypeEnum.equals(ProcessTypeEnum.RESTORE_DESIGN_DATASET.toString())) {
                 taskType = TaskType.RESTORE_DESIGN_DATASET_TASK;

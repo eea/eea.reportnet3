@@ -154,6 +154,11 @@
 			<version>2.20.80</version>
 		</dependency>
 		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>url-connection-client</artifactId>
+			<version>2.20.80</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.parquet</groupId>
 			<artifactId>parquet-avro</artifactId>
 			<version>1.13.1</version>
