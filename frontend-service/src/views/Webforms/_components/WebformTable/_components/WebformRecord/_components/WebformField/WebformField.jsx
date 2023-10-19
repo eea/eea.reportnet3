@@ -139,7 +139,7 @@ export const WebformField = ({
           ? conditionalField.type === 'MULTISELECT_CODELIST'
             ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
             : conditionalField.value
-          : field.value,
+          : encodeURIComponent(field.value),
         datasetSchemaId,
         400
       );
