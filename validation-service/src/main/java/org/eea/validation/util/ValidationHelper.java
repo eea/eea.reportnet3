@@ -1281,6 +1281,7 @@ public class ValidationHelper implements DisposableBean {
         LOG.info("Process {} not finished for dataset {}", processId, datasetId);
         if (taskRepository.isProcessEnding(processId)) {
           try {
+            LOG.info("Process {} for dataset {} ending", processId, datasetId);
             Thread.sleep(5000);
           } catch (InterruptedException eeaEx) {
             LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
