@@ -1146,6 +1146,7 @@ public class ValidationHelper implements DisposableBean {
         } finally {
           try {
             Thread.sleep(1000);
+            LOG.info("Thread {}. Checking status of process {} for dataset {}", Thread.currentThread().getName(), validationTask.processId, validationTask.datasetId);
             checkFinishedValidations(validationTask.datasetId, validationTask.processId);
           } catch (EEAException | InterruptedException eeaEx) {
             LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
@@ -1277,6 +1278,7 @@ public class ValidationHelper implements DisposableBean {
           isFinished = true;
         }
       } else {
+        LOG.info("Process {} not finished for dataset {}", processId, datasetId);
         if (taskRepository.isProcessEnding(processId)) {
           try {
             Thread.sleep(5000);
@@ -1285,6 +1287,7 @@ public class ValidationHelper implements DisposableBean {
           }
           checkFinishedValidations(datasetId, processId);
         }
+        LOG.info("Process {} not ending for dataset {}", processId, datasetId);
       }
       return isFinished;
     }
