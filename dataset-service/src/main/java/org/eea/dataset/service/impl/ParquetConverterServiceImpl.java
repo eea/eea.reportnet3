@@ -481,9 +481,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //Reading csv file
         try (
                 Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
-                CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader().builder()
+                CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                        .setHeader()
+                        .setSkipHeaderRecord(false)
                         .setDelimiter(delimiterChar)
-                        .setSkipHeaderRecord(true)
                         .setIgnoreHeaderCase(true)
                         .setTrim(true).build())) {
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
