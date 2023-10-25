@@ -669,8 +669,9 @@ public class FileTreatmentHelper implements DisposableBean {
 
         try {
             setUpS3PathResolver(datasetId, dataset, s3PathResolver);
+            LOG.info("Exporting table data for S3PathResolver {}", s3PathResolver);
             List<S3Object> exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
-            LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
+            LOG.info("Exporting table data with exportFilenames {}", exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
                 s3ConvertService.convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, out);
@@ -717,6 +718,7 @@ public class FileTreatmentHelper implements DisposableBean {
             case TEST:
                 break;
             case EUDATASET:
+                s3PathResolver.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
                 break;
             case REFERENCE:
                 s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);

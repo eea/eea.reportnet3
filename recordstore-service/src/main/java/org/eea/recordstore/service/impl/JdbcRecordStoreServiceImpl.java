@@ -2159,7 +2159,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                     }
                   });
                 } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-                  LOG.warn("EUDATASET dataset {}", datasetId);
+                  LOG.info("EUDATASET dataset {}", datasetId);
                   S3PathResolver euPath = new S3PathResolver(dataflowId, datasetId);
                   euPath.setTableName(table.getNameTableSchema());
                   euPath.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
