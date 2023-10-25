@@ -79,6 +79,9 @@ export const EUDataset = () => {
   } = euDatasetState;
 
   let exportMenuRef = useRef();
+  let bigDataRef = useRef();
+
+  bigDataRef.current = euDatasetState.bigData;
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -179,7 +182,11 @@ export const EUDataset = () => {
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
     try {
-      await DatasetService.exportDatasetData(datasetId, fileType);
+      if (bigDataRef.current) {
+        await DatasetService.exportDatasetDataDL(datasetId, fileType);
+      } else {
+        await DatasetService.exportDatasetData(datasetId, fileType);
+      }
     } catch (error) {
       console.error('EUDataset - onExportDataInternalExtension.', error);
       const {
@@ -275,7 +282,7 @@ export const EUDataset = () => {
     euDatasetDispatch({ type: 'ON_TAB_CHANGE', payload: { tableSchemaId: table.tableSchemaId } });
 
   const renderLayout = children => (
-    <MainLayout>
+    <MainLayout bigData={euDatasetState.bigData}>
       <div className="rep-container">{children}</div>
     </MainLayout>
   );
