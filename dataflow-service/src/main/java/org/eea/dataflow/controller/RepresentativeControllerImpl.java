@@ -143,8 +143,8 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataProvider", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("isAuthenticated()")
-  @ApiOperation(value = "Find all DataProviders  by their Group Id",
+  @PreAuthorize("isAuthenticated() or checkApiKey(null, null, null)")
+  @ApiOperation(value = "Find all DataProviders and their Group Id",
           produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
           responseContainer = "List", hidden = true)
   public DataProvidersVO findAllDataProviders(@RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,

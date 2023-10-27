@@ -100,7 +100,12 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
         .contains(new SimpleGrantedAuthority("ROLE_FEIGN"))) {
       log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
-    } else {
+    }
+    else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities()
+            .contains(new SimpleGrantedAuthority("ROLE_UTILITY_API_KEY"))){
+      log.info("Invocation was made from a user with role ROLE_UTILITY_API_KEY. Letting it go");
+      canAccess = true;
+    }else {
       Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
           .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
           .collect(Collectors.toList());

@@ -772,7 +772,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   @ApiOperation(value = "Create ApiKey by User Id, Dataflow Id and Dataprovider Id",
       response = String.class, hidden = true)
   public String getApiKey(@ApiParam(value = "User wanted id") @PathVariable("userId") String userId,
-      @ApiParam(value = "Dataflow id", example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(value = "Dataflow id", example = "0") @RequestParam(value = "dataflowId",  required = false) Long dataflowId,
       @ApiParam(value = "Data provider id", example = "0") @RequestParam(value = "dataProvider",
           required = false) Long dataProvider) {
     return retrieveApiKey(userId, dataflowId, dataProvider);

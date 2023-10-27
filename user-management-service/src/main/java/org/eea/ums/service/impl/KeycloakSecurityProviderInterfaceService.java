@@ -656,6 +656,7 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   public TokenVO authenticateApiKey(String apiKey) {
     List<UserRepresentation> userRepresentations = new ArrayList<>();
     Long dataflowId = 0l;
+    Boolean dataflowIdExists = true;
 
     for (UserRepresentation userRepresentation : keycloakConnectorService.getUsers()) {
       if (null != userRepresentation.getAttributes()
@@ -670,7 +671,13 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
         if (StringUtils.isNotEmpty(userApiKey)) {
 
           String[] apiKeyValues = userApiKey.split(",");
-          dataflowId = Long.valueOf(apiKeyValues[1]);
+          if (apiKeyValues[1].equals ("null")){
+            dataflowIdExists = false;
+            LOG.info("For api key authentication a null dataflow id was provided.");
+          }
+          if(dataflowIdExists) {
+            dataflowId = Long.valueOf(apiKeyValues[1]);
+          }
           userRepresentations.add(userRepresentation);
         }
       }
@@ -682,16 +689,18 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
       tokenVO = new TokenVO();
       tokenVO.setUserId(user.getId());
       Set<String> userGroups = new HashSet<>();
-      for (GroupInfo groupInfo : keycloakConnectorService.getGroupsByUser(user.getId())) {
-        if (groupInfo.getName()
-            .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))
-            || groupInfo.getName()
-                .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
-            || groupInfo.getName()
-                .equals(ResourceGroupEnum.DATAFLOW_REPORTER_WRITE.getGroupName(dataflowId))
-            || groupInfo.getName()
-                .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
-          userGroups.add(groupInfo.getName());
+      if(dataflowIdExists) {
+        for (GroupInfo groupInfo : keycloakConnectorService.getGroupsByUser(user.getId())) {
+          if (groupInfo.getName()
+                  .equals(ResourceGroupEnum.DATAFLOW_LEAD_REPORTER.getGroupName(dataflowId))
+                  || groupInfo.getName()
+                  .equals(ResourceGroupEnum.DATAFLOW_REPORTER_READ.getGroupName(dataflowId))
+                  || groupInfo.getName()
+                  .equals(ResourceGroupEnum.DATAFLOW_REPORTER_WRITE.getGroupName(dataflowId))
+                  || groupInfo.getName()
+                  .equals(ResourceGroupEnum.DATAFLOW_EDITOR_WRITE.getGroupName(dataflowId))) {
+            userGroups.add(groupInfo.getName());
+          }
         }
       }
       tokenVO.setGroups(userGroups);
