@@ -29,6 +29,7 @@ import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
 import org.eea.validation.util.RuleOperators;
+import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private RepresentativeControllerZuul representativeControllerZuul;
     private S3Helper s3Helper;
     private DremioHelperService dremioHelperService;
+    private ValidationHelper validationHelper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioExpressionRulesExecuteServiceImpl.class);
     private static final String RECORD_IF_THEN = "recordIfThen";
@@ -86,7 +88,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     @Autowired
     public DremioExpressionRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService, DatasetSchemaControllerZuul datasetSchemaControllerZuul,
                                                    DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, DremioRulesService dremioRulesService, RepresentativeControllerZuul representativeControllerZuul,
-                                                   S3Helper s3Helper, DremioHelperService dremioHelperService) {
+                                                   S3Helper s3Helper, DremioHelperService dremioHelperService, ValidationHelper validationHelper) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -96,6 +98,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         this.representativeControllerZuul = representativeControllerZuul;
         this.s3Helper = s3Helper;
         this.dremioHelperService = dremioHelperService;
+        this.validationHelper = validationHelper;
     }
 
     @Override
@@ -263,10 +266,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
                     throw e1;
                 }
-                //if the dataset to validate is of reference type, then the validation path should be changed
-                StringBuilder pathBuilder = new StringBuilder().append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength));
-                String s3FilePath = pathBuilder.append(SLASH).append(subFile).toString();
-                s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
+                validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, subFile, ruleVO.getRuleId().length(), parquetFile);
                 count++;
             } finally {
                 dremioHelperService.deleteFileFromR3IfExists(parquetFile);
@@ -309,7 +309,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             }
             if (parquetRecordCount > 0) {
                 writer.close();
-                uploadParquetToS3(file, ruleVO, validationResolver, ruleVO.getRuleId().length(), parquetFile);
+                validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, file, ruleVO.getRuleId().length(), parquetFile);
             }
         } catch (Exception e) {
             LOG.error("Error creating parquet file {}", parquetFile);
@@ -317,22 +317,6 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         } finally {
             dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }
-    }
-
-    /**
-     * Uploads parquet file to S3
-     * @param fileName
-     * @param ruleVO
-     * @param validationResolver
-     * @param ruleIdLength
-     * @param parquetFile
-     */
-    private void uploadParquetToS3(String fileName, RuleVO ruleVO, S3PathResolver validationResolver, int ruleIdLength, String parquetFile) {
-        StringBuilder pathBuilder = new StringBuilder();
-        //if the dataset to validate is of reference type, then the validation path should be changed
-        String s3FilePath = pathBuilder.append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode())
-                .append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength)).append(SLASH).append(fileName).toString();
-        s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
     }
 
     private static Schema getSchema() {

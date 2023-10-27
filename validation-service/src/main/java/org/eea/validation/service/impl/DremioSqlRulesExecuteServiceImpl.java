@@ -34,6 +34,7 @@ import org.eea.validation.service.RulesService;
 import org.eea.validation.service.SqlRulesService;
 import org.eea.validation.util.FKValidationUtils;
 import org.eea.validation.util.UniqueValidationUtils;
+import org.eea.validation.util.ValidationHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private SqlRulesService sqlRulesService;
     private DremioHelperService dremioHelperService;
     private RepresentativeControllerZuul representativeControllerZuul;
+    private ValidationHelper validationHelper;
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
     private static final String IS_TABLE_EMPTY = "isTableEmpty";
@@ -87,7 +89,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                                             DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
                                             DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, SchemasRepository schemasRepository,
                                             DataSetControllerZuul dataSetControllerZuul, SqlRulesService sqlRulesService, DremioHelperService dremioHelperService,
-                                            RepresentativeControllerZuul representativeControllerZuul) {
+                                            RepresentativeControllerZuul representativeControllerZuul, ValidationHelper validationHelper) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -100,6 +102,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         this.sqlRulesService = sqlRulesService;
         this.dremioHelperService = dremioHelperService;
         this.representativeControllerZuul = representativeControllerZuul;
+        this.validationHelper = validationHelper;
     }
 
     @Override
@@ -455,10 +458,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                     LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
                     throw e1;
                 }
-                //if the dataset to validate is of reference type, then the validation path should be changed
-                StringBuilder pathBuilder = new StringBuilder().append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength));
-                String s3FilePath = pathBuilder.append(SLASH).append(subFile).toString();
-                s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
+                validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, subFile, ruleIdLength, parquetFile);
                 count++;
             } finally {
                 dremioHelperService.deleteFileFromR3IfExists(parquetFile);
@@ -499,10 +499,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
                 throw e1;
             }
-            //if the dataset to validate is of reference type, then the validation path should be changed
-            StringBuilder pathBuilder = new StringBuilder().append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode()).append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength));
-            String s3FilePath = pathBuilder.append(SLASH).append(file).toString();
-            s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
+           validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, file, ruleIdLength, parquetFile);
         } finally {
             dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         }

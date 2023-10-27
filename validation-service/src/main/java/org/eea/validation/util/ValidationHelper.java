@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -1373,5 +1374,34 @@ public class ValidationHelper implements DisposableBean {
    */
   public String removeSpacesEnum(String listFormatted) {
     return listFormatted.replace(", ", ",").replace("[", "").replace("]", "");
+  }
+
+  /**
+   * Builds rule validation folder name
+   * @param ruleVO
+   * @param validationResolver
+   * @param fileName
+   * @param ruleIdLength
+   * @param parquetFile
+   * @return
+   */
+  public String getRuleValidationFolderName(RuleVO ruleVO, S3PathResolver validationResolver, String fileName, int ruleIdLength, String parquetFile) {
+    StringBuilder pathBuilder = new StringBuilder();
+    return pathBuilder.append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode())
+            .append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength)).append(SLASH).append(fileName).toString();
+  }
+
+  /**
+   * uploads validation parquet to S3
+   * @param ruleVO
+   * @param validationResolver
+   * @param fileName
+   * @param ruleIdLength
+   * @param parquetFile
+   */
+  public void uploadValidationParquetToS3(RuleVO ruleVO, S3PathResolver validationResolver, String fileName, int ruleIdLength, String parquetFile) {
+    //if the dataset to validate is of reference type, then the validation path should be changed
+    String s3FilePath = this.getRuleValidationFolderName(ruleVO, validationResolver, fileName, ruleIdLength, parquetFile);
+    s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
   }
 }
