@@ -3211,7 +3211,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       // propagate new table into the datasets schema
       try {
-        Thread.sleep(2000);
+        Thread.sleep(10000);
       } catch (InterruptedException e) {
         LOG.info("Propagate Error");
       }
