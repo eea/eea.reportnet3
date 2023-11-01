@@ -139,7 +139,7 @@ export const WebformField = ({
           ? conditionalField.type === 'MULTISELECT_CODELIST'
             ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
             : conditionalField.value
-          : field.value,
+          : encodeURIComponent(field.value),
         datasetSchemaId,
         400
       );
@@ -203,8 +203,8 @@ export const WebformField = ({
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
         ? value.join(';')
         : value;
-
-    try {
+    
+        try {
       if (!isSubmiting && initialFieldValue !== parsedValue) {
         await DatasetService.updateField(
           datasetId,
@@ -460,7 +460,7 @@ export const WebformField = ({
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
+              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false, field.updatesGroupInfo);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onFocus={event => onFocusField(event.target.value)}
