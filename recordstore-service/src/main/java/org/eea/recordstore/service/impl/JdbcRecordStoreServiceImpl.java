@@ -1014,7 +1014,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       deleteAllViewsFromSchema(datasetId);
       deleteAllMatViewsFromSchema(datasetId);
     } catch (RecordStoreAccessException e1) {
-      LOG_ERROR.error("Error deleting Query view for datasetId {} : {}", datasetId, e1.getMessage(), e1);
+      LOG.error("Error deleting Query view for datasetId {} : {}", datasetId, e1.getMessage(), e1);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error deleting Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
+      throw e;
     }
 
     datasetSchema.getTableSchemas().stream()
@@ -1029,7 +1032,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             // execute view permission
             executeViewPermissions(table.getNameTableSchema(), datasetId);
           } catch (RecordStoreAccessException e) {
-            LOG_ERROR.error("Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
+            LOG.error("Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
+          } catch (Exception e) {
+            LOG.error("Unexpected error! Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
+            throw e;
           }
         });
   }
