@@ -525,8 +525,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setWebformOptionsLoadingStatus = loadingStatus =>
     designerDispatch({ type: 'SET_WEBFORM_OPTIONS_LOADING_STATUS', payload: { loadingStatus } });
 
-  const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
-
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
     designerDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
   };

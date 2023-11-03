@@ -1,6 +1,5 @@
 import { useContext, useEffect, useReducer } from 'react';
 
-import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
@@ -157,15 +156,15 @@ export const WebformView = ({
   };
 
   const combinationTableRender = tableName => {
-    const calculated = singlesCalculatedData
-      .flatMap(singlesRecord =>
-        singlesRecord[Object.keys(singlesRecord).find(key => key.toLowerCase() === tableName.toLowerCase())]
-          .map(tableRecord => ({
-            pamsId: singlesRecord['id'],
-            pamName: singlesRecord['paMName'],
-            ...tableRecord,
-          }))
-      );
+    const calculated = singlesCalculatedData.flatMap(singlesRecord =>
+      singlesRecord[Object.keys(singlesRecord).find(key => key.toLowerCase() === tableName.toLowerCase())].map(
+        tableRecord => ({
+          pamsId: singlesRecord['id'],
+          pamName: singlesRecord['paMName'],
+          ...tableRecord
+        })
+      )
+    );
     return renderTable(uniqBy(calculated, value => JSON.stringify(value)));
   };
 
