@@ -236,7 +236,8 @@ public class DatasetControllerImpl implements DatasetController {
                   example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "fieldSchemaId",
                   required = false) String fieldSchemaId,
           @ApiParam(type = "String", value = "Value to filter",
-                  example = "3") @RequestParam(value = "fieldValue", required = false) String fieldValue) {
+                  example = "3") @RequestParam(value = "fieldValue", required = false) String fieldValue,
+          @ApiParam(value = "List of qc codes to filter") @RequestParam(value = "qcCodes", required = false) String[] qcCodes) {
     if (null == datasetId || null == idTableSchema) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.DATASET_INCORRECT_ID);
@@ -252,7 +253,7 @@ public class DatasetControllerImpl implements DatasetController {
     TableVO result = null;
     try {
       result = dataLakeDataRetrieverService.getTableValuesDLById(datasetId, idTableSchema, pageable, fields,
-              levelError, idRules, fieldSchemaId, fieldValue);
+              levelError, qcCodes, fieldSchemaId, fieldValue);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {

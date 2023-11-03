@@ -15,13 +15,13 @@ public interface DataLakeDataRetrieverService {
      * @param pageable
      * @param fields
      * @param levelError
-     * @param idRules
+     * @param qcCodes
      * @param fieldSchema
      * @param fieldValue
      * @return
      * @throws EEAException
      */
     TableVO getTableValuesDLById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
-                                 String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
+                                 String fields, ErrorTypeEnum[] levelError, String[] qcCodes, String fieldSchema,
                                  String fieldValue) throws EEAException;
 }

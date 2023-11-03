@@ -78,7 +78,8 @@ public interface DatasetController {
                               @RequestParam(value = "levelError", required = false) ErrorTypeEnum[] levelError,
                               @RequestParam(value = "idRules", required = false) String[] idRules,
                               @RequestParam(value = "fieldSchemaId", required = false) String fieldSchemaId,
-                              @RequestParam(value = "fieldValue", required = false) String fieldValue);
+                              @RequestParam(value = "fieldValue", required = false) String fieldValue,
+                              @RequestParam(value = "qcCodes", required = false) String[] qcCodes);
 
   /**
    * Update dataset.

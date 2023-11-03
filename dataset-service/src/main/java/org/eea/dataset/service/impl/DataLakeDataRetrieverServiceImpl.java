@@ -75,7 +75,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     @Override
     @Transactional
     public TableVO getTableValuesDLById(final Long datasetId, final String idTableSchema,
-                                        Pageable pageable, final String fields, ErrorTypeEnum[] levelError, String[] idRules,
+                                        Pageable pageable, final String fields, ErrorTypeEnum[] levelError, String[] qcCodes,
                                         String fieldSchema, String fieldValue) throws EEAException {
         TableVO result = new TableVO();
         Long totalRecords = 0L;
