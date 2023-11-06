@@ -96,6 +96,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     selectedRuleId: '',
     selectedRuleLevelError: '',
     selectedRuleMessage: '',
+    selectedShortCode: '',
     selectedTableSchemaId: null,
     tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
@@ -907,9 +908,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const onSelectValidation = (
     tableSchemaId,
     selectedRuleId = '',
+    selectedShortCode = '',
     selectedRuleMessage = '',
     selectedRuleLevelError = ''
   ) => {
+    console.log('inside Dataset onSelectValidation');
     setDataViewerOptions({
       ...dataViewerOptions,
       isGroupedValidationDeleted: false,
@@ -917,6 +920,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       selectedRuleId,
       selectedRuleLevelError,
       selectedRuleMessage,
+      selectedShortCode,
       selectedTableSchemaId: tableSchemaId,
       tableSchemaId
     });
@@ -1142,6 +1146,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
         selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+        selectedShortCode={dataViewerOptions.selectedShortCode}
         selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}

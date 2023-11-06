@@ -506,16 +506,32 @@ export const ShowValidationsList = memo(
     };
 
     const onRowSelect = async event => {
+      console.log('inside onRowSelect');
       switchToTabularData();
       switch (event.data.entityType) {
         case 'FIELD':
         case 'RECORD':
-          onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+          console.log('switch RECORD option');
+          console.log('rule id: ' + event.data.ruleId);
+          console.log('shortCode ' + event.data.shortCode);
+          onSelectValidation(
+            event.data.tableSchemaId,
+            event.data.ruleId,
+            event.data.shortCode,
+            event.data.message,
+            event.data.levelError
+          );
           break;
         case 'TABLE':
           const ruleSchema = getRuleSchema(event.data.ruleId);
           if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
-            onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+            onSelectValidation(
+              event.data.tableSchemaId,
+              event.data.ruleId,
+              event.data.shortCode,
+              event.data.message,
+              event.data.levelError
+            );
           } else {
             onSelectValidation(event.data.tableSchemaId);
           }
