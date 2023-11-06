@@ -660,10 +660,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               });
             } else {
               LOG.info("Create data snapshot dataset {}", idDataset);
-              S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
+              Long dataProviderId = dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0;
+              S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataProviderId, idDataset);
 
               //Get table name file from S3, save it locally and then upload to DC table name path
-              S3PathResolver providerPath = new S3PathResolver(dataflowId, dataset.getDataProviderId(), idDataset);
+              S3PathResolver providerPath = new S3PathResolver(dataflowId, dataProviderId, idDataset);
               providerPath.setPath(S3_CURRENT_PATH);
               LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
               List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
@@ -1064,7 +1065,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     if (dataflow.getBigData()) {
       if (!DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
         S3PathResolver snapshotPath =
-            new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(),
+            new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0,
                 idReportingDataset);
         snapshotPath.setPath(S3_SNAPSHOT_FOLDER_PATH);
         snapshotPath.setSnapshotId(idSnapshot);

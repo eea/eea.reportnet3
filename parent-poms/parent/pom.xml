@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.3-ARCHITECTURE_DATALAKES</api-gateway.version>
-    <communication.version>v3.3-ARCHITECTURE_DATALAKES</communication.version>
-    <collaboration.version>v3.3-ARCHITECTURE_DATALAKES</collaboration.version>
-    <dataflow.version>v3.3-ARCHITECTURE_DATALAKES</dataflow.version>
-    <dataset.version>v3.3-ARCHITECTURE_DATALAKES</dataset.version>
-    <document.version>v3.3-ARCHITECTURE_DATALAKES</document.version>
-    <frontend.version>v3.3-ARCHITECTURE_DATALAKES</frontend.version>
-    <indexsearch.version>v3.3-ARCHITECTURE_DATALAKES</indexsearch.version>
-    <inspire.version>v3.3-ARCHITECTURE_DATALAKES</inspire.version>
-    <recordstore.version>v3.3-ARCHITECTURE_DATALAKES</recordstore.version>
-    <ums.version>v3.3-ARCHITECTURE_DATALAKES</ums.version>
-    <validation.version>v3.3-ARCHITECTURE_DATALAKES</validation.version>
-    <common-interfaces.version>v3.3-ARCHITECTURE_DATALAKES</common-interfaces.version>
-    <common-utitlities.version>v3.3-ARCHITECTURE_DATALAKES</common-utitlities.version>
-    <rod.version>v3.3-ARCHITECTURE_DATALAKES</rod.version>
-    <orchestrator.version>v3.3-ARCHITECTURE_DATALAKES</orchestrator.version>
+    <api-gateway.version>reference-dataflow</api-gateway.version>
+    <communication.version>reference-dataflow</communication.version>
+    <collaboration.version>reference-dataflow</collaboration.version>
+    <dataflow.version>reference-dataflow</dataflow.version>
+    <dataset.version>reference-dataflow</dataset.version>
+    <document.version>reference-dataflow</document.version>
+    <frontend.version>reference-dataflow</frontend.version>
+    <indexsearch.version>reference-dataflow</indexsearch.version>
+    <inspire.version>reference-dataflow</inspire.version>
+    <recordstore.version>reference-dataflow</recordstore.version>
+    <ums.version>reference-dataflow</ums.version>
+    <validation.version>reference-dataflow</validation.version>
+    <common-interfaces.version>reference-dataflow</common-interfaces.version>
+    <common-utitlities.version>reference-dataflow</common-utitlities.version>
+    <rod.version>reference-dataflow</rod.version>
+    <orchestrator.version>reference-dataflow</orchestrator.version>
   </properties>
 </project>
