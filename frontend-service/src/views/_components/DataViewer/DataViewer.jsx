@@ -458,7 +458,6 @@ export const DataViewer = ({
         valueFilter
       );
     }
-
     if (!isNil(valueFilter)) {
       setPrevFilterValue(valueFilter);
     }
@@ -466,25 +465,27 @@ export const DataViewer = ({
 
   useEffect(() => {
     if (selectedShortCode !== '' || selectedRuleId !== '' || isGroupedValidationDeleted) {
-      bigData
-        ? onFetchData(
-            sort.sortField,
-            sort.sortOrder,
-            0,
-            records.recordsPerPage,
-            levelErrorValidations,
-            selectedShortCode,
-            valueFilter
-          )
-        : onFetchData(
-            sort.sortField,
-            sort.sortOrder,
-            0,
-            records.recordsPerPage,
-            levelErrorValidations,
-            selectedRuleId,
-            valueFilter
-          );
+      if (bigData) {
+        onFetchData(
+          sort.sortField,
+          sort.sortOrder,
+          0,
+          records.recordsPerPage,
+          levelErrorValidations,
+          selectedShortCode,
+          valueFilter
+        );
+      } else {
+        onFetchData(
+          sort.sortField,
+          sort.sortOrder,
+          0,
+          records.recordsPerPage,
+          levelErrorValidations,
+          selectedRuleId,
+          valueFilter
+        );
+      }
     }
   }, [selectedRuleId, selectedShortCode]);
 
@@ -562,25 +563,27 @@ export const DataViewer = ({
 
   const onChangePage = event => {
     dispatchRecords({ type: 'ON_CHANGE_PAGE', payload: event });
-    bigData
-      ? onFetchData(
-          sort.sortField,
-          sort.sortOrder,
-          event.first,
-          event.rows,
-          levelErrorValidations,
-          selectedShortCode,
-          valueFilter
-        )
-      : onFetchData(
-          sort.sortField,
-          sort.sortOrder,
-          event.first,
-          event.rows,
-          levelErrorValidations,
-          selectedRuleId,
-          valueFilter
-        );
+    if (bigData) {
+      onFetchData(
+        sort.sortField,
+        sort.sortOrder,
+        event.first,
+        event.rows,
+        levelErrorValidations,
+        selectedShortCode,
+        valueFilter
+      );
+    } else {
+      onFetchData(
+        sort.sortField,
+        sort.sortOrder,
+        event.first,
+        event.rows,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
+    }
   };
 
   const onConditionalChange = (field, enteredValue) => {
@@ -925,25 +928,27 @@ export const DataViewer = ({
   const onSort = event => {
     dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
     dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: 0 });
-    bigData
-      ? onFetchData(
-          event.sortField,
-          event.sortOrder,
-          0,
-          records.recordsPerPage,
-          levelErrorValidations,
-          selectedShortCode,
-          valueFilter
-        )
-      : onFetchData(
-          event.sortField,
-          event.sortOrder,
-          0,
-          records.recordsPerPage,
-          levelErrorValidations,
-          selectedRuleId,
-          valueFilter
-        );
+    if (bigData) {
+      onFetchData(
+        event.sortField,
+        event.sortOrder,
+        0,
+        records.recordsPerPage,
+        levelErrorValidations,
+        selectedShortCode,
+        valueFilter
+      );
+    } else {
+      onFetchData(
+        event.sortField,
+        event.sortOrder,
+        0,
+        records.recordsPerPage,
+        levelErrorValidations,
+        selectedRuleId,
+        valueFilter
+      );
+    }
   };
 
   const onUpdateData = () => setIsDataUpdated(!isDataUpdated);

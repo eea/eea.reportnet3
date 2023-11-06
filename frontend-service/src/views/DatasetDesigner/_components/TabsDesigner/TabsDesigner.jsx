@@ -54,6 +54,7 @@ export const TabsDesigner = ({
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
+  selectedShortCode,
   selectedTableSchemaId,
   setActiveTableSchemaId,
   tableSchemaId,
@@ -429,6 +430,7 @@ export const TabsDesigner = ({
                       selectedRuleId={selectedRuleId}
                       selectedRuleLevelError={selectedRuleLevelError}
                       selectedRuleMessage={selectedRuleMessage}
+                      selectedShortCode={selectedShortCode}
                       selectedTableSchemaId={selectedTableSchemaId}
                       table={tabs[i]}
                       viewType={viewType}

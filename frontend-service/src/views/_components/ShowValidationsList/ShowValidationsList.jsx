@@ -492,6 +492,7 @@ export const ShowValidationsList = memo(
       tablesFilter,
       isChangedPage
     ) => {
+      console.log('fetch');
       onLoadErrors(
         firstRow,
         numberRows,
@@ -506,14 +507,10 @@ export const ShowValidationsList = memo(
     };
 
     const onRowSelect = async event => {
-      console.log('inside onRowSelect');
       switchToTabularData();
       switch (event.data.entityType) {
         case 'FIELD':
         case 'RECORD':
-          console.log('switch RECORD option');
-          console.log('rule id: ' + event.data.ruleId);
-          console.log('shortCode ' + event.data.shortCode);
           onSelectValidation(
             event.data.tableSchemaId,
             event.data.ruleId,

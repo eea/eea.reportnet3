@@ -902,7 +902,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       isGroupedValidationSelected: false,
       selectedRuleMessage: '',
       selectedRuleLevelError: '',
-      selectedRuleId: ''
+      selectedRuleId: '',
+      selectedShortCode: ''
     });
 
   const onSelectValidation = (
@@ -912,7 +913,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     selectedRuleMessage = '',
     selectedRuleLevelError = ''
   ) => {
-    console.log('inside Dataset onSelectValidation');
     setDataViewerOptions({
       ...dataViewerOptions,
       isGroupedValidationDeleted: false,
