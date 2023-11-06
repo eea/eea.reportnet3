@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2.12</api-gateway.version>
-    <communication.version>v3.2.12</communication.version>
-    <collaboration.version>v3.2.12</collaboration.version>
-    <dataflow.version>v3.2.12</dataflow.version>
-    <dataset.version>v3.2.12</dataset.version>
-    <document.version>v3.2.12</document.version>
-    <frontend.version>v3.2.12</frontend.version>
-    <indexsearch.version>v3.2.12</indexsearch.version>
-    <inspire.version>v3.2.12</inspire.version>
-    <recordstore.version>v3.2.12</recordstore.version>
-    <ums.version>v3.2.12</ums.version>
-    <validation.version>v3.2.12</validation.version>
-    <common-interfaces.version>v3.2.12</common-interfaces.version>
-    <common-utitlities.version>v3.2.12</common-utitlities.version>
-    <rod.version>v3.2.12</rod.version>
-    <orchestrator.version>v3.2.12</orchestrator.version>
+    <api-gateway.version>v3.2.12-Feature-259210</api-gateway.version>
+    <communication.version>v3.2.12-Feature-259210</communication.version>
+    <collaboration.version>v3.2.12-Feature-259210</collaboration.version>
+    <dataflow.version>v3.2.12-Feature-259210</dataflow.version>
+    <dataset.version>v3.2.12-Feature-259210</dataset.version>
+    <document.version>v3.2.12-Feature-259210</document.version>
+    <frontend.version>v3.2.12-Feature-259210</frontend.version>
+    <indexsearch.version>v3.2.12-Feature-259210</indexsearch.version>
+    <inspire.version>v3.2.12-Feature-259210</inspire.version>
+    <recordstore.version>v3.2.12-Feature-259210</recordstore.version>
+    <ums.version>v3.2.12-Feature-259210</ums.version>
+    <validation.version>v3.2.12-Feature-259210</validation.version>
+    <common-interfaces.version>v3.2.12-Feature-259210</common-interfaces.version>
+    <common-utitlities.version>v3.2.12-Feature-259210</common-utitlities.version>
+    <rod.version>v3.2.12-Feature-259210</rod.version>
+    <orchestrator.version>v3.2.12-Feature-259210</orchestrator.version>
   </properties>
 </project>
