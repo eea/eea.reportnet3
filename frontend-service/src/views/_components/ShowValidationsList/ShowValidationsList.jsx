@@ -492,6 +492,7 @@ export const ShowValidationsList = memo(
       tablesFilter,
       isChangedPage
     ) => {
+      console.log('fetch');
       onLoadErrors(
         firstRow,
         numberRows,
@@ -510,12 +511,24 @@ export const ShowValidationsList = memo(
       switch (event.data.entityType) {
         case 'FIELD':
         case 'RECORD':
-          onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+          onSelectValidation(
+            event.data.tableSchemaId,
+            event.data.ruleId,
+            event.data.shortCode,
+            event.data.message,
+            event.data.levelError
+          );
           break;
         case 'TABLE':
           const ruleSchema = getRuleSchema(event.data.ruleId);
           if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
-            onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+            onSelectValidation(
+              event.data.tableSchemaId,
+              event.data.ruleId,
+              event.data.shortCode,
+              event.data.message,
+              event.data.levelError
+            );
           } else {
             onSelectValidation(event.data.tableSchemaId);
           }

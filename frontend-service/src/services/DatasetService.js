@@ -545,7 +545,7 @@ export const DatasetService = {
     levelError = null,
     pageNum,
     pageSize,
-    ruleId = undefined,
+    qcCodes = undefined,
     tableSchemaId,
     value = ''
   }) => {
@@ -556,7 +556,7 @@ export const DatasetService = {
       pageSize,
       fields,
       levelError,
-      ruleId,
+      qcCodes,
       fieldSchemaId,
       value
     );
