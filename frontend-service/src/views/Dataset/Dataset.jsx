@@ -216,7 +216,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         );
         setHasWritePermissions(isCustodianInReferenceDataset && isDatasetUpdatable);
 
-        if (true) {
+        if (isCustodianInReferenceDataset) {
           leftSideBarContext.addModels([
             {
               className: 'dataflow-showPublicInfo-help-step',
