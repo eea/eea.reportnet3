@@ -17,7 +17,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { Filters } from 'views/_components/Filters';
 import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
-import { FiltersUtils } from 'views/_components/Filters/_functions/Utils/FiltersUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';

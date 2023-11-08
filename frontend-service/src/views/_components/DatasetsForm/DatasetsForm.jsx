@@ -10,7 +10,7 @@ import { ErrorMessage } from 'views/_components/ErrorMessage';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-export const DatasetsForm = ({ getDatasetData }) => {
+export const DatasetsForm = ({ getDatasetData, isLoading }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -18,7 +18,6 @@ export const DatasetsForm = ({ getDatasetData }) => {
   const [datasetId, setDatasetId] = useState('');
   const [datasetsFormError, setDatasetsFormError] = useState();
   const [errors, setErrors] = useState({ datasetId: '', dataProviderId: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const checkIsEmptyDatasetId = () =>
     datasetId.length === 0
@@ -79,9 +78,9 @@ export const DatasetsForm = ({ getDatasetData }) => {
     return errors.datasetId === '' && errors.dataProviderId === '';
   };
 
-  const onGetDatasetData = async () => {
+  const onGetDatasetData = async e => {
+    e.preventDefault();
     if (checkInputs()) {
-      setIsSubmitting(true);
       try {
         await getDatasetData(datasetId, dataProviderId);
       } catch (error) {
@@ -97,10 +96,6 @@ export const DatasetsForm = ({ getDatasetData }) => {
         if (!isUndefined(errorResponse) && errorResponse.status === 500) {
           setDatasetsFormError(resourcesContext.messages['datasetsFormError']);
         }
-      } finally {
-        setIsSubmitting(false);
-        setDatasetId('');
-        setDataProviderId('');
       }
     }
   };
@@ -165,7 +160,7 @@ export const DatasetsForm = ({ getDatasetData }) => {
           <fieldset className={`${styles.buttonHolder}`}>
             <Button
               className="rp-btn primary"
-              disabled={isSubmitting || errors['dataProviderId'] !== '' || errors['datasetId'] !== ''}
+              disabled={isLoading || errors['dataProviderId'] !== '' || errors['datasetId'] !== ''}
               id="buttonDatasetForm"
               label={resourcesContext.messages['findDataset']}
               onClick={onGetDatasetData}

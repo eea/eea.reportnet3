@@ -294,7 +294,7 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     return (
       <p>
         <a
-          href=""
+          href={getUrl(routes.DATASET, { dataflowId, datasetId }, true)}
           onClick={() => {
             navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
           }}>
