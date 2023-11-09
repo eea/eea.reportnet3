@@ -146,7 +146,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 field.set(object, dremioJdbcTemplate);
                 Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
 
-                recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, recordIds, parameters, fieldName, object, method);
+                recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
             }
 
             if (recordIds.size() > 0) {
@@ -279,7 +279,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private List<String> getRecordIds(S3PathResolver datatableResolver, String tableSchemaId, String tablePath, RuleVO ruleVO, List<String> recordIds, List<String> parameters, String fieldName, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+    private List<String> getRecordIds(S3PathResolver datatableResolver, String tableSchemaId, String tablePath, RuleVO ruleVO, List<String> parameters, String fieldName, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+        List<String> recordIds = new ArrayList<>();
         int parameterLength = method.getParameters().length;
         switch (parameterLength) {
             case 1:
