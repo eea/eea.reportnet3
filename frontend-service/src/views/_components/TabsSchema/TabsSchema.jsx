@@ -36,6 +36,7 @@ export const TabsSchema = ({
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
+  selectedShortCode,
   selectedTableSchemaId,
   showWriteButtons = true,
   tables,
@@ -94,6 +95,7 @@ export const TabsSchema = ({
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}
                   selectedRuleMessage={selectedRuleMessage}
+                  selectedShortCode={selectedShortCode}
                   selectedTableSchemaId={selectedTableSchemaId}
                   showWriteButtons={showWriteButtons}
                   tableFixedNumber={table.fixedNumber}

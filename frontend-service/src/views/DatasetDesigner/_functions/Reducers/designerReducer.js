@@ -158,6 +158,7 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
+          selectedShortCode: payload.selectedShortCode,
           tableSchemaId: payload.tableSchemaId,
           selectedTableSchemaId: payload.selectedTableSchemaId
         },
@@ -175,6 +176,7 @@ export const designerReducer = (state, { type, payload }) => {
           selectedRuleId: payload.selectedRuleId,
           selectedRuleLevelError: payload.selectedRuleLevelError,
           selectedRuleMessage: payload.selectedRuleMessage,
+          selectedShortCode: payload.selectedShortCode,
           tableSchemaId: payload.tableSchemaId,
           selectedTableSchemaId: payload.selectedTableSchemaId
         },

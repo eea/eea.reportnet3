@@ -353,7 +353,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         String optionalPK = pkAndFkDetailsList.get(2);
         String optionalFK = pkAndFkDetailsList.get(3);
         S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
-        String pkTablePath = s3Service.getTablePathByDatasetType(dataflowId, datasetIdRefered, pkTableName, pkTableResolver);
+        String pkTablePath = s3Service.getTablePathByDatasetType(datasetSchemaPK.getIdDataFlow(), datasetIdRefered, pkTableName, pkTableResolver);
         recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
         return recordIds;
     }

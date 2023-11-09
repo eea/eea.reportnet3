@@ -61,6 +61,7 @@ export const FieldsDesigner = ({
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
+  selectedShortCode,
   selectedTableSchemaId,
   table,
   viewType
@@ -480,6 +481,7 @@ export const FieldsDesigner = ({
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
+          selectedShortCode={selectedShortCode}
           selectedTableSchemaId={selectedTableSchemaId}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}

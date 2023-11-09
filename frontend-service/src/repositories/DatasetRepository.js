@@ -296,7 +296,7 @@ export const DatasetRepository = {
     pageSize,
     fields,
     levelError,
-    ruleId,
+    qcCodes,
     fieldSchemaId,
     value
   ) =>
@@ -305,7 +305,7 @@ export const DatasetRepository = {
         datasetId,
         fields,
         fieldSchemaId,
-        idRules: ruleId,
+        qcCodes,
         levelError,
         pageNum,
         pageSize,
