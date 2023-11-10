@@ -137,7 +137,9 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
                  if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION, false)) {
                    dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
                 }
-                retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), validationTablePath);
+                 if (recordVOS.size()>0) {
+                     retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), validationTablePath);
+                 }
             }
         } else {
             setEmptyResults(result);
@@ -255,17 +257,19 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
      */
     private List<RecordVO> buildQueriesAndGetRecords(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldValue, TableVO result,
                                                      Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery,  ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath) {
+        boolean levelErrorNotEmpty = levelError!=null && levelError.length>0 && levelError.length!=MAX_FILTERS;
+        boolean qcCodesNotEmpty = qcCodes!=null && qcCodes.length>0;
         //filter value
         if (!fieldValue.equals("")) {
             buildFieldValueFilterQuery(fieldValue, fieldIdMap, dataQuery);
         }
         //filter by levelError
-        if (levelError!=null && validationTablePath!=null) {
+        if (levelErrorNotEmpty && validationTablePath!=null) {
             buildLevelErrorQueryFilter(fieldValue, dataQuery, levelError, validationTablePath);
         }
         //filter by qc_code
-        if (qcCodes!=null && validationTablePath!=null) {
-            buildQcCodeFilterQuery(fieldValue, dataQuery, levelError, qcCodes, validationTablePath);
+        if (qcCodesNotEmpty && validationTablePath!=null) {
+            buildQcCodeFilterQuery(fieldValue, dataQuery, levelErrorNotEmpty, qcCodes, validationTablePath);
         }
         //sorting
         if (fields !=null) {
@@ -285,31 +289,48 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         return recordVOS;
     }
 
-    private static void buildQcCodeFilterQuery(String fieldValue, StringBuilder dataQuery, ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath) {
+    /**
+     * Builds query for filtering records by qcCodes
+     * @param fieldValue
+     * @param dataQuery
+     * @param levelErrorNotEmpty
+     * @param qcCodes
+     * @param validationTablePath
+     */
+    private static void buildQcCodeFilterQuery(String fieldValue, StringBuilder dataQuery, boolean levelErrorNotEmpty, String[] qcCodes, String validationTablePath) {
         List<String> qcCodesList = Arrays.asList(qcCodes);
         String qcCodesValues = qcCodesList.stream() .map(s -> "\'" + s + "\'") .collect(Collectors.joining(", "));
-        if (!fieldValue.equals("") || levelError!=null) {
+        if (!fieldValue.equals("") || levelErrorNotEmpty) {
             dataQuery.append(" AND ");
         } else {
             dataQuery.append(" WHERE ");
         }
-        dataQuery.append("EXISTS (SELECT RECORD_ID FROM ").append(validationTablePath).append(" WHERE QC_CODE IN (").append(qcCodesValues).append(")");
+        dataQuery.append("EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v WHERE t.RECORD_ID=v.RECORD_ID AND QC_CODE IN (").append(qcCodesValues).append("))");
     }
 
+    /**
+     * Builds query for filtering records by level error
+     * @param fieldValue
+     * @param dataQuery
+     * @param levelError
+     * @param validationTablePath
+     */
     private static void buildLevelErrorQueryFilter(String fieldValue, StringBuilder dataQuery, ErrorTypeEnum[] levelError, String validationTablePath) {
-        if (levelError!=null && levelError.length!=0 && levelError.length!=MAX_FILTERS) {
-            List<ErrorTypeEnum> levelErrorList = Arrays.asList(levelError);
-            String levelErrorValues = levelErrorList.stream() .map(s -> "\'" + s + "\'") .collect(Collectors.joining(", "));
-            if (!fieldValue.equals("")) {
-                dataQuery.append(" AND ");
-            } else {
-                dataQuery.append(" WHERE ");
-            }
+        List<ErrorTypeEnum> levelErrorList = Arrays.asList(levelError);
+        String levelErrorValues = levelErrorList.stream().map(s -> "\'" + s + "\'").collect(Collectors.joining(", "));
+        if (!fieldValue.equals("")) {
+            dataQuery.append(" AND ");
+        } else {
+            dataQuery.append(" WHERE ");
+        }
+        if (levelErrorList.size() == 1 && levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
+            dataQuery.append("NOT EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v ").append(" WHERE t.RECORD_ID=v.RECORD_ID)");
+        } else {
+            dataQuery.append("(EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v WHERE t.RECORD_ID=v.RECORD_ID AND VALIDATION_LEVEL IN (").append(levelErrorValues).append("))");
             if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
-                dataQuery.append("NOT EXISTS (SELECT RECORD_ID FROM ").append(validationTablePath).append(" v ").append(" WHERE t.RECORD_ID=v.RECORD_ID)");
-            } else {
-                dataQuery.append("EXISTS (SELECT RECORD_ID FROM ").append(validationTablePath).append(" WHERE VALIDATION_LEVEL IN (").append(levelErrorValues).append(")");
+                dataQuery.append(" OR NOT EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v ").append(" WHERE t.RECORD_ID=v.RECORD_ID)");
             }
+            dataQuery.append(")");
         }
     }
 
