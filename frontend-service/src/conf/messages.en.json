@@ -995,6 +995,7 @@
     "nextReportDue": "Next report due",
     "no": "No",
     "noApiKey": "There is no generated API key",
+    "noChanges": "No changes",
     "noConstraints": "No unique constraints to show",
     "noConstraintsWithSelectedParameters": "There are no constraints with the selected parameters",
     "noCreatedTables": "There are no created tables",
