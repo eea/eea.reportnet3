@@ -350,6 +350,9 @@ public class DatasetControllerImpl implements DatasetController {
               example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
       @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
 
+    if (dataflowId == null){
+      dataflowId = datasetService.getDataFlowIdById(datasetId);
+    }
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
@@ -365,9 +368,6 @@ public class DatasetControllerImpl implements DatasetController {
       try {
         if(file == null){
           throw new EEAException("Empty file and file path");
-        }
-        if (dataflowId == null){
-          dataflowId = datasetService.getDataFlowIdById(datasetId);
         }
 
         JobVO job = null;
