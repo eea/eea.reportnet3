@@ -234,6 +234,9 @@ export const ShowValidationsList = memo(
     const getRuleSchema = ruleId =>
       validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
 
+    const getRuleSchemaByQcCode = qcCode =>
+      validationContext.rulesDescription.find(ruleDescription => ruleDescription.shortCode === qcCode);  
+
     const getValidationsOptionTypes = (data, option) => {
       const optionsItems = data
         .filter(filterType => filterType.type === option)
@@ -520,7 +523,12 @@ export const ShowValidationsList = memo(
           );
           break;
         case 'TABLE':
-          const ruleSchema = getRuleSchema(event.data.ruleId);
+          let ruleSchema = null;
+          if (event.data.ruleId!=null) {
+            ruleSchema = getRuleSchema(event.data.ruleId);
+          } else {
+            ruleSchema = getRuleSchemaByQcCode(event.data.shortCode);
+          }
           if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
             onSelectValidation(
               event.data.tableSchemaId,
