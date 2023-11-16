@@ -305,6 +305,7 @@ public class DataflowServiceImpl implements DataflowService {
       }
 
       // Get user's datasets
+      //TODO check if user has permissions for dataflows that have already been deleted.
       Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
       boolean userAdmin = isAdmin();
       List<Long> idsResources = null;
