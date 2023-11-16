@@ -275,6 +275,16 @@ public class DataflowServiceImpl implements DataflowService {
     return dataflowMapper.entityListToClass(dataflows);
   }
 
+  private List<ResourceAccessVO> removeResourcesIfNeeded(List<ResourceAccessVO> resources){
+    resources.removeIf(resourceVO -> {
+              SecurityRoleEnum role = resourceVO.getRole();
+              return role != null
+                      && role.equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
+                      && !dataflowRepository.getPublicInfoByDataflowId(resourceVO.getId());
+            }
+      );
+    return resources;
+  }
 
   /**
    * Gets the dataflows.
@@ -305,7 +315,6 @@ public class DataflowServiceImpl implements DataflowService {
       }
 
       // Get user's datasets
-      //TODO check if user has permissions for dataflows that have already been deleted.
       Map<Long, List<DataflowStatusDataset>> map = getDatasetsStatusByUser();
       boolean userAdmin = isAdmin();
       List<Long> idsResources = null;
@@ -313,22 +322,16 @@ public class DataflowServiceImpl implements DataflowService {
       if (MapUtils.isNotEmpty(filters) && filters.containsKey("role")) {
         List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW,
                 SecurityRoleEnum.fromValue(filters.get("role")));
-        resourcesByUser.removeIf(
-            resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
-                && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+        resourcesByUser = removeResourcesIfNeeded(resourcesByUser);
         idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
 
         List<ResourceAccessVO> resourcesByUserWithoutRole = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-        resourcesByUserWithoutRole.removeIf(
-            resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
-                && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+        resourcesByUserWithoutRole = removeResourcesIfNeeded(resourcesByUserWithoutRole);
         idsResourcesWithoutRole = resourcesByUserWithoutRole.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
         filters.remove("role");
       } else {
         List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-        resourcesByUser.removeIf(
-            resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
-                && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+        resourcesByUser = removeResourcesIfNeeded(resourcesByUser);
         idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
       }
 
@@ -1596,9 +1599,7 @@ public class DataflowServiceImpl implements DataflowService {
 
     List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
     LOG.info("resourcesByUser {}", resourcesByUser);
-    resourcesByUser.removeIf(
-        resourceAccessVO -> resourceAccessVO.getRole().equals(SecurityRoleEnum.NATIONAL_COORDINATOR)
-            && !dataflowRepository.getPublicInfoByDataflowId(resourceAccessVO.getId()));
+    resourcesByUser = removeResourcesIfNeeded(resourcesByUser);
     LOG.info("resourcesByUser after deletion {}", resourcesByUser);
     List<Long>  idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
     LOG.info("idsResources {}", idsResources);
