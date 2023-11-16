@@ -98,7 +98,6 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     boolean canAccess = false;
     if (SecurityContextHolder.getContext().getAuthentication().getAuthorities()
         .contains(new SimpleGrantedAuthority("ROLE_FEIGN"))) {
-      log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
       Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
@@ -146,7 +145,6 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     boolean canAccess = false;
     if (SecurityContextHolder.getContext().getAuthentication().getAuthorities()
         .contains(new SimpleGrantedAuthority("ROLE_FEIGN"))) {
-      log.warn("Invocation was made from a feign client with a due token. Letting it go");
       canAccess = true;
     } else {
       log.info("Checking available permissions for user {}",
