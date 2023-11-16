@@ -922,6 +922,7 @@
         { "key": "GET_JOBS_STATUSES_ERROR" },
         { "key": "GET_ORGANIZATIONS_ERROR" },
         { "key": "CREATE_ORGANIZATION_ERROR" },
+        { "key": "UPDATE_ORGANIZATION_ERROR" },
         { "key": "GET_CONTROL_STATUSES_ERROR" },
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },

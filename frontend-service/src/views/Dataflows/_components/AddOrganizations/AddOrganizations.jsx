@@ -406,7 +406,24 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     }
   };
 
-  const updateProvider = async () => {};
+  const updateProvider = async () => {
+    setIsLoadingButton(true);
+    try {
+      await AddOrganizationsService.createProvider({
+        group: group.label,
+        label: organizationName,
+        code: providerEditing.code,
+        groupId: group.group
+      });
+      onCloseEditDialog();
+    } catch (error) {
+      console.error('AddOrganizations - updateProvider.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
+    } finally {
+      setIsLoadingButton(false);
+    }
+  };
 
   const onEnterKey = key => {
     if (key === 'Enter') {

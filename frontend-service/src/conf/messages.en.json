@@ -1508,6 +1508,7 @@
     "updatedDocumentCompletedEvent": "{:fileName} Document updated at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
     "updateFieldByIdError": "Failed updating field",
     "updateIntegrationError": "Error updating integration",
+    "updateOrganizationError": "Error updating organization",
     "updatePublicStatusFailedEvent": "Error updating the dataflow public status",
     "updateRecordsByIdError": "Failed updating record",
     "updateRecordsInCascadeByIdError": "Failed updating record. Check that the PaM Id does not already exist",
