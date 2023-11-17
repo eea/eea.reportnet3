@@ -207,8 +207,6 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private RepresentativeMapper representativeMapper;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * Gets the by id.
@@ -302,12 +300,15 @@ public class DataflowServiceImpl implements DataflowService {
       List<DataFlowVO> dataflowVOs = new ArrayList<>();
       PaginatedDataflowVO paginatedDataflowVO = new PaginatedDataflowVO();
 
+      LOG.info("Debugging getDataflowsIssue for userId {} step-1", userId);
 
       // get obligations and pageable
       List<ObligationVO> obligations = obligationControllerZull
           .findOpenedObligations(null, null, null, null, null).getObligations();
       ObjectMapper objectMapper = new ObjectMapper();
       String arrayToJson = objectMapper.writeValueAsString(obligations);
+
+      LOG.info("Debugging getDataflowsIssue for userId {} step-2", userId);
 
       Pageable pageable = null;
       if (null != pageNum && null != pageSize) {
@@ -335,11 +336,16 @@ public class DataflowServiceImpl implements DataflowService {
         idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
       }
 
+      LOG.info("Debugging getDataflowsIssue for userId {} step-3", userId);
+
       Map<String, List<String>> attributes = userManagementControllerZull.getUserAttributes();
       List<String> pinnedDataflows = new ArrayList<>();
       if (MapUtils.isNotEmpty(attributes) && attributes.containsKey("pinnedDataflows")) {
         pinnedDataflows.addAll(attributes.get("pinnedDataflows"));
       }
+
+      LOG.info("Debugging getDataflowsIssue for userId {} step-4", userId);
+
       // Get user's dataflows sorted by status and creation date
       if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
           || dataflowType == TypeDataflowEnum.REFERENCE) {
@@ -395,6 +401,7 @@ public class DataflowServiceImpl implements DataflowService {
 
         }
 
+        LOG.info("Debugging getDataflowsIssue for userId {} step-5", userId);
 
         dataflows.forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
@@ -404,6 +411,8 @@ public class DataflowServiceImpl implements DataflowService {
           }
           dataflowVOs.add(dataflowVO);
         });
+
+        LOG.info("Debugging getDataflowsIssue for userId {} step-6", userId);
 
         // SET OBLIGATIONS
         if (!TypeDataflowEnum.REFERENCE.equals(dataflowType)) {
@@ -429,9 +438,12 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
       paginatedDataflowVO.setDataflows(dataflowVOs);
+
+      LOG.info("Debugging getDataflowsIssue for userId {} step-7", userId);
+
       return paginatedDataflowVO;
     } catch (Exception e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error retrieving dataflows {} due to reason {}", userId,
           e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
@@ -480,7 +492,7 @@ public class DataflowServiceImpl implements DataflowService {
       try {
         getOpenedObligations(dataflowVOs);
       } catch (FeignException e) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error retrieving obligations for dataflows from user id {} due to reason {}", userId,
             e.getMessage(), e);
       }
@@ -1014,10 +1026,10 @@ public class DataflowServiceImpl implements DataflowService {
           break;
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("Error knowing if the entity {} with id {} is reference. Message {}", entity,
+      LOG.error("Error knowing if the entity {} with id {} is reference. Message {}", entity,
           entityId, e.getMessage(), e);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Could not find if the entity {} with id {} is reference. Message {}", entity,
+      LOG.error("Unexpected error! Could not find if the entity {} with id {} is reference. Message {}", entity,
               entityId, e.getMessage());
       throw e;
     }
@@ -1059,10 +1071,10 @@ public class DataflowServiceImpl implements DataflowService {
           break;
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("Error knowing if the entity {} with id {} is a dataflow type {}. Message {}",
+      LOG.error("Error knowing if the entity {} with id {} is a dataflow type {}. Message {}",
           entity, entityId, dataflowType, e.getMessage(), e);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Could not find if the entity {} with id {} is dataflow type. Message {}", entity,
+      LOG.error("Unexpected error! Could not find if the entity {} with id {} is dataflow type. Message {}", entity,
               entityId, e.getMessage());
       throw e;
     }
@@ -1121,7 +1133,7 @@ public class DataflowServiceImpl implements DataflowService {
             .findObligationById(dataflowPublicVO.getObligation().getObligationId()));
       }
     } catch (FeignException e) {
-      LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}",
+      LOG.error("Error retrieving obligation for dataflow id {} due to reason {}",
           dataflowPublicVO.getId(), e.getMessage(), e);
     }
   }
@@ -1217,7 +1229,7 @@ public class DataflowServiceImpl implements DataflowService {
             .findObligationById(dataflow.getObligation().getObligationId()));
 
       } catch (FeignException e) {
-        LOG_ERROR.error("Error while getting obligation by id {}", e.getMessage(), e);
+        LOG.error("Error while getting obligation by id {}", e.getMessage(), e);
         ObligationVO obligationVO = new ObligationVO();
         dataflow.setObligation(obligationVO);
       }
@@ -1350,7 +1362,7 @@ public class DataflowServiceImpl implements DataflowService {
       try {
         getObligation(dataflowVO);
       } catch (FeignException e) {
-        LOG_ERROR.error("Error retrieving obligation for dataflow id {} due to reason {}", id,
+        LOG.error("Error retrieving obligation for dataflow id {} due to reason {}", id,
             e.getMessage(), e);
       }
       // we sort the weblinks and documents
@@ -1397,7 +1409,7 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
     } catch (FeignException e) {
-      LOG_ERROR.error("Error while getting all opened obligations {}", e.getMessage(), e);
+      LOG.error("Error while getting all opened obligations {}", e.getMessage(), e);
       for (DataFlowVO dataFlowVO : dataflowVOs) {
         ObligationVO obligationVO = new ObligationVO();
         dataFlowVO.setObligation(obligationVO);
@@ -1434,7 +1446,7 @@ public class DataflowServiceImpl implements DataflowService {
     try {
       dataflowRepository.deleteNativeDataflow(dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Error deleting native dataflow with id: {}", dataflowId, e);
+      LOG.error("Error deleting native dataflow with id: {}", dataflowId, e);
       throw new EEAException(
           String.format("Error deleting native dataflow with id: %s", dataflowId), e);
     }
