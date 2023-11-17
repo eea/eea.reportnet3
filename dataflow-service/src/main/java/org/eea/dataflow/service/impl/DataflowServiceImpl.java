@@ -1467,6 +1467,8 @@ public class DataflowServiceImpl implements DataflowService {
     boolean containsFinalFeedback = false;
     if (null != datasetsStatusList) {
       for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
+        String datasetStatus = (datasetsStatusList.get(i).getStatus() != null) ? datasetsStatusList.get(i).getStatus().toString() : null;
+        LOG.info("Debugging setReportingDatasetStatus datasetsStatusObject id {} status {} dataProviderId {}", datasetsStatusList.get(i).getId(), datasetStatus, datasetsStatusList.get(i).getDataProviderId());
         switch (datasetsStatusList.get(i).getStatus()) {
           case PENDING:
             containsPending = true;
