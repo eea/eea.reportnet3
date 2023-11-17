@@ -300,16 +300,11 @@ public class DataflowServiceImpl implements DataflowService {
       List<DataFlowVO> dataflowVOs = new ArrayList<>();
       PaginatedDataflowVO paginatedDataflowVO = new PaginatedDataflowVO();
 
-      LOG.info("Debugging getDataflowsIssue for userId {} step-1", userId);
-
       // get obligations and pageable
       List<ObligationVO> obligations = obligationControllerZull
           .findOpenedObligations(null, null, null, null, null).getObligations();
       ObjectMapper objectMapper = new ObjectMapper();
       String arrayToJson = objectMapper.writeValueAsString(obligations);
-
-      LOG.info("Debugging getDataflowsIssue for userId {} step-2", userId);
-
       Pageable pageable = null;
       if (null != pageNum && null != pageSize) {
         pageable = PageRequest.of(pageNum, pageSize);
@@ -336,15 +331,11 @@ public class DataflowServiceImpl implements DataflowService {
         idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
       }
 
-      LOG.info("Debugging getDataflowsIssue for userId {} step-3", userId);
-
       Map<String, List<String>> attributes = userManagementControllerZull.getUserAttributes();
       List<String> pinnedDataflows = new ArrayList<>();
       if (MapUtils.isNotEmpty(attributes) && attributes.containsKey("pinnedDataflows")) {
         pinnedDataflows.addAll(attributes.get("pinnedDataflows"));
       }
-
-      LOG.info("Debugging getDataflowsIssue for userId {} step-4", userId);
 
       // Get user's dataflows sorted by status and creation date
       if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
@@ -401,8 +392,6 @@ public class DataflowServiceImpl implements DataflowService {
 
         }
 
-        LOG.info("Debugging getDataflowsIssue for userId {} step-5", userId);
-
         dataflows.forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
           List<DataflowStatusDataset> datasetsStatusList = map.get(dataflowVO.getId());
@@ -411,8 +400,6 @@ public class DataflowServiceImpl implements DataflowService {
           }
           dataflowVOs.add(dataflowVO);
         });
-
-        LOG.info("Debugging getDataflowsIssue for userId {} step-6", userId);
 
         // SET OBLIGATIONS
         if (!TypeDataflowEnum.REFERENCE.equals(dataflowType)) {
@@ -438,8 +425,6 @@ public class DataflowServiceImpl implements DataflowService {
         }
       }
       paginatedDataflowVO.setDataflows(dataflowVOs);
-
-      LOG.info("Debugging getDataflowsIssue for userId {} step-7", userId);
 
       return paginatedDataflowVO;
     } catch (Exception e) {
@@ -1467,8 +1452,9 @@ public class DataflowServiceImpl implements DataflowService {
     boolean containsFinalFeedback = false;
     if (null != datasetsStatusList) {
       for (int i = 0; i < datasetsStatusList.size() && !containsPending; i++) {
-        String datasetStatus = (datasetsStatusList.get(i).getStatus() != null) ? datasetsStatusList.get(i).getStatus().toString() : null;
-        LOG.info("Debugging setReportingDatasetStatus datasetsStatusObject id {} status {} dataProviderId {}", datasetsStatusList.get(i).getId(), datasetStatus, datasetsStatusList.get(i).getDataProviderId());
+        if(datasetsStatusList.get(i).getStatus() == null) {
+          LOG.error("For dataflowId {} there is a dataset with status null and providerId {}. This dataset must be removed from keycloak", datasetsStatusList.get(i).getId(), datasetsStatusList.get(i).getDataProviderId());
+        }
         switch (datasetsStatusList.get(i).getStatus()) {
           case PENDING:
             containsPending = true;
