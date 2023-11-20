@@ -653,45 +653,74 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 creatFields(rs, pm, fields, recordValue, intHeaders);
                 result = md.invoke(object, pm.get(0), pm.get(1));
             } else {
-                String firstValue;
-                FieldValue fieldValue = new FieldValue();
-                if (pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE)) {
-                    firstValue = rs.getString(fieldName);
-                    fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
-                    fieldValue.setValue(firstValue);
-                } else if (intHeaders!=null && intHeaders.size()>0) {
-                    firstValue = (String) pm.get(0);
-                    fieldValue.setIdFieldSchema((String) pm.get(0));
-                    fieldValue.setValue(rs.getString(intHeaders.get(0)));
-                } else {
-                    firstValue = (String) pm.get(0);
-                    fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
-                    fieldValue.setValue(firstValue);
-                }
-                fields.add(fieldValue);
-                recordValue.setFields(fields);
-                fieldValue.setRecord(recordValue);
-                RuleOperators.setEntity(fieldValue);
-                RuleOperators.setEntity(recordValue);
-                if (methodName.contains(NUMBER)) {
-                    result = md.invoke(object, firstValue, pm.get(1));
-                } else if (methodName.contains(LENGTH)) {
-                    result = md.invoke(object, firstValue, pm.get(1));
-                } else if (methodName.contains(DAY) || methodName.contains(MONTH) || methodName.contains(YEAR)) {
-                    result = md.invoke(object, firstValue, pm.get(1));
-                } else {
-                    if (pm.get(1) instanceof String && ((String) pm.get(1)).startsWith(SINGLE_QUOTE)) {
-                        processParameterList(pm, (String) pm.get(1));
-                    }
-                    result = md.invoke(object, firstValue, pm.get(1));
-                }
+                result = invokeMethodIfNotRecord(ruleVO.getReferenceId(), fieldName, rs, object, methodName, md, pm, fields, recordValue, intHeaders);
             }
         }
         return result;
     }
 
     /**
-     * Processes paramater list
+     * Invoke rule method in case method name doesn't contain "Record"
+     * @param referenceId
+     * @param fieldName
+     * @param rs
+     * @param object
+     * @param methodName
+     * @param md
+     * @param pm
+     * @param fields
+     * @param recordValue
+     * @param intHeaders
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private static Object invokeMethodIfNotRecord(String referenceId, String fieldName, SqlRowSet rs, Object object, String methodName, Method md, List<Object> pm,
+                                                  List<FieldValue> fields, RecordValue recordValue, List<String> intHeaders) throws IllegalAccessException, InvocationTargetException {
+        Object result;
+        String firstValue = setRecorAndFieldsAndGetFirstParameterForMethondInvocation(referenceId, fieldName, rs, pm, fields, recordValue, intHeaders);
+        if (methodName.contains(NUMBER)) {
+            result = md.invoke(object, firstValue, pm.get(1));
+        } else if (methodName.contains(LENGTH)) {
+            result = md.invoke(object, firstValue, pm.get(1));
+        } else if (methodName.contains(DAY) || methodName.contains(MONTH) || methodName.contains(YEAR)) {
+            result = md.invoke(object, firstValue, pm.get(1));
+        } else {
+            if (pm.get(1) instanceof String && ((String) pm.get(1)).startsWith(SINGLE_QUOTE)) {
+                processParameterList(pm, (String) pm.get(1));
+            }
+            result = md.invoke(object, firstValue, pm.get(1));
+        }
+        return result;
+    }
+
+    private static String setRecorAndFieldsAndGetFirstParameterForMethondInvocation(String referenceId, String fieldName, SqlRowSet rs, List<Object> pm, List<FieldValue> fields,
+                                                                                    RecordValue recordValue, List<String> intHeaders) {
+        String firstValue;
+        FieldValue fieldValue = new FieldValue();
+        if (pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE)) {
+            firstValue = rs.getString(fieldName);
+            fieldValue.setIdFieldSchema(referenceId);
+            fieldValue.setValue(firstValue);
+        } else if (intHeaders !=null && intHeaders.size()>0) {
+            firstValue = (String) pm.get(0);
+            fieldValue.setIdFieldSchema((String) pm.get(0));
+            fieldValue.setValue(rs.getString(intHeaders.get(0)));
+        } else {
+            firstValue = (String) pm.get(0);
+            fieldValue.setIdFieldSchema(referenceId);
+            fieldValue.setValue(firstValue);
+        }
+        fields.add(fieldValue);
+        recordValue.setFields(fields);
+        fieldValue.setRecord(recordValue);
+        RuleOperators.setEntity(fieldValue);
+        RuleOperators.setEntity(recordValue);
+        return firstValue;
+    }
+
+    /**
+     * Processes parameter list
      * @param pm
      * @param paramToRemove
      */
