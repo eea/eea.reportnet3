@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -693,14 +692,12 @@ public interface DatasetController {
    * Download file.
    *
    * @param datasetId the dataset id
-   * @param fileName  the file name
-   * @param response  the response
-   * @return
+   * @param fileName the file name
+   * @param response the response
    */
   @GetMapping(value = "/{datasetId}/downloadFileDL",
         produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-  ResponseEntity<StreamingResponseBody> downloadFileDL(@PathVariable Long datasetId, @RequestParam String fileName, HttpServletResponse response)
-      throws Exception;
+  void downloadFileDL(@PathVariable Long datasetId, @RequestParam String fileName, HttpServletResponse response);
 
     /**
    * Update check view.
