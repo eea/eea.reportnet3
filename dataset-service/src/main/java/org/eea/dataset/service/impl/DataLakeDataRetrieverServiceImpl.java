@@ -15,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -424,25 +425,66 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         validationQuery.append(")");
         List<DremioValidationVO> dremioValidationsVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioValidationMapper());
         for (DremioValidationVO dv : dremioValidationsVOS) {
-           List<RecordVO> records =  recordVOS.stream().filter(recordVO -> recordVO.getId().equals(dv.getRecordId())).collect(Collectors.toList());
-           records.forEach(vr -> vr.getFields().parallelStream().forEach(fieldVO -> {
-               if (fieldVO.getName().equals(dv.getFieldName())) {
-                   FieldValidationVO fieldValidationVO = new FieldValidationVO();
-                   List<FieldValidationVO> fieldValidations = new ArrayList<>();
-                   ValidationVO validationVO = new ValidationVO();
-                   validationVO.setId(dv.getPk());
-                   validationVO.setLevelError(dv.getValidationLevel());
-                   validationVO.setMessage(dv.getMessage());
-                   validationVO.setTypeEntity(dv.getValidationArea());
-                   fieldValidationVO.setValidation(validationVO);
-                   if (fieldVO.getFieldValidations()!=null) {
-                       fieldValidations = fieldVO.getFieldValidations();
-                   }
-                   fieldValidations.add(fieldValidationVO);
-                   fieldVO.setFieldValidations(fieldValidations);
-               }
-           }));
+            ValidationVO validationVO = getValidationVO(dv);
+            List<RecordVO> records =  recordVOS.stream().filter(recordVO -> recordVO.getId().equals(dv.getRecordId())).collect(Collectors.toList());
+            if (dv.getValidationArea().equals(EntityTypeEnum.FIELD) || dv.getValidationArea().equals(EntityTypeEnum.TABLE)) {
+                records.forEach(vr -> vr.getFields().parallelStream().forEach(fieldVO -> {
+                    if (fieldVO.getName().equals(dv.getFieldName())) {
+                        setFieldValidations(validationVO, fieldVO);
+                    }
+                }));
+            } else if (dv.getValidationArea().equals(EntityTypeEnum.RECORD)) {
+                records.forEach(recordVO -> {
+                    setRecordValidations(validationVO, recordVO);
+                });
+            }
         }
+    }
+
+    /**
+     * Sets record validations
+     * @param validationVO
+     * @param recordVO
+     */
+    private static void setRecordValidations(ValidationVO validationVO, RecordVO recordVO) {
+        List<RecordValidationVO> recordValidations = new ArrayList<>();
+        RecordValidationVO recordValidationVO = new RecordValidationVO();
+        recordValidationVO.setValidation(validationVO);
+        if (recordVO.getRecordValidations()!=null) {
+            recordValidations = recordVO.getRecordValidations();
+        }
+        recordValidations.add(recordValidationVO);
+        recordVO.setRecordValidations(recordValidations);
+    }
+
+    /**
+     * Sets field validations
+     * @param validationVO
+     * @param fieldVO
+     */
+    private static void setFieldValidations(ValidationVO validationVO, FieldVO fieldVO) {
+        FieldValidationVO fieldValidationVO = new FieldValidationVO();
+        List<FieldValidationVO> fieldValidations = new ArrayList<>();
+        fieldValidationVO.setValidation(validationVO);
+        if (fieldVO.getFieldValidations()!=null) {
+            fieldValidations = fieldVO.getFieldValidations();
+        }
+        fieldValidations.add(fieldValidationVO);
+        fieldVO.setFieldValidations(fieldValidations);
+    }
+
+    /**
+     * Get validationVO
+     * @param dv
+     * @return
+     */
+    private static ValidationVO getValidationVO(DremioValidationVO dv) {
+        ValidationVO validationVO = new ValidationVO();
+        validationVO.setId(dv.getPk());
+        validationVO.setLevelError(dv.getValidationLevel());
+        validationVO.setMessage(dv.getMessage());
+        validationVO.setTypeEntity(dv.getValidationArea());
+        return validationVO;
     }
 
     /**
