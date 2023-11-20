@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DataLakeDataRetrieverService;
 import org.eea.dataset.service.BigDataDatasetService;
@@ -133,6 +134,9 @@ public class DatasetControllerImpl implements DatasetController {
   /** The big data dataset service */
   @Autowired
   private BigDataDatasetService bigDataDatasetService;
+
+  @Autowired
+  private DremioHelperService dremioHelperService;
 
   /**
    * Gets the data tables values.
@@ -1298,6 +1302,19 @@ public class DatasetControllerImpl implements DatasetController {
       return ResponseEntity.ok().contentType(MediaType.APPLICATION_STREAM_JSON).body(responsebody);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error in etlExportDatasetV2 for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Override
+  @GetMapping("/testApiPost")
+  public void testApiPost() {
+    try {
+      String createTableQuery = "select record_id,At1 from \"rn3-dataset\".\"rn3-dataset\".\"df-0008445\".\"dp-0000070\".\"ds-0010183\".\"current\".\"Item\"";
+      String result = dremioHelperService.executeSqlStatementPost(createTableQuery);
+      LOG.info("result {}", result);
+    } catch (Exception e) {
+      LOG_ERROR.error("Error:",e);
       throw e;
     }
   }

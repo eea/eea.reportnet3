@@ -347,7 +347,10 @@ public interface DatasetController {
       @RequestParam(value = "columnName", required = false) String columnName,
       @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
 
-  /**
+    @GetMapping("/testApiPost")
+    void testApiPost();
+
+    /**
    * Etl export dataset legacy.
    *
    * @param datasetId the dataset id

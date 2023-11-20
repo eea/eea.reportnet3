@@ -23,4 +23,7 @@ public interface DremioApiController {
 
     @PostMapping(value = "api/v3/sql", produces = MediaType.APPLICATION_JSON)
     void sqlQuery(@RequestHeader(value = "Authorization") String token, @RequestBody DremioSqlRequestBody body);
+
+    @PostMapping(value = "api/v3/sql", produces = MediaType.APPLICATION_JSON)
+    String sqlQueryString(@RequestHeader(value = "Authorization") String token, @RequestBody DremioSqlRequestBody body);
 }
