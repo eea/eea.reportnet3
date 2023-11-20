@@ -2029,8 +2029,6 @@ public class DatasetControllerImpl implements DatasetController {
       FileInputStream in = new FileInputStream(file);
       // copy from in to out
       StreamingResponseBody responsebody = outputStream -> out.write(in.readAllBytes());
-      in.close();
-      out.close();
 
       return ResponseEntity.ok()
           .contentType(MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM_VALUE))
