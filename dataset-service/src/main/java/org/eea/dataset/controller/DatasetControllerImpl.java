@@ -2043,18 +2043,20 @@ public class DatasetControllerImpl implements DatasetController {
    * Download file DL.
    *
    * @param datasetId the dataset id
-   * @param fileName the file name
-   * @param response the response
+   * @param fileName  the file name
+   * @param response  the response
+   * @return
    */
   @Override
   @GetMapping(value = "/{datasetId}/downloadFileDL",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @ApiOperation(value = "Download file", hidden = true)
-  public void downloadFileDL(
+  public ResponseEntity<StreamingResponseBody> downloadFileDL(
       @ApiParam(type = "Long", value = "Dataset Id", example = "0") @PathVariable Long datasetId,
       @ApiParam(type = "String", value = "File name", example = "file.csv") @RequestParam
-      String fileName, @ApiParam(value = "response") HttpServletResponse response) {
+      String fileName, @ApiParam(value = "response") HttpServletResponse response)
+      throws Exception {
     try {
       LOG.info("Downloading file generated from export dataset. DatasetId {} Filename {}",
           datasetId, fileName);
@@ -2064,19 +2066,20 @@ public class DatasetControllerImpl implements DatasetController {
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
       OutputStream out = response.getOutputStream();
-      try (FileInputStream in = new FileInputStream(file)) {
-        // copy from in to out
-        IOUtils.copyLarge(in, out);
-        out.close();
-        in.close();
-      } catch (Exception e) {
-        LOG.error("Unexpected error! Error in copying large file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage(), e);
-        throw e;
-      }
+      FileInputStream in = new FileInputStream(file);
+      // copy from in to out
+      StreamingResponseBody responsebody = outputStream -> out.write(in.readAllBytes());
+      in.close();
+      out.close();
+
+      return ResponseEntity.ok()
+          .contentType(MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM_VALUE))
+          .body(responsebody);
     } catch (IOException | EEAException e) {
       LOG.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
           datasetId, fileName, e.getMessage(), e);
+      throw new Exception(e.getMessage());
     } catch (Exception e) {
       LOG.error("Unexpected error! Error downloading file {} for datasetId {} Message: {}", fileName, datasetId, e.getMessage(), e);
       throw e;
