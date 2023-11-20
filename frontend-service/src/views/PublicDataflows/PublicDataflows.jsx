@@ -57,7 +57,7 @@ export const PublicDataflows = () => {
 
   useEffect(() => {
     onLoadPublicDataflows();
-  }, [pagination]);
+  }, [pagination, sortByOptions]);
 
   useEffect(() => {
     if (!themeContext.headerCollapse) {
@@ -271,7 +271,6 @@ export const PublicDataflows = () => {
             isLoading={isLoading}
             onFilter={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
-            onSort={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             options={filterOptions}
             panelClassName="overwriteZindexPanel"
             recoilId="publicDataflows"
