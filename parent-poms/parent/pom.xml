@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.3-ARCHITECTURE_DATALAKES</api-gateway.version>
-    <communication.version>v3.3-ARCHITECTURE_DATALAKES</communication.version>
-    <collaboration.version>v3.3-ARCHITECTURE_DATALAKES</collaboration.version>
-    <dataflow.version>v3.3-ARCHITECTURE_DATALAKES</dataflow.version>
-    <dataset.version>v3.3-ARCHITECTURE_DATALAKES</dataset.version>
-    <document.version>v3.3-ARCHITECTURE_DATALAKES</document.version>
-    <frontend.version>v3.3-ARCHITECTURE_DATALAKES</frontend.version>
-    <indexsearch.version>v3.3-ARCHITECTURE_DATALAKES</indexsearch.version>
-    <inspire.version>v3.3-ARCHITECTURE_DATALAKES</inspire.version>
-    <recordstore.version>v3.3-ARCHITECTURE_DATALAKES</recordstore.version>
-    <ums.version>v3.3-ARCHITECTURE_DATALAKES</ums.version>
-    <validation.version>v3.3-ARCHITECTURE_DATALAKES</validation.version>
-    <common-interfaces.version>v3.3-ARCHITECTURE_DATALAKES</common-interfaces.version>
-    <common-utitlities.version>v3.3-ARCHITECTURE_DATALAKES</common-utitlities.version>
-    <rod.version>v3.3-ARCHITECTURE_DATALAKES</rod.version>
-    <orchestrator.version>v3.3-ARCHITECTURE_DATALAKES</orchestrator.version>
+    <api-gateway.version>expression-bug</api-gateway.version>
+    <communication.version>expression-bug</communication.version>
+    <collaboration.version>expression-bug</collaboration.version>
+    <dataflow.version>expression-bug</dataflow.version>
+    <dataset.version>expression-bug</dataset.version>
+    <document.version>expression-bug</document.version>
+    <frontend.version>expression-bug</frontend.version>
+    <indexsearch.version>expression-bug</indexsearch.version>
+    <inspire.version>expression-bug</inspire.version>
+    <recordstore.version>expression-bug</recordstore.version>
+    <ums.version>expression-bug</ums.version>
+    <validation.version>expression-bug</validation.version>
+    <common-interfaces.version>expression-bug</common-interfaces.version>
+    <common-utitlities.version>expression-bug</common-utitlities.version>
+    <rod.version>expression-bug</rod.version>
+    <orchestrator.version>expression-bug</orchestrator.version>
   </properties>
 </project>

@@ -84,6 +84,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private static final String YEAR = "Year";
     private static final String COMMA = ",";
     private static final String OPEN_BRACKET = "[";
+    private static final String SINGLE_QUOTE ="'";
 
     @Autowired
     public DremioExpressionRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService, DatasetSchemaControllerZuul datasetSchemaControllerZuul,
@@ -572,7 +573,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 list.add(fieldName);
             }
             headerNames.put(methodName, list);
-        } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET)) {
+        } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET) && !parameter.startsWith(SINGLE_QUOTE)) {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
             List<String> list = headerNames.get(methodName);
             if (list!=null) {
@@ -635,7 +636,17 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         recordValue.setDataProviderCode(providerCode);
         List<String> intHeaders = headerNames.get(md.getName());
         if (pm.size()==1) {
-            createField(ruleVO, fieldName, rs, fields, recordValue);
+            String fieldValue = "";
+            String fieldSchemaId = "";
+            if (fieldName.isEmpty()) {
+                fieldValue = rs.getString(headerNames.get(methodName).get(0));
+            }
+            if (ruleVO.getType().equals(EntityTypeEnum.RECORD)) {
+                fieldSchemaId = (String) pm.get(0);
+            } else {
+                fieldSchemaId = ruleVO.getReferenceId();
+            }
+            createField(fieldName, rs, fields, recordValue, fieldValue, fieldSchemaId);
             result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE) ? rs.getString(fieldName) : pm.get(0));
         } else if (pm.size()==2) {
             if (record) {
@@ -669,11 +680,25 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 } else if (methodName.contains(DAY) || methodName.contains(MONTH) || methodName.contains(YEAR)) {
                     result = md.invoke(object, firstValue, pm.get(1));
                 } else {
+                    if (pm.get(1) instanceof String && ((String) pm.get(1)).startsWith(SINGLE_QUOTE)) {
+                        processParameterList(pm, (String) pm.get(1));
+                    }
                     result = md.invoke(object, firstValue, pm.get(1));
                 }
             }
         }
         return result;
+    }
+
+    /**
+     * Processes paramater list
+     * @param pm
+     * @param paramToRemove
+     */
+    private static void processParameterList(List<Object> pm, String paramToRemove) {
+        String parameter = paramToRemove.substring(1, paramToRemove.length() - 1);
+        pm.remove(paramToRemove);
+        pm.add(parameter);
     }
 
     private static void creatFields(SqlRowSet rs, List<Object> pm, List<FieldValue> fields, RecordValue recordValue, List<String> intHeaders) {
@@ -689,10 +714,14 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         RuleOperators.setEntity(recordValue);
     }
 
-    private void createField(RuleVO ruleVO, String fieldName, SqlRowSet rs, List<FieldValue> fields, RecordValue recordValue) {
+    private void createField(String fieldName, SqlRowSet rs, List<FieldValue> fields, RecordValue recordValue, String fieldVal, String fieldSchemaId) {
         FieldValue fieldValue = new FieldValue();
-        fieldValue.setValue(rs.getString(fieldName));
-        fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
+        if (fieldName.isEmpty()) {
+            fieldValue.setValue(fieldVal);
+        } else {
+            fieldValue.setValue(rs.getString(fieldName));
+        }
+        fieldValue.setIdFieldSchema(fieldSchemaId);
         fields.add(fieldValue);
         recordValue.setFields(fields);
         fieldValue.setRecord(recordValue);
