@@ -1,12 +1,21 @@
 package org.eea.datalake.service.impl;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import feign.FeignException;
+import net.minidev.json.parser.ParseException;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.DremioApiJob;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.controller.dremio.controller.DremioApiController;
 import org.eea.interfaces.vo.dremio.*;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -268,6 +277,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
                 throw e;
             }
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            DremioApiJob dremioApiJob = objectMapper.readValue(result, DremioApiJob.class);
+            Object results = dremioApiController.sqlApiResults(token, dremioApiJob.getId());
+            System.out.println(results);
+        } catch (JsonMappingException e) {
+            throw new RuntimeException(e);
+        } catch (JsonParseException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return result;
     }

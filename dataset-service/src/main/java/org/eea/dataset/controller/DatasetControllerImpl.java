@@ -1310,7 +1310,7 @@ public class DatasetControllerImpl implements DatasetController {
   @GetMapping("/testApiPost")
   public void testApiPost() {
     try {
-      String createTableQuery = "select record_id,At1 from \"rn3-dataset\".\"rn3-dataset\".\"df-0008445\".\"dp-0000070\".\"ds-0010183\".\"current\".\"Item\"";
+      String createTableQuery = "select * from \"rn3-dataset\".\"rn3-dataset\".\"df-0000156\".\"dp-0000042\".\"ds-0002621\".\"current\".\"lakestab\"";
       String result = dremioHelperService.executeSqlStatementPost(createTableQuery);
       LOG.info("result {}", result);
     } catch (Exception e) {
