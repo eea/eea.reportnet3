@@ -142,6 +142,9 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
         try {
             LOG.info("exportFilenames size {}", exportFilenames.size());
+            bufferedWriter.write("{\"records\":[\n");
+            List<String> headers = new ArrayList<>();
+
             for (int j = 0; j < exportFilenames.size(); j++) {
                 File parquetFile =
                     s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
@@ -153,21 +156,15 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
                 Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
                 GenericRecord record = r.read();
-                List<String> headers = new ArrayList<>();
-                int size = 0;
-                int counter = 0;
+                int size = record.getSchema().getFields().size();
                 if (j == 0) {
-                    size = record.getSchema().getFields().size();
                     for (int i = 0; i < size; i++) {
                         headers.add(record.get(i).toString());
                     }
-                    bufferedWriter.write("{\"records\":[\n");
                 }
-                LOG.info("record {}", record);
                 do {
-                    if (counter == 0) {
+                    if (j == 0) {
                         bufferedWriter.write("{");
-                        counter++;
                     } else {
                         bufferedWriter.write(",\n{");
                     }
@@ -186,11 +183,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     }
                     bufferedWriter.write("}");
                 } while ((record = r.read()) == null);
-
-                if (j == exportFilenames.size() - 1) {
-                    bufferedWriter.write("\n]}");
-                }
             }
+            bufferedWriter.write("\n]}");
         } catch (Exception e) {
             LOG.error("Error in convert method for tableName {}", tableName, e);
         }
