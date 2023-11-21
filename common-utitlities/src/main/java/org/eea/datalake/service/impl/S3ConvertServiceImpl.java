@@ -157,10 +157,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 GenericRecord record = r.read();
                 int size = record.getSchema().getFields().size();
                 if (size > 0) {
-                    List<String> headers = new ArrayList<>();
-                    for (int i = 0; i < size; i++) {
-                        headers.add(record.get(i).toString());
-                    }
+                    List<String> headers =
+                        record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
                     LOG.info("exportFilenames headers {}", headers);
                     do {
                         if (j == 0) {
