@@ -12,13 +12,15 @@ import java.util.zip.ZipOutputStream;
 public interface S3ConvertService {
 
 
-    void convertParquetToJSON(File parquetFile, File jsonOutputFile);
+    void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, File jsonOutputFile);
 
     void convertParquetToXML(File parquetFile, File xmlOutputFile);
 
     void convertParquetToXLSX(File parquetFile, File xmlOutputFile);
 
     void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset, Long datasetId);
+
+    void convertParquetToJSON(List<S3Object> exportFilenames, String nameDataset, Long datasetId);
 
     void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String nameDataset, Long datasetId, ZipOutputStream out);
 }

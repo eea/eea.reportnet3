@@ -639,18 +639,14 @@ public class FileTreatmentHelper implements DisposableBean {
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
                 s3ConvertService.convertParquetToCSV(exportFilenames, tableName, datasetId);
-            } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
+            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
+                s3ConvertService.convertParquetToJSON(exportFilenames, tableName, datasetId);
+            }/*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;
                 File xlsxFile = new File(exportDLPath + nameDataset);
 
                 s3ConvertService.convertParquetToXLSX(parquetFile, xlsxFile);
-            } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
-                File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
-                nameDataset = nameDataset + JSON_TYPE;
-                File xlsxFile = new File(exportDLPath + nameDataset);
-
-                s3ConvertService.convertParquetToJSON(parquetFile, xlsxFile);
             } else if (mimeType.equalsIgnoreCase(FileTypeEnum.XML.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XML_TYPE;
