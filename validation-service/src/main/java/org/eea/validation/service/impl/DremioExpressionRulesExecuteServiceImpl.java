@@ -320,6 +320,10 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         }
     }
 
+    /**
+     * Gets parquet schema
+     * @return
+     */
     private static Schema getSchema() {
         List<String> parquetHeaders = Arrays.asList(PK, PARQUET_RECORD_ID_COLUMN_HEADER, VALIDATION_LEVEL, VALIDATION_AREA, MESSAGE, TABLE_NAME, FIELD_NAME, DATASET_ID, QC_CODE);
         List<Schema.Field> fields = new ArrayList<>();
@@ -678,7 +682,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private static Object invokeMethodIfNotRecord(String referenceId, String fieldName, SqlRowSet rs, Object object, String methodName, Method md, List<Object> pm,
                                                   List<FieldValue> fields, RecordValue recordValue, List<String> intHeaders) throws IllegalAccessException, InvocationTargetException {
         Object result;
-        String firstValue = setRecorAndFieldsAndGetFirstParameterForMethondInvocation(referenceId, fieldName, rs, pm, fields, recordValue, intHeaders);
+        String firstValue = setRecordAndFieldsAndGetParameterForMethodInvocation(referenceId, fieldName, rs, pm, fields, recordValue, intHeaders);
         if (methodName.contains(NUMBER)) {
             result = md.invoke(object, firstValue, pm.get(1));
         } else if (methodName.contains(LENGTH)) {
@@ -694,8 +698,19 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         return result;
     }
 
-    private static String setRecorAndFieldsAndGetFirstParameterForMethondInvocation(String referenceId, String fieldName, SqlRowSet rs, List<Object> pm, List<FieldValue> fields,
-                                                                                    RecordValue recordValue, List<String> intHeaders) {
+    /**
+     * Sets record and field values and returns parameter for method invocation
+     * @param referenceId
+     * @param fieldName
+     * @param rs
+     * @param pm
+     * @param fields
+     * @param recordValue
+     * @param intHeaders
+     * @return
+     */
+    private static String setRecordAndFieldsAndGetParameterForMethodInvocation(String referenceId, String fieldName, SqlRowSet rs, List<Object> pm, List<FieldValue> fields,
+                                                                               RecordValue recordValue, List<String> intHeaders) {
         String firstValue;
         FieldValue fieldValue = new FieldValue();
         if (pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE)) {
