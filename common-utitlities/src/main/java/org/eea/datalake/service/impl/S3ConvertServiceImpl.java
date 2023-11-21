@@ -99,8 +99,9 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
         LOG.info("Creating file for export: {}", jsonFile);
 
-        try {
-            convertParquetToJSON(exportFilenames, tableName, datasetId, jsonFile);
+        try (FileWriter fw = new FileWriter(jsonFile, true);
+            BufferedWriter bw = new BufferedWriter(fw)) {
+            convertParquetToJSON(exportFilenames, tableName, datasetId, bw);
         } catch (Exception e) {
             LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
         }
@@ -137,17 +138,15 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, File jsonOutputFile) {
+    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter) {
 
         try {
+            LOG.info("exportFilenames size {}", exportFilenames.size());
             for (int j = 0; j < exportFilenames.size(); j++) {
                 File parquetFile =
                     s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
                         exportDLPath, PARQUET_TYPE, datasetId);
                 InputStream inputStream = new FileInputStream(parquetFile);
-                FileWriter fw = new FileWriter(jsonOutputFile, true);
-                BufferedWriter bw = new BufferedWriter(fw);
-
                 ParquetStream parquetStream = new ParquetStream(inputStream);
                 ParquetReader<GenericRecord> r =
                     AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
@@ -162,38 +161,38 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     for (int i = 0; i < size; i++) {
                         headers.add(record.get(i).toString());
                     }
-                    bw.write("{\"records\":[\n");
+                    bufferedWriter.write("{\"records\":[\n");
                 }
-
+                LOG.info("record {}", record);
                 do {
                     if (counter == 0) {
-                        bw.write("{");
+                        bufferedWriter.write("{");
                         counter++;
                     } else {
-                        bw.write(",\n{");
+                        bufferedWriter.write(",\n{");
                     }
                     for (int i = 0; i < size; i++) {
                         String recordValue = record.get(i).toString();
                         boolean isNumeric = pattern.matcher(recordValue).matches();
-                        bw.write("\"" + headers.get(i) + "\":");
+                        bufferedWriter.write("\"" + headers.get(i) + "\":");
                         if (isNumeric) {
-                            bw.write(recordValue);
+                            bufferedWriter.write(recordValue);
                         } else {
-                            bw.write("\"" + recordValue + "\"");
+                            bufferedWriter.write("\"" + recordValue + "\"");
                         }
                         if (i < size - 1) {
-                            bw.write(",");
+                            bufferedWriter.write(",");
                         }
                     }
-                    bw.write("}");
+                    bufferedWriter.write("}");
                 } while ((record = r.read()) == null);
 
                 if (j == exportFilenames.size() - 1) {
-                    bw.write("\n]}");
+                    bufferedWriter.write("\n]}");
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", jsonOutputFile, tableName, e);
+            LOG.error("Error in convert method for tableName {}", tableName, e);
         }
     }
 
