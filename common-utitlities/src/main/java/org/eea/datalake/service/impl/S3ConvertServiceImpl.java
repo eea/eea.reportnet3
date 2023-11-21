@@ -18,6 +18,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.utils.LiteralConstants;
+import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,11 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
+    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+        createJsonFile(exportFilenames, tableName, datasetId);
+    }
+
+    @Override
     public void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, ZipOutputStream out) {
         File csvFile = createCSVFile(exportFilenames, tableName, datasetId);
 
@@ -84,10 +90,21 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
 
         } catch (Exception e) {
-            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile,
-                tableName, e);
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
         return csvFile;
+    }
+
+    private File createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+        File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
+        LOG.info("Creating file for export: {}", jsonFile);
+
+        try {
+            convertParquetToJSON(exportFilenames, tableName, datasetId, jsonFile);
+        } catch (Exception e) {
+            LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
+        }
+        return jsonFile;
     }
 
     private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
@@ -120,55 +137,63 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public void convertParquetToJSON(File parquetFile, File jsonOutputFile) {
-        validateFileFormat(parquetFile, jsonOutputFile, JSON_TYPE);
+    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, File jsonOutputFile) {
 
-        try (InputStream inputStream = new FileInputStream(parquetFile);
-            FileWriter fw = new FileWriter(jsonOutputFile, true);
-            BufferedWriter bw = new BufferedWriter(fw)) {
+        try {
+            for (int j = 0; j < exportFilenames.size(); j++) {
+                File parquetFile =
+                    s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
+                        exportDLPath, PARQUET_TYPE, datasetId);
+                InputStream inputStream = new FileInputStream(parquetFile);
+                FileWriter fw = new FileWriter(jsonOutputFile, true);
+                BufferedWriter bw = new BufferedWriter(fw);
 
-            ParquetStream parquetStream = new ParquetStream(inputStream);
-            ParquetReader<GenericRecord> r = AvroParquetReader
-                .<GenericRecord>builder(parquetStream)
-                .disableCompatibility()
-                .build();
+                ParquetStream parquetStream = new ParquetStream(inputStream);
+                ParquetReader<GenericRecord> r =
+                    AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
 
-            Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-
-            bw.write("{\"records\":[\n");
-            GenericRecord record = r.read();
-            List<String> headers = new ArrayList<>();
-            int size = record.getSchema().getFields().size();
-            for (int i = 0; i < size; i++) {
-                headers.add(record.get(i).toString());
-            }
-            int counter = 0;
-            do {
-                if (counter == 0) {
-                    bw.write("{");
-                    counter++;
-                } else {
-                    bw.write(",\n{");
+                Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+                GenericRecord record = r.read();
+                List<String> headers = new ArrayList<>();
+                int size = 0;
+                int counter = 0;
+                if (j == 0) {
+                    size = record.getSchema().getFields().size();
+                    for (int i = 0; i < size; i++) {
+                        headers.add(record.get(i).toString());
+                    }
+                    bw.write("{\"records\":[\n");
                 }
-                for (int i = 0; i < size; i++) {
-                    String recordValue = record.get(i).toString();
-                    boolean isNumeric = pattern.matcher(recordValue).matches();
-                    bw.write("\"" + headers.get(i) + "\":");
-                    if (isNumeric) {
-                        bw.write(recordValue);
+
+                do {
+                    if (counter == 0) {
+                        bw.write("{");
+                        counter++;
                     } else {
-                        bw.write("\"" + recordValue + "\"");
+                        bw.write(",\n{");
                     }
-                    if (i < size - 1) {
-                        bw.write(",");
+                    for (int i = 0; i < size; i++) {
+                        String recordValue = record.get(i).toString();
+                        boolean isNumeric = pattern.matcher(recordValue).matches();
+                        bw.write("\"" + headers.get(i) + "\":");
+                        if (isNumeric) {
+                            bw.write(recordValue);
+                        } else {
+                            bw.write("\"" + recordValue + "\"");
+                        }
+                        if (i < size - 1) {
+                            bw.write(",");
+                        }
                     }
-                }
-                bw.write("}");
-            } while ((record = r.read()) == null);
+                    bw.write("}");
+                } while ((record = r.read()) == null);
 
-            bw.write("\n]}");
-        } catch (IOException e) {
-            e.printStackTrace();
+                if (j == exportFilenames.size() - 1) {
+                    bw.write("\n]}");
+                }
+            }
+        } catch (Exception e) {
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", jsonOutputFile, tableName, e);
         }
     }
 
