@@ -161,6 +161,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     for (int i = 0; i < size; i++) {
                         headers.add(record.get(i).toString());
                     }
+                    LOG.info("exportFilenames headers {}", headers);
                     do {
                         if (j == 0) {
                             bufferedWriter.write("{");
