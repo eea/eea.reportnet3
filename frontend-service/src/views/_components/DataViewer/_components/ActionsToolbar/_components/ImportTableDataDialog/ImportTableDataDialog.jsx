@@ -15,6 +15,7 @@ import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ImportTableDataDialog = ({
+  bigData,
   colsSchema,
   dataflowId,
   datasetId,
@@ -142,6 +143,7 @@ export const ImportTableDataDialog = ({
       return (
         <CustomFileUpload
           accept=".csv"
+          bigData={bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
           dialogOnHide={() => setImportTableDialogVisible(false)}

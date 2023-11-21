@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
@@ -259,10 +260,19 @@ public class ValidationHelper implements DisposableBean {
   public boolean finishProcessInMap(String processId) {
     boolean result = false;
     synchronized (processesMap) {
-      ValidationProcessVO removed = processesMap.remove(processId);
-      System.gc();
-      if (removed != null) {
-        LOG.info("Removing process {} from processesMap ", processId);
+      LOG.info("Process {} will be removed from processesMap", processId);
+      if (processesMap.containsKey(processId)) {
+        LOG.info("ProcessesMap contains processId " + processId);
+        ValidationProcessVO removed = processesMap.remove(processId);
+        System.gc();
+        if (removed != null) {
+          LOG.info("Removing process {} from processesMap ", processId);
+          result = true;
+        } else {
+          LOG.info("Process {} not removed from processesMap", processId);
+        }
+      } else {
+        LOG.info("Process {} not found in processesMap" + processId);
         result = true;
       }
     }
@@ -356,7 +366,7 @@ public class ValidationHelper implements DisposableBean {
 
       //delete previous validation folder
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-        s3Helper.deleleFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+        s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
@@ -1146,7 +1156,8 @@ public class ValidationHelper implements DisposableBean {
         } finally {
           try {
             Thread.sleep(1000);
-            checkFinishedValidations(validationTask.datasetId, validationTask.processId);
+            LOG.info("Checking status of process {} for dataset {}. taskId {}", validationTask.processId, validationTask.datasetId, validationTask.taskId);
+            checkFinishedValidations(validationTask.datasetId, validationTask.processId, validationTask.taskId);
           } catch (EEAException | InterruptedException eeaEx) {
             LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
                 validationTask.datasetId, eeaEx.getMessage(), eeaEx);
@@ -1165,26 +1176,29 @@ public class ValidationHelper implements DisposableBean {
      * @return true, if successful
      * @throws EEAException the EEA exception
      */
-    private boolean checkFinishedValidations(Long datasetId, String processId) throws EEAException {
+    private boolean checkFinishedValidations(Long datasetId, String processId, Long taskId) throws EEAException {
       boolean isFinished = false;
+      LOG.info("checkFinishedValidations for processId {}, datasetId {} and taskId {}", processId, datasetId, taskId);
       if (taskRepository.isProcessFinished(processId)) {
+        LOG.info("isProcessFinished for processId " + processId);
         if (finishProcessInMap(processId)) {
+          LOG.info("Removed process {} from processesMap", processId);
           ProcessVO process = processControllerZuul.findById(processId);
           LOG.info("Process {} finished for dataset {}", processId, datasetId);
           // Release the lock manually
           Map<String, Object> executeValidation = new HashMap<>();
           executeValidation.put(LiteralConstants.SIGNATURE,
-              LockSignature.EXECUTE_VALIDATION.getValue());
+                  LockSignature.EXECUTE_VALIDATION.getValue());
           executeValidation.put(LiteralConstants.DATASETID, datasetId);
           lockService.removeLockByCriteria(executeValidation);
 
           Map<String, Object> forceExecuteValidation = new HashMap<>();
           forceExecuteValidation.put(LiteralConstants.SIGNATURE,
-              LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
+                  LockSignature.FORCE_EXECUTE_VALIDATION.getValue());
           forceExecuteValidation.put(LiteralConstants.DATASETID, datasetId);
           lockService.removeLockByCriteria(forceExecuteValidation);
           datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
-              DatasetRunningStatusEnum.VALIDATED);
+                  DatasetRunningStatusEnum.VALIDATED);
 
           // after last dataset validations have been saved, an event is sent to notify it
           Map<String, Object> value = new HashMap<>();
@@ -1195,18 +1209,18 @@ public class ValidationHelper implements DisposableBean {
           // validation threads inheritances from it. This is a side effect.
           value.put("user", process.getUser());
           DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
-          S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
+          S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0, datasetId, S3_VALIDATION);
           DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataset.getDataflowId());
-          if (dataflow.getBigData()!=null) {
+          if (dataflow.getBigData() != null) {
             value.put("bigData", dataflow.getBigData());
           }
 
-          if (dataflow.getBigData()!=null && !dataflow.getBigData() || dataflow.getBigData()==null) {
+          if (dataflow.getBigData() != null && !dataflow.getBigData() || dataflow.getBigData() == null) {
             kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_CLEAN_KYEBASE, value);
           }
           if (processControllerZuul.updateProcess(datasetId, -1L, ProcessStatusEnum.FINISHED,
-              ProcessTypeEnum.VALIDATION, processId,
-              process.getUser(), 0, null)) {
+                  ProcessTypeEnum.VALIDATION, processId,
+                  process.getUser(), 0, null)) {
 
             Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
             value.put("validation_job_id", jobId);
@@ -1215,7 +1229,7 @@ public class ValidationHelper implements DisposableBean {
 
             if (datasetId.equals(process.getDatasetId()) && process.isReleased()) {
               ProcessVO nextProcess = null;
-              if (jobId!=null) {
+              if (jobId != null) {
                 List<String> processes = jobProcessControllerZuul.findProcessesByJobId(jobId);
                 processes.remove(process.getProcessId());
                 for (String procId : processes) {
@@ -1229,7 +1243,7 @@ public class ValidationHelper implements DisposableBean {
                 nextProcess = processControllerZuul.getNextProcess(processId);
               }
               if (null != nextProcess) {
-                if (dataflow.getBigData()!=null && dataflow.getBigData()) {
+                if (dataflow.getBigData() != null && dataflow.getBigData()) {
                   S3PathResolver nextS3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), nextProcess.getDatasetId(), S3_VALIDATION);
                   JobVO jobVO = null;
                   Boolean createParquetWithSQL = false;
@@ -1248,7 +1262,7 @@ public class ValidationHelper implements DisposableBean {
                           true);
                 }
               } else if (processControllerZuul.isProcessFinished(processId)) {
-                if (jobId!=null) {
+                if (jobId != null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
@@ -1261,30 +1275,33 @@ public class ValidationHelper implements DisposableBean {
               // Delete the lock to the Release process
               deleteLockToReleaseProcess(datasetId);
               checkAndPromoteFolder(s3PathResolver, dataflow);
-              if (jobId!=null) {
+              if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
               }
               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
-                  value,
-                  NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+                      value,
+                      NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
               if (taskRepository.hasProcessCanceledTasks(processId)) {
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS,
-                    value,
-                    NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
+                        value,
+                        NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
               }
             }
           }
           isFinished = true;
         }
       } else {
+        LOG.info("Process {} not finished for dataset {}. TaskId {}", processId, datasetId, taskId);
         if (taskRepository.isProcessEnding(processId)) {
           try {
+            LOG.info("Process {} for dataset {} ending", processId, datasetId);
             Thread.sleep(5000);
           } catch (InterruptedException eeaEx) {
             LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
           }
-          checkFinishedValidations(datasetId, processId);
+          checkFinishedValidations(datasetId, processId, taskId);
         }
+        LOG.info("Process {} not ending for dataset {}. TaskId {}", processId, datasetId, taskId);
       }
       return isFinished;
     }
@@ -1357,5 +1374,34 @@ public class ValidationHelper implements DisposableBean {
    */
   public String removeSpacesEnum(String listFormatted) {
     return listFormatted.replace(", ", ",").replace("[", "").replace("]", "");
+  }
+
+  /**
+   * Builds rule validation folder name
+   * @param ruleVO
+   * @param validationResolver
+   * @param fileName
+   * @param ruleIdLength
+   * @param parquetFile
+   * @return
+   */
+  public String getRuleValidationFolderName(RuleVO ruleVO, S3PathResolver validationResolver, String fileName, int ruleIdLength, String parquetFile) {
+    StringBuilder pathBuilder = new StringBuilder();
+    return pathBuilder.append(s3Service.getTableAsFolderQueryPath(validationResolver, S3_VALIDATION_TABLE_PATH)).append(SLASH).append(ruleVO.getShortCode())
+            .append(DASH).append(ruleVO.getRuleId().substring(ruleIdLength - 3, ruleIdLength)).append(SLASH).append(fileName).toString();
+  }
+
+  /**
+   * uploads validation parquet to S3
+   * @param ruleVO
+   * @param validationResolver
+   * @param fileName
+   * @param ruleIdLength
+   * @param parquetFile
+   */
+  public void uploadValidationParquetToS3(RuleVO ruleVO, S3PathResolver validationResolver, String fileName, int ruleIdLength, String parquetFile) {
+    //if the dataset to validate is of reference type, then the validation path should be changed
+    String s3FilePath = this.getRuleValidationFolderName(ruleVO, validationResolver, fileName, ruleIdLength, parquetFile);
+    s3Helper.uploadFileToBucket(s3FilePath, parquetFile);
   }
 }

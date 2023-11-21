@@ -234,6 +234,9 @@ export const ShowValidationsList = memo(
     const getRuleSchema = ruleId =>
       validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
 
+    const getRuleSchemaByQcCode = qcCode =>
+      validationContext.rulesDescription.find(ruleDescription => ruleDescription.shortCode === qcCode);  
+
     const getValidationsOptionTypes = (data, option) => {
       const optionsItems = data
         .filter(filterType => filterType.type === option)
@@ -492,6 +495,7 @@ export const ShowValidationsList = memo(
       tablesFilter,
       isChangedPage
     ) => {
+      console.log('fetch');
       onLoadErrors(
         firstRow,
         numberRows,
@@ -510,12 +514,29 @@ export const ShowValidationsList = memo(
       switch (event.data.entityType) {
         case 'FIELD':
         case 'RECORD':
-          onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+          onSelectValidation(
+            event.data.tableSchemaId,
+            event.data.ruleId,
+            event.data.shortCode,
+            event.data.message,
+            event.data.levelError
+          );
           break;
         case 'TABLE':
-          const ruleSchema = getRuleSchema(event.data.ruleId);
+          let ruleSchema = null;
+          if (event.data.ruleId!=null) {
+            ruleSchema = getRuleSchema(event.data.ruleId);
+          } else {
+            ruleSchema = getRuleSchemaByQcCode(event.data.shortCode);
+          }
           if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
-            onSelectValidation(event.data.tableSchemaId, event.data.ruleId, event.data.message, event.data.levelError);
+            onSelectValidation(
+              event.data.tableSchemaId,
+              event.data.ruleId,
+              event.data.shortCode,
+              event.data.message,
+              event.data.levelError
+            );
           } else {
             onSelectValidation(event.data.tableSchemaId);
           }

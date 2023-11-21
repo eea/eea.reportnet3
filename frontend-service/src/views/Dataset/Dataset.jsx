@@ -96,6 +96,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     selectedRuleId: '',
     selectedRuleLevelError: '',
     selectedRuleMessage: '',
+    selectedShortCode: '',
     selectedTableSchemaId: null,
     tableSchemaId: QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : ''
   });
@@ -901,12 +902,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       isGroupedValidationSelected: false,
       selectedRuleMessage: '',
       selectedRuleLevelError: '',
-      selectedRuleId: ''
+      selectedRuleId: '',
+      selectedShortCode: ''
     });
 
   const onSelectValidation = (
     tableSchemaId,
     selectedRuleId = '',
+    selectedShortCode = '',
     selectedRuleMessage = '',
     selectedRuleLevelError = ''
   ) => {
@@ -917,6 +920,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       selectedRuleId,
       selectedRuleLevelError,
       selectedRuleMessage,
+      selectedShortCode,
       selectedTableSchemaId: tableSchemaId,
       tableSchemaId
     });
@@ -1142,6 +1146,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
         selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+        selectedShortCode={dataViewerOptions.selectedShortCode}
         selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
@@ -1371,6 +1376,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       {isImportDatasetDialogVisible && (
         <CustomFileUpload
           accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
+          bigData={metadata?.dataflow.bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dialogHeader={selectedCustomImportIntegration.name}

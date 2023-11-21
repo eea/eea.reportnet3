@@ -1539,6 +1539,12 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
+
     datasetControllerImpl.deleteDatasetData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -1552,6 +1558,12 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
+
     datasetControllerImpl.deleteImportDataLegacy(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -1563,7 +1575,12 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
+
     datasetControllerImpl.deleteDatasetData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -1574,6 +1591,11 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void privateDeleteDatasetDataTest() {
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
     datasetControllerImpl.privateDeleteDatasetData(1L, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
@@ -1596,7 +1618,11 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void privateDeleteDatasetDataDatasetBelongsDataflowTest() {
-    Mockito.when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
     try {
       datasetControllerImpl.privateDeleteDatasetData(1L, 1L, false);
     } catch (ResponseStatusException e) {
@@ -1623,6 +1649,12 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
+
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
@@ -1636,6 +1668,12 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
+
     datasetControllerImpl.deleteImportTableLegacy(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());
@@ -1646,7 +1684,12 @@ public class DatasetControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
-    Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
+    when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
+
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
         Mockito.any());

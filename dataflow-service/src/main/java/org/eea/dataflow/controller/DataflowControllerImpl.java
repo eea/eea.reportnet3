@@ -244,9 +244,9 @@ public class DataflowControllerImpl implements DataFlowController {
       dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING, filters,
           orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error("Could not retrieve dataflows for userId {}", userId, e);
     } catch (Exception e){
-      LOG_ERROR.error("Unexpected error! Could not retrieve dataflows for userId {}. Message: {}", userId, e.getMessage());
+      LOG.error("Unexpected error! Could not retrieve dataflows for userId {}", userId, e);
       throw e;
     }
     return dataflows;

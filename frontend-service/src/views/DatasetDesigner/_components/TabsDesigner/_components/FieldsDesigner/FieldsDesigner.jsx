@@ -61,6 +61,7 @@ export const FieldsDesigner = ({
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
+  selectedShortCode,
   selectedTableSchemaId,
   table,
   viewType
@@ -480,6 +481,7 @@ export const FieldsDesigner = ({
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
           selectedRuleMessage={selectedRuleMessage}
+          selectedShortCode={selectedShortCode}
           selectedTableSchemaId={selectedTableSchemaId}
           tableHasErrors={table.hasErrors}
           tableId={table.tableSchemaId}
@@ -1011,6 +1013,7 @@ export const FieldsDesigner = ({
         {designerState.isImportTableSchemaDialogVisible && (
           <CustomFileUpload
             accept=".csv"
+            bigData={bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}

@@ -82,6 +82,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 itemPosition = 8;
             } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 4;
+            } else if (S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 5;
             } else {
                 itemPosition = 6;
             }
@@ -105,7 +107,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if(importFolder) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
                 S3_IMPORT_TABLE_NAME_FOLDER_PATH);
-        } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+        } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())
+            || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getS3Path(s3PathResolver);
         } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
@@ -248,16 +251,31 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public void executeSqlStatement(String sqlStatement){
+    public String executeSqlStatement(String sqlStatement){
         DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
         try {
-            dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+            return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
         } catch (FeignException e) {
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                dremioApiController.sqlQuery(token, dremioSqlRequestBody);
+                return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
             } else {
                 LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
+                throw e;
+            }
+        }
+    }
+
+    @Override
+    public DremioJobStatusResponse pollForJobStatus(String id){
+        try {
+            return dremioApiController.pollForJobStatus(token, id);
+        } catch (FeignException e) {
+            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
+                token = this.getAuthToken();
+                return dremioApiController.pollForJobStatus(token, id);
+            } else {
+                LOG.error("Could not retrieve dremio job status for id {}", id);
                 throw e;
             }
         }

@@ -82,9 +82,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
   private void createFeignSecurity(String feignInvocationUser, String feignInvocationUserId,
       String securityToken) {
-    log.info(
-        "Invocation came from a feign client, setting security context with user {} and user id {} ",
-        feignInvocationUser, feignInvocationUserId);
     Set<String> authorities = new HashSet<>();
     authorities.add("FEIGN");
     UserDetails userDetails = EeaUserDetails.create(feignInvocationUser, authorities);

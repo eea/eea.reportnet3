@@ -15,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -31,10 +32,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -71,135 +69,348 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
 
     /** The Constant LOG. */
     private static final Logger LOG = LoggerFactory.getLogger(DataLakeDataRetrieverServiceImpl.class);
+    private static final int MAX_FILTERS = 5;
 
     @Override
     @Transactional
-    public TableVO getTableValuesDLById(final Long datasetId, final String idTableSchema,
-                                        Pageable pageable, final String fields, ErrorTypeEnum[] levelError, String[] idRules,
-                                        String fieldSchema, String fieldValue) throws EEAException {
-        TableVO result = new TableVO();
-        Long totalRecords = 0L;
+    public TableVO getTableValuesDLById(final Long datasetId, final String idTableSchema, Pageable pageable, final String fields, ErrorTypeEnum[] levelError,
+                                        String[] qcCodes, String fieldSchema, String fieldValue) throws EEAException {
+        TableVO result;
         DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        String datasetSchemaId = dataset.getDatasetSchema();
+        TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
         if (COLLECTION.equals(dataset.getDatasetTypeEnum())) {
-            //Find all dp folders and get dp code
-            String datasetSchemaId = dataset.getDatasetSchema();
-            Map<String, FieldSchemaVO> fieldIdMap;
-            TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
-            S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
-            LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
-            boolean isFolderPromoted = dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false);
-            s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
-            boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
-            if (isFolderPromoted && folderExist) {
-                LOG.info("s3Helper.buildRecordsCountQueryDC(s3PathResolver) : {}",  s3Helper.buildRecordsCountQueryDC(s3PathResolver));
-                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3PathResolver), Long.class);
-                LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
-                pageable = calculatePageable(pageable, totalRecords);
-                fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
-                FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
-                fieldSchemaProviderCode.setName("data_provider_code");
-                fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
-                DremioRecordMapper recordMapper = new DremioRecordMapper();
-                recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
-                StringBuilder dataQuery = new StringBuilder();
-                dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH));
-                //filter value
-                if (!fieldValue.equals("")) {
-                    buildFilterQuery(fieldValue, fieldIdMap, dataQuery);
-                }
-                //sorting
-                if (fields!=null) {
-                    buildSortQuery(fields, datasetSchemaId, fieldIdMap, dataQuery);
-                }
-                //pagination
-                if (pageable!=null) {
-                    buildPaginationQuery(pageable, dataQuery);
-                }
-                LOG.info("For datasetId {} dataQuery.toString() : {}", datasetId, dataQuery);
-                List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
-                result.setIdTableSchema(idTableSchema);
-                result.setRecords(recordVOS);
-                result.setTotalFilteredRecords(Long.valueOf(recordVOS.size()));
+            result = getDCTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
+        } else if (EUDATASET.equals(dataset.getDatasetTypeEnum())) {
+            result = getEUDatasetTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
+        } else {
+            result = getDatasetTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
+        }
+        return result;
+    }
+
+    /**
+     * Finds dataset total records
+     * @param dataset
+     * @param tableSchemaVO
+     * @param pageable
+     * @param fields
+     * @param fieldValue
+     * @param dataset
+     * @param tableSchemaVO
+     * @param levelError
+     * @param qcCodes
+     * @return
+     */
+    private TableVO getDatasetTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) {
+        Long totalRecords = 0L;
+        Long datasetId = dataset.getId();
+        TableVO result = new TableVO();
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
+        if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+            s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+        } else {
+            s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+        }
+        boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
+        LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
+        LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
+        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
+            StringBuilder dataQuery = new StringBuilder();
+            StringBuilder recordsCountQuery = new StringBuilder();
+            if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+                s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
+                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
+                dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+                recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
             } else {
+                totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
+                dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+                recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+            }
+            result.setTotalRecords(totalRecords);
+
+            LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
+            Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+            s3PathResolver.setTableName(S3_VALIDATION);
+            String validationTablePath = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            StringBuilder filteredQuery = buildFilteredQuery(dataset, fields, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
+            if (filteredQuery.toString().isEmpty() && levelError!=null && levelError.length==0) {
                 result.setTotalFilteredRecords(0L);
-                result.setTableValidations(new ArrayList<>());
-                result.setTotalRecords(0L);
+                result.setTotalRecords(totalRecords);
                 result.setRecords(new ArrayList<>());
+            } else {
+                recordsCountQuery.append(filteredQuery);
+                getTableResultsAndValidations(dataset, tableSchemaVO, pageable, result, s3PathResolver, dataQuery, recordsCountQuery, validationTablePath, filteredQuery);
             }
         } else {
-            String datasetSchemaId = dataset.getDatasetSchema();
-            Map<String, FieldSchemaVO> fieldIdMap;
-            TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
-            S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
-            if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
-                s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
-            } else {
-                s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
-            }
-            LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
-            LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", s3Helper.checkFolderExist(s3PathResolver));
-            if (s3Helper.checkFolderExist(s3PathResolver) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
-                StringBuilder dataQuery = new StringBuilder();
-                if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
-                    s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
-                    LOG.info("s3Helper.getRecordsCountQuery(s3PathResolver) : {}",  s3Helper.getRecordsCountQuery(s3PathResolver));
-                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
-                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver));
-                } else {
-                    LOG.info("s3Helper.buildRecordsCountQuery(s3PathResolver) : {}",  s3Helper.buildRecordsCountQuery(s3PathResolver));
-                    totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-                    dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
-                }
+            setEmptyResults(result);
+        }
+        return result;
+    }
 
-                LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
-                pageable = calculatePageable(pageable, totalRecords);
-                fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
-                DremioRecordMapper recordMapper = new DremioRecordMapper();
-                recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(idTableSchema);
-                //filter value
-                if (!fieldValue.equals("")) {
-                    buildFilterQuery(fieldValue, fieldIdMap, dataQuery);
-                }
-                //sorting
-                if (fields!=null) {
-                    buildSortQuery(fields, datasetSchemaId, fieldIdMap, dataQuery);
-                }
-                //pagination
-                if (pageable!=null) {
-                    buildPaginationQuery(pageable, dataQuery);
-                }
-                LOG.info("For datasetId {} dataQuery.toString() : {}", datasetId, dataQuery);
-                List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
-                result.setIdTableSchema(idTableSchema);
-                result.setRecords(recordVOS);
-                result.setTotalFilteredRecords(Long.valueOf(recordVOS.size()));
-                s3PathResolver.setTableName(S3_VALIDATION);
-                if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-                if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION, false)) {
-                    dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
-                }
-                    retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), s3PathResolver);
-                }
-            } else {
-                result.setTotalFilteredRecords(0L);
-                result.setTableValidations(new ArrayList<>());
-                result.setTotalRecords(0L);
-                result.setRecords(new ArrayList<>());
+    /**
+     * Gets table results and validations
+     * @param dataset
+     * @param tableSchemaVO
+     * @param pageable
+     * @param result
+     * @param s3PathResolver
+     * @param dataQuery
+     * @param recordsCountQuery
+     * @param validationTablePath
+     * @param filteredQuery
+     */
+    private void getTableResultsAndValidations(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, TableVO result, S3PathResolver s3PathResolver, StringBuilder dataQuery, StringBuilder recordsCountQuery, String validationTablePath, StringBuilder filteredQuery) {
+        Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);
+        result.setTotalFilteredRecords(totalFilteredRecords);
+
+        pageable = calculatePageable(pageable, totalFilteredRecords);
+        //pagination
+        if (pageable !=null) {
+            buildPaginationQuery(pageable, filteredQuery);
+        }
+        dataQuery.append(filteredQuery);
+        LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
+        List<RecordVO> recordVOS = getRecordVOS(dataset, tableSchemaVO, dataQuery);
+        result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
+        result.setRecords(recordVOS);
+
+        if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
+            if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION, false)) {
+                dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
+            }
+            if (recordVOS.size()>0) {
+                retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), validationTablePath);
             }
         }
-        result.setTotalRecords(totalRecords);
+    }
+
+    /**
+     * Finds dataCollection total records
+     * @param dataset
+     * @param tableSchemaVO
+     * @param pageable
+     * @param fields
+     * @param fieldValue
+     * @param dataset
+     * @param tableSchemaVO
+     * @param levelError
+     * @param qcCodes
+     * @return
+     */
+    private TableVO getDCTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) {
+        Long totalRecords = 0L;
+        Long datasetId = dataset.getId();
+        TableVO result = new TableVO();
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+        boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
+        LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
+        LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
+        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false)) {
+            s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
+            totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3PathResolver), Long.class);
+            result.setTotalRecords(totalRecords);
+            LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
+            pageable = calculatePageable(pageable, totalRecords);
+            Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+            FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
+            fieldSchemaProviderCode.setName("data_provider_code");
+            fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
+            StringBuilder filteredQuery = buildFilteredQuery(dataset, fields, fieldValue, fieldIdMap, levelError, qcCodes, null);
+            StringBuilder recordsCountQuery = new StringBuilder();
+            recordsCountQuery.append("select count(record_id) from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ").append(filteredQuery);
+            Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);
+            result.setTotalFilteredRecords(totalFilteredRecords);
+
+            pageable = calculatePageable(pageable, totalFilteredRecords);
+            //pagination
+            if (pageable !=null) {
+                buildPaginationQuery(pageable, filteredQuery);
+            }
+
+            StringBuilder dataQuery = new StringBuilder();
+            dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ");
+            dataQuery.append(filteredQuery);
+            LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
+            List<RecordVO> recordVOS = getRecordVOS(dataset, tableSchemaVO, dataQuery);
+            result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
+            result.setRecords(recordVOS);
+        } else {
+            setEmptyResults(result);
+        }
         return result;
+    }
+
+    /**
+     * Finds EU dataset total records
+     * @param dataset
+     * @param tableSchemaVO
+     * @param pageable
+     * @param fields
+     * @param fieldValue
+     * @param dataset
+     * @param tableSchemaVO
+     * @param levelError
+     * @param qcCodes
+     * @return
+     */
+    private TableVO getEUDatasetTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) {
+        Long totalRecords = 0L;
+        Long datasetId = dataset.getId();
+        TableVO result = new TableVO();
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_EU_SNAPSHOT_ROOT_PATH);
+        boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
+        LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
+        LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
+        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false)) {
+            s3PathResolver.setPath(S3_TABLE_NAME_EU_QUERY_PATH);
+            totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
+            result.setTotalRecords(totalRecords);
+            LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
+            Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+            FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
+            fieldSchemaProviderCode.setName("data_provider_code");
+            fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
+            StringBuilder filteredQuery = buildFilteredQuery(dataset, fields, fieldValue, fieldIdMap, levelError, qcCodes, null);
+            StringBuilder recordsCountQuery = new StringBuilder();
+            recordsCountQuery.append("select count(record_id) from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_EU_QUERY_PATH) + " t ").append(filteredQuery);
+            Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);
+            result.setTotalFilteredRecords(totalFilteredRecords);
+
+            pageable = calculatePageable(pageable, totalFilteredRecords);
+            //pagination
+            if (pageable !=null) {
+                buildPaginationQuery(pageable, filteredQuery);
+            }
+
+            StringBuilder dataQuery = new StringBuilder();
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+            dataQuery.append(filteredQuery);
+            LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
+            List<RecordVO> recordVOS = getRecordVOS(dataset, tableSchemaVO, dataQuery);
+            result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
+            result.setRecords(recordVOS);
+        } else {
+            setEmptyResults(result);
+        }
+        return result;
+    }
+
+    /**
+     * Get records
+     * @param dataset
+     * @param tableSchemaVO
+     * @param dataQuery
+     * @return
+     */
+    private List<RecordVO> getRecordVOS(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, StringBuilder dataQuery) {
+        DremioRecordMapper recordMapper = new DremioRecordMapper();
+        recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(dataset.getDatasetSchema()).setTableSchemaId(tableSchemaVO.getIdTableSchema());
+        List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
+        return recordVOS;
+    }
+
+    /**
+     * Sets empty results
+     * @param result
+     */
+    private static void setEmptyResults(TableVO result) {
+        result.setTotalFilteredRecords(0L);
+        result.setTableValidations(new ArrayList<>());
+        result.setTotalRecords(0L);
+        result.setRecords(new ArrayList<>());
+    }
+
+    /**
+     * Builds queries and returns data records
+     * @param dataset
+     * @param fields
+     * @param fieldValue
+     * @param fieldIdMap
+     * @param levelError
+     * @param qcCodes
+     * @param validationTablePath
+     * @return
+     */
+    private StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
+                                      ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath) {
+        StringBuilder query = new StringBuilder();
+        boolean levelErrorNotEmpty = levelError!=null && levelError.length>0 && levelError.length!=MAX_FILTERS;
+        boolean qcCodesNotEmpty = qcCodes!=null && qcCodes.length>0;
+        //filter value
+        if (!fieldValue.equals("")) {
+            buildFieldValueFilterQuery(fieldValue, fieldIdMap, query);
+        }
+        //filter by levelError
+        if (levelErrorNotEmpty && validationTablePath!=null) {
+            buildLevelErrorQueryFilter(fieldValue, query, levelError, validationTablePath);
+        }
+        //filter by qc_code
+        if (qcCodesNotEmpty && validationTablePath!=null) {
+            buildQcCodeFilterQuery(fieldValue, query, levelErrorNotEmpty, qcCodes, validationTablePath);
+        }
+        //sorting
+        if (fields !=null) {
+            buildSortQuery(fields, dataset.getDatasetSchema(), fieldIdMap, query);
+        }
+        return query;
+    }
+
+    /**
+     * Builds query for filtering records by qcCodes
+     * @param fieldValue
+     * @param dataQuery
+     * @param levelErrorNotEmpty
+     * @param qcCodes
+     * @param validationTablePath
+     */
+    private static void buildQcCodeFilterQuery(String fieldValue, StringBuilder dataQuery, boolean levelErrorNotEmpty, String[] qcCodes, String validationTablePath) {
+        List<String> qcCodesList = Arrays.asList(qcCodes);
+        String qcCodesValues = qcCodesList.stream() .map(s -> "\'" + s + "\'") .collect(Collectors.joining(", "));
+        if (!fieldValue.equals("") || levelErrorNotEmpty) {
+            dataQuery.append(" AND ");
+        } else {
+            dataQuery.append(" WHERE ");
+        }
+        dataQuery.append("(EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v WHERE t.RECORD_ID=v.RECORD_ID AND QC_CODE IN (").append(qcCodesValues).append(")))");
+    }
+
+    /**
+     * Builds query for filtering records by level error
+     * @param fieldValue
+     * @param dataQuery
+     * @param levelError
+     * @param validationTablePath
+     */
+    private static void buildLevelErrorQueryFilter(String fieldValue, StringBuilder dataQuery, ErrorTypeEnum[] levelError, String validationTablePath) {
+        List<ErrorTypeEnum> levelErrorList = Arrays.asList(levelError);
+        String levelErrorValues = levelErrorList.stream().map(s -> "\'" + s + "\'").collect(Collectors.joining(", "));
+        if (!fieldValue.equals("")) {
+            dataQuery.append(" AND ");
+        } else {
+            dataQuery.append(" WHERE ");
+        }
+        if (levelErrorList.size() == 1 && levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
+            dataQuery.append("(NOT EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v ").append(" WHERE t.RECORD_ID=v.RECORD_ID))");
+        } else {
+            dataQuery.append("(EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v WHERE t.RECORD_ID=v.RECORD_ID AND VALIDATION_LEVEL IN (").append(levelErrorValues).append("))");
+            if (levelErrorList.contains(ErrorTypeEnum.CORRECT)) {
+                dataQuery.append(" OR NOT EXISTS (SELECT DISTINCT v.RECORD_ID FROM ").append(validationTablePath).append(" v ").append(" WHERE t.RECORD_ID=v.RECORD_ID)");
+            }
+            dataQuery.append(")");
+        }
     }
 
     /**
      * retrieves validation results from dremio validation folder and maps them to fieldVO objects
      * @param recordVOS
      * @param tableName
-     * @param s3PathResolver
+     * @param validationTablePath
      */
-    private void retrieveValidations(List<RecordVO> recordVOS, String tableName, S3PathResolver s3PathResolver) {
+    private void retrieveValidations(List<RecordVO> recordVOS, String tableName, String validationTablePath) {
         StringBuilder validationQuery = new StringBuilder();
-        validationQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+        validationQuery.append("select * from " + validationTablePath);
         validationQuery.append(" where table_name='").append(tableName).append("'").append(" and record_id in ('");
         AtomicInteger count = new AtomicInteger();
         recordVOS.forEach(recordVO -> {
@@ -214,25 +425,66 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         validationQuery.append(")");
         List<DremioValidationVO> dremioValidationsVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioValidationMapper());
         for (DremioValidationVO dv : dremioValidationsVOS) {
-           List<RecordVO> records =  recordVOS.stream().filter(recordVO -> recordVO.getId().equals(dv.getRecordId())).collect(Collectors.toList());
-           records.forEach(vr -> vr.getFields().parallelStream().forEach(fieldVO -> {
-               if (fieldVO.getName().equals(dv.getFieldName())) {
-                   FieldValidationVO fieldValidationVO = new FieldValidationVO();
-                   List<FieldValidationVO> fieldValidations = new ArrayList<>();
-                   ValidationVO validationVO = new ValidationVO();
-                   validationVO.setId(dv.getPk());
-                   validationVO.setLevelError(dv.getValidationLevel());
-                   validationVO.setMessage(dv.getMessage());
-                   validationVO.setTypeEntity(dv.getValidationArea());
-                   fieldValidationVO.setValidation(validationVO);
-                   if (fieldVO.getFieldValidations()!=null) {
-                       fieldValidations = fieldVO.getFieldValidations();
-                   }
-                   fieldValidations.add(fieldValidationVO);
-                   fieldVO.setFieldValidations(fieldValidations);
-               }
-           }));
+            ValidationVO validationVO = getValidationVO(dv);
+            List<RecordVO> records =  recordVOS.stream().filter(recordVO -> recordVO.getId().equals(dv.getRecordId())).collect(Collectors.toList());
+            if (dv.getValidationArea().equals(EntityTypeEnum.FIELD) || dv.getValidationArea().equals(EntityTypeEnum.TABLE)) {
+                records.forEach(vr -> vr.getFields().parallelStream().forEach(fieldVO -> {
+                    if (fieldVO.getName().equals(dv.getFieldName())) {
+                        setFieldValidations(validationVO, fieldVO);
+                    }
+                }));
+            } else if (dv.getValidationArea().equals(EntityTypeEnum.RECORD)) {
+                records.forEach(recordVO -> {
+                    setRecordValidations(validationVO, recordVO);
+                });
+            }
         }
+    }
+
+    /**
+     * Sets record validations
+     * @param validationVO
+     * @param recordVO
+     */
+    private static void setRecordValidations(ValidationVO validationVO, RecordVO recordVO) {
+        List<RecordValidationVO> recordValidations = new ArrayList<>();
+        RecordValidationVO recordValidationVO = new RecordValidationVO();
+        recordValidationVO.setValidation(validationVO);
+        if (recordVO.getRecordValidations()!=null) {
+            recordValidations = recordVO.getRecordValidations();
+        }
+        recordValidations.add(recordValidationVO);
+        recordVO.setRecordValidations(recordValidations);
+    }
+
+    /**
+     * Sets field validations
+     * @param validationVO
+     * @param fieldVO
+     */
+    private static void setFieldValidations(ValidationVO validationVO, FieldVO fieldVO) {
+        FieldValidationVO fieldValidationVO = new FieldValidationVO();
+        List<FieldValidationVO> fieldValidations = new ArrayList<>();
+        fieldValidationVO.setValidation(validationVO);
+        if (fieldVO.getFieldValidations()!=null) {
+            fieldValidations = fieldVO.getFieldValidations();
+        }
+        fieldValidations.add(fieldValidationVO);
+        fieldVO.setFieldValidations(fieldValidations);
+    }
+
+    /**
+     * Get validationVO
+     * @param dv
+     * @return
+     */
+    private static ValidationVO getValidationVO(DremioValidationVO dv) {
+        ValidationVO validationVO = new ValidationVO();
+        validationVO.setId(dv.getPk());
+        validationVO.setLevelError(dv.getValidationLevel());
+        validationVO.setMessage(dv.getMessage());
+        validationVO.setTypeEntity(dv.getValidationArea());
+        return validationVO;
     }
 
     /**
@@ -297,8 +549,8 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
      * @param fieldIdMap
      * @param dataQuery
      */
-    private static void buildFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
-        dataQuery.append(" where ");
+    private static void buildFieldValueFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
+        dataQuery.append(" where (");
         List<String> headers = fieldIdMap.values().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
         LOG.info("headers : {}", headers);
         dataQuery.append(headers.get(0)).append(" like '%").append(fieldValue).append("%'");
@@ -306,6 +558,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         headers.remove(headers.get(0));
         LOG.info("headers : {}", headers);
         headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
+        dataQuery.append(")");
     }
 
     /**

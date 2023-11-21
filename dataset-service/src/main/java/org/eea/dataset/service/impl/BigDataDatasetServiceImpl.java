@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
@@ -54,7 +55,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 
 @ImportDataLakeCommons
@@ -107,12 +108,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     FileCommonUtils fileCommonUtils;
 
+    @Autowired
+    DatasetSchemaService datasetSchemaService;
+
 
     @Override
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
                               String fmeJobId, String filePathInS3) throws Exception {
-        String fileName = null;
+        String fileName = (file != null) ? file.getOriginalFilename() : null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
         File s3File = null;
@@ -148,10 +152,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 List<Long> datasetIds = new ArrayList<>();
                 datasetIds.add(datasetId);
                 jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId);
+                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId);
                 if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
                     LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
-                    datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
+                    datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, fileName);
                     throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
                 }
             }
@@ -177,9 +181,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
                 //todo handle other extensions
                 //delete objects ?
-            }
-            else{
-                fileName = file.getOriginalFilename();
             }
 
             //check if there is already an import job with status IN_PROGRESS for the specific datasetId
@@ -637,13 +638,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         Arrays.stream(folder.listFiles((f, p) -> StringUtils.endsWithAny(p, extensionsToDelete))).forEach(File::delete);
     }
 
-    /**
-     * Generate s3 presigned Url for import
-     *
-     * @param datasetId the dataset id
-     * @param dataflowId the dataflow id
-     * @param providerId the provider id
-     */
     @Override
     public String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId){
         if (dataflowId == null){
@@ -657,4 +651,42 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String filePath = s3Service.getS3Path(s3PathResolver);
         return s3Helper.generatePresignedUrl(filePath);
     }
+
+    @Override
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName) throws Exception {
+        if(tableSchemaName == null) {
+            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+            tableSchemaName = datasetSchemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
+        }
+        if(providerId == null){
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            providerId = dataSetMetabaseVO.getDataProviderId();
+        }
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
+        //path in s3 for the folder that contains the stored csv files
+        String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+
+        //remove csv files that are related to the table
+        parquetConverterService.removeCsvFilesThatWillBeReplaced(s3PathResolver, tableSchemaName, s3PathForCsvFolder);
+
+        //remove folders that contain the previous parquet files
+        if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            //demote table folder
+            dremioHelperService.demoteFolderOrFile(s3PathResolver, tableSchemaName, false);
+            s3Helper.deleteFolder(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        }
+    }
+
+    @Override
+    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId) throws Exception {
+        if(providerId == null){
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            providerId = dataSetMetabaseVO.getDataProviderId();
+        }
+        List<TableSchemaIdNameVO> tableSchemaIdNameVOs = datasetSchemaService.getTableSchemasIds(datasetId);
+        for (TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOs){
+            deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema());
+        }
+    }
+
 }

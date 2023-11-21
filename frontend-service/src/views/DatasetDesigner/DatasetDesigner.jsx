@@ -131,6 +131,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       selectedRuleId: '',
       selectedRuleLevelError: '',
       selectedRuleMessage: '',
+      selectedShortCode: '',
       selectedTableSchemaId: null,
       tableSchemaId: QuerystringUtils.getUrlParamValue('tab')
     },
@@ -918,13 +919,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         isGroupedValidationSelected: false,
         selectedRuleId: '',
         selectedRuleLevelError: '',
-        selectedRuleMessage: ''
+        selectedRuleMessage: '',
+        selectedShortCode: ''
       }
     });
 
   const onSelectValidation = (
     tableSchemaId,
     selectedRuleId = '',
+    selectedShortCode = '',
     selectedRuleMessage = '',
     selectedRuleLevelError = ''
   ) => {
@@ -937,6 +940,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         selectedRuleId,
         selectedRuleLevelError,
         selectedRuleMessage,
+        selectedShortCode,
         selectedTableSchemaId: tableSchemaId,
         tableSchemaId
       }
@@ -1810,6 +1814,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             selectedRuleId={dataViewerOptions.selectedRuleId}
             selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
             selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+            selectedShortCode={dataViewerOptions.selectedShortCode}
             selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
             setActiveTableSchemaId={tabSchemaId =>
               designerDispatch({
@@ -1914,6 +1919,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload
             accept={DatasetUtils.getValidExtensions({ validExtensions: designerState.selectedImportExtension })}
+            bigData={designerState.bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogHeader={selectedCustomImportIntegration.name}
