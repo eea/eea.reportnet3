@@ -156,31 +156,29 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
                 GenericRecord record = r.read();
                 int size = record.getSchema().getFields().size();
-                if (size > 0) {
-                    List<String> headers =
-                        record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                    LOG.info("exportFilenames headers {}", headers);
-                    do {
-                        if (j == 0) {
-                            bufferedWriter.write("{");
+                List<String> headers = new ArrayList<>();
+
+                while ((record = r.read()) != null) {
+                    if (j == 0) {
+                        headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+                        bufferedWriter.write("{");
+                    } else {
+                        bufferedWriter.write(",\n{");
+                    }
+                    for (int i = 0; i < size; i++) {
+                        String recordValue = record.get(i).toString();
+                        boolean isNumeric = pattern.matcher(recordValue).matches();
+                        bufferedWriter.write("\"" + headers.get(i) + "\":");
+                        if (isNumeric) {
+                            bufferedWriter.write(recordValue);
                         } else {
-                            bufferedWriter.write(",\n{");
+                            bufferedWriter.write("\"" + recordValue + "\"");
                         }
-                        for (int i = 0; i < size; i++) {
-                            String recordValue = record.get(i).toString();
-                            boolean isNumeric = pattern.matcher(recordValue).matches();
-                            bufferedWriter.write("\"" + headers.get(i) + "\":");
-                            if (isNumeric) {
-                                bufferedWriter.write(recordValue);
-                            } else {
-                                bufferedWriter.write("\"" + recordValue + "\"");
-                            }
-                            if (i < size - 1) {
-                                bufferedWriter.write(",");
-                            }
+                        if (i < size - 1) {
+                            bufferedWriter.write(",");
                         }
-                        bufferedWriter.write("}");
-                    } while ((record = r.read()) == null);
+                    }
+                    bufferedWriter.write("}");
                 }
             }
             bufferedWriter.write("\n]}");
