@@ -155,17 +155,17 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
                 Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
                 GenericRecord record = r.read();
-                int size = record.getSchema().getFields().size();
                 List<String> headers = new ArrayList<>();
-
+                int headersSize = 0;
                 while ((record = r.read()) != null) {
                     if (j == 0) {
                         headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+                        headersSize = headers.size();
                         bufferedWriter.write("{");
                     } else {
                         bufferedWriter.write(",\n{");
                     }
-                    for (int i = 0; i < size; i++) {
+                    for (int i = 0; i < headersSize; i++) {
                         String recordValue = record.get(i).toString();
                         boolean isNumeric = pattern.matcher(recordValue).matches();
                         bufferedWriter.write("\"" + headers.get(i) + "\":");
@@ -174,7 +174,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         } else {
                             bufferedWriter.write("\"" + recordValue + "\"");
                         }
-                        if (i < size - 1) {
+                        if (i < headersSize - 1) {
                             bufferedWriter.write(",");
                         }
                     }
