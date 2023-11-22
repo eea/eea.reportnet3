@@ -182,7 +182,6 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     }
                     if (j < headersSize - 1) {
                         bufferedWriter.write("},\n");
-                        counter++;
                     } else {
                         bufferedWriter.write("}");
                     }
