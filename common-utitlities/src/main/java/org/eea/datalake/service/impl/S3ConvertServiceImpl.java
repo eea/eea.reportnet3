@@ -99,7 +99,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
         LOG.info("Creating file for export: {}", jsonFile);
 
-        try (FileWriter fw = new FileWriter(jsonFile, true);
+        try (FileWriter fw = new FileWriter(jsonFile);
             BufferedWriter bw = new BufferedWriter(fw)) {
             convertParquetToJSON(exportFilenames, tableName, datasetId, bw);
         } catch (Exception e) {
