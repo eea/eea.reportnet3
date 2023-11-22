@@ -157,7 +157,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
 
                 Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-                GenericRecord record = r.read();
+                GenericRecord record;
                 while ((record = r.read()) != null) {
                     if (counter == 0) {
                         headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
