@@ -145,6 +145,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             bufferedWriter.write("{\"records\":[\n");
             List<String> headers = new ArrayList<>();
             int headersSize = 0;
+            int counter = 0;
 
             for (int j = 0; j < exportFilenames.size(); j++) {
                 File parquetFile =
@@ -155,7 +156,6 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 ParquetReader<GenericRecord> r =
                     AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
 
-                int counter = 0;
                 Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
                 GenericRecord record = r.read();
                 while ((record = r.read()) != null) {
@@ -180,11 +180,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                             bufferedWriter.write(",");
                         }
                     }
-                    if (j < headersSize - 1) {
-                        bufferedWriter.write("},\n");
-                    } else {
-                        bufferedWriter.write("}");
-                    }
+                    bufferedWriter.write("}");
                 }
             }
             bufferedWriter.write("\n]}");
