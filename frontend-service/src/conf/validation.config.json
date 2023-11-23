@@ -233,11 +233,11 @@
       "!=": "FIELD_DIST_MONTH"
     },
     "year": {
-      ">": "FIELD_GT_YEAR_DATETIME",
-      "<": "FIELD_LT_YEAR_DATETIME",
-      ">=": "FIELD_GTEQ_YEAR_DATETIME",
-      "<=": "FIELD_LTEQ_YEAR_DATETIME",
-      "=": "FIELD_EQ_YEAR_DATETIME",
+      ">": "FIELD_GT_YEAR",
+      "<": "FIELD_LT_YEAR",
+      ">=": "FIELD_GTEQ_YEAR",
+      "<=": "FIELD_LTEQ_YEAR",
+      "=": "FIELD_EQ_YEAR",
       "!=": "FIELD_DIST_YEAR"
     },
     "dayDateTime": {
