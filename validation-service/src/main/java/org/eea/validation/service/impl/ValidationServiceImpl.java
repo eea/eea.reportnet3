@@ -1,28 +1,21 @@
 package org.eea.validation.service.impl;
 
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
-import javax.transaction.Transactional;
+import com.opencsv.CSVWriter;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
+import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.S3ConvertService;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
@@ -41,25 +34,9 @@ import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.exception.EEAInvalidSQLException;
-import org.eea.validation.persistence.data.domain.DatasetValidation;
-import org.eea.validation.persistence.data.domain.DatasetValue;
-import org.eea.validation.persistence.data.domain.FieldValidation;
-import org.eea.validation.persistence.data.domain.FieldValue;
-import org.eea.validation.persistence.data.domain.RecordValidation;
-import org.eea.validation.persistence.data.domain.RecordValue;
-import org.eea.validation.persistence.data.domain.TableValidation;
-import org.eea.validation.persistence.data.domain.TableValue;
-import org.eea.validation.persistence.data.domain.Validation;
+import org.eea.validation.persistence.data.domain.*;
 import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
-import org.eea.validation.persistence.data.repository.DatasetRepository;
-import org.eea.validation.persistence.data.repository.FieldRepository;
-import org.eea.validation.persistence.data.repository.FieldValidationRepository;
-import org.eea.validation.persistence.data.repository.RecordRepository;
-import org.eea.validation.persistence.data.repository.RecordValidationRepository;
-import org.eea.validation.persistence.data.repository.TableRepository;
-import org.eea.validation.persistence.data.repository.TableValidationRepository;
-import org.eea.validation.persistence.data.repository.ValidationDatasetRepository;
-import org.eea.validation.persistence.data.repository.ValidationRepository;
+import org.eea.validation.persistence.data.repository.*;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -84,7 +61,14 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import com.opencsv.CSVWriter;
+
+import javax.transaction.Transactional;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.Future;
+
+import static org.eea.utils.LiteralConstants.S3_VALIDATION;
+import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
 
 /**
  * The Class ValidationServiceImpl.
@@ -138,6 +122,12 @@ public class ValidationServiceImpl implements ValidationService {
   /** The path public file. */
   @Value("${validationExportPathFile}")
   private String pathPublicFile;
+
+  /**
+   * The path export DL.
+   */
+  @Value("${exportDLPath}")
+  private String exportDLPath;
 
   /** The kie base manager. */
   @Autowired
@@ -218,6 +208,18 @@ public class ValidationServiceImpl implements ValidationService {
   /** The sql validation utils. */
   @Autowired
   private SQLValidationUtils sqlValidationUtils;
+
+  @Autowired
+  private S3ConvertService s3ConvertService;
+
+  @Autowired
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  @Autowired
+  private S3Helper s3Helper;
+
+  @Autowired
+  private DremioHelperService dremioHelperService;
 
 
   /**
@@ -806,6 +808,32 @@ public class ValidationServiceImpl implements ValidationService {
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportValidationFile when releasing notification (DOWNLOAD_VALIDATIONS_COMPLETED_EVENT) for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
+    }
+  }
+
+  @Override
+  public void exportValidationFileDL(Long datasetId) throws EEAException {
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
+    s3PathResolver.setPath(S3_VALIDATION_TABLE_PATH);
+    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false)) {
+      String creatingFileError =
+              String.format("Failed generating CSV file with name %s using datasetID %s",
+                      S3_VALIDATION, datasetId);
+      // Creates notification VO and passes the datasetID, the filename and the datasetType
+      NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+              .fileName(S3_VALIDATION).datasetType(dataset.getDatasetTypeEnum()).error(creatingFileError).build();
+      try {
+
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT,
+                null, notificationVO);
+      } catch (Exception e) {
+        LOG_ERROR.info("Error exporting validation table data from dataset Id {}.", datasetId);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
+                null, notificationVO);
+        throw e;
+      }
     }
   }
 
