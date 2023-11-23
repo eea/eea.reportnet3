@@ -241,7 +241,6 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                                                       SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
         List<String> recordIds = new ArrayList<>();
         Schema schema = getSchema();
-        int ruleIdLength = ruleVO.getRuleId().length();
         while (rs.next()) {
             boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
             if (!isValid) {
