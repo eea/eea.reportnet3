@@ -354,6 +354,10 @@ public enum EventType {
   VALIDATE_RULES_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "validate_rules_completed_event", true),
 
+  /** The validate all rules finish event. */
+  VALIDATE_ALL_RULES_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "validate_all_rules_completed_event", true),
+
   /** The copy dataset schema completed event. */
   COPY_DATASET_SCHEMA_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_completed_event", true),

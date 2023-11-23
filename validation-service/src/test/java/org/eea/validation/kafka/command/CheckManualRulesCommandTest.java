@@ -10,6 +10,7 @@ import java.util.Map;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -22,13 +23,17 @@ import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.io.KafkaSender;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.notification.factory.NotificableEventFactory;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
 import org.eea.validation.service.RuleExpressionService;
+import org.eea.validation.service.RulesService;
+import org.eea.validation.service.impl.RulesServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,13 +52,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CheckManualRulesCommandTest {
-
   /**
    * The Check manual rules command.
    */
   @InjectMocks
   private CheckManualRulesCommand CheckManualRulesCommand;
 
+  @Mock
+  private RulesServiceImpl rulesService;
   /**
    * The kafka sender utils.
    */
@@ -126,10 +133,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeTest() throws EEAException {
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
+  public void allQcRuleValidation_executeTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -161,21 +165,11 @@ public class CheckManualRulesCommandTest {
     eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
     eeaEventVO.setData(data);
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
-    Mockito.when(schemasRepository.findFieldSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(fieldSchema);
-
-    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
@@ -184,7 +178,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeRecordTest() throws EEAException {
+  public void allQcRuleValidation_executeRecordTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -222,21 +216,12 @@ public class CheckManualRulesCommandTest {
     eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
     eeaEventVO.setData(data);
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
 
-    Mockito.when(schemasRepository.findRecordSchema(Mockito.any(), Mockito.any()))
-        .thenReturn(recordSchema);
-
-    Mockito.when(ruleExpressionService.isDataTypeCompatible(Mockito.anyString(), Mockito.any(),
-        Mockito.any())).thenReturn(true);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
@@ -245,10 +230,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeDefaultDatasetTest() throws EEAException {
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
+  public void allQcRuleValidation_executeDefaultDatasetTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -286,19 +268,11 @@ public class CheckManualRulesCommandTest {
     eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
     eeaEventVO.setData(data);
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
-
-    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
@@ -307,10 +281,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeTableTest() throws EEAException {
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
+  public void allQcRuleValidation_executeTableTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -350,19 +321,11 @@ public class CheckManualRulesCommandTest {
     eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
     eeaEventVO.setData(data);
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
-
-    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
@@ -371,7 +334,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeSQLTest() throws EEAException {
+  public void allQcRuleValidation_executeSQLTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -432,19 +395,11 @@ public class CheckManualRulesCommandTest {
     tableVO.setNameTableSchema("");
     schemaVO.setTableSchemas(Arrays.asList(tableVO));
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
-
-    Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
-        .thenReturn(schemaVO);
-    Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
@@ -453,7 +408,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeSQLFieldTest() throws EEAException {
+  public void allQcRuleValidation_executeSQLFieldTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -514,19 +469,11 @@ public class CheckManualRulesCommandTest {
     tableVO.setNameTableSchema("");
     schemaVO.setTableSchemas(Arrays.asList(tableVO));
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
-
-    Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
-        .thenReturn(schemaVO);
-    Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
@@ -535,7 +482,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeSQLRecordTest() throws EEAException {
+  public void allQcRuleValidation_executeSQLRecordTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -596,19 +543,11 @@ public class CheckManualRulesCommandTest {
     tableVO.setNameTableSchema("");
     schemaVO.setTableSchemas(Arrays.asList(tableVO));
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
-
-    Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
-        .thenReturn(schemaVO);
-    Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(rulesRepository, Mockito.times(1)).updateRule(Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
@@ -617,10 +556,7 @@ public class CheckManualRulesCommandTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void executeSQLQueryErrorTest() throws EEAException {
-
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
+  public void allQcRuleValidation_executeSQLQueryErrorTest() throws EEAException {
 
     Map<String, Object> data = new HashMap<>();
     data.put("dataset_id", "1");
@@ -681,19 +617,11 @@ public class CheckManualRulesCommandTest {
     tableVO.setNameTableSchema("");
     schemaVO.setTableSchemas(Arrays.asList(tableVO));
 
-    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
-        .thenReturn(schema);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
-        .thenReturn(dsMetabaseVO);
-    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
-
-    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
-    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.doNothing().when(rulesService).validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
 
     CheckManualRulesCommand.execute(eeaEventVO);
-    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(rulesService, Mockito.times(1))
+        .validateAllRules(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.anyString());
   }
 
   /**
