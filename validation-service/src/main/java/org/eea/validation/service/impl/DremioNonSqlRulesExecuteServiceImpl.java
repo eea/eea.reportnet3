@@ -124,7 +124,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
             runRuleAndCreateParquet(createParquetWithSQL, parameters, fieldName, fileName, rs, dataTableResolver, validationResolver, ruleVO, method, object);
         } catch (Exception e1) {
-            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {},{}", ruleId, datasetId, tableName, e1.getMessage());
+            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
         }
     }

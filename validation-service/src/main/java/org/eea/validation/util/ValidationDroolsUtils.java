@@ -65,7 +65,7 @@ public class ValidationDroolsUtils {
     Boolean validationResult = false;
     // this , checks if the user upload a file and in this field, the field have a , in the last
     // position(that is really dificult to happend but we put it just in case)
-    if (',' != value.charAt(value.length() - 1)) {
+    if (!value.isEmpty() && ',' != value.charAt(value.length() - 1)) {
       // we delete the first character and the last one because we receive a string with [] values
       final List<String> arrayValue = Arrays.asList(value.split(";"));
       // we trim the codelistValues to clean blank spaces

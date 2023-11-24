@@ -84,7 +84,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private static final String YEAR = "Year";
     private static final String COMMA = ",";
     private static final String OPEN_BRACKET = "[";
-    private static final String SINGLE_QUOTE ="'";
+    private static final String SINGLE_QUOTE ="\'";
+    private static final String DOUBLE_QUOTE ="\"";
 
     @Autowired
     public DremioExpressionRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService, DatasetSchemaControllerZuul datasetSchemaControllerZuul,
@@ -136,7 +137,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
             runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver);
         } catch (Exception e1) {
-            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {},{}", ruleId, datasetId, tableName, e1.getMessage());
+            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
         }
     }
@@ -240,7 +241,6 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                                                       SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
         List<String> recordIds = new ArrayList<>();
         Schema schema = getSchema();
-        int ruleIdLength = ruleVO.getRuleId().length();
         while (rs.next()) {
             boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
             if (!isValid) {
@@ -577,7 +577,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 list.add(fieldName);
             }
             headerNames.put(methodName, list);
-        } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET) && !parameter.startsWith(SINGLE_QUOTE)) {
+        } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET) && !parameter.startsWith(SINGLE_QUOTE) && !parameter.startsWith(DOUBLE_QUOTE)) {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
             List<String> list = headerNames.get(methodName);
             if (list!=null) {
@@ -690,7 +690,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         } else if (methodName.contains(DAY) || methodName.contains(MONTH) || methodName.contains(YEAR)) {
             result = md.invoke(object, firstValue, pm.get(1));
         } else {
-            if (pm.get(1) instanceof String && ((String) pm.get(1)).startsWith(SINGLE_QUOTE)) {
+            if (pm.get(1) instanceof String && (((String) pm.get(1)).startsWith(SINGLE_QUOTE) || ((String) pm.get(1)).startsWith(DOUBLE_QUOTE))) {
                 processParameterList(pm, (String) pm.get(1));
             }
             result = md.invoke(object, firstValue, pm.get(1));
