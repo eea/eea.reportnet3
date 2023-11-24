@@ -267,4 +267,10 @@ public interface ValidationService {
    */
   void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors);
 
+  /**
+   * Gets the rule message in case of big data
+   * @param datasetSchema
+   * @param errors
+   */
+  void getRuleMessageDL(String datasetSchema, List<GroupValidationVO> errors);
 }

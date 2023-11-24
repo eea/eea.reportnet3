@@ -473,29 +473,6 @@ public class ValidationControllerImpl implements ValidationController {
     }
   }
 
-  @Override
-  @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
-  @PostMapping(value = "/exportDL/{datasetId}")
-  @ApiOperation(value = "Export all the validations for a given dataset grouped by code",
-          hidden = true)
-  public void exportValidationDataCSVDL(@ApiParam(value = "Dataset id used in the export process",
-          example = "1") @PathVariable("datasetId") Long datasetId) throws Exception {
-    LOG.info("Export dataset validation data from datasetId {}, with type .csv", datasetId);
-    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-    userNotificationContentVO.setDatasetId(datasetId);
-    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_VALIDATIONS_START",
-            userNotificationContentVO);
-
-    try {
-      validationService.exportValidationFileDL(datasetId);
-    } catch (Exception e) {
-      LOG_ERROR.error("Error exporting bigData validation data from the dataset {}.  Message: {}",
-              datasetId, e.getMessage());
-      throw e;
-    }
-  }
-
   /**
    * Download file.
    *

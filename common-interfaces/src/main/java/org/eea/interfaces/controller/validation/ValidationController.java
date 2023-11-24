@@ -133,14 +133,6 @@ public interface ValidationController {
   void exportValidationDataCSV(@PathVariable("datasetId") Long datasetId);
 
   /**
-   * Export validation data CSV for big data.
-   *
-   * @param datasetId the dataset id
-   */
-  @PostMapping(value = "/exportDL/{datasetId}")
-  void exportValidationDataCSVDL(@PathVariable("datasetId") Long datasetId) throws Exception;
-
-  /**
    * Download file.
    *
    * @param datasetId the dataset id

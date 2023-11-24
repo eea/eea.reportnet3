@@ -11,10 +11,12 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
@@ -42,6 +44,7 @@ import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.DataLakeValidationService;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.util.KieBaseManager;
 import org.eea.validation.util.RulesErrorUtils;
@@ -221,6 +224,11 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DremioHelperService dremioHelperService;
 
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private DataLakeValidationService dataLakeValidationService;
 
   /**
    * Run dataset validations.
@@ -892,6 +900,28 @@ public class ValidationServiceImpl implements ValidationService {
     return validations;
   }
 
+  private FailedValidationsDatasetVO getBigDataValidationsByDataset(DataSetMetabaseVO dataSetMetabaseVO) {
+    FailedValidationsDatasetVO validations = new FailedValidationsDatasetVO();
+
+    validations.setErrors(new ArrayList<>());
+    validations.setIdDatasetSchema(dataSetMetabaseVO.getDatasetSchema());
+    validations.setIdDataset(dataSetMetabaseVO.getId());
+    List<GroupValidationVO> errors = new ArrayList<>();
+
+    S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId()!=null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), S3_VALIDATION);
+    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false)) {
+       errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
+              "", null, "", false, false);
+    }
+
+    getRuleMessageDL(dataSetMetabaseVO.getDatasetSchema(), errors);
+    validations.setErrors(errors);
+
+    validations.setTotalRecords(Long.valueOf(errors.size()));
+
+    return validations;
+  }
+
   /**
    * Gets the rule message.
    *
@@ -909,6 +939,30 @@ public class ValidationServiceImpl implements ValidationService {
           if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
               || EntityTypeEnum.RECORD == validation.getTypeEntity())
               && validation.getIdRule().equals(rule.getRuleId().toString())) {
+            validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Gets the rule message.
+   *
+   * @param datasetSchema
+   * @param errors the errors
+   * @return the rule message
+   */
+  @Override
+  public void getRuleMessageDL(String datasetSchema, List<GroupValidationVO> errors) {
+    RulesSchema rules =
+            rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchema));
+    if (null != rules && null != rules.getRules()) {
+      for (GroupValidationVO validation : errors) {
+        for (Rule rule : rules.getRules()) {
+          if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
+                  || EntityTypeEnum.RECORD == validation.getTypeEntity())
+                  && validation.getShortCode().equals(rule.getShortCode().toString())) {
             validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
           }
         }
@@ -936,10 +990,10 @@ public class ValidationServiceImpl implements ValidationService {
    * @param nHeaders the n headers
    * @return the string[]
    */
-  private String[] fillValidationErrorData(GroupValidationVO error, DatasetValue dataset,
+  private String[] fillValidationErrorData(GroupValidationVO error, String datasetSchema,
       int nHeaders) {
     RulesSchemaVO rulesVO =
-        ruleservice.getActiveRulesSchemaByDatasetId(dataset.getIdDatasetSchema());
+        ruleservice.getActiveRulesSchemaByDatasetId(datasetSchema);
     List<RuleVO> ruleListVO = rulesVO.getRules();
     String[] fieldsToWrite = new String[nHeaders];
 
@@ -980,9 +1034,15 @@ public class ValidationServiceImpl implements ValidationService {
   private void fillValidationDataCSV(Long datasetId, int nHeaders, CSVWriter csvWriter,
       NotificationVO notificationVO) throws EEAException {
     try {
-      DatasetValue dataset = getDatasetValuebyId(datasetId);
-      FailedValidationsDatasetVO validations = getValidationsByDatasetValue(dataset, datasetId);
-
+      FailedValidationsDatasetVO validations = null;
+      DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+      if (dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+        validations = getBigDataValidationsByDataset(dataSetMetabaseVO);
+      } else {
+        DatasetValue dataset = getDatasetValuebyId(datasetId);
+        validations = getValidationsByDatasetValue(dataset, datasetId);
+      }
 
       if (CollectionUtils.isEmpty(validations.getErrors())) {
         LOG_ERROR.error(
@@ -996,7 +1056,7 @@ public class ValidationServiceImpl implements ValidationService {
 
           GroupValidationVO castedError = (GroupValidationVO) error;
 
-          csvWriter.writeNext(fillValidationErrorData(castedError, dataset, nHeaders), false);
+          csvWriter.writeNext(fillValidationErrorData(castedError, dataSetMetabaseVO.getDatasetSchema(), nHeaders), false);
         }
       }
     }
