@@ -137,7 +137,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
             runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver);
         } catch (Exception e1) {
-            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {},{}", ruleId, datasetId, tableName, e1.getMessage());
+            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
         }
     }
