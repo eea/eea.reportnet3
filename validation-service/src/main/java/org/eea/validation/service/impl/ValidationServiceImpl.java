@@ -824,7 +824,7 @@ public class ValidationServiceImpl implements ValidationService {
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
     s3PathResolver.setPath(S3_VALIDATION_TABLE_PATH);
-    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false)) {
+    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
       String creatingFileError =
               String.format("Failed generating CSV file with name %s using datasetID %s",
                       S3_VALIDATION, datasetId);
@@ -909,7 +909,7 @@ public class ValidationServiceImpl implements ValidationService {
     List<GroupValidationVO> errors = new ArrayList<>();
 
     S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId()!=null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), S3_VALIDATION);
-    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName(), false)) {
+    if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
        errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
               "", null, "", false, false);
     }
