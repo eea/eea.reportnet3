@@ -72,13 +72,13 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
-        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName, importFolder);
+    public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
+        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
         if (directoryItems!=null) {
             LOG.info("directoryItems : {}", directoryItems.toString());
             LOG.info("directoryItems getChildren : {}", directoryItems.getChildren());
             Integer itemPosition;
-            if (importFolder) {
+            if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 8;
             } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 4;
@@ -102,9 +102,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
+    public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName) {
         String directoryPath = null;
-        if(importFolder) {
+        if(S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
                 S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())
@@ -131,11 +131,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public String getFolderId(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
+    public String getFolderId(S3PathResolver s3PathResolver, String folderName) {
         String folderId = null;
-        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName, importFolder);
+        DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
         if (directoryItems!=null) {
-            Integer itemPosition = (importFolder == true) ? 8 : 6;
+            Integer itemPosition;
+            if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 8;
+            } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
+                itemPosition = 4;
+            } else {
+                itemPosition = 6;
+            }
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
                 DremioDirectoryItem item = itemOptional.get();
@@ -147,11 +154,11 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
+    public void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName) {
         String directoryPath;
         String folderId;
         DremioPromotionRequestBody requestBody;
-        if(importFolder) {
+        if(S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
             String[] path = directoryPath.split("/");
             requestBody = new DremioCSVPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioCSVPromotionRequestBody.Format(CSV_FORMAT_TYPE, true));
@@ -162,14 +169,14 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             requestBody = new DremioParquetPromotionRequestBody(ENTITY_TYPE, DREMIO_CONSTANT + directoryPath, path, DATASET_TYPE, new DremioParquetPromotionRequestBody.Format(PARQUET_FORMAT_TYPE));
         }
 
-        if(checkFolderPromoted(s3PathResolver, folderName, importFolder)){
+        if(checkFolderPromoted(s3PathResolver, folderName)){
             LOG.info("Folder {} is already promoted", directoryPath);
             return;
         }else {
             LOG.info("Folder {} is not promoted ", directoryPath);
         }
 
-        folderId = getFolderId(s3PathResolver, folderName, importFolder);
+        folderId = getFolderId(s3PathResolver, folderName);
 
         try {
             dremioApiController.promote(token, folderId, requestBody);
@@ -185,19 +192,13 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder) {
-        String directoryPath;
-        if(importFolder) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_IMPORT_FILE_PATH);
-        }
-        else{
-            directoryPath = S3_DEFAULT_BUCKET_PATH + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH);
-        }
-        if(!checkFolderPromoted(s3PathResolver, folderName, importFolder)){
+    public void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName) {
+        String directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, s3PathResolver.getPath());
+        if(!checkFolderPromoted(s3PathResolver, folderName)){
             LOG.info("Folder {} is not promoted", directoryPath);
             return;
         }
-        String folderId = getFolderId(s3PathResolver, folderName, importFolder);
+        String folderId = getFolderId(s3PathResolver, folderName);
         try {
             dremioApiController.demote(token, folderId);
         } catch (FeignException e) {
@@ -209,31 +210,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             }
         }
         LOG.info("Demoted folder {}", directoryPath);
-    }
-
-    @Override
-    public void removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder){
-        String tablePath = null;
-        if(importFolder){
-            s3PathResolver.setPath(S3_IMPORT_QUERY_PATH);
-            tablePath = s3Service.getS3Path(s3PathResolver);
-        }
-        else{
-            s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
-            tablePath = s3Service.getS3Path(s3PathResolver);
-        }
-
-        if(!checkFolderPromoted(s3PathResolver, folderName, importFolder)){
-            LOG.info("The file or folder in path {} is not promoted", tablePath);
-            return;
-        }
-        String dropTableQuery = "DROP TABLE " + tablePath;
-        try{
-            dremioJdbcTemplate.execute(dropTableQuery);
-        }
-        catch (Exception e){
-            LOG.error("Could not drop table {}", tablePath);
-        }
     }
 
     @Override

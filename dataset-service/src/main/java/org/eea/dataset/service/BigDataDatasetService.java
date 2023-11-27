@@ -50,7 +50,8 @@ public interface BigDataDatasetService {
      * @param datasetId the dataset id
      * @param dataflowId the dataflow id
      * @param providerId the provider id
+     * @param deletePrefilledData the deletePrefilledTables
      */
-    void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId) throws Exception;
+    void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables) throws Exception;
 
 }

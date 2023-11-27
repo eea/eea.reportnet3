@@ -119,4 +119,12 @@ public interface S3Helper {
      * @return the url
      */
     String generatePresignedUrl(String filePath);
+
+    /**
+     * Copies a file from one destination to another
+     * @param source
+     * @param destination
+     * @return
+     */
+    void copyFileToAnotherDestination(String source, String destination);
 }
