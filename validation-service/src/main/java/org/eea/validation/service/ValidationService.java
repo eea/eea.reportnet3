@@ -1,28 +1,22 @@
 package org.eea.validation.service;
 
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.multitenancy.DatasetId;
-import org.eea.validation.persistence.data.domain.DatasetValidation;
-import org.eea.validation.persistence.data.domain.DatasetValue;
-import org.eea.validation.persistence.data.domain.FieldValidation;
-import org.eea.validation.persistence.data.domain.FieldValue;
-import org.eea.validation.persistence.data.domain.RecordValidation;
-import org.eea.validation.persistence.data.domain.RecordValue;
-import org.eea.validation.persistence.data.domain.TableValidation;
-import org.eea.validation.persistence.data.domain.TableValue;
+import org.eea.validation.persistence.data.domain.*;
 import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.kie.api.KieBase;
 import org.kie.api.runtime.KieSession;
 import org.springframework.data.domain.Pageable;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * The Interface ValidationService.
@@ -248,6 +242,13 @@ public interface ValidationService {
   void exportValidationFile(@DatasetId Long datasetId) throws EEAException, IOException;
 
   /**
+   * Export validation file for big data.
+   *
+   * @param datasetId the dataset id
+   */
+  void exportValidationFileDL(Long datasetId) throws EEAException;
+
+  /**
    * Download exported file.
    *
    * @param datasetId the dataset id
@@ -266,4 +267,10 @@ public interface ValidationService {
    */
   void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors);
 
+  /**
+   * Gets the rule message in case of big data
+   * @param datasetSchema
+   * @param errors
+   */
+  void getRuleMessageDL(String datasetSchema, List<GroupValidationVO> errors);
 }

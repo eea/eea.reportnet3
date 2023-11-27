@@ -72,7 +72,6 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     private static final int MAX_FILTERS = 5;
 
     @Override
-    @Transactional
     public TableVO getTableValuesDLById(final Long datasetId, final String idTableSchema, Pageable pageable, final String fields, ErrorTypeEnum[] levelError,
                                         String[] qcCodes, String fieldSchema, String fieldValue) throws EEAException {
         TableVO result;
