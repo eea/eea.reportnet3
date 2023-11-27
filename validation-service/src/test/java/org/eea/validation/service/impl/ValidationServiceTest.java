@@ -5,6 +5,7 @@ package org.eea.validation.service.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -22,9 +23,12 @@ import org.apache.commons.io.FileUtils;
 import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
@@ -279,6 +283,10 @@ public class ValidationServiceTest {
   /** The rule service impl. */
   @Mock
   private RulesServiceImpl ruleServiceImpl;
+  @Mock
+  private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /**
    * Inits the mocks.
@@ -1029,6 +1037,12 @@ public class ValidationServiceTest {
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean())).thenReturn(errorList);
     when(ruleServiceImpl.getActiveRulesSchemaByDatasetId(Mockito.any())).thenReturn(rulesSchemaVO);
+
+    when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(anyLong())).thenReturn(dataSetMetabase);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setId(1L);
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(dataFlowVO);
     validationServiceImpl.exportValidationFile(1L);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
