@@ -792,7 +792,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
         deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
       }
       else {
@@ -801,6 +801,12 @@ public class DatasetControllerImpl implements DatasetController {
       }
       LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
+      // Release the lock manually
+      Map<String, Object> deleteDatasetValues = new HashMap<>();
+      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+              LockSignature.DELETE_DATASET_VALUES.getValue());
+      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(deleteDatasetValues);
       LOG.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }
@@ -847,7 +853,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (dataFlowVO.getBigData()) {
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, true);
         deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
       }
       else {
@@ -856,6 +862,12 @@ public class DatasetControllerImpl implements DatasetController {
       }
       LOG.info("Successfully privately deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
+      // Release the lock manually
+      Map<String, Object> deleteDatasetValues = new HashMap<>();
+      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+              LockSignature.DELETE_DATASET_VALUES.getValue());
+      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(deleteDatasetValues);
       LOG_ERROR.error("Unexpected error! Error privately deleting dataset data for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());
       throw e;
     }
@@ -955,6 +967,12 @@ public class DatasetControllerImpl implements DatasetController {
       }
       LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
     } catch (Exception e) {
+      // Release the lock manually
+      Map<String, Object> deleteImportTable = new HashMap<>();
+      deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
+      deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+      deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+      lockService.removeLockByCriteria(deleteImportTable);
       LOG.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
     }

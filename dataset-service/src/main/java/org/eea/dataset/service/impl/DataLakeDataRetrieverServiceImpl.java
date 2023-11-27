@@ -114,7 +114,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
         LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
-        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName() ,false)) {
+        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
             StringBuilder dataQuery = new StringBuilder();
             StringBuilder recordsCountQuery = new StringBuilder();
             if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
@@ -176,8 +176,8 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         result.setRecords(recordVOS);
 
         if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-            if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION, false)) {
-                dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION, false);
+            if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION)) {
+                dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION);
             }
             if (recordVOS.size()>0) {
                 retrieveValidations(recordVOS, tableSchemaVO.getNameTableSchema(), validationTablePath);
@@ -206,7 +206,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
         LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
-        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false)) {
+        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName())) {
             s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
             totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3PathResolver), Long.class);
             result.setTotalRecords(totalRecords);
@@ -262,7 +262,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
         LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
-        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName(), false)) {
+        if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName())) {
             s3PathResolver.setPath(S3_TABLE_NAME_EU_QUERY_PATH);
             totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
             result.setTotalRecords(totalRecords);

@@ -8,17 +8,15 @@ public interface DremioHelperService {
 
     String getAuthToken();
 
-    boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
+    boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName);
 
-    DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
+    DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName);
 
-    String getFolderId(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
+    String getFolderId(S3PathResolver s3PathResolver, String folderName);
 
-    void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
+    void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName);
 
-    void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
-
-    void removeImportRelatedTableFromDremio(S3PathResolver s3PathResolver, String folderName, Boolean importFolder);
+    void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName);
 
     void deleteFileFromR3IfExists(String parquetFile) throws Exception;
 

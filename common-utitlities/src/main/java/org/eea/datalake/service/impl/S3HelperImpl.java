@@ -330,4 +330,22 @@ public class S3HelperImpl implements S3Helper {
 
         return url.toString();
     }
+
+    /**
+     * Copies a file from one destination to another
+     * @param source
+     * @param destination
+     * @return
+     */
+    @Override
+    public void copyFileToAnotherDestination(String source, String destination){
+        CopyObjectRequest copyReq = CopyObjectRequest.builder()
+                .sourceBucket(S3_BUCKET_NAME)
+                .sourceKey(source)
+                .destinationBucket(S3_BUCKET_NAME)
+                .destinationKey(destination)
+                .build();
+
+        CopyObjectResponse copyObjectResponse = s3Client.copyObject(copyReq);
+    }
 }
