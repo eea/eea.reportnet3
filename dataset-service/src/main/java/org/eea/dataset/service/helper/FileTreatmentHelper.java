@@ -2589,7 +2589,7 @@ public class FileTreatmentHelper implements DisposableBean {
         private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out) {
             try {
                 File csvFile;
-                if (exportFilenames == null) {
+                if (CollectionUtils.isEmpty(exportFilenames)) {
                     List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
 
                     csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
@@ -2606,7 +2606,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
         private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId) {
             try {
-                if (exportFilenames == null) {
+                if (CollectionUtils.isEmpty(exportFilenames)) {
                     List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
 
                     s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
@@ -2624,11 +2624,16 @@ public class FileTreatmentHelper implements DisposableBean {
             DataSetSchema datasetSchema =
                 schemasRepository.findById(new ObjectId(datasetVO.getDatasetSchema())).orElse(null);
 
+            LOG.info("datasetSchema {}", datasetSchema);
+
             List<FieldSchema> fieldSchema = datasetSchema.getTableSchemas().stream().
                     filter(t -> t.getRecordSchema().getIdTableSchema().equals(tableSchemaId))
                 .findFirst().get().getRecordSchema().getFieldSchema();
 
+            LOG.info("fieldSchema {}", fieldSchema);
             List<String> headers = fieldSchema.stream().map(FieldSchema::getHeaderName).collect(Collectors.toList());
+            LOG.info("headers {}", headers);
+
             return headers;
         }
 
