@@ -9,6 +9,7 @@ import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
@@ -638,9 +639,9 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
-                s3ConvertService.convertParquetToCSV(exportFilenames, tableName, datasetId);
+                convertParquetToCSV(exportFilenames, tableName, datasetId, tableSchemaId);
             } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
-                s3ConvertService.convertParquetToJSON(exportFilenames, tableName, datasetId);
+                convertParquetToJSON(exportFilenames, tableName, datasetId);
             }/*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;
@@ -659,7 +660,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out) {
+    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
 
@@ -669,7 +670,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
-                s3ConvertService.convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, out);
+                convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, tableSchemaId, out);
             } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;
@@ -929,7 +930,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                         LOG.info("Exporting tableSchema {}", tableSchema);
-                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out);
+                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString());
                     }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
                 } catch (Exception e) {
@@ -2580,6 +2581,56 @@ public class FileTreatmentHelper implements DisposableBean {
                         processId);
             }
             return isProcessStarted;
+        }
+
+        private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out) {
+            try {
+                File csvFile;
+                if (exportFilenames == null) {
+                    List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
+
+                    csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
+                } else {
+                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId);
+                }
+
+                s3ConvertService.convertParquetToCSVinZIP(csvFile, tableName, out);
+            } catch (Exception e) {
+                LOG.error("Unexpected error! Error in convertParquetToCSVinZIP for datasetId {} and tableName {}", datasetId, tableName, e);
+                throw e;
+            }
+        }
+
+        private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId) {
+            try {
+                if (exportFilenames == null) {
+                    List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
+
+                    s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
+                } else {
+                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId);
+                }
+            } catch (Exception e) {
+                LOG.error("Unexpected error! Error in convertParquetToCSV for datasetId {} and tableName {}", datasetId, tableName, e);
+                throw e;
+            }
+        }
+
+        private List<String> getFieldsFromSchema(Long datasetId, String tableSchemaId) {
+            DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            DataSetSchema datasetSchema =
+                schemasRepository.findById(new ObjectId(datasetVO.getDatasetSchema())).orElse(null);
+
+            List<FieldSchema> fieldSchema = datasetSchema.getTableSchemas().stream().
+                    filter(t -> t.getRecordSchema().getIdTableSchema().equals(tableSchemaId))
+                .findFirst().get().getRecordSchema().getFieldSchema();
+
+            List<String> headers = fieldSchema.stream().map(FieldSchema::getHeaderName).collect(Collectors.toList());
+            return headers;
+        }
+
+        private void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+            s3ConvertService.createJsonFile(exportFilenames, tableName, datasetId);
         }
     }
 

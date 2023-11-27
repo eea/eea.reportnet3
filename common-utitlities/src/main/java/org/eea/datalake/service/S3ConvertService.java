@@ -16,9 +16,11 @@ public interface S3ConvertService {
 
     void convertParquetToXLSX(File parquetFile, File xmlOutputFile);
 
-    void convertParquetToCSV(List<S3Object> exportFilenames, String nameDataset, Long datasetId);
+    void convertParquetToCSVinZIP(File csvFile, String tableName, ZipOutputStream out);
 
-    void convertParquetToJSON(List<S3Object> exportFilenames, String nameDataset, Long datasetId);
+    File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId);
 
-    void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String nameDataset, Long datasetId, ZipOutputStream out);
+    File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers);
+
+    File createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId);
 }

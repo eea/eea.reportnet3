@@ -50,19 +50,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     private String exportDLPath;
 
     @Override
-    public void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId) {
-        createCSVFile(exportFilenames, tableName, datasetId);
-    }
-
-    @Override
-    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId) {
-        createJsonFile(exportFilenames, tableName, datasetId);
-    }
-
-    @Override
-    public void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, ZipOutputStream out) {
-        File csvFile = createCSVFile(exportFilenames, tableName, datasetId);
-
+    public void convertParquetToCSVinZIP(File csvFile, String tableName, ZipOutputStream out) {
         try (FileInputStream fis = new FileInputStream(csvFile)) {
             // Adding the csv file to the zip
             ZipEntry e = new ZipEntry(tableName + CSV_TYPE);
@@ -79,7 +67,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         }
     }
 
-    private File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    @Override
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
         File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         LOG.info("Creating file for export: {}", csvFile);
 
@@ -88,14 +77,30 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
             csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
-
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
         return csvFile;
     }
 
-    private File createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    @Override
+    public File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers) {
+        File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        LOG.info("Creating file for export: {}", csvFile);
+
+        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
+            CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+
+            csvWriter.writeNext(headers.toArray(String[]::new), false);
+        } catch (Exception e) {
+            LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
+        }
+        return csvFile;
+    }
+
+    @Override
+    public File createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
         LOG.info("Creating file for export: {}", jsonFile);
 
