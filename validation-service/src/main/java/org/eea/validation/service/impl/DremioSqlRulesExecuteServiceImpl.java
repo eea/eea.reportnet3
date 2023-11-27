@@ -153,7 +153,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName);
             }
         } catch (Exception e) {
-            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {},{}", ruleId, datasetId, tableName, e.getMessage());
+            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e.getMessage());
             throw new DremioValidationException(e.getMessage());
         }
     }

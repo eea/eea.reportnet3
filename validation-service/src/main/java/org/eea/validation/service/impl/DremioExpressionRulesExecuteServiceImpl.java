@@ -84,6 +84,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private static final String YEAR = "Year";
     private static final String COMMA = ",";
     private static final String OPEN_BRACKET = "[";
+    private static final String SINGLE_QUOTE ="\'";
+    private static final String DOUBLE_QUOTE ="\"";
 
     @Autowired
     public DremioExpressionRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService, DatasetSchemaControllerZuul datasetSchemaControllerZuul,
@@ -135,7 +137,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
             runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver);
         } catch (Exception e1) {
-            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and tableName {},{}", ruleId, datasetId, tableName, e1.getMessage());
+            LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
         }
     }
@@ -239,7 +241,6 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                                                       SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
         List<String> recordIds = new ArrayList<>();
         Schema schema = getSchema();
-        int ruleIdLength = ruleVO.getRuleId().length();
         while (rs.next()) {
             boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
             if (!isValid) {
@@ -319,6 +320,10 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         }
     }
 
+    /**
+     * Gets parquet schema
+     * @return
+     */
     private static Schema getSchema() {
         List<String> parquetHeaders = Arrays.asList(PK, PARQUET_RECORD_ID_COLUMN_HEADER, VALIDATION_LEVEL, VALIDATION_AREA, MESSAGE, TABLE_NAME, FIELD_NAME, DATASET_ID, QC_CODE);
         List<Schema.Field> fields = new ArrayList<>();
@@ -572,7 +577,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 list.add(fieldName);
             }
             headerNames.put(methodName, list);
-        } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET)) {
+        } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET) && !parameter.startsWith(SINGLE_QUOTE) && !parameter.startsWith(DOUBLE_QUOTE)) {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
             List<String> list = headerNames.get(methodName);
             if (list!=null) {
@@ -635,45 +640,109 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         recordValue.setDataProviderCode(providerCode);
         List<String> intHeaders = headerNames.get(md.getName());
         if (pm.size()==1) {
-            createField(ruleVO, fieldName, rs, fields, recordValue);
+            String fieldValue = "";
+            String fieldSchemaId = "";
+            if (fieldName.isEmpty()) {
+                fieldValue = rs.getString(headerNames.get(methodName).get(0));
+            }
+            if (ruleVO.getType().equals(EntityTypeEnum.RECORD)) {
+                fieldSchemaId = (String) pm.get(0);
+            } else {
+                fieldSchemaId = ruleVO.getReferenceId();
+            }
+            createField(fieldName, rs, fields, recordValue, fieldValue, fieldSchemaId);
             result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE) ? rs.getString(fieldName) : pm.get(0));
         } else if (pm.size()==2) {
             if (record) {
                 creatFields(rs, pm, fields, recordValue, intHeaders);
                 result = md.invoke(object, pm.get(0), pm.get(1));
             } else {
-                String firstValue;
-                FieldValue fieldValue = new FieldValue();
-                if (pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE)) {
-                    firstValue = rs.getString(fieldName);
-                    fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
-                    fieldValue.setValue(firstValue);
-                } else if (intHeaders!=null && intHeaders.size()>0) {
-                    firstValue = (String) pm.get(0);
-                    fieldValue.setIdFieldSchema((String) pm.get(0));
-                    fieldValue.setValue(rs.getString(intHeaders.get(0)));
-                } else {
-                    firstValue = (String) pm.get(0);
-                    fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
-                    fieldValue.setValue(firstValue);
-                }
-                fields.add(fieldValue);
-                recordValue.setFields(fields);
-                fieldValue.setRecord(recordValue);
-                RuleOperators.setEntity(fieldValue);
-                RuleOperators.setEntity(recordValue);
-                if (methodName.contains(NUMBER)) {
-                    result = md.invoke(object, firstValue, pm.get(1));
-                } else if (methodName.contains(LENGTH)) {
-                    result = md.invoke(object, firstValue, pm.get(1));
-                } else if (methodName.contains(DAY) || methodName.contains(MONTH) || methodName.contains(YEAR)) {
-                    result = md.invoke(object, firstValue, pm.get(1));
-                } else {
-                    result = md.invoke(object, firstValue, pm.get(1));
-                }
+                result = invokeMethodIfNotRecord(ruleVO.getReferenceId(), fieldName, rs, object, methodName, md, pm, fields, recordValue, intHeaders);
             }
         }
         return result;
+    }
+
+    /**
+     * Invoke rule method in case method name doesn't contain "Record"
+     * @param referenceId
+     * @param fieldName
+     * @param rs
+     * @param object
+     * @param methodName
+     * @param md
+     * @param pm
+     * @param fields
+     * @param recordValue
+     * @param intHeaders
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     */
+    private static Object invokeMethodIfNotRecord(String referenceId, String fieldName, SqlRowSet rs, Object object, String methodName, Method md, List<Object> pm,
+                                                  List<FieldValue> fields, RecordValue recordValue, List<String> intHeaders) throws IllegalAccessException, InvocationTargetException {
+        Object result;
+        String firstValue = setRecordAndFieldsAndGetParameterForMethodInvocation(referenceId, fieldName, rs, pm, fields, recordValue, intHeaders);
+        if (methodName.contains(NUMBER)) {
+            result = md.invoke(object, firstValue, pm.get(1));
+        } else if (methodName.contains(LENGTH)) {
+            result = md.invoke(object, firstValue, pm.get(1));
+        } else if (methodName.contains(DAY) || methodName.contains(MONTH) || methodName.contains(YEAR)) {
+            result = md.invoke(object, firstValue, pm.get(1));
+        } else {
+            if (pm.get(1) instanceof String && (((String) pm.get(1)).startsWith(SINGLE_QUOTE) || ((String) pm.get(1)).startsWith(DOUBLE_QUOTE))) {
+                processParameterList(pm, (String) pm.get(1));
+            }
+            result = md.invoke(object, firstValue, pm.get(1));
+        }
+        return result;
+    }
+
+    /**
+     * Sets record and field values and returns parameter for method invocation
+     * @param referenceId
+     * @param fieldName
+     * @param rs
+     * @param pm
+     * @param fields
+     * @param recordValue
+     * @param intHeaders
+     * @return
+     */
+    private static String setRecordAndFieldsAndGetParameterForMethodInvocation(String referenceId, String fieldName, SqlRowSet rs, List<Object> pm, List<FieldValue> fields,
+                                                                               RecordValue recordValue, List<String> intHeaders) {
+        String firstValue;
+        FieldValue fieldValue = new FieldValue();
+        if (pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE)) {
+            firstValue = rs.getString(fieldName);
+            fieldValue.setIdFieldSchema(referenceId);
+            fieldValue.setValue(firstValue);
+        } else if (intHeaders !=null && intHeaders.size()>0) {
+            firstValue = (String) pm.get(0);
+            fieldValue.setIdFieldSchema((String) pm.get(0));
+            fieldValue.setValue(rs.getString(intHeaders.get(0)));
+        } else {
+            firstValue = (String) pm.get(0);
+            fieldValue.setIdFieldSchema(referenceId);
+            fieldValue.setValue(firstValue);
+        }
+        fields.add(fieldValue);
+        recordValue.setFields(fields);
+        fieldValue.setRecord(recordValue);
+        RuleOperators.setEntity(fieldValue);
+        RuleOperators.setEntity(recordValue);
+        return firstValue;
+    }
+
+    /**
+     * Processes parameter list
+     * @param pm
+     * @param paramToRemove
+     */
+    private static void processParameterList(List<Object> pm, String paramToRemove) {
+        String parameter = paramToRemove.substring(1, paramToRemove.length() - 1);
+        pm.remove(paramToRemove);
+        pm.add(parameter);
     }
 
     private static void creatFields(SqlRowSet rs, List<Object> pm, List<FieldValue> fields, RecordValue recordValue, List<String> intHeaders) {
@@ -689,10 +758,14 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         RuleOperators.setEntity(recordValue);
     }
 
-    private void createField(RuleVO ruleVO, String fieldName, SqlRowSet rs, List<FieldValue> fields, RecordValue recordValue) {
+    private void createField(String fieldName, SqlRowSet rs, List<FieldValue> fields, RecordValue recordValue, String fieldVal, String fieldSchemaId) {
         FieldValue fieldValue = new FieldValue();
-        fieldValue.setValue(rs.getString(fieldName));
-        fieldValue.setIdFieldSchema(ruleVO.getReferenceId());
+        if (fieldName.isEmpty()) {
+            fieldValue.setValue(fieldVal);
+        } else {
+            fieldValue.setValue(rs.getString(fieldName));
+        }
+        fieldValue.setIdFieldSchema(fieldSchemaId);
         fields.add(fieldValue);
         recordValue.setFields(fields);
         fieldValue.setRecord(recordValue);
