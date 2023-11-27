@@ -2623,13 +2623,18 @@ public class FileTreatmentHelper implements DisposableBean {
 
             LOG.info("datasetSchema {}", datasetSchema);
 
-            List<FieldSchema> fieldSchema = datasetSchema.getTableSchemas().stream().
-                    filter(t -> t.getRecordSchema().getIdTableSchema().equals(tableSchemaId))
-                .findFirst().get().getRecordSchema().getFieldSchema();
+            TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
+                .filter(t -> t.getRecordSchema().getIdTableSchema().toString().equals(tableSchemaId))
+                .findAny().orElse(null);
 
-            LOG.info("fieldSchema {}", fieldSchema);
-            List<String> headers = fieldSchema.stream().map(FieldSchema::getHeaderName).collect(Collectors.toList());
-            LOG.info("headers {}", headers);
+            List<String> headers = new ArrayList<>();
+            if (tableSchema != null) {
+                List<FieldSchema> fieldSchema = tableSchema.getRecordSchema().getFieldSchema();
+
+                LOG.info("fieldSchema {}", fieldSchema);
+                headers = fieldSchema.stream().map(FieldSchema::getHeaderName).collect(Collectors.toList());
+                LOG.info("headers {}", headers);
+            }
 
             return headers;
         }
