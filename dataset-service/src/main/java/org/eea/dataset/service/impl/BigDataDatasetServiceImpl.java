@@ -694,6 +694,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 //do not delete prefilled tables
                 TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), dataSetMetabaseVO.getDatasetSchema());
                 if(tableSchemaVO.getToPrefill()){
+                    LOG.info("The data for table with tableSchemaId {} for datasetId {} will not be deleted because the table is prefilled.", tableSchemaIdNameVO.getIdTableSchema(), datasetId );
                     continue;
                 }
             }
