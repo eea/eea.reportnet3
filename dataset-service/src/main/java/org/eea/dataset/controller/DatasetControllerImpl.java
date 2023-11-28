@@ -853,7 +853,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (dataFlowVO.getBigData()) {
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, true);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false);
         deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
       }
       else {
