@@ -1003,20 +1003,22 @@ public class ValidationServiceImpl implements ValidationService {
         ruleListVO.stream().filter(rule -> rule.getShortCode().equals(error.getShortCode()))
             .findFirst().orElse(new RuleVO());
 
+    String ruleName = "";
+    String ruleDescription = "";
+    if (ruleVO.getShortCode()!=null) {
+      ruleName = ruleVO.getRuleName().startsWith("=") ? " " + ruleVO.getRuleName() : ruleVO.getRuleName();
+      ruleDescription = ruleVO.getDescription().startsWith("=") ? " " + ruleVO.getDescription() : ruleVO.getDescription();
+    }
     // Sets all the data which is later going to be written into the CSV
 
     fieldsToWrite[0] = error.getTypeEntity().toString();
     fieldsToWrite[1] = error.getNameTableSchema();
     fieldsToWrite[2] = error.getNameFieldSchema();
-    fieldsToWrite[3] =
-        error.getShortCode().startsWith("=") ? " " + error.getShortCode() : error.getShortCode();
-    fieldsToWrite[4] =
-        ruleVO.getRuleName().startsWith("=") ? " " + ruleVO.getRuleName() : ruleVO.getRuleName();
-    fieldsToWrite[5] = ruleVO.getDescription().startsWith("=") ? " " + ruleVO.getDescription()
-        : ruleVO.getDescription();
+    fieldsToWrite[3] = error.getShortCode().startsWith("=") ? " " + error.getShortCode() : error.getShortCode();
+    fieldsToWrite[4] = ruleName;
+    fieldsToWrite[5] = ruleDescription;
     fieldsToWrite[6] = error.getLevelError().toString();
-    fieldsToWrite[7] =
-        error.getMessage().startsWith("=") ? " " + error.getMessage() : error.getMessage();
+    fieldsToWrite[7] = error.getMessage().startsWith("=") ? " " + error.getMessage() : error.getMessage();
     fieldsToWrite[8] = error.getNumberOfRecords().toString();
 
     return fieldsToWrite;
