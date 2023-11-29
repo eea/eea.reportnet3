@@ -697,18 +697,12 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                                                   List<FieldValue> fields, RecordValue recordValue, List<String> intHeaders) throws IllegalAccessException, InvocationTargetException {
         Object result;
         String firstValue = setRecordAndFieldsAndGetParameterForMethodInvocation(referenceId, fieldName, rs, pm, fields, recordValue, intHeaders);
-        if (methodName.contains(NUMBER)) {
-            result = md.invoke(object, firstValue, pm.get(1));
-        } else if (methodName.contains(LENGTH)) {
-            result = md.invoke(object, firstValue, pm.get(1));
-        } else if (methodName.contains(DAY) || methodName.contains(MONTH) || methodName.contains(YEAR)) {
-            result = md.invoke(object, firstValue, pm.get(1));
-        } else {
+        if (!methodName.contains(NUMBER) && !methodName.contains(LENGTH) && !methodName.contains(DAY) && !methodName.contains(MONTH) && !methodName.contains(YEAR)) {
             if (pm.get(1) instanceof String && (((String) pm.get(1)).startsWith(SINGLE_QUOTE) || ((String) pm.get(1)).startsWith(DOUBLE_QUOTE))) {
                 processParameterList(pm, (String) pm.get(1));
             }
-            result = md.invoke(object, firstValue, pm.get(1));
         }
+        result = md.invoke(object, firstValue, pm.get(1));
         return result;
     }
 
