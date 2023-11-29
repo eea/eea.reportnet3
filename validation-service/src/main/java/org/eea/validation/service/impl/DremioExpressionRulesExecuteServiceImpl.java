@@ -564,23 +564,19 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      */
     private void createHeaderNames(String parameter, String methodName, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query) {
         parameter = parameter.trim();
+        List<String> list = headerNames.get(methodName);
+        if (list==null) {
+            list = new ArrayList<>();
+        }
         if (parameter.equalsIgnoreCase(VALUE)) {
-            List<String> list = headerNames.get(methodName);
-            if (list!=null && !list.contains(fieldName)) {
-                list.add(fieldName);
-            } else {
-                list = new ArrayList<>();
+            if (!list.contains(fieldName)) {
                 list.add(fieldName);
             }
             headerNames.put(methodName, list);
         } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET) && !parameter.startsWith(SINGLE_QUOTE) && !parameter.startsWith(DOUBLE_QUOTE)) {
             if (!isDate(parameter)) {
                 FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
-                List<String> list = headerNames.get(methodName);
-                if (list!=null) {
-                    list.add(fieldSchema.getName());
-                } else {
-                    list = new ArrayList<>();
+                if (!list.contains(fieldSchema.getName())) {
                     list.add(fieldSchema.getName());
                 }
                 headerNames.put(methodName, list);
