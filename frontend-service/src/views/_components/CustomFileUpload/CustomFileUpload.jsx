@@ -50,6 +50,7 @@ export const CustomFileUpload = ({
   invalidNumberOfFilesMessageSummary = 'You can only upload {0} {1}.',
   isDialog = false,
   isImportDatasetDesignerSchema = false,
+  isImportLeadReportersDialog = false,
   maxFileSize = null,
   mode = 'advanced',
   multiple = false,
@@ -101,7 +102,7 @@ export const CustomFileUpload = ({
   }, [state.isUploadClicked]);
 
   useEffect(() => {
-    if (state.progress === 100 && bigData) {
+    if (state.progress === 100 && bigData && !isImportLeadReportersDialog) {
       const timer = setTimeout(() => {
         onUpload();
       }, 5000);
@@ -303,7 +304,7 @@ export const CustomFileUpload = ({
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
 
         if (xhr.status >= 200 && xhr.status < 300) {
-          if (onUpload && !bigData) {
+          if (onUpload && !(bigData && !isImportLeadReportersDialog)) {
             onUpload({ xhr: xhr, files: _files.current });
           }
         } else {

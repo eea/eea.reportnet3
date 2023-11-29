@@ -235,7 +235,7 @@ export const ShowValidationsList = memo(
       validationContext.rulesDescription.find(ruleDescription => ruleDescription.id === ruleId);
 
     const getRuleSchemaByQcCode = qcCode =>
-      validationContext.rulesDescription.find(ruleDescription => ruleDescription.shortCode === qcCode);  
+      validationContext.rulesDescription.find(ruleDescription => ruleDescription.shortCode === qcCode);
 
     const getValidationsOptionTypes = (data, option) => {
       const optionsItems = data
@@ -495,7 +495,6 @@ export const ShowValidationsList = memo(
       tablesFilter,
       isChangedPage
     ) => {
-      console.log('fetch');
       onLoadErrors(
         firstRow,
         numberRows,
@@ -524,7 +523,7 @@ export const ShowValidationsList = memo(
           break;
         case 'TABLE':
           let ruleSchema = null;
-          if (event.data.ruleId!=null) {
+          if (event.data.ruleId != null) {
             ruleSchema = getRuleSchema(event.data.ruleId);
           } else {
             ruleSchema = getRuleSchemaByQcCode(event.data.shortCode);
