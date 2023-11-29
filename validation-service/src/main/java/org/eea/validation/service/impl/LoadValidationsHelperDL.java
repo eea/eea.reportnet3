@@ -57,7 +57,7 @@ public class LoadValidationsHelperDL {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelperDL.class);
 
-    public FailedValidationsDatasetVO getListGroupValidationsDL(@DatasetId Long datasetId,
+    public FailedValidationsDatasetVO getListGroupValidationsDL(Long datasetId,
                                                               Pageable pageable, List<ErrorTypeEnum> levelErrorsFilter,
                                                               List<EntityTypeEnum> typeEntitiesFilter, String tableFilter, String fieldValueFilter,
                                                               String headerField, Boolean asc) throws EEAException {

@@ -125,7 +125,7 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
      * @return the string
      */
     private String addOrderByDL(String headerField, Boolean asc) {
-        return StringUtils.isBlank(headerField) ? ""
+        return StringUtils.isBlank(headerField) ? "order by shortCode asc"
                 : "order by " + headerField + (asc ? " asc" : " desc");
     }
 }

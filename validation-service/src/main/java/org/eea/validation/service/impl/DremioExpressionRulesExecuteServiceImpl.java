@@ -42,6 +42,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -490,13 +492,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             });
             headerNames.put(ruleMethodName, hNames);
         } else {
-            boolean containsExpression = ruleExpressionDTO.getParams().stream().anyMatch(RuleExpressionDTO.class::isInstance);
-            if (!containsExpression) {
-                List<Object> finalParameters = parameters;
-                ruleExpressionDTO.getParams().forEach(finalParameters::add);
-            } else {
-                extractFieldHeaders(ruleExpressionDTO, headerNames, fieldName, datasetSchemaId, query);
-            }
+            extractFieldHeaders(ruleExpressionDTO, headerNames, fieldName, datasetSchemaId, query);
         }
     }
 
@@ -578,17 +574,35 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             }
             headerNames.put(methodName, list);
         } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET) && !parameter.startsWith(SINGLE_QUOTE) && !parameter.startsWith(DOUBLE_QUOTE)) {
-            FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
-            List<String> list = headerNames.get(methodName);
-            if (list!=null) {
-                list.add(fieldSchema.getName());
-            } else {
-                list = new ArrayList<>();
-                list.add(fieldSchema.getName());
+            if (!isDate(parameter)) {
+                FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
+                List<String> list = headerNames.get(methodName);
+                if (list!=null) {
+                    list.add(fieldSchema.getName());
+                } else {
+                    list = new ArrayList<>();
+                    list.add(fieldSchema.getName());
+                }
+                headerNames.put(methodName, list);
+                query.append(COMMA).append(fieldSchema.getName());
             }
-            headerNames.put(methodName, list);
-            query.append(COMMA).append(fieldSchema.getName());
         }
+    }
+
+    /**
+     * Checks if string is valid date
+     * @param inDate
+     * @return
+     */
+    private boolean isDate(String inDate) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        try {
+            dateFormat.parse(inDate.trim());
+        } catch (ParseException e) {
+           return false;
+        }
+        return true;
     }
 
     /**
