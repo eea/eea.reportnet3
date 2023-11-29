@@ -146,8 +146,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter) {
 
         try {
-            LOG.info("exportFilenames size {}", exportFilenames.size());
-            bufferedWriter.write("{\"records\":[\n");
+            bufferedWriter.write("{\"tables\":[{\"records\":[");
             List<String> headers = new ArrayList<>();
             int headersSize = 0;
             int counter = 0;
@@ -170,7 +169,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         bufferedWriter.write("{");
                         counter++;
                     } else {
-                        bufferedWriter.write(",\n{");
+                        bufferedWriter.write(",{");
                     }
                     for (int i = 0; i < headersSize; i++) {
                         String recordValue = record.get(i).toString();
@@ -188,7 +187,9 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     bufferedWriter.write("}");
                 }
             }
-            bufferedWriter.write("\n]}");
+            bufferedWriter.write("],\"tableName\":\"");
+            bufferedWriter.write(tableName);
+            bufferedWriter.write("\"}]}");
         } catch (Exception e) {
             LOG.error("Error in convert method for tableName {}", tableName, e);
         }
