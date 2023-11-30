@@ -1,6 +1,8 @@
 package org.eea.dataset.service.helper;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -76,6 +78,7 @@ import org.eea.interfaces.vo.dataset.ETLFieldVO;
 import org.eea.interfaces.vo.dataset.ETLRecordVO;
 import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -858,6 +861,7 @@ public class FileTreatmentHelperTest {
     tableSchemas.add(tableSchema);
     tableSchemas.add(tableSchema2);
     datasetSchema.setTableSchemas(tableSchemas);
+    datasetSchema.setReferenceDataset(true);
     recordSchema.setFieldSchema(fieldSchemas);
     fieldSchema.setHeaderName("headerName");
     fieldSchema.setIdFieldSchema(new ObjectId("5cf0e9b3b793310e9ceca190"));
@@ -873,6 +877,7 @@ public class FileTreatmentHelperTest {
     fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
     fieldValue.setValue("value");
 
+    Mockito.when(datasetService.getDatasetType(anyLong())).thenReturn(DatasetTypeEnum.REFERENCE);
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
