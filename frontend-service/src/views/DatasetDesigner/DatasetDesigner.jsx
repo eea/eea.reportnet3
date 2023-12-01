@@ -1087,7 +1087,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const validateQcRules = async () => {
     setSqlValidationRunning(true);
     try {
-      await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
       notificationContext.add(
         {
           type: 'VALIDATE_QCS_INIT',
@@ -1102,6 +1101,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+      await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
     } catch (error) {
       console.error('DatasetDesigner - validateQcRules.', error);
       notificationContext.add(
@@ -1124,7 +1124,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const validateAllQcRules = async () => {
     setAllSqlValidationRunning(true);
     try {
-      await DatasetService.validateAllSql(datasetId);
       notificationContext.add(
         {
           type: 'VALIDATE_ALL_QCS_INIT',
@@ -1139,6 +1138,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+      await DatasetService.validateAllSql(datasetId);
     } catch (error) {
       console.error('DatasetDesigner - validateAllQcRules.', error);
       notificationContext.add(

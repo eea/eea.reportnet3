@@ -29,7 +29,7 @@ public interface RulesService {
    * @param checkNoSQL wether to check sql statements or not
    * @param user the user that is validating
    */
-  void validateAllRules(Long datasetId, boolean checkNoSQL, Object user);
+  void validateAllRules(Long datasetId, boolean checkNoSQL, String user);
 
   /**
    * Creates the empty rules schema.

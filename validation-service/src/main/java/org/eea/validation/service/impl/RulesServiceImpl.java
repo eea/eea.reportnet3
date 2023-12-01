@@ -280,7 +280,7 @@ public class RulesServiceImpl implements RulesService {
 
   private static final String KEYWORDS = "DELETE,INSERT,DROP";
 
-  public void validateAllRules(Long datasetId, boolean checkNoSQL, Object user) {
+  public void validateAllRules(Long datasetId, boolean checkNoSQL, String user) {
     try {
       ThreadPropertiesManager.setVariable("user", user);
       List<Rule> errorRulesList = new ArrayList<>();
