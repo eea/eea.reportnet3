@@ -21,7 +21,9 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -31,18 +33,26 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.ReferencedFieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
+import org.eea.kafka.domain.EEAEventVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.validation.mapper.DatasetHistoricRuleMapper;
 import org.eea.validation.mapper.IntegrityMapper;
 import org.eea.validation.mapper.RuleHistoricInfoMapper;
 import org.eea.validation.mapper.RuleMapper;
 import org.eea.validation.mapper.RulesSchemaMapper;
+import org.eea.validation.persistence.data.repository.DatasetRepository;
 import org.eea.validation.persistence.data.repository.TableRepository;
 import org.eea.validation.persistence.repository.AuditRepository;
 import org.eea.validation.persistence.repository.IntegritySchemaRepository;
@@ -60,6 +70,7 @@ import org.eea.validation.persistence.schemas.audit.Audit;
 import org.eea.validation.persistence.schemas.audit.RuleHistoricInfo;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.RuleExpressionService;
 import org.eea.validation.util.GeometryValidationUtils;
 import org.eea.validation.util.KieBaseManager;
 import org.junit.Assert;
@@ -154,6 +165,18 @@ public class RulesServiceImplTest {
   @Mock
   private DatasetHistoricRuleMapper datasetHistoricRuleMapper;
 
+  @Mock
+  private DatasetMetabaseController datasetMetabaseController;
+  
+  @Mock
+  private RuleExpressionService ruleExpressionService;
+
+  @Mock
+  private DatasetSchemaController datasetSchemaController;
+
+  @Mock
+  private DatasetRepository datasetRepository;
+  
   private SecurityContext securityContext;
 
   private Authentication authentication;
@@ -167,6 +190,580 @@ public class RulesServiceImplTest {
     MockitoAnnotations.openMocks(this);
   }
 
+
+  /**
+   * Execute test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", Boolean.TRUE);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence(null);
+    rule1.setType(EntityTypeEnum.FIELD);
+    rule1.setReferenceId(new ObjectId());
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document fieldSchema = new Document();
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Execute record test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeRecordTest() throws EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", Boolean.TRUE);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence(null);
+    rule1.setType(EntityTypeEnum.RECORD);
+    rule1.setReferenceId(new ObjectId());
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rule1.setWhenCondition("when");
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document recordSchema = new Document();
+    Document fieldSchema = new Document();
+    fieldSchema.put("_id", "5cf0e9b3b793310e9ceca190");
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+    List<Document> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema);
+    recordSchema.put("fieldSchemas", fieldSchemas);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Execute default dataset test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeDefaultDatasetTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", Boolean.TRUE);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence(null);
+    rule1.setType(EntityTypeEnum.DATASET);
+    rule1.setReferenceId(new ObjectId());
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rule1.setWhenCondition("when");
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document recordSchema = new Document();
+    Document fieldSchema = new Document();
+    fieldSchema.put("_id", "5cf0e9b3b793310e9ceca190");
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+    List<Document> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema);
+    recordSchema.put("fieldSchemas", fieldSchemas);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Execute table test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeTableTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", Boolean.TRUE);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence(null);
+    rule1.setType(EntityTypeEnum.TABLE);
+    rule1.setReferenceId(new ObjectId());
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rule1.setWhenCondition("when");
+    rule1.setThenCondition(Arrays.asList("when", "woah"));
+    rule1.setRuleId(new ObjectId());
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document recordSchema = new Document();
+    Document fieldSchema = new Document();
+    fieldSchema.put("_id", "5cf0e9b3b793310e9ceca190");
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+    List<Document> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema);
+    recordSchema.put("fieldSchemas", fieldSchemas);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Execute SQL test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeSQLTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", false);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence("sentence");
+    rule1.setType(EntityTypeEnum.TABLE);
+    rule1.setReferenceId(new ObjectId("5ce524fad31fc52540abae73"));
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rule1.setWhenCondition("when");
+    rule1.setThenCondition(Arrays.asList("when", "woah"));
+    rule1.setRuleId(new ObjectId());
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document recordSchema = new Document();
+    Document fieldSchema = new Document();
+    fieldSchema.put("_id", "5ce524fad31fc52540abae73");
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+    List<Document> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema);
+    recordSchema.put("fieldSchemas", fieldSchemas);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+    rulesSQL.add(rule1);
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    schemaVO.setIdDataSetSchema("5ce524fad31fc52540abae73");
+    schemaVO.setNameDatasetSchema("test");
+    TableSchemaVO tableVO = new TableSchemaVO();
+    RecordSchemaVO recordVO = new RecordSchemaVO();
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setPkReferenced(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(true);
+    fieldSchemaVO.setType(DataType.LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    recordVO.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    recordVO.setIdRecordSchema("5ce524fad31fc52540abae73");
+    tableVO.setRecordSchema(recordVO);
+    tableVO.setIdTableSchema("5ce524fad31fc52540abae73");
+    tableVO.setNameTableSchema("");
+    schemaVO.setTableSchemas(Arrays.asList(tableVO));
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
+        .thenReturn(schemaVO);
+    Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());  }
+
+  /**
+   * Execute SQL field test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeSQLFieldTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", false);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence("sentence");
+    rule1.setType(EntityTypeEnum.FIELD);
+    rule1.setReferenceId(new ObjectId("5ce524fad31fc52540abae73"));
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rule1.setWhenCondition("when");
+    rule1.setThenCondition(Arrays.asList("when", "woah"));
+    rule1.setRuleId(new ObjectId());
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document recordSchema = new Document();
+    Document fieldSchema = new Document();
+    fieldSchema.put("_id", "5ce524fad31fc52540abae73");
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+    List<Document> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema);
+    recordSchema.put("fieldSchemas", fieldSchemas);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+    rulesSQL.add(rule1);
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    schemaVO.setIdDataSetSchema("5ce524fad31fc52540abae73");
+    schemaVO.setNameDatasetSchema("test");
+    TableSchemaVO tableVO = new TableSchemaVO();
+    RecordSchemaVO recordVO = new RecordSchemaVO();
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setPkReferenced(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(true);
+    fieldSchemaVO.setType(DataType.LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    recordVO.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    recordVO.setIdRecordSchema("5ce524fad31fc52540abae73");
+    tableVO.setRecordSchema(recordVO);
+    tableVO.setIdTableSchema("5ce524fad31fc52540abae73");
+    tableVO.setNameTableSchema("");
+    schemaVO.setTableSchemas(Arrays.asList(tableVO));
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
+        .thenReturn(schemaVO);
+    Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  /**
+   * Execute SQL record test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeSQLRecordTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", false);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence("sentence");
+    rule1.setType(EntityTypeEnum.RECORD);
+    rule1.setReferenceId(new ObjectId("5ce524fad31fc52540abae73"));
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rule1.setWhenCondition("when");
+    rule1.setThenCondition(Arrays.asList("when", "woah"));
+    rule1.setRuleId(new ObjectId());
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document recordSchema = new Document();
+    Document fieldSchema = new Document();
+    fieldSchema.put("_id", "5ce524fad31fc52540abae73");
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+    List<Document> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema);
+    recordSchema.put("fieldSchemas", fieldSchemas);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+    rulesSQL.add(rule1);
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    schemaVO.setIdDataSetSchema("5ce524fad31fc52540abae73");
+    schemaVO.setNameDatasetSchema("test");
+    TableSchemaVO tableVO = new TableSchemaVO();
+    RecordSchemaVO recordVO = new RecordSchemaVO();
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setPkReferenced(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(true);
+    fieldSchemaVO.setType(DataType.LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    recordVO.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    recordVO.setIdRecordSchema("5ce524fad31fc52540abae73");
+    tableVO.setRecordSchema(recordVO);
+    tableVO.setIdTableSchema("5ce524fad31fc52540abae73");
+    tableVO.setNameTableSchema("");
+    schemaVO.setTableSchemas(Arrays.asList(tableVO));
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    Mockito.when(datasetSchemaController.findDataSchemaByDatasetId(Mockito.any()))
+        .thenReturn(schemaVO);
+    Mockito.when(datasetRepository.getTableId(Mockito.any(), Mockito.any())).thenReturn(1L);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());  }
+
+  /**
+   * Execute SQL query error test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void allQcRuleValidation_executeSQLQueryErrorTest() throws EEAException {
+
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("dataset_id", "1");
+    data.put("user", "user");
+    data.put("checkNoSQL", false);
+
+    String schema = new ObjectId().toString();
+    DataSetMetabaseVO dsMetabaseVO = new DataSetMetabaseVO();
+    dsMetabaseVO.setDataflowId(1L);
+
+    RulesSchema ruleSchema = new RulesSchema();
+    List<Rule> rules = new ArrayList<>();
+    Rule rule1 = new Rule();
+    rule1.setAutomatic(Boolean.FALSE);
+    rule1.setSqlSentence("delete");
+    rule1.setType(EntityTypeEnum.RECORD);
+    rule1.setReferenceId(new ObjectId("5ce524fad31fc52540abae73"));
+    rule1.setVerified(Boolean.TRUE);
+    rule1.setEnabled(Boolean.FALSE);
+    rule1.setWhenCondition("when");
+    rule1.setThenCondition(Arrays.asList("when", "woah"));
+    rule1.setRuleId(new ObjectId());
+    rules.add(rule1);
+    ruleSchema.setRules(rules);
+
+    Document recordSchema = new Document();
+    Document fieldSchema = new Document();
+    fieldSchema.put("_id", "5ce524fad31fc52540abae73");
+    fieldSchema.put("typeData", DataType.NUMBER_INTEGER);
+    List<Document> fieldSchemas = new ArrayList<>();
+    fieldSchemas.add(fieldSchema);
+    recordSchema.put("fieldSchemas", fieldSchemas);
+
+    List<Rule> rulesSQL = new ArrayList<>();
+    rulesSQL.add(rule1);
+    EEAEventVO eeaEventVO = new EEAEventVO();
+    eeaEventVO.setEventType(EventType.VALIDATE_MANUAL_QC_COMMAND);
+    eeaEventVO.setData(data);
+
+    DataSetSchemaVO schemaVO = new DataSetSchemaVO();
+    schemaVO.setIdDataSetSchema("5ce524fad31fc52540abae73");
+    schemaVO.setNameDatasetSchema("test");
+    TableSchemaVO tableVO = new TableSchemaVO();
+    RecordSchemaVO recordVO = new RecordSchemaVO();
+    FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
+    fieldSchemaVO.setPkReferenced(true);
+    fieldSchemaVO.setId("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setPk(true);
+    fieldSchemaVO.setType(DataType.LINK);
+    ReferencedFieldSchemaVO referenced = new ReferencedFieldSchemaVO();
+    referenced.setIdDatasetSchema("5ce524fad31fc52540abae73");
+    referenced.setIdPk("5ce524fad31fc52540abae73");
+    fieldSchemaVO.setReferencedField(referenced);
+    recordVO.setFieldSchema(Arrays.asList(fieldSchemaVO));
+    recordVO.setIdRecordSchema("5ce524fad31fc52540abae73");
+    tableVO.setRecordSchema(recordVO);
+    tableVO.setIdTableSchema("5ce524fad31fc52540abae73");
+    tableVO.setNameTableSchema("");
+    schemaVO.setTableSchemas(Arrays.asList(tableVO));
+
+    Mockito.when(datasetMetabaseController.findDatasetSchemaIdById(Mockito.anyLong()))
+        .thenReturn(schema);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dsMetabaseVO);
+    Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.findSqlRules(Mockito.any())).thenReturn(rulesSQL);
+
+    Mockito.when(rulesRepository.getAllDisabledRules(Mockito.any())).thenReturn(ruleSchema);
+    Mockito.when(rulesRepository.getAllUncheckedRules(Mockito.any())).thenReturn(ruleSchema);
+
+    rulesServiceImpl.validateAllRules(1L, false, "user");
+    Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
+        Mockito.any(), Mockito.any());
+  }
+
+  
   /**
    * Delete rule by id.
    *
