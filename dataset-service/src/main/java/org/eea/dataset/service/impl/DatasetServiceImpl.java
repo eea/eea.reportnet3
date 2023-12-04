@@ -48,10 +48,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationToolTypeEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.*;
-import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.*;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -91,10 +88,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 
 import javax.transaction.Transactional;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -3251,9 +3245,17 @@ public class DatasetServiceImpl implements DatasetService {
       Integer limit, Integer offset, String filterValue, String columnName,
       String dataProviderCodes) throws EEAException {
     try {
-      // Delete the query log and the timestamp part later, once the tests are finished.
-      outputStream.write(recordRepository.findAndGenerateETLJson(datasetId, outputStream,
-          tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes).getBytes());
+      Long dataflowId = getDataFlowIdById(datasetId);
+      DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
+      if (dataflow.getBigData()) {
+        outputStream.write(recordRepository.findAndGenerateETLJsonDL(datasetId, outputStream, tableSchemaId, limit,
+            offset, filterValue, columnName, dataProviderCodes).getBytes());
+      } else {
+        // Delete the query log and the timestamp part later, once the tests are finished.
+        outputStream.write(
+            recordRepository.findAndGenerateETLJson(datasetId, outputStream, tableSchemaId, limit,
+                offset, filterValue, columnName, dataProviderCodes).getBytes());
+      }
       LOG.info("Finish ETL Export proccess for datasetId {}", datasetId);
     } catch (IOException e) {
       LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);

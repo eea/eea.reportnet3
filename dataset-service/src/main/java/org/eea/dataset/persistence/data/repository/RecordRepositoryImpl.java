@@ -6,6 +6,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3ConvertService;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -15,12 +19,15 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
@@ -45,12 +52,15 @@ import org.postgresql.core.BaseConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -70,6 +80,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class RecordRepositoryImpl.
@@ -121,6 +133,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   @Autowired
   private JobControllerZuul jobControllerZuul;
+
+  /** The dataset metabase service. */
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private S3Service s3Service;
+
+  @Autowired
+  @Qualifier("dremioJdbcTemplate")
+  private JdbcTemplate dremioJdbcTemplate;
 
   /**
    * The connection url.
@@ -615,6 +638,68 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return resultjson.toString();
   }
 
+  @Override
+  public String findAndGenerateETLJsonDL(Long datasetId, OutputStream outputStream,
+    String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
+    String dataProviderCodes) throws EEAException, SQLException {
+    checkSql(filterValue);
+    checkSql(columnName);
+    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+    List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
+    String tableName = "";
+
+    // create primary json
+    JSONObject resultjson = new JSONObject();
+    JSONArray tables = new JSONArray();
+    if (tableSchemaId != null) {
+      tableSchemaList = tableSchemaList.stream()
+          .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
+          .collect(Collectors.toList());
+    }
+    if (offset == 0) {
+      offset = 1;
+    }
+
+    GsonJsonParser gsonparser = new GsonJsonParser();
+    // get json for each table requested
+    for (TableSchema tableSchema : tableSchemaList) {
+
+      Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, true));
+
+      JSONObject resultTable = new JSONObject();
+      tableName = tableSchema.getNameTableSchema();
+      resultTable.put("tableName", tableName);
+      JSONArray tableRecords = new JSONArray();
+
+      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+        resultTable.put("totalRecords", totalRecords);
+      }
+
+      if (totalRecords != null && totalRecords > 0L) {
+        resultTable.put("{\"tables\":[{\"records\":[","");
+        for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
+
+          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
+          JSONArray fields = getAllRecordsDL(query, tableSchema.getIdTableSchema().toString());
+
+          // add to table's records list
+          if (fields != null) {
+            tableRecords.addAll(gsonparser.parseList(fields.toString()));
+          }
+        }
+      }
+      resultTable.put("records", tableRecords);
+      // add table to resultjson tables list
+      tables.add(resultTable);
+    }
+    resultjson.put("tables", tables);
+
+    return resultjson.toString();
+  }
+
   private Integer queryGetRecordCountbyFilterChain(String query, Long datasetId, String filterChain)
       throws SQLException {
     Connection connection = null;
@@ -857,6 +942,41 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     BigInteger result = (BigInteger) query.setHint(QueryHints.READ_ONLY, true).getSingleResult();
     return result.longValue();
+  }
+
+
+  /** Gets the count DL.
+   *
+   * @param totalRecords
+   * @return
+   */
+  private Long getCountDL(String totalRecords) {
+    return dremioJdbcTemplate.queryForObject(totalRecords, Long.class);
+  }
+
+  /** Gets the count DL.
+   *
+   * @param totalRecords
+   * @return
+   */
+  private JSONArray getAllRecordsDL(String totalRecords, String tableSchemaId) throws SQLException {
+    ResultSet rs = dremioJdbcTemplate.queryForObject(totalRecords, ResultSet.class);
+    ResultSetMetaData metaData = rs.getMetaData();
+    int columnCount = metaData.getColumnCount();
+
+    JSONArray fields = new JSONArray();
+    JSONObject fieldObj = new JSONObject();
+
+    while (rs.next()){
+      for (int i = 1; i <= columnCount; i++) {
+        String columnName = metaData.getColumnName(i);
+        String value = rs.getString(columnName);
+        fieldObj.put(columnName, value);
+      }
+      fields.add(fieldObj);
+    }
+
+    return fields;
   }
 
   /**
@@ -1614,6 +1734,57 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   /**
+   * Total records query DL.
+   *
+   * @param datasetId the dataset id
+   * @param tableSchema the table schema
+   * @param filterValue the filter value
+   * @param columnName the column name
+   * @param dataProviderCodes the data provider codes
+   * @param getCount get count
+   * @return the string
+   */
+  private String totalRecordsQueryDL(Long datasetId, TableSchema tableSchema, String filterValue,
+      String columnName, String dataProviderCodes, boolean getCount) {
+
+    StringBuilder stringQuery = new StringBuilder();
+
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableSchema.getNameTableSchema());
+    String table = setUpS3PathResolver(datasetId, dataset, s3PathResolver);
+
+    if (getCount) {
+      stringQuery.append("select count(record_id) from " + table);
+    } else {
+      stringQuery.append("select * from " + table);
+    }
+
+    if ((StringUtils.isNotEmpty(filterValue) && StringUtils.isNotEmpty(columnName))
+        || StringUtils.isNotEmpty(dataProviderCodes)) {
+      stringQuery.append(" where ");
+      if (StringUtils.isNotEmpty(filterValue) && StringUtils.isNotEmpty(columnName)) {
+        stringQuery.append(columnName + " = '"+ filterValue + "' and ");
+      }
+      if (StringUtils.isNotEmpty(dataProviderCodes)) {
+        List<String> countryCodesList = new ArrayList<>(Arrays.asList(dataProviderCodes.split(",")));
+        StringBuilder countries = new StringBuilder();
+        for (int i = 0; i < countryCodesList.size(); i++) {
+          countries.append("'" + countryCodesList.get(i) + "'");
+          if (i + 1 != countryCodesList.size()) {
+            countries.append(",");
+          }
+        }
+        stringQuery.append(String.format(" data_provider_code in (%s) ", countries));
+      } else {
+        stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
+      }
+    }
+
+    LOG.info("TotalRecords Query: {}", stringQuery);
+    return stringQuery.toString();
+  }
+
+  /**
    * Truncate dataset by dataset id
    *
    * @param datasetId
@@ -1917,5 +2088,41 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     return stringQuery;
+  }
+
+
+  private String setUpS3PathResolver(Long datasetId, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver) {
+    String path = null;
+    switch (dataset.getDatasetTypeEnum()) {
+      case REPORTING:
+        s3PathResolver.setPath(S3_TABLE_NAME_QUERY_PATH);
+        s3PathResolver.setDataProviderId(dataset.getDataProviderId());
+        s3PathResolver.setDatasetId(datasetId);
+        path = s3Service.getS3Path(s3PathResolver);
+        break;
+      case DESIGN:
+        s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3PathResolver.setDataProviderId(0L);
+        s3PathResolver.setDatasetId(datasetId);
+        path = s3Service.getS3Path(s3PathResolver);
+        break;
+      case COLLECTION:
+        s3PathResolver.setDatasetId(datasetId);
+        path = s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH);
+        break;
+      case TEST:
+        break;
+      case EUDATASET:
+        break;
+      case REFERENCE:
+        path = s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_DATAFLOW_REFERENCE_QUERY_PATH);
+        break;
+      default:
+        LOG.info("Dataset Type does not exist!");
+        break;
+    }
+
+    LOG.info("Method setUpS3PathResolver returns : {}", path);
+    return path;
   }
 }

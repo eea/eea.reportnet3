@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -3156,6 +3157,10 @@ DatasetServiceTest {
     // .thenReturn("5cf0e9b3b793310e9ceca192");
 
     // Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
+
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZull.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     Mockito
         .when(
             recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),
@@ -3186,6 +3191,9 @@ DatasetServiceTest {
     // .thenReturn("5cf0e9b3b793310e9ceca192");
 
     // Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(dsSchema));
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZull.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     Mockito
         .when(
             recordRepository.findAndGenerateETLJson(Mockito.anyLong(), Mockito.any(), Mockito.any(),
