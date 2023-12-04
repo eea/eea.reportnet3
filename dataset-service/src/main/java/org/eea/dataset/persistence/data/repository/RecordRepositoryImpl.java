@@ -55,12 +55,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -960,8 +960,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return
    */
   private JSONArray getAllRecordsDL(String totalRecords, String tableSchemaId) throws SQLException {
-    ResultSet rs = dremioJdbcTemplate.queryForObject(totalRecords, ResultSet.class);
-    ResultSetMetaData metaData = rs.getMetaData();
+    SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
+    SqlRowSetMetaData metaData = rs.getMetaData();
     int columnCount = metaData.getColumnCount();
 
     JSONArray fields = new JSONArray();
@@ -2095,7 +2095,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String path = null;
     switch (dataset.getDatasetTypeEnum()) {
       case REPORTING:
-        s3PathResolver.setPath(S3_TABLE_NAME_QUERY_PATH);
+        s3PathResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3PathResolver.setDataProviderId(dataset.getDataProviderId());
         s3PathResolver.setDatasetId(datasetId);
         path = s3Service.getS3Path(s3PathResolver);
