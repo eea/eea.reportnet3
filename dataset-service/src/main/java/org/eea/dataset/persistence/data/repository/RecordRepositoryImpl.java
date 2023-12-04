@@ -977,17 +977,17 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           recordObj.put("id_record", value);
         } else if (columnName == "data_provider_code") {
           recordObj.put("countryCode", value);
-        } else {
+        } else if (columnName != "dir0") {
           fieldObj.put("fieldName",columnName);
           fieldObj.put("value",value);
           fieldObj.put("field_value_id",null);
           fields.add(fieldObj);
         }
+        recordObj.put("fields", fields);
+        recordObj.put("id_table_schema", tableSchemaId);
       }
-      recordObj.put("fields", fields);
-      recordObj.put("id_table_schema", tableSchemaId);
+      records.add(recordObj);
     }
-    records.add(recordObj);
 
     return records;
   }
