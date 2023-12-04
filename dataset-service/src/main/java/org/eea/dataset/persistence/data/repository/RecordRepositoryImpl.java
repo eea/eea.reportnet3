@@ -679,8 +679,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
 
       if (totalRecords != null && totalRecords > 0L) {
-        resultTable.put("{\"tables\":[{\"records\":[","");
-        for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
+        //for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
 
           String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
           JSONArray fields = getAllRecordsDL(query, tableSchema.getIdTableSchema().toString());
@@ -689,7 +688,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           if (fields != null) {
             tableRecords.addAll(gsonparser.parseList(fields.toString()));
           }
-        }
+        //}
       }
       resultTable.put("records", tableRecords);
       // add table to resultjson tables list
