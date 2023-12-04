@@ -964,18 +964,32 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     int columnCount = metaData.getColumnCount();
 
     JSONArray fields = new JSONArray();
-    JSONObject fieldObj = new JSONObject();
+    JSONArray records = new JSONArray();
+    JSONObject recordObj = new JSONObject();
 
-    while (rs.next()){
+    while (rs.next()) {
       for (int i = 1; i <= columnCount; i++) {
+        JSONObject fieldObj = new JSONObject();
         String columnName = metaData.getColumnName(i);
         String value = rs.getString(columnName);
-        fieldObj.put(columnName, value);
-      }
-      fields.add(fieldObj);
-    }
 
-    return fields;
+        if (columnName == "record_id") {
+          recordObj.put("id_record", value);
+        } else if (columnName == "data_provider_code") {
+          recordObj.put("countryCode", value);
+        } else {
+          fieldObj.put("fieldName",columnName);
+          fieldObj.put("value",value);
+          fieldObj.put("field_value_id",null);
+          fields.add(fieldObj);
+        }
+      }
+      recordObj.put("fields", fields);
+      recordObj.put("id_table_schema", tableSchemaId);
+    }
+    records.add(recordObj);
+
+    return records;
   }
 
   /**
