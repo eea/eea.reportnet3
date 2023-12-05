@@ -689,7 +689,7 @@ public class FileTreatmentHelper implements DisposableBean {
             String[] columns = new String[headers.size()];
             while (rs.next()) {
                 for (int j = 0; j < headers.size(); j++) {
-                    columns[j] = rs.getString(headers.get(j)).toString();
+                    columns[j] = rs.getString(headers.get(j));
                 }
                 if (includeCountryCode!=null) {
                     columns[headers.size()-1] = rs.getString(headers.get(headers.size()-1));
