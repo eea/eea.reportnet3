@@ -666,29 +666,35 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       offset = 1;
     }
 
+    File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
+    fileFolder.mkdirs();
     File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + "_etlExport" + JSON_TYPE);
-    FileWriter fw = new FileWriter(jsonFile);
-    BufferedWriter bw = new BufferedWriter(fw);
-    // get json for each table requested
-    bw.write("{\"tables\":[");
-    for (TableSchema tableSchema : tableSchemaList) {
-      Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, true));
+    try (FileWriter fw = new FileWriter(jsonFile);
+        BufferedWriter bw = new BufferedWriter(fw)) {
 
-      if (totalRecords != null && totalRecords > 0L) {
-        //for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
+      // get json for each table requested
+      bw.write("{\"tables\":[");
+      for (TableSchema tableSchema : tableSchemaList) {
+        Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, true));
 
-        String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
-        getAllRecordsDL(query, tableSchema, bw);
-        bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
-        //}
+        if (totalRecords != null && totalRecords > 0L) {
+          //for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
+
+          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
+          getAllRecordsDL(query, tableSchema, bw);
+          bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
+          //}
+        }
+        if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+            || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+          bw.write(",\"totalRecords\":\"" + totalRecords + "\"");
+        }
+        bw.write("\"}");
       }
-      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        bw.write(",\"totalRecords\":\"" + totalRecords + "\"");
-      }
-      bw.write("\"}");
+      bw.write("]}");
+    } catch (Exception e) {
+      LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
     }
-    bw.write("]}");
 
     return jsonFile;
   }
