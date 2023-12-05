@@ -169,6 +169,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Value("${spring.datasource.driverClassName}")
   private String connectionDriver;
 
+  /**
+   * The path export DL.
+   */
+  @Value("${exportDLPath}")
+  private String exportDLPath;
+
   /** The Constant WHERE_ID_TABLE_SCHEMA: {@value}. */
   private static final String WHERE_ID_TABLE_SCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
 
@@ -639,9 +645,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   @Override
-  public String findAndGenerateETLJsonDL(Long datasetId, OutputStream outputStream,
+  public File findAndGenerateETLJsonDL(Long datasetId, OutputStream outputStream,
     String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
-    String dataProviderCodes) throws EEAException, SQLException {
+    String dataProviderCodes) throws EEAException, SQLException, IOException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -651,8 +657,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     String tableName = "";
 
     // create primary json
-    JSONObject resultjson = new JSONObject();
-    JSONArray tables = new JSONArray();
     if (tableSchemaId != null) {
       tableSchemaList = tableSchemaList.stream()
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
@@ -662,36 +666,31 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       offset = 1;
     }
 
-    GsonJsonParser gsonparser = new GsonJsonParser();
+    File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + "_etlExport" + JSON_TYPE);
+    FileWriter fw = new FileWriter(jsonFile);
+    BufferedWriter bw = new BufferedWriter(fw);
     // get json for each table requested
+    bw.write("{\"tables\":[");
     for (TableSchema tableSchema : tableSchemaList) {
-
       Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, true));
-
-      JSONObject resultTable = new JSONObject();
-      tableName = tableSchema.getNameTableSchema();
-      resultTable.put("tableName", tableName);
-      JSONArray fields = new JSONArray();
-
-      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        resultTable.put("totalRecords", totalRecords);
-      }
 
       if (totalRecords != null && totalRecords > 0L) {
         //for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
 
         String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
-        fields = getAllRecordsDL(query, tableSchema.getIdTableSchema().toString());
+        getAllRecordsDL(query, tableSchema, bw);
+        bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
         //}
       }
-      resultTable.put("records", fields);
-      // add table to resultjson tables list
-      tables.add(resultTable);
+      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
+          || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+        bw.write(",\"totalRecords\":\"" + totalRecords + "\"");
+      }
+      bw.write("\"}");
     }
-    resultjson.put("tables", tables);
+    bw.write("]}");
 
-    return resultjson.toString();
+    return jsonFile;
   }
 
   private Integer queryGetRecordCountbyFilterChain(String query, Long datasetId, String filterChain)
@@ -953,38 +952,45 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param totalRecords
    * @return
    */
-  private JSONArray getAllRecordsDL(String totalRecords, String tableSchemaId) throws SQLException {
+  private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw)
+      throws SQLException, IOException {
     SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
     SqlRowSetMetaData metaData = rs.getMetaData();
     int columnCount = metaData.getColumnCount();
 
-    JSONArray fields = new JSONArray();
-    JSONArray records = new JSONArray();
-    JSONObject recordObj = new JSONObject();
-
     while (rs.next()) {
+      bw.write("{\"records\":[{\"fields\":[{");
+      String id_record = null;
+      String countryCode = null;
       for (int i = 1; i <= columnCount; i++) {
-        JSONObject fieldObj = new JSONObject();
         String columnName = metaData.getColumnName(i);
         String value = rs.getString(columnName);
 
         if (columnName == "record_id") {
-          recordObj.put("id_record", value);
+          id_record = value;
         } else if (columnName == "data_provider_code") {
-          recordObj.put("countryCode", value);
+          countryCode = value;
         } else if (columnName != "dir0") {
-          fieldObj.put("fieldName",columnName);
-          fieldObj.put("value",value);
-          fieldObj.put("field_value_id",null);
-          fields.add(fieldObj);
+          bw.write("\"fieldName\":" + "\"" + columnName + "\",");
+          bw.write("\"value\":" + "\"" + value + "\",");
+          bw.write("\"field_value_id\":" + null);
+          if (i != columnCount) {
+            bw.write("},");
+          } else {
+            bw.write("}");
+          }
         }
-        recordObj.put("fields", fields);
-        recordObj.put("id_table_schema", tableSchemaId);
       }
-      records.add(recordObj);
+      bw.write("],");
+      bw.write("\"id_table_schema\":" + "\"" + tableSchema.getIdTableSchema().toString() + "\",");
+      bw.write("\"id_record\":" + "\"" + id_record + "\",");
+      bw.write("\"countryCode\":" + "\"" + countryCode + "\"");
+      if (rs.last()) {
+        bw.write("}");
+      } else {
+        bw.write("},");
+      }
     }
-
-    return records;
   }
 
   /**
