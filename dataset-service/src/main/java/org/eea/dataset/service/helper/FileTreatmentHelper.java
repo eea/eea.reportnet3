@@ -143,6 +143,8 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
 
+    private static final String FILE_EXPORT_LIMIT = "100000";
+
     /**
      * The import executor service.
      */
@@ -737,7 +739,7 @@ public class FileTreatmentHelper implements DisposableBean {
             qcCodes = new String[]{filters.getQcCodes()};
         }
         StringBuilder filteredQuery = dataLakeDataRetrieverService.buildFilteredQuery(dataset, null, filters.getFieldValue(), fieldIdMap, filters.getLevelError(), qcCodes, validationTablePath);
-        filteredQuery.append(" limit 100000");
+        filteredQuery.append(" limit " + FILE_EXPORT_LIMIT);
         dataQuery.append(filteredQuery);
         return dataQuery;
     }
