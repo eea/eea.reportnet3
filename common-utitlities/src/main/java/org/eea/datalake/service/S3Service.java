@@ -1,6 +1,7 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 
 public interface S3Service {
 
@@ -32,4 +33,11 @@ public interface S3Service {
      * @return
      */
     String getTablePathByDatasetType(Long dataflowId, Long datasetId, String tableName, S3PathResolver tableResolver);
+
+    /**
+     *
+     * @param dataset
+     * @return
+     */
+    S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName);
 }

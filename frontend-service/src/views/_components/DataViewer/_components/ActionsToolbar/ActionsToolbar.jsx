@@ -56,6 +56,7 @@ export const ActionsToolbar = ({
   prevFilterValue,
   records,
   selectedRuleId,
+  selectedShortCode,
   selectedRuleLevelError,
   selectedRuleMessage,
   selectedTableSchemaId,
@@ -128,7 +129,7 @@ export const ActionsToolbar = ({
           type.code,
           isFilteredByValue ? filter.valueFilter : '',
           levelErrorValidations.map(levelError => levelError.toUpperCase()),
-          selectedRuleId,
+          selectedShortCode,
           isExportFilteredCsv,
           isFilterValidationsActive
         );
