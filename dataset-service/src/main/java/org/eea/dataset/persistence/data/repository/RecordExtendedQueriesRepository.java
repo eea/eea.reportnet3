@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
+import java.io.File;
 import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.List;
@@ -102,9 +103,9 @@ public interface RecordExtendedQueriesRepository {
    * @return the stream
    * @throws EEAException the EEA exception
    */
-  String findAndGenerateETLJsonDL(Long datasetId, OutputStream outputStream, String tableSchemaId,
+  File findAndGenerateETLJsonDL(Long datasetId, OutputStream outputStream, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes) throws EEAException, SQLException;
+      String dataProviderCodes) throws EEAException, SQLException, IOException;
 
   /**
    * Find ordered native record.

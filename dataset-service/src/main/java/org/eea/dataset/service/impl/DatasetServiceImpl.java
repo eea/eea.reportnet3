@@ -3248,8 +3248,12 @@ public class DatasetServiceImpl implements DatasetService {
       Long dataflowId = getDataFlowIdById(datasetId);
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
       if (dataflow.getBigData()) {
-        outputStream.write(recordRepository.findAndGenerateETLJsonDL(datasetId, outputStream, tableSchemaId, limit,
-            offset, filterValue, columnName, dataProviderCodes).getBytes());
+        File andGenerateETLJsonDL =
+            recordRepository.findAndGenerateETLJsonDL(datasetId, outputStream, tableSchemaId, limit,
+                offset, filterValue, columnName, dataProviderCodes);
+
+        byte[] bytes = IOUtils.toByteArray(new FileInputStream(andGenerateETLJsonDL));
+        outputStream.write(bytes);
       } else {
         // Delete the query log and the timestamp part later, once the tests are finished.
         outputStream.write(
