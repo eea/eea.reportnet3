@@ -44,12 +44,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.*;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -147,6 +150,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      LOG.info("Start executing RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {} ", datasetId);
       String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
       String processId = String.valueOf(eeaEventVO.getData().get("process_id"));
       Long jobId = null;
@@ -201,11 +205,13 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         createSnapshotVO.setDescription("Release " + cetReleaseDate + " CET");
 
         LOG.info("Creating release process for dataflowId {}, dataProviderId {} dataset {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
+        LOG.info("Start release process for RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
         String nextProcessId = UUID.randomUUID().toString();
         processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, nextProcessId,
                 user, defaultReleaseProcessPriority, true);
         LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
+        LOG.info("Finished release process for RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
 
         if (jobId!=null) {
           LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
@@ -227,7 +233,9 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
         if (dataflowVO.isShowPublicInfo()) {
           try {
+            LOG.info("Save file to public export Started for RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
             fileTreatmentHelper.savePublicFiles(dataflowVO.getId(), dataset.getDataProviderId());
+            LOG.info("Save file to public export Finished for RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
           } catch (IOException e) {
             LOG.error("Folder not created in dataflow {} with dataprovider {} and datasetId {} message {}",
                 dataset.getDataflowId(), dataset.getDataProviderId(), datasetId, e.getMessage(), e);
@@ -286,6 +294,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                   messageVO.getContent());
         }
       }
+      LOG.info("Finish executing RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {} ", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw new EEAException(e.getMessage());

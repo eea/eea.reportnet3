@@ -11,7 +11,6 @@ import org.eea.interfaces.controller.orchestrator.JobHistoryController.JobHistor
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
@@ -39,8 +38,15 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.UUID;
 
 /**
  * The Class PropagateNewFieldCommand.
@@ -140,6 +146,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+      LOG.info("Start executing VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {} ", datasetId);
       Long validationJobId = null;
       if (eeaEventVO.getData().get("validation_job_id")!=null) {
         validationJobId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("validation_job_id")));
@@ -236,11 +243,13 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
                 "Releasing datasets process continues. At this point, the datasets from the dataflowId {}, dataProviderId {} and jobId {} have no blockers",
                 dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
 
+        LOG.info("Start release process for VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
         LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
         processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
         LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
+        LOG.info("Finished release process for VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
@@ -258,14 +267,17 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         jobProcessControllerZuul.save(jobProcessVO);
         LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
 
+        LOG.info("Updating release process for VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
         LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
         processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
         LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
+        LOG.info("Finished Updating release process for VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
 
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
                 dateFormatter.format(dateRelease), false, processId);
       }
+      LOG.info("Finish executing VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {} ", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
     }
