@@ -689,10 +689,11 @@ public class FileTreatmentHelper implements DisposableBean {
             String[] columns = new String[headers.size()];
             while (rs.next()) {
                 for (int j = 0; j < headers.size(); j++) {
-                    columns[j] = rs.getString(headers.get(j));
-                }
-                if (includeCountryCode!=null) {
-                    columns[headers.size()-1] = rs.getString(headers.get(headers.size()-1));
+                    if (headers.get(j).equals(includeCountryCode)) {
+                        columns[headers.size()-1] = rs.getString(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
+                    } else {
+                        columns[j] = rs.getString(headers.get(j));
+                    }
                 }
                 csvWriter.writeNext(columns, false);
             }
