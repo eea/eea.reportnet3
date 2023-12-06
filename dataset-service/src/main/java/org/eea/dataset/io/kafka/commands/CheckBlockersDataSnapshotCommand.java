@@ -249,7 +249,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
         LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
-        LOG.info("Finished release process for VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
+        LOG.info("Created release process for VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);

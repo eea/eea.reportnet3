@@ -211,7 +211,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                 ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, nextProcessId,
                 user, defaultReleaseProcessPriority, true);
         LOG.info("Created release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
-        LOG.info("Finished release process for RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
+        LOG.info("Created release process for RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {}, dataflowId {} ", datasetId, dataset.getDataflowId());
 
         if (jobId!=null) {
           LOG.info("Creating jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
@@ -220,12 +220,13 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
           LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextProcessId);
         }
 
+        LOG.info("Updating release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
         LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
         processControllerZuul.updateProcess(nextData, dataset.getDataflowId(),
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, nextProcessId,
                 user, defaultReleaseProcessPriority, true);
         LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), jobId, nextData, nextProcessId);
-
+        LOG.info("Finished Updating release process with processId {} for dataflowId {}, dataProviderId {} dataset {}, jobId {}", nextProcessId, dataset.getDataflowId(), dataset.getDataProviderId(), nextData, jobId);
         datasetSnapshotService.addSnapshot(nextData, createSnapshotVO, null, dateRelease, false, nextProcessId);
       } else {
 
