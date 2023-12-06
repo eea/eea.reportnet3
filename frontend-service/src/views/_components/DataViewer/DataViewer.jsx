@@ -1215,7 +1215,7 @@ export const DataViewer = ({
         tableId={tableId}
         tableName={tableName}
       />
-      <ContextMenu model={menu} ref={contextMenuRef} />
+      {!bigData && <ContextMenu model={menu} ref={contextMenuRef} />}
       <div className={styles.Table}>
         <DataTable
           contextMenuSelection={records.selectedRecord}
