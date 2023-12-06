@@ -1249,8 +1249,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       String table;
       if (spaceIdx!=-1) {
         table = sqlContainingSchema.substring(datId.length()+1,spaceIdx);
-      } else {
+      } else if (closeParIdx!=-1) {
         table = sqlContainingSchema.substring(datId.length()+1,closeParIdx);
+      } else {
+        table = sqlContainingSchema.substring(datId.length()+1);
       }
       table = processTableName(table);
       String pathToReplace = DATASET+Long.valueOf(datId)+DOT+table;
