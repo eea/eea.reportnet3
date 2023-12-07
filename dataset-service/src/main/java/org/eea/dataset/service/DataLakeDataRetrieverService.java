@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
 
@@ -24,4 +25,14 @@ public interface DataLakeDataRetrieverService {
     TableVO getTableValuesDLById(@DatasetId Long datasetId, String mongoID, Pageable pageable,
                                  String fields, ErrorTypeEnum[] levelError, String[] idRules, String fieldSchema,
                                  String fieldValue) throws EEAException;
+
+
+    /**
+     * @param idTableSchema
+     * @param datasetSchemaId
+     * @return
+     * @throws EEAException
+     */
+    TableSchemaVO getTableSchemaVO(String idTableSchema,
+        String datasetSchemaId) throws EEAException;
 }

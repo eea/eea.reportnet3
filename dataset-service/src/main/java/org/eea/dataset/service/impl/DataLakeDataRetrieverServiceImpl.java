@@ -315,7 +315,8 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
      * @return
      * @throws EEAException
      */
-    private TableSchemaVO getTableSchemaVO(String idTableSchema, String datasetSchemaId) throws EEAException {
+    @Override
+    public TableSchemaVO getTableSchemaVO(String idTableSchema, String datasetSchemaId) throws EEAException {
         DataSetSchemaVO dataSetSchemaVO;
         try {
             dataSetSchemaVO = fileCommon.getDataSetSchemaVO(datasetSchemaId);
