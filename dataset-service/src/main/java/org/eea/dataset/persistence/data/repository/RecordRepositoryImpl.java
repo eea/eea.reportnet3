@@ -150,12 +150,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private JdbcTemplate dremioJdbcTemplate;
 
   /**
-   * The parse common.
-   */
-  @Autowired
-  private FileCommonUtils fileCommon;
-
-  /**
    * The connection url.
    */
   @Value("${spring.datasource.url}")
