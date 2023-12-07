@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>export-filter</api-gateway.version>
-    <communication.version>export-filter</communication.version>
-    <collaboration.version>export-filter</collaboration.version>
-    <dataflow.version>export-filter</dataflow.version>
-    <dataset.version>export-filter</dataset.version>
-    <document.version>export-filter</document.version>
-    <frontend.version>export-filter</frontend.version>
-    <indexsearch.version>export-filter</indexsearch.version>
-    <inspire.version>export-filter</inspire.version>
-    <recordstore.version>export-filter</recordstore.version>
-    <ums.version>export-filter</ums.version>
-    <validation.version>export-filter</validation.version>
-    <common-interfaces.version>export-filter</common-interfaces.version>
-    <common-utitlities.version>export-filter</common-utitlities.version>
-    <rod.version>export-filter</rod.version>
-    <orchestrator.version>export-filter</orchestrator.version>
+    <api-gateway.version>v3.3-ARCHITECTURE_DATALAKES</api-gateway.version>
+    <communication.version>v3.3-ARCHITECTURE_DATALAKES</communication.version>
+    <collaboration.version>v3.3-ARCHITECTURE_DATALAKES</collaboration.version>
+    <dataflow.version>v3.3-ARCHITECTURE_DATALAKES</dataflow.version>
+    <dataset.version>v3.3-ARCHITECTURE_DATALAKES</dataset.version>
+    <document.version>v3.3-ARCHITECTURE_DATALAKES</document.version>
+    <frontend.version>v3.3-ARCHITECTURE_DATALAKES</frontend.version>
+    <indexsearch.version>v3.3-ARCHITECTURE_DATALAKES</indexsearch.version>
+    <inspire.version>v3.3-ARCHITECTURE_DATALAKES</inspire.version>
+    <recordstore.version>v3.3-ARCHITECTURE_DATALAKES</recordstore.version>
+    <ums.version>v3.3-ARCHITECTURE_DATALAKES</ums.version>
+    <validation.version>v3.3-ARCHITECTURE_DATALAKES</validation.version>
+    <common-interfaces.version>v3.3-ARCHITECTURE_DATALAKES</common-interfaces.version>
+    <common-utitlities.version>v3.3-ARCHITECTURE_DATALAKES</common-utitlities.version>
+    <rod.version>v3.3-ARCHITECTURE_DATALAKES</rod.version>
+    <orchestrator.version>v3.3-ARCHITECTURE_DATALAKES</orchestrator.version>
   </properties>
 </project>
