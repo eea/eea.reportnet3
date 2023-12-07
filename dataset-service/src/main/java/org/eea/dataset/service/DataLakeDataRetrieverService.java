@@ -27,12 +27,4 @@ public interface DataLakeDataRetrieverService {
                                  String fieldValue) throws EEAException;
 
 
-    /**
-     * @param idTableSchema
-     * @param datasetSchemaId
-     * @return
-     * @throws EEAException
-     */
-    TableSchemaVO getTableSchemaVO(String idTableSchema,
-        String datasetSchemaId) throws EEAException;
 }
