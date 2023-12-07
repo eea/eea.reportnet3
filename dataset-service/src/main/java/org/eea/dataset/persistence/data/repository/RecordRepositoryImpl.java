@@ -6,8 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.datalake.service.S3ConvertService;
-import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioRecordMapper;
@@ -20,10 +18,11 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DataLakeDataRetrieverService;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -34,6 +33,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -146,6 +146,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Autowired
   @Qualifier("dremioJdbcTemplate")
   private JdbcTemplate dremioJdbcTemplate;
+
+  /** The datalake service */
+  @Autowired
+  private DataLakeDataRetrieverService dataLakeDataRetrieverService;
 
   /**
    * The connection url.
@@ -683,7 +687,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           //for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
 
           String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
-          getAllRecordsDL(query, tableSchema, bw);
+          getAllRecordsDL(query, tableSchema, bw, datasetId);
           bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
           //}
         }
@@ -960,10 +964,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param totalRecords
    * @return
    */
-  private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw)
-      throws SQLException, IOException {
+  private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw, Long datasetId)
+      throws SQLException, IOException, EEAException {
 
     DremioRecordMapper recordMapper = new DremioRecordMapper();
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String datasetSchemaId = dataset.getDatasetSchema();
+    TableSchemaVO tableSchemaVO = dataLakeDataRetrieverService.getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
+
+    recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchema.getIdTableSchema().toString());
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
     LOG.info(String.valueOf(recordVOS));
 
