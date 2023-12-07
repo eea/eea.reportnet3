@@ -971,14 +971,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw, Long datasetId)
       throws SQLException, IOException, EEAException {
 
-    DremioRecordMapper recordMapper = new DremioRecordMapper();
+    /*DremioRecordMapper recordMapper = new DremioRecordMapper();
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
 
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchema.getIdTableSchema().toString());
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
-    LOG.info(String.valueOf(recordVOS));
+    LOG.info(String.valueOf(recordVOS));*/
 
     SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
     SqlRowSetMetaData metaData = rs.getMetaData();
@@ -2208,13 +2208,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     return path;
   }
 
-  /**
+/*  *//**
    * finds tableSchemaVO
    * @param idTableSchema
    * @param datasetSchemaId
    * @return
    * @throws EEAException
-   */
+   *//*
   private TableSchemaVO getTableSchemaVO(String idTableSchema, String datasetSchemaId) throws EEAException {
     DataSetSchemaVO dataSetSchemaVO;
     try {
@@ -2231,5 +2231,5 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     }
     tableSchemaVO = tableSchemaOptional.get();
     return tableSchemaVO;
-  }
+  }*/
 }
