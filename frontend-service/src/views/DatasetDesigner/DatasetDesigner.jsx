@@ -1153,7 +1153,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
-      setAllSqlValidationRunning(false);
     }
   };
 
@@ -1229,7 +1228,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         icon={allSqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateAllSqlRulesBtn']}
         onClick={validateAllQcRules}
-        tooltip={resourcesContext.messages['validateRulesBtnTootip']}
+        tooltip={resourcesContext.messages['validateAllRulesBtnTootip']}
         tooltipOptions={{ position: 'top' }}
       />
       <Button

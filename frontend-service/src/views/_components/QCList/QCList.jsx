@@ -216,7 +216,13 @@ export const QCList = ({
   };
 
   useCheckNotifications(
-    ['INVALIDATED_QC_RULE_EVENT', 'VALIDATED_QC_RULE_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
+    [
+      'INVALIDATED_QC_RULE_EVENT',
+      'VALIDATED_QC_RULE_EVENT',
+      'VALIDATE_RULES_ERROR_EVENT',
+      'DISABLE_NAMES_TYPES_RULES_ERROR_EVENT',
+      'VALIDATE_ALL_RULES_COMPLETED_EVENT'
+    ],
     onUpdateData,
     true
   );
