@@ -202,7 +202,7 @@ export const DatasetService = {
     fileType,
     filterValue,
     levelErrorValidations,
-    selectedRuleId,
+    selectedShortCode,
     isExportFilteredCsv,
     isFilterValidationsActive
   ) =>
@@ -212,7 +212,7 @@ export const DatasetService = {
       fileType,
       filterValue,
       levelErrorValidations,
-      selectedRuleId,
+      selectedShortCode,
       isExportFilteredCsv,
       isFilterValidationsActive
     ),

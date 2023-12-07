@@ -155,7 +155,7 @@ export const DatasetRepository = {
     fileType,
     filterValue,
     levelErrorValidations,
-    selectedRuleId,
+    selectedShortCode,
     isExportFilteredCsv,
     isFilterValidationsActive
   ) =>
@@ -163,7 +163,7 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.exportTableDataDL, { datasetId, fileType, tableSchemaId }),
       data: {
         fieldValue: isExportFilteredCsv ? filterValue : '',
-        idRules: isExportFilteredCsv ? selectedRuleId : '',
+        qcCodes: isExportFilteredCsv ? selectedShortCode : '',
         levelError: isExportFilteredCsv && isFilterValidationsActive ? levelErrorValidations : []
       },
       headers: { 'Content-Type': 'application/json' }

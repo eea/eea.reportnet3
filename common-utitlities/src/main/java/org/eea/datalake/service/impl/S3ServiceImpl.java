@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
 import static org.eea.utils.LiteralConstants.*;
 
 
@@ -234,6 +236,23 @@ public class S3ServiceImpl implements S3Service {
             tablePath = this.getTableAsFolderQueryPath(tableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         }
         return tablePath;
+    }
+
+    @Override
+    public S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName) {
+        S3PathResolver s3PathResolver;
+        if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+            s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), tableName);
+            s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+        }  else if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.COLLECTION)) {
+            s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getId(), tableName, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+        } else if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.EUDATASET)) {
+            s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getId(), tableName, S3_EU_SNAPSHOT_ROOT_PATH);
+        } else {
+            s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), tableName);
+            s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+        }
+        return s3PathResolver;
     }
 
     private String formatSnapshotFolder(Long snapshotId) {

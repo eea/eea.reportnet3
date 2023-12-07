@@ -32,6 +32,8 @@ public class ExportFilterVO implements Serializable {
 
   /** The field value. */
   private String fieldValue;
+  /** The qc codes */
+  private String qcCodes;
 
   /**
    * Hash code.
@@ -40,7 +42,7 @@ public class ExportFilterVO implements Serializable {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(levelError, idRules, fieldValue);
+    return Objects.hash(levelError, idRules, fieldValue, qcCodes);
   }
 
   /**
@@ -60,7 +62,7 @@ public class ExportFilterVO implements Serializable {
     }
     final ExportFilterVO other = (ExportFilterVO) obj;
     return Objects.equals(levelError, other.levelError) && Objects.equals(idRules, other.idRules)
-        && Objects.equals(fieldValue, other.fieldValue);
+        && Objects.equals(fieldValue, other.fieldValue) && Objects.equals(qcCodes, other.qcCodes);
   }
 
 

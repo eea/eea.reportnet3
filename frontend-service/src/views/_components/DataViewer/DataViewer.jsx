@@ -1203,6 +1203,7 @@ export const DataViewer = ({
         prevFilterValue={prevFilterValue}
         records={records}
         selectedRuleId={selectedRuleId}
+        selectedShortCode={selectedShortCode}
         selectedRuleLevelError={selectedRuleLevelError}
         selectedRuleMessage={selectedRuleMessage}
         selectedTableSchemaId={selectedTableSchemaId}

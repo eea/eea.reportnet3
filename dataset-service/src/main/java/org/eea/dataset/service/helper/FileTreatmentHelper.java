@@ -5,14 +5,16 @@ package org.eea.dataset.service.helper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
 import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.impl.S3HelperImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.exception.InvalidFileException;
@@ -30,7 +32,9 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.DataLakeDataRetrieverService;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.file.CSVSegmentedReaderStrategy;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -58,6 +62,8 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.TaskType;
@@ -83,14 +89,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.ResponseBytes;
-import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.annotation.PostConstruct;
@@ -101,9 +107,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.*;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
 import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REPORTING;
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
 import static org.eea.utils.LiteralConstants.*;
@@ -134,6 +142,8 @@ public class FileTreatmentHelper implements DisposableBean {
      * The Constant FILE_PUBLIC_DATASET_PATTERN_NAME.
      */
     private static final String FILE_PUBLIC_DATASET_PATTERN_NAME = "%s-%s";
+
+    private static final String FILE_EXPORT_LIMIT = "100000";
 
     /**
      * The import executor service.
@@ -322,6 +332,21 @@ public class FileTreatmentHelper implements DisposableBean {
     @Autowired
     private S3ConvertService s3ConvertService;
 
+    @Autowired
+    private DremioHelperService dremioHelperService;
+
+    @Autowired
+    private DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    private S3Service s3Service;
+
+    @Autowired
+    private DataLakeDataRetrieverService dataLakeDataRetrieverService;
+
+    @Autowired
+    @Qualifier("dremioJdbcTemplate")
+    JdbcTemplate dremioJdbcTemplate;
 
     /**
      * Initialize the executor service.
@@ -619,7 +644,27 @@ public class FileTreatmentHelper implements DisposableBean {
         fileFolder.mkdirs();
 
         try {
-            convertParquetFile(datasetId, mimeType, tableSchemaId, tableName);
+            boolean filtered = !filters.getFieldValue().isEmpty() || filters.getLevelError().length>0 || !filters.getQcCodes().isEmpty();
+            if (filtered) {
+                DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+                DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+                String includeCountryCode = getCode(dataset.getDataflowId(), datasetType);
+                S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableName);
+                boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
+                LOG.info("For datasetId {} s3PathResolver : {}", dataset.getId(), s3PathResolver);
+                LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
+                if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
+                    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataset.getDatasetSchema());
+                    StringBuilder dataQuery = createDataQuery(tableName, filters, dataset, s3PathResolver, tableSchemaVO);
+                    List<String> headers = getHeadersForFileDL(includeCountryCode, tableSchemaVO);
+                    File csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId()), tableName + CSV_TYPE);
+                    LOG.info("Creating file for export: {}", csvFile);
+                    SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(dataQuery.toString());
+                    createCsvWithFiltersDL(headers, csvFile, rs, includeCountryCode);
+                }
+            } else {
+                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName);
+            }
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT, null, notificationVO);
             LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
 
@@ -627,6 +672,77 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null, notificationVO);
         }
+    }
+
+    /**
+     * creates csv with filters for big data
+     * @param headers
+     * @param csvFile
+     * @param rs
+     * @throws IOException
+     */
+    private static void createCsvWithFiltersDL(List<String> headers, File csvFile, SqlRowSet rs, String includeCountryCode) throws IOException {
+        try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
+                CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+            csvWriter.writeNext(headers.toArray(String[]::new), false);
+            String[] columns = new String[headers.size()];
+            while (rs.next()) {
+                for (int j = 0; j < headers.size(); j++) {
+                    if (headers.get(j).equals(includeCountryCode)) {
+                        columns[headers.size()-1] = rs.getString(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
+                    } else {
+                        columns[j] = rs.getString(headers.get(j));
+                    }
+                }
+                csvWriter.writeNext(columns, false);
+            }
+        }
+    }
+
+    /**
+     * gets headers for csv file
+     * @param includeCountryCode
+     * @param tableSchemaVO
+     * @return
+     */
+    private static List<String> getHeadersForFileDL(String includeCountryCode, TableSchemaVO tableSchemaVO) {
+        List<String> headers =  tableSchemaVO.getRecordSchema().getFieldSchema().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
+        if (includeCountryCode !=null) {
+            headers.add(includeCountryCode);
+        }
+        return headers;
+    }
+
+    /**
+     * create dataQuery for exporting with filters
+     * @param tableName
+     * @param filters
+     * @param dataset
+     * @param s3PathResolver
+     * @param tableSchemaVO
+     * @return
+     */
+    private StringBuilder createDataQuery(String tableName, ExportFilterVO filters, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver, TableSchemaVO tableSchemaVO) {
+        StringBuilder dataQuery = new StringBuilder();
+        if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+            s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+        } else {
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+        }
+        S3PathResolver s3ValidationResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0, dataset.getId(), tableName);
+        s3ValidationResolver.setTableName(S3_VALIDATION);
+        String validationTablePath = s3Service.getTableAsFolderQueryPath(s3ValidationResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
+        String[] qcCodes = null;
+        if (!filters.getQcCodes().isEmpty()) {
+            qcCodes = new String[]{filters.getQcCodes()};
+        }
+        StringBuilder filteredQuery = dataLakeDataRetrieverService.buildFilteredQuery(dataset, null, filters.getFieldValue(), fieldIdMap, filters.getLevelError(), qcCodes, validationTablePath);
+        filteredQuery.append(" limit " + FILE_EXPORT_LIMIT);
+        dataQuery.append(filteredQuery);
+        return dataQuery;
     }
 
     private void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName) {

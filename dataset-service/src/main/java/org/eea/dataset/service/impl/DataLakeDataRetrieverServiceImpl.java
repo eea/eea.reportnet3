@@ -10,14 +10,14 @@ import org.eea.dataset.mapper.DremioRecordMapper;
 import org.eea.dataset.mapper.DremioValidationMapper;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataLakeDataRetrieverService;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.validation.DremioValidationVO;
@@ -31,8 +31,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import javax.transaction.Transactional;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -44,7 +46,7 @@ import static org.eea.utils.LiteralConstants.*;
 @Service
 public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverService {
 
-    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+    private DatasetMetabaseService datasetMetabaseService;
     private JdbcTemplate dremioJdbcTemplate;
     private FileCommonUtils fileCommon;
     private S3Service s3Service;
@@ -52,12 +54,13 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     private S3Client s3Client;
     private S3Helper s3Helper;
     private DremioHelperService dremioHelperService;
+    private DatasetSchemaService datasetSchemaService;
 
     @Autowired
-    public DataLakeDataRetrieverServiceImpl(DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
+    public DataLakeDataRetrieverServiceImpl(DatasetMetabaseService datasetMetabaseService, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
                                             FileCommonUtils fileCommon, S3Service s3Service, SchemasRepository schemasRepository, S3Client s3Client, S3Helper s3Helper,
-                                            DremioHelperService dremioHelperService) {
-        this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
+                                            DremioHelperService dremioHelperService, DatasetSchemaService datasetSchemaService) {
+        this.datasetMetabaseService = datasetMetabaseService;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.fileCommon = fileCommon;
         this.s3Service = s3Service;
@@ -65,6 +68,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         this.s3Client = s3Client;
         this.s3Helper = s3Helper;
         this.dremioHelperService = dremioHelperService;
+        this.datasetSchemaService = datasetSchemaService;
     }
 
     /** The Constant LOG. */
@@ -75,9 +79,9 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
     public TableVO getTableValuesDLById(final Long datasetId, final String idTableSchema, Pageable pageable, final String fields, ErrorTypeEnum[] levelError,
                                         String[] qcCodes, String fieldSchema, String fieldValue) throws EEAException {
         TableVO result;
-        DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         String datasetSchemaId = dataset.getDatasetSchema();
-        TableSchemaVO tableSchemaVO = getTableSchemaVO(idTableSchema, datasetSchemaId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
         if (COLLECTION.equals(dataset.getDatasetTypeEnum())) {
             result = getDCTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
         } else if (EUDATASET.equals(dataset.getDatasetTypeEnum())) {
@@ -105,12 +109,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
-        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, datasetId, tableSchemaVO.getNameTableSchema());
-        if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
-            s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
-        } else {
-            s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
-        }
+        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
         LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
@@ -171,7 +170,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         }
         dataQuery.append(filteredQuery);
         LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
-        List<RecordVO> recordVOS = getRecordVOS(dataset, tableSchemaVO, dataQuery);
+        List<RecordVO> recordVOS = getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
         result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
         result.setRecords(recordVOS);
 
@@ -202,7 +201,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
-        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
         LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
@@ -232,7 +231,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ");
             dataQuery.append(filteredQuery);
             LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
-            List<RecordVO> recordVOS = getRecordVOS(dataset, tableSchemaVO, dataQuery);
+            List<RecordVO> recordVOS = getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
             result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
             result.setRecords(recordVOS);
         } else {
@@ -258,7 +257,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
-        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), datasetId, tableSchemaVO.getNameTableSchema(), S3_EU_SNAPSHOT_ROOT_PATH);
+        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
         LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
         LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
@@ -287,7 +286,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
             dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
             dataQuery.append(filteredQuery);
             LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
-            List<RecordVO> recordVOS = getRecordVOS(dataset, tableSchemaVO, dataQuery);
+            List<RecordVO> recordVOS = getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
             result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
             result.setRecords(recordVOS);
         } else {
@@ -298,14 +297,14 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
 
     /**
      * Get records
-     * @param dataset
+     * @param datasetSchema
      * @param tableSchemaVO
      * @param dataQuery
      * @return
      */
-    private List<RecordVO> getRecordVOS(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, StringBuilder dataQuery) {
+    private List<RecordVO> getRecordVOS(String datasetSchema , TableSchemaVO tableSchemaVO, StringBuilder dataQuery) {
         DremioRecordMapper recordMapper = new DremioRecordMapper();
-        recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(dataset.getDatasetSchema()).setTableSchemaId(tableSchemaVO.getIdTableSchema());
+        recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchema).setTableSchemaId(tableSchemaVO.getIdTableSchema());
         List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
         return recordVOS;
     }
@@ -332,7 +331,8 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
      * @param validationTablePath
      * @return
      */
-    private StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
+    @Override
+    public StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
                                       ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath) {
         StringBuilder query = new StringBuilder();
         boolean levelErrorNotEmpty = levelError!=null && levelError.length>0 && levelError.length!=MAX_FILTERS;
@@ -558,31 +558,6 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         LOG.info("headers : {}", headers);
         headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
         dataQuery.append(")");
-    }
-
-    /**
-     * finds tableSchemaVO
-     * @param idTableSchema
-     * @param datasetSchemaId
-     * @return
-     * @throws EEAException
-     */
-    private TableSchemaVO getTableSchemaVO(String idTableSchema, String datasetSchemaId) throws EEAException {
-        DataSetSchemaVO dataSetSchemaVO;
-        try {
-            dataSetSchemaVO = fileCommon.getDataSetSchemaVO(datasetSchemaId);
-        } catch (EEAException e) {
-            LOG.error("Error retrieving dataset schema for datasetSchemaId {}", datasetSchemaId);
-            throw new EEAException(e);
-        }
-        Optional<TableSchemaVO> tableSchemaOptional = dataSetSchemaVO.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(idTableSchema)).findFirst();
-        TableSchemaVO tableSchemaVO = null;
-        if (!tableSchemaOptional.isPresent()) {
-            LOG.error("table with id {} not found in mongo results", idTableSchema);
-            throw new EEAException("Error retrieving table with id " + idTableSchema);
-        }
-        tableSchemaVO = tableSchemaOptional.get();
-        return tableSchemaVO;
     }
 
     private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
