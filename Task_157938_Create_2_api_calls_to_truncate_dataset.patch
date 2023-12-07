@@ -1,0 +1,352 @@
+Index: dataset-service/src/main/java/org/eea/dataset/controller/DatasetControllerImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/controller/DatasetControllerImpl.java b/dataset-service/src/main/java/org/eea/dataset/controller/DatasetControllerImpl.java
+--- a/dataset-service/src/main/java/org/eea/dataset/controller/DatasetControllerImpl.java	(revision c308089ca760f19d5622fc74543f221a3a93da07)
++++ b/dataset-service/src/main/java/org/eea/dataset/controller/DatasetControllerImpl.java	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -17,6 +17,7 @@
+ import org.eea.dataset.service.helper.DeleteHelper;
+ import org.eea.dataset.service.helper.FileTreatmentHelper;
+ import org.eea.dataset.service.helper.UpdateRecordHelper;
++import org.eea.dataset.service.model.TruncateDataset;
+ import org.eea.exception.EEAErrorMessage;
+ import org.eea.exception.EEAException;
+ import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+@@ -1852,13 +1853,53 @@
+ 
+       LOG.info("Method checkLocks results: {},", results);
+     } catch (Exception e) {
+-      LOG_ERROR.error("Error while executing method checkLocks ffor datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
++      LOG_ERROR.error("Error while executing method checkLocks for datasetId: {}, dataflowId: {}, dataProviderId: {}", datasetId, dataflowId, dataProviderId, e);
+       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+     }
+ 
+     return new ResponseEntity<>(results, HttpStatus.OK);
+   }
+ 
++
++  /**
++   * Gets dataset Data to be truncated
++   *
++   * @param datasetId
++   * @param dataProviderId
++   * @return
++   */
++  @PostMapping("/private/getDatasetData")
++  @ApiOperation(value = "Get dataset data to be truncated", hidden = true)
++  public TruncateDataset getDatasetData(
++      @RequestParam(value = "datasetId") Long datasetId,
++      @RequestParam(value = "dataProviderId") Long dataProviderId) {
++    LOG.info("Method getDatasetData called for datasetId: {} and dataProviderId {}", datasetId, dataProviderId);
++    if (datasetId == null || dataProviderId == null) {
++      return null;
++    }
++
++    TruncateDataset datasetDataToBeDeleted = new TruncateDataset();
++    try {
++      datasetDataToBeDeleted = datasetService.getDatasetDataToBeDeleted(datasetId, dataProviderId);
++    } catch (Exception e) {
++      LOG_ERROR.error("Error while executing method getDatasetData for datasetId: {}, dataProviderId: {}", datasetId, dataProviderId, e);
++    }
++
++    LOG.info("Method getDatasetData returns truncateDataset: {}", datasetDataToBeDeleted);
++    return datasetDataToBeDeleted;
++  }
++
++
++  @DeleteMapping("/private/truncateDataset")
++  @ApiOperation(value = "Truncate dataset by dataset id", hidden = true)
++  public Boolean truncateDataset(@RequestParam("datasetId") Long datasetId) {
++    LOG.info("Method truncateDataset called for datasetId: {}", datasetId);
++    if (datasetId == null) {
++      return null;
++    }
++    return datasetService.truncateDataset(datasetId);
++  }
++
+   /**
+    * Creates the response entity.
+    *
+Index: dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java
+--- a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java	(revision c308089ca760f19d5622fc74543f221a3a93da07)
++++ b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -93,4 +93,12 @@
+    */
+   List<RecordValue> findOrderedNativeRecord(Long idTable, Long datasetId, Pageable pageable,
+       ExportFilterVO filters);
++
++  /**
++   * Truncate dataset by dataset id
++   *
++   * @param datasetId
++   * @return
++   */
++  boolean truncateDataset(Long datasetId);
+ }
+Index: dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java
+--- a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java	(revision c308089ca760f19d5622fc74543f221a3a93da07)
++++ b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -1535,4 +1535,33 @@
+     return stringQuery.toString();
+   }
+ 
++  /**
++   * Truncate dataset by dataset id
++   *
++   * @param datasetId
++   * @return
++   */
++  @Override
++  public boolean truncateDataset(Long datasetId) {
++
++    LOG.info("Method truncateDataset called for datasetId {}", datasetId);
++    boolean deleted;
++
++    try {
++      String sql = new StringBuilder("truncate table dataset_").append(datasetId)
++              .append(".record_value cascade").toString();
++
++      Query query = entityManager.createQuery(sql);
++      deleted = query.executeUpdate() == 1;
++
++      LOG.info("Dataset id {} has been truncated with query: {}", datasetId, sql);
++    } catch (Exception e) {
++      LOG_ERROR.error(
++          "Error in method truncateDataset for datasetId {} with error",
++          datasetId, e);
++      throw e;
++    }
++
++    return deleted;
++  }
+ }
+Index: dataset-service/src/main/java/org/eea/dataset/persistence/metabase/repository/DataSetMetabaseRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/persistence/metabase/repository/DataSetMetabaseRepository.java b/dataset-service/src/main/java/org/eea/dataset/persistence/metabase/repository/DataSetMetabaseRepository.java
+--- a/dataset-service/src/main/java/org/eea/dataset/persistence/metabase/repository/DataSetMetabaseRepository.java	(revision c308089ca760f19d5622fc74543f221a3a93da07)
++++ b/dataset-service/src/main/java/org/eea/dataset/persistence/metabase/repository/DataSetMetabaseRepository.java	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -130,4 +130,12 @@
+    */
+   List<DataSetMetabase> findByDataProviderIdIn(List<Long> providerIdList);
+ 
++  /**
++   * Find by data provider id and dataset id.
++   *
++   * @param datasetId the dataset id
++   * @param dataProviderId the data provider id
++   * @return
++   */
++  DataSetMetabase findByIdAndDataProviderId(Long datasetId, Long dataProviderId);
+ }
+Index: dataset-service/src/main/java/org/eea/dataset/service/DatasetService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/service/DatasetService.java b/dataset-service/src/main/java/org/eea/dataset/service/DatasetService.java
+--- a/dataset-service/src/main/java/org/eea/dataset/service/DatasetService.java	(revision c308089ca760f19d5622fc74543f221a3a93da07)
++++ b/dataset-service/src/main/java/org/eea/dataset/service/DatasetService.java	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -12,6 +12,7 @@
+ import org.eea.dataset.persistence.data.domain.TableValue;
+ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+ import org.eea.dataset.persistence.schemas.domain.TableSchema;
++import org.eea.dataset.service.model.TruncateDataset;
+ import org.eea.exception.EEAException;
+ import org.eea.interfaces.vo.dataset.DataSetVO;
+ import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
+@@ -606,4 +607,20 @@
+    * @param datasetId the dataset id
+    */
+   void deleteTempEtlExport(@DatasetId Long datasetId);
++
++  /**
++   * Find dataset data for dataset id and data provider id if can be deleted.
++   *
++   * @param datasetId
++   * @param dataProviderId
++   * @return
++   */
++  TruncateDataset getDatasetDataToBeDeleted(Long datasetId, Long dataProviderId);
++
++  /**
++   * Truncate dataset by dataset id
++   * @param datasetId
++   * @return
++   */
++  boolean truncateDataset(Long datasetId);
+ }
+Index: dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java b/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java
+--- a/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java	(revision c308089ca760f19d5622fc74543f221a3a93da07)
++++ b/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -78,6 +78,7 @@
+ import org.eea.dataset.service.PaMService;
+ import org.eea.dataset.service.helper.FileTreatmentHelper;
+ import org.eea.dataset.service.helper.PostgresBulkImporter;
++import org.eea.dataset.service.model.TruncateDataset;
+ import org.eea.exception.EEAErrorMessage;
+ import org.eea.exception.EEAException;
+ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+@@ -3403,4 +3404,66 @@
+     return dictionary;
+   }
+ 
++  /**
++   * Find dataset data for dataset id and data provider id if can be deleted.
++   *
++   * @param datasetId
++   * @param dataProviderId
++   * @return
++   */
++  @Override
++  public TruncateDataset getDatasetDataToBeDeleted(Long datasetId, Long dataProviderId) {
++
++    LOG.info("Method getDatasetDataToBeDeleted called for datasetId {} and dataProviderId {}", datasetId, dataProviderId);
++    TruncateDataset truncateDataset = new TruncateDataset();
++    boolean canBeDeleted;
++
++    try {
++      DataSetMetabase dataSetMetabase = dataSetMetabaseRepository.findByIdAndDataProviderId(datasetId, dataProviderId);
++      LOG.info("Dataset retrieved {} for datasetId {} and dataProviderId {}", dataSetMetabase, datasetId, dataProviderId);
++
++      if (dataSetMetabase != null) {
++        DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabase.getDatasetSchema()));
++        DataFlowVO dataFlowVO =dataflowControllerZuul.getMetabaseById(dataSetMetabase.getDataflowId());
++
++        canBeDeleted = dataSetSchema.getTableSchemas().stream()
++            .allMatch(table -> table.getReadOnly() && table.getFixedNumber() == Boolean.FALSE);
++
++        LOG.info("Method getDatasetDataToBeDeleted canBeDeleted: {} for datasetId {} and dataProviderId {} ",
++            canBeDeleted, datasetId, dataProviderId);
++
++        truncateDataset.setDatasetId(datasetId);
++        truncateDataset.setDatasetName(dataSetMetabase.getDataSetName());
++        truncateDataset.setDataProviderId(dataProviderId);
++        truncateDataset.setDataflowName(dataFlowVO.getName());
++      }
++    } catch (Exception e) {
++      LOG_ERROR.error("Error in getDatasetDataToBeDeleted. Error message: {}", e.getMessage(), e);
++    }
++
++    return truncateDataset;
++  }
++
++
++  /**
++   * Truncate dataset by dataset id
++   * @param datasetId
++   * @return
++   */
++  @Override
++  public boolean truncateDataset(Long datasetId) {
++    LOG.info("Method truncateDataset called for datasetId {}", datasetId);
++    boolean deleted = false;
++
++    try {
++      deleted = recordRepository.truncateDataset(datasetId);
++    } catch (Exception e) {
++      LOG_ERROR.error(
++          "Error in getDatasetDataToBeDeleted. Error message: {}",
++          e.getMessage(), e);
++    }
++
++    LOG.info("Dataset {} has been truncated", datasetId);
++    return deleted;
++  }
+ }
+Index: dataset-service/src/main/java/org/eea/dataset/service/model/TruncateDataset.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/service/model/TruncateDataset.java b/dataset-service/src/main/java/org/eea/dataset/service/model/TruncateDataset.java
+new file mode 100644
+--- /dev/null	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
++++ b/dataset-service/src/main/java/org/eea/dataset/service/model/TruncateDataset.java	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -0,0 +1,23 @@
++package org.eea.dataset.service.model;
++
++import lombok.Getter;
++import lombok.Setter;
++import lombok.ToString;
++
++@Getter
++@Setter
++@ToString
++public class TruncateDataset {
++
++    /** The dataset id. */
++    private Long datasetId;
++
++    /** The data provider id. */
++    private Long dataProviderId;
++
++    /** The dataset name. */
++    private String datasetName;
++
++    /** The dataflow name. */
++    private String dataflowName;
++}
+Index: parent-poms/parent/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/parent-poms/parent/pom.xml b/parent-poms/parent/pom.xml
+--- a/parent-poms/parent/pom.xml	(revision c308089ca760f19d5622fc74543f221a3a93da07)
++++ b/parent-poms/parent/pom.xml	(revision 25a7f5e47d72cb7448ba6dfb259a96fae9a63cb8)
+@@ -13,20 +13,20 @@
+   <packaging>pom</packaging>
+   <version>3.0.0</version>
+   <properties>
+-    <api-gateway.version>v3.1.6</api-gateway.version>
+-    <communication.version>v3.1.6</communication.version>
+-    <collaboration.version>v3.1.6</collaboration.version>
+-    <dataflow.version>v3.1.6</dataflow.version>
+-    <dataset.version>v3.1.6</dataset.version>
+-    <document.version>v3.1.6</document.version>
+-    <frontend.version>v3.1.6</frontend.version>
+-    <indexsearch.version>v3.1.6</indexsearch.version>
+-    <inspire.version>v3.1.6</inspire.version>
+-    <recordstore.version>v3.1.6</recordstore.version>
+-    <ums.version>v3.1.6</ums.version>
+-    <validation.version>v3.1.6</validation.version>
+-    <common-interfaces.version>v3.1.6</common-interfaces.version>
+-    <common-utitlities.version>v3.1.6</common-utitlities.version>
+-    <rod.version>v3.1.6</rod.version>
++    <api-gateway.version>v3.1.6-truncate-dataset</api-gateway.version>
++    <communication.version>v3.1.6-truncate-dataset</communication.version>
++    <collaboration.version>v3.1.6-truncate-dataset</collaboration.version>
++    <dataflow.version>v3.1.6-truncate-dataset</dataflow.version>
++    <dataset.version>v3.1.6-truncate-dataset</dataset.version>
++    <document.version>v3.1.6-truncate-dataset</document.version>
++    <frontend.version>v3.1.6-truncate-dataset</frontend.version>
++    <indexsearch.version>v3.1.6-truncate-dataset</indexsearch.version>
++    <inspire.version>v3.1.6-truncate-dataset</inspire.version>
++    <recordstore.version>v3.1.6-truncate-dataset</recordstore.version>
++    <ums.version>v3.1.6-truncate-dataset</ums.version>
++    <validation.version>v3.1.6-truncate-dataset</validation.version>
++    <common-interfaces.version>v3.1.6-truncate-dataset</common-interfaces.version>
++    <common-utitlities.version>v3.1.6-truncate-dataset</common-utitlities.version>
++    <rod.version>v3.1.6-truncate-dataset</rod.version>
+   </properties>
+ </project>

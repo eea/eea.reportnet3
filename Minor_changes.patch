@@ -1,0 +1,46 @@
+Index: recordstore-service/src/main/java/org/eea/recordstore/persistence/repository/TaskRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/recordstore-service/src/main/java/org/eea/recordstore/persistence/repository/TaskRepository.java b/recordstore-service/src/main/java/org/eea/recordstore/persistence/repository/TaskRepository.java
+--- a/recordstore-service/src/main/java/org/eea/recordstore/persistence/repository/TaskRepository.java	(revision 1b2f6e4ecaf82f24e4fc914db3b30bb5151bb6c8)
++++ b/recordstore-service/src/main/java/org/eea/recordstore/persistence/repository/TaskRepository.java	(date 1670323230355)
+@@ -11,7 +11,7 @@
+ public interface TaskRepository extends JpaRepository<Task, Long> {
+ 
+     @Query(nativeQuery = true,
+-        value = "select t.id from task t, procces p where t.procces_id = p.procces_id and p.process_type= 'RELEASE' and t.status='IN_PROGRESS' and (extract(epoch from LOCALTIMESTAMP - t.date_start) / 60) > :timeInMinutes")
++    value = "select id from task where status='IN_PROGRESS' and task_type='RELEASE_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
+     List<BigInteger> getTasksInProgress(@Param("timeInMinutes") long timeInMinutes);
+ 
+ }
+Index: recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java b/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java
+--- a/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java	(revision 1b2f6e4ecaf82f24e4fc914db3b30bb5151bb6c8)
++++ b/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java	(date 1670323431880)
+@@ -1886,8 +1886,6 @@
+                 throw e;
+             }
+         }
+-        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(),
+-            new Date(), processId);
+ 
+         //ATTACHMENT
+         String nameFileAttachmentValue = pathSnapshot + String.format(FILE_PATTERN_NAME, idSnapshot,
+@@ -1897,7 +1895,10 @@
+             + ".attachment_value(id, file_name, content, field_value_id) FROM STDIN";
+         copyFromFile(copyQueryAttachment, nameFileAttachmentValue, cm);
+ 
+-        LOG.info("Method copyProcessSpecificSnapshot ends with datasetId: {}", datasetId);
++        LOG.info("Executed copyProcessSpecificSnapshot for attachment_value with file {} and dataCollectionId {}", nameFileAttachmentValue, datasetId);
++        LOG.info("Updating copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
++        processService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), processId);
++        LOG.info("Updated copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
+     }
+   
+   /**

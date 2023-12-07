@@ -1,0 +1,298 @@
+Index: common-utitlities/src/main/java/org/eea/datalake/service/impl/S3ConvertServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common-utitlities/src/main/java/org/eea/datalake/service/impl/S3ConvertServiceImpl.java b/common-utitlities/src/main/java/org/eea/datalake/service/impl/S3ConvertServiceImpl.java
+new file mode 100644
+--- /dev/null	(date 1686819062467)
++++ b/common-utitlities/src/main/java/org/eea/datalake/service/impl/S3ConvertServiceImpl.java	(date 1686819062467)
+@@ -0,0 +1,71 @@
++package org.eea.datalake.service.impl;
++
++import com.opencsv.CSVWriter;
++import org.apache.avro.Schema;
++import org.apache.avro.generic.GenericRecord;
++import org.apache.parquet.Preconditions;
++import org.apache.parquet.avro.AvroParquetReader;
++import org.apache.parquet.hadoop.ParquetReader;
++import org.eea.datalake.service.S3ConvertService;
++import org.eea.datalake.service.model.ParquetStream;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
++import org.springframework.stereotype.Service;
++
++import java.io.*;
++import java.util.List;
++import java.util.stream.Collectors;
++
++@Service
++public class S3ConvertServiceImpl implements S3ConvertService {
++
++    private static final Logger LOG = LoggerFactory.getLogger(S3ConvertServiceImpl.class);
++
++    @Override
++    public void convertParquetToCSV(File parquetFile, File csvOutputFile) throws IOException {
++        Preconditions.checkArgument(parquetFile.getName().endsWith(".parquet"),
++            "parquet file should have .parquet extension");
++        Preconditions.checkArgument(csvOutputFile.getName().endsWith(".csv"),
++            "csv file should have .csv extension");
++        Preconditions.checkArgument(!csvOutputFile.exists(),
++            "Output file " + csvOutputFile.getAbsolutePath() + " already exists");
++
++        LOG.info("Converting {} to {}", parquetFile.getName(), csvOutputFile.getName());
++
++        try (InputStream inputStream = new FileInputStream(parquetFile);
++            CSVWriter csvWriter = new CSVWriter(new FileWriter(csvOutputFile),
++                CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
++                CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
++
++            ParquetStream parquetStream = new ParquetStream(inputStream);
++            ParquetReader<GenericRecord> r = AvroParquetReader
++                .<GenericRecord>builder(parquetStream)
++                .disableCompatibility()
++                .build();
++
++            int counter = 0;
++            int size = 0;
++            GenericRecord record;
++            while ((record = r.read()) != null) {
++
++                if (counter == 0 ) {
++                    size = record.getSchema().getFields().size();
++                    List<String> headers = record.getSchema().getFields().stream()
++                        .map(Schema.Field::name)
++                        .collect(Collectors.toList());
++                    csvWriter.writeNext(headers.toArray(String[]::new), false);
++                    counter++;
++                } else {
++                    String[] columns = new String[size];
++                    for (int i = 0; i < size; i++) {
++                        columns[i] = record.get(i).toString();
++
++                    }
++                    csvWriter.writeNext(columns, false);
++                }
++            }
++        } catch (IOException e) {
++            e.printStackTrace();
++        }
++    }
++}
+Index: common-utitlities/src/main/java/org/eea/datalake/service/S3ConvertService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common-utitlities/src/main/java/org/eea/datalake/service/S3ConvertService.java b/common-utitlities/src/main/java/org/eea/datalake/service/S3ConvertService.java
+new file mode 100644
+--- /dev/null	(date 1686819062479)
++++ b/common-utitlities/src/main/java/org/eea/datalake/service/S3ConvertService.java	(date 1686819062479)
+@@ -0,0 +1,9 @@
++package org.eea.datalake.service;
++
++import java.io.File;
++import java.io.IOException;
++
++public interface S3ConvertService {
++
++    void convertParquetToCSV(File parquetFile, File csvOutputFile) throws IOException;
++}
+Index: common-utitlities/src/main/java/org/eea/datalake/service/model/ParquetStream.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common-utitlities/src/main/java/org/eea/datalake/service/model/ParquetStream.java b/common-utitlities/src/main/java/org/eea/datalake/service/model/ParquetStream.java
+new file mode 100644
+--- /dev/null	(date 1686818508464)
++++ b/common-utitlities/src/main/java/org/eea/datalake/service/model/ParquetStream.java	(date 1686818508464)
+@@ -0,0 +1,59 @@
++package org.eea.datalake.service.model;
++
++import org.apache.commons.compress.utils.IOUtils;
++import org.apache.parquet.io.DelegatingSeekableInputStream;
++import org.apache.parquet.io.InputFile;
++import org.apache.parquet.io.SeekableInputStream;
++
++import java.io.ByteArrayInputStream;
++import java.io.IOException;
++import java.io.InputStream;
++
++public class ParquetStream implements InputFile {
++    //private final String streamId;
++    private final byte[] data;
++
++    private static class SeekableByteArrayInputStream extends ByteArrayInputStream {
++        public SeekableByteArrayInputStream(byte[] buf) {
++            super(buf);
++        }
++
++        public void setPos(int pos) {
++            this.pos = pos;
++        }
++
++        public int getPos() {
++            return this.pos;
++        }
++    }
++
++    public ParquetStream(InputStream stream) throws IOException {
++        this.data = IOUtils.toByteArray(stream);
++    }
++
++    @Override
++    public long getLength()  {
++        return this.data.length;
++    }
++
++    @Override
++    public SeekableInputStream newStream() throws IOException {
++        return new DelegatingSeekableInputStream(new SeekableByteArrayInputStream(this.data)) {
++            @Override
++            public void seek(long newPos) {
++                ((SeekableByteArrayInputStream) this.getStream()).setPos((int) newPos);
++            }
++
++            @Override
++            public long getPos() {
++                return ((SeekableByteArrayInputStream) this.getStream()).getPos();
++            }
++        };
++    }
++
++    @Override
++    public String toString() {
++        return "ParquetStream[]";
++    }
++}
++
+Index: dataset-service/src/main/java/org/eea/dataset/controller/TestDremioControllerImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/controller/TestDremioControllerImpl.java b/dataset-service/src/main/java/org/eea/dataset/controller/TestDremioControllerImpl.java
+--- a/dataset-service/src/main/java/org/eea/dataset/controller/TestDremioControllerImpl.java	(revision 799645692c877e9ff0f7f41b5e7972d367983098)
++++ b/dataset-service/src/main/java/org/eea/dataset/controller/TestDremioControllerImpl.java	(date 1686820845204)
+@@ -1,12 +1,24 @@
+ package org.eea.dataset.controller;
+ 
++import io.swagger.annotations.ApiParam;
++import org.eea.datalake.service.S3ConvertService;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.beans.factory.annotation.Qualifier;
+ import org.springframework.jdbc.core.JdbcTemplate;
+ import org.springframework.jdbc.support.rowset.SqlRowSet;
+ import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PathVariable;
+ import org.springframework.web.bind.annotation.RequestMapping;
+ import org.springframework.web.bind.annotation.RestController;
++import software.amazon.awssdk.core.ResponseBytes;
++import software.amazon.awssdk.services.s3.S3Client;
++import software.amazon.awssdk.services.s3.model.GetObjectRequest;
++import software.amazon.awssdk.services.s3.model.GetObjectResponse;
++import software.amazon.awssdk.services.s3.model.S3Exception;
++
++import java.io.*;
+ 
+ @RequestMapping("/dremio")
+ @RestController
+@@ -16,6 +28,15 @@
+     @Autowired
+     JdbcTemplate dremioJdbcTemplate;
+ 
++    @Autowired
++    S3ConvertService s3ConvertService;
++
++    @Qualifier("getS3Client")
++    @Autowired
++    S3Client s3Client;
++
++    private static final Logger LOG = LoggerFactory.getLogger(TestDremioControllerImpl.class);
++
+     @GetMapping("run")
+     public void run() {
+         SqlRowSet rs = dremioJdbcTemplate.queryForRowSet("SELECT * FROM \"rn3-dataset.rn3-dataset\".\"tab.csv\";");
+@@ -23,4 +44,42 @@
+             System.out.println(rs.getString("A") + "," + rs.getString("B") + "," + rs.getString("C") + "," + rs.getString("D"));
+         }
+     }
++
++
++    @GetMapping("/export/{filename}")
++    public void export(@ApiParam(type = "String",
++        value = "Filename") @PathVariable("filename") String filename) throws IOException {
++
++        try {
++            GetObjectRequest objectRequest = GetObjectRequest
++                .builder()
++                .key(filename+".parquet")
++                .bucket("rn3-dataset")
++                .build();
++
++            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
++            byte[] data = objectBytes.asByteArray();
++
++            // Write the data to a local file.
++            File myFile = new File("/reportnet3-data/input/importFiles/"+filename+".parquet");
++            LOG.info("Local file {}", myFile);
++            OutputStream os = new FileOutputStream(myFile);
++            os.write(data);
++            System.out.println("Successfully obtained bytes from an S3 object");
++            os.close();
++
++            s3ConvertService.convertParquetToCSV(myFile, new File("/reportnet3-data/input/importFiles/"+filename+".csv"));
++
++
++        } catch (IOException ex) {
++            ex.printStackTrace();
++        } catch (S3Exception e) {
++            System.err.println(e.awsErrorDetails().errorMessage());
++            System.exit(1);
++        }
++
++
++    }
++
++
+ }
+Index: common-utitlities/pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common-utitlities/pom.xml b/common-utitlities/pom.xml
+--- a/common-utitlities/pom.xml	(revision 799645692c877e9ff0f7f41b5e7972d367983098)
++++ b/common-utitlities/pom.xml	(date 1686821124259)
+@@ -153,6 +153,21 @@
+ 			<artifactId>s3</artifactId>
+ 			<version>2.20.80</version>
+ 		</dependency>
++		<dependency>
++			<groupId>org.apache.parquet</groupId>
++			<artifactId>parquet-avro</artifactId>
++			<version>1.13.1</version>
++		</dependency>
++		<dependency>
++			<groupId>com.opencsv</groupId>
++			<artifactId>opencsv</artifactId>
++			<version>4.0</version>
++		</dependency>
++		<dependency>
++			<groupId>org.apache.hadoop</groupId>
++			<artifactId>hadoop-common</artifactId>
++			<version>3.3.5</version>
++		</dependency>
+ 	</dependencies>
+ 	<build>
+ 		<plugins>
+@@ -178,4 +193,4 @@
+ 			</plugin>
+ 		</plugins>
+ 	</build>
+-</project>
+\ No newline at end of file
++</project>
