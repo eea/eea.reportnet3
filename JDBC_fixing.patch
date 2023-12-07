@@ -1,0 +1,118 @@
+Index: dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java
+--- a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java	(revision 34bd11f20cf4209cdf0849cd64ebab013f06bcf3)
++++ b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordRepositoryImpl.java	(date 1683532493547)
+@@ -463,7 +463,7 @@
+   @Override
+   public String findAndGenerateETLJson(Long datasetId, OutputStream outputStream,
+       String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
+-      String dataProviderCodes) throws EEAException {
++      String dataProviderCodes) throws EEAException, SQLException {
+     checkSql(filterValue);
+     checkSql(columnName);
+     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+@@ -509,10 +509,8 @@
+ 
+         // We need to know which is the first position in the temp table to take the results
+         // If there's no position that means we have to import the data from that request
+-        String query = "SELECT count(id) from dataset_" + datasetId + ".temp_etlexport " + "WHERE filter_value='" + filterChain + "';";
+-        Query recordsTmpExportQueryResult = entityManager.createNativeQuery(query);
+         try {
+-          int recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
++          int recordsTmpExport = queryGetRecordCountbyFilterChain(datasetId, filterChain);
+           LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
+ 
+           while (recordsTmpExport != totalRecords) {
+@@ -521,12 +519,12 @@
+                 LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
+                 deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport);
+ 
+-                recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
++                recordsTmpExport = queryGetRecordCountbyFilterChain(datasetId, filterChain);
+                 LOG.info("Table temp_etlexport has {} rows for filterChain {}. Records stored {}", recordsTmpExport, filterChain, recordsTmpExport);
+               } while (recordsTmpExport != 0);
+             }
+             exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery);
+-            recordsTmpExport = ((BigInteger) recordsTmpExportQueryResult.getSingleResult()).intValue();
++            recordsTmpExport = queryGetRecordCountbyFilterChain(datasetId, filterChain);
+           }
+         } catch (Exception e) {
+           LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId, e);
+@@ -622,6 +620,39 @@
+     return resultjson.toString();
+   }
+ 
++  private int queryGetRecordCountbyFilterChain(Long datasetId, String filterChain)
++      throws SQLException {
++    Connection connection = null;
++    PreparedStatement pstmt = null;
++    ResultSet rs = null;
++    int recordCount = -1;
++    String query = "SELECT count(id) AS recordCount from dataset_?.temp_etlexport WHERE filter_value= ?";
++    try {
++      connection =
++          DriverManager.getConnection(connectionUrl, connectionUsername, connectionPassword);
++      pstmt = connection.prepareStatement(query);
++      pstmt.setString(1, datasetId.toString());
++      pstmt.setString(2, filterChain);
++      rs = pstmt.executeQuery();
++      rs.next();
++
++      recordCount = rs.getInt("recordCount");
++    } catch (Exception e) {
++      LOG.error(
++          "Unexpected error! Error in queryGetRecordCountbyFilterChain for datasetId {} with filter_value {}",
++          datasetId, filterChain, e);
++    } finally {
++      if (rs != null)
++        rs.close();
++      if (pstmt != null)
++        pstmt.close();
++      if (connection != null)
++        connection.close();
++    }
++
++    return recordCount;
++  }
++
+   private void exportAndImportToEtlExportTable(Long datasetId, String filterChain, StringBuilder stringQuery) {
+     try {
+       LOG.info("Export data to snap file for datasetId {} with filter_value {}", datasetId, filterChain);
+Index: dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java b/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java
+--- a/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java	(revision 34bd11f20cf4209cdf0849cd64ebab013f06bcf3)
++++ b/dataset-service/src/main/java/org/eea/dataset/service/impl/DatasetServiceImpl.java	(date 1683532493566)
+@@ -3129,6 +3129,8 @@
+       LOG.info("Finish ETL Export proccess for datasetId {}", datasetId);
+     } catch (IOException e) {
+       LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);
++    } catch (SQLException e) {
++      LOG.error("ETLExport error for datasetId {} Message: {}", datasetId, e.getMessage(), e);
+     }
+   }
+ 
+Index: dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java
+--- a/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java	(revision 34bd11f20cf4209cdf0849cd64ebab013f06bcf3)
++++ b/dataset-service/src/main/java/org/eea/dataset/persistence/data/repository/RecordExtendedQueriesRepository.java	(date 1683530727379)
+@@ -83,7 +83,7 @@
+    */
+   String findAndGenerateETLJson(Long datasetId, OutputStream outputStream, String tableSchemaId,
+       Integer limit, Integer offset, String filterValue, String columnName,
+-      String dataProviderCodes) throws EEAException;
++      String dataProviderCodes) throws EEAException, SQLException;
+ 
+   /**
+    * Find ordered native record.

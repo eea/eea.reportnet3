@@ -1,0 +1,365 @@
+Index: validation-service/src/main/java/org/eea/validation/persistence/data/metabase/repository/TaskRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/validation-service/src/main/java/org/eea/validation/persistence/data/metabase/repository/TaskRepository.java b/validation-service/src/main/java/org/eea/validation/persistence/data/metabase/repository/TaskRepository.java
+--- a/validation-service/src/main/java/org/eea/validation/persistence/data/metabase/repository/TaskRepository.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/validation-service/src/main/java/org/eea/validation/persistence/data/metabase/repository/TaskRepository.java	(date 1681902002923)
+@@ -181,6 +181,16 @@
+                                                       @Param("statuses") Set<String> statuses, @Param("taskType") String taskType);
+ 
+   Optional<Task> findById(Long id);
++
++  /**
++   * Checks if is process ending.
++   *
++   * @param processId the process id
++   * @return true, if is process ending
++   */
++  @Query(nativeQuery = true,
++      value = "select case when (exists (select id from task where process_id=:processId and status ='CANCELED' and task_type='VALIDATION_TASK' limit 1)) then TRUE else FALSE end")
++  boolean hasProcessCanceledTasks(@Param("processId") String processId);
+ }
+ 
+ 
+Index: orchestrator-service/src/main/java/org/eea/orchestrator/io/notification/events/ReleaseFailedEvent.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/orchestrator-service/src/main/java/org/eea/orchestrator/io/notification/events/ReleaseFailedEvent.java b/orchestrator-service/src/main/java/org/eea/orchestrator/io/notification/events/ReleaseFailedEvent.java
+new file mode 100644
+--- /dev/null	(date 1681815687492)
++++ b/orchestrator-service/src/main/java/org/eea/orchestrator/io/notification/events/ReleaseFailedEvent.java	(date 1681815687492)
+@@ -0,0 +1,36 @@
++package org.eea.orchestrator.io.notification.events;
++
++import org.eea.exception.EEAException;
++import org.eea.interfaces.controller.dataflow.DataFlowController;
++import org.eea.interfaces.controller.dataflow.RepresentativeController;
++import org.eea.kafka.domain.EventType;
++import org.eea.kafka.domain.NotificationVO;
++import org.eea.notification.event.NotificableEventHandler;
++import org.springframework.beans.factory.annotation.Autowired;
++
++import java.util.Map;
++
++public class ReleaseFailedEvent implements NotificableEventHandler {
++
++    /** The representative controller zuul. */
++    @Autowired
++    private RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
++
++    /** The dataflow controller zuul. */
++    @Autowired
++    private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
++
++    /**
++     * Gets the event type.
++     *
++     * @return the event type
++     */
++    @Override
++    public EventType getEventType() {
++        return EventType.RELEASE_REFUSED_EVENT;
++    }
++
++    @Override public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
++        return null;
++    }
++}
+Index: validation-service/src/main/java/org/eea/validation/controller/ValidationControllerImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/validation-service/src/main/java/org/eea/validation/controller/ValidationControllerImpl.java b/validation-service/src/main/java/org/eea/validation/controller/ValidationControllerImpl.java
+--- a/validation-service/src/main/java/org/eea/validation/controller/ValidationControllerImpl.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/validation-service/src/main/java/org/eea/validation/controller/ValidationControllerImpl.java	(date 1681902913177)
+@@ -32,6 +32,7 @@
+ import org.eea.lock.annotation.LockCriteria;
+ import org.eea.lock.annotation.LockMethod;
+ import org.eea.thread.ThreadPropertiesManager;
++import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
+ import org.eea.validation.service.ValidationService;
+ import org.eea.validation.service.impl.LoadValidationsHelper;
+ import org.eea.validation.util.ValidationHelper;
+@@ -106,6 +107,9 @@
+   @Autowired
+   private JobProcessControllerZuul jobProcessControllerZuul;
+ 
++  /** The task repository. */
++  @Autowired
++  private TaskRepository taskRepository;
+ 
+   /**
+    * Executes the validation job
+@@ -579,6 +583,12 @@
+       throw e;
+     }
+   }
++
++  @Override
++  @GetMapping("/private/hasProcessCanceledTasks/{processId}")
++  public boolean hasProcessCanceledTasks(@PathVariable("processId") String processId) {
++    return taskRepository.hasProcessCanceledTasks(processId);
++  }
+ }
+ 
+ 
+Index: orchestrator-service/src/main/java/org/eea/orchestrator/service/JobProcessService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/orchestrator-service/src/main/java/org/eea/orchestrator/service/JobProcessService.java b/orchestrator-service/src/main/java/org/eea/orchestrator/service/JobProcessService.java
+--- a/orchestrator-service/src/main/java/org/eea/orchestrator/service/JobProcessService.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/orchestrator-service/src/main/java/org/eea/orchestrator/service/JobProcessService.java	(date 1681819531255)
+@@ -11,4 +11,6 @@
+     Long findJobIdByProcessId(String processId);
+ 
+     List<String> findProcessesByJobId(Long jobId);
++
++    String findStatusByJobId(Long jobId);
+ }
+Index: orchestrator-service/src/main/java/org/eea/orchestrator/scheduling/JobForFinalizingInProgressValidationJobsWithFinishedTasks.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/orchestrator-service/src/main/java/org/eea/orchestrator/scheduling/JobForFinalizingInProgressValidationJobsWithFinishedTasks.java b/orchestrator-service/src/main/java/org/eea/orchestrator/scheduling/JobForFinalizingInProgressValidationJobsWithFinishedTasks.java
+--- a/orchestrator-service/src/main/java/org/eea/orchestrator/scheduling/JobForFinalizingInProgressValidationJobsWithFinishedTasks.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/orchestrator-service/src/main/java/org/eea/orchestrator/scheduling/JobForFinalizingInProgressValidationJobsWithFinishedTasks.java	(date 1681903536475)
+@@ -97,6 +97,7 @@
+                         boolean finished = true;
+                         String uuid = null, user = null, queuedProcess = null;
+                         Long datasetId = null;
++                        boolean hasProcessCanceledTasks = false;
+                         for (String processId : processes) {
+                             ProcessVO process = processControllerZuul.findById(processId);
+                             if (process.getStatus().equals(ProcessStatusEnum.IN_QUEUE.toString())) {
+@@ -114,6 +115,10 @@
+                             uuid = processId;
+                             user = process.getUser();
+                             datasetId = process.getDatasetId();
++
++                            if (validationControllerZuul.hasProcessCanceledTasks(processId)) {
++                                hasProcessCanceledTasks = true;
++                            }
+                         }
+                         if (finished && queuedProcess == null) {
+                             //all processes of the provider datasets are finished, as all tasks are finished
+@@ -122,6 +127,11 @@
+                             jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
+                             kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+                                     value);
++                            if (hasProcessCanceledTasks) {
++                                value.put("error", "Tasks have canceled status");
++                                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
++                                    value);
++                            }
+                         } else if (queuedProcess != null) {
+                             //a process for one of the provider datasets is stuck in state IN_QUEUE, so execute validation for that process
+                             ProcessVO process = processControllerZuul.findById(queuedProcess);
+@@ -146,6 +156,13 @@
+                             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                                     value,
+                                     NotificationVO.builder().user(user).datasetId(datasetId).build());
++
++                            if (validationControllerZuul.hasProcessCanceledTasks(processId)) {
++                                value.put("error", "Tasks have canceled status");
++                                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
++                                    value,
++                                    NotificationVO.builder().user(user).datasetId(datasetId).build());
++                            }
+                         }
+                     }
+                 } catch (Exception er) {
+Index: validation-service/src/main/java/org/eea/validation/util/ValidationHelper.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/validation-service/src/main/java/org/eea/validation/util/ValidationHelper.java b/validation-service/src/main/java/org/eea/validation/util/ValidationHelper.java
+--- a/validation-service/src/main/java/org/eea/validation/util/ValidationHelper.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/validation-service/src/main/java/org/eea/validation/util/ValidationHelper.java	(date 1681903256147)
+@@ -1138,8 +1138,11 @@
+                 if (jobId!=null) {
+                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+                 }
+-                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
+-                    value);
++                kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
++                if (taskRepository.hasProcessCanceledTasks(processId)) {
++                  value.put("error", "Tasks have canceled status");
++                  kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value);
++                }
+               }
+ 
+             } else {
+@@ -1152,6 +1155,12 @@
+               kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FINISHED_EVENT,
+                   value,
+                   NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
++              if (taskRepository.hasProcessCanceledTasks(processId)) {
++                value.put("error", "Tasks have canceled status");
++                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT,
++                    value,
++                    NotificationVO.builder().user(process.getUser()).datasetId(datasetId).build());
++              }
+             }
+           }
+           isFinished = true;
+Index: recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java b/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java
+--- a/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/recordstore-service/src/main/java/org/eea/recordstore/service/impl/JdbcRecordStoreServiceImpl.java	(date 1681826801660)
+@@ -1698,6 +1698,14 @@
+         dataSetSnapshotControllerZuul.updateSnapshotEURelease(datasetIdFromSnapshot);
+         dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+       }
++
++      if (JobStatusEnum.FAILED.equals(jobProcessControllerZuul.findStatusByJobId(jobId))) {
++        LOG_ERROR.info("Release job {} failed with snapshot {} and processId {},", jobId, idSnapshot, processId);
++        dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(dataset.getDataflowId(), dataset.getDataflowId());
++        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_FAILED_EVENT, value,
++            NotificationVO.builder().dataflowId(dataset.getDataflowId()).providerId(dataset.getDataflowId()).user(user).error("Release Failed").build());
++      }
++
+       LOG.info("Snapshot {} restored for processId {}", idSnapshot, processId);
+     } catch (Exception e) {
+       if (!prefillingReference) {
+@@ -1978,7 +1986,7 @@
+             processVO.getUser(), processVO.getPriority(), processVO.isReleased());
+         LOG.info("Updated copyProcessSpecificSnapshot release process status of process with processId {} to FINISHED for dataflowId {}, dataCollectionId {}", processId, datasetId);
+     }
+-  
++
+   /**
+    * Compose delete sql.
+    *
+Index: orchestrator-service/src/main/java/org/eea/orchestrator/service/impl/JobProcessServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/orchestrator-service/src/main/java/org/eea/orchestrator/service/impl/JobProcessServiceImpl.java b/orchestrator-service/src/main/java/org/eea/orchestrator/service/impl/JobProcessServiceImpl.java
+--- a/orchestrator-service/src/main/java/org/eea/orchestrator/service/impl/JobProcessServiceImpl.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/orchestrator-service/src/main/java/org/eea/orchestrator/service/impl/JobProcessServiceImpl.java	(date 1681819895824)
+@@ -4,6 +4,7 @@
+ import org.eea.orchestrator.mapper.JobProcessMapper;
+ import org.eea.orchestrator.persistence.domain.JobProcess;
+ import org.eea.orchestrator.persistence.repository.JobProcessRepository;
++import org.eea.orchestrator.persistence.repository.JobRepository;
+ import org.eea.orchestrator.service.JobProcessService;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.stereotype.Service;
+@@ -15,6 +16,7 @@
+ 
+     private JobProcessRepository jobProcessRepository;
+     private JobProcessMapper jobProcessMapper;
++    private JobRepository jobRepository;
+ 
+     @Autowired
+     public JobProcessServiceImpl(JobProcessRepository jobProcessRepository, JobProcessMapper jobProcessMapper) {
+@@ -51,4 +53,9 @@
+     public List<String> findProcessesByJobId(Long jobId) {
+         return jobProcessRepository.findProcessesByJobId(jobId);
+     }
++
++    @Override
++    public String findStatusByJobId(Long jobId) {
++        return jobRepository.findStatusByJobId(jobId);
++    }
+ }
+Index: orchestrator-service/src/main/java/org/eea/orchestrator/persistence/repository/JobRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/orchestrator-service/src/main/java/org/eea/orchestrator/persistence/repository/JobRepository.java b/orchestrator-service/src/main/java/org/eea/orchestrator/persistence/repository/JobRepository.java
+--- a/orchestrator-service/src/main/java/org/eea/orchestrator/persistence/repository/JobRepository.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/orchestrator-service/src/main/java/org/eea/orchestrator/persistence/repository/JobRepository.java	(date 1681819925262)
+@@ -146,6 +146,13 @@
+     @Query(nativeQuery = true,
+             value = "select * from jobs where job_status= 'IN_PROGRESS' and job_type = 'IMPORT' and fme_job_id is not null and (fme_status is null or fme_status != 'SUCCESS')")
+     List<Job> findFmeJobsToPollForStatus();
++
++    /**
++     * Find job status by job id
++     * @return
++     */
++    @Query(nativeQuery = true, value = "select j.job_status from jobs j where j.id= :jobId")
++    String findStatusByJobId(Long jobId);
+ }
+ 
+ 
+Index: orchestrator-service/src/main/java/org/eea/orchestrator/controller/JobProcessControllerImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/orchestrator-service/src/main/java/org/eea/orchestrator/controller/JobProcessControllerImpl.java b/orchestrator-service/src/main/java/org/eea/orchestrator/controller/JobProcessControllerImpl.java
+--- a/orchestrator-service/src/main/java/org/eea/orchestrator/controller/JobProcessControllerImpl.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/orchestrator-service/src/main/java/org/eea/orchestrator/controller/JobProcessControllerImpl.java	(date 1681819531238)
+@@ -52,4 +52,10 @@
+     public List<String> findProcessesByJobId(@PathVariable("jobId") Long jobId) {
+         return jobProcessService.findProcessesByJobId(jobId);
+     }
++
++    @Override
++    @GetMapping(value = "/findStatusByJobId/{jobId}")
++    public String findStatusByJobId(@PathVariable("jobId") Long jobId) {
++        return jobProcessService.findStatusByJobId(jobId);
++    }
+ }
+Index: common-interfaces/src/main/java/org/eea/interfaces/controller/orchestrator/JobProcessController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common-interfaces/src/main/java/org/eea/interfaces/controller/orchestrator/JobProcessController.java b/common-interfaces/src/main/java/org/eea/interfaces/controller/orchestrator/JobProcessController.java
+--- a/common-interfaces/src/main/java/org/eea/interfaces/controller/orchestrator/JobProcessController.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/common-interfaces/src/main/java/org/eea/interfaces/controller/orchestrator/JobProcessController.java	(date 1681819531217)
+@@ -36,4 +36,13 @@
+      */
+     @GetMapping(value = "/findProcessesByJobId/{jobId}")
+     List<String> findProcessesByJobId(@PathVariable("jobId") Long jobId);
++
++
++    /**
++     * Finds jobId by job id
++     * @param jobId
++     * @return
++     */
++    @GetMapping(value = "/findStatusByJobId/{jobId}")
++    String findStatusByJobId(@PathVariable("jobId") Long jobId);
+ }
+Index: common-interfaces/src/main/java/org/eea/interfaces/controller/validation/ValidationController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common-interfaces/src/main/java/org/eea/interfaces/controller/validation/ValidationController.java b/common-interfaces/src/main/java/org/eea/interfaces/controller/validation/ValidationController.java
+--- a/common-interfaces/src/main/java/org/eea/interfaces/controller/validation/ValidationController.java	(revision 321fedff6b4fe9761085754d3bd977d3c2b0ce67)
++++ b/common-interfaces/src/main/java/org/eea/interfaces/controller/validation/ValidationController.java	(date 1681902913187)
+@@ -212,6 +212,14 @@
+    */
+   @GetMapping("/private/findTaskById/{taskId}")
+   TaskVO findTaskById(@PathVariable("taskId") Long taskId);
++
++  /**
++   * Finds task by processId
++   * @param processId
++   * @return
++   */
++  @GetMapping("/private/hasProcessCanceledTasks/{processId}")
++  boolean hasProcessCanceledTasks(@PathVariable("processId") String processId);
+ }
+ 
+ 
