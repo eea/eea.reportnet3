@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.drools.template.ObjectDataCompiler;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -68,8 +70,10 @@ import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -81,6 +85,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
 
 /**
  * The Class ValidationService.
@@ -175,6 +181,15 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private DatasetRepository datasetRepository;
 
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  @Qualifier("dremioJdbcTemplate")
+  private JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  private S3Helper s3Helper;
 
 
   /** The Constant LOG. */
@@ -268,10 +283,19 @@ public class RulesServiceImpl implements RulesService {
 
       RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
       List<Rule> rulesSQLSchema = rulesRepository.findSqlRules(new ObjectId(datasetSchemaId));
+      boolean bigData;
+
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+      if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+        bigData = true;
+      } else {
+        bigData = false;
+      }
 
       if (null != rulesSchema && !rulesSchema.getRules().isEmpty()) {
         rulesSchema.getRules().stream().filter(rule -> !rule.isAutomatic()).forEach(rule -> {
-          updateRuleState(errorRulesList, datasetId, checkNoSQL, datasetSchemaId, rulesSQLSchema, rule);
+          updateRuleState(errorRulesList, datasetId, checkNoSQL, datasetSchemaId, rulesSQLSchema, rule, bigData);
         });
       }
 
@@ -2167,14 +2191,15 @@ public class RulesServiceImpl implements RulesService {
    * @param rulesSQLSchema  the rules SQL schema
    * @param rule            the rule
    */
-  private void updateRuleState(List<Rule> errorRulesList, Long datasetId, boolean checkNoSQL, String datasetSchemaId, List<Rule> rulesSQLSchema, Rule rule) {
+  private void updateRuleState(List<Rule> errorRulesList, Long datasetId, boolean checkNoSQL, String datasetSchemaId,
+                               List<Rule> rulesSQLSchema, Rule rule, boolean bigData) {
     try {
       Boolean valid = null;
       if (checkNoSQL && null == rule.getSqlSentence()) {
         valid = validateRule(datasetSchemaId, rule);
       }
       if (rulesSQLSchema.contains(rule) && null != rule.getSqlSentence()) {
-        valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule);
+        valid = validateSQLRule(rule.getSqlSentence(), datasetId, rule, bigData);
       }
       if (Boolean.TRUE.equals(valid)) {
         rule.setVerified(true);
@@ -2250,7 +2275,7 @@ public class RulesServiceImpl implements RulesService {
    * @param rule      the rule
    * @return the boolean
    */
-  private Boolean validateSQLRule(String query, Long datasetId, Rule rule) {
+  private Boolean validateSQLRule(String query, Long datasetId, Rule rule, boolean bigData) {
     boolean isSQLCorrect = true;
     // validate query
     if (!org.codehaus.plexus.util.StringUtils.isBlank(query)) {
@@ -2258,8 +2283,18 @@ public class RulesServiceImpl implements RulesService {
       if (checkQuerySyntax(query)) {
         try {
           String preparedquery = query.contains(";") ? query.replace(";", "") + " limit 5" : query + " limit 5";
-          launchValidationQuery(preparedquery, datasetId, rule);
-        } catch (EEAInvalidSQLException e) {
+          if (bigData) {
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+            String tableName = sqlRulesService.getTableNameByRule(rule, dataSetMetabaseVO.getDatasetSchema());
+            S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+            if (s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+              String sqlCode = sqlRulesService.replaceTableNamesWithS3Path(preparedquery);
+              dremioJdbcTemplate.execute(sqlCode);
+            }
+          } else {
+            launchValidationQuery(preparedquery, datasetId, rule);
+          }
+        } catch (Exception e) {
           LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = false;
         }
