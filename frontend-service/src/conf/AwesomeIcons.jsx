@@ -58,6 +58,7 @@ import {
   faFileWord,
   faFlagCheckered,
   faFolder,
+  faFolderPlus,
   faGlobeEurope,
   faGripLines,
   faHome,
@@ -255,6 +256,8 @@ export const AwesomeIcons = icon => {
       return faFlagCheckered;
     case 'folder':
       return faFolder;
+    case 'folderPlus':
+      return faFolderPlus;
     case 'formula':
       return faSquareRootAlt;
     case 'gif':

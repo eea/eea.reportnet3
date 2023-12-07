@@ -72,6 +72,7 @@ import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1285,6 +1286,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Pageable pageable, ExportFilterVO filters) throws SQLException {
 
     String stringQuery = buildQueryWithExportFilters(datasetId, tableId, pageable, filters);
+    LOG.info("Dataset id {} tableId {}", datasetId, tableId);
 
     int parameterPosition = 1;
     ErrorTypeEnum[] levelErrorsArray = filters.getLevelError();
@@ -1975,10 +1977,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
   private void createJsonRecordsForTable(Long datasetId, String tableSchemaId, String filterValue, String columnName, String dataProviderCodes, List<TableSchema> tableSchemaList, String tableName,
                                                 Integer tableCount, Long totalRecords, String jsonFile, Long jobId, Integer limit, Integer offset, String filterChain, TableSchema tableSchema) throws IOException, SQLException {
-    try (FileWriter fw = new FileWriter(jsonFile, true);
-         BufferedWriter bw = new BufferedWriter(fw)) {
+    try (FileWriter bw = new FileWriter(jsonFile, true)) {
       LOG.info("Starting creation of json file {} for datasetId {} and jobId {}", jsonFile, datasetId, jobId);
-      ObjectMapper mapper = new ObjectMapper();
       if (tableCount == 1) {
         bw.write("{\n\"tables\": [\n");
       }
@@ -2000,7 +2000,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         Integer initExtract = (offset - 1) * limit;
         Integer limitAux = ETL_EXPORT_MIN_LIMIT;
         Integer recordCount = 0;
-        String res;
         CopyOut copyOut;
         CopyManager copyManager;
         byte[] buffer;
@@ -2019,12 +2018,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 bw.write(",");
               }
               bw.write("\n");
-              res = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(mapper.readTree(buffer));
-              bw.write(res);
+              bw.write(new String(buffer, StandardCharsets.UTF_8));
               if (recordCount==0) {
                 recordCount++;
               }
             }
+            bw.flush();
             System.gc();
           } catch (Exception e) {
             throw e;
@@ -2116,6 +2115,48 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       }
     }
     return stringQuery;
+  }
+
+  @Override
+  public Long countByTableSchema(Long datasetId, String idTableSchema) throws SQLException {
+    Connection connection = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+
+    try {
+      String query = "select count(r.id) from dataset_%s.record_value r, dataset_%s.table_value t where "
+          + "t.id = r.id_table and t.id_table_schema=?";
+
+      ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+          .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+
+      connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+          connectionDataVO.getUser(), connectionDataVO.getPassword());
+      query = String.format(query, datasetId, datasetId);
+      LOG.info("countByTableSchema query: {}", query);
+
+      pstmt = connection.prepareStatement(query);
+      pstmt.setString(1, idTableSchema);
+      LOG.info("countByTableSchema query ps: {}", pstmt);
+
+      rs = pstmt.executeQuery();
+      rs.next();
+
+      return rs.getLong(1);
+    } catch (Exception e) {
+      LOG.error(
+          "Unexpected error! Error in countByTableSchema for datasetId {} with filter_value {}",
+          datasetId, e);
+    } finally {
+      if (rs != null)
+        rs.close();
+      if (pstmt != null)
+        pstmt.close();
+      if (connection != null)
+        connection.close();
+    }
+
+    return 0L;
   }
 
 

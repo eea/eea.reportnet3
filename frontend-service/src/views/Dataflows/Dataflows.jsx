@@ -61,6 +61,7 @@ import { CurrentPage, ErrorUtils } from 'views/_functions/Utils';
 import { DataflowsUtils } from './_functions/Utils/DataflowsUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { AddOrganizations } from './_components/AddOrganizations';
 
 const { permissions } = config;
 
@@ -96,6 +97,7 @@ export const Dataflows = () => {
     isReferencedDataflowDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isReportingObligationsDialogVisible: false,
+    isShowAddOrganizationsDialogVisible: false,
     isUserListVisible: false,
     isValidatingAllDataflowsUsers: false,
     isValidationStatusDialogVisible: false,
@@ -167,12 +169,13 @@ export const Dataflows = () => {
 
   const filterBy = useRecoilValue(filterByCustomFilterStore(tabId));
 
-  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
-  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
-  const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
-  const { resetFilterState: resetJobsStatusesFilterState } = useApplyFilters('jobsStatuses');
   const { resetFilterState: resetControlStatusesFilterState } = useApplyFilters('controlStatuses');
+  const { resetFilterState: resetJobsStatusesFilterState } = useApplyFilters('jobsStatuses');
   const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
+  const { resetFiltersState: resetReportingObligationsFiltersState } = useFilters('reportingObligations');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+  const { resetFilterState: resetValidationsStatusesFilterState } = useApplyFilters('validationsStatuses');
+  const { resetFilterState: resetShowAddOrganizationsFilterState } = useApplyFilters('addOrganizations');
 
   useBreadCrumbs({ currentPage: CurrentPage.DATAFLOWS });
 
@@ -189,6 +192,15 @@ export const Dataflows = () => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
+
+    const addOrganizationBtn = {
+      className: 'dataflowList-left-side-bar-create-dataflow-help-step',
+      icon: 'folderPlus',
+      isVisible: isAdmin || isCustodian,
+      label: 'addOrganization',
+      onClick: () => manageDialogs('isShowAddOrganizationsDialogVisible', true),
+      title: 'addOrganization'
+    };
 
     const createReportingDataflowBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
@@ -264,7 +276,7 @@ export const Dataflows = () => {
     const adminJobsStatusBtn = {
       className: 'dataflowList-left-side-bar-create-dataflow-help-step',
       icon: 'laptop',
-      isVisible: isAdmin || isCustodian,
+      isVisible: true,
       label: 'jobsStatus',
       onClick: () => manageDialogs('isJobStatusDialogVisible', true),
       title: 'jobsMonitoring'
@@ -290,6 +302,7 @@ export const Dataflows = () => {
 
     leftSideBarContext.addModels(
       [
+        addOrganizationBtn,
         adminCreateNewPermissionsBtn,
         adminManageNationalCoordinatorsBtn,
         adminControlStatusBtn,
@@ -911,6 +924,11 @@ export const Dataflows = () => {
     }
   };
 
+  const hideAddOrganizationsDialog = () => {
+    manageDialogs('isShowAddOrganizationsDialogVisible', false);
+    resetShowAddOrganizationsFilterState();
+  };
+
   const renderPaginator = () => {
     if (totalRecords > 0) {
       return (
@@ -1089,6 +1107,13 @@ export const Dataflows = () => {
           visible={dataflowsState.isReportingObligationsDialogVisible}>
           <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
         </Dialog>
+      )}
+
+      {dataflowsState.isShowAddOrganizationsDialogVisible && (
+        <AddOrganizations
+          isDialogVisible={dataflowsState.isShowAddOrganizationsDialogVisible}
+          onCloseDialog={hideAddOrganizationsDialog}
+        />
       )}
     </div>
   );

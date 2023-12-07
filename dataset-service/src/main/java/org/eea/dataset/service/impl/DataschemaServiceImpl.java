@@ -1222,7 +1222,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
 
       releaseCreateUpdateView(datasetId,
-          SecurityContextHolder.getContext().getAuthentication().getName(), true);
+          SecurityContextHolder.getContext().getAuthentication().getName(), false);
 
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {

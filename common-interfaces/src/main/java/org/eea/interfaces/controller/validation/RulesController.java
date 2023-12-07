@@ -39,6 +39,11 @@ public interface RulesController {
 
   }
 
+  @PostMapping(value = "/validateAllRules", produces = MediaType.APPLICATION_JSON_VALUE)
+  void validateAllRules(
+      @RequestParam(value = "datasetId") Long datasetId
+  ) throws Exception;
+
   /**
    * Creates the empty rules schema.
    *

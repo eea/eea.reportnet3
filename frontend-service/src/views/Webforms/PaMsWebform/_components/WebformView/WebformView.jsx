@@ -1,6 +1,5 @@
 import { useContext, useEffect, useReducer } from 'react';
 
-import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';

@@ -1,6 +1,7 @@
 package org.eea.dataset.service.impl;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -275,7 +276,13 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   @Caching(evict = {@CacheEvict(value = "dataFlowId", key = "#datasetId"),
       @CacheEvict(value = "datasetSchemaByDatasetId", key = "#datasetId")})
   public void deleteDesignDataset(Long datasetId) {
-    dataSetMetabaseRepository.deleteNativeDataset(datasetId);
+    try {
+      dataSetMetabaseRepository.deleteNativeDataset(datasetId);
+    } catch(Exception e){
+      LOG.info("Removing design dataset entry before removing dataset with id {}", datasetId);
+      //This code was added because in Transport there is no "on delete cascade" for the dataset_design_fkey.
+      designDatasetRepository.deleteById(datasetId);
+    }
     LOG.info("Deleted native dataset with datasetId {}", datasetId);
   }
 
@@ -334,12 +341,12 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     message.setProviderId(datasetMetabase.getDataProviderId());
     message.setAutomatic(true);
 
-    // Send message to provider
+    // Send message to providers and custodian
     Optional<DesignDataset> designDataset =
         designDatasetRepository.findFirstByDatasetSchema(datasetMetabase.getDatasetSchema());
     collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message, SecurityContextHolder.getContext().getAuthentication().getName(), null);
     collaborationControllerZuul.notifyNewMessages(datasetStatusMessageVO.getDataflowId(),
-        datasetMetabase.getDataProviderId(), datasetMetabase.getId(), datasetMetabase.getStatus(),
+        datasetMetabase.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), datasetMetabase.getId(), datasetMetabase.getStatus(),
         designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
         EventType.UPDATED_DATASET_STATUS.toString());
     LOG.info("Automatic feedback message created for dataflowId {}. Message: {}",

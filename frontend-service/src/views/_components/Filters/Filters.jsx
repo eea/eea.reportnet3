@@ -49,12 +49,14 @@ const components = {
 export const Filters = ({
   className,
   isLoading,
+  isProvider,
   isStrictModeVisible,
   onFilter,
   onReset = () => {},
   onSort,
   options = [],
   panelClassName,
+  providerUsername,
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -74,8 +76,9 @@ export const Filters = ({
         const response = await Promise.all(
           filterByKeys.map(key => snapshot.getPromise(filterByStore(`${key}_${recoilId}`)))
         );
-
-        const filterBy = Object.assign({}, ...response);
+        const filterBy = isProvider
+          ? Object.assign({}, ...response, { creatorUsername: [providerUsername] })
+          : Object.assign({}, ...response);
 
         set(filterByCustomFilterStore(recoilId), filterBy);
       },

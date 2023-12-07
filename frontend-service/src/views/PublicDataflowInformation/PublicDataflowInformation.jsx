@@ -47,6 +47,8 @@ export const PublicDataflowInformation = () => {
   const navigate = useNavigate();
   const { dataflowId } = useParams();
 
+  const baseRod3Url = 'https://rod.eionet.europa.eu';
+
   const resourcesContext = useContext(ResourcesContext);
   const themeContext = useContext(ThemeContext);
   const notificationContext = useContext(NotificationContext);
@@ -470,9 +472,55 @@ export const PublicDataflowInformation = () => {
       return <div className={styles.noDatasets}>{resourcesContext.messages['noDatasets']}</div>;
     }
 
+    const onOpenTab = (e, url) => {
+      if (e.button === 0 || e.button === 1) {
+        e.preventDefault();
+        window.open(url, '_blank');
+        e.stopPropagation();
+      }
+    };
+
+    const renderRedirectText = (text, url) => (
+      <span>
+        {text}{' '}
+        <span className={styles.link} onMouseDown={e => onOpenTab(e, url)} title={text}>
+          <FontAwesomeIcon
+            aria-hidden={false}
+            aria-labelledby={text}
+            className="p-breadcrumb-home"
+            icon={AwesomeIcons('externalUrl')}
+            role="link"
+          />
+        </span>
+      </span>
+    );
+
     return (
       <Fragment>
         <Title icon="clone" iconSize="4rem" subtitle={dataflowData.description} title={dataflowData.name} />
+        <div className={styles.legalInstrumentAndObligation}>
+          <p>
+            <strong>{resourcesContext.messages['obligation']}: </strong>
+            {dataflowData.obligation?.obligationId
+              ? renderRedirectText(
+                  dataflowData.obligation?.title,
+                  `${baseRod3Url}/obligations/${dataflowData.obligation?.obligationId}`
+                )
+              : dataflowData.obligation.title}
+          </p>
+        </div>
+        <div className={styles.legalInstrumentAndObligation}>
+          <p>
+            <strong>{resourcesContext.messages['instrumentColumnTitle']}: </strong>
+            {dataflowData.obligation?.legalInstrument?.id
+              ? renderRedirectText(
+                  dataflowData.obligation?.legalInstrument?.alias,
+                  `${baseRod3Url}/instruments/${dataflowData.obligation?.legalInstrument?.id}`
+                )
+              : dataflowData.obligation?.legalInstrument?.alias}
+          </p>
+          <br />
+        </div>
         {!TextUtils.areEquals(dataflowData.type, config.dataflowType.BUSINESS.value) && (
           <Toolbar className={styles.actionsToolbar}>
             <div className="p-toolbar-group-left">

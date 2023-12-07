@@ -1,15 +1,5 @@
 package org.eea.validation.util;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
@@ -43,6 +33,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The Class SQLValitaionUtils.
@@ -522,17 +523,17 @@ public class SQLValidationUtils {
    *
    * @param field the field
    * @param rvAux the Auxiliary RecordValue
-   * @param fieldsAndSchemas the fields and schemas
-   * @param tableToEvaluate
+   * @param tableToEvaluate The table to evaluate
    * @return the replacement
    */
   private String getReplacement(String field, RecordValue rvAux, TableValue tableToEvaluate) {
     String replacement = "";
+    field = field.replaceAll("[{%}]", "");
     for (RecordValue record : tableToEvaluate.getRecords()) {
       if (record.getId().equals(rvAux.getId())) {
         for (FieldValue aux : record.getFields()) {
           if ((null != aux.getValue() || null != aux.getColumnName())
-              && field.toLowerCase().contains(aux.getColumnName().toLowerCase())
+              && field.equalsIgnoreCase(aux.getColumnName())
               && (!aux.getColumnName().toLowerCase().contains("_id"))) {
             replacement = aux.getValue();
             break;

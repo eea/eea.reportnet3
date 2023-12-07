@@ -93,27 +93,27 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * The Constant QUERY_2_WITHOUT_CONDITIONAL.
    */
   private static final String QUERY_2_WITHOUT_CONDITIONAL =
-      "FROM field_value fv, field_value tag  WHERE fv.id_field_schema = :fieldSchemaId ";
+      "FROM field_value fv, field_value tag  WHERE fv.id_field_schema = ? ";
 
   /**
    * The Constant QUERY_2_WITH_CONDITIONAL.
    */
   private static final String QUERY_2_WITH_CONDITIONAL =
-      "FROM field_value fv, field_value tag, field_value cond  WHERE fv.id_field_schema = :fieldSchemaId ";
+      "FROM field_value fv, field_value tag, field_value cond  WHERE fv.id_field_schema = ? ";
 
   /**
    * The Constant QUERY_3.
    */
   private static final String QUERY_3 =
-      "AND tag.id_field_schema = :labelId AND fv.id_record = tag.id_record "
+      "AND tag.id_field_schema = ? AND fv.id_record = tag.id_record "
           + " AND fv.value <> '' "
-          + " AND (:searchText IS NULL or LOWER(fv.value) like LOWER(CONCAT('%',:searchText,'%')) or LOWER(tag.value) like LOWER(CONCAT('%',:searchText,'%')) ) ";
+          + " AND (? IS NULL or LOWER(fv.value) like LOWER(CONCAT('%',?,'%')) or LOWER(tag.value) like LOWER(CONCAT('%',?,'%')) ) ";
 
   /**
    * The Constant QUERY_3_CONDITIONAL.
    */
   private static final String QUERY_3_CONDITIONAL =
-      "AND (cond.id_field_schema = :conditionalId AND cond.value = :conditionalValue AND cond.id_record = fv.id_record or :conditionalId IS NULL) ";
+      "AND (cond.id_field_schema = ? AND cond.value = ? AND cond.id_record = fv.id_record or ? IS NULL) ";
 
   /**
    * The Constant QUERY_ORDER.
@@ -192,36 +192,16 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     queryBuilder.append(QUERY_ORDER);
 
     String finalQuery = queryBuilder.toString();
-    finalQuery = finalQuery.replace(":fieldSchemaId", "'" + idPk + "'")
-        .replace(":labelId", "'" + labelSchemaId + "'")
-        .replace(":searchText", "'" + searchValue + "'");
-    if (StringUtils.isNotBlank(conditionalSchemaId)) {
-      finalQuery = finalQuery.replace(":conditionalId", "'" + conditionalSchemaId + "'")
-          .replace(":conditionalValue", "'" + conditionalValue + "'");
-    }
     LOG.info("Query to execute in links: {}", finalQuery);
     Session session = (Session) entityManager.getDelegate();
 
-    fieldsVO = executeQueryfindByIdFieldSchemaWithTagOrdered(session, finalQuery, resultsNumber);
+    fieldsVO = executeQueryfindByIdFieldSchemaWithTagOrdered(session, finalQuery, resultsNumber,
+        idPk, labelSchemaId, searchValue, conditionalSchemaId, conditionalValue);
 
-    // Remove the duplicate values
-    HashSet<String> seen = new HashSet<>();
-    fieldsVO.removeIf(e -> !seen.add(e.getValue()));
-
-    // Remove all values that are not of the correct type
-    if (sortQueryType == SortQueryType.NUMBER) {
-      fieldsVO.removeIf(e -> !stringIsNumeric(e.getValue()));
-      if (DataType.NUMBER_INTEGER.equals(dataTypePk)) {
-        fieldsVO.removeIf(e -> !stringIsInteger(e.getValue()));
-      }
-    } else if (sortQueryType == SortQueryType.DATE) {
-      fieldsVO.removeIf(e -> !stringIsDate(e.getValue()));
-    }
+    removeDuplicateValues(dataTypePk, fieldsVO, sortQueryType);
 
     return fieldsVO;
   }
-
-
 
   /**
    * Query execution record.
@@ -240,7 +220,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     Query query = entityManager.createNativeQuery(finalQuery, FieldValue.class);
     return query.getResultList();
   }
-
 
   /**
    * Query find value by other field.
@@ -279,6 +258,22 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     });
   }
 
+  private void removeDuplicateValues(DataType dataTypePk, List<FieldVO> fieldsVO, SortQueryType sortQueryType) {
+    // Remove the duplicate values
+    HashSet<String> seen = new HashSet<>();
+    fieldsVO.removeIf(e -> !seen.add(e.getValue()));
+
+    // Remove all values that are not of the correct type
+    if (sortQueryType == SortQueryType.NUMBER) {
+      fieldsVO.removeIf(e -> !stringIsNumeric(e.getValue()));
+      if (DataType.NUMBER_INTEGER.equals(dataTypePk)) {
+        fieldsVO.removeIf(e -> !stringIsInteger(e.getValue()));
+      }
+    } else if (sortQueryType == SortQueryType.DATE) {
+      fieldsVO.removeIf(e -> !stringIsDate(e.getValue()));
+    }
+  }
+
   /**
    * Execute queryfind by id field schema with tag ordered.
    *
@@ -287,12 +282,23 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @return the list
    */
   private List<FieldVO> executeQueryfindByIdFieldSchemaWithTagOrdered(Session session, String query,
-      Integer resultsNumber) {
+      Integer resultsNumber, String idPk, String labelSchemaId, String searchValue,
+      String conditionalSchemaId, String conditionalValue) {
     return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
       @Override
       public List<FieldVO> execute(Connection conn) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-          stmt.setMaxRows(resultsNumber);
+          stmt.setString(1, idPk);
+          stmt.setString(2, labelSchemaId);
+          stmt.setString(3, searchValue);
+          stmt.setString(4, searchValue);
+          stmt.setString(5, searchValue);
+          if (StringUtils.isNotBlank(conditionalSchemaId)) {
+            stmt.setString(6, conditionalSchemaId);
+            stmt.setString(7, conditionalValue);
+            stmt.setString(8, conditionalSchemaId);
+          }
+
           ResultSet rs = stmt.executeQuery();
           List<FieldVO> fields = new ArrayList<>();
           while (rs.next()) {
@@ -311,7 +317,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
       }
     });
   }
-
   /**
    * List to string.
    *
@@ -377,6 +382,5 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     }
     return isDate;
   }
-
 
 }

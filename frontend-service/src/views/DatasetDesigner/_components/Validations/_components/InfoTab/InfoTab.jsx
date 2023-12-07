@@ -19,6 +19,8 @@ import { ValidationContext } from 'views/_functions/Contexts/ValidationContext';
 export const InfoTab = ({
   componentName,
   creationFormState,
+  descriptionMaxLength = 0,
+  errorMessageMaxLength = 0,
   onAddToClickedFields,
   onDeleteFromClickedFields,
   onInfoFieldChange,
@@ -78,11 +80,7 @@ export const InfoTab = ({
       setFieldsDropdown(
         <Dropdown
           appendTo={document.body}
-          disabled={
-            creationFormState.candidateRule.automatic || validationContext.ruleEdit
-              ? true
-              : fieldDropdownOptions.disabled
-          }
+          disabled={creationFormState.candidateRule.automatic ? true : fieldDropdownOptions.disabled}
           filterPlaceholder={fieldDropdownOptions.placeholder}
           id={`${componentName}__field`}
           onChange={fieldDropdownOptions.onChange}
@@ -129,11 +127,7 @@ export const InfoTab = ({
           <label htmlFor="table">{resourcesContext.messages['table']}</label>
           <Dropdown
             appendTo={document.body}
-            disabled={
-              creationFormState.candidateRule.automatic || validationContext.ruleEdit
-                ? true
-                : tableFieldOptions.disabled
-            }
+            disabled={creationFormState.candidateRule.automatic ? true : tableFieldOptions.disabled}
             filterPlaceholder={resourcesContext.messages['table']}
             id={`${componentName}__table`}
             onChange={e => onInfoFieldChange('table', e.value)}
@@ -201,7 +195,7 @@ export const InfoTab = ({
           <label htmlFor={`${componentName}__description`}>{resourcesContext.messages['description']}</label>
           <InputText
             id={`${componentName}__description`}
-            maxLength={config.INPUT_MAX_LENGTH}
+            maxLength={descriptionMaxLength ? descriptionMaxLength : config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('description', e.target.value)}
             placeholder={resourcesContext.messages['description']}
             value={creationFormState.candidateRule.description}
@@ -238,7 +232,7 @@ export const InfoTab = ({
           <InputText
             id={`${componentName}__errorMessage`}
             keyfilter="noDoubleQuote"
-            maxLength={config.INPUT_MAX_LENGTH}
+            maxLength={errorMessageMaxLength ? errorMessageMaxLength : config.INPUT_MAX_LENGTH}
             onChange={e => onInfoFieldChange('errorMessage', e.target.value)}
             placeholder={resourcesContext.messages['ruleErrorMessage']}
             value={creationFormState.candidateRule.errorMessage}

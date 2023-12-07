@@ -781,6 +781,15 @@ public interface DatasetController {
           @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
           @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
 
+  /**
+   * Update geometry field
+   * @param datasetId
+   * @return
+   */
+  @PutMapping("/{datasetId}/updateGeometry")
+  void updateGeometry(@PathVariable("datasetId") Long datasetId);
+
+
 
   /**
    * Generate s3 presigned Url for import

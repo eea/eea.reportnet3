@@ -291,11 +291,10 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getDatasetTemplate = validation => {
     const dataflowId = validation.dataflowId;
     const datasetId = validation.datasetId;
-    // if (validation.user === userContext.name) {
     return (
       <p>
         <a
-          href=""
+          href={getUrl(routes.DATASET, { dataflowId, datasetId }, true)}
           onClick={() => {
             navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
           }}>
@@ -303,15 +302,6 @@ export const ValidationsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         </a>
       </p>
     );
-    // } else {
-    //     return (
-    //         <p>
-    //             <a href="" onClick={() => {
-    //                 navigate(getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, {dataflowId}, true));
-    //             }}>{validation.datasetName} - {datasetId}</a>
-    //         </p>
-    //     )
-    // }
   };
 
   const onRefresh = () => {

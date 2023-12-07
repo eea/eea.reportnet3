@@ -1,11 +1,8 @@
 package org.eea.interfaces.controller.dataflow;
 
 import java.util.List;
-import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.FMEUserVO;
-import org.eea.interfaces.vo.dataflow.LeadReporterVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+
+import org.eea.interfaces.vo.dataflow.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +34,34 @@ public interface RepresentativeController {
   @PostMapping("/{dataflowId}")
   Long createRepresentative(@PathVariable("dataflowId") final Long dataflowId,
       @RequestBody RepresentativeVO representativeVO);
+
+  /**
+   * Creates a provider.
+   *
+   * @param dataProviderVO the provider to be created
+   */
+  @PostMapping("/create-provider")
+  void createProvider(@RequestBody DataProviderVO dataProviderVO) throws Exception;
+
+  /**
+   * Find all data providers
+   * @param pageNum
+   * @param pageSize
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
+   */
+  @GetMapping(value = "/dataProvider", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataProvidersVO findAllDataProviders(@RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+                                       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
+                                       @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+                                       @RequestParam(value = "sortedColumn", defaultValue = "jobId") String sortedColumn,
+                                       @RequestParam(value = "providerCode", required = false) String providerCode,
+                                       @RequestParam(value = "groupId", required = false) Integer groupId,
+                                       @RequestParam(value = "label", required = false) String label);
 
   /**
    * Find all data provider by group id.

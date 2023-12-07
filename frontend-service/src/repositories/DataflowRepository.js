@@ -49,8 +49,10 @@ export const DataflowRepository = {
   generateAllSchemasInfoFile: async dataflowId =>
     await HTTPRequester.post({ url: getUrl(DataflowConfig.generateAllSchemasInfoFile, { dataflowId }) }),
 
-  generateUsersByCountryFile: async dataflowId =>
-    await HTTPRequester.post({ url: getUrl(DataflowConfig.generateUsersByCountryFile, { dataflowId }) }),
+  generateUsersByCountryFile: async (dataflowId, dataProviderId) =>
+    await HTTPRequester.post({
+      url: getUrl(DataflowConfig.generateUsersByCountryFile, { dataflowId, dataProviderId })
+    }),
 
   getDetails: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.getDetails, { dataflowId }) }),
 
@@ -109,11 +111,12 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.createEmptyDatasetSchema, { dataflowId, datasetSchemaName })
     }),
 
-  getPublicData: async ({ filterBy, isAsc, numberRows, pageNum, sortByHeader }) =>
-    await HTTPRequester.post({
+  getPublicData: async ({ filterBy, isAsc = true, numberRows, pageNum, sortByHeader = 'name' }) => {
+    return await HTTPRequester.post({
       url: getUrl(DataflowConfig.getPublicData, { isAsc, numberRows, pageNum, sortBy: sortByHeader }),
       data: { ...filterBy }
-    }),
+    });
+  },
 
   get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 

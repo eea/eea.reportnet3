@@ -2,6 +2,7 @@ package org.eea.dataflow.service.impl;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,11 +36,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.vo.dataflow.DataProviderCodeVO;
-import org.eea.interfaces.vo.dataflow.DataProviderVO;
-import org.eea.interfaces.vo.dataflow.FMEUserVO;
-import org.eea.interfaces.vo.dataflow.LeadReporterVO;
-import org.eea.interfaces.vo.dataflow.RepresentativeVO;
+import org.eea.interfaces.vo.dataflow.*;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
@@ -60,6 +57,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,6 +66,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.opencsv.CSVWriter;
 import io.jsonwebtoken.lang.Collections;
+import org.springframework.web.server.ResponseStatusException;
 
 /** The Class RepresentativeServiceImpl. */
 @Service("dataflowRepresentativeService")
@@ -155,9 +155,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RepresentativeServiceImpl.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant EMAIL: {@value}. */
   private static final String EMAIL = "Email";
@@ -301,6 +298,27 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
+   * Find all data providers
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
+   */
+  @Override
+  public DataProvidersVO getAllDataProviders(Pageable pageable, boolean asc, String sortedColumn, String providerCode, Integer groupId, String label) {
+
+    List<DataProvider> providersPaginated = dataProviderRepository.findProvidersPaginated(pageable, asc, sortedColumn, providerCode, groupId, label);
+    List<DataProviderVO> providersVOPaginated = dataProviderMapper.entityListToClass(providersPaginated);
+    DataProvidersVO dataProvidersVO = new DataProvidersVO();
+    dataProvidersVO.setTotalRecords(dataProviderRepository.count());
+    dataProvidersVO.setFilteredRecords(dataProviderRepository.countProvidersPaginated(asc, sortedColumn, providerCode, groupId, label));
+    dataProvidersVO.setProvidersList(providersVOPaginated);
+    return dataProvidersVO;
+  }
+
+  /**
    * Gets the all data provider by group id.
    *
    * @param groupId the group id
@@ -423,9 +441,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
       }
     } catch (IOException e) {
-      LOG_ERROR.error("Error in exporting representatives for dataflowId {} Message: {}", dataflowId, EEAErrorMessage.CSV_FILE_ERROR, e);
+      LOG.error("Error in exporting representatives for dataflowId {} Message: {}", dataflowId, EEAErrorMessage.CSV_FILE_ERROR, e);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in exportFile for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error in exportFile for dataflowId {}. Message: {}", dataflowId, e.getMessage());
       throw e;
     }
     // Once read we convert it to string
@@ -464,9 +482,9 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
       }
     } catch (IOException e) {
-      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+      LOG.error(EEAErrorMessage.CSV_FILE_ERROR, e);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in exportTemplateReportersFile for groupId {}. Message: {}", groupId, e.getMessage());
+      LOG.error("Unexpected error! Error in exportTemplateReportersFile for groupId {}. Message: {}", groupId, e.getMessage());
       throw e;
     }
     // Once read we convert it to string
@@ -515,15 +533,15 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         representativeRepository.saveAll(representativeList);
       }
     } catch (IOException e) {
-      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+      LOG.error(EEAErrorMessage.CSV_FILE_ERROR, e);
     } catch (IndexOutOfBoundsException e) {
-      LOG_ERROR.error(EEAErrorMessage.DATA_FILE_ERROR, e);
+      LOG.error(EEAErrorMessage.DATA_FILE_ERROR, e);
       throw new EEAException(EEAErrorMessage.DATA_FILE_ERROR);
     } catch (EEAException e) {
-      LOG_ERROR.error(EEAErrorMessage.DATAFLOW_NOTFOUND, e);
+      LOG.error(EEAErrorMessage.DATAFLOW_NOTFOUND, e);
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in importLeadReportersFile for dataflowId {} and groupId {}. Message: {}", dataflowId, groupId, e.getMessage());
+      LOG.error("Unexpected error! Error in importLeadReportersFile for dataflowId {} and groupId {}. Message: {}", dataflowId, groupId, e.getMessage());
       throw e;
     }
 
@@ -569,7 +587,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       fieldsToWrite[0] = countryCode;
       fieldsToWrite[1] = email.toLowerCase();
       fieldsToWrite[2] = addLeadReporter(countryCodeList, countryCode, dataProviderList, dataflowId,
-          email, representativeList, user);
+          email.toLowerCase(), representativeList, user);
       csvWriter.writeNext(fieldsToWrite);
     }
     return representativeList;
@@ -857,6 +875,32 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       }
     }
     return isReleased;
+  }
+
+  /**
+   * @param dataProviderVO the data provider to be created
+   * @return the created data provider
+   * @throws EEAException
+   */
+  public void createProvider(DataProviderVO dataProviderVO) throws Exception {
+    List<DataProvider> dataProviderList = dataProviderRepository.findAllByDataProviderGroup_id(dataProviderVO.getGroupId());
+    String code = dataProviderVO.getCode();
+
+    if (dataProviderList.stream().anyMatch(dataProvider -> dataProvider.getCode().equals(code))) {
+      LOG.error("Could not create data provider. Data provider with name: " + dataProviderVO.getLabel() + " and code: " + dataProviderVO.getCode() + " in group id: " + dataProviderVO.getGroupId() + " already exists.");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DUPLICATE_PROVIDER_CODE);
+    }
+    if (StringUtils.isEmpty(dataProviderVO.getLabel()) || StringUtils.isEmpty(code) || dataProviderVO.getGroupId() == null) {
+      LOG.error("Could not create data provider. Label, code, and groupId must not be empty or null");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EMPTY_PROVIDER_DETAILS);
+    }
+
+    try {
+      dataProviderRepository.saveDataProvider(dataProviderVO.getLabel(), dataProviderVO.getCode(), dataProviderVO.getGroupId());
+    } catch (Exception e) {
+      LOG.error("Could not create data provider with name: " + dataProviderVO.getLabel() + " and code: " + dataProviderVO.getCode() + " in group id: " + dataProviderVO.getGroupId() + ". Message: " + e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CREATING_PROVIDER);
+    }
   }
 
   /**

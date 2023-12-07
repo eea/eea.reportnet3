@@ -481,7 +481,8 @@ public class FileTreatmentHelper implements DisposableBean {
         String includeCountryCode = getCode(idDataflow, datasetType);
 
         final IFileExportContext contextExport = fileExportFactory.createContext(mimeType);
-        LOG.info("End of createFile");
+        LOG.info("End of createFile idDataflow {}, datasetType {}, includeCountryCode {} for datasetId {} and tableSchemaId {}",
+            idDataflow, datasetType, includeCountryCode, datasetId, tableSchemaId);
         return contextExport.fileWriter(idDataflow, datasetId, tableSchemaId, includeCountryCode, false,
                 filters);
     }
@@ -935,7 +936,7 @@ public class FileTreatmentHelper implements DisposableBean {
         List<RecordValue> allRecords = new ArrayList<>();
 
         tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
-                tableWithAttachmentFieldSet, datasetSchema.getTableSchemas());
+                tableWithAttachmentFieldSet, datasetSchema);
         recordRepository.saveAll(allRecords);
         LOG.info("Data saved for datasetId {}", datasetId);
         // now the view is not updated, update the check to false
@@ -2296,18 +2297,20 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param fixedNumberTables the fixed number tables
          * @param allRecords the all records
          * @param tableWithAttachmentFieldSet the table with attachment field set
-         * @param tableSchemas the table schemas
+         * @param dataSetSchema the dataset schema
          */
         private void tableValueFor (Long datasetId, DatasetValue dataset, List < String > readOnlyTables,
                 List < String > fixedNumberTables, List < RecordValue > allRecords,
-                Set < String > tableWithAttachmentFieldSet, List < TableSchema > tableSchemas){
+                Set < String > tableWithAttachmentFieldSet, DataSetSchema dataSetSchema){
             for (TableValue tableValue : dataset.getTableValues()) {
                 // Check if the table with idTableSchema has been populated already
                 Long oldTableId =
                         datasetService.findTableIdByTableSchema(datasetId, tableValue.getIdTableSchema());
                 fillTableId(tableValue.getIdTableSchema(), dataset.getTableValues(), oldTableId);
-                if (!readOnlyTables.contains(tableValue.getIdTableSchema())
-                        && !fixedNumberTables.contains(tableValue.getIdTableSchema())) {
+                DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+                if ((!readOnlyTables.contains(tableValue.getIdTableSchema())
+                        && !fixedNumberTables.contains(tableValue.getIdTableSchema()))
+                || datasetType.equals(DatasetTypeEnum.REFERENCE) || dataSetSchema.isReferenceDataset()) {
                     // Put an empty value to the field if it's an attachment type if and only if table has
                     // fields of this type
                     if (tableWithAttachmentFieldSet.contains(tableValue.getIdTableSchema())) {
@@ -2347,7 +2350,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 } else if (!readOnlyTables.contains(tableValue.getIdTableSchema())
                         && fixedNumberTables.contains(tableValue.getIdTableSchema())) {
                     ObjectId tableSchemaIdTemp = new ObjectId(tableValue.getIdTableSchema());
-                    TableSchema tableSchema = tableSchemas.stream()
+                    TableSchema tableSchema = dataSetSchema.getTableSchemas().stream()
                             .filter(tableSchemaIt -> tableSchemaIt.getIdTableSchema().equals(tableSchemaIdTemp))
                             .findFirst().orElse(null);
                     if (tableSchema != null) {

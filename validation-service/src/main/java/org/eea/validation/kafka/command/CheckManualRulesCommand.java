@@ -20,9 +20,6 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
-import org.eea.kafka.domain.NotificationVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
-import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.exception.EEAInvalidSQLException;
 import org.eea.validation.persistence.data.repository.DatasetRepository;
@@ -70,20 +67,8 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
-  /** The Constant REGULATION_TEMPLATE_FILE. */
-  private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
-
-  /** The Constant REGULATION_TEMPLATE_FILE. */
-  private static final String TYPE_DATA = "typeData";
-
-  /**
-   * The Constant KEYWORDS: {@value}.
-   */
-  private static final String KEYWORDS = "DELETE,INSERT,DROP";
-
-  /** The dataset repository. */
   @Autowired
-  private DatasetRepository datasetRepository;
+  private RulesService rulesService;
 
   /** The rules repository. */
   @Autowired
@@ -141,10 +126,8 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     try {
-      ThreadPropertiesManager.setVariable("user", eeaEventVO.getData().get("user"));
-      List<Rule> errorRulesList = new ArrayList<>();
       Long datasetId =
-              Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
+          Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
       boolean checkNoSQL = (boolean) eeaEventVO.getData().get("checkNoSQL");
       boolean bigData;
 

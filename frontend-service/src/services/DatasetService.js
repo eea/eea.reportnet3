@@ -103,7 +103,6 @@ export const DatasetService = {
   downloadExportFile: async (datasetId, fileName, providerId) =>
     await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
 
-  downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId) =>
     await DatasetRepository.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId),
 
   downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>

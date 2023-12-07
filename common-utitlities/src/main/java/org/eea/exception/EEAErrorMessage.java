@@ -248,6 +248,10 @@ public final class EEAErrorMessage {
   public static final String DATASET_SCHEMA_INVALID_NAME_ERROR =
       "Dataset name invalid, use valid name";
 
+  /** The Constant DATASET_ID_IS_NULL: {@value}. */
+  public static final String DATASET_ID_IS_NULL =
+      "Dataset id should not be null.";
+
   /** The Constant TABLE_READ_ONLY: {@value}. */
   public static final String TABLE_READ_ONLY = "The table is marked as read only";
 
@@ -481,6 +485,18 @@ public final class EEAErrorMessage {
   /** The Constant CREATING_REPRESENTATIVE: {@value}. */
   public static final String CREATING_REPRESENTATIVE =
       "An unknown error happenned while creating a representative.";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String CREATING_PROVIDER =
+      "An unknown error happenned while creating a representative.";
+
+  /** The Constant DUPLICATE_PROVIDER_CODE: {@value}. */
+  public static final String DUPLICATE_PROVIDER_CODE =
+      "Code provided already exists.";
+
+  /** The Constant EMPTY_PROVIDER_DETAILS: {@value}. */
+  public static final String EMPTY_PROVIDER_DETAILS =
+      "Label, code, and groupId must not be empty or null";
 
   /** The Constant EXPORT_LEAD_REPORTERS: {@value}. */
   public static final String EXPORT_LEAD_REPORTERS =

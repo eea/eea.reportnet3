@@ -80,6 +80,8 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
+            descriptionMaxLength={5000}
+            errorMessageMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}
@@ -123,6 +125,8 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
           <InfoTab
             componentName={componentName}
             creationFormState={creationFormState}
+            descriptionMaxLength={5000}
+            errorMessageMaxLength={5000}
             onAddToClickedFields={onAddToClickedFields}
             onDeleteFromClickedFields={onDeleteFromClickedFields}
             onInfoFieldChange={onInfoFieldChange}

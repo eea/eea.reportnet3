@@ -40,7 +40,9 @@ export const TabView = ({
   onTabDragAndDrop,
   onTabDragAndDropStart,
   onTabEditingHeader,
+  onTabHasErrors,
   onTabNameError,
+  onTabNameLengthWarning,
   renderActiveOnly = true,
   style = null,
   tabs,
@@ -243,6 +245,7 @@ export const TabView = ({
           onTabDragAndDrop={onTabDragAndDrop}
           onTabDragAndDropStart={onTabDragAndDropStart}
           onTabEditingHeader={onTabEditingHeader}
+          onTabHasErrors={onTabHasErrors}
           onTabHeaderClick={event => {
             onTabHeaderClick(event, tab, index);
             if (!isUndefined(onTabEditingHeader)) {
@@ -251,6 +254,7 @@ export const TabView = ({
           }}
           onTabMouseWheel={onTabMouseWheel}
           onTabNameError={onTabNameError}
+          onTabNameLengthWarning={onTabNameLengthWarning}
           readOnly={tab.props.readOnly}
           rightIcon={tab.props.rightIcon}
           rightIconClass={tab.props.rightIconClass}
@@ -374,7 +378,9 @@ TabView.propTypes = {
   onTabConfirmDelete: PropTypes.func,
   onTabDragAndDrop: PropTypes.func,
   onTabClick: PropTypes.func,
+  onTabHasErrors: PropTypes.func,
   onTabNameError: PropTypes.func,
+  onTabNameLengthWarning: PropTypes.func,
   renderActiveOnly: PropTypes.bool,
   style: PropTypes.object
 };

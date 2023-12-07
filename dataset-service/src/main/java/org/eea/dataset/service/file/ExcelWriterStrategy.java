@@ -2,7 +2,7 @@ package org.eea.dataset.service.file;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
@@ -23,6 +23,7 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -228,7 +229,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
           return new HSSFWorkbook();
         case XLSX:
         case VALIDATIONS:
-          return new XSSFWorkbook();
+          return new SXSSFWorkbook();
         default:
           throw new IOException("Unknow MIME type: " + mimeType);
       }
@@ -255,9 +256,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
     String nameSheet = table.getNameTableSchema();
     Sheet sheet =
         createSheetAndHeaders(workbook, table, includeCountryCode, includeValidations, nameSheet);
-
     List<FieldSchemaVO> fieldSchemas = table.getRecordSchema().getFieldSchema();
-
     // Used to map each fieldValue with the correct fieldSchema
     Map<String, Integer> indexMap = new HashMap<>();
 
@@ -293,7 +292,15 @@ public class ExcelWriterStrategy implements WriterStrategy {
     CellStyle cs = workbook.createCellStyle();
     cs.setWrapText(true);
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    Long totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema());
+    LOG.info("Dataset id {} for table.getIdTableSchema {}", datasetId, table.getIdTableSchema());
+    Long totalRecords = 0L;
+    try {
+      totalRecords = fileCommon.countRecordsByTableSchema(table.getIdTableSchema(), datasetId);
+    } catch (SQLException e) {
+      LOG.error("Error in countRecordsByTableSchema for datasetId {} and IdTableSchema {}",
+          datasetId, table.getIdTableSchema(), e);
+    }
+    LOG.info("Dataset id {} totalRecords {} for table.getIdTableSchema {}", datasetId, totalRecords, table.getIdTableSchema());
     int batchSize = 50000 / fieldSchemas.size();
     int numSheets = 0;
     for (int numPage = 1; totalRecords >= 0; totalRecords = totalRecords - batchSize, numPage++) {

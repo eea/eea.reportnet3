@@ -83,7 +83,7 @@ export const WebformField = ({
     selectedFieldSchemaId
   } = webformFieldState;
 
-  const { formatDate, getMultiselectValues } = WebformRecordUtils;
+  const { formatDate, formatDateTime, getMultiselectValues } = WebformRecordUtils;
 
   const { getObjectiveOptions } = PaMsUtils;
 
@@ -139,7 +139,7 @@ export const WebformField = ({
           ? conditionalField.type === 'MULTISELECT_CODELIST'
             ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
             : conditionalField.value
-          : field.value,
+          : encodeURIComponent(field.value),
         datasetSchemaId,
         400
       );
@@ -203,8 +203,8 @@ export const WebformField = ({
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
         ? value.join(';')
         : value;
-
-    try {
+    
+        try {
       if (!isSubmiting && initialFieldValue !== parsedValue) {
         await DatasetService.updateField(
           datasetId,
@@ -226,11 +226,13 @@ export const WebformField = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        console.error('WebformField - onEditorSubmitValue.', error);
-        if (updateInCascade) {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
-        } else {
-          notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
+        if (field.fieldType !== 'DATETIME') {
+          console.error('WebformField - onEditorSubmitValue.', error);
+          if (updateInCascade) {
+            notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
+          } else {
+            notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
+          }
         }
       }
     } finally {
@@ -288,16 +290,17 @@ export const WebformField = ({
     }
   };
 
+  const changeDatePickerPosition = inputLeftPosition => {
+    const datePickerElements = document.getElementsByClassName('p-datepicker');
+    for (let index = 0; index < datePickerElements.length; index++) {
+      const datePicker = datePickerElements[index];
+      datePicker.style.left = `${inputLeftPosition}px`;
+    }
+  };
+
   const renderTemplate = (field, option, type) => {
     switch (type) {
       case 'DATE':
-        const changeDatePickerPosition = inputLeftPosition => {
-          const datePickerElements = document.getElementsByClassName('p-datepicker');
-          for (let index = 0; index < datePickerElements.length; index++) {
-            const datePicker = datePickerElements[index];
-            datePicker.style.left = `${inputLeftPosition}px`;
-          }
-        };
         return (
           <Calendar
             appendTo={document.body}
@@ -317,6 +320,7 @@ export const WebformField = ({
               onFillField(field, option, formatDate(event.value, isNil(event.value)));
               onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
             }}
+            readOnlyInput={true}
             selectableYears={100}
             value={new Date(field.value)}
             yearNavigator={true}
@@ -329,23 +333,22 @@ export const WebformField = ({
             dateFormat="yy-mm-dd"
             id={field.fieldId}
             monthNavigator={true}
-            onBlur={event => {
-              if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
-              else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
+            onBlur={e => {
+              if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
+              else onEditorSubmitValue(field, option, formatDateTime(e.value, isNil(e.value)));
             }}
-            onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
-            onFocus={event => {
-              changeDatePickerPosition(event.target.getBoundingClientRect().left);
-              onFocusField(event.target.value);
+            onChange={e => {
+              onFillField(field, option, formatDateTime(e.value, isNil(e.value)));
             }}
-            onSelect={event => {
-              onFillField(field, option, formatDate(event.value, isNil(event.value)));
-              onEditorSubmitValue(field, option, formatDate(event.value, isNil(event.value)));
+            onSelect={e => {
+              onFillField(field, option, formatDateTime(e.value, isNil(e.value)));
+              onEditorSubmitValue(field, option, formatDateTime(e.value, isNil(e.value)));
             }}
+            readOnlyInput={true}
             selectableYears={100}
             showSeconds={true}
             showTime={true}
-            value={field.value}
+            value={new Date(field.value)}
             yearNavigator={true}
           />
         );
@@ -457,7 +460,7 @@ export const WebformField = ({
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary, field.updatesGroupInfo);
+              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false, field.updatesGroupInfo);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onFocus={event => onFocusField(event.target.value)}

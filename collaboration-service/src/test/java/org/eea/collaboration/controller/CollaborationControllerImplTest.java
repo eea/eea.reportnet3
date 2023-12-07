@@ -372,9 +372,9 @@ public class CollaborationControllerImplTest {
 
   @Test
   public void notifyNewMessagesTest() {
-    collaborationControllerImpl.notifyNewMessages(1L, 1L, null, null, null, "RECEIVED_MESSAGE");
+    collaborationControllerImpl.notifyNewMessages(1L, 1L, null, null, null, null, "RECEIVED_MESSAGE");
     Mockito.verify(collaborationServiceHelper, Mockito.times(1)).notifyNewMessages(
-        Mockito.anyLong(), Mockito.anyLong(), Mockito.nullable(Long.class),
+        Mockito.anyLong(), Mockito.anyLong(), Mockito.nullable(String.class), Mockito.nullable(Long.class),
         Mockito.nullable(DatasetStatusEnum.class), Mockito.nullable(String.class), Mockito.any());
   }
 }

@@ -287,7 +287,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       }
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
-      throw e;
     }
   }
 

@@ -1,11 +1,9 @@
 package org.eea.dataflow.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -677,6 +675,42 @@ public class RepresentativeControllerImplTest {
     representativeControllerImpl.validateLeadReporters(1L);
     Mockito.verify(representativeService, times(1)).validateLeadReporters(Mockito.anyLong(),
         Mockito.anyBoolean());
+  }
+
+  @Test
+  public void testCreateProvider_Success() throws Exception {
+    // given
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setLabel("TestLabel");
+    dataProviderVO.setCode("TestCode");
+    dataProviderVO.setGroupId(1L);
+
+    // when
+    doNothing().when(representativeService).createProvider(any());
+
+    representativeControllerImpl.createProvider(dataProviderVO);
+
+    // then
+    verify(representativeService).createProvider(dataProviderVO);
+  }
+
+  @Test
+  public void testCreateProvider_BadRequest() throws Exception {
+    // given
+    DataProviderVO dataProviderVO = new DataProviderVO();
+    dataProviderVO.setLabel("TestLabel");
+    dataProviderVO.setCode("TestCode");
+    dataProviderVO.setGroupId(1L);
+
+    // when
+    doThrow(EEAException.class).when(representativeService).createProvider(any());
+
+    // then
+    try {
+      representativeControllerImpl.createProvider(dataProviderVO);
+    } catch (ResponseStatusException e) {
+      assert e.getStatus() == HttpStatus.BAD_REQUEST;
+    }
   }
 
 }

@@ -55,6 +55,8 @@ export const ActionsProvider = ({ children }) => {
       case 'DATASET_VALIDATE':
         setValidateDatasetProcessing(true);
         break;
+      default:
+        break;
     }
 
     timer.current = setInterval(async () => {

@@ -317,6 +317,9 @@ export const FieldsDesigner = ({
     setIsErrorDialogVisible(true);
   };
 
+  const onCheckPk = checked => {
+    setIsPkChecked(checked);
+  };
   const deleteField = async (deletedFieldIndex, deletedFieldType) => {
     try {
       setIsLoading(true);
@@ -617,7 +620,7 @@ export const FieldsDesigner = ({
           fields={fields}
           fieldType=""
           fieldValue=""
-          hasPK={!isNil(fields) && fields.filter(field => field.pk).length > 0}
+          hasPK={isPkChecked || (!isNil(fields) && fields.filter(field => field.pk).length > 0)}
           index="-1"
           initialFieldIndexDragged={initialFieldIndexDragged}
           isCodelistOrLink={isCodelistOrLink}
@@ -625,6 +628,7 @@ export const FieldsDesigner = ({
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isLoading={isLoading}
           isReferenceDataset={isReferenceDataset}
+          onCheckPkCheckbox={onCheckPk}
           onCodelistAndLinkShow={onCodelistAndLinkShow}
           onFieldDragAndDrop={onFieldDragAndDrop}
           onNewFieldAdd={onFieldAdd}
@@ -681,7 +685,7 @@ export const FieldsDesigner = ({
               fields={fields}
               fieldType={field.type}
               fieldValue={field.value}
-              hasPK={fields.filter(field => field.pk).length > 0}
+              hasPK={isPkChecked || fields.filter(field => field.pk).length > 0}
               index={index}
               initialFieldIndexDragged={initialFieldIndexDragged}
               isCodelistOrLink={isCodelistOrLink}
@@ -692,6 +696,7 @@ export const FieldsDesigner = ({
               key={field.fieldId}
               markedForDeletion={markedForDeletion}
               onBulkCheck={onBulkCheck}
+              onCheckPkCheckbox={onCheckPk}
               onCodelistAndLinkShow={onCodelistAndLinkShow}
               onFieldDelete={onFieldDelete}
               onFieldDragAndDrop={onFieldDragAndDrop}
@@ -1013,7 +1018,6 @@ export const FieldsDesigner = ({
         {designerState.isImportTableSchemaDialogVisible && (
           <CustomFileUpload
             accept=".csv"
-            bigData={bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}

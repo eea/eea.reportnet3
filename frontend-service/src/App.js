@@ -37,6 +37,7 @@ import { ResourcesProvider } from 'views/_functions/Providers/ResourcesProvider'
 import { ThemeProvider } from 'views/_functions/Providers/ThemeProvider';
 import { UserProvider } from 'views/_functions/Providers/UserProvider';
 import { ValidationProvider } from 'views/_functions/Providers/ValidationProvider';
+import { LegalNotice } from 'views/LegalNotice';
 
 const App = () => {
   return (
@@ -129,9 +130,14 @@ const App = () => {
                                 path={routes.REFERENCE_DATASET_SCHEMA}
                               />
                               <Route element={<PrivateRoute component={Dataset} />} exact path={routes.DATASET} />
-                              <Route element={<PrivateRoute component={DataflowHelp} />} exact path={routes.DOCUMENTS} />
+                              <Route
+                                element={<PrivateRoute component={DataflowHelp} />}
+                                exact
+                                path={routes.DOCUMENTS}
+                              />
                               <Route element={<PrivateRoute component={EUDataset} />} exact path={routes.EU_DATASET} />
                               <Route element={<PrivacyStatement />} exact path={routes.PRIVACY_STATEMENT} />
+                              <Route element={<LegalNotice />} exact path={routes.LEGAL_NOTICE} />
                               <Route element={<PrivateRoute component={Settings} />} exact path={routes.SETTINGS} />
                               <Route
                                 element={<PrivateRoute component={ReferenceDataflow} />}

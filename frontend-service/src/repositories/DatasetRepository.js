@@ -1,7 +1,6 @@
 import { DatasetConfig } from './config/DatasetConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
-// import {dataschema_getSchemas_dataset_8495} from "./mockResponses";
 
 export const DatasetRepository = {
   testImportProcess: async datasetId =>
@@ -192,7 +191,7 @@ export const DatasetRepository = {
         datasetSchemaId,
         fieldSchemaId,
         resultsNumber: resultsNumber !== '' ? resultsNumber : undefined,
-        searchToken: searchToken !== '' ? searchToken : undefined
+        searchToken: encodeURIComponent(searchToken) !== '' ? encodeURIComponent(searchToken) : undefined
       })
     }),
 
@@ -353,6 +352,11 @@ export const DatasetRepository = {
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDatasetNameDesign, { datasetId, datasetSchemaName })
     }),
+  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
+      data: { idTableSchema: tableSchemaId, nameTableSchema: tableSchemaName }
+    }),
 
   updateTableDesign: async (
     tableSchemaToPrefill,
@@ -374,14 +378,10 @@ export const DatasetRepository = {
         toPrefill: tableSchemaToPrefill
       }
     }),
-
-  updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>
-    await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
-      data: { idTableSchema: tableSchemaId, nameTableSchema: tableSchemaName }
-    }),
-
   validate: async datasetId => await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId }) }),
+
+  validateAllSql: async datasetId =>
+    await HTTPRequester.post({ url: getUrl(DatasetConfig.validateAllSql, { datasetId }) }),
 
   validateSqlRules: async (datasetId, datasetSchemaId) =>
     await HTTPRequester.post({ url: getUrl(DatasetConfig.validateSql, { datasetId, datasetSchemaId }) })
