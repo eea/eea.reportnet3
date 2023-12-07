@@ -43,12 +43,4 @@ public interface DataLakeDataRetrieverService {
                                      ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath);
 
 
-    /**
-     * @param idTableSchema
-     * @param datasetSchemaId
-     * @return
-     * @throws EEAException
-     */
-    TableSchemaVO getTableSchemaVO(String idTableSchema,
-        String datasetSchemaId) throws EEAException;
 }

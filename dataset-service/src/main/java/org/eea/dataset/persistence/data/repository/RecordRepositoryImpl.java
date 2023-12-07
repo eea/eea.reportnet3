@@ -20,6 +20,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataLakeDataRetrieverService;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
@@ -33,6 +34,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
@@ -147,9 +149,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Qualifier("dremioJdbcTemplate")
   private JdbcTemplate dremioJdbcTemplate;
 
-  /** The datalake service */
+  /**
+   * The parse common.
+   */
   @Autowired
-  private DataLakeDataRetrieverService dataLakeDataRetrieverService;
+  private FileCommonUtils fileCommon;
 
   /**
    * The connection url.
@@ -970,7 +974,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     DremioRecordMapper recordMapper = new DremioRecordMapper();
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetSchemaId = dataset.getDatasetSchema();
-    TableSchemaVO tableSchemaVO = dataLakeDataRetrieverService.getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
+    TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
 
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchema.getIdTableSchema().toString());
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
@@ -2202,5 +2206,30 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     LOG.info("Method setUpS3PathResolver returns : {}", path);
     return path;
+  }
+
+  /**
+   * finds tableSchemaVO
+   * @param idTableSchema
+   * @param datasetSchemaId
+   * @return
+   * @throws EEAException
+   */
+  private TableSchemaVO getTableSchemaVO(String idTableSchema, String datasetSchemaId) throws EEAException {
+    DataSetSchemaVO dataSetSchemaVO;
+    try {
+      dataSetSchemaVO = fileCommon.getDataSetSchemaVO(datasetSchemaId);
+    } catch (EEAException e) {
+      LOG.error("Error retrieving dataset schema for datasetSchemaId {}", datasetSchemaId);
+      throw new EEAException(e);
+    }
+    Optional<TableSchemaVO> tableSchemaOptional = dataSetSchemaVO.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(idTableSchema)).findFirst();
+    TableSchemaVO tableSchemaVO = null;
+    if (!tableSchemaOptional.isPresent()) {
+      LOG.error("table with id {} not found in mongo results", idTableSchema);
+      throw new EEAException("Error retrieving table with id " + idTableSchema);
+    }
+    tableSchemaVO = tableSchemaOptional.get();
+    return tableSchemaVO;
   }
 }
