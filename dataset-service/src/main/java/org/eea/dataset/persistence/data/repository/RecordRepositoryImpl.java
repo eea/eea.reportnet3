@@ -28,10 +28,7 @@ import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuu
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.ExportFilterVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
-import org.eea.interfaces.vo.dataset.TableVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -975,16 +972,38 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     DremioRecordMapper recordMapper = new DremioRecordMapper();
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-    LOG.info("dataset : {}", dataset);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
-    LOG.info("tableSchemaVO : {}", tableSchemaVO);
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
-    LOG.info("recordMapper : {}", recordMapper);
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
-    LOG.info(String.valueOf(recordVOS));
 
-    SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
+    for (int i = 0; i < recordVOS.size(); i++) {
+      bw.write("{\"records\":[{\"fields\":[");
+      RecordVO recordVO = recordVOS.get(i);
+      int recordsSize = recordVO.getFields().size();
+      for (int j = 0; j < recordVO.getFields().size(); j++) {
+        FieldVO fieldVO = recordVO.getFields().get(j);
+        bw.write("{\"fieldName\":" + "\"" + fieldVO.getName() + "\",");
+        bw.write("\"value\":" + "\"" + fieldVO.getValue() + "\",");
+        bw.write("\"field_value_id\":" + fieldVO.getIdFieldSchema());
+        if (j == recordsSize - 1) {
+          bw.write("}");
+        } else {
+          bw.write("},");
+        }
+      }
+      bw.write("],");
+      bw.write("\"id_table_schema\":" + "\"" + tableSchemaVO.getIdTableSchema() + "\",");
+      bw.write("\"id_record\":" + "\"" + recordVO.getId() + "\",");
+      bw.write("\"countryCode\":" + "\"" + recordVO.getDataProviderCode() + "\"");
+      if (i == recordsSize - 1) {
+        bw.write("}");
+      } else {
+        bw.write("},");
+      }
+    }
+
+/*    SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
     SqlRowSetMetaData metaData = rs.getMetaData();
     int columnCount = metaData.getColumnCount();
 
@@ -1020,7 +1039,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       } else {
         bw.write("},");
       }
-    }
+    }*/
   }
 
   /**
