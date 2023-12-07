@@ -182,9 +182,6 @@ public class RulesServiceImpl implements RulesService {
   private DatasetRepository datasetRepository;
 
   @Autowired
-  private DataFlowControllerZuul dataFlowControllerZuul;
-
-  @Autowired
   @Qualifier("dremioJdbcTemplate")
   private JdbcTemplate dremioJdbcTemplate;
 
@@ -273,6 +270,7 @@ public class RulesServiceImpl implements RulesService {
 
   private static final String KEYWORDS = "DELETE,INSERT,DROP";
 
+  @Override
   public void validateAllRules(Long datasetId, boolean checkNoSQL, String user) {
     try {
       ThreadPropertiesManager.setVariable("user", user);
@@ -286,7 +284,7 @@ public class RulesServiceImpl implements RulesService {
       boolean bigData;
 
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+      DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
       if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
         bigData = true;
       } else {
