@@ -965,7 +965,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     int columnCount = metaData.getColumnCount();
 
     while (rs.next()) {
-      bw.write("{\"records\":[{\"fields\":[{");
+      bw.write("{\"records\":[{\"fields\":[");
       String id_record = null;
       String countryCode = null;
       for (int i = 1; i <= columnCount; i++) {
@@ -977,7 +977,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         } else if (columnName == "data_provider_code") {
           countryCode = value;
         } else if (columnName != "dir0") {
-          bw.write("\"fieldName\":" + "\"" + columnName + "\",");
+          bw.write("{\"fieldName\":" + "\"" + columnName + "\",");
           bw.write("\"value\":" + "\"" + value + "\",");
           bw.write("\"field_value_id\":" + null);
           if (i != columnCount) {
