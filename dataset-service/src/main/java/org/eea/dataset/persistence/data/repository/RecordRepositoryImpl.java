@@ -10,6 +10,7 @@ import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.mapper.DremioRecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -960,6 +961,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw)
       throws SQLException, IOException {
+
+    DremioRecordMapper recordMapper = new DremioRecordMapper();
+    List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
+    LOG.info(String.valueOf(recordVOS));
+
     ResultSet rs = dremioJdbcTemplate.queryForObject(totalRecords, ResultSet.class);
     ResultSetMetaData metaData = rs.getMetaData();
     int columnCount = metaData.getColumnCount();
