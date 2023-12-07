@@ -6,8 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.eea.datalake.service.S3ConvertService;
-import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioRecordMapper;
@@ -22,7 +20,6 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DataLakeDataRetrieverService;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
@@ -148,10 +145,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Autowired
   @Qualifier("dremioJdbcTemplate")
   private JdbcTemplate dremioJdbcTemplate;
-
-  /** The data set metabase controller zuul. */
-  @Autowired
-  private DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
   /** The datalake service */
   @Autowired
@@ -974,7 +967,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       throws SQLException, IOException, EEAException {
 
     DremioRecordMapper recordMapper = new DremioRecordMapper();
-    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = dataLakeDataRetrieverService.getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
 
