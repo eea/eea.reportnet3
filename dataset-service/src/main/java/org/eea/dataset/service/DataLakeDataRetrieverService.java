@@ -4,6 +4,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.springframework.data.domain.Pageable;
 
@@ -41,4 +42,13 @@ public interface DataLakeDataRetrieverService {
     StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
                                      ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath);
 
+
+    /**
+     * @param idTableSchema
+     * @param datasetSchemaId
+     * @return
+     * @throws EEAException
+     */
+    TableSchemaVO getTableSchemaVO(String idTableSchema,
+        String datasetSchemaId) throws EEAException;
 }

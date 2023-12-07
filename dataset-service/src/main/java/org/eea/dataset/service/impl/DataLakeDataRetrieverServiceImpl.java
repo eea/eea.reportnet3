@@ -18,6 +18,7 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.validation.DremioValidationVO;
@@ -31,10 +32,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -558,6 +556,32 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         LOG.info("headers : {}", headers);
         headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
         dataQuery.append(")");
+    }
+
+    /**
+     * finds tableSchemaVO
+     * @param idTableSchema
+     * @param datasetSchemaId
+     * @return
+     * @throws EEAException
+     */
+    @Override
+    public TableSchemaVO getTableSchemaVO(String idTableSchema, String datasetSchemaId) throws EEAException {
+        DataSetSchemaVO dataSetSchemaVO;
+        try {
+            dataSetSchemaVO = fileCommon.getDataSetSchemaVO(datasetSchemaId);
+        } catch (EEAException e) {
+            LOG.error("Error retrieving dataset schema for datasetSchemaId {}", datasetSchemaId);
+            throw new EEAException(e);
+        }
+        Optional<TableSchemaVO> tableSchemaOptional = dataSetSchemaVO.getTableSchemas().stream().filter(t -> t.getIdTableSchema().equals(idTableSchema)).findFirst();
+        TableSchemaVO tableSchemaVO = null;
+        if (!tableSchemaOptional.isPresent()) {
+            LOG.error("table with id {} not found in mongo results", idTableSchema);
+            throw new EEAException("Error retrieving table with id " + idTableSchema);
+        }
+        tableSchemaVO = tableSchemaOptional.get();
+        return tableSchemaVO;
     }
 
     private Pageable calculatePageable(Pageable pageable, Long totalRecords) {
