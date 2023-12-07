@@ -974,10 +974,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     DremioRecordMapper recordMapper = new DremioRecordMapper();
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    LOG.info("dataset : {}", dataset);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
-
-    recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchema.getIdTableSchema().toString());
+    LOG.info("tableSchemaVO : {}", tableSchemaVO);
+    recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
+    LOG.info("recordMapper : {}", recordMapper);
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
     LOG.info(String.valueOf(recordVOS));
 
