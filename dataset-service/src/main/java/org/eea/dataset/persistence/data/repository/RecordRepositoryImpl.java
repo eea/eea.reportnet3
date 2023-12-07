@@ -689,7 +689,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
           bw.write(",\"totalRecords\":\"" + totalRecords + "\"");
         }
-        bw.write("\"}");
+        bw.write("}");
       }
       bw.write("]}");
     } catch (Exception e) {
@@ -960,8 +960,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw)
       throws SQLException, IOException {
-    SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
-    SqlRowSetMetaData metaData = rs.getMetaData();
+    ResultSet rs = dremioJdbcTemplate.queryForObject(totalRecords, ResultSet.class);
+    ResultSetMetaData metaData = rs.getMetaData();
     int columnCount = metaData.getColumnCount();
 
     while (rs.next()) {
@@ -972,11 +972,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         String columnName = metaData.getColumnName(i);
         String value = rs.getString(columnName);
 
-        if (columnName == "record_id") {
+        if ("record_id".equals(columnName)) {
           id_record = value;
-        } else if (columnName == "data_provider_code") {
+        } else if ("data_provider_code".equals(columnName)) {
           countryCode = value;
-        } else if (columnName != "dir0") {
+        } else if (!"dir0".equals(columnName)) {
           bw.write("{\"fieldName\":" + "\"" + columnName + "\",");
           bw.write("\"value\":" + "\"" + value + "\",");
           bw.write("\"field_value_id\":" + null);
