@@ -123,7 +123,6 @@ export const FieldDesigner = ({
   const validationContext = useContext(ValidationContext);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [headerInitialHeight, setHeaderInitialHeight] = useState();
-  const [isPkCheckboxChecked, setIsPkCheckboxChecked] = useState(false);
 
   useEffect(() => {
     const header = document.getElementById('header');
