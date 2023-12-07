@@ -966,8 +966,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
     LOG.info(String.valueOf(recordVOS));
 
-    ResultSet rs = dremioJdbcTemplate.queryForObject(totalRecords, ResultSet.class);
-    ResultSetMetaData metaData = rs.getMetaData();
+    SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
+    SqlRowSetMetaData metaData = rs.getMetaData();
     int columnCount = metaData.getColumnCount();
 
     while (rs.next()) {
@@ -1805,6 +1805,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
       }
     }
+
+    stringQuery.append(" limit 2000");
 
     LOG.info("TotalRecords Query: {}", stringQuery);
     return stringQuery.toString();
