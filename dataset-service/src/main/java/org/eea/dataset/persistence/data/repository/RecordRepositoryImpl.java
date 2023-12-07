@@ -983,9 +983,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int recordsSize = recordVO.getFields().size();
       for (int j = 0; j < recordVO.getFields().size(); j++) {
         FieldVO fieldVO = recordVO.getFields().get(j);
-        bw.write("{\"fieldName\":" + "\"" + fieldVO.getName() + "\",");
-        bw.write("\"value\":" + "\"" + fieldVO.getValue() + "\",");
-        bw.write("\"field_value_id\":" + fieldVO.getIdFieldSchema() + "\",");
+        bw.write("{\"fieldName\":\"" + fieldVO.getName() + "\",");
+        bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
+        bw.write("\"field_value_id\":\"" + fieldVO.getIdFieldSchema() + "\",");
         if (j == recordsSize - 1) {
           bw.write("}");
         } else {
@@ -993,9 +993,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
       }
       bw.write("],");
-      bw.write("\"id_table_schema\":" + "\"" + tableSchemaVO.getIdTableSchema() + "\",");
-      bw.write("\"id_record\":" + "\"" + recordVO.getId() + "\",");
-      bw.write("\"countryCode\":" + "\"" + recordVO.getDataProviderCode() + "\"");
+      bw.write("\"id_table_schema\":\"" + tableSchemaVO.getIdTableSchema() + "\",");
+      bw.write("\"id_record\":\"" + recordVO.getId() + "\",");
+      bw.write("\"countryCode\":\"" + recordVO.getDataProviderCode() + "\"");
       if (i == recordsSize - 1) {
         bw.write("}");
       } else {
