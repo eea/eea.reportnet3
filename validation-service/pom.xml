@@ -91,7 +91,7 @@
 			<artifactId>jts-core</artifactId>
 			<version>1.18.2</version>
 		</dependency>
-	</dependencies>
+    </dependencies>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>nexus-snapshots</id>

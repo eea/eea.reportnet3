@@ -79,15 +79,16 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const { resetFilterState } = useApplyFilters('uniqueConstraints');
 
+  const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
+  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
     name: ''
   });
-  const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
-  const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
   const [selectedView, setSelectedView] = useState(
     QuerystringUtils.getUrlParamValue('view') !== '' ? QuerystringUtils.getUrlParamValue('view') : 'design'
   );
+  const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -525,8 +526,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setWebformOptionsLoadingStatus = loadingStatus =>
     designerDispatch({ type: 'SET_WEBFORM_OPTIONS_LOADING_STATUS', payload: { loadingStatus } });
 
-  const setIsLoadingFile = value => designerDispatch({ type: 'SET_IS_LOADING_FILE', payload: { value } });
-
   const manageDialogs = (dialog, value, secondDialog, secondValue) => {
     designerDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
   };
@@ -825,6 +824,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     false
   );
 
+  useCheckNotifications(
+    ['VALIDATE_ALL_RULES_COMPLETED_EVENT', 'DISABLE_NAMES_TYPES_RULES_ERROR_EVENT'],
+    setAllSqlValidationRunning,
+    false
+  );
+
   const onHideValidationsDialog = () => {
     if (validationContext.opener === 'validationsListDialog' && validationContext.reOpenOpener) {
       validationContext.onResetOpener();
@@ -1080,9 +1085,75 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const validateQcRules = async () => {
     setSqlValidationRunning(true);
     try {
+      notificationContext.add(
+        {
+          type: 'VALIDATE_QCS_INIT',
+          content: {
+            customContent: { origin: 'DESIGN' },
+            dataflowId,
+            dataflowName: designerState.dataflowName,
+            datasetId,
+            datasetName: designerState.datasetSchemaName,
+            type: 'DESIGN'
+          }
+        },
+        true
+      );
       await DatasetService.validateSqlRules(datasetId, designerState.datasetSchemaId);
     } catch (error) {
       console.error('DatasetDesigner - validateQcRules.', error);
+      notificationContext.add(
+        {
+          type: 'VALIDATE_QCS_ERROR_EVENT',
+          content: {
+            customContent: { origin: 'DESIGN' },
+            dataflowId,
+            dataflowName: designerState.dataflowName,
+            datasetId,
+            datasetName: designerState.datasetSchemaName,
+            type: 'DESIGN'
+          }
+        },
+        true
+      );
+    }
+  };
+
+  const validateAllQcRules = async () => {
+    setAllSqlValidationRunning(true);
+    try {
+      notificationContext.add(
+        {
+          type: 'VALIDATE_ALL_QCS_INIT',
+          content: {
+            customContent: { origin: 'DESIGN' },
+            dataflowId,
+            dataflowName: designerState.dataflowName,
+            datasetId,
+            datasetName: designerState.datasetSchemaName,
+            type: 'DESIGN'
+          }
+        },
+        true
+      );
+      await DatasetService.validateAllSql(datasetId);
+    } catch (error) {
+      console.error('DatasetDesigner - validateAllQcRules.', error);
+      notificationContext.add(
+        {
+          type: 'VALIDATE__ALL_QCS_ERROR_EVENT',
+          content: {
+            customContent: { origin: 'DESIGN' },
+            dataflowId,
+            dataflowName: designerState.dataflowName,
+            datasetId,
+            datasetName: designerState.datasetSchemaName,
+            type: 'DESIGN'
+          }
+        },
+        true
+      );
+      setAllSqlValidationRunning(false);
     }
   };
 
@@ -1155,6 +1226,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
       <Button
         className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
+        icon={allSqlValidationRunning ? 'spinnerAnimate' : 'check'}
+        label={resourcesContext.messages['validateAllSqlRulesBtn']}
+        onClick={validateAllQcRules}
+        tooltip={resourcesContext.messages['validateRulesBtnTootip']}
+        tooltipOptions={{ position: 'top' }}
+      />
+      <Button
+        className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateSqlRulesBtn']}
         onClick={validateQcRules}
@@ -1162,7 +1241,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         tooltipOptions={{ position: 'top' }}
       />
       <Button
-        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        className={`p-button-secondary p-button-animated-blink p-button-right-aligned ${styles.closeButton}`}
         icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={onHideValidationsDialog}

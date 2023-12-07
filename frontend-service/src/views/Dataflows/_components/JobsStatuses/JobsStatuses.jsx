@@ -458,7 +458,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <div className={styles.tooltip}>
         <p>
           <a
-            href=""
+            href={getUrl(routes.DATAFLOW, { dataflowId }, true)}
             onClick={() => {
               navigate(getUrl(routes.DATAFLOW, { dataflowId }, true));
             }}>
@@ -477,7 +477,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       <div className={styles.tooltip}>
         <p>
           <a
-            href=""
+            href={getUrl(routes.DATASET, { dataflowId, datasetId }, true)}
             onClick={() => {
               navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
             }}>

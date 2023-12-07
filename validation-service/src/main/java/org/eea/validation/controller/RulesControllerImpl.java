@@ -92,6 +92,27 @@ public class RulesControllerImpl implements RulesController {
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
 
+  @Override
+  @PostMapping(value = "/validateAllRules", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @ApiOperation(value = "Validate all rules", hidden = true)
+  public void validateAllRules(
+      @RequestParam(value = "datasetId") Long datasetId
+  ) throws Exception {
+    if (datasetId == null ) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_ID_IS_NULL);
+    }
+    try {
+      String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+      boolean checkNoSQL = true;
+      rulesService.validateAllRules(datasetId, checkNoSQL, userName);
+    } catch (Exception e) {
+      LOG.error("Error validating QC's for datasetId: {}, user: {}, message: {}",
+          datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), e.getMessage());
+      throw e;
+    }
+  }
+
 
   /**
    * Creates the empty rules schema.

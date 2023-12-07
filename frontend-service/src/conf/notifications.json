@@ -685,6 +685,22 @@
           }
         },
         {
+          "key": "VALIDATE_QCS_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "VALIDATE_ALL_QCS_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "DISABLE_NAMES_TYPES_RULES_ERROR_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
@@ -1164,6 +1180,13 @@
           }
         },
         {
+          "key": "VALIDATE_ALL_RULES_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
+          }
+        },
+        {
           "key": "UPDATED_DATASET_STATUS",
           "navigateTo": {
             "section": "DATASET",
@@ -1229,6 +1252,22 @@
         { "key": "DATASET_DATA_LOADING_INIT", "messageKeys": {} },
         { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
         { "key": "DELETE_DOCUMENT_INIT_INFO" },
+        {
+          "key": "VALIDATE_QCS_INIT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
+          "key": "VALIDATE_ALL_QCS_INIT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
         {
           "key": "VALIDATE_DATA_INIT",
           "navigateTo": {

@@ -52,6 +52,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getDatasetData = async (forwardedDatasetId, forwardedProviderId) => {
     setLoadingStatus('pending');
+    setIsLoading(true);
 
     try {
       const data = await ControlStatusesService.getDatasetData(forwardedDatasetId, forwardedProviderId);
@@ -244,7 +245,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
       datasetId === undefined ||
       dataProviderId === undefined
     ) {
-      return <DatasetsForm getDatasetData={getDatasetData} />;
+      return <DatasetsForm getDatasetData={getDatasetData} isLoading={isLoading} />;
     }
 
     return (
@@ -292,7 +293,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
           {isDatasetDataDeleteSuccessfull ? (
             <p>
               <a
-                href=""
+                href={getUrl(routes.DATASET, { dataflowId, datasetId }, true)}
                 onClick={() => {
                   navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
                 }}>
@@ -303,7 +304,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
           ) : (
             <p>
               <a
-                href=""
+                href={getUrl(routes.DATASET, { dataflowId, datasetId }, true)}
                 onClick={() => {
                   navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
                 }}>
@@ -338,7 +339,7 @@ export const ControlStatuses = ({ onCloseDialog, isDialogVisible }) => {
             <p>
               {resourcesContext.messages['providerDatasetDataRemoveDialogContent']}
               <a
-                href=""
+                href={getUrl(routes.DATASET, { dataflowId, datasetId }, true)}
                 onClick={() => {
                   navigate(getUrl(routes.DATASET, { dataflowId, datasetId }, true));
                 }}>

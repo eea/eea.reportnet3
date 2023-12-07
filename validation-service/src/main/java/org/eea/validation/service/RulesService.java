@@ -21,6 +21,16 @@ import org.eea.multitenancy.DatasetId;
  */
 public interface RulesService {
 
+
+  /**
+   * Validates all rules
+   *
+   * @param datasetId the dataset id
+   * @param checkNoSQL wether to check sql statements or not
+   * @param user the user that is validating
+   */
+  void validateAllRules(Long datasetId, boolean checkNoSQL, String user);
+
   /**
    * Creates the empty rules schema.
    *

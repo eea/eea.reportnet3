@@ -118,7 +118,7 @@ export const BigButtonList = ({
   });
 
   const [providerId, setProviderId] = useState(null);
-  const [showPublicInfo, setShowPublicInfo] = useState(true);
+  const [showPublicInfo, setShowPublicInfo] = useState(false);
   const hasExpirationDate = new Date(dataflowState.obligations?.expirationDate) > new Date();
   const receiptBtnRef = useRef(null);
 

@@ -27,12 +27,9 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useDateTimeFormatByUserPreferences } from 'views/_functions/Hooks/useDateTimeFormatByUserPreferences';
 
-import { UserContext } from 'views/_functions/Contexts/UserContext';
-
 export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisible }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
-  const userContext = useContext(UserContext);
 
   const [columns, setColumns] = useState([]);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);

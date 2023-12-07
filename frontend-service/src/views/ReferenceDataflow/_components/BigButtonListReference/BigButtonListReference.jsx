@@ -108,7 +108,6 @@ export const BigButtonListReference = ({
       notification => notification.key === 'NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT'
     );
     if (response) {
-      setIsCreatingReferenceDatasets(false);
       handleDialogs({ dialog: 'isTableWithNoPK', isVisible: true });
     }
   }, [notificationContext]);
@@ -502,6 +501,7 @@ export const BigButtonListReference = ({
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onCreateReferenceDatasetsWithNoPKs}
           onHide={() => {
+            setIsCreatingReferenceDatasets(false);
             handleDialogs({ dialog: 'isTableWithNoPK', isVisible: false });
             notificationContext.removeHiddenByKey('NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT');
           }}

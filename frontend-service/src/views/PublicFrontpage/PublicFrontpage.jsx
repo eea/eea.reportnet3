@@ -161,14 +161,6 @@ export const PublicFrontpage = () => {
                           API
                         </a>
                       </li>
-                      <li>
-                        <a
-                          href={`https://www.eionet.europa.eu/reportnet/docs/reportnet-3-legal-notice.pdf`}
-                          rel="noopener noreferrer"
-                          target="_blank">
-                          Legal notice
-                        </a>
-                      </li>
                     </ul>
                   </div>
                 </div>

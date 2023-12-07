@@ -248,6 +248,10 @@ public final class EEAErrorMessage {
   public static final String DATASET_SCHEMA_INVALID_NAME_ERROR =
       "Dataset name invalid, use valid name";
 
+  /** The Constant DATASET_ID_IS_NULL: {@value}. */
+  public static final String DATASET_ID_IS_NULL =
+      "Dataset id should not be null.";
+
   /** The Constant TABLE_READ_ONLY: {@value}. */
   public static final String TABLE_READ_ONLY = "The table is marked as read only";
 
