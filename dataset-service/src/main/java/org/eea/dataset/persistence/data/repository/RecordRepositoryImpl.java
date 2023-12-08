@@ -979,13 +979,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     for (int i = 0; i < recordVOS.size(); i++) {
       bw.write("{\"fields\":[");
       RecordVO recordVO = recordVOS.get(i);
-      int recordsSize = recordVO.getFields().size();
+      int fieldsSize = recordVO.getFields().size();
       for (int j = 0; j < recordVO.getFields().size(); j++) {
         FieldVO fieldVO = recordVO.getFields().get(j);
         bw.write("{\"fieldName\":\"" + fieldVO.getName() + "\",");
         bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
         bw.write("\"field_value_id\":\"" + fieldVO.getIdFieldSchema() + "\"");
-        if (j == recordsSize - 1) {
+        if (j == fieldsSize - 1) {
           bw.write("}");
         } else {
           bw.write("},");
@@ -995,7 +995,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       bw.write("\"id_table_schema\":\"" + tableSchemaVO.getIdTableSchema() + "\",");
       bw.write("\"id_record\":\"" + recordVO.getId() + "\",");
       bw.write("\"countryCode\":\"" + recordVO.getDataProviderCode() + "\"");
-      if (i == recordsSize - 1) {
+      if (i == recordVOS.size() - 1) {
         bw.write("}");
       } else {
         bw.write("},");
