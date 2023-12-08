@@ -84,6 +84,7 @@ export const FieldsDesigner = ({
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPkChecked, setIsPkChecked] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
