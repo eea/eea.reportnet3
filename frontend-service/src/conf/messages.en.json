@@ -619,6 +619,7 @@
     "exportEuDatasetInit": "Exporting EU datasets data",
     "exportEUDatasetMessage": "Are you sure you want to export EU datasets?",
     "exportFilteredCsv": "CSV (.csv with filters)",
+    "exportFilteredCsvDL": "CSV (.csv with filters (limit 100.000 records))",
     "exportImport": "Import/Export",
     "exportInProgress": "Export in progress",
     "exportLeadReporters": "Export lead reporters",

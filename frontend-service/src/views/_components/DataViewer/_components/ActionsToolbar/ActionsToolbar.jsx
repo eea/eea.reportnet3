@@ -113,7 +113,11 @@ export const ActionsToolbar = ({
   const exportExtensionItems = config.exportTypes.exportTableTypes.map(type => ({
     command: () => onExportTableData(type),
     icon: type.code,
-    label: resourcesContext.messages[type.key]
+    label: bigData
+      ? resourcesContext.messages[type.key] === resourcesContext.messages['exportFilteredCsv']
+        ? resourcesContext.messages['exportFilteredCsvDL']
+        : resourcesContext.messages[type.key]
+      : resourcesContext.messages[type.key]
   }));
 
   const onExportTableData = async type => {
