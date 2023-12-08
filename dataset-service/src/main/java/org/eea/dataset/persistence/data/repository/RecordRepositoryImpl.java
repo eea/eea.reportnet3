@@ -975,9 +975,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
-
+    bw.write("{\"records\":[");
     for (int i = 0; i < recordVOS.size(); i++) {
-      bw.write("{\"records\":[{\"fields\":[");
+      bw.write("{\"fields\":[");
       RecordVO recordVO = recordVOS.get(i);
       int recordsSize = recordVO.getFields().size();
       for (int j = 0; j < recordVO.getFields().size(); j++) {
