@@ -1002,44 +1002,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         bw.write("},");
       }
     }
-
-/*    SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(totalRecords);
-    SqlRowSetMetaData metaData = rs.getMetaData();
-    int columnCount = metaData.getColumnCount();
-
-    while (rs.next()) {
-      bw.write("{\"records\":[{\"fields\":[");
-      String id_record = null;
-      String countryCode = null;
-      for (int i = 1; i <= columnCount; i++) {
-        String columnName = metaData.getColumnName(i);
-        String value = rs.getString(columnName);
-
-        if ("record_id".equals(columnName)) {
-          id_record = value;
-        } else if ("data_provider_code".equals(columnName)) {
-          countryCode = value;
-        } else if (!"dir0".equals(columnName)) {
-          bw.write("{\"fieldName\":" + "\"" + columnName + "\",");
-          bw.write("\"value\":" + "\"" + value + "\",");
-          bw.write("\"field_value_id\":" + null);
-          if (i != columnCount) {
-            bw.write("},");
-          } else {
-            bw.write("}");
-          }
-        }
-      }
-      bw.write("],");
-      bw.write("\"id_table_schema\":" + "\"" + tableSchema.getIdTableSchema().toString() + "\",");
-      bw.write("\"id_record\":" + "\"" + id_record + "\",");
-      bw.write("\"countryCode\":" + "\"" + countryCode + "\"");
-      if (rs.last()) {
-        bw.write("}");
-      } else {
-        bw.write("},");
-      }
-    }*/
   }
 
   /**
@@ -1843,8 +1805,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
       }
     }
-
-    stringQuery.append(" limit 2000");
 
     LOG.info("TotalRecords Query: {}", stringQuery);
     return stringQuery.toString();
