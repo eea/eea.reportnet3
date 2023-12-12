@@ -522,13 +522,7 @@ export const ShowValidationsList = memo(
           );
           break;
         case 'TABLE':
-          let ruleSchema = null;
-          if (event.data.ruleId != null) {
-            ruleSchema = getRuleSchema(event.data.ruleId);
-          } else {
-            ruleSchema = getRuleSchemaByQcCode(event.data.shortCode);
-          }
-          if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
+          if (bigData) {
             onSelectValidation(
               event.data.tableSchemaId,
               event.data.ruleId,
@@ -536,10 +530,27 @@ export const ShowValidationsList = memo(
               event.data.message,
               event.data.levelError
             );
+            break;
           } else {
-            onSelectValidation(event.data.tableSchemaId);
+            let ruleSchema = null;
+            if (event.data.ruleId != null) {
+              ruleSchema = getRuleSchema(event.data.ruleId);
+            } else {
+              ruleSchema = getRuleSchemaByQcCode(event.data.shortCode);
+            }
+            if (TextUtils.areEquals(ruleSchema.automaticType, 'TABLE_UNIQUENESS')) {
+              onSelectValidation(
+                event.data.tableSchemaId,
+                event.data.ruleId,
+                event.data.shortCode,
+                event.data.message,
+                event.data.levelError
+              );
+            } else {
+              onSelectValidation(event.data.tableSchemaId);
+            }
+            break;
           }
-          break;
         default:
           break;
       }
