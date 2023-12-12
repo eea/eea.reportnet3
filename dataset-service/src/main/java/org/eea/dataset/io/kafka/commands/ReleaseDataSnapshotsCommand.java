@@ -150,7 +150,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-      LOG.info("Start executing RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {} ", datasetId);
+      LOG.info("261613 Start executing RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {} ", datasetId);
       String dateRelease = String.valueOf(eeaEventVO.getData().get("dateRelease"));
       String processId = String.valueOf(eeaEventVO.getData().get("process_id"));
       Long jobId = null;
@@ -295,7 +295,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
                   messageVO.getContent());
         }
       }
-      LOG.info("Finish executing RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {} ", datasetId);
+      LOG.info("261613 Finish executing RELEASE_ONEBYONE_COMPLETED_EVENT on ReleaseDataSnapshotsCommand.execute for datasetId {} ", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw new EEAException(e.getMessage());

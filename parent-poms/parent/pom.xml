@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>261613</api-gateway.version>
-    <communication.version>261613</communication.version>
-    <collaboration.version>261613</collaboration.version>
-    <dataflow.version>261613</dataflow.version>
-    <dataset.version>261613</dataset.version>
-    <document.version>261613</document.version>
-    <frontend.version>261613</frontend.version>
-    <indexsearch.version>261613</indexsearch.version>
-    <inspire.version>261613</inspire.version>
-    <recordstore.version>261613</recordstore.version>
-    <ums.version>261613</ums.version>
-    <validation.version>261613</validation.version>
-    <common-interfaces.version>261613</common-interfaces.version>
-    <common-utitlities.version>261613</common-utitlities.version>
-    <rod.version>261613</rod.version>
-    <orchestrator.version>261613</orchestrator.version>
+    <api-gateway.version>261613_v2</api-gateway.version>
+    <communication.version>261613_v2</communication.version>
+    <collaboration.version>261613_v2</collaboration.version>
+    <dataflow.version>261613_v2</dataflow.version>
+    <dataset.version>261613_v2</dataset.version>
+    <document.version>261613_v2</document.version>
+    <frontend.version>261613_v2</frontend.version>
+    <indexsearch.version>261613_v2</indexsearch.version>
+    <inspire.version>261613_v2</inspire.version>
+    <recordstore.version>261613_v2</recordstore.version>
+    <ums.version>261613_v2</ums.version>
+    <validation.version>261613_v2</validation.version>
+    <common-interfaces.version>261613_v2</common-interfaces.version>
+    <common-utitlities.version>261613_v2</common-utitlities.version>
+    <rod.version>261613_v2</rod.version>
+    <orchestrator.version>261613_v2</orchestrator.version>
   </properties>
 </project>

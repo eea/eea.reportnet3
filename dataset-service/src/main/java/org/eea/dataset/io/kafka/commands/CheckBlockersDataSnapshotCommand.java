@@ -146,7 +146,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
     try {
       Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
-      LOG.info("Start executing VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {} ", datasetId);
+      LOG.info("261613 Start executing VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {} ", datasetId);
       Long validationJobId = null;
       if (eeaEventVO.getData().get("validation_job_id")!=null) {
         validationJobId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("validation_job_id")));
@@ -277,7 +277,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
                 dateFormatter.format(dateRelease), false, processId);
       }
-      LOG.info("Finish executing VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {} ", datasetId);
+      LOG.info("261613 Finish executing VALIDATION_RELEASE_FINISHED_EVENT on CheckBlockersDataSnapshotCommand.execute for datasetId {} ", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
     }

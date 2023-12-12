@@ -1185,6 +1185,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         value.put("uuid", processId);
         value.put("user", notificationUser);
         value.put("validation_job_id", jobId);
+        LOG.info("261613 Before Validation Event, Dataset-Service, for dataflowId {} and dataProviderId {} with jobId {}", dataflowId, dataProviderId, jobId);
         kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
       }
       LOG.info("Successfully created release snapshots for dataflowId {} and dataProviderId {} with jobId {}", dataflowId, dataProviderId, jobId);

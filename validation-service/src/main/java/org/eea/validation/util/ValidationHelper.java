@@ -15,7 +15,6 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -75,7 +74,16 @@ import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -546,6 +554,7 @@ public class ValidationHelper implements DisposableBean {
           eeaEventVO);
     }
 
+    LOG.info("261613 calling ValidationHelper.processValidation() finally block, Validation-Service for dataset {}", validationTask.datasetId);
     this.validationExecutorService.submit(new ValidationTasksExecutorThread(validationTask));
   }
 
@@ -1065,6 +1074,7 @@ public class ValidationHelper implements DisposableBean {
         } finally {
           try {
             Thread.sleep(1000);
+            LOG.info("261613 calling ValidationHelper.run() finally block, Validation-Service for dataset {}", validationTask.datasetId);
             checkFinishedValidations(validationTask.datasetId, validationTask.processId);
           } catch (EEAException | InterruptedException eeaEx) {
             LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
@@ -1144,6 +1154,7 @@ public class ValidationHelper implements DisposableBean {
                 if (jobId!=null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
                 }
+                LOG.info("261613 Before Validation Event, Validation-Service, ValidationHelper.checkFinishedValidations() ,for datasetId {} with jobId {}", datasetId, jobId);
                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
                 if (taskRepository.hasProcessCanceledTasks(processId)) {
                   kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
@@ -1176,6 +1187,7 @@ public class ValidationHelper implements DisposableBean {
           } catch (InterruptedException eeaEx) {
             LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
           }
+          LOG.info("261613 calling checkFinishedValidations recursion, Validation-Service, ValidationHelper.checkFinishedValidations(),for datasetId {}", datasetId);
           checkFinishedValidations(datasetId, processId);
         }
       }

@@ -125,6 +125,7 @@ public class JobForFinalizingInProgressValidationJobsWithFinishedTasks {
                             LOG.info("Finalizing stuck validation job {}", jobVO.getId());
                             Map<String, Object> value = createValue(jobVO.getId(), uuid, user, datasetId);
                             jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
+                            LOG.info("261613 Before Validation Event, Orchestrator-Service, for datasetId {} with jobId {}", datasetId, jobVO.getId());
                             kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT,
                                     value);
                             if (hasProcessCanceledTasks) {
