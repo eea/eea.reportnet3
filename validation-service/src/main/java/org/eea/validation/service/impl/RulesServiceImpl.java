@@ -2295,6 +2295,7 @@ public class RulesServiceImpl implements RulesService {
         } catch (Exception e) {
           LOG.info("SQL is not correct: {}, {}", e.getMessage(), e);
           isSQLCorrect = false;
+          rule.setSqlError(e.getCause().getCause().getMessage());
         }
       } else {
         isSQLCorrect = false;
