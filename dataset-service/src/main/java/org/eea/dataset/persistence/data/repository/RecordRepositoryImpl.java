@@ -1802,10 +1802,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
       }
     }
-    if (limit!=0) {
+    if (limit!=0 && !getCount) {
       stringQuery.append(" limit ").append(limit);
     }
-    if (offset!=0) {
+    if (offset!=0 && !getCount) {
       stringQuery.append(" offset ").append(offset);
     }
 
