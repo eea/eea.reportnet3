@@ -670,9 +670,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
           .collect(Collectors.toList());
     }
-    if (offset == 0) {
-      offset = 1;
-    }
 
     File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
     fileFolder.mkdirs();
@@ -683,12 +680,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       // get json for each table requested
       bw.write("{\"tables\":[");
       for (TableSchema tableSchema : tableSchemaList) {
-        Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, true));
+        Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true));
 
         if (totalRecords != null && totalRecords > 0L) {
           //for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
 
-          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
+          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, false);
           getAllRecordsDL(query, tableSchema, bw, datasetId);
           bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
           //}
@@ -1769,7 +1766,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the string
    */
   private String totalRecordsQueryDL(Long datasetId, TableSchema tableSchema, String filterValue,
-      String columnName, String dataProviderCodes, boolean getCount) {
+      String columnName, String dataProviderCodes, int limit, int offset, boolean getCount) {
 
     StringBuilder stringQuery = new StringBuilder();
 
@@ -1802,6 +1799,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       } else {
         stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
       }
+    }
+    if (limit!=0) {
+      stringQuery.append(" limit ").append(limit);
+    }
+    if (offset!=0) {
+      stringQuery.append(" offset ").append(offset);
     }
 
     LOG.info("TotalRecords Query: {}", stringQuery);
