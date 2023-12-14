@@ -104,7 +104,7 @@ public interface RecordExtendedQueriesRepository {
    */
   File findAndGenerateETLJsonDL(Long datasetId, String tableSchemaId,
       Integer limit, Integer offset, String filterValue, String columnName,
-      String dataProviderCodes, File jsonFile, String jsonFileString) throws EEAException;
+      String dataProviderCodes, File jsonFile) throws EEAException;
 
   /**
    * Find ordered native record.
