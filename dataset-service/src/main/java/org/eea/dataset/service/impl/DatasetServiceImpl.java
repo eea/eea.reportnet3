@@ -3253,7 +3253,7 @@ public class DatasetServiceImpl implements DatasetService {
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableSchemaId + "_etlExport" + JSON_TYPE);
 
         jsonFile = recordRepository.findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit,
-                offset, filterValue, columnName, dataProviderCodes, jsonFile);
+                offset, filterValue, columnName, dataProviderCodes, jsonFile, null);
 
         byte[] bytes = IOUtils.toByteArray(new FileInputStream(jsonFile));
         outputStream.write(bytes);
