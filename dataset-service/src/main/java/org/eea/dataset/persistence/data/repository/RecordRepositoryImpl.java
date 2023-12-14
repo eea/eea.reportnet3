@@ -662,7 +662,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public File findAndGenerateETLJsonDL(Long datasetId, String tableSchemaId, Integer limit,
       Integer offset, String filterValue, String columnName, String dataProviderCodes,
-      File jsonFile) throws EEAException {
+      File jsonFile, String jsonFileString) throws EEAException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -678,8 +678,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .collect(Collectors.toList());
     }
 
-    try (FileWriter fw = new FileWriter(jsonFile);
-        BufferedWriter bw = new BufferedWriter(fw)) {
+    try {
+      FileWriter fw;
+      if (jsonFileString == null) {
+        fw = new FileWriter(jsonFile);
+      } else {
+        fw = new FileWriter(jsonFileString, true);
+      }
+      BufferedWriter bw = new BufferedWriter(fw);
 
       // get json for each table requested
       bw.write("{\"tables\":[");
@@ -698,6 +704,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         bw.write("}");
       }
       bw.write("]}");
+
+      bw.close();
+      fw.close();
     } catch (Exception e) {
       LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
     }
@@ -1925,8 +1934,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
         DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
         if (dataFlowVO.getBigData()) {
-          findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes,
-              new File(jsonFile));
+          findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes,null,
+              jsonFile);
         } else {
           String filterChain = tableSchema.getIdTableSchema().toString();
           if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName) || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
