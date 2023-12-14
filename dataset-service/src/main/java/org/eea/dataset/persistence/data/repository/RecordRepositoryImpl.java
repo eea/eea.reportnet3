@@ -1928,7 +1928,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         if (dataFlowVO.getBigData()) {
 
           findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit, offset, filterValue,
-                  columnName, dataProviderCodes, new File(jsonFile));
+                  columnName, dataProviderCodes, new File(importPath + ETL_EXPORT, jsonFile));
 
           createZipFromJson(filePath, datasetId, jobId);
         } else {
