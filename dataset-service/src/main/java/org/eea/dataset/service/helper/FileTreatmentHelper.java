@@ -765,17 +765,16 @@ public class FileTreatmentHelper implements DisposableBean {
         if (checkSchemaGeometry(datasetSchema)) {
             LOG.info("Updating geometries for dataset {}", datasetId);
             // update geometries (native)
-            long limit = 5000L;
+            long limit = 500L;
             long offset = 0L;
             boolean moreRecords = true;
             Map<Integer, Map<String, String>> mapFieldValue = new HashMap<>();
             while (moreRecords) {
                 mapFieldValue.clear();
                 mapFieldValue = getFieldValueGeometry(datasetId, limit, offset);
-                int size = mapFieldValue.keySet().size();
-                for (int i = 0; i < size; i++) {
-                    executeUpdateGeometry(datasetId, mapFieldValue.get(i));
-                }
+                mapFieldValue.values().forEach(record ->
+                    executeUpdateGeometry(datasetId, record)
+                );
                 moreRecords = !mapFieldValue.isEmpty();
                 offset += limit;
             }
