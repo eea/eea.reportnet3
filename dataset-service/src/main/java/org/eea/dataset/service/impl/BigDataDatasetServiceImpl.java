@@ -201,7 +201,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             LOG.info("Importing file to s3 {}", importFileInDremioInfo);
             importDatasetDataToDremio(importFileInDremioInfo, file, s3File);
-            finishImportProcess(importFileInDremioInfo);
+            if(integrationId == null) {
+                //the fme job should not be finished yet
+                finishImportProcess(importFileInDremioInfo);
+            }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {
             LOG.error("File import failed: for jobId {} dataflowId={} datasetId={}, tableSchemaId={}, fileName={} ", jobId, dataflowId, datasetId,
