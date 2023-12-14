@@ -354,7 +354,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
             checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
             expectedHeaders = getFieldNames(importFileInDremioInfo.getTableSchemaId(), dataSetSchema, csvFile.getName());
-            CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(delimiterChar).build());
+            CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
             int recordCounter = 0;
             for (CSVRecord csvRecord : csvParser) {
                 if(csvRecord.values().length == 0){
@@ -441,7 +441,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                     modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MODIFIED_CSV_SUFFIX, randomStrForNewFolderSuffix);
                     csvFileWithAddedColumns = new File(modifiedFilePath);
                     writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
-                    csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(delimiterChar).build());
+                    csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
 
                     //add headers
                     csvPrinter.printRecord(expectedHeaders);
@@ -522,10 +522,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     private void convertCsvToParquetCustom(File csvFile, String parquetFilePath, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
 
         LOG.info("For job {} converting csv file {} to parquet file {}", importFileInDremioInfo, csvFile.getPath(), parquetFilePath);
-        char delimiterChar = defaultDelimiter;
-        if (!StringUtils.isBlank(importFileInDremioInfo.getDelimiter())){
-            delimiterChar = importFileInDremioInfo.getDelimiter().charAt(0);
-        }
+        char delimiterChar = LiteralConstants.COMMA.charAt(0);
 
         // Check that the parquet file exists, if so delete it
         if (Files.exists(Paths.get(parquetFilePath))) {
