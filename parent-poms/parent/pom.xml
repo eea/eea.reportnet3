@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.3-IMPORT_FME_FIX</api-gateway.version>
-    <communication.version>v3.3-IMPORT_FME_FIX</communication.version>
-    <collaboration.version>v3.3-IMPORT_FME_FIX</collaboration.version>
-    <dataflow.version>v3.3-IMPORT_FME_FIX</dataflow.version>
-    <dataset.version>v3.3-IMPORT_FME_FIX</dataset.version>
-    <document.version>v3.3-IMPORT_FME_FIX</document.version>
-    <frontend.version>v3.3-IMPORT_FME_FIX</frontend.version>
-    <indexsearch.version>v3.3-IMPORT_FME_FIX</indexsearch.version>
-    <inspire.version>v3.3-IMPORT_FME_FIX</inspire.version>
-    <recordstore.version>v3.3-IMPORT_FME_FIX</recordstore.version>
-    <ums.version>v3.3-IMPORT_FME_FIX</ums.version>
-    <validation.version>v3.3-IMPORT_FME_FIX</validation.version>
-    <common-interfaces.version>v3.3-IMPORT_FME_FIX</common-interfaces.version>
-    <common-utitlities.version>v3.3-IMPORT_FME_FIX</common-utitlities.version>
-    <rod.version>v3.3-IMPORT_FME_FIX</rod.version>
-    <orchestrator.version>v3.3-IMPORT_FME_FIX</orchestrator.version>
+    <api-gateway.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</api-gateway.version>
+    <communication.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</communication.version>
+    <collaboration.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</collaboration.version>
+    <dataflow.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</dataflow.version>
+    <dataset.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</dataset.version>
+    <document.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</document.version>
+    <frontend.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</frontend.version>
+    <indexsearch.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</indexsearch.version>
+    <inspire.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</inspire.version>
+    <recordstore.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</recordstore.version>
+    <ums.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</ums.version>
+    <validation.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</validation.version>
+    <common-interfaces.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</common-interfaces.version>
+    <common-utitlities.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</common-utitlities.version>
+    <rod.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</rod.version>
+    <orchestrator.version>v3.3-ADD-ORGANIZATIONS-TEST-FIX</orchestrator.version>
   </properties>
 </project>

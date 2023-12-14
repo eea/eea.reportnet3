@@ -1,0 +1,11 @@
+{
+  "EEA_MEMBER_COUNTRIES": { "key": "EEA_MEMBER_COUNTRIES", "label": "eeaCountries" },
+  "ALL_COUNTRIES": {
+    "key": "ALL_COUNTRIES",
+    "label": "allCountries"
+  },
+  "COMPANY_GROUP_1": { "key": "COMPANY_GROUP_1", "label": "companyGroup1" },
+  "COMPANY_GROUP_2": { "key": "COMPANY_GROUP_2", "label": "companyGroup2" },
+  "MAP_MY_TREE_PROVIDERS": { "key": "MAP_MY_TREE_PROVIDERS", "label": "mapMyTreeProviders" },
+  "COUNTRIES": { "key": "COUNTRIES", "label": "countriesGroup" }
+}
