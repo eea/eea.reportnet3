@@ -765,10 +765,19 @@ public class FileTreatmentHelper implements DisposableBean {
         if (checkSchemaGeometry(datasetSchema)) {
             LOG.info("Updating geometries for dataset {}", datasetId);
             // update geometries (native)
-            Map<Integer, Map<String, String>> mapFieldValue = getFieldValueGeometry(datasetId);
-            int size = mapFieldValue.keySet().size();
-            for (int i = 0; i < size; i++) {
-                executeUpdateGeometry(datasetId, mapFieldValue.get(i));
+            long limit = 5000L;
+            long offset = 0L;
+            boolean moreRecords = true;
+            Map<Integer, Map<String, String>> mapFieldValue = new HashMap<>();
+            while (moreRecords) {
+                mapFieldValue.clear();
+                mapFieldValue = getFieldValueGeometry(datasetId, limit, offset);
+                int size = mapFieldValue.keySet().size();
+                for (int i = 0; i < size; i++) {
+                    executeUpdateGeometry(datasetId, mapFieldValue.get(i));
+                }
+                moreRecords = !mapFieldValue.isEmpty();
+                offset += limit;
             }
         }
     }
@@ -829,9 +838,14 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param datasetId the dataset id
      * @return the field value geometry
      */
-    private Map<Integer, Map<String, String>> getFieldValueGeometry(Long datasetId) {
-        String query = "select id, value from dataset_" + datasetId
-                + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
+    private Map<Integer, Map<String, String>> getFieldValueGeometry(Long datasetId, long limit, long currentOffset) {
+        String query = "SELECT id, value FROM dataset_" + datasetId +
+            ".field_value fv " +
+            "WHERE fv.type IN " +
+            "('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')" +
+            " ORDER BY id" +
+            " LIMIT " + limit + " OFFSET " + currentOffset;
+
         List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
         Map<Integer, Map<String, String>> resultMap = new HashMap<>();
         for (int i = 0; i < resultQuery.size(); i++) {
