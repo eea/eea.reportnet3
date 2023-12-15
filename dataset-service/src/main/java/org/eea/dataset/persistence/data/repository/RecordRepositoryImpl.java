@@ -988,7 +988,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       for (int j = 0; j < recordVO.getFields().size(); j++) {
         FieldVO fieldVO = recordVO.getFields().get(j);
         bw.write("{\"fieldName\":\"" + fieldVO.getName() + "\",");
-        bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
+        if (fieldVO.getValue().contains("\"")) {
+          String noQuotes = fieldVO.getValue().replaceAll("\"", "\\\"");
+          bw.write("\"value\":\"" + noQuotes + "\",");
+        } else if (fieldVO.getValue().contains("\'")) {
+          String noQuotes = fieldVO.getValue().replaceAll("\'", "\\\'");
+          bw.write("\"value\":\"" + noQuotes + "\",");
+        } else {
+          bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
+        }
         bw.write("\"field_value_id\":\"" + fieldVO.getIdFieldSchema() + "\"");
         if (j == fieldsSize - 1) {
           bw.write("}");
