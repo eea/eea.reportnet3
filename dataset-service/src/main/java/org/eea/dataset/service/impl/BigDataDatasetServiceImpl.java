@@ -197,6 +197,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 providerCode = dataProviderVO.getCode();
             }
 
+            if(StringUtils.isNotBlank(fmeJobId)){
+                //retrieve the replace data value from the job
+                replace = (Boolean) job.getParameters().get("replace");
+            }
+
             importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, delimiter, integrationId, providerCode);
 
             LOG.info("Importing file to s3 {}", importFileInDremioInfo);
