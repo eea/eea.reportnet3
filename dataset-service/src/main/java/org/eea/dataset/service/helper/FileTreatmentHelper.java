@@ -777,6 +777,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 );
                 moreRecords = !mapFieldValue.isEmpty();
                 offset += limit;
+                LOG.info("Current offset is {}", offset);
             }
         }
     }
