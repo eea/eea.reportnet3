@@ -240,7 +240,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //if there is already a process created for the import then it should be updated instead of creating a new one
         String processUUID = null;
         Boolean processExists = false;
-        processUUID = UUID.randomUUID().toString();
+        List<String> processIds = jobProcessControllerZuul.findProcessesByJobId(importFileInDremioInfo.getJobId());
+        if(processIds != null && processIds.size() > 0){
+            processUUID = processIds.get(0);
+            processExists = true;
+            LOG.info("Process with id {} already exists for import job {}", processUUID, (importFileInDremioInfo.getJobId()));
+        }
+        else{
+            processUUID = UUID.randomUUID().toString();
+        }
+
         importFileInDremioInfo.setProcessId(processUUID);
 
         DataSetSchema schema = datasetService.getSchemaIfReportable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getTableSchemaId());
