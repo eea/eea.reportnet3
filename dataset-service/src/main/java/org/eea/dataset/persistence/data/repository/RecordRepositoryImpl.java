@@ -991,8 +991,8 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         if (fieldVO.getValue().contains("\"")) {
           String noQuotes = fieldVO.getValue().replaceAll("\"", "\\\"");
           bw.write("\"value\":\"" + noQuotes + "\",");
-        } else if (fieldVO.getValue().contains("\'")) {
-          String noQuotes = fieldVO.getValue().replaceAll("\'", "\\\'");
+        } else if (fieldVO.getValue().contains("'")) {
+          String noQuotes = fieldVO.getValue().replaceAll("'", "\\'");
           bw.write("\"value\":\"" + noQuotes + "\",");
         } else {
           bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
@@ -1783,7 +1783,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the string
    */
   private String totalRecordsQueryDL(Long datasetId, TableSchema tableSchema, String filterValue,
-      String columnName, String dataProviderCodes, int limit, int offset, boolean getCount) {
+      String columnName, String dataProviderCodes, Integer limit, Integer offset, boolean getCount) {
 
     StringBuilder stringQuery = new StringBuilder();
 
@@ -1817,10 +1817,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
       }
     }
-    if (limit!=0 && !getCount) {
+    if (limit != null && limit != 0 && !getCount) {
       stringQuery.append(" limit ").append(limit);
     }
-    if (offset!=0 && !getCount) {
+    if (offset != null && offset != 0 && !getCount) {
       stringQuery.append(" offset ").append(offset);
     }
 
