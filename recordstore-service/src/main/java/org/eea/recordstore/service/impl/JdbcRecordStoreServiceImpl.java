@@ -2043,7 +2043,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       ReleaseTaskVO releaseTaskVO =
           ReleaseTaskVO.builder().snapshotId(idSnapshot).datasetId(datasetId)
-              .dataflowId(processVO.getDataflowId()).build();
+              .dataflowId(dataflowId).build();
       ObjectMapper objectMapper = new ObjectMapper();
       String json = "";
       try {
@@ -2225,7 +2225,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Updated task status of task with id {} with idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
 
       LOG.info("Updating process status of process with id {} to FINISHED", processVO.getId());
-      processService.updateProcess(processVO.getDatasetId(), processVO.getDataflowId(),
+      processService.updateProcess(processVO.getDatasetId(), dataflowId,
           ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(processVO.getProcessType()), processId,
           processVO.getUser(), processVO.getPriority(), processVO.isReleased());
       LOG.info("Updated process status of process with id {} to FINISHED", processVO.getId());
