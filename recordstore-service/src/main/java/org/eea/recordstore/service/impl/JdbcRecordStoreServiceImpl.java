@@ -1920,146 +1920,105 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       ProcessVO finalProcessVO = processVO;
       Long finalJobId = jobId;
 
-      ReleaseTaskVO releaseTaskVO =
-          ReleaseTaskVO.builder().snapshotId(idSnapshot).datasetId(datasetId)
-              .dataflowId(processVO.getDataflowId()).build();
-      ObjectMapper objectMapper = new ObjectMapper();
-      String json = "";
-      try {
-        json = objectMapper.writeValueAsString(releaseTaskVO);
-      } catch (JsonProcessingException e) {
-        LOG_ERROR.error("error processing json for releaseTaskVO {}", releaseTaskVO);
-        throw e;
-      }
-
-      TaskType taskType = null;
-      if (processVO.getProcessType().equals(ProcessTypeEnum.RELEASE.toString())){
-        taskType = TaskType.RELEASE_TASK;
-      } else if (processVO.getProcessType().equals(ProcessTypeEnum.COPY_TO_EU_DATASET.toString())) {
-        taskType = TaskType.COPY_TO_EU_DATASET_TASK;
-      } else if (processVO.getProcessType().equals(ProcessTypeEnum.RESTORE_DESIGN_DATASET.toString())) {
-        taskType = TaskType.RESTORE_DESIGN_DATASET_TASK;
-      } else if (processVO.getProcessType().equals(ProcessTypeEnum.RESTORE_REPORTING_DATASET.toString())) {
-        taskType = TaskType.RESTORE_REPORTING_DATASET_TASK;
-      } else if (processVO.getProcessType().equals(ProcessTypeEnum.COPY_REFERENCE_DATASET.toString())) {
-        taskType = TaskType.COPY_REFERENCE_DATASET_TASK;
-      }
-      TaskVO task = new TaskVO(null, processId, ProcessStatusEnum.IN_QUEUE, taskType, new Date(), null, null,
-          json, 0, null);
-      task = taskService.saveTask(task);
-      LOG.info("Created task with id {} with idSnapshot {} and processId {}", task.getId(), idSnapshot, processId);
-
-      task.setStartingDate(new Date());
-      task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-      task.setPod(serviceInstanceId);
-
-      try {
-        task = taskService.saveTask(task);
-        LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
-      } catch (Exception er) {
-        LOG.error("Error updating task {}", task.getId());
-        task = taskService.saveTask(task);
-        LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), idSnapshot, processId);
-      }
-
       datasetSchema.getTableSchemas().stream()
-        .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
-        .forEach(table -> {
-            try {
-              if (DatasetTypeEnum.REPORTING.equals(datasetType)) {
-                //Delete old files
-                Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
-                Long dataflowId = finalProcessVO.getDataflowId();
-                Long reportingDatasetId = finalProcessVO.getDatasetId();
+          .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
+          .forEach(table -> {
+              try {
+                if (DatasetTypeEnum.REPORTING.equals(datasetType)) {
+                  //Delete old files
+                  Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
+                  Long dataflowId = finalProcessVO.getDataflowId();
+                  Long reportingDatasetId = finalProcessVO.getDatasetId();
 
-                //Delete table name DC folder if exists
-                String nameTableSchema = table.getNameTableSchema();
-                S3PathResolver dataCollectionPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
-                dataCollectionPath.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
-                LOG.info("Checking if table name DC folder exist in path {}", dataCollectionPath);
-                if (s3Helper.checkTableNameDCProviderFolderExist(dataCollectionPath)) {
-                  s3Helper.deleleTableNameDCFolder(dataCollectionPath);
-                  LOG.info("Successfully deleted files in path: {}", dataCollectionPath);
+                  //Delete table name DC folder if exists
+                  String nameTableSchema = table.getNameTableSchema();
+                  S3PathResolver dataCollectionPath = new S3PathResolver(dataflowId, providerId, datasetId, nameTableSchema);
+                  dataCollectionPath.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
+                  LOG.info("Checking if table name DC folder exist in path {}", dataCollectionPath);
+                  if (s3Helper.checkTableNameDCProviderFolderExist(dataCollectionPath)) {
+                    s3Helper.deleleTableNameDCFolder(dataCollectionPath);
+                    LOG.info("Successfully deleted files in path: {}", dataCollectionPath);
+                  }
+
+                  //Get table name file from S3, save it locally and then upload to DC table name path
+                  S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, reportingDatasetId, nameTableSchema);
+                  providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                  LOG.info("Getting tableNameFilenames for provider path resolver {}", providerPath);
+                  List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
+                  LOG.info("Table Name Filenames found : {}", tableNameFilenames);
+                  tableNameFilenames.stream().forEach(file -> {
+                    String key = file.key();
+                    String filename = new File(key).getName();
+                    dataCollectionPath.setFilename(filename);
+                    dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
+                    dataCollectionPath.setParquetFolder(key.split("/")[5]);
+                    try {
+                      LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                      File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                      String tableNameDCPath = s3Service.getS3Path(dataCollectionPath);
+                      LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
+                      s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
+                      LOG.info("Uploading finished successfully for {}", tableNameDCPath);
+                      //promote folder
+                      checkAndPromoteFolder(dataCollectionPath, S3_TABLE_NAME_DC_QUERY_PATH);
+                    } catch (IOException e) {
+                      LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
+                          reportingDatasetId, dataflowId, e);
+                    }
+                  });
+                  processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
+                      ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
+                      finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
+
+                } else if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
+                  LOG.info("REFERENCE dataset {}", datasetId);
+                  //dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
+
+                  Long dataflowId = finalProcessVO.getDataflowId();
+                  Long reportingDatasetId = finalProcessVO.getDatasetId();
+                  String nameTableSchema = table.getNameTableSchema();
+                  S3PathResolver referencePath = new S3PathResolver(dataflowId);
+
+                  //Get table name file from S3, save it locally and then upload to DC table name path
+                  S3PathResolver providerPath = new S3PathResolver(dataflowId, 0L, reportingDatasetId, nameTableSchema);
+                  providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
+                  LOG.info("Getting tableNameFilenames for reference path resolver {}", providerPath);
+                  List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
+                  LOG.info("Table Name Filenames found : {}", tableNameFilenames);
+                  tableNameFilenames.stream().forEach(file -> {
+                    String key = file.key();
+                    String filename = new File(key).getName();
+                    referencePath.setFilename(filename);
+                    referencePath.setTableName(nameTableSchema);
+                    referencePath.setPath(S3_DATAFLOW_REFERENCE_PATH);
+                    referencePath.setParquetFolder(key.split("/")[5]);
+                    try {
+                      LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                      File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                      String tableNameDCPath = s3Service.getS3Path(referencePath);
+                      LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
+                      s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
+                      LOG.info("Uploading finished successfully for {}", tableNameDCPath);
+                      //promote folder
+                      checkAndPromoteFolder(referencePath, S3_DATAFLOW_REFERENCE_QUERY_PATH);
+                    } catch (IOException e) {
+                      LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
+                          reportingDatasetId, dataflowId, e);
+                    }
+                  });
+
+                  processService.updateProcess(finalProcessVO.getDatasetId(), dataflowId,
+                      ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
+                      finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
+
+                } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+
                 }
-
-                //Get table name file from S3, save it locally and then upload to DC table name path
-                S3PathResolver providerPath = new S3PathResolver(dataflowId, providerId, reportingDatasetId, nameTableSchema);
-                providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
-                LOG.info("Getting tableNameFilenames for provider path resolver {}", providerPath);
-                List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-                LOG.info("Table Name Filenames found : {}", tableNameFilenames);
-                tableNameFilenames.stream().forEach(file -> {
-                  String key = file.key();
-                  String filename = new File(key).getName();
-                  dataCollectionPath.setFilename(filename);
-                  dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
-                  dataCollectionPath.setParquetFolder(key.split("/")[5]);
-                  try {
-                    LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-                    File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                    String tableNameDCPath = s3Service.getS3Path(dataCollectionPath);
-                    LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
-                    s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
-                    LOG.info("Uploading finished successfully for {}", tableNameDCPath);
-                    //promote folder
-                    checkAndPromoteFolder(dataCollectionPath, S3_TABLE_NAME_DC_QUERY_PATH);
-                  } catch (IOException e) {
-                    LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
-                        reportingDatasetId, dataflowId, e);
-                  }
-                });
-              } else if (DatasetTypeEnum.REFERENCE.equals(datasetType) && prefillingReference) {
-                LOG.info("REFERENCE dataset {}", datasetId);
-                //dataSetSnapshotControllerZuul.deleteSnapshot(datasetIdFromSnapshot, idSnapshot);
-
-                Long dataflowId = finalProcessVO.getDataflowId();
-                Long reportingDatasetId = finalProcessVO.getDatasetId();
-                String nameTableSchema = table.getNameTableSchema();
-                S3PathResolver referencePath = new S3PathResolver(dataflowId);
-
-                //Get table name file from S3, save it locally and then upload to DC table name path
-                S3PathResolver providerPath = new S3PathResolver(dataflowId, 0L, reportingDatasetId, nameTableSchema);
-                providerPath.setPath(S3_TABLE_NAME_FOLDER_PATH);
-                LOG.info("Getting tableNameFilenames for reference path resolver {}", providerPath);
-                List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
-                LOG.info("Table Name Filenames found : {}", tableNameFilenames);
-                tableNameFilenames.stream().forEach(file -> {
-                  String key = file.key();
-                  String filename = new File(key).getName();
-                  referencePath.setFilename(filename);
-                  referencePath.setTableName(nameTableSchema);
-                  referencePath.setPath(S3_DATAFLOW_REFERENCE_PATH);
-                  referencePath.setParquetFolder(key.split("/")[5]);
-                  try {
-                    LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-                    File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                    String tableNameDCPath = s3Service.getS3Path(referencePath);
-                    LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
-                    s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
-                    LOG.info("Uploading finished successfully for {}", tableNameDCPath);
-                    //promote folder
-                    checkAndPromoteFolder(referencePath, S3_DATAFLOW_REFERENCE_QUERY_PATH);
-                  } catch (IOException e) {
-                    LOG_ERROR.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
-                        reportingDatasetId, dataflowId, e);
-                  }
-                });
-              } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
-                LOG.info("EU Dataset release");
+              } catch (Exception e) {
+                LOG_ERROR.error("Error in delete and copy release process for finalJobId {}, dataflowId {}",
+                    finalJobId, datasetId, e);
               }
-            } catch (Exception e) {
-              LOG_ERROR.error("Error in delete and copy release process for finalJobId {}, dataflowId {}",
-                  finalJobId, datasetId, e);
-            }
-        });
-
-      LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
-      taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
-      LOG.info("Updated task status of task with id {} with idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
-
-      processService.updateProcess(finalProcessVO.getDatasetId(), processVO.getDataflowId(),
-          ProcessStatusEnum.FINISHED, ProcessTypeEnum.fromValue(finalProcessVO.getProcessType()), processId,
-          finalProcessVO.getUser(), finalProcessVO.getPriority(), finalProcessVO.isReleased());
+          });
 
       LOG.info("Finished restoring the snapshot files from Snapshot {} and datasetId {} of processId {}", idSnapshot, datasetId, processId);
       updateJobStatusToFinished(jobId);
