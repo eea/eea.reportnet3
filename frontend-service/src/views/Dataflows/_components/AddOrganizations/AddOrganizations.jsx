@@ -221,9 +221,18 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const getProviderCodeTemplate = provider => <p>{provider.code}</p>;
 
   const getProviderGroupTemplate = provider => {
-    const groupKey = Object.keys(config.providerGroup)[provider.groupId - 1];
+    let groupKey;
 
-    return <p>{resourcesContext.messages[config.providerGroup[groupKey].label]}</p>;
+    if (window.location.href.indexOf('sanbox') !== -1 || window.location.href.indexOf('dev') !== -1) {
+      groupKey = Object.keys(config.providerGroupDev)[provider.groupId - 1];
+      return groupKey ? <p>{resourcesContext.messages[config.providerGroupDev[groupKey].label]}</p> : '';
+    } else if (window.location.href.indexOf('test') !== -1) {
+      groupKey = Object.keys(config.providerGroupTest)[provider.groupId - 1];
+      return groupKey ? <p>{resourcesContext.messages[config.providerGroupTest[groupKey].label]}</p> : '';
+    } else {
+      groupKey = Object.keys(config.providerGroup)[provider.groupId - 1];
+      return groupKey ? <p>{resourcesContext.messages[config.providerGroup[groupKey].label]}</p> : '';
+    }
   };
 
   const renderAddOrganizationForm = () => {

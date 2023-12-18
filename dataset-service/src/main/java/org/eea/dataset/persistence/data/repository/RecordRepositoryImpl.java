@@ -23,11 +23,13 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -153,6 +155,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Lazy
   @Autowired
   private FileCommonUtils fileCommon;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DataFlowController.DataFlowControllerZuul dataflowControllerZuul;
 
   /**
    * The connection url.
@@ -654,9 +660,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   @Override
-  public File findAndGenerateETLJsonDL(Long datasetId, OutputStream outputStream,
-    String tableSchemaId, Integer limit, Integer offset, String filterValue, String columnName,
-    String dataProviderCodes) throws EEAException, SQLException, IOException {
+  public File findAndGenerateETLJsonDL(Long datasetId, String tableSchemaId, Integer limit,
+      Integer offset, String filterValue, String columnName, String dataProviderCodes,
+      File jsonFile) throws EEAException, SQLException, IOException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -671,38 +677,36 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
           .collect(Collectors.toList());
     }
-    if (offset == 0) {
-      offset = 1;
-    }
-
-    File fileFolder = new File(exportDLPath, "dataset-" + datasetId);
-    fileFolder.mkdirs();
-    File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + "_etlExport" + JSON_TYPE);
     try (FileWriter fw = new FileWriter(jsonFile);
         BufferedWriter bw = new BufferedWriter(fw)) {
 
       // get json for each table requested
       bw.write("{\"tables\":[");
-      for (TableSchema tableSchema : tableSchemaList) {
-        Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, true));
+      for (int i = 0; i< tableSchemaList.size(); i++) {
+        TableSchema tableSchema = tableSchemaList.get(i);
+
+        Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true));
 
         if (totalRecords != null && totalRecords > 0L) {
-          //for (int i = offset * limit; i < i + limit && i < i + totalRecords; i += limit) {
-
-          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, false);
+          String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, false);
           getAllRecordsDL(query, tableSchema, bw, datasetId);
           bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
-          //}
         }
         if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
             || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
           bw.write(",\"totalRecords\":\"" + totalRecords + "\"");
         }
-        bw.write("}");
+        if (i == tableSchemaList.size() - 1) {
+          bw.write("}");
+        } else {
+          bw.write("},");
+        }
       }
       bw.write("]}");
+      bw.flush();
     } catch (Exception e) {
       LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
+      throw e;
     }
 
     return jsonFile;
@@ -984,7 +988,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       for (int j = 0; j < recordVO.getFields().size(); j++) {
         FieldVO fieldVO = recordVO.getFields().get(j);
         bw.write("{\"fieldName\":\"" + fieldVO.getName() + "\",");
-        bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
+        if (fieldVO.getValue().contains("\"")) {
+          String noQuotes = fieldVO.getValue().replaceAll("\"", "");
+          noQuotes = "\\\"" + noQuotes + "\\\"";
+          bw.write("\"value\":\"" + noQuotes + "\",");
+        } else {
+          bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
+        }
         bw.write("\"field_value_id\":\"" + fieldVO.getIdFieldSchema() + "\"");
         if (j == fieldsSize - 1) {
           bw.write("}");
@@ -1771,7 +1781,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return the string
    */
   private String totalRecordsQueryDL(Long datasetId, TableSchema tableSchema, String filterValue,
-      String columnName, String dataProviderCodes, boolean getCount) {
+      String columnName, String dataProviderCodes, Integer limit, Integer offset, boolean getCount) {
 
     StringBuilder stringQuery = new StringBuilder();
 
@@ -1804,6 +1814,12 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       } else {
         stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
       }
+    }
+    if (limit != null && limit != 0 && !getCount) {
+      stringQuery.append(" limit ").append(limit);
+    }
+    if (offset != null && offset != 0 && !getCount) {
+      stringQuery.append(" offset ").append(offset);
     }
 
     LOG.info("TotalRecords Query: {}", stringQuery);
@@ -1912,23 +1928,33 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
       File fileFolder = new File(importPath, "etlExport");
       fileFolder.mkdirs();
-      String filePath =importPath + ETL_EXPORT + fileName;
+      String filePath = importPath + ETL_EXPORT + fileName;
       String jsonFile = filePath + JSON;
       Integer tableCount = 0;
-      for (TableSchema tableSchema : tableSchemaList) {
-        tableCount++;
-        tableName = tableSchema.getNameTableSchema();
-        Long totalRecords = getCount(totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes), columnName, filterValue);
 
-        String filterChain = tableSchema.getIdTableSchema().toString();
-        if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-                || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-          filterChain = filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue, dataProviderCodes)
-                  .filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
+      DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+      if (dataFlowVO.getBigData()) {
+        findAndGenerateETLJsonDL(datasetId, tableSchemaId, limit, offset, filterValue,
+            columnName, dataProviderCodes, new File(jsonFile));
+
+      } else {
+        for (TableSchema tableSchema : tableSchemaList) {
+          tableCount++;
+          tableName = tableSchema.getNameTableSchema();
+          Long totalRecords = getCount(totalRecordsQuery(datasetId, tableSchema, filterValue, columnName, dataProviderCodes),
+              columnName, filterValue);
+
+          String filterChain = tableSchema.getIdTableSchema().toString();
+          if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName) || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+            filterChain = filterChain + "_" + Stream.of(tableSchemaId, columnName, filterValue,
+                dataProviderCodes).filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.joining(","));
+          }
+
+          createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName,
+              dataProviderCodes, tableSchemaList, tableName, tableCount, totalRecords, jsonFile,
+              jobId, limit, offset, filterChain, tableSchema);
+
         }
-
-        createJsonRecordsForTable(datasetId, tableSchemaId, filterValue, columnName, dataProviderCodes, tableSchemaList, tableName, tableCount, totalRecords, jsonFile,
-                jobId, limit, offset, filterChain, tableSchema);
       }
 
       createZipFromJson(filePath, datasetId, jobId);
@@ -1955,7 +1981,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     try (ZipOutputStream out =
                  new ZipOutputStream(new FileOutputStream(zipFile));
          FileInputStream fis = new FileInputStream(jsonFile)) {
-      ZipEntry entry = new ZipEntry(jsonFile);
+      ZipEntry entry = new ZipEntry(jobId+JSON);
       out.putNextEntry(entry);
       IOUtils.copyLarge(fis, out);
       LOG.info("Created FILE_EXPORT file {}, for datasetId {} and jobId {}", zipFile, datasetId, jobId);
