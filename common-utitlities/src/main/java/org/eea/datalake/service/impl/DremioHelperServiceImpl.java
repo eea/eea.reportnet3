@@ -43,6 +43,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.password}")
     private String dremioPassword;
 
+    @Value("${dremio.jobPolling.numberOfRetries}")
+    private Integer numberOfRetriesForJobPolling;
+
     @Autowired
     private DremioApiController dremioApiController;
     @Autowired
@@ -285,5 +288,23 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             throw new RuntimeException(e);
         }
         return result;
+    }
+
+    @Override
+    public Boolean dremioProcessFinishedSuccessfully(String processId) throws Exception {
+        for(int i=0; i < numberOfRetriesForJobPolling; i++) {
+            DremioJobStatusResponse response = this.pollForJobStatus(processId);
+            String jobState = response.getJobState().getValue();
+            if(jobState.equals(DremioJobStatusEnum.COMPLETED.getValue())) {
+                return true;
+            }
+            else if(jobState.equals(DremioJobStatusEnum.CANCELED.getValue()) || jobState.equals(DremioJobStatusEnum.FAILED.getValue())){
+                return false;
+            }
+            else {
+                Thread.sleep(10000);
+            }
+        }
+        return false;
     }
 }

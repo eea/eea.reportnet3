@@ -1307,11 +1307,25 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) {
+  /**
+   * Checks and promotes validation table
+   * @param s3PathResolver
+   * @param dataflow
+   * @throws EEAException
+   */
+  private void checkAndPromoteFolder(S3PathResolver s3PathResolver, DataFlowVO dataflow) throws EEAException {
     if (dataflow.getBigData()!=null && dataflow.getBigData()) {
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
-        String query = "ALTER TABLE " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " REFRESH METADATA AUTO PROMOTION";
-        dremioHelperService.executeSqlStatement(query);
+        try {
+          String validateTable = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+          String query = "ALTER TABLE " + validateTable + " REFRESH METADATA AUTO PROMOTION";
+          String id = dremioHelperService.executeSqlStatement(query);
+          if(!dremioHelperService.dremioProcessFinishedSuccessfully(id)){
+            throw new EEAException("Failed promoting table " + validateTable);
+          }
+        } catch (Exception e) {
+          throw new EEAException(e.getCause().getCause().getMessage());
+        }
       }
     }
   }
