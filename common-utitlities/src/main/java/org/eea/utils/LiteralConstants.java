@@ -1,5 +1,7 @@
 package org.eea.utils;
 
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * The Class LiteralConstants.
  */
@@ -177,10 +179,12 @@ public final class LiteralConstants {
   public static final int S3_NAME_PATTERN_LENGTH = 7;
 
   /** The Constant S3_DEFAULT_BUCKET: {@value}. */
-  public static final String S3_DEFAULT_BUCKET = "\"rn3-dataset\".\"rn3-dataset\"";
+  @Value("${s3.default.bucket}")
+  public static String S3_DEFAULT_BUCKET;
 
   /** The Constant S3_DEFAULT_BUCKET_PATH: {@value}. */
-  public static final String S3_DEFAULT_BUCKET_PATH = "rn3-dataset/rn3-dataset";
+  @Value("${s3.default.bucket.path}")
+  public static String S3_DEFAULT_BUCKET_PATH;
 
   /** The Constant S3_LEFT_PAD: {@value}. */
   public static final String S3_LEFT_PAD= "0";
@@ -335,7 +339,8 @@ public final class LiteralConstants {
   public static final String S3_VALIDATION = "validation";
 
   /** The Constant S3_BUCKET_NAME: {@value}. */
-  public static final String S3_BUCKET_NAME = "rn3-dataset";
+  @Value("${s3.default.bucket.name}")
+  public static String S3_BUCKET_NAME;
 
   /** The Constant PARQUET_RECORD_ID_COLUMN_HEADER: {@value}. */
   public static final String PARQUET_RECORD_ID_COLUMN_HEADER = "record_id";
