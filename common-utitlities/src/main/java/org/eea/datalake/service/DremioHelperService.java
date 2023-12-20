@@ -25,4 +25,6 @@ public interface DremioHelperService {
     DremioJobStatusResponse pollForJobStatus(String id);
 
     String executeSqlStatementPost(String sqlStatement);
+
+    Boolean dremioProcessFinishedSuccessfully(String processId) throws Exception;
 }

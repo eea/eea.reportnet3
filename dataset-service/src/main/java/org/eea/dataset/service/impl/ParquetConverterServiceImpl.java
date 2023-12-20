@@ -76,9 +76,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     @Value("${dremio.promote.numberOfRetries}")
     private Integer numberOfRetriesForPromoting;
 
-    @Value("${dremio.jobPolling.numberOfRetries}")
-    private Integer numberOfRetriesForJobPolling;
-
     @Autowired
     private FileCommonUtils fileCommonUtils;
 
@@ -186,7 +183,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
                 String createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
                 String processId = dremioHelperService.executeSqlStatement(createTableQuery);
-                if(!dremioProcessFinishedSuccessfully(processId)){
+                if(!dremioHelperService.dremioProcessFinishedSuccessfully(processId)){
                     throw new Exception("For jobId " + importFileInDremioInfo.getJobId() + " parquet table was not created successfully");
                 }
             }
@@ -286,24 +283,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         if (s3Helper.checkFolderExist(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH)) {
             s3Helper.deleteFolder(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         }
-    }
-
-
-    private Boolean dremioProcessFinishedSuccessfully(String processId) throws Exception {
-        for(int i=0; i < numberOfRetriesForJobPolling; i++) {
-            DremioJobStatusResponse response = dremioHelperService.pollForJobStatus(processId);
-            String jobState = response.getJobState().getValue();
-            if(jobState.equals(DremioJobStatusEnum.COMPLETED.getValue())) {
-                return true;
-            }
-            else if(jobState.equals(DremioJobStatusEnum.CANCELED.getValue()) || jobState.equals(DremioJobStatusEnum.FAILED.getValue())){
-                return false;
-            }
-            else {
-                Thread.sleep(10000);
-            }
-        }
-        return false;
     }
 
     private void refreshTableMetadataAndPromote(ImportFileInDremioInfo importFileInDremioInfo, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {

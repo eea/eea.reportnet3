@@ -1972,6 +1972,10 @@
     "value": "Y29tLmRyZW1pby5qZGJjLkRyaXZlcg=="
   },
   {
+    "key": "config/application/dremio.jobPolling.numberOfRetries",
+    "value": "bWFyaWE="
+  },
+  {
     "key": "config/application/dremio.password",
     "value": "ZHJlbW1hcmlhNw=="
   },
@@ -1993,10 +1997,6 @@
   },
   {
     "key": "config/dataset/dremio.promote.numberOfRetries",
-    "value": "bWFyaWE="
-  },
-  {
-    "key": "config/dataset/dremio.jobPolling.numberOfRetries",
     "value": "bWFyaWE="
   }
 ]
