@@ -488,7 +488,23 @@ public final class EEAErrorMessage {
 
   /** The Constant CREATING_PROVIDER: {@value}. */
   public static final String CREATING_PROVIDER =
-      "An unknown error happenned while creating a representative.";
+      "An unknown error happened while creating a provider.";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER =
+      "An unknown error happened while updating a provider.";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER_NULL_OBJECT =
+      "Cannot update provider with an empty request";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER_NULL_ID =
+      "Provider ID is missing, please specify the provider.";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER_FAILED_LABEL_EXISTS =
+      "Given provider label already exists at this group, please specify another label.";
 
   /** The Constant DUPLICATE_PROVIDER_CODE: {@value}. */
   public static final String DUPLICATE_PROVIDER_CODE =

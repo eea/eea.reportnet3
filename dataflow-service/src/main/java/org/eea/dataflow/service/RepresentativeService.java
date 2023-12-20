@@ -24,6 +24,11 @@ public interface RepresentativeService {
   Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO) throws EEAException;
 
   /**
+   * @param dataProviderVO the data provider to be updated
+   */
+  void updateProvider(DataProviderVO dataProviderVO) throws Exception;
+
+  /**
    * @param dataProviderVO the data provider to be created
    */
   void createProvider(DataProviderVO dataProviderVO) throws Exception;
@@ -43,6 +48,17 @@ public interface RepresentativeService {
    * @return the long
    */
   Long updateDataflowRepresentative(RepresentativeVO representativeVO);
+
+  /**
+   * Find all data providers
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
+   */
+  List<DataProviderCodeVO> getAllDataProviderGroups();
 
   /**
    * Find all data providers

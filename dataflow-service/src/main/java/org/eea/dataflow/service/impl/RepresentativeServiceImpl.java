@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -295,6 +298,23 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     LOG.info("Obtaining the representatives for the dataflow : {}", dataflowId);
     return representativeMapper
         .entityListToClass(representativeRepository.findAllByDataflow_Id(dataflowId));
+  }
+
+
+  /**
+   * Find all data providers
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
+   */
+  @Override
+  public List<DataProviderCodeVO> getAllDataProviderGroups() {
+
+    List<DataProviderGroup> providerGroupsPaginated = dataProviderGroupRepository.findAll();
+    return dataProviderGroupMapper.entityListToClass(providerGroupsPaginated);
   }
 
   /**
@@ -882,6 +902,52 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @return the created data provider
    * @throws EEAException
    */
+  public void updateProvider(DataProviderVO dataProviderVO) throws Exception {
+    Optional<DataProvider> optionalDataProvider = dataProviderRepository.findById(dataProviderVO.getId());
+    DataProvider dataProvider = optionalDataProvider.orElseThrow(() ->
+            new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER_NULL_OBJECT));
+
+    List<DataProvider> allDataProviders = dataProviderRepository.findAllByDataProviderGroup_id(dataProvider.getDataProviderGroup().getId());
+
+    Predicate<DataProvider> haveSameLabel = dataProviderEntity->
+        dataProviderEntity.getLabel().equals(dataProviderVO.getLabel());
+
+    boolean sameLabelExists = allDataProviders.stream()
+            .anyMatch(dataProviderEntity ->
+                    dataProviderEntity != null &&
+                    haveSameLabel.test(dataProviderEntity));
+
+    if (sameLabelExists == true) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER_FAILED_LABEL_EXISTS);
+    }
+
+    // Duplicate the incoming data provider object
+    DataProvider updatedDataProvider = new DataProvider();
+    updatedDataProvider.setId(dataProvider.getId());
+    updatedDataProvider.setCode(dataProvider.getCode());
+    updatedDataProvider.setRepresentatives(dataProvider.getRepresentatives());
+    updatedDataProvider.setDataProviderGroup(dataProvider.getDataProviderGroup());
+    // update label
+    updatedDataProvider.setLabel(dataProviderVO.getLabel());
+
+    dataProviderRepository.save(updatedDataProvider);
+
+    // release notification
+    NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .providerId(dataProviderVO.getId())
+            .providerLabel(dataProviderVO.getLabel())
+            .build();
+
+    kafkaSenderUtils.releaseNotificableKafkaEvent(
+            EventType.UPDATE_ORGANIZATION_COMPLETED_EVENT, null, notificationVO);
+  }
+
+  /**
+   * @param dataProviderVO the data provider to be created
+   * @return the created data provider
+   * @throws EEAException
+   */
   public void createProvider(DataProviderVO dataProviderVO) throws Exception {
     List<DataProvider> dataProviderList = dataProviderRepository.findAllByDataProviderGroup_id(dataProviderVO.getGroupId());
     String code = dataProviderVO.getCode();
@@ -901,6 +967,21 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       LOG.error("Could not create data provider with name: " + dataProviderVO.getLabel() + " and code: " + dataProviderVO.getCode() + " in group id: " + dataProviderVO.getGroupId() + ". Message: " + e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CREATING_PROVIDER);
     }
+
+    // retrieve created data provider / company
+    DataProviderGroup dataProviderGroup = new DataProviderGroup();
+    dataProviderGroup.setId(dataProviderVO.getGroupId());
+    DataProvider createdDataProvider = dataProviderRepository.findByDataProviderGroupAndCode(dataProviderGroup, dataProviderVO.getCode());
+
+    // release notification
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+        .providerId(createdDataProvider.getId())
+        .providerLabel(createdDataProvider.getLabel())
+        .build();
+
+    kafkaSenderUtils.releaseNotificableKafkaEvent(
+        EventType.CREATE_ORGANIZATION_COMPLETED_EVENT, null, notificationVO);
   }
 
   /**
