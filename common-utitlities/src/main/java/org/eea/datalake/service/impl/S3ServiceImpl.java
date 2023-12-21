@@ -157,7 +157,7 @@ public class S3ServiceImpl implements S3Service {
         } else if (path.equals(S3_IMPORT_TABLE_NAME_FOLDER_PATH) || path.equals(S3_VALIDATION_TABLE_PATH)) {
             return String.format(path, dataflowFolder,
                 dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
-        } else if (path.equals(S3_TABLE_NAME_FOLDER_PATH)) {
+        } else if (path.equals(S3_TABLE_NAME_FOLDER_PATH) || path.equals(S3_CURRENT_PATH)) {
             return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                 s3PathResolver.getTableName());
         } else {
