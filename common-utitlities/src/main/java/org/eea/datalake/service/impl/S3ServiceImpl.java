@@ -74,19 +74,15 @@ public class S3ServiceImpl implements S3Service {
         String euDatasetFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
         String tableName = s3PathResolver.getTableName();
 
-        String format = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, tableName,
-                fileName);
-        String formatWithParquetFolder = String.format(path, dataflowFolder, dataCollectionFolder, tableName,
-                dataProviderFolder, parquetFolder, fileName);
         if (S3_IMPORT_QUERY_PATH.equals(path)
             || S3_TABLE_AS_FOLDER_QUERY_PATH.equals(path)
             || S3_TABLE_NAME_QUERY_PATH.equals(path) || S3_IMPORT_CSV_FILE_QUERY_PATH.equals(path)
             || S3_TABLE_NAME_VALIDATE_QUERY_PATH.equals(
             path)) {
-            path = S3_DEFAULT_BUCKET + format;
+            path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, tableName, fileName);
         } else if (S3_IMPORT_FILE_PATH.equals(path) || S3_TABLE_NAME_PATH.equals(path) || S3_VALIDATION_RULE_PATH.equals(path) ||
                 S3_TABLE_NAME_VALIDATE_PATH.equals(path) ) {
-            path = format;
+            path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, tableName, fileName);
         } else if (S3_VALIDATION_QUERY_PATH.equals(path)) {
             path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getValidationId(), fileName);
         } else if (S3_VALIDATION_PATH.equals(path)) {
@@ -100,9 +96,11 @@ public class S3ServiceImpl implements S3Service {
         } else if (S3_VALIDATION_DC_PATH.equals(path)) {
             path = String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getValidationId(), dataProviderFolder, fileName);
         } else if (S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH.equals(path)) {
-            path = S3_DEFAULT_BUCKET + formatWithParquetFolder;
+            path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataCollectionFolder, tableName,
+                    dataProviderFolder, parquetFolder, fileName);
         } else if (S3_TABLE_NAME_DC_PATH.equals(path) || S3_TABLE_NAME_VALIDATE_DC_PATH.equals(path)) {
-            path = formatWithParquetFolder;
+            path = String.format(path, dataflowFolder, dataCollectionFolder, tableName,
+                    dataProviderFolder, parquetFolder, fileName);
         } else if (S3_EXPORT_QUERY_PATH.equals(path)) {
             path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataCollectionFolder, fileName);
         } else if (S3_EXPORT_PATH.equals(path)) {
