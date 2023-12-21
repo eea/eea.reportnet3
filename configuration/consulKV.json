@@ -1998,5 +1998,21 @@
   {
     "key": "config/dataset/dremio.promote.numberOfRetries",
     "value": "bWFyaWE="
+  },
+  {
+    "key": "config/dataset/dremio.jobPolling.numberOfRetries",
+    "value": "bWFyaWE="
+  },
+  {
+    "key": "config/application/s3.default.bucket",
+    "value": "\"rn3-dataset\".\"rn3-dataset\""
+  },
+  {
+    "key": "config/application/s3.default.bucket.name",
+    "value": "rn3-dataset"
+  },
+  {
+    "key": "config/application/s3.default.bucket.path",
+    "value": "rn3-dataset/rn3-dataset"
   }
 ]
