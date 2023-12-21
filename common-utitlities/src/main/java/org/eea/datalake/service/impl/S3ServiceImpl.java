@@ -149,12 +149,22 @@ public class S3ServiceImpl implements S3Service {
             return String.format(path, dataflowFolder);
         } else if (path.equals(S3_DATAFLOW_REFERENCE_FOLDER_PATH)) {
             return String.format(path, dataflowFolder, s3PathResolver.getTableName());
-        }
-        else if (path.equals(S3_DATAFLOW_REFERENCE_QUERY_PATH)) {
+        } else if (path.equals(S3_DATAFLOW_REFERENCE_QUERY_PATH)) {
             return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, s3PathResolver.getTableName());
+        } else if (path.equals(S3_TABLE_AS_FOLDER_QUERY_PATH)) {
+            return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                s3PathResolver.getTableName());
+        } else if (path.equals(S3_IMPORT_TABLE_NAME_FOLDER_PATH) || path.equals(S3_VALIDATION_TABLE_PATH)) {
+            return String.format(path, dataflowFolder,
+                dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
+        } else if (path.equals(S3_TABLE_NAME_FOLDER_PATH)) {
+            return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
+                s3PathResolver.getTableName());
+        } else {
+            LOG.info("Wrong type value: {}", path);
         }
-        return String.format(path, dataflowFolder,
-                    dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
+
+        return null;
     }
 
     private String calculateS3TableAsFolderPath(S3PathResolver s3PathResolver) {
