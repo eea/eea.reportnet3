@@ -46,6 +46,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.jobPolling.numberOfRetries}")
     private Integer numberOfRetriesForJobPolling;
 
+    /** The Constant S3_DEFAULT_BUCKET_PATH: {@value}. */
+    @Value("${s3.default.bucket.path}")
+    private String S3_DEFAULT_BUCKET_PATH;
+
     @Autowired
     private DremioApiController dremioApiController;
     @Autowired
