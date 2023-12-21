@@ -2001,14 +2001,14 @@
   },
   {
     "key": "config/application/s3.default.bucket",
-    "value": "\"rn3-dataset\".\"rn3-dataset\""
+    "value": "InJuMy1kYXRhc2V0Ii4icm4zLWRhdGFzZXQi"
   },
   {
     "key": "config/application/s3.default.bucket.name",
-    "value": "rn3-dataset"
+    "value": "cm4zLWRhdGFzZXQ="
   },
   {
     "key": "config/application/s3.default.bucket.path",
-    "value": "rn3-dataset/rn3-dataset"
+    "value": "cm4zLWRhdGFzZXQvcm4zLWRhdGFzZXQ="
   }
 ]
