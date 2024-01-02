@@ -320,6 +320,14 @@ public enum EventType {
   COMMAND_NEW_DESIGN_FIELD_PROPAGATION(LiteralConstants.COMMAND_TOPIC, "new_field_propagation",
       false),
 
+  /** The creating organization completed event. */
+  CREATE_ORGANIZATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "create_organization_completed_event", true),
+
+  /** The creating organization completed event. */
+  UPDATE_ORGANIZATION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "update_organization_completed_event", true),
+
   /** The add datacollection completed event. */
   ADD_DATACOLLECTION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_datacollection_completed_event", true),

@@ -2,9 +2,9 @@ package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
 import org.eea.dataflow.persistence.domain.DataProvider;
+import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -30,6 +30,8 @@ public interface DataProviderRepository extends PagingAndSortingRepository<DataP
    * @return the list
    */
   List<DataProvider> findByCode(String code);
+
+  DataProvider findByDataProviderGroupAndCode(DataProviderGroup dataProviderGroup, String Code);
 
   /**
    * Save a DataProvider object.
