@@ -38,6 +38,9 @@ export const dataflowReducer = (state, { type, payload }) => {
     case 'SET_DESIGN_DATASET_SCHEMAS':
       return { ...state, designDatasetSchemas: payload.designDatasets };
 
+    case 'SET_IS_EXPORTING':
+      return { ...state, isExporting: payload };
+
     case 'REFRESH_PAGE':
       return { ...state, refresh: !state.refresh };
 
