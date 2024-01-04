@@ -109,7 +109,7 @@ export const ReferenceDataflow = () => {
     datasetsInfoBtn: dataflowState.isAdmin,
     editBtn:
       (dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian) || dataflowState.isAdmin,
-    exportBtn: true,
+    exportBtn: dataflowState.isCustodian || dataflowState.isAdmin,
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:
