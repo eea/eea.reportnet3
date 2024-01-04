@@ -1,10 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Future;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DesignDatasetMapper;
 import org.eea.dataset.mapper.FieldSchemaNoRulesMapper;
@@ -50,6 +45,12 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * The Class DesignDatasetServiceImpl.
@@ -456,6 +457,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
         // related to the PK/FK
         updateFieldSchema(datasetId, field);
       }
+      dataschemaService.releaseCreateUpdateView(datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), false);
     });
   }
 

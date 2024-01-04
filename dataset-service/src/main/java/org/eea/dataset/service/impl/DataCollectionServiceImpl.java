@@ -1,18 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
@@ -85,6 +72,20 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The Class DataCollectionServiceImpl.
@@ -498,7 +499,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // remove from the list of designs the ones that are going to be referenceDatasets
     List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
     List<String> referenceSchemasId = new ArrayList<>();
-    designs.stream().forEach(dataset -> {
+    designs.forEach(dataset -> {
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
       if (schema != null && schema.getReferenceDataset() != null
           && Boolean.TRUE.equals(schema.getReferenceDataset())) {
@@ -512,7 +513,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       }
     });
-    designs.removeIf(design -> referenceDatasets.contains(design));
+    designs.removeIf(referenceDatasets::contains);
 
     // Now we have splitted the schemas between designs ("normal") schemas and schemas that are
     // reference,
@@ -596,7 +597,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    */
   private void checkLinksInReferenceDatasets(List<DesignDatasetVO> referenceDatasets,
       List<String> referenceSchemasId) {
-    referenceDatasets.stream().forEach(reference -> {
+    referenceDatasets.forEach(reference -> {
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(reference.getDatasetSchema());
       for (TableSchemaVO table : schema.getTableSchemas()) {
         for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
@@ -621,6 +622,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           }
         }
       }
+      datasetSchemaService.releaseCreateUpdateView(reference.getId(), SecurityContextHolder.getContext().getAuthentication().getName(), false);
     });
   }
 

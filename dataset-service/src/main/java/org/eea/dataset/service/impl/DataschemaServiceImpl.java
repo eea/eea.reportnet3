@@ -578,10 +578,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
-
-    releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
-
   }
 
   /**
@@ -1221,9 +1217,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
 
-      releaseCreateUpdateView(datasetId,
-          SecurityContextHolder.getContext().getAuthentication().getName(), false);
-
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         if (!rulesControllerZuul.existsRuleRequired(datasetSchemaId, fieldSchemaVO.getId())) {
@@ -1244,12 +1237,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
             fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       }
-
-      releaseCreateUpdateView(datasetId,
-          SecurityContextHolder.getContext().getAuthentication().getName(), false);
     }
-
-
   }
 
   /**
@@ -2576,6 +2564,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             datasetId, e.getMessage(), e);
       }
     }
+    releaseCreateUpdateView(datasetId,
+        SecurityContextHolder.getContext().getAuthentication().getName(), false);
   }
 
 
@@ -2811,6 +2801,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               datasetId);
         }
       }
+      releaseCreateUpdateView(datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), false);
       LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in readFieldLines for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
@@ -2854,10 +2845,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     // Add UniqueConstraint if needed
     createUniqueConstraintPK(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO);
-
-    // Create query view
-    releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
   }
 
 
@@ -3293,6 +3280,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               datasetId, e.getMessage(), e);
         }
       }
+      releaseCreateUpdateView(datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), false);
     });
   }
 
