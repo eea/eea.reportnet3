@@ -5,6 +5,7 @@ import { Column } from 'primereact/column';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 
 import styles from './AddOrganizations.module.scss';
 
@@ -32,6 +33,7 @@ import { Dropdown } from 'views/_components/Dropdown';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { ActionsColumn } from 'views/_components/ActionsColumn';
 
 export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const filterBy = useRecoilValue(filterByCustomFilterStore('addOrganizations'));
@@ -39,17 +41,24 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
 
+  const [actionsButtons, setActionsButtons] = useState({
+    id: null,
+    isActionButtonsLoading: false,
+    isActionButtonsEditing: false
+  });
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [group, setGroup] = useState();
   const [isFiltered, setIsFiltered] = useState(false);
   const [isAddOrganizationDialogVisible, setIsAddOrganizationDialogVisible] = useState(false);
+  const [isEditOrganizationDialogVisible, setIsEditOrganizationDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingButton, setIsLoadingButton] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState('idle');
-  const [organizationName, setOrganizationName] = useState();
+  const [organizationName, setOrganizationName] = useState('');
   const [organizationsList, setOrganizationsList] = useState([]);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
+  const [providerEditing, setProviderEditing] = useState();
   const [sort, setSort] = useState({ field: 'label', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -98,6 +107,11 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       setIsLoading(false);
       setIsRefreshing(false);
     }
+  };
+
+  const onEditProviderName = provider => {
+    setProviderEditing(provider);
+    setIsEditOrganizationDialogVisible(true);
   };
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
@@ -184,19 +198,25 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         key: 'label',
         header: resourcesContext.messages['label'],
         template: getProviderLabelTemplate,
-        className: styles.middleColumn
+        className: styles.largeColumn
       },
       {
         key: 'code',
         header: resourcesContext.messages['code'],
         template: getProviderCodeTemplate,
-        className: styles.middleColumn
+        className: styles.largeColumn
       },
       {
         key: 'group_id',
         header: resourcesContext.messages['group'],
         template: getProviderGroupTemplate,
-        className: styles.middleColumn
+        className: styles.largeColumn
+      },
+      {
+        key: 'actions',
+        header: resourcesContext.messages['actions'],
+        template: getActionsTemplate,
+        className: styles.smallColumn
       }
     ];
 
@@ -224,6 +244,24 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     const groupKey = Object.keys(config.providerGroup)[provider.groupId - 1];
 
     return <p>{resourcesContext.messages[config.providerGroup[groupKey].label]}</p>;
+  };
+
+  const getActionsTemplate = provider => {
+    return (
+      <ActionsColumn
+        disabledButtons={isNil(provider.id) && actionsButtons.isActionButtonsLoading}
+        isUpdating={actionsButtons.isActionButtonsEditing}
+        onEditClick={() => {
+          setActionsButtons({
+            ...actionsButtons,
+            id: provider.id
+          });
+          onEditProviderName(provider);
+        }}
+        rowDataId={provider.id}
+        rowUpdatingId={actionsButtons.id}
+      />
+    );
   };
 
   const renderAddOrganizationForm = () => {
@@ -278,6 +316,54 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     );
   };
 
+  const renderEditOrganizationForm = () => {
+    const hasError = !isEmpty(organizationName) && (isRepeatedOrganization() || !isValidOrganizationName());
+
+    return (
+      <div className={styles.addDialog}>
+        <div className={styles.inputWrapper}>
+          <label className={styles.label} htmlFor="organizationNameInput">
+            {resourcesContext.messages['organizationName']}
+          </label>
+          <InputText
+            className={hasError ? styles.error : ''}
+            id="organizationNameInput"
+            onChange={event => {
+              setOrganizationName(event.target.value);
+              if (providerEditing.label !== '') {
+                setProviderEditing({ ...providerEditing, label: '' });
+              }
+            }}
+            placeholder={resourcesContext.messages['organizationNameDots']}
+            ref={inputRef}
+            style={{ margin: '0.3rem 0' }}
+            value={organizationName ? organizationName : providerEditing.label}
+          />
+        </div>
+        <div className={styles.inputWrapper}>
+          <label className={styles.label} htmlFor="codeInput">
+            {resourcesContext.messages['code']}
+          </label>
+          <InputText disabled={true} style={{ margin: '0.3rem 0' }} value={providerEditing.code} />
+        </div>
+        <div className={styles.inputWrapper}>
+          <label className={styles.label} htmlFor="groupsDropdown">
+            {resourcesContext.messages['group']}
+          </label>
+          <InputText
+            disabled={true}
+            style={{ margin: '0.3rem 0' }}
+            value={
+              resourcesContext.messages[
+                config.providerGroup[Object.keys(config.providerGroup)[providerEditing.groupId - 1]].label
+              ]
+            }
+          />
+        </div>
+      </div>
+    );
+  };
+
   const hasEmptyData = () => isEmpty(organizationName) || isEmpty(group);
 
   const onRefresh = () => {
@@ -287,7 +373,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const onResetAll = () => {
     setIsRefreshing(true);
-    setOrganizationName(null);
+    setOrganizationName('');
     setGroup(null);
 
     getOrganizations();
@@ -295,6 +381,10 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const onCloseAddDialog = () => {
     setIsAddOrganizationDialogVisible(false);
+  };
+
+  const onCloseEditDialog = () => {
+    setIsEditOrganizationDialogVisible(false);
   };
 
   const createNewProvider = async () => {
@@ -309,6 +399,25 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       onCloseAddDialog();
     } catch (error) {
       console.error('AddOrganizations - createNewProvider.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
+    } finally {
+      setIsLoadingButton(false);
+    }
+  };
+
+  const updateProvider = async () => {
+    setIsLoadingButton(true);
+    try {
+      await AddOrganizationsService.createProvider({
+        group: group.label,
+        label: organizationName,
+        code: providerEditing.code,
+        groupId: group.group
+      });
+      onCloseEditDialog();
+    } catch (error) {
+      console.error('AddOrganizations - updateProvider.', error);
       setLoadingStatus('error');
       notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
     } finally {
@@ -361,6 +470,18 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const getTooltipMessage = () => {
     if (hasEmptyData()) {
+      return resourcesContext.messages['incompleteDataTooltip'];
+    } else if (isRepeatedOrganization()) {
+      return resourcesContext.messages['organizationAlreadyExists'];
+    } else if (!isValidOrganizationName()) {
+      return resourcesContext.messages['notValidOrganizationNameTooltip'];
+    } else {
+      return null;
+    }
+  };
+
+  const getEditTooltipMessage = () => {
+    if (isEmpty(organizationName)) {
       return resourcesContext.messages['incompleteDataTooltip'];
     } else if (isRepeatedOrganization()) {
       return resourcesContext.messages['organizationAlreadyExists'];
@@ -468,6 +589,27 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
           }}
           visible={isAddOrganizationDialogVisible}>
           {renderAddOrganizationForm()}
+        </ConfirmDialog>
+      )}
+
+      {isEditOrganizationDialogVisible && (
+        <ConfirmDialog
+          confirmTooltip={getEditTooltipMessage()}
+          dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
+          disabledConfirm={
+            isEmpty(organizationName) || isLoadingButton || isRepeatedOrganization() || !isValidOrganizationName()
+          }
+          header={resourcesContext.messages['edit']}
+          iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['save']}
+          onConfirm={updateProvider}
+          onHide={() => {
+            onResetAll();
+            onCloseEditDialog();
+          }}
+          visible={isEditOrganizationDialogVisible}>
+          {renderEditOrganizationForm()}
         </ConfirmDialog>
       )}
     </Fragment>
