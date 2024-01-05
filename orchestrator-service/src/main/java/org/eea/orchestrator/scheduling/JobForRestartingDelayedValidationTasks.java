@@ -78,13 +78,13 @@ public class JobForRestartingDelayedValidationTasks {
                     try {
                         TaskVO taskVO = validationControllerZuul.findTaskById(taskId.longValue());
                         if (taskVO!=null) {
-                            ObjectMapper objectMapper = new ObjectMapper();
-                            JsonNode jsonNode = objectMapper.readTree(taskVO.getJson());
-                            String eventType = jsonNode.get(EVENT_TYPE).asText();
-                            if (!eventType.equals(COMMAND_VALIDATE_TABLE)) {
+//                            ObjectMapper objectMapper = new ObjectMapper();
+//                            JsonNode jsonNode = objectMapper.readTree(taskVO.getJson());
+//                            String eventType = jsonNode.get(EVENT_TYPE).asText();
+//                            if (!eventType.equals(COMMAND_VALIDATE_TABLE)) {
                                 LOG.info("Restarting task {}", taskId);
                                 validationControllerZuul.restartTask(taskId.longValue());
-                            }
+//                            }
                         }
                     } catch (Exception e) {
                         LOG.error("Error while running scheduled task restartDelayedTasks for task {}", taskId);
