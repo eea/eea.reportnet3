@@ -21,5 +21,11 @@ export const AddOrganizationsService = {
     });
 
     return response.data;
-  }
+  },
+  getProviderGroups: async () => {
+    const response = await AddOrganizationsRepository.getProviderGroups();
+
+    return response.data;
+  },
+  updateProvider: async ({ id, label }) => await AddOrganizationsRepository.updateProvider(id, label)
 };

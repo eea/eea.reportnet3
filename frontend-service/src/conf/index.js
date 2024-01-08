@@ -15,7 +15,6 @@ import languageCode from './language.code.json';
 import notifications from './notifications.json';
 import permissions from './permissions.json';
 import primeIcons from './prime.icons.json';
-import providerGroup from './providerGroup.json';
 import storage from './storage.config.json';
 import systemNotifications from './systemNotifications.json';
 import theme from './theme.config.json';
@@ -57,7 +56,6 @@ export const config = {
   notifications: notifications,
   systemNotifications: systemNotifications,
   permissions: permissions,
-  providerGroup: providerGroup,
   storage: storage,
   datasetStatus: datasetStatus,
   theme: theme,
