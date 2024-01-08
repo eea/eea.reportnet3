@@ -138,7 +138,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @LockMethod
   @HystrixCommand
-  @PatchMapping("/provider/update")
+  @PutMapping("/provider/update")
   @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
   @ApiOperation(value = "Updates a single provider", response = DataProviderVO.class, hidden = true)
   public void updateProvider(
