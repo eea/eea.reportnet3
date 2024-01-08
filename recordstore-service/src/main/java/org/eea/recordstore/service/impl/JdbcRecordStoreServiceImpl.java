@@ -956,7 +956,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
     Files.deleteIfExists(path3);
     Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
-    Files.deleteIfExists(path4);
+    Files.deleteIfExists(path4);//TODO: Here I have a crash
     Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
     Files.deleteIfExists(path5);
   }
@@ -2283,24 +2283,29 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * @param fileName the file name
    * @param copyManager the copy manager
    */
+  //TODO : try-catch with sources
   private void copyFromFileRecovery(String query, String fileName, CopyManager copyManager)
       throws SQLException, IOException {
     try {
       Path path = Paths.get(fileName);
       // bufferFile it's a size in bytes defined in consul variable. It can be 65536
       char[] cbuf = new char[bufferFile];
-      int len = 0;
+      int len;
 
       // Copy the data from the file by chunks
       CopyIn cp = copyManager.copyIn(query);
-      FileReader from = new FileReader(path.toString());
-      while ((len = from.read(cbuf)) > 0) {
-        byte[] buf = new String(cbuf, 0, len).getBytes();
-        cp.writeToCopy(buf, 0, buf.length);
-      }
-      cp.endCopy();
-      if (cp.isActive()) {
-        cp.cancelCopy();
+      try (FileReader from = new FileReader(path.toString())){
+        while ((len = from.read(cbuf)) > 0) {
+          byte[] buf = new String(cbuf, 0, len).getBytes();
+          cp.writeToCopy(buf, 0, buf.length);
+        }
+        cp.endCopy();
+        if (cp.isActive()) {
+          cp.cancelCopy();
+        }
+      } catch (Exception ex) {
+        LOG_ERROR.error("Error in recover copy field process for fileName {} with error", fileName, ex);
+        throw ex;
       }
     } catch (Exception e) {
       LOG_ERROR.error("Error in recover copy field process for fileName {} with error", fileName, e);
@@ -2322,11 +2327,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
     int maxLinesPerFile = 200000;
 
-        try {
-            // Actual splitting of file into smaller files
-            FileInputStream fstream = new FileInputStream(inputfile);
+        try (FileInputStream fstream = new FileInputStream(inputfile);
             DataInputStream in = new DataInputStream(fstream);
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+            BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+            // Actual splitting of file into smaller files
+
             String strLine;
             String firstFieldId = null;
             String lastFieldId = null;
@@ -2335,23 +2340,25 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 // Destination File Location
                 String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j,
                     LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-                FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
-                BufferedWriter out = new BufferedWriter(fstream1);
-                for (int i = 1; i <= maxLinesPerFile; i++) {
+                try (FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
+                    BufferedWriter out = new BufferedWriter(fstream1)) {
+                  for (int i = 1; i <= maxLinesPerFile; i++) {
                     strLine = br.readLine();
                     if (strLine != null) {
-                        if (i == 1) {
-                            firstFieldId = Arrays.stream(strLine.split("\t")).findFirst().get();
-                        } else if (i == maxLinesPerFile) {
-                            lastFieldId = Arrays.stream(strLine.split("\t")).findFirst().get();
-                        }
-                        out.write(strLine);
-                        if (i != maxLinesPerFile) {
-                            out.newLine();
-                        }
+                      if (i == 1) {
+                        firstFieldId = Arrays.stream(strLine.split("\t")).findFirst().get();
+                      } else if (i == maxLinesPerFile) {
+                        lastFieldId = Arrays.stream(strLine.split("\t")).findFirst().get();
+                      }
+                      out.write(strLine);
+                      if (i != maxLinesPerFile) {
+                        out.newLine();
+                      }
                     }
+                  }
+                } catch (Exception ex) {
+                  LOG_ERROR.error("error processing json for snap file {}", splitFileName);
                 }
-                out.close();
                 ReleaseTaskVO releaseTaskVO =
                     ReleaseTaskVO.builder().splitFileName(splitFileName).snapshotId(idSnapshot)
                         .splitFileId(j).numberOfSplitFiles(numberOfFiles).datasetId(datasetId)
@@ -2382,8 +2389,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               task = taskService.saveTask(task);
               LOG.info("Created task with id {} for file {} with idSnapshot {} and processId {}", task.getId(), splitFileName, idSnapshot, processId);
             }
-
-            in.close();
         } catch (Exception e) {
             LOG_ERROR.error("Error in file {} with error", inputfile, e);
         }
@@ -2397,32 +2402,30 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     int numberOfFiles = snapFileForSplitting.getNumberOfFiles();
     int maxLinesPerFile = 200000;
 
-    try {
+    try(FileInputStream fstream = new FileInputStream(inputfile);
+        DataInputStream in = new DataInputStream(fstream);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
       // Actual splitting of file into smaller files
-      FileInputStream fstream = new FileInputStream(inputfile);
-      DataInputStream in = new DataInputStream(fstream);
-      BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
       String strLine;
 
       for (int j = 1; j <= numberOfFiles; j++) {
         // Destination File Location
-        String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j,
-            LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
-        FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName);
-        BufferedWriter out = new BufferedWriter(fstream1);
-        for (int i = 1; i <= maxLinesPerFile; i++) {
-          strLine = br.readLine();
-          if (strLine != null) {
-            out.write(strLine);
-            if (i != maxLinesPerFile) {
-              out.newLine();
+        String splitFileName = String.format(SPLIT_FILE_PATTERN_NAME, idSnapshot, j, LiteralConstants.SNAPSHOT_FILE_FIELD_SUFFIX);
+        try (FileWriter fstream1 = new FileWriter(pathSnapshot + splitFileName); BufferedWriter out = new BufferedWriter(fstream1)) {
+          for (int i = 1; i <= maxLinesPerFile; i++) {
+            strLine = br.readLine();
+            if (strLine != null) {
+              out.write(strLine);
+              if (i != maxLinesPerFile) {
+                out.newLine();
+              }
             }
           }
+        } catch (Exception ex) {
+          LOG_ERROR.error("Error in file {} with error", inputfile, ex);
         }
-        out.close();
       }
-
-      in.close();
     } catch (Exception e) {
       LOG_ERROR.error("Error in file {} with error", inputfile, e);
     }
@@ -2443,9 +2446,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     int numberOfLines = 0;
     double maxLinesPerFile = 200000.0;
 
+    Scanner scanner = null;
     try {
       File file = new File(inputfile);
-      Scanner scanner = new Scanner(file);
+      scanner = new Scanner(file);
       while (scanner.hasNextLine()) {
         scanner.nextLine();
         numberOfLines++;
@@ -2459,6 +2463,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("Method isSnapFileForSplitting ends for file {} with {} lines into {} files", inputfile, numberOfLines, numberOfFiles);
     } catch (Exception e) {
       LOG_ERROR.error("Error in file {} with error", inputfile,  e);
+    } finally {
+      if (scanner != null) {
+        scanner.close();
+      }
     }
 
     return splitSnapfile;

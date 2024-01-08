@@ -764,6 +764,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         // neccessary
         dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
             datasetId);
+        //TODO:  Here we have issue if custodian do continuously changes on fields then we will end up in race conditions with parallel drop and creates in materialized views
         dataschemaService.releaseCreateUpdateView(datasetId,
             SecurityContextHolder.getContext().getAuthentication().getName(), false);
 

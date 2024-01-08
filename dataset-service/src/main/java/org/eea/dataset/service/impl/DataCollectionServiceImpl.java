@@ -499,7 +499,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // remove from the list of designs the ones that are going to be referenceDatasets
     List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
     List<String> referenceSchemasId = new ArrayList<>();
-    designs.forEach(dataset -> {
+    designs.stream().forEach(dataset -> {
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
       if (schema != null && schema.getReferenceDataset() != null
           && Boolean.TRUE.equals(schema.getReferenceDataset())) {
@@ -513,7 +513,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       }
     });
-    designs.removeIf(referenceDatasets::contains);
+    designs.removeIf(design -> referenceDatasets.contains(design));
 
     // Now we have splitted the schemas between designs ("normal") schemas and schemas that are
     // reference,
@@ -595,9 +595,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDatasets the reference datasets
    * @param referenceSchemasId the reference schemas id
    */
+  //TODO: check if we want to use boolean to run only if tables have link to reference dataset
   private void checkLinksInReferenceDatasets(List<DesignDatasetVO> referenceDatasets,
       List<String> referenceSchemasId) {
     referenceDatasets.forEach(reference -> {
+      boolean canExecuteViews = false;
       DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(reference.getDatasetSchema());
       for (TableSchemaVO table : schema.getTableSchemas()) {
         for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
@@ -614,6 +616,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                   field, reference.getId(), false);
               datasetSchemaService.propagateRulesAfterUpdateSchema(reference.getDatasetSchema(),
                   field, type, reference.getId());
+              canExecuteViews = true;
             } catch (EEAException e) {
               LOG_ERROR.error(
                   "Link from reference dataset to regular schema detected. Error trying to change the field to Text type. DatasetId {}.Message {}",
@@ -622,7 +625,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           }
         }
       }
-      datasetSchemaService.releaseCreateUpdateView(reference.getId(), SecurityContextHolder.getContext().getAuthentication().getName(), false);
+      if (canExecuteViews) {
+        datasetSchemaService.releaseCreateUpdateView(reference.getId(), SecurityContextHolder.getContext().getAuthentication().getName(), false);
+      }
     });
   }
 

@@ -2776,6 +2776,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchemas.stream().anyMatch(f -> f.getPk() != null && f.getPk());
       FieldSchema existingFieldPk = fieldSchemas.stream()
           .filter(f -> f.getPk() != null && f.getPk()).findFirst().orElse(null);
+      //TODO: rollback here
+      boolean canExecuteViews = false;
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
@@ -2792,6 +2794,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             // UPDATE
             updateImportFieldSchema(fieldSchemaVO, fieldSchemas, datasetSchema, datasetId);
           }
+          canExecuteViews = true;
           if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
             pkAlreadyInTable = true;
           }
@@ -2801,7 +2804,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
               datasetId);
         }
       }
-      releaseCreateUpdateView(datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), false);
+      if (canExecuteViews) {
+        releaseCreateUpdateView(datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), false);
+      }
       LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in readFieldLines for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
