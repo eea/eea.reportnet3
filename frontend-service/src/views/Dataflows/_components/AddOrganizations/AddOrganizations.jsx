@@ -9,8 +9,6 @@ import isNil from 'lodash/isNil';
 
 import styles from './AddOrganizations.module.scss';
 
-import { config } from 'conf';
-
 import { AddOrganizationsService } from 'services/AddOrganizationsService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -47,7 +45,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     isActionButtonsEditing: false
   });
   const [filteredRecords, setFilteredRecords] = useState(0);
-  const [group, setGroup] = useState();
+  const [selectedGroup, setSelectedGroup] = useState();
   const [isFiltered, setIsFiltered] = useState(false);
   const [isAddOrganizationDialogVisible, setIsAddOrganizationDialogVisible] = useState(false);
   const [isEditOrganizationDialogVisible, setIsEditOrganizationDialogVisible] = useState(false);
@@ -59,6 +57,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const [organizationsList, setOrganizationsList] = useState([]);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [providerEditing, setProviderEditing] = useState();
+  const [providerGroupsList, setProviderGroupsList] = useState([]);
   const [sort, setSort] = useState({ field: 'label', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
 
@@ -72,12 +71,33 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   let organizationCode = organizationName?.replaceAll(' ', '').substring(0, 20).toUpperCase();
 
   useEffect(() => {
+    getProviderGroups();
+  }, []);
+
+  useEffect(() => {
     getOrganizations();
   }, [pagination, sort]);
 
   useInputTextFocus(isAddOrganizationDialogVisible, inputRef);
 
   const isValidOrganizationName = () => RegularExpressions['nonSymbols'].test(organizationName);
+
+  const getProviderGroups = async () => {
+    setLoadingStatus('pending');
+
+    try {
+      const data = await AddOrganizationsService.getProviderGroups();
+
+      setProviderGroupsList(data);
+      setLoadingStatus('success');
+    } catch (error) {
+      console.error('AddOrganizations - getProviderGroups.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'GET_ORGANIZATIONS_ERROR' }, true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getOrganizations = async () => {
     setLoadingStatus('pending');
@@ -89,7 +109,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         sortOrder: sort.order,
         sortField: sort.field,
         providerCode: filterBy.code,
-        groupId: !filterBy.groupId ? filterBy.groupId : filterBy.groupId.value,
+        groupId: !filterBy.groupId ? filterBy.groupId : filterBy.groupId.dataProviderGroupId,
         label: filterBy.label
       });
 
@@ -116,33 +136,6 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
 
-  const groupOptions = [
-    {
-      label: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
-      group: 1
-    },
-    {
-      label: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
-      group: 2
-    },
-    {
-      label: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
-      group: 3
-    },
-    {
-      label: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
-      group: 4
-    },
-    {
-      label: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
-      group: 5
-    },
-    {
-      label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
-      group: 6
-    }
-  ];
-
   const filterOptions = [
     {
       nestedOptions: [
@@ -155,32 +148,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     {
       key: 'groupId',
       label: resourcesContext.messages['group'],
-      dropdownOptions: [
-        {
-          label: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
-          value: 1
-        },
-        {
-          label: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
-          value: 2
-        },
-        {
-          label: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
-          value: 3
-        },
-        {
-          label: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
-          value: 4
-        },
-        {
-          label: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
-          value: 5
-        },
-        {
-          label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
-          value: 6
-        }
-      ],
+      dropdownOptions: providerGroupsList,
       template: 'groupId',
       type: 'DROPDOWN'
     }
@@ -228,7 +196,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         field={column.key}
         header={column.header}
         key={column.key}
-        sortable={column.key !== 'id'}
+        sortable={column.key !== 'actions'}
         style={column.style}
       />
     ));
@@ -240,12 +208,9 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const getProviderCodeTemplate = provider => <p>{provider.code}</p>;
 
-  const getProviderGroupTemplate = provider => {
-    const groupKey = Object.keys(config.providerGroup)[provider.groupId - 1];
-
-    return <p>{resourcesContext.messages[config.providerGroup[groupKey].label]}</p>;
-  };
-
+  const getProviderGroupTemplate = provider => (
+    <p>{providerGroupsList.find(group => provider.groupId === group.dataProviderGroupId).label}</p>
+  );
   const getActionsTemplate = provider => {
     return (
       <ActionsColumn
@@ -302,14 +267,14 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
           <Dropdown
             appendTo={document.body}
             id="groupsDropdown"
-            onChange={event => setGroup(event.target.value)}
+            onChange={event => setSelectedGroup(event.target.value)}
             onKeyPress={event => onEnterKey(event.key)}
             optionLabel="label"
-            options={groupOptions}
+            options={providerGroupsList}
             placeholder={resourcesContext.messages['selectGroupOfCompanies']}
             ref={dropdownRef}
             style={{ margin: '0.3rem 0' }}
-            value={group}
+            value={selectedGroup}
           />
         </div>
       </div>
@@ -353,18 +318,14 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
           <InputText
             disabled={true}
             style={{ margin: '0.3rem 0' }}
-            value={
-              resourcesContext.messages[
-                config.providerGroup[Object.keys(config.providerGroup)[providerEditing.groupId - 1]].label
-              ]
-            }
+            value={providerGroupsList.find(group => providerEditing.groupId === group.dataProviderGroupId).label}
           />
         </div>
       </div>
     );
   };
 
-  const hasEmptyData = () => isEmpty(organizationName) || isEmpty(group);
+  const hasEmptyData = () => isEmpty(organizationName) || isEmpty(selectedGroup);
 
   const onRefresh = () => {
     setIsRefreshing(true);
@@ -374,7 +335,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const onResetAll = () => {
     setIsRefreshing(true);
     setOrganizationName('');
-    setGroup(null);
+    setSelectedGroup(null);
 
     getOrganizations();
   };
@@ -391,10 +352,10 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     setIsLoadingButton(true);
     try {
       await AddOrganizationsService.createProvider({
-        group: group.label,
+        group: selectedGroup.label,
         label: organizationName,
         code: organizationCode,
-        groupId: group.group
+        groupId: selectedGroup.dataProviderGroupId
       });
       onCloseAddDialog();
     } catch (error) {
@@ -409,17 +370,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const updateProvider = async () => {
     setIsLoadingButton(true);
     try {
-      await AddOrganizationsService.createProvider({
-        group: group.label,
-        label: organizationName,
-        code: providerEditing.code,
-        groupId: group.group
+      await AddOrganizationsService.updateProvider({
+        id: actionsButtons.id,
+        label: organizationName
       });
       onCloseEditDialog();
     } catch (error) {
       console.error('AddOrganizations - updateProvider.', error);
       setLoadingStatus('error');
-      notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
+      notificationContext.add({ type: 'UPDATE_ORGANIZATION_ERROR' }, true);
     } finally {
       setIsLoadingButton(false);
     }
