@@ -22,19 +22,21 @@ window.env = {
   /**
    * SANDBOX
    */
-  REACT_APP_BACKEND: 'https://sandbox-api.reportnet.europa.eu',
-  EULOGIN_URL:
-    'https://sandbox-auth.reportnet.europa.eu/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=https%3A%2F%2Fsandbox.reportnet.europa.eu%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
-  WEBSOCKET_URL: 'wss://sandbox.reportnet.europa.eu/communication/reportnet-websocket',
-
-  /**
-   * LOCALHOST
-   */
-  // REACT_APP_BACKEND: 'http://localhost:8010',
+  // REACT_APP_BACKEND: 'https://sandbox-api.reportnet.europa.eu',
   // EULOGIN_URL:
-  //   'http://localhost:8010/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=https%3A%2F%2Flocalhost%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
-  // WEBSOCKET_URL: 'wss://localhost:8010/communication/reportnet-websocket',
+  //   'https://sandbox-auth.reportnet.europa.eu/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=https%3A%2F%2Fsandbox.reportnet.europa.eu%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
+  // WEBSOCKET_URL: 'wss://sandbox.reportnet.europa.eu/communication/reportnet-websocket',
+  //
 
+
+
+
+
+  // personal changes
+  REACT_APP_BACKEND: 'http://localhost:8010',
+  EULOGIN_URL:
+      'http://localhost:8010/auth/realms/Reportnet/protocol/openid-connect/auth?client_id=reportnet&redirect_uri=https%3A%2F%2Flocalhost%2Feulogin%2F&response_mode=fragment&response_type=code&scope=openid',
+  WEBSOCKET_URL: 'wss://localhost:8010/communication/reportnet-websocket',
   REACT_APP_EULOGIN: false,
   DOCUMENTATION_FOLDER: 'test'
 };

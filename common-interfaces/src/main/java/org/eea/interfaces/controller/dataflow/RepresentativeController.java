@@ -49,7 +49,7 @@ public interface RepresentativeController {
    *
    * @param dataProviderVO the provider to be created
    */
-  @PatchMapping("/provider/update")
+  @PutMapping("/provider/update")
   void updateProvider(@RequestBody DataProviderVO dataProviderVO) throws Exception;
 
   /**
