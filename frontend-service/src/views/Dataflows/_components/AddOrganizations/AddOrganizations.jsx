@@ -360,9 +360,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       onCloseAddDialog();
     } catch (error) {
       console.error('AddOrganizations - createNewProvider.', error);
-      setLoadingStatus('error');
-      notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
+      notificationContext.add(
+        {
+          type: 'CREATE_ORGANIZATION_ERROR',
+          content: { customContent: { createError: error.response.data.message } }
+        },
+        true
+      );
     } finally {
+      onResetAll();
       setIsLoadingButton(false);
     }
   };
@@ -378,8 +384,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     } catch (error) {
       console.error('AddOrganizations - updateProvider.', error);
       setLoadingStatus('error');
-      notificationContext.add({ type: 'UPDATE_ORGANIZATION_ERROR' }, true);
+      notificationContext.add(
+        {
+          type: 'UPDATE_ORGANIZATION_ERROR',
+          content: { customContent: { updateError: error.response.data.message } }
+        },
+        true
+      );
     } finally {
+      onResetAll();
       setIsLoadingButton(false);
     }
   };
