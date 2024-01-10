@@ -762,8 +762,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
         // After the update, we create the rules needed and change the type of the field if
         // neccessary
+        LOG.info("VAGOS inside updateFieldSchema with datasetId : {}", datasetId);
         dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
-            datasetId);//For fields
+            datasetId);
 
         // Add the Pk if needed to the catalogue
         dataschemaService.addToPkCatalogue(fieldSchemaVO, datasetId);
