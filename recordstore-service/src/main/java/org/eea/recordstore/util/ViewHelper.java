@@ -1,13 +1,5 @@
 package org.eea.recordstore.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.recordstore.service.RecordStoreService;
@@ -20,6 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 /**
  * The Class ViewHelper.
@@ -69,19 +70,24 @@ public class ViewHelper implements DisposableBean {
    */
   public void insertViewProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // Check the number of views per dataset in this moment queued
+    processesList.stream().filter(datasetId::equals).forEach(id -> LOG.info("VAGOS inside insertViewProcces filter datasetIds current datasetId {}", id));
+
     switch (processesList.stream().filter(datasetId::equals).collect(Collectors.counting())
         .toString()) {
       case "0":
         // no processes running, then we should queue it
+        LOG.info("VAGOS inside insertViewProcces, CASE 0, datasetId : {}, isMaterialized: {}, checkSQL: {}", datasetId, isMaterialized, checkSQL);
         viewExecutorService.execute(
             () -> executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL));
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       case "1":
+        LOG.info("VAGOS inside insertViewProcces, CASE 1, datasetId : {}, isMaterialized: {}, checkSQL: {}", datasetId, isMaterialized, checkSQL);
         // one process already queued so, we notify to every instance
         kafkaSenderUtils.releaseDatasetKafkaEvent(EventType.INSERT_VIEW_PROCCES_EVENT, datasetId);
         break;
       default:
+        LOG.info("VAGOS inside insertViewProcces, CASE default, datasetId : {}, isMaterialized: {}, checkSQL: {}", datasetId, isMaterialized, checkSQL);
         // if there are 2 processes, one active, one in queue, no need to add more as the last
         // process will take all the changes happened before the second process starts
         break;
@@ -95,7 +101,9 @@ public class ViewHelper implements DisposableBean {
    */
   public void insertProccesList(Long datasetId) {
     synchronized (processesList) {
+      LOG.info("VAGOS inside insertProccesList before adding dataset with id {}", datasetId);
       processesList.add(datasetId);
+      processesList.stream().filter(datasetId::equals).forEach(id -> LOG.info("after adding dataset id, List contains ids : {} ", id));
       LOG.info("Add process create Query views from dataset: {} ", datasetId);
     }
   }
@@ -109,11 +117,14 @@ public class ViewHelper implements DisposableBean {
    */
   public void finishProcces(Long datasetId, Boolean isMaterialized, Boolean checkSQL) {
     // If we hace two dataset view generating process we have to execute it again
+    LOG.info("VAGOS inside finishProcces with datasetID : {}", datasetId);
     if (2 == processesList.stream().filter(datasetId::equals).collect(Collectors.counting())) {
+      LOG.info("VAGOS inside finishProcces when we have 2 datasets with same id : {}", datasetId);
       viewExecutorService.execute(
           () -> executeCreateUpdateMaterializedQueryView(datasetId, isMaterialized, checkSQL));
     }
     // update the processes list in every recordstore instance
+    LOG.info("VAGOS inside finishProcces before releaseDeleteViewProccesEvent : {}", datasetId);
     releaseDeleteViewProccesEvent(datasetId);
   }
 
@@ -124,6 +135,7 @@ public class ViewHelper implements DisposableBean {
    */
   public void deleteProccesList(Long datasetId) {
     synchronized (processesList) {
+      LOG.info("VAGOS inside deleteProccesList before remove : datasetId: {}", datasetId);
       processesList.remove(datasetId);
       LOG.info("Delete process create Query views from dataset: {} ", datasetId);
     }
@@ -138,10 +150,12 @@ public class ViewHelper implements DisposableBean {
    */
   public void executeCreateUpdateMaterializedQueryView(Long datasetId, Boolean isMaterialized,
       Boolean checkSQL) {
+    LOG.info("VAGOS inside executeCreateUpdateMaterializedQueryView before createUpdateQueryView with dataset id : {}", datasetId);
     recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
     if (Boolean.TRUE.equals(checkSQL)) {
       releaseValidateManualQCEvent(datasetId, true);
     }
+    LOG.info("VAGOS inside executeCreateUpdateMaterializedQueryView before releaseFinishViewProcessEvent with dataset id : {}", datasetId);
     releaseFinishViewProcessEvent(datasetId, isMaterialized, checkSQL);
   }
 

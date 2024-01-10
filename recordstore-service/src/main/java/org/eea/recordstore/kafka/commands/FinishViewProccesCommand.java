@@ -21,6 +21,7 @@ public class FinishViewProccesCommand extends AbstractEEAEventHandlerCommand {
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  private static final Logger LOG = LoggerFactory.getLogger(ViewHelper.class);
 
   /** The view helper. */
   @Autowired
@@ -50,7 +51,7 @@ public class FinishViewProccesCommand extends AbstractEEAEventHandlerCommand {
       Boolean isMaterialized =
               Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("isMaterialized")));
       Boolean checkSQL = Boolean.parseBoolean(String.valueOf(eeaEventVO.getData().get("checkSQL")));
-
+      LOG.info("VAGOS inside FinishViewProccesCommand.execute with datasetId : {}", datasetId);
       viewHelper.finishProcces(datasetId, isMaterialized, checkSQL);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

@@ -1,13 +1,12 @@
 package org.eea.dataset.controller;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.netty.util.internal.StringUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -62,13 +61,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.netty.util.internal.StringUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetSchemaControllerImpl.
@@ -762,7 +763,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         // After the update, we create the rules needed and change the type of the field if
         // neccessary
         dataschemaService.propagateRulesAfterUpdateSchema(datasetSchema, fieldSchemaVO, type,
-            datasetId);
+            datasetId);//For fields
 
         // Add the Pk if needed to the catalogue
         dataschemaService.addToPkCatalogue(fieldSchemaVO, datasetId);

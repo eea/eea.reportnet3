@@ -23,6 +23,7 @@ public class DeleteViewProccesCommand extends AbstractEEAEventHandlerCommand {
 
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  private static final Logger LOG = LoggerFactory.getLogger(ViewHelper.class);
 
   /**
    * Gets the event type.
@@ -46,6 +47,7 @@ public class DeleteViewProccesCommand extends AbstractEEAEventHandlerCommand {
       Long datasetId =
               Long.parseLong(String.valueOf(eeaEventVO.getData().get(LiteralConstants.DATASET_ID)));
 
+      LOG.info("VAGOS inside DeleteViewProccesCommand.execute : {}", datasetId);
       viewHelper.deleteProccesList(datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());

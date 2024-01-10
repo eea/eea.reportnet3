@@ -1,18 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.eea.dataset.mapper.DataCollectionMapper;
 import org.eea.dataset.persistence.metabase.domain.ChangesEUDataset;
 import org.eea.dataset.persistence.metabase.domain.DataCollection;
@@ -85,6 +72,20 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The Class DataCollectionServiceImpl.
@@ -519,6 +520,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     // we have to check if there are links on reference datasets. If it is the case, then the links
     // can't point to
     // normal schemas. If this happens, convert the type Link to Text
+    LOG.info("VAGOS Before checkLinksInReferenceDatasets, referenceDatasets size : {}", (long) referenceDatasets.size());
     checkLinksInReferenceDatasets(referenceDatasets, referenceSchemasId);
 
     // check if there are designs (or reference) to continue the process
@@ -613,6 +615,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                   field, reference.getId(), false);
               datasetSchemaService.propagateRulesAfterUpdateSchema(reference.getDatasetSchema(),
                   field, type, reference.getId());
+              LOG.info("VAGOS In checkLinksInReferenceDatasets, reference schema id : {}", reference.getId());
             } catch (EEAException e) {
               LOG_ERROR.error(
                   "Link from reference dataset to regular schema detected. Error trying to change the field to Text type. DatasetId {}.Message {}",

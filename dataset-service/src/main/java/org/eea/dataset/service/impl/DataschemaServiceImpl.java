@@ -579,9 +579,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throw new EEAException(e);
     }
 
-    releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
-
   }
 
   /**
@@ -1221,6 +1218,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
 
+      LOG.info("VAGOS inside propagateRulesAfterUpdateSchema : {} and datasetId : {}", fieldSchemaVO.getName(), datasetId);
       releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
 
@@ -1245,6 +1243,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       }
 
+      LOG.info("VAGOS inside propagateRulesAfterUpdateSchema : {} and datasetId : {}", fieldSchemaVO.getName(), datasetId);
       releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
     }
@@ -2576,6 +2575,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             datasetId, e.getMessage(), e);
       }
     }
+    LOG.info("VAGOS inside updateReferenceDataset,  datasetId: {}", datasetId);
+    releaseCreateUpdateView(datasetId,
+        SecurityContextHolder.getContext().getAuthentication().getName(), false);
   }
 
 

@@ -956,7 +956,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Path path3 = Paths.get(pathSnapshot + nameFileRecordValue);
     Files.deleteIfExists(path3);
     Path path4 = Paths.get(pathSnapshot + nameFileFieldValue);
-    Files.deleteIfExists(path4);
+    //Files.deleteIfExists(path4);
     Path path5 = Paths.get(pathSnapshot + nameAttachmentValue);
     Files.deleteIfExists(path5);
   }
@@ -1025,6 +1025,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         .forEach(table -> {
           List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
           try {
+            LOG.info("VAGOS inside createUpdateQueryView : {} and datasetId {}", table.getNameTableSchema(), datasetId);
             // create materialiced view or query view of all tableSchemas
             executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId, true);
