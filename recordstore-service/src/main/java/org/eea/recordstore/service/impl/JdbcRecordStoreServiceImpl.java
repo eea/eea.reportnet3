@@ -1025,7 +1025,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         .forEach(table -> {
           List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
           try {
-            LOG.info("VAGOS inside createUpdateQueryView : {} and datasetId {}", table.getNameTableSchema(), datasetId);
+            LOG.info("VAGOS inside JDBC createUpdateQueryView : {} and datasetId {}", table.getNameTableSchema(), datasetId);
             // create materialiced view or query view of all tableSchemas
             executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId, true);
