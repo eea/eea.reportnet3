@@ -578,6 +578,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
+    LOG.info("VAGOS inside updateTableSchema,  datasetId: {}", datasetId);
+    releaseCreateUpdateView(datasetId,
+        SecurityContextHolder.getContext().getAuthentication().getName(), false);
 
   }
 
@@ -2575,9 +2578,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             datasetId, e.getMessage(), e);
       }
     }
-    LOG.info("VAGOS inside updateReferenceDataset,  datasetId: {}", datasetId);
-    releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
   }
 
 
