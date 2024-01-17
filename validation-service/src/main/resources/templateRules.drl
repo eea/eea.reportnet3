@@ -39,6 +39,9 @@ end template
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
 function boolean isCodelist( String value , String codelistItems){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}	
@@ -46,6 +49,9 @@ function boolean isCodelist( String value , String codelistItems){
 }
 
 function boolean isMultiSelectCodelistValidate( String value , String codelistItems){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}	
@@ -53,6 +59,9 @@ function boolean isMultiSelectCodelistValidate( String value , String codelistIt
 }
 
 function boolean isCodelistInsensitive( String value ,  String codelistItems){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}	
