@@ -1134,6 +1134,12 @@
           "key": "UPDATE_DATACOLLECTION_COMPLETED_EVENT"
         },
         {
+          "key": "CREATE_ORGANIZATION_COMPLETED_EVENT"
+        },
+        {
+          "key": "UPDATE_ORGANIZATION_COMPLETED_EVENT"
+        },
+        {
           "key": "ADD_DATACOLLECTION_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",

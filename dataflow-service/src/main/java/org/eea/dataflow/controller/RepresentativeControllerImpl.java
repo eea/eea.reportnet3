@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -65,7 +66,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
 
   /** The valid columns. */
-  List<String> validColumns = Arrays.asList("code", "group_id", "label");
+  List<String> validColumns = Arrays.asList("id", "code", "group_id", "label");
 
 
   /** The representative service. */
@@ -114,7 +115,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PostMapping("/provider/create")
   @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
-  @ApiOperation(value = "Create the list of providers", response = DataProviderVO.class, hidden = true)
+  @ApiOperation(value = "Creates a single provider", response = DataProviderVO.class, hidden = true)
   public void createProvider(
       @ApiParam(type = "Object", value = "Data Provider Object") @RequestBody DataProviderVO dataProviderVO) throws Exception {
 
@@ -125,6 +126,38 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CREATING_PROVIDER);
     } catch(Exception e){
       LOG.error("Unexpected error! Could not create data provider {} Message: {}", dataProviderVO, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Updates a provider.
+   *
+   * @param dataProviderVO the provider to be created
+   */
+  @Override
+  @LockMethod
+  @HystrixCommand
+  @PutMapping("/provider/update")
+  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+  @ApiOperation(value = "Updates a single provider", response = DataProviderVO.class, hidden = true)
+  public void updateProvider(
+      @ApiParam(type = "Object", value = "Data Provider Object") @RequestBody DataProviderVO dataProviderVO) throws Exception {
+
+    if (dataProviderVO == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER_NULL_OBJECT);
+    }
+    if (dataProviderVO.getId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER_NULL_ID);
+    }
+
+    try {
+      representativeService.updateProvider(dataProviderVO);
+    } catch (EEAException e) {
+      LOG.error("Error creating new data provider {} Message: {}", dataProviderVO, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER);
+    } catch(Exception e){
+      LOG.error("Unexpected error! Could not update data provider {} Message: {}", dataProviderVO, e.getMessage());
       throw e;
     }
   }
@@ -166,6 +199,33 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw e;
     }
 
+  }
+
+  /**
+   * Find all data providers
+   * @param pageNum
+   * @param pageSize
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataProviderGroups", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Find all DataProviders  by their Group Id",
+          produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
+          responseContainer = "List", hidden = true)
+  public List<DataProviderCodeVO> findAllDataProviderGroups() {
+    try {
+      return representativeService.getAllDataProviderGroups();
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve all data group providers");
+      throw e;
+    }
   }
 
   /**

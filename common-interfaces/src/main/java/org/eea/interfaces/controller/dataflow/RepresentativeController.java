@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,8 +41,16 @@ public interface RepresentativeController {
    *
    * @param dataProviderVO the provider to be created
    */
-  @PostMapping("/create-provider")
+  @PostMapping("/provider/create")
   void createProvider(@RequestBody DataProviderVO dataProviderVO) throws Exception;
+
+  /**
+   * Updates a provider.
+   *
+   * @param dataProviderVO the provider to be created
+   */
+  @PutMapping("/provider/update")
+  void updateProvider(@RequestBody DataProviderVO dataProviderVO) throws Exception;
 
   /**
    * Find all data providers
@@ -63,12 +72,14 @@ public interface RepresentativeController {
                                        @RequestParam(value = "groupId", required = false) Integer groupId,
                                        @RequestParam(value = "label", required = false) String label);
 
-  /**
-   * Find all data provider by group id.
-   *
-   * @param groupId the group id
-   * @return the list
-   */
+  @GetMapping(value = "/dataProviderGroups", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataProviderCodeVO> findAllDataProviderGroups();
+    /**
+     * Find all data provider by group id.
+     *
+     * @param groupId the group id
+     * @return the list
+     */
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderVO> findAllDataProviderByGroupId(@PathVariable("groupId") Long groupId);
 

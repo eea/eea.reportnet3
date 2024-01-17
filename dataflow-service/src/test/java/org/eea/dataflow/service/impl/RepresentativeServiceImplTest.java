@@ -988,9 +988,18 @@ public class RepresentativeServiceImplTest {
     dataProviderVO.setLabel("TestLabel");
     dataProviderVO.setCode("TestCode");
     dataProviderVO.setGroupId(1L);
+    DataProvider dataProvider = new DataProvider();
+    dataProvider.setLabel("TestLabel");
+    dataProvider.setCode("TestCode");
+    DataProviderGroup dataProviderGroup = new DataProviderGroup();
+    dataProviderGroup.setId(1L);
+    dataProvider.setDataProviderGroup(dataProviderGroup);
 
     when(dataProviderRepository.findAllByDataProviderGroup_id(1L)).thenReturn(new ArrayList<>());
+    Mockito.when(dataProviderRepository.findByDataProviderGroupAndCode(Mockito.any(), Mockito.anyString())).thenReturn(dataProvider);
     doNothing().when(dataProviderRepository).saveDataProvider(Mockito.any(), Mockito.any(), Mockito.any());
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(securityContext.getAuthentication().getName()).thenReturn("user");
 
     // when
     representativeServiceImpl.createProvider(dataProviderVO);
