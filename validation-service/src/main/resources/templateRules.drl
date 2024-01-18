@@ -39,6 +39,9 @@ end template
 
 //////////////////////////////////////////VALIDATION CODELIST////////////////////////////////////////////////////////////
 function boolean isCodelist( String value , String codelistItems){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}	
@@ -46,6 +49,9 @@ function boolean isCodelist( String value , String codelistItems){
 }
 
 function boolean isMultiSelectCodelistValidate( String value , String codelistItems){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}	
@@ -53,6 +59,9 @@ function boolean isMultiSelectCodelistValidate( String value , String codelistIt
 }
 
 function boolean isCodelistInsensitive( String value ,  String codelistItems){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}	
@@ -62,7 +71,21 @@ function boolean isCodelistInsensitive( String value ,  String codelistItems){
 //////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
 function boolean isBlank(String value){
 	return !StringUtils.isBlank(value);
-} 
+}
+
+function boolean isWhiteSpace(CharSequence cs) {
+   int strLen;
+   if (cs != null && (strLen = cs.length()) != 0) {
+      for(int i = 0; i < strLen; ++i) {
+         if (Character.isWhitespace(cs.charAt(i))) {
+            return true;
+         }
+      }
+     return false;
+   } else {
+     return false;
+   }
+}
 
 //////////////////////////////////////////VALIDATION EMPTY POINT VALUE////////////////////////////////////////////////////////////
 function boolean isBlankPoint(FieldValue fieldValue){
@@ -92,6 +115,9 @@ function boolean isBoolean(String value){
 
 //////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
 function boolean isDateYYYYMMDD( String value ){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}	
@@ -113,6 +139,9 @@ function boolean isDateYYYYMMDD( String value ){
 
 //////////////////////////////////////////VALIDATION DATETIME////////////////////////////////////////////////////////////
 function boolean isDateTime( String value ){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}
@@ -138,6 +167,9 @@ function boolean isDateTime( String value ){
 
 //////////////////////////////////////////VALIDATION NUMBER_INTEGER///////////////////////////////////////////////////////////
 function boolean isNumberInteger(String value){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}
@@ -151,6 +183,9 @@ function boolean isNumberInteger(String value){
 
 //////////////////////////////////////////VALIDATION NUMBER_DECIMAL///////////////////////////////////////////////////////////
 function boolean isNumberDecimal(String value){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}
@@ -164,6 +199,9 @@ function boolean isNumberDecimal(String value){
  
 //////////////////////////////////////////VALIDATION URL///////////////////////////////////////////////////////////
 function boolean isURL( String value ){	
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}
@@ -172,6 +210,9 @@ function boolean isURL( String value ){
 
 //////////////////////////////////////////VALIDATION EMAIL///////////////////////////////////////////////////////////
 function boolean isEmail(String value){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}
@@ -180,6 +221,9 @@ function boolean isEmail(String value){
  
  //////////////////////////////////////////VALIDATION PHONE///////////////////////////////////////////////////////////
 function boolean isPhone(String value){
+	if (isWhiteSpace(value)) {
+	    return false;
+	}
 	if(!isBlank(value)){
 		return true;
 	}
