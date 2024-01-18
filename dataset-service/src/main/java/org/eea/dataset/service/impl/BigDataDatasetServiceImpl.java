@@ -22,6 +22,8 @@ import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProces
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
+import org.eea.interfaces.vo.dataset.ETLTableVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -720,6 +722,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         // now the view is not updated, update the check to false
         datasetService.updateCheckView(datasetId, false);
+    }
+
+    @Override
+    public void etlImportForBigData(Long datasetId, Long dataflowId, Long providerId, ETLDatasetVO etlDatasetVO) throws Exception{
+        for (ETLTableVO table: etlDatasetVO.getTables()){
+            //create csv modified and turn in into a parquet file. use parquetConverterService.convertCsvToParquet
+        }
+
+        importBigData(datasetId, dataflowId, providerId, null, file, true, null, ",", null, null, null);
+
     }
 
 }

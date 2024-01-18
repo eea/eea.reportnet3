@@ -1528,9 +1528,32 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     try {
+
+      //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+      List<Long> datasetIds = new ArrayList<>();
+      datasetIds.add(datasetId);
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      Long jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus);
+      if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+        LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,  EEAErrorMessage.JOB_REFUSED_ERROR_MESSAGE);
+      }
+
+
       LOG.info("Calling etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
-      LOG.info("Successfully called etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+        try {
+          bigDataDatasetService.etlImportForBigData(datasetId, dataflowId, providerId,etlDatasetVO);
+        } catch (Exception e) {
+          LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
+          throw e;
+        }
+      }
+      else{
+        fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
+        LOG.info("Successfully called etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
           e.getMessage(), e);

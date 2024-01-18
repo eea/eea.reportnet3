@@ -744,6 +744,9 @@ public final class EEAErrorMessage {
   /** The Constant FILE_EXPORT_ERROR_MESSAGE */
   public static final String FILE_EXPORT_ERROR_MESSAGE = "Error exporting file";
 
+  /** The Constant JOB_REFUSED_ERROR_MESSAGE */
+  public static final String JOB_REFUSED_ERROR_MESSAGE = "A new job could not be inserted because there is another job in progress.";
+
   /**
    * Instantiates a new EEA error message.
    */

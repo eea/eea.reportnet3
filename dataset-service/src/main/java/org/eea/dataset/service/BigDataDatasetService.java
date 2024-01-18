@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.ETLDatasetVO;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BigDataDatasetService {
@@ -50,8 +51,18 @@ public interface BigDataDatasetService {
      * @param datasetId the dataset id
      * @param dataflowId the dataflow id
      * @param providerId the provider id
-     * @param deletePrefilledData the deletePrefilledTables
+     * @param deletePrefilledTables the deletePrefilledTables
      */
     void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables) throws Exception;
+
+    /**
+     * Etl Import For Big Data dataflows
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param etlDatasetVO the etlDatasetVO
+     */
+    void etlImportForBigData(Long datasetId, Long dataflowId, Long providerId, ETLDatasetVO etlDatasetVO) throws Exception;
 
 }

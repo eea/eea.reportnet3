@@ -280,7 +280,6 @@ public class JobControllerImpl implements JobController {
         parameters.put("dataProviderId", providerId);
         parameters.put("tableSchemaId", tableSchemaId);
         parameters.put("fileName", fileName);
-        parameters.put("dataProviderId", providerId);
         parameters.put("replace", replace);
         parameters.put("integrationId", integrationId);
         parameters.put("delimiter", delimiter);
@@ -310,6 +309,54 @@ public class JobControllerImpl implements JobController {
         LOG.info("Adding import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
         Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false, fmeJobId, dataflowName, datasetName);
         LOG.info("Successfully added import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
+        return jobId;
+    }
+
+    @Override
+    @HystrixCommand(commandProperties = {@HystrixProperty(
+            name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+    @PostMapping(value = "/addEtlImport/{datasetId}")
+    @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+    @ApiOperation(value = "Import file", hidden = true)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
+            @ApiResponse(code = 400, message = "Execution error"),
+            @ApiResponse(code = 412, message = "Dataflow not releasable")})
+    public Long addEtlImportJob(@PathVariable("datasetId") Long datasetId,
+                                @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                @RequestParam(value = "providerId", required = false) Long providerId,
+                                @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus) {
+
+        ThreadPropertiesManager.setVariable("user",
+                SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("dataflowId", dataflowId);
+        parameters.put("datasetId", datasetId);
+        parameters.put("dataProviderId", providerId);
+        JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
+        if(jobStatus != null){
+            statusToInsert = jobStatus;
+        }
+
+        String dataflowName = null;
+        try{
+            dataflowName = dataFlowControllerZuul.findDataflowNameById(dataflowId);
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataflowId, e);
+        }
+
+        String datasetName = null;
+        try{
+            datasetName = dataSetMetabaseControllerZuul.findDatasetNameById(datasetId);
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
+        }
+
+        LOG.info("Adding etl import job for dataflowId={}, datasetId={}, providerId={} and creator={}", dataflowId, datasetId, providerId, SecurityContextHolder.getContext().getAuthentication().getName());
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.IMPORT, statusToInsert, false, null, dataflowName, datasetName);
+        LOG.info("Successfully added etl import job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={}, replace={}, integrationId={} and creator={}", dataflowId, datasetId, providerId, tableSchemaId, replace, integrationId, SecurityContextHolder.getContext().getAuthentication().getName());
         return jobId;
     }
 
