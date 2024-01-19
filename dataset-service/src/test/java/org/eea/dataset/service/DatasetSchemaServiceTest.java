@@ -815,8 +815,6 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateTableSchemaTest() throws EEAException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     DataSetMetabase dataSetMetabase = new DataSetMetabase();
     dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
