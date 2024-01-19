@@ -1725,7 +1725,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         lines++;
                         batchCounter++;
                     }
-                    if (batchCounter < 5000 && batchCounter >0) {
+                    if (batchCounter <= 5000 && batchCounter >0) {
                         // left overs if the last batch is less than 5000
                         this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
                                 schema, connectionDataVO, lines-batchCounter, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
@@ -2265,6 +2265,7 @@ public class FileTreatmentHelper implements DisposableBean {
                             datasetToFile.getDataProviderId());
                 } else {
                     datasetToFile.setPublicFileName(null);
+                    dataSetMetabaseRepository.save(datasetToFile);
                     dataSetMetabaseRepository.save(datasetToFile);
                 }
             }
