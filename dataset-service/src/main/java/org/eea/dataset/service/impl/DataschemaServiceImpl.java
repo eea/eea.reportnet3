@@ -578,10 +578,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
-
-    releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
-
   }
 
   /**
@@ -2576,6 +2572,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             datasetId, e.getMessage(), e);
       }
     }
+    releaseCreateUpdateView(datasetId,
+        SecurityContextHolder.getContext().getAuthentication().getName(), false);
   }
 
 
