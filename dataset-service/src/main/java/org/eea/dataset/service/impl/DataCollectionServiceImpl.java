@@ -378,6 +378,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Override
   @Async
   public void updateDataCollection(Long dataflowId, boolean referenceDataflow) {
+    LOG.info("------------------------------- In updateDataCollection in service for dataflowId {}", dataflowId);
     manageDataCollection(dataflowId, null, false, false, false, referenceDataflow, false);
     LOG.info("Successfully updated data collection for dataflowId {}", dataflowId);
   }
@@ -399,6 +400,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
+
+    LOG.info("------------------------------- In createEmptyDataCollection service for dataflowId {}", dataflowId);
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
         referenceDataflow, stopAndNotifyPKError);
     LOG.info("Managed creating data collection for dataflowId {}", dataflowId);
@@ -469,32 +472,47 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         hasPk = checkIfSchemasHavePk(designs);
         if (!hasPk) {
           LOG_ERROR.error(
-              "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
-              dataflowId);
+                  "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
+                  dataflowId);
           releaseLockAndNotification(dataflowId, "No primary key in any schemas in the dataflow",
-              isCreation, hasPk);
+                  isCreation, hasPk);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
+                  EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
         }
       }
       LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation process.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
-      designs.stream().forEach(dataset -> {
-        recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
-        List<RuleVO> rulesSql =
-            rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
-        if (null != rulesSql && !rulesSql.isEmpty()) {
-          rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
-              .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
+      try {
+        for (DesignDatasetVO dataset : designs) {
+          //designs.stream().forEach(dataset -> {
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
+          recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
+          List<RuleVO> rulesSql =
+                  rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} after findSqlSentencesByDatasetSchemaId", dataset.getId());
+          if (null != rulesSql && !rulesSql.isEmpty()) {
+            LOG.info("------------------------------- In manageDataCollection for datasetId {} before validateSqlRuleDataCollection", dataset.getId());
+            rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
+                    .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
+            LOG.info("------------------------------- In manageDataCollection for datasetId {} after validateSqlRuleDataCollection", dataset.getId());
+          }
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} done", dataset.getId());
         }
-      });
-      LOG.info(
-          "Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
-          rulesWithError.size());
-      if (stopAndNotifySQLErrors) {
-        rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError);
+        ;//);
+        LOG.info(
+                "------------------------------- Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
+                rulesWithError.size());
+        if (stopAndNotifySQLErrors) {
+          rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError);
+        }
+      }
+      catch(Exception e){
+        LOG.info("------------------------------- In manageDataCollection EXCEPTION {} ", e.getMessage(), e);
+        throw e;
       }
     }
+
     // remove from the list of designs the ones that are going to be referenceDatasets
     List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
     List<String> referenceSchemasId = new ArrayList<>();
