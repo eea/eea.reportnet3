@@ -180,12 +180,14 @@ public class DataCollectionControllerImpl implements DataCollectionController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     try {
+      LOG.info("------------------------------- In createEmptyDataCollection controller for dataflowId {}", dataflowId);
       // This method will release the lock
        LOG.info("Creating empty data collection for dataflowId {}", dataflowId);
       dataCollectionService.createEmptyDataCollection(dataflowId, date, stopAndNotifySQLErrors,
               manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
       LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
     } catch (Exception e) {
+      LOG.info("------------------------------- In createEmptyDataCollection controller Exception for dataflowId {}", dataflowId);
       LOG_ERROR.error("Unexpected error! Error creating empty data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
@@ -208,6 +210,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") @LockCriteria(
           name = "dataflowId") Long dataflowId) {
 
+    LOG.info("------------------------------- In updateDataCollection for dataflowId {}", dataflowId);
     // new check: dataflow is Reference dataset?
     DataFlowVO dataflow = dataCollectionService.getDataflowMetabase(dataflowId);
     boolean referenceDataflow = false;
