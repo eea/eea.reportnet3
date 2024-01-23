@@ -326,6 +326,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                         .setSkipHeaderRecord(false)
                         .setDelimiter(delimiterChar)
                         .setIgnoreHeaderCase(true)
+                        .setIgnoreEmptyLines(false)
                         .setTrim(true).build())) {
             csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
@@ -398,6 +399,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                         .setSkipHeaderRecord(false)
                         .setDelimiter(delimiterChar)
                         .setIgnoreHeaderCase(true)
+                        .setIgnoreEmptyLines(false)
                         .setTrim(true).build())) {
             csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
