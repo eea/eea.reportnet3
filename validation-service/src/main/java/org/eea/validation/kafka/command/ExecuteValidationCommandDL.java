@@ -21,8 +21,8 @@ public class ExecuteValidationCommandDL extends ExecuteValidationCommand {
   @Autowired
   private DremioRulesExecuteService dremioRulesExecuteService;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+  /** The Constant LOG. */
+  private static final Logger LOG = LoggerFactory.getLogger(ExecuteValidationCommandDL.class);
 
   /**
    * Gets the event type.
@@ -63,7 +63,7 @@ public class ExecuteValidationCommandDL extends ExecuteValidationCommand {
         dremioRulesExecuteService.execute(dataflowId, datasetId, datasetSchemaId, tableName, tableSchemaId, ruleId, dataProviderId, taskId, createParquetWithSQL);
       };
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error executing event COMMAND_VALIDATE_DL. Message: {}", e.getMessage());
+      LOG.error("Unexpected error! Error executing event COMMAND_VALIDATE_DL. Message: {}", e.getMessage());
       throw e;
     }
   }

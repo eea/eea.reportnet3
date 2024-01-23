@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.3</api-gateway.version>
-    <communication.version>v3.3</communication.version>
-    <collaboration.version>v3.3</collaboration.version>
-    <dataflow.version>v3.3</dataflow.version>
-    <dataset.version>v3.3</dataset.version>
-    <document.version>v3.3</document.version>
-    <frontend.version>v3.3</frontend.version>
-    <indexsearch.version>v3.3</indexsearch.version>
-    <inspire.version>v3.3</inspire.version>
-    <recordstore.version>v3.3</recordstore.version>
-    <ums.version>v3.3</ums.version>
-    <validation.version>v3.3</validation.version>
-    <common-interfaces.version>v3.3</common-interfaces.version>
-    <common-utitlities.version>v3.3</common-utitlities.version>
-    <rod.version>v3.3</rod.version>
-    <orchestrator.version>v3.3</orchestrator.version>
+    <api-gateway.version>validation-with-disabled-rules</api-gateway.version>
+    <communication.version>validation-with-disabled-rules</communication.version>
+    <collaboration.version>validation-with-disabled-rules</collaboration.version>
+    <dataflow.version>validation-with-disabled-rules</dataflow.version>
+    <dataset.version>validation-with-disabled-rules</dataset.version>
+    <document.version>validation-with-disabled-rules</document.version>
+    <frontend.version>validation-with-disabled-rules</frontend.version>
+    <indexsearch.version>validation-with-disabled-rules</indexsearch.version>
+    <inspire.version>validation-with-disabled-rules</inspire.version>
+    <recordstore.version>validation-with-disabled-rules</recordstore.version>
+    <ums.version>validation-with-disabled-rules</ums.version>
+    <validation.version>validation-with-disabled-rules</validation.version>
+    <common-interfaces.version>validation-with-disabled-rules</common-interfaces.version>
+    <common-utitlities.version>validation-with-disabled-rules</common-utitlities.version>
+    <rod.version>validation-with-disabled-rules</rod.version>
+    <orchestrator.version>validation-with-disabled-rules</orchestrator.version>
   </properties>
 </project>

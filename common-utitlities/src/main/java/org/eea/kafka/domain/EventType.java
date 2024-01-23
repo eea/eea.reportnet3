@@ -604,7 +604,13 @@ public enum EventType {
   COMMAND_VALIDATE_EXPRESSION_DL(LiteralConstants.COMMAND_TOPIC, "execute_validations_expression_dl_key", false),
 
   /** The command validated sql datalake completed. */
-  COMMAND_VALIDATED_EXPRESSION_DL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_expression_validated_key", true);
+  COMMAND_VALIDATED_EXPRESSION_DL_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "dl_expression_validated_key", true),
+
+  /** The command validate sql datalake. */
+  COMMAND_VALIDATE_EMPTY_RULE(LiteralConstants.COMMAND_TOPIC, "execute_validations_empty_rule_key", false),
+
+  /** The command validated sql datalake completed. */
+  COMMAND_VALIDATED_EMPTY_RULE_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "empty_rule_validated_key", true);
 
 
   /** The topic. */
