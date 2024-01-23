@@ -1264,6 +1264,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @Override
   @PostMapping("/v1/{datasetId}/etlImport")
@@ -1280,7 +1281,9 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Dataflow id",
           example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Provider id",
-          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "Boolean", value = "Replace Data",
+              example = "0") @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -1297,9 +1300,9 @@ public class DatasetControllerImpl implements DatasetController {
     }
 
     try {
-      LOG.info("Calling etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
-      LOG.info("Successfully called etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      LOG.info("Calling etlImport for dataflowId {} datasetId {} and replaceData {}", dataflowId, datasetId, replaceData);
+      fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData);
+      LOG.info("Successfully called etlImport for dataflowId {} datasetId {} and replaceData {}", dataflowId, datasetId, replaceData);
     } catch (EEAException e) {
       LOG_ERROR.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
           e.getMessage(), e);
@@ -1318,6 +1321,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @Override
   @PostMapping("/{datasetId}/etlImport")
@@ -1333,8 +1337,10 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Dataflow id",
           example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Provider id",
-          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    this.etlImportDataset(datasetId, etlDatasetVO, dataflowId, providerId);
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "Boolean", value = "Replace Data",
+              example = "0") @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData) {
+    this.etlImportDataset(datasetId, etlDatasetVO, dataflowId, providerId, replaceData);
   }
 
   /**

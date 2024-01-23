@@ -364,11 +364,13 @@ public interface DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @PostMapping("/v1/{datasetId}/etlImport")
   void etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "replaceData", required = false) Boolean replaceData);
 
   /**
    * Etl import dataset legacy.
@@ -377,11 +379,13 @@ public interface DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @PostMapping("/{datasetId}/etlImport")
   void etlImportDatasetLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "replaceData", required = false) Boolean replaceData);
 
   /**
    * Gets the attachment.
