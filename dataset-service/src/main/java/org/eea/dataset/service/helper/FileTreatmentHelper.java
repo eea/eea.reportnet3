@@ -594,10 +594,11 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param datasetId    the dataset id
      * @param etlDatasetVO the etl dataset VO
      * @param providerId   the provider id
+     * @param replaceData
      * @throws EEAException the EEA exception
      */
     public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
-                                 Long providerId) throws EEAException {
+                                 Long providerId, Boolean replaceData) throws EEAException {
         // Get the datasetSchemaId by the datasetId
         LOG.info("Import data into dataset {}", datasetId);
         String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
@@ -648,7 +649,7 @@ public class FileTreatmentHelper implements DisposableBean {
         DatasetTypeEnum datasetType = datasetService.getDatasetType(dataset.getId());
 
         etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
-                readOnlyTables, fixedNumberTables, datasetType);
+                readOnlyTables, fixedNumberTables, datasetType, replaceData);
         dataset.setTableValues(tables);
         dataset.setIdDatasetSchema(datasetSchemaId);
 
@@ -1209,7 +1210,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
             // delete precious data if necessary
-            wipeData(datasetId, tableSchemaId, replace);
+            wipeData(datasetId, tableSchemaId, replace, false);
             LOG.info("Data has been wiped during rn3FileProcess datasetId {}, files {}", datasetId, files);
 
             // Wait a second before continue to avoid duplicated insertions
@@ -1272,7 +1273,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Start RN3-Import segmentation process: datasetId={}, files={}", datasetId, files);
 
             // delete precious data if necessary
-            wipeData(datasetId, tableSchemaId, replace);
+            wipeData(datasetId, tableSchemaId, replace, false);
             LOG.info("Data has been wiped during rn3FileProcessIntoTasks datasetId {}, files {}", datasetId, files);
 
             // Wait a second before continue to avoid duplicated insertions
@@ -1550,11 +1551,12 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param datasetId the dataset id
          * @param tableSchemaId the table schema id
          * @param delete the delete
+         * @param deleteReferenceTables the deleteReferenceTables
          */
-        private void wipeData (Long datasetId, String tableSchemaId,boolean delete){
+        private void wipeData (Long datasetId, String tableSchemaId,boolean delete, Boolean deleteReferenceTables){
             if (delete) {
                 if (null != tableSchemaId) {
-                    datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+                    datasetService.deleteTableBySchema(tableSchemaId, datasetId, deleteReferenceTables);
                 } else {
                     datasetService.deleteImportData(datasetId, true);
                 }
@@ -1574,7 +1576,7 @@ public class FileTreatmentHelper implements DisposableBean {
         private void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
                 IntegrationVO integrationVO, Long jobId){
             if (null != tableSchemaId) {
-                datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+                datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
             } else {
                 datasetService.deleteImportData(datasetId, true);
             }
@@ -2065,16 +2067,23 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param readOnlyTables the read only tables
          * @param fixedNumberTables the fixed number tables
          * @param datasetType the dataset type
+         * @param replaceData the replaceData
          */
         private void etlTableFor (ETLDatasetVO etlDatasetVO, DataProviderVO provider,
         final PartitionDataSetMetabase partition, Map<String, TableSchema > tableMap,
                 Map < String, FieldSchema > fieldMap, DatasetValue dataset, List < TableValue > tables,
-                List < String > readOnlyTables, List < String > fixedNumberTables, DatasetTypeEnum datasetType){
+                List < String > readOnlyTables, List < String > fixedNumberTables, DatasetTypeEnum datasetType, Boolean replaceData){
             for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
                 etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable,
                         datasetType);
                 // Check if table is read Only and save into a list
                 TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
+
+                // if needed remove already existing data from table
+                if(replaceData){
+                    wipeData(dataset.getId(), String.valueOf(tableSchema.getIdTableSchema()), true, true);
+                }
+
                 if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
                     readOnlyTables.add(tableSchema.getIdTableSchema().toString());
                 }

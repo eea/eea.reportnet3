@@ -713,7 +713,7 @@ public class FileTreatmentHelperTest {
   @Test(expected = EEAException.class)
   public void etlImportDatasetSchemaIdNotFoundTest() throws EEAException {
     try {
-      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L);
+      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L, false);
     } catch (EEAException e) {
       assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
       throw e;
@@ -731,7 +731,7 @@ public class FileTreatmentHelperTest {
         .thenReturn("5cf0e9b3b793310e9ceca190");
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     try {
-      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L);
+      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L, false);
     } catch (EEAException e) {
       assertEquals(
           String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, "5cf0e9b3b793310e9ceca190"),
@@ -805,7 +805,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L);
+    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L, false);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -886,7 +886,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L);
+    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L, false);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
