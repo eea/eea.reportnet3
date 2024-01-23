@@ -485,11 +485,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       try {
         for (DesignDatasetVO dataset : designs) {
           //designs.stream().forEach(dataset -> {
-          if(!stopAndNotifySQLErrors) {
-            LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
-            recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
-            LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
-          }
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
+          recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
+
           List<RuleVO> rulesSql =
                   rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
           LOG.info("------------------------------- In manageDataCollection for datasetId {} after findSqlSentencesByDatasetSchemaId", dataset.getId());
