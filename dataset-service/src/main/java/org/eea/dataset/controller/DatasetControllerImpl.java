@@ -9,11 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
-import org.eea.dataset.service.DataLakeDataRetrieverService;
-import org.eea.dataset.service.BigDataDatasetService;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
@@ -32,6 +28,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
@@ -129,7 +126,7 @@ public class DatasetControllerImpl implements DatasetController {
 
   /** The datalake service */
   @Autowired
-  private DataLakeDataRetrieverService dataLakeDataRetrieverService;
+  private DataLakeDataRetrieverFactory dataLakeDataRetrieverFactory;
 
   /** The big data dataset service */
   @Autowired
@@ -256,8 +253,10 @@ public class DatasetControllerImpl implements DatasetController {
     // else pageable will be null, it will be created inside the service
     TableVO result = null;
     try {
-      result = dataLakeDataRetrieverService.getTableValuesDLById(datasetId, idTableSchema, pageable, fields,
-              levelError, qcCodes, fieldSchemaId, fieldValue);
+      DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+      String datasetSchemaId = dataset.getDatasetSchema();
+      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
+      result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
     } catch (EEAException e) {
       LOG_ERROR.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
