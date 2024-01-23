@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.3</api-gateway.version>
-    <communication.version>v3.3</communication.version>
-    <collaboration.version>v3.3</collaboration.version>
-    <dataflow.version>v3.3</dataflow.version>
-    <dataset.version>v3.3</dataset.version>
-    <document.version>v3.3</document.version>
-    <frontend.version>v3.3</frontend.version>
-    <indexsearch.version>v3.3</indexsearch.version>
-    <inspire.version>v3.3</inspire.version>
-    <recordstore.version>v3.3</recordstore.version>
-    <ums.version>v3.3</ums.version>
-    <validation.version>v3.3</validation.version>
-    <common-interfaces.version>v3.3</common-interfaces.version>
-    <common-utitlities.version>v3.3</common-utitlities.version>
-    <rod.version>v3.3</rod.version>
-    <orchestrator.version>v3.3</orchestrator.version>
+    <api-gateway.version>sorting</api-gateway.version>
+    <communication.version>sorting</communication.version>
+    <collaboration.version>sorting</collaboration.version>
+    <dataflow.version>sorting</dataflow.version>
+    <dataset.version>sorting</dataset.version>
+    <document.version>sorting</document.version>
+    <frontend.version>sorting</frontend.version>
+    <indexsearch.version>sorting</indexsearch.version>
+    <inspire.version>sorting</inspire.version>
+    <recordstore.version>sorting</recordstore.version>
+    <ums.version>sorting</ums.version>
+    <validation.version>sorting</validation.version>
+    <common-interfaces.version>sorting</common-interfaces.version>
+    <common-utitlities.version>sorting</common-utitlities.version>
+    <rod.version>sorting</rod.version>
+    <orchestrator.version>sorting</orchestrator.version>
   </properties>
 </project>

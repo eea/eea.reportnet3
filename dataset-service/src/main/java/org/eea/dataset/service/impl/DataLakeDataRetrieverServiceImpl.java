@@ -158,7 +158,12 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
      * @param filteredQuery
      */
     private void getTableResultsAndValidations(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, TableVO result, S3PathResolver s3PathResolver, StringBuilder dataQuery, StringBuilder recordsCountQuery, String validationTablePath, StringBuilder filteredQuery) {
-        Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);
+        String recordsCountQueryString = recordsCountQuery.toString();
+        int idx = recordsCountQueryString.indexOf("order by");
+        if (idx!=-1) {
+            recordsCountQueryString = recordsCountQueryString.substring(0, idx-1);
+        }
+        Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQueryString, Long.class);
         result.setTotalFilteredRecords(totalFilteredRecords);
 
         pageable = calculatePageable(pageable, totalFilteredRecords);
@@ -516,7 +521,7 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         if (DataType.LINK.equals(sortField.getType())
                 || DataType.EXTERNAL_LINK.equals(sortField.getType())) {
             Document documentField =
-                    schemasRepository.findFieldSchema(datasetSchemaId, sortField.getName());
+                    schemasRepository.findFieldSchema(datasetSchemaId, sortField.getId());
             Document documentReference = (Document) documentField.get("referencedField");
             Document documentFieldReferenced =
                     schemasRepository.findFieldSchema(documentReference.get("idDatasetSchema").toString(),
@@ -528,16 +533,16 @@ public class DataLakeDataRetrieverServiceImpl implements DataLakeDataRetrieverSe
         switch (sortField.getType()) {
             case NUMBER_INTEGER:
             case NUMBER_DECIMAL:
-                dataQuery.append(" order by CAST(").append(sortField.getName()).append(" as DECIMAL) ");
+                dataQuery.append(" order by CASE when ").append(sortField.getName()).append(" like '' THEN 0 ELSE CAST(").append(sortField.getName()).append(" as NUMERIC) END");
                 break;
             case DATE:
-                dataQuery.append(" order by CAST(").append(sortField.getName()).append(" as DATE) ");
+                dataQuery.append(" order by CASE when ").append(sortField.getName()).append(" like '' THEN '0000-00-00' ELSE CAST(").append(sortField.getName()).append(" as DATE) END");
                 break;
             default:
                 dataQuery.append(" order by ").append(sortField.getName());
                 break;
         }
-        dataQuery.append(sort[1].equals("1") ? "asc" : "desc");
+        dataQuery.append(sort[1].equals("1") ? " asc" : " desc");
     }
 
     /**
