@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.1.6-ARCHITECTURE</api-gateway.version>
-    <communication.version>v3.1.6-ARCHITECTURE</communication.version>
-    <collaboration.version>v3.1.6-ARCHITECTURE</collaboration.version>
-    <dataflow.version>v3.1.6-ARCHITECTURE</dataflow.version>
-    <dataset.version>v3.1.6-ARCHITECTURE</dataset.version>
-    <document.version>v3.1.6-ARCHITECTURE</document.version>
-    <frontend.version>v3.1.6-ARCHITECTURE</frontend.version>
-    <indexsearch.version>v3.1.6-ARCHITECTURE</indexsearch.version>
-    <inspire.version>v3.1.6-ARCHITECTURE</inspire.version>
-    <recordstore.version>v3.1.6-ARCHITECTURE</recordstore.version>
-    <ums.version>v3.1.6-ARCHITECTURE</ums.version>
-    <validation.version>v3.1.6-ARCHITECTURE</validation.version>
-    <common-interfaces.version>v3.1.6-ARCHITECTURE</common-interfaces.version>
-    <common-utitlities.version>v3.1.6-ARCHITECTURE</common-utitlities.version>
-    <rod.version>v3.1.6-ARCHITECTURE</rod.version>
-    <orchestrator.version>v3.1.6-ARCHITECTURE</orchestrator.version>
+    <api-gateway.version>v3.1.263503_QC_DIALOGUE</api-gateway.version>
+    <communication.version>v3.1.263503_QC_DIALOGUE</communication.version>
+    <collaboration.version>v3.1.263503_QC_DIALOGUE</collaboration.version>
+    <dataflow.version>v3.1.263503_QC_DIALOGUE</dataflow.version>
+    <dataset.version>v3.1.263503_QC_DIALOGUE</dataset.version>
+    <document.version>v3.1.263503_QC_DIALOGUE</document.version>
+    <frontend.version>v3.1.263503_QC_DIALOGUE</frontend.version>
+    <indexsearch.version>v3.1.263503_QC_DIALOGUE</indexsearch.version>
+    <inspire.version>v3.1.263503_QC_DIALOGUE</inspire.version>
+    <recordstore.version>v3.1.263503_QC_DIALOGUE</recordstore.version>
+    <ums.version>v3.1.263503_QC_DIALOGUE</ums.version>
+    <validation.version>v3.1.263503_QC_DIALOGUE</validation.version>
+    <common-interfaces.version>v3.1.263503_QC_DIALOGUE</common-interfaces.version>
+    <common-utitlities.version>v3.1.263503_QC_DIALOGUE</common-utitlities.version>
+    <rod.version>v3.1.263503_QC_DIALOGUE</rod.version>
+    <orchestrator.version>v3.1.263503_QC_DIALOGUE</orchestrator.version>
   </properties>
 </project>

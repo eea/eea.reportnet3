@@ -415,6 +415,25 @@ export const MyFilters = ({
       return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
     }
 
+    let options = option.multiSelectOptions ?? getOptionsTypes(data,option.key)
+
+    options.sort((a, b) => {
+      const fieldA = convertToComparableString(a.value);
+      const fieldB = convertToComparableString(b.value);
+      
+      return fieldA.localeCompare(fieldB, undefined, { sensitivity: 'base' });
+    });
+    
+    function convertToComparableString(value) {
+      if (value === undefined || value === null) {
+        return '';
+      }
+      if (typeof value !== 'string') {
+        return String(value);
+      }
+      return value;
+    }
+
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
@@ -436,7 +455,7 @@ export const MyFilters = ({
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={option.multiSelectOptions ? option.multiSelectOptions : getOptionsTypes(data, option.key)}
+          options={options}
           value={filterBy[option.key]}
         />
       </div>
