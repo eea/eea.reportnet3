@@ -412,11 +412,12 @@ public class DatasetServiceImpl implements DatasetService {
    *
    * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
+   * @param deleteReferenceTables the deleteReferenceTables
    */
   @Override
   @Transactional
-  public void deleteTableBySchema(final String tableSchemaId, final Long datasetId) {
-    deleteRecords(datasetId, tableSchemaId, true);
+  public void deleteTableBySchema(final String tableSchemaId, final Long datasetId, Boolean deleteReferenceTables) {
+    deleteRecords(datasetId, tableSchemaId, true, deleteReferenceTables);
   }
 
   /**
@@ -425,8 +426,9 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id
    * @param deletePrefilledTables the delete prefilled tables
+   * @param deleteReferenceTables the delete reference tables
    */
-  private void deleteRecords(Long datasetId, String tableSchemaId, Boolean deletePrefilledTables) {
+  private void deleteRecords(Long datasetId, String tableSchemaId, Boolean deletePrefilledTables, Boolean deleteReferenceTables) {
 
     boolean singleTable = null != tableSchemaId;
     Long dataflowId = getDataFlowIdById(datasetId);
@@ -452,7 +454,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       } else if (Boolean.TRUE.equals(tableSchema.getReadOnly())
           && !(DatasetTypeEnum.REFERENCE.equals(datasetType)
-              && Boolean.TRUE.equals(referenceUpdateable))) {
+              && (Boolean.TRUE.equals(referenceUpdateable) || Boolean.TRUE.equals(deleteReferenceTables)))) {
         LOG.info("Skipped deleteRecords: datasetId={}, tableSchemaId={}, tableSchema.readOnly={}",
             datasetId, loopTableSchemaId, tableSchema.getReadOnly());
       } else if (Boolean.TRUE.equals(tableSchema.getFixedNumber())) {
@@ -494,7 +496,7 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   @Transactional
   public void deleteImportData(final Long datasetId, Boolean deletePrefilledTables) {
-    deleteRecords(datasetId, null, deletePrefilledTables);
+    deleteRecords(datasetId, null, deletePrefilledTables, false);
   }
 
   /**

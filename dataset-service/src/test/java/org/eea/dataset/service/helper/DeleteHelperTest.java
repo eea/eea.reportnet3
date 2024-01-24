@@ -62,7 +62,7 @@ public class DeleteHelperTest {
 
   @Test
   public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
-    Mockito.doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
 
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),

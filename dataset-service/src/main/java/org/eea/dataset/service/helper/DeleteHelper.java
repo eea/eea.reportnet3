@@ -109,7 +109,7 @@ public class DeleteHelper {
   @Async
   public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId) {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
-    datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+    datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
