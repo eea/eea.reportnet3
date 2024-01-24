@@ -485,9 +485,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       try {
         for (DesignDatasetVO dataset : designs) {
           //designs.stream().forEach(dataset -> {
-          LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
-          recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
-          LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
+          if(!stopAndNotifySQLErrors && dataflowId == 9511) {
+            LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
+            recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
+            LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
+          }
 
           List<RuleVO> rulesSql =
                   rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
@@ -524,6 +526,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         referenceDatasets.add(dataset);
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} before updateReferenceDataset", dataset.getId());
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
               true);
           LOG.info("There are reference datasets for dataflowId {}. Deleting its export eu dataset integrations", dataflowId);
