@@ -486,10 +486,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (DesignDatasetVO dataset : designs) {
           //designs.stream().forEach(dataset -> {
           if(!stopAndNotifySQLErrors && dataflowId == 9511) {
-            LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
-            recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
-            LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
+            DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
+            if (!(schema != null && schema.getReferenceDataset() != null
+                    && Boolean.TRUE.equals(schema.getReferenceDataset()) && isCreation)) {
+              LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
+              recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
+              LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
+            }
+            else{
+              LOG.info("------------------------------- In manageDataCollection for datasetId {} did not call createUpdateQueryView", dataset.getId());
+            }
           }
+
 
           List<RuleVO> rulesSql =
                   rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
