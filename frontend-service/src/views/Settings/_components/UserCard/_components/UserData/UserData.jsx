@@ -18,15 +18,22 @@ export const UserData = () => {
       <div className={styles.userLogoBoxContainer}>
         <UserImage />
       </div>
-      <div className={styles.userName}>
+      <div className={styles.userPersonalName}>
         {!isUndefined(userContext.firstName) && userContext.firstName !== ''
           ? `${userContext.firstName} ${userContext.lastName}`
           : userContext.preferredUsername}
       </div>
-      <div className={styles.userMail}>
-        {!isUndefined(userContext.firstName) && userContext.email !== '' && userContext.email}
+      <div className={styles.userName}>
+        Username: <strong>{userContext.preferredUsername}</strong>
       </div>
       <div>
+        <div className={styles.userMail}>
+          {!isUndefined(userContext.firstName) && userContext.email !== '' && (
+            <span>
+              Email: <strong>{userContext.email}</strong>
+            </span>
+          )}
+        </div>
         <a
           disabled
           href={getUrl(routes.PRIVACY_POLICY_EIONET)}
