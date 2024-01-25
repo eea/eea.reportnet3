@@ -482,45 +482,37 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       }
       LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation process.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
-      try {
-        for (DesignDatasetVO dataset : designs) {
-          //designs.stream().forEach(dataset -> {
-          if(!stopAndNotifySQLErrors && dataflowId == 9511) {
-            DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
-            if (!(schema != null && schema.getReferenceDataset() != null
-                    && Boolean.TRUE.equals(schema.getReferenceDataset()) && isCreation)) {
-              LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
-              recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
-              LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
-            }
-            else{
-              LOG.info("------------------------------- In manageDataCollection for datasetId {} did not call createUpdateQueryView", dataset.getId());
-            }
+      designs.stream().forEach(dataset -> {
+        if(stopAndNotifySQLErrors) {
+          //we will update the materialized views only once and only for not reference datasets
+          DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
+          if (schema != null && schema.getReferenceDataset() != null
+                  && Boolean.TRUE.equals(schema.getReferenceDataset())) {
+            LOG.info("------------------------------- In manageDataCollection for datasetId {} did not call createUpdateQueryView", dataset.getId());
           }
-
-
-          List<RuleVO> rulesSql =
-                  rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
-          LOG.info("------------------------------- In manageDataCollection for datasetId {} after findSqlSentencesByDatasetSchemaId", dataset.getId());
-          if (null != rulesSql && !rulesSql.isEmpty()) {
-            LOG.info("------------------------------- In manageDataCollection for datasetId {} before validateSqlRuleDataCollection", dataset.getId());
-            rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
-                    .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
-            LOG.info("------------------------------- In manageDataCollection for datasetId {} after validateSqlRuleDataCollection", dataset.getId());
+          else{
+            LOG.info("------------------------------- In manageDataCollection for datasetId {} creating update query view", dataset.getId());
+            recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
+            LOG.info("------------------------------- In manageDataCollection for datasetId {} created update query view", dataset.getId());
           }
-          LOG.info("------------------------------- In manageDataCollection for datasetId {} done", dataset.getId());
         }
-        ;//);
-        LOG.info(
-                "------------------------------- Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
-                rulesWithError.size());
-        if (stopAndNotifySQLErrors) {
-          rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError);
+
+        List<RuleVO> rulesSql =
+                rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
+        LOG.info("------------------------------- In manageDataCollection for datasetId {} after findSqlSentencesByDatasetSchemaId", dataset.getId());
+        if (null != rulesSql && !rulesSql.isEmpty()) {
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} before validateSqlRuleDataCollection", dataset.getId());
+          rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
+                  .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
+          LOG.info("------------------------------- In manageDataCollection for datasetId {} after validateSqlRuleDataCollection", dataset.getId());
         }
-      }
-      catch(Exception e){
-        LOG.info("------------------------------- In manageDataCollection EXCEPTION {} ", e.getMessage(), e);
-        throw e;
+        LOG.info("------------------------------- In manageDataCollection for datasetId {} done", dataset.getId());
+      });
+      LOG.info(
+              "------------------------------- Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
+              rulesWithError.size());
+      if (stopAndNotifySQLErrors) {
+        rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError);
       }
     }
 
@@ -534,6 +526,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         referenceDatasets.add(dataset);
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
+          //we will update the materialized views for reference datasets
           LOG.info("------------------------------- In manageDataCollection for datasetId {} before updateReferenceDataset", dataset.getId());
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
               true);
@@ -544,11 +537,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     });
     designs.removeIf(design -> referenceDatasets.contains(design));
 
-    // Now we have splitted the schemas between designs ("normal") schemas and schemas that are
-    // reference,
+    // Now we have splitted the schemas between designs ("normal") schemas and schemas that are reference,
     // we have to check if there are links on reference datasets. If it is the case, then the links
-    // can't point to
-    // normal schemas. If this happens, convert the type Link to Text
+    // can't point to normal schemas. If this happens, convert the type Link to Text
     checkLinksInReferenceDatasets(referenceDatasets, referenceSchemasId);
 
     // check if there are designs (or reference) to continue the process
