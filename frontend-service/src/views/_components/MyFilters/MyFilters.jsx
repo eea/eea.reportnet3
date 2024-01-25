@@ -455,7 +455,7 @@ export const MyFilters = ({
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={option.multiSelectOptions ? option.multiSelectOptions : getOptionsTypes(data, option.key)}
+          options={options}
           value={filterBy[option.key]}
         />
       </div>
