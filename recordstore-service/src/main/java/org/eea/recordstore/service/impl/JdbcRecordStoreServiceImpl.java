@@ -1005,7 +1005,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   @Override
   public void createUpdateQueryView(Long datasetId, boolean isMaterialized) {
-    LOG.info("------------------------------- In createUpdateQueryView for datasetId {}", datasetId);
     LOG.info("Executing createUpdateQueryView on the datasetId {}. Materialized: {}", datasetId,
         isMaterialized);
     DataSetSchemaVO datasetSchema =
@@ -1021,20 +1020,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       throw e;
     }
 
-    LOG.info("------------------------------- In createUpdateQueryView for datasetId {} there are the following tables:", datasetId);
-    datasetSchema.getTableSchemas().stream()
-            .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
-            .forEach(table -> {
-              LOG.info("------------------------------- In createUpdateQueryView for datasetId {} table: {} with id {}", datasetId, table.getNameTableSchema(), table.getIdTableSchema());
-            });
-
-
     datasetSchema.getTableSchemas().stream()
         .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
         .forEach(table -> {
           List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
           try {
-            LOG.info("------------------------------- In createUpdateQueryView for datasetId {} creating materialized view for table {} with id {}", datasetId, table.getNameTableSchema(), table.getIdTableSchema());
+            LOG.info("Creating or updating query view for datasetId {} and table {} with id {}", datasetId, table.getNameTableSchema(), table.getIdTableSchema());
             // create materialiced view or query view of all tableSchemas
             executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
                 datasetId, true);
@@ -1042,10 +1033,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
             // execute view permission
             executeViewPermissions(table.getNameTableSchema(), datasetId);
           } catch (RecordStoreAccessException e) {
-            LOG.info("------------------------------- In createUpdateQueryView RecordStoreAccessException for datasetId {}", datasetId);
             LOG.error("Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
           } catch (Exception e) {
-            LOG.info("------------------------------- In createUpdateQueryView Exception for datasetId {}", datasetId);
             LOG.error("Unexpected error! Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
             throw e;
           }

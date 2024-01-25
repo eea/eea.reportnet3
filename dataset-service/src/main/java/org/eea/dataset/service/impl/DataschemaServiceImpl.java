@@ -1217,7 +1217,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
 
-      LOG.info("------------------------------- In propagateRulesAfterUpdateSchema for datasetId {} before releaseCreateUpdateView", datasetId);
       releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
 
@@ -1242,7 +1241,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       }
 
-      LOG.info("------------------------------- In propagateRulesAfterUpdateSchema for datasetId {} before releaseCreateUpdateView", datasetId);
       releaseCreateUpdateView(datasetId,
           SecurityContextHolder.getContext().getAuthentication().getName(), false);
     }
