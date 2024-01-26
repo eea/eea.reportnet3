@@ -388,7 +388,6 @@ public class ValidationHelper implements DisposableBean {
         value.put(LiteralConstants.DATASET_ID, dataset.getId());
         value.put("uuid", processId);
         value.put("dataflowId", dataset.getDataflowId());
-        value.put("datasetId", dataset.getId());
         value.put("user", processesMap.get(processId).getRequestingUser());
         value.put("dataProviderId", dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0);
         value.put("datasetSchema", dataset.getDatasetSchema());
@@ -405,6 +404,13 @@ public class ValidationHelper implements DisposableBean {
         } else {
           addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_DL, value);
         }
+      }
+      if (rules.size()==0) {
+        Map<String, Object> value = new HashMap<>();
+        value.put(LiteralConstants.DATASET_ID, dataset.getId());
+        value.put("uuid", processId);
+        value.put("bigData", "true");
+        addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EMPTY_RULE, value);
       }
     }
   }
