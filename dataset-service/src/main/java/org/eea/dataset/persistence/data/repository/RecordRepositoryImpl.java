@@ -1920,9 +1920,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         tableSchemaList = tableSchemaList.stream().filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
                 .collect(Collectors.toList());
       }
-      if (offset == 0) {
-        offset = 1;
-      }
 
       String fileName = String.format(FILE_PATTERN_NAME_V2, jobId);
       File fileFolder = new File(importPath, "etlExport");
@@ -1937,6 +1934,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             columnName, dataProviderCodes, new File(jsonFile));
 
       } else {
+        if (offset == 0) {
+          offset = 1;
+        }
+
         for (TableSchema tableSchema : tableSchemaList) {
           tableCount++;
           tableName = tableSchema.getNameTableSchema();
