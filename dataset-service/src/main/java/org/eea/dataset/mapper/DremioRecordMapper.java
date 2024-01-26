@@ -26,10 +26,16 @@ public class DremioRecordMapper implements RowMapper<RecordVO> {
         recordVO.setIdRecordSchema(recordSchemaVO.getIdRecordSchema());
         List<FieldVO> fields = new ArrayList<>();
         for (FieldSchemaVO fieldSchemaVO : fieldSchemas) {
+            String value;
+            try {
+                value = resultSet.getString(fieldSchemaVO.getName());
+            } catch (java.sql.SQLException e) {
+                value = null;
+            }
             FieldVO field = new FieldVO();
             field.setIdFieldSchema(fieldSchemaVO.getId());
             field.setType(fieldSchemaVO.getType());
-            field.setValue(resultSet.getString(fieldSchemaVO.getName()));
+            field.setValue(value);
             field.setName(fieldSchemaVO.getName());
             fields.add(field);
         }

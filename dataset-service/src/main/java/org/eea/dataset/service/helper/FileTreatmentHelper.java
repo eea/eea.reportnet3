@@ -32,7 +32,6 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DataLakeDataRetrieverService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
@@ -42,6 +41,7 @@ import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.IFileExportFactory;
 import org.eea.dataset.service.file.interfaces.IFileParseContext;
 import org.eea.dataset.service.file.interfaces.IFileParserFactory;
+import org.eea.dataset.util.DataLakeDataRetrieverUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -340,9 +340,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
     @Autowired
     private S3Service s3Service;
-
-    @Autowired
-    private DataLakeDataRetrieverService dataLakeDataRetrieverService;
 
     @Autowired
     @Qualifier("dremioJdbcTemplate")
@@ -740,7 +737,7 @@ public class FileTreatmentHelper implements DisposableBean {
         if (!filters.getQcCodes().isEmpty()) {
             qcCodes = new String[]{filters.getQcCodes()};
         }
-        StringBuilder filteredQuery = dataLakeDataRetrieverService.buildFilteredQuery(dataset, null, filters.getFieldValue(), fieldIdMap, filters.getLevelError(), qcCodes, validationTablePath);
+        StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, null, filters.getFieldValue(), fieldIdMap, filters.getLevelError(), qcCodes, validationTablePath);
         filteredQuery.append(" limit " + FILE_EXPORT_LIMIT);
         dataQuery.append(filteredQuery);
         return dataQuery;
