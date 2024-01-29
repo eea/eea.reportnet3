@@ -225,24 +225,30 @@ public class SqlRulesServiceImpl implements SqlRulesService {
       RuleVO ruleVO) {
     Rule rule = ruleMapper.classToEntity(ruleVO);
 
-    DataSetMetabaseVO dataSetMetabaseVO =
-        datasetMetabaseController.findDatasetMetabaseById(datasetId);
-    String query = proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
     boolean verifAndEnabled = true;
-    boolean bigData = isBigData(dataSetMetabaseVO.getDataflowId());
-    if (!StringUtils.isBlank(validateRule(query, dataSetMetabaseVO, rule, bigData))) {
+    try {
+      DataSetMetabaseVO dataSetMetabaseVO =
+              datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      String query = proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
+      boolean bigData = isBigData(dataSetMetabaseVO.getDataflowId());
+      if (!StringUtils.isBlank(validateRule(query, dataSetMetabaseVO, rule, bigData))) {
+        LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
+        verifAndEnabled = false;
+        rule.setEnabled(verifAndEnabled);
+      }
+    } catch (Exception e) {
       LOG.info("Rule validation not passed before pass to datacollection: {}", rule);
       verifAndEnabled = false;
       rule.setEnabled(verifAndEnabled);
+    } finally {
+      rule.setVerified(verifAndEnabled);
+      rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id,'")
+              .append(rule.getRuleId().toString())
+              .append(
+                      "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
+              .append(")").toString());
+      rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     }
-    rule.setVerified(verifAndEnabled);
-    rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id,'")
-        .append(rule.getRuleId().toString())
-        .append(
-            "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
-        .append(")").toString());
-    rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
-
     return verifAndEnabled;
   }
 
