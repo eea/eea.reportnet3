@@ -84,6 +84,7 @@ public class LoadValidationsHelperDL {
                 }
             });
             validation.setTotalRecords(totalRecords.get());
+            s3PathResolver.setTableName(S3_VALIDATION);
             if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                 validation.setTotalFilteredRecords(
                         Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
