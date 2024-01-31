@@ -1,21 +1,5 @@
 package org.eea.dataflow.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
@@ -88,6 +72,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * The Class DataFlowServiceImplTest.
@@ -1526,7 +1523,7 @@ public class DataFlowServiceImplTest {
     documents.add(document);
     Mockito.when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
     Mockito.when(dataflowPrivateMapper.entityToClass(Mockito.any())).thenReturn(dataflowPrivateVO);
-    Mockito.when(documentControllerZuul.getAllDocumentsByDataflow(Mockito.anyLong()))
+    Mockito.lenient().when(documentControllerZuul.getAllDocumentsByDataflow(eq(2L), Mockito.anyLong()))
         .thenReturn(documents);
     assertEquals(dataflowPrivateVO, dataflowServiceImpl.getPrivateDataflowById(1L));
   }

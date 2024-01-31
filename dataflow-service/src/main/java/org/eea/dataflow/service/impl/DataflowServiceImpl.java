@@ -1,16 +1,8 @@
 package org.eea.dataflow.service.impl;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -89,9 +81,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The Class DataflowServiceImpl.
@@ -1546,7 +1547,7 @@ public class DataflowServiceImpl implements DataflowService {
       if (null != dataflow) {
         dataflowPrivateVO = dataflowPrivateMapper.entityToClass(dataflow);
         dataflowPrivateVO
-            .setDocuments(documentControllerZuul.getAllDocumentsByDataflow(dataflowId));
+            .setDocuments(documentControllerZuul.getAllDocumentsByDataflow(null, dataflowId));
       } else {
         throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
       }
