@@ -1,20 +1,5 @@
 package org.eea.dataset.persistence.data.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
@@ -29,6 +14,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 
 
@@ -146,9 +147,8 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @return the list
    */
   @Override
-  public Object queryExecutionSingle(String generatedQuery) {
-    Query query = entityManager.createNativeQuery(generatedQuery);
-    return query.getSingleResult();
+  public void queryExecutionSingle(String generatedQuery) {
+    entityManager.createNativeQuery(generatedQuery).getSingleResult();
   }
 
   /**
