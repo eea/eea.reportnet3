@@ -765,20 +765,17 @@ public class FileTreatmentHelper implements DisposableBean {
         // check schema has geometry and check field Value has geometry
         if (checkSchemaGeometry(datasetSchema)) {
             LOG.info("Updating geometries for dataset {}", datasetId);
-            // update geometries (native)
-            long limit = 500L;
+            long limit = 5000L;
             long offset = 0L;
             boolean moreRecords = true;
-            Map<Integer, Map<String, String>> mapFieldValue = new HashMap<>();
             while (moreRecords) {
-                mapFieldValue.clear();
-                mapFieldValue = getFieldValueGeometry(datasetId, limit, offset);
-                mapFieldValue.values().forEach(record ->
+                List<Object[]> resultBatch = getFieldValueGeometry(datasetId, limit, offset);
+                resultBatch.forEach(record ->
                     executeUpdateGeometry(datasetId, record)
                 );
-                moreRecords = !mapFieldValue.isEmpty();
-                offset += limit;
+                moreRecords = !resultBatch.isEmpty();
                 LOG.info("Current offset is {}", offset);
+                offset += limit;
             }
         }
     }
@@ -817,29 +814,14 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     /**
-     * Check field value geometry.
-     *
-     * @param datasetId the dataset id
-     * @return true, if successful
-     */
-    private boolean checkFieldValueGeometry(Long datasetId) {
-        boolean result = false;
-        String query = "select count(fv.id) from dataset_" + datasetId
-                + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
-        Integer count = Integer.parseInt(fieldRepository.queryExecutionSingle(query).toString());
-        if (count != null && count > 0) {
-            result = true;
-        }
-        return result;
-    }
-
-    /**
      * Gets the field value geometry.
      *
      * @param datasetId the dataset id
+     * @param limit the limit
+     * @param currentOffset the offset
      * @return the field value geometry
      */
-    private Map<Integer, Map<String, String>> getFieldValueGeometry(Long datasetId, long limit, long currentOffset) {
+    private List<Object[]> getFieldValueGeometry(Long datasetId, long limit, long currentOffset) {
         String query = "SELECT id, value FROM dataset_" + datasetId +
             ".field_value fv " +
             "WHERE fv.type IN " +
@@ -847,40 +829,18 @@ public class FileTreatmentHelper implements DisposableBean {
             " ORDER BY id" +
             " LIMIT " + limit + " OFFSET " + currentOffset;
 
-        List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
-        Map<Integer, Map<String, String>> resultMap = new HashMap<>();
-        for (int i = 0; i < resultQuery.size(); i++) {
-            Map<String, String> fieldMap = new HashMap<>();
-            for (int j = 0; j < 10000 && !resultQuery.isEmpty(); j++) {
-                fieldMap.put(resultQuery.get(0)[0].toString(), resultQuery.get(0)[1].toString());
-                resultQuery.remove(resultQuery.get(0));
-            }
-            resultMap.put(i, fieldMap);
-        }
-        return resultMap;
+        return fieldRepository.queryExecutionList(query);
     }
 
     /**
      * Execute update geometry.
      *
      * @param datasetId     the dataset id
-     * @param mapFieldValue the map field value
      */
-    private void executeUpdateGeometry(Long datasetId, Map<String, String> mapFieldValue) {
-        String query =
-                "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
+    private void executeUpdateGeometry(Long datasetId, Object[] record) {
+        String query = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[" + "row('" + record[0] + "', '" + record[1] + "')" +
+            "] as public.geom_update[]));";
 
-        Iterator<Entry<String, String>> iterator = mapFieldValue.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            query += "row('" + entry.getKey() + "', '" + entry.getValue();
-            if (iterator.hasNext()) {
-                query += "'), ";
-            } else {
-                query += "')";
-            }
-        }
-        query += "] as public.geom_update[]));";
         fieldRepository.queryExecutionSingle(query);
     }
 
