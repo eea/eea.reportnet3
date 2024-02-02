@@ -765,18 +765,14 @@ public class FileTreatmentHelper implements DisposableBean {
         // check schema has geometry and check field Value has geometry
         if (checkSchemaGeometry(datasetSchema)) {
             LOG.info("Updating geometries for dataset {}", datasetId);
-            long limit = 5000L;
+            // update geometries (native)
+            long limit = 500L;
             long offset = 0L;
-            boolean moreRecords = true;
-            while (moreRecords) {
-                List<Object[]> resultBatch = getFieldValueGeometry(datasetId, limit, offset);
-                resultBatch.forEach(record ->
-                    executeUpdateGeometry(datasetId, record)
-                );
-                moreRecords = !resultBatch.isEmpty();
-                LOG.info("Current offset is {}", offset);
+            while (getFieldValueGeometry(datasetId, limit, offset)) {
                 offset += limit;
+                LOG.info("Current offset is {}", offset);
             }
+            LOG.info("Finished updating geometries for dataset {}", datasetId);
         }
     }
 
@@ -821,7 +817,7 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param currentOffset the offset
      * @return the field value geometry
      */
-    private List<Object[]> getFieldValueGeometry(Long datasetId, long limit, long currentOffset) {
+    private boolean getFieldValueGeometry(Long datasetId, long limit, long currentOffset) {
         String query = "SELECT id, value FROM dataset_" + datasetId +
             ".field_value fv " +
             "WHERE fv.type IN " +
@@ -829,19 +825,21 @@ public class FileTreatmentHelper implements DisposableBean {
             " ORDER BY id" +
             " LIMIT " + limit + " OFFSET " + currentOffset;
 
-        return fieldRepository.queryExecutionList(query);
-    }
+        List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
+        boolean moreRecords = !resultQuery.isEmpty();
 
-    /**
-     * Execute update geometry.
-     *
-     * @param datasetId     the dataset id
-     */
-    private void executeUpdateGeometry(Long datasetId, Object[] record) {
-        String query = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[" + "row('" + record[0] + "', '" + record[1] + "')" +
-            "] as public.geom_update[]));";
+        String queryGeometry = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
+        while (!resultQuery.isEmpty()) {
+            queryGeometry += "row('" + resultQuery.get(0)[0].toString() + "', '" + resultQuery.get(0)[1].toString() + "'),";
+            resultQuery.remove(resultQuery.get(0));
+        }
+        if (moreRecords) {
+            queryGeometry = queryGeometry.substring(0, queryGeometry.length() - 1);
+            queryGeometry += "] as public.geom_update[]));";
+            fieldRepository.queryExecutionSingle(queryGeometry);
+        }
 
-        fieldRepository.queryExecutionSingle(query);
+        return moreRecords;
     }
 
 
