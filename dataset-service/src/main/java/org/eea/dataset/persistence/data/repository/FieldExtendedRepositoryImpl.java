@@ -145,7 +145,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * Query execution single.
    *
    * @param generatedQuery the generated query
-   * @return the list
    */
   @Override
   @Transactional
