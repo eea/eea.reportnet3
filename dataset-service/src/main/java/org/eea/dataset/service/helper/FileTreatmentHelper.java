@@ -824,22 +824,28 @@ public class FileTreatmentHelper implements DisposableBean {
             "('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')" +
             " ORDER BY id" +
             " LIMIT " + limit + " OFFSET " + currentOffset;
+        boolean moreRecords = false;
+        try {
+            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
+            moreRecords = !resultQuery.isEmpty();
 
-        List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
-        boolean moreRecords = !resultQuery.isEmpty();
+            String queryGeometry = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
+            while (!resultQuery.isEmpty()) {
+                queryGeometry += "row('" + resultQuery.get(0)[0].toString() + "', '" + resultQuery.get(0)[1].toString() + "'),";
+                resultQuery.remove(resultQuery.get(0));
+            }
+            if (moreRecords) {
+                queryGeometry = queryGeometry.substring(0, queryGeometry.length() - 1);
+                queryGeometry += "] as public.geom_update[]));";
+                fieldRepository.queryExecutionSingle(queryGeometry);
+            }
+            return moreRecords;
 
-        String queryGeometry = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
-        while (!resultQuery.isEmpty()) {
-            queryGeometry += "row('" + resultQuery.get(0)[0].toString() + "', '" + resultQuery.get(0)[1].toString() + "'),";
-            resultQuery.remove(resultQuery.get(0));
+        }catch (Exception ex) {
+            LOG.info("Geometry field: Geometry update failed for dataset id {}", datasetId, ex);
         }
-        if (moreRecords) {
-            queryGeometry = queryGeometry.substring(0, queryGeometry.length() - 1);
-            queryGeometry += "] as public.geom_update[]));";
-            fieldRepository.queryExecutionSingle(queryGeometry);
-        }
-
         return moreRecords;
+
     }
 
 
