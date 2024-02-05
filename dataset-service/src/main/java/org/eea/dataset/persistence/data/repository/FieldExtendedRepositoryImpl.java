@@ -18,6 +18,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -147,6 +148,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @return the list
    */
   @Override
+  @Transactional
   public void queryExecutionSingle(String generatedQuery) {
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
   }
