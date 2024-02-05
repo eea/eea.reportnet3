@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { isNil } from 'lodash';
 
 export const EUDataset = () => {
   const navigate = useNavigate();
@@ -147,19 +148,30 @@ export const EUDataset = () => {
     }
   };
 
-  const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(
-    exportType => exportType.code !== 'xlsx+validations'
-  );
-
   const getExportExtensionsList = () => {
-    const internalExtensionList = internalExtensionsList.map(type => {
-      const extensionsTypes = type.code.split('+');
-      return {
-        command: () => onExportDataInternalExtension(type.code),
-        icon: extensionsTypes[0],
-        label: resourcesContext.messages[type.key]
-      };
-    });
+    const internalExtensionList = config.exportTypes.exportDatasetTypes
+      .map(type => {
+        const extensionsTypes = !isNil(type.code) && type.code.split('+');
+
+        if (bigDataRef?.current) {
+          if (!extensionsTypes?.includes('xlsx')) {
+            return {
+              command: () => onExportDataInternalExtension(type.code),
+              icon: extensionsTypes[0],
+              label: resourcesContext.messages[type.key]
+            };
+          } else {
+            return null;
+          }
+        } else {
+          return {
+            command: () => onExportDataInternalExtension(type.code),
+            icon: extensionsTypes[0],
+            label: resourcesContext.messages[type.key]
+          };
+        }
+      })
+      .filter(item => item !== null);
 
     euDatasetDispatch({
       type: 'GET_EXPORT_EXTENSIONS_LIST',
