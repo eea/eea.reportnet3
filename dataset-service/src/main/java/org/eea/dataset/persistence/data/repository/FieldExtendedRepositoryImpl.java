@@ -149,9 +149,15 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Override
   @Transactional
   public void queryExecutionSingle(String generatedQuery) {
+    flush();
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
+    flush();
+  }
+
+  private void flush() {
     entityManager.flush();
     entityManager.clear();
+    entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAllRegions();
   }
 
   /**
