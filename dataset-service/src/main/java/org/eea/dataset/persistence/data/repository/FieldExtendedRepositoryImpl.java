@@ -151,7 +151,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   @Transactional
   public void queryExecutionSingle(String generatedQuery) {
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
-    //test
   }
 
   /**
