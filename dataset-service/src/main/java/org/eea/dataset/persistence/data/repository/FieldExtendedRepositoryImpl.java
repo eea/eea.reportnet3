@@ -152,6 +152,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
     entityManager.flush();
     entityManager.clear();
+    entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAllRegions();
   }
 
   /**
