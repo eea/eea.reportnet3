@@ -768,7 +768,10 @@ public class FileTreatmentHelper implements DisposableBean {
             // update geometries (native)
             long limit = 500L;
             long offset = 0L;
-            while (getFieldValueGeometry(datasetId, limit, offset)) {
+
+            ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+                    .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+            while (getFieldValueGeometry(datasetId, limit, offset, connectionDataVO)) {
                 offset += limit;
                 LOG.info("Current offset is {}", offset);
             }
@@ -817,7 +820,7 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param currentOffset the offset
      * @return the field value geometry
      */
-    private boolean getFieldValueGeometry(Long datasetId, long limit, long currentOffset) {
+    private boolean getFieldValueGeometry(Long datasetId, long limit, long currentOffset, ConnectionDataVO connectionDataVO) {
         String query = "SELECT id, value FROM dataset_" + datasetId +
             ".field_value fv " +
             "WHERE fv.type IN " +
@@ -837,9 +840,6 @@ public class FileTreatmentHelper implements DisposableBean {
             if (moreRecords) {
                 queryGeometry = queryGeometry.substring(0, queryGeometry.length() - 1);
                 queryGeometry += "] as public.geom_update[]));";
-
-                ConnectionDataVO connectionDataVO = recordStoreControllerZuul
-                        .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
                 fieldRepository.queryExecutionSingle(queryGeometry, connectionDataVO);
             }

@@ -177,26 +177,16 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param connectionDataVO the ConnectionDataVO
    */
   @Override
-  public void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) throws SQLException {
-    Connection connection = null;
-    PreparedStatement pstmt = null;
-    ResultSet rs = null;
+  public void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) {
 
-    try {
-      connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-              connectionDataVO.getUser(), connectionDataVO.getPassword());
+      try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+           connectionDataVO.getUser(), connectionDataVO.getPassword());
+           PreparedStatement pstmt = connection.prepareStatement(generatedQuery);
+           ResultSet rs = pstmt.executeQuery()) {
 
-      pstmt = connection.prepareStatement(generatedQuery);
-
-      rs = pstmt.executeQuery();
-      rs.next();
-    } catch (Exception e) {
-      LOG.info("Geometry field: Geometry update failed for queryExecutionSingle.", e);
-    } finally {
-      if (rs != null) rs.close();
-      if (pstmt != null) pstmt.close();
-      if (connection != null) connection.close();
-    }
+      } catch (Exception e) {
+          LOG.info("Geometry field: Geometry update failed for queryExecutionSingle.", e);
+      }
   }
 
 
