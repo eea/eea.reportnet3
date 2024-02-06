@@ -147,7 +147,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param generatedQuery the generated query
    */
   @Override
-  @Transactional
+  @Transactional(readOnly = true)
   public void queryExecutionSingle(String generatedQuery) {
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
   }
