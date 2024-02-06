@@ -837,7 +837,11 @@ public class FileTreatmentHelper implements DisposableBean {
             if (moreRecords) {
                 queryGeometry = queryGeometry.substring(0, queryGeometry.length() - 1);
                 queryGeometry += "] as public.geom_update[]));";
-                fieldRepository.queryExecutionSingle(queryGeometry);
+
+                ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+                        .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+
+                fieldRepository.queryExecutionSingle(queryGeometry, connectionDataVO);
             }
             return moreRecords;
 

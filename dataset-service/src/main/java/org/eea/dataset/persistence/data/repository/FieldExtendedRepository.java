@@ -3,8 +3,10 @@ package org.eea.dataset.persistence.data.repository;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -63,8 +65,9 @@ public interface FieldExtendedRepository {
    * Query execution single.
    *
    * @param generatedQuery the generated query
+   * @param connectionDataVO the ConnectionDataVO
    */
-  void queryExecutionSingle(String generatedQuery);
+  void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) throws SQLException;
 
   /**
    * Query execution list.
