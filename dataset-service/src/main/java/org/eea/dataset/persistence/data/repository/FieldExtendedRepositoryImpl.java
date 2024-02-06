@@ -8,19 +8,17 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionDelegatorBaseImpl;
 import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.transaction.Transactional;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -149,11 +147,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param generatedQuery the generated query
    */
   @Override
+  @Transactional
   public void queryExecutionSingle(String generatedQuery) {
-    entityManager.unwrap(Session.class).setDefaultReadOnly(true);
-    entityManager.getTransaction().begin();
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
-    entityManager.getTransaction().commit();
   }
 
 
