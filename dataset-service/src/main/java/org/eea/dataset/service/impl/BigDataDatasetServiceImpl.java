@@ -229,7 +229,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
                 finishImportProcess(importFileInDremioInfo);
             }
-            throw e;
         }
     }
 
@@ -595,6 +594,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
                         : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;
+            } else if (EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())) {
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ALL_FILES_ARE_EMPTY);
+                eventType = EventType.IMPORT_EMPTY_FILES_ERROR_EVENT;
             } else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_EVENT
@@ -642,6 +644,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     .user(SecurityContextHolder.getContext().getAuthentication().getName())
                     .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
+                    value, notificationWarning);
+        }
+
+        if(importFileInDremioInfo.getSendEmptyFileWarning()){
+            NotificationVO notificationWarning = NotificationVO.builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
                     value, notificationWarning);
         }
 
