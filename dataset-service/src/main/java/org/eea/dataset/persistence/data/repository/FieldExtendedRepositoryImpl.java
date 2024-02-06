@@ -138,7 +138,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   @Override
   public List<Object[]> queryExecutionList(String generatedQuery) {
+    flush();
     Query query = entityManager.createNativeQuery(generatedQuery);
+    entityManager.close();
     return query.getResultList();
   }
 
