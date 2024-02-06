@@ -9,21 +9,23 @@ import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionDelegatorBaseImpl;
 import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -177,6 +179,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param connectionDataVO the ConnectionDataVO
    */
   @Override
+  @Transactional
   public void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) {
 
       try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
