@@ -149,9 +149,11 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param generatedQuery the generated query
    */
   @Override
-  @Modifying(flushAutomatically = true, clearAutomatically = true)
   public void queryExecutionSingle(String generatedQuery) {
+    entityManager.unwrap(Session.class).setDefaultReadOnly(true);
+    entityManager.getTransaction().begin();
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
+    entityManager.getTransaction().commit();
   }
 
 
