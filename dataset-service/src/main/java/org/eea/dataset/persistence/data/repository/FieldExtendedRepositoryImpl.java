@@ -181,6 +181,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     Connection connection = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
+
     try {
       connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
               connectionDataVO.getUser(), connectionDataVO.getPassword());
