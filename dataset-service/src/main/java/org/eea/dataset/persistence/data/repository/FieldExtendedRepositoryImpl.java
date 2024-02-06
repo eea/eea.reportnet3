@@ -5,24 +5,25 @@ import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionDelegatorBaseImpl;
 import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -55,6 +56,24 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
+
+  /**
+   * The connection url.
+   */
+  @Value("${spring.datasource.url}")
+  private String connectionUrl;
+
+  /**
+   * The connection username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String connectionUsername;
+
+  /**
+   * The connection password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String connectionPassword;
 
 
   /** The Constant QUERY_FIELD_SCHEMA_AND_VALUE: {@value}. */
@@ -141,15 +160,33 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
     return query.getResultList();
   }
 
+
+/*  @Override
+  @Transactional(readOnly = true)
+  public void queryExecutionSingle(String generatedQuery) {
+    entityManager.unwrap(Session.class).setDefaultReadOnly(true);
+    entityManager.getTransaction().begin();
+    entityManager.createNativeQuery(generatedQuery).getSingleResult();
+    entityManager.getTransaction().commit();
+  }*/
+
   /**
    * Query execution single.
    *
    * @param generatedQuery the generated query
+   * @param connectionDataVO the ConnectionDataVO
    */
   @Override
-  @Transactional(readOnly = true)
-  public void queryExecutionSingle(String generatedQuery) {
-    entityManager.createNativeQuery(generatedQuery).getSingleResult();
+  public void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) {
+
+      try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+           connectionDataVO.getUser(), connectionDataVO.getPassword());
+           PreparedStatement pstmt = connection.prepareStatement(generatedQuery);
+           ResultSet rs = pstmt.executeQuery()) {
+
+      } catch (Exception e) {
+          LOG.info("Geometry field: Geometry update failed for queryExecutionSingle.", e);
+      }
   }
 
 
