@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
@@ -137,6 +138,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @return the list
    */
   @Override
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
   public List<Object[]> queryExecutionList(String generatedQuery) {
     Query query = entityManager.createNativeQuery(generatedQuery);
     return query.getResultList();
@@ -148,18 +150,11 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param generatedQuery the generated query
    */
   @Override
-  @Transactional
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
   public void queryExecutionSingle(String generatedQuery) {
-    flush();
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
-    entityManager.close();
   }
 
-  private void flush() {
-    entityManager.flush();
-    entityManager.clear();
-    //entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAllRegions();
-  }
 
   /**
    * Find by id field schema with tag ordered.
