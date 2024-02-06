@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.Session;
+import org.hibernate.engine.spi.SessionDelegatorBaseImpl;
 import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -137,7 +138,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   @Override
   public List<Object[]> queryExecutionList(String generatedQuery) {
+    flush();
     Query query = entityManager.createNativeQuery(generatedQuery);
+    entityManager.close();
     return query.getResultList();
   }
 
@@ -151,13 +154,13 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   public void queryExecutionSingle(String generatedQuery) {
     flush();
     entityManager.createNativeQuery(generatedQuery).getSingleResult();
-    flush();
+    entityManager.close();
   }
 
   private void flush() {
     entityManager.flush();
     entityManager.clear();
-    entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAllRegions();
+    //entityManager.unwrap(Session.class).getSessionFactory().getCache().evictAllRegions();
   }
 
   /**
