@@ -94,7 +94,6 @@ export const BigButtonList = ({
   const [isConfirmCollectionDialog, setIsConfirmCollectionDialog] = useState(false);
   const [isCopyDataCollectionToEUDatasetDialogVisible, setIsCopyDataCollectionToEUDatasetDialogVisible] =
     useState(false);
-  // const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
   const [isExportEUDatasetDialogVisible, setIsExportEUDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isImportingDataflow, setIsImportingDataflow] = useState(false);
