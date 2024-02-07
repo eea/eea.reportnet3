@@ -578,7 +578,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
         if (StringUtils.isBlank(tableSchemaId)) {
-            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFileName);
+            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFileName, false);
         }
 
         for (String csvHeader : csvHeaders) {
@@ -621,7 +621,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
      */
     private List<String> getFieldNames(String tableSchemaId, DataSetSchema dataSetSchema, String fileName) throws EEAException {
         if (StringUtils.isBlank(tableSchemaId)) {
-            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, fileName);
+            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, fileName, false);
         }
         List<String> fieldNames = new ArrayList<>();
         fieldNames.add(PARQUET_RECORD_ID_COLUMN_HEADER);
