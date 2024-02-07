@@ -983,9 +983,6 @@ public class RulesServiceImpl implements RulesService {
           .append(
               "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
           .append(")").toString());
-/*      if (!TypeStatusEnum.DRAFT.equals(dataflowStatus)) {
-        recordStoreController.createUpdateQueryView(datasetId, false);
-      }*/
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     validateRule(rule);
