@@ -3737,7 +3737,7 @@ public class DatasetServiceImpl implements DatasetService {
       }
       boolean guessTableName = null == tableSchemaId;
       if (guessTableName && originalFileName != null) {
-        tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(datasetSchema, originalFileName);
+        tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(datasetSchema, originalFileName, true);
       }
 
       EventType eventType = EventType.IMPORT_REPORTING_REFUSED_EVENT;
