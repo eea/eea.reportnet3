@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -157,20 +156,25 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @return the list
    */
   @Override
-  public List<Object[]> queryExecutionList(String generatedQuery) {
-    Query query = entityManager.createNativeQuery(generatedQuery);
-    return query.getResultList();
+  public List<Object[]> queryExecutionList(String generatedQuery, ConnectionDataVO connectionDataVO) {
+    List<Object[]> myList = new ArrayList<>();
+
+    try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+        connectionDataVO.getUser(), connectionDataVO.getPassword());
+         PreparedStatement pstmt = connection.prepareStatement(generatedQuery);
+         ResultSet rs = pstmt.executeQuery()) {
+
+      while (rs.next()) {
+        Object[] row = new Object[rs.getMetaData().getColumnCount()];
+        row[0] = rs.getString(1);
+        row[1] = rs.getString(2);
+        myList.add(row);
+      }
+    } catch (Exception e) {
+      LOG.info("Geometry field: Geometry select failed for queryExecutionList.", e);
+    }
+    return myList;
   }
-
-
-/*  @Override
-  @Transactional(readOnly = true)
-  public void queryExecutionSingle(String generatedQuery) {
-    entityManager.unwrap(Session.class).setDefaultReadOnly(true);
-    entityManager.getTransaction().begin();
-    entityManager.createNativeQuery(generatedQuery).getSingleResult();
-    entityManager.getTransaction().commit();
-  }*/
 
   /**
    * Query execution single.

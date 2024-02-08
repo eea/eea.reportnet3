@@ -766,7 +766,7 @@ public class FileTreatmentHelper implements DisposableBean {
         if (checkSchemaGeometry(datasetSchema)) {
             LOG.info("Updating geometries for dataset {}", datasetId);
             // update geometries (native)
-            long limit = 1000L;
+            long limit = 500L;
             long offset = 0L;
 
             ConnectionDataVO connectionDataVO = recordStoreControllerZuul
@@ -829,7 +829,7 @@ public class FileTreatmentHelper implements DisposableBean {
             " LIMIT " + limit + " OFFSET " + currentOffset;
         boolean moreRecords = false;
         try {
-            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
+            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query, connectionDataVO);
             moreRecords = !resultQuery.isEmpty();
 
             String queryGeometry = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";

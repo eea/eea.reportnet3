@@ -75,6 +75,6 @@ public interface FieldExtendedRepository {
    * @param generatedQuery the generated query
    * @return the list
    */
-  List<Object[]> queryExecutionList(String generatedQuery);
+  List<Object[]> queryExecutionList(String generatedQuery, ConnectionDataVO connectionDataVO) throws SQLException;
 
 }
