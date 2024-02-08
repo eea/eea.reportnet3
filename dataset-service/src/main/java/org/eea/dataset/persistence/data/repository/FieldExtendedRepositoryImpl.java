@@ -179,7 +179,6 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @param connectionDataVO the ConnectionDataVO
    */
   @Override
-  @Transactional
   public void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) {
 
       try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
