@@ -380,7 +380,7 @@ const useBigButtonList = ({
   const checkDisabledDataCollectionButton = () =>
     isEmpty(dataflowState.data.dataCollections) &&
     dataflowState.isDataSchemaCorrect &&
-    dataflowState.formHasRepresentatives;
+    dataflowState.formHasLeadReporters;
 
   const dashboardBigButton = [
     {
@@ -414,7 +414,7 @@ const useBigButtonList = ({
         ? resourcesContext.messages['disabledCreateDataCollectionSchemas']
         : !dataflowState.isDataSchemaCorrect
         ? resourcesContext.messages['disabledCreateDataCollectionSchemasWithError']
-        : !dataflowState.formHasRepresentatives
+        : !dataflowState.formHasLeadReporters
         ? resourcesContext.messages['disabledCreateDataCollectionNoProviders']
         : undefined,
       visibility: buttonsVisibility.createDataCollection
