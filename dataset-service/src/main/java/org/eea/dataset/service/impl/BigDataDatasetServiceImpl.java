@@ -345,7 +345,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             LOG.info("Checking csv file {}. {}", fileName, importFileInDremioInfo);
 
             if (guessTableName) {
-                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(schema, fileName);
+                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(schema, fileName, false);
             }
 
             if (!guessTableName || StringUtils.isNotBlank(tableSchemaId)) {

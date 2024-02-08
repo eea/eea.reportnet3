@@ -1540,7 +1540,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 try (InputStream inputStream = new FileInputStream(file)) {
 
                     if (guessTableName) {
-                        tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName);
+                        tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName, true);
                     }
                     if (!guessTableName || StringUtils.isNotBlank(tableSchemaId)) {
                         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
@@ -1604,7 +1604,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 try {
 
                     if (guessTableName) {
-                        tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName);
+                        tableSchemaId = getTableSchemaIdFromFileName(datasetSchema, fileName, true);
                     }
                     if (!guessTableName || StringUtils.isNotBlank(tableSchemaId)) {
                         LOG.info("Start RN3-Import file: fileName={}, tableSchemaId={}", fileName, tableSchemaId);
@@ -1646,16 +1646,24 @@ public class FileTreatmentHelper implements DisposableBean {
          *
          * @param schema the schema
          * @param fileName the file name
+         * @param ignoreCase the ignoreCase
          * @return the table schema id from file name
          * @throws EEAException the EEA exception
          */
-        public String getTableSchemaIdFromFileName(DataSetSchema schema, String fileName)
+        public String getTableSchemaIdFromFileName(DataSetSchema schema, String fileName, Boolean ignoreCase)
       throws EEAException {
             String tableSchemaId = "";
             String tableName = fileName.substring(0, fileName.lastIndexOf((".")));
             for (TableSchema tableSchema : schema.getTableSchemas()) {
-                if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
-                    tableSchemaId = tableSchema.getIdTableSchema().toString();
+                if(ignoreCase) {
+                    if (tableSchema.getNameTableSchema().equalsIgnoreCase(tableName)) {
+                        tableSchemaId = tableSchema.getIdTableSchema().toString();
+                    }
+                }
+                else{
+                    if (tableSchema.getNameTableSchema().equals(tableName)) {
+                        tableSchemaId = tableSchema.getIdTableSchema().toString();
+                    }
                 }
             }
             return tableSchemaId;
