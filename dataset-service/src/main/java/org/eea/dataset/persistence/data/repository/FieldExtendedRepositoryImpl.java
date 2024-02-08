@@ -164,11 +164,16 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
          PreparedStatement pstmt = connection.prepareStatement(generatedQuery);
          ResultSet rs = pstmt.executeQuery()) {
 
+      Object[] row = new Object[rs.getMetaData().getColumnCount()];
       while (rs.next()) {
-        Object[] row = new Object[rs.getMetaData().getColumnCount()];
         row[0] = rs.getString(1);
         row[1] = rs.getString(2);
         myList.add(row);
+
+        if (rs.last()) {
+          row[0] = null;
+          row[1] = null;
+        }
       }
     } catch (Exception e) {
       LOG.info("Geometry field: Geometry select failed for queryExecutionList.", e);
