@@ -81,7 +81,7 @@ export const Dataflow = () => {
     deleteInput: '',
     description: '',
     designDatasetSchemas: [],
-    formHasRepresentatives: false,
+    formHasLeadReporters: false,
     hasCustodianPermissions: false,
     hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
@@ -357,8 +357,11 @@ export const Dataflow = () => {
       const representativesNoDatasets = dataflowState.data.representatives.filter(
         representative => !representative.hasDatasets
       );
+      const representativesHasLeadReporters = dataflowState.data.representatives.filter(
+        representative => representative.leadReporters.length > 0
+      );
       setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
-      setFormHasRepresentatives(!isEmpty(representativesNoDatasets));
+      setFormHasLeadReporters(!isEmpty(representativesHasLeadReporters));
     }
   }, [dataflowState.data.representatives]);
 
@@ -462,8 +465,8 @@ export const Dataflow = () => {
 
   const setDataProviderSelected = value => dataflowDispatch({ type: 'SET_DATA_PROVIDER_SELECTED', payload: value });
 
-  const setFormHasRepresentatives = value =>
-    dataflowDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
+  const setFormHasLeadReporters = value =>
+    dataflowDispatch({ type: 'SET_FORM_HAS_LEAD_REPORTERS', payload: { formHasLeadReporters: value } });
 
   const setHasRepresentativesWithoutDatasets = value =>
     dataflowDispatch({
@@ -1308,7 +1311,7 @@ export const Dataflow = () => {
                   label: dataflowState.data.dataProviderGroupName
                 }}
                 setDataProviderSelected={setDataProviderSelected}
-                setFormHasRepresentatives={setFormHasRepresentatives}
+                setFormHasLeadReporters={setFormHasLeadReporters}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setRepresentativeImport={isImport =>
                   dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: isImport })

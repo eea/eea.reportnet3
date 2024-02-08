@@ -45,7 +45,7 @@ export const ManageLeadReporters = ({
   representativesImport = false,
   setDataProviderSelected,
   selectedDataProviderGroup,
-  setFormHasRepresentatives,
+  setFormHasLeadReporters,
   setHasRepresentativesWithoutDatasets,
   setRepresentativeImport
 }) => {
@@ -131,7 +131,11 @@ export const ManageLeadReporters = ({
 
   useEffect(() => {
     if (!isEmpty(formState.representatives)) {
-      setFormHasRepresentatives(formState.representatives.length > 1);
+      const representativesHasLeadReporters = formState.representatives.filter(
+        representative => representative.leadReporters.filter(leadReporter => leadReporter.id !== 'empty').length > 0
+      );
+
+      setFormHasLeadReporters(!isEmpty(representativesHasLeadReporters));
     }
   }, [formState.representatives]);
 
