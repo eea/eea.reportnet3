@@ -372,7 +372,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         const extensionsTypes = !isNil(type.code) && type.code.split('+');
 
         if (designerState?.bigData) {
-          if (!extensionsTypes?.includes('xlsx')) {
+          if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
             return {
               command: () => onExportDataInternalExtension(type.code),
               icon: extensionsTypes[0],
