@@ -452,7 +452,7 @@
     "disabledQuickEdit": "Quick edit is disabled when data table is sorted or filtered",
     "disabledRequiredPK": "Field is a PK",
     "disabledRulesErrorEvent": "Failed disabling rules",
-    "disableNamesTypesRulesErrorEvent": "Some QCs are now <strong>invalid</strong> in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}",
+    "disableNamesTypesRulesErrorEvent": "Some QCs are now <strong>invalid</strong> in <a href='{:navigateTo}' title='dataset schema'>{:datasetName}</a>",
     "documentDeleteCompletedEvent": "Document deleted at <a href='{:navigateTo}' title='dataflowName'>{:shortDataflowName}</a>",
     "documentDeleteFailedEvent": "Error on document deleting at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "documentDescriptionValidationMax": "Document description is too long",
