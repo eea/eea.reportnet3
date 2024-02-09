@@ -766,7 +766,7 @@ public class FileTreatmentHelper implements DisposableBean {
         if (checkSchemaGeometry(datasetSchema)) {
             LOG.info("Updating geometries for dataset {}", datasetId);
             // update geometries (native)
-            long limit = 500L;
+            long limit = 1000L;
             long offset = 0L;
 
             ConnectionDataVO connectionDataVO = recordStoreControllerZuul
