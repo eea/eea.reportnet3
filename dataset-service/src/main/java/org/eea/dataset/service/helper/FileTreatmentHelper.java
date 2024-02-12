@@ -829,7 +829,7 @@ public class FileTreatmentHelper implements DisposableBean {
             " LIMIT " + limit + " OFFSET " + currentOffset;
         boolean moreRecords = false;
         try {
-            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query, connectionDataVO);
+            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
             moreRecords = !resultQuery.isEmpty();
 
             String queryGeometry = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
