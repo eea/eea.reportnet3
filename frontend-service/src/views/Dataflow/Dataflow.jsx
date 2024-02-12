@@ -773,6 +773,10 @@ export const Dataflow = () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
 
+      if (dataflow.type === 'REFERENCE') {
+        navigate(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId: dataflowId }, true));
+      }
+
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',

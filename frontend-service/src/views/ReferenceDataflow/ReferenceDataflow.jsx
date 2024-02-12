@@ -242,6 +242,10 @@ export const ReferenceDataflow = () => {
     try {
       const referenceDataflow = await ReferenceDataflowService.get(referenceDataflowId);
 
+      if (referenceDataflow.type !== 'REFERENCE') {
+        navigate(getUrl(routes.DATAFLOW, { dataflowId: referenceDataflowId }, true));
+      }
+
       dataflowDispatch({
         type: 'LOADING_SUCCESS',
         payload: {
