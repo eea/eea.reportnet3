@@ -156,24 +156,9 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * @return the list
    */
   @Override
-  public List<Object[]> queryExecutionList(String generatedQuery, ConnectionDataVO connectionDataVO) {
-    List<Object[]> myList = new ArrayList<>();
-
-    try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-        connectionDataVO.getUser(), connectionDataVO.getPassword());
-         PreparedStatement pstmt = connection.prepareStatement(generatedQuery);
-         ResultSet rs = pstmt.executeQuery()) {
-
-      while (rs.next()) {
-        Object[] row = new Object[rs.getMetaData().getColumnCount()];
-        row[0] = rs.getString(1);
-        row[1] = rs.getString(2);
-        myList.add(row);
-      }
-    } catch (Exception e) {
-      LOG.info("Geometry field: Geometry select failed for queryExecutionList.", e);
-    }
-    return myList;
+  public List<Object[]> queryExecutionList(String generatedQuery) {
+    Query query = entityManager.createNativeQuery(generatedQuery);
+    return query.getResultList();
   }
 
   /**
