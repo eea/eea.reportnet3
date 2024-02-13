@@ -387,8 +387,16 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    */
   @Override
   public List<DataProviderVO> findDataProvidersByCode(String code) {
-    List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
-    return dataProviderMapper.entityListToClass(dataProviders);
+    List<DataProviderVO> list = new ArrayList<>();
+
+    try {
+      List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
+      list = dataProviderMapper.entityListToClass(dataProviders);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Could not find Data Providers by code.", e);
+    }
+
+    return list;
   }
 
   /**
@@ -827,13 +835,27 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   @Override
   public List<Long> getProviderIds() throws EEAException {
     List<DataProviderVO> dataProviders = null;
-    String countryCode = getCountryCodeNC();
-    if (null != countryCode) {
-      dataProviders = findDataProvidersByCode(countryCode);
-    } else {
-      throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
+    List<Long> list = new ArrayList<>();
+
+
+    try {
+      String countryCode = getCountryCodeNC();
+
+      if (null != countryCode) {
+        dataProviders = findDataProvidersByCode(countryCode);
+      } else {
+        throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
+      }
+
+      list = dataProviders.stream().map(DataProviderVO::getId).collect(Collectors.toList());
+    } catch (EEAException e) {
+      LOG.error("Unexpected error! Could not retrieve provider ids.", e);
+      throw e;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Could not retrieve provider ids.", e);
     }
-    return dataProviders.stream().map(DataProviderVO::getId).collect(Collectors.toList());
+
+    return list;
   }
 
 

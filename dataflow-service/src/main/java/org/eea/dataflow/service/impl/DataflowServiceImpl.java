@@ -963,13 +963,20 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds) {
-    return dataflowMapper
+    List<DataFlowVO> list = new ArrayList<>();
+    try {
+      list = dataflowMapper
         .entityListToClass(
             dataflowRepository
                 .findDataflowsByDataproviderIdsAndDataflowIds(
                     userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
                         .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()),
                     dataProviderIds));
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Could not get dataflows by data provider ids.", e);
+    }
+
+    return list;
   }
 
 
