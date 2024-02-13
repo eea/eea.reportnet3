@@ -934,7 +934,7 @@ public class RepresentativeServiceImplTest {
         .thenReturn(dataProviderListVO);
     try {
       representativeServiceImpl.getProviderIds();
-    } catch (EEAException e) {
+    } catch (Exception e) {
       assertNotNull(e);
       throw e;
     }
