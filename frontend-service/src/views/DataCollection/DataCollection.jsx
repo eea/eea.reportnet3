@@ -125,7 +125,7 @@ export const DataCollection = () => {
       .map(type => {
         const extensionsTypes = !isNil(type.code) && type.code.split('+');
         if (bigDataRef.current) {
-          if (!extensionsTypes?.includes('xlsx')) {
+          if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
             return {
               command: () => onExportDataInternalExtension(type.code),
               icon: extensionsTypes[0],
