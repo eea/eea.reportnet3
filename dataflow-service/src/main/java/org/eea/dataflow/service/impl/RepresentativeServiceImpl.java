@@ -391,6 +391,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     try {
       List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
+      LOG.info("findByCode finished");
       list = dataProviderMapper.entityListToClass(dataProviders);
     } catch (Exception e) {
       LOG.error("Unexpected error! Could not find Data Providers by code.", e);
@@ -837,12 +838,12 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     List<DataProviderVO> dataProviders = null;
     List<Long> list = new ArrayList<>();
 
-
     try {
       String countryCode = getCountryCodeNC();
-
+      LOG.info("getCountryCodeNC finished");
       if (null != countryCode) {
         dataProviders = findDataProvidersByCode(countryCode);
+        LOG.info("findDataProvidersByCode finished");
       } else {
         throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
       }

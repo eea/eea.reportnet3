@@ -892,6 +892,7 @@ public class DataflowControllerImpl implements DataFlowController {
     try {
       // get providerId and check if user is National coordinator
       dataProviderIds = representativeService.getProviderIds();
+      LOG.info("getProviderIds finished");
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
     } catch (Exception e){
@@ -901,8 +902,10 @@ public class DataflowControllerImpl implements DataFlowController {
 
     try {
       dataflows = dataflowService.getDataflowsByDataProviderIds(dataProviderIds);
+      LOG.info("getDataflowsByDataProviderIds finished");
       dataProviderIds.stream().forEach(
               dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
+      LOG.info("streaming getDataflowsByDataProviderIds finished");
     } catch (Exception e){
       LOG_ERROR.error("Unexpected error! Could not retrieve dataflows by providerIds. Message: {}", e.getMessage());
       throw e;
