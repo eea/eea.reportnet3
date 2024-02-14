@@ -849,6 +849,7 @@ public class UserManagementControllerImpl implements UserManagementController {
       @ApiParam(value = "dataflowId") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(value = "dataProviderId") @PathVariable("dataProviderId") Long dataProviderId) {
 
+    LOG.info("getUserRolesByDataflowAndCountry started");
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
 
