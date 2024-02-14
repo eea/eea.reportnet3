@@ -892,7 +892,6 @@ public class DataflowControllerImpl implements DataFlowController {
     try {
       // get providerId and check if user is National coordinator
       dataProviderIds = representativeService.getProviderIds();
-      LOG.info("getProviderIds finished");
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, EEAErrorMessage.UNAUTHORIZED);
     } catch (Exception e){
