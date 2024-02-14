@@ -876,6 +876,8 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList) {
     List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
+    LOG.info("getUserRoles started");
+
     for (DataFlowVO dataflowVO : dataflowList) {
       if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
         DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
@@ -883,6 +885,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowUserRoleVO.setDataflowName(dataflowVO.getName());
         dataflowUserRoleVO.setUsers(userManagementControllerZull
             .getUserRolesByDataflowAndCountry(dataflowVO.getId(), dataProviderId));
+        LOG.info("userManagementControllerZull.getUserRolesByDataflowAndCountry ended");
         if (!dataflowUserRoleVO.getUsers().isEmpty()) {
           dataflowUserRoleVOList.add(dataflowUserRoleVO);
         }

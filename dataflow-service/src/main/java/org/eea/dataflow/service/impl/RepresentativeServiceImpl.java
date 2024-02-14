@@ -391,7 +391,6 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     try {
       List<DataProvider> dataProviders = dataProviderRepository.findByCode(code);
-      LOG.info("findByCode finished");
       list = dataProviderMapper.entityListToClass(dataProviders);
     } catch (Exception e) {
       LOG.error("Unexpected error! Could not find Data Providers by code.", e);

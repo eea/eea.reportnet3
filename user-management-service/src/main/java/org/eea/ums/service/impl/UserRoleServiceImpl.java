@@ -110,6 +110,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     Map<String, List<GroupInfo>> groupInfoMap = new HashMap<>();
     List<UserRoleVO> finalList = new ArrayList<>();
 
+    LOG.info("datasetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId started");
     List<Long> datasetIds = datasetMetabaseControllerZuul
         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
 
