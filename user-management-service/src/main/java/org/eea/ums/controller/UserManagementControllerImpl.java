@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -253,7 +255,9 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the resources by user
    */
   @Override
-  @HystrixCommand
+  //@HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type")
   @ApiOperation(value = "Get logged User's Resources by their Types",
@@ -838,7 +842,8 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the user roles by dataflow and country
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,
