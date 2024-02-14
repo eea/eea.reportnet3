@@ -524,6 +524,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
           example = "0") @RequestParam("dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "provider Id",
           example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
+    LOG.info("getDatasetIdsByDataflowIdAndDataProviderId started");
     return datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
         dataProviderId);
   }
