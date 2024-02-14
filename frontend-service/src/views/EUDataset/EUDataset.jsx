@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
@@ -41,6 +41,8 @@ export const EUDataset = () => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const [bigData, setBigData] = useState(false)
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     bigData: false,
@@ -129,6 +131,16 @@ export const EUDataset = () => {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} }, true);
     }
   };
+// Ticket 262014: bigdataref is not updated soon enough for the extension list to be rendered correctly. 
+// bigdataref.current remains false on occasion, during initial population of the extensionlist making it so
+// that the bigdata check is unreliable and thus wrong content is shown. Below is a workaround using a useState
+  useEffect(()=>{
+    if(euDatasetState?.bigData && !bigData) setBigData(true)
+  },[euDatasetState?.bigData])
+
+  useEffect(()=>{
+    getExportExtensionsList()
+  },[bigData])
 
   const getDataSchema = async () => {
     try {
@@ -153,7 +165,7 @@ export const EUDataset = () => {
       .map(type => {
         const extensionsTypes = !isNil(type.code) && type.code.split('+');
 
-        if (bigDataRef?.current) {
+        if (bigData) {
           if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
             return {
               command: () => onExportDataInternalExtension(type.code),
