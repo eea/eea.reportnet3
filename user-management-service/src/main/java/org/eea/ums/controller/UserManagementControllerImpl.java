@@ -255,9 +255,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the resources by user
    */
   @Override
-  //@HystrixCommand
-  @HystrixCommand(commandProperties = {@HystrixProperty(
-          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  @HystrixCommand
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type")
   @ApiOperation(value = "Get logged User's Resources by their Types",
@@ -842,8 +840,7 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the user roles by dataflow and country
    */
   @Override
-  @HystrixCommand(commandProperties = {@HystrixProperty(
-          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_LEAD_REPORTER','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   @GetMapping("/getUserRolesByDataflow/{dataflowId}/dataProviderId/{dataProviderId}")
   @ApiOperation(value = "Get a List of Users by Dataflow", response = UserRoleVO.class,

@@ -840,10 +840,8 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     try {
       String countryCode = getCountryCodeNC();
-      LOG.info("getCountryCodeNC finished");
       if (null != countryCode) {
         dataProviders = findDataProvidersByCode(countryCode);
-        LOG.info("findDataProvidersByCode finished");
       } else {
         throw new EEAException(EEAErrorMessage.UNAUTHORIZED);
       }

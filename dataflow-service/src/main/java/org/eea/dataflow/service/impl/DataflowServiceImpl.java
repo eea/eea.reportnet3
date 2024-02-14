@@ -965,13 +965,10 @@ public class DataflowServiceImpl implements DataflowService {
   public List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds) {
     List<DataFlowVO> list = new ArrayList<>();
     try {
-      LOG.info("getResourcesByUser started");
       List<Long> resources = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
               .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-      LOG.info("getResourcesByUser finished");
 
       List<Dataflow> dataflows = dataflowRepository.findDataflowsByDataproviderIdsAndDataflowIds(resources, dataProviderIds);
-      LOG.info("findDataflowsByDataproviderIdsAndDataflowIds finished");
 
       list = dataflowMapper.entityListToClass(dataflows);
     } catch (Exception e) {
