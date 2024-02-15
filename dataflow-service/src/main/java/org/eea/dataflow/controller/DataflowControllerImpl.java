@@ -873,7 +873,6 @@ public class DataflowControllerImpl implements DataFlowController {
    * @return the user roles all dataflows
    */
   @Override
-  @CrossOrigin
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/getUserRolesAllDataflows")
   @ApiOperation(value = "Gets the user roles for all dataflows", hidden = true)
