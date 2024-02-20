@@ -1,6 +1,17 @@
 package org.eea.ums.service.impl;
 
-import com.opencsv.CSVWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -32,21 +43,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.opencsv.CSVWriter;
 
 /**
  * The Class UserRoleServiceImpl.
@@ -100,17 +97,6 @@ public class UserRoleServiceImpl implements UserRoleService {
   private static final String DOWNLOAD_USERS_BY_COUNTRY_EXCEPTION =
       "Download exported users by country found a file with the followings parameters:, dataflowId: %s + filename: %s";
 
-  private final Set<String> rolesToFetch = new HashSet<>(Arrays.asList(
-      SecurityRoleEnum.DATA_CUSTODIAN.toString(),
-      SecurityRoleEnum.LEAD_REPORTER.toString(),
-      SecurityRoleEnum.NATIONAL_COORDINATOR.toString(),
-      SecurityRoleEnum.REPORTER_READ.toString(),
-      SecurityRoleEnum.REPORTER_WRITE.toString(),
-      SecurityRoleEnum.DATA_STEWARD.toString(),
-      SecurityRoleEnum.DATA_OBSERVER.toString(),
-      SecurityRoleEnum.STEWARD_SUPPORT.toString()
-  ));
-
   /**
    * Gets the user roles by dataflow country.
    *
@@ -132,38 +118,29 @@ public class UserRoleServiceImpl implements UserRoleService {
     if (null != datasetIds && !datasetIds.isEmpty()) {
       getGroupInfoMap(groupInfoMap, datasetIds.get(0));
 
-      getUsersByRoles(groupInfoMap, rolesToFetch, finalList);
+      // CUSTODIAN
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_CUSTODIAN.toString());
+      // LEAD REPORTER
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.LEAD_REPORTER.toString());
+      // NATIONAL COORDINATOR
+      getUsersRolesByGroup(groupInfoMap, finalList,
+          SecurityRoleEnum.NATIONAL_COORDINATOR.toString());
+      // REPORTER READ
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.REPORTER_READ.toString());
+      // REPORTER WRITE
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.REPORTER_WRITE.toString());
+      // STEWARD
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_STEWARD.toString());
+      // OBSERVER
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.DATA_OBSERVER.toString());
+      // STEWARD SUPPORT
+      getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.STEWARD_SUPPORT.toString());
 
     }
     LOG.info("getGroupInfoMap finished");
     return finalList;
   }
 
-  /**
-   * Gets the users roles by group.
-   *
-   * @param groupInfoMap The groupInfoMap
-   * @param rolesToFetch The roles to fetch
-   * @param finalList The final list
-   */
-  private void getUsersByRoles(Map<String, List<GroupInfo>> groupInfoMap, Set<String> rolesToFetch, List<UserRoleVO> finalList) {
-    for (Map.Entry<String, List<GroupInfo>> entry : groupInfoMap.entrySet()) {
-      String role = entry.getKey();
-      if (rolesToFetch.contains(role)) {
-        for (GroupInfo groupInfo : entry.getValue()) {
-          UserRepresentation[] users = keycloakConnectorService.getUsersByGroupId(groupInfo.getId());
-          Arrays.asList(users).forEach(user -> {
-            UserRoleVO userRole = new UserRoleVO();
-            List<String> userRoles = new ArrayList<>();
-            userRoles.add(role);
-            userRole.setEmail(user.getEmail());
-            userRole.setRoles(userRoles);
-            finalList.add(userRole);
-          });
-        }
-      }
-    }
-  }
 
   /**
    * Gets the group info map.
@@ -242,6 +219,32 @@ public class UserRoleServiceImpl implements UserRoleService {
       groupInfoValue.addAll(groupInfoMap.get(group));
     }
     groupInfoMap.put(group, groupInfoValue);
+  }
+
+  /**
+   * Gets the users roles by group.
+   *
+   * @param groupInfoMap the group info map
+   * @param usersList the users list
+   * @param group the group
+   * @return the users roles by group
+   */
+  private void getUsersRolesByGroup(Map<String, List<GroupInfo>> groupInfoMap,
+      List<UserRoleVO> usersList, String group) {
+    if (null != groupInfoMap.get(group) && !groupInfoMap.get(group).isEmpty()) {
+      for (GroupInfo groupInfo : groupInfoMap.get(group)) {
+        groupInfo.getId();
+        UserRepresentation[] users = keycloakConnectorService.getUsersByGroupId(groupInfo.getId());
+        for (int i = 0; i < users.length; i++) {
+          UserRoleVO userRol = new UserRoleVO();
+          List<String> roles = new ArrayList<>();
+          roles.add(group);
+          userRol.setEmail(users[i].getEmail());
+          userRol.setRoles(roles);
+          usersList.add(userRol);
+        }
+      }
+    }
   }
 
   private List<UserRoleVO> getUserRoleList(Long dataflowId) {
