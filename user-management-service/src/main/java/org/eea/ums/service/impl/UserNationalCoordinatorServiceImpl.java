@@ -8,6 +8,7 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
@@ -17,6 +18,7 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.ums.service.LockUmsService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.UserNationalCoordinatorService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
@@ -29,8 +31,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,6 +69,9 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
 
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private LockUmsService lockUmsService;
 
   /**
    * Gets the national coordinators.
@@ -102,43 +109,58 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   @Async
   public void createNationalCoordinator(UserNationalCoordinatorVO userNationalCoordinatorVO)
       throws EEAException {
+
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("email", userNationalCoordinatorVO.getEmail());
+    mapCriteria.put("countryCode", userNationalCoordinatorVO.getCountryCode());
+
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
 
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT, null, notificationVO);
+    if (lockUmsService.lockNotExists(LockSignature.NATIONAL_COORDINATOR_CREATE, mapCriteria)) {
+      lockUmsService.createLock(mapCriteria, SecurityContextHolder.getContext().getAuthentication().getName());
 
-    checkUser(userNationalCoordinatorVO);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT, null, notificationVO);
 
-    // check Country
-    List<DataProviderVO> providers = representativeControllerZuul
-        .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
-    if (CollectionUtils.isEmpty(providers)) {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
-      throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
-    }
+      checkUser(userNationalCoordinatorVO);
 
-    try {
+      // check Country
+      List<DataProviderVO> providers = representativeControllerZuul
+          .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
+      if (CollectionUtils.isEmpty(providers)) {
+        lockUmsService.removeLock(mapCriteria);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+      }
 
-      // create country group
-      keycloakConnectorService
-          .createGroupDetail(getNationalCoordinatorGroup(userNationalCoordinatorVO));
-      securityProviderInterfaceService.addContributorToUserGroup(Optional.empty(),
-          userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
-              .getGroupName(userNationalCoordinatorVO.getCountryCode()));
-      // datasets in this country
-      List<ResourceAssignationVO> resourcesForNC =
-          getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.TRUE);
+      try {
 
-      // finally add all permissions
-      securityProviderInterfaceService.addContributorsToUserGroup(resourcesForNC);
+        // create country group
+        keycloakConnectorService
+            .createGroupDetail(getNationalCoordinatorGroup(userNationalCoordinatorVO));
+        securityProviderInterfaceService.addContributorToUserGroup(Optional.empty(),
+            userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
+                .getGroupName(userNationalCoordinatorVO.getCountryCode()));
+        // datasets in this country
+        List<ResourceAssignationVO> resourcesForNC =
+            getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.TRUE);
 
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
+        // finally add all permissions
+        securityProviderInterfaceService.addContributorsToUserGroup(resourcesForNC);
 
-    } catch (Exception e) {
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
-      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+        // sent notification
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
+
+        lockUmsService.removeLock(mapCriteria);
+
+      } catch (Exception e) {
+        lockUmsService.removeLock(mapCriteria);
+        // sent notification
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+      }
+    } else {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ANOTHER_ADDING_PROCESS_IN_PROGRESS_EVENT, null, notificationVO);
     }
   }
 
@@ -152,41 +174,55 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   @Async
   public void deleteNationalCoordinator(UserNationalCoordinatorVO userNationalCoordinatorVO)
       throws EEAException {
+
+    Map<String, Object> mapCriteria = new HashMap<>();
+    mapCriteria.put("email", userNationalCoordinatorVO.getEmail());
+    mapCriteria.put("countryCode", userNationalCoordinatorVO.getCountryCode());
+
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+    if (lockUmsService.lockNotExists(LockSignature.NATIONAL_COORDINATOR_DELETE, mapCriteria)) {
+      lockUmsService.createLock(mapCriteria, SecurityContextHolder.getContext().getAuthentication().getName());
 
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT, null, notificationVO);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT, null, notificationVO);
 
-    checkUser(userNationalCoordinatorVO);
+      checkUser(userNationalCoordinatorVO);
 
-    // check Country
-    List<DataProviderVO> providers = representativeControllerZuul
-        .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
-    if (CollectionUtils.isEmpty(providers)) {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
-      throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
-    }
+      // check Country
+      List<DataProviderVO> providers = representativeControllerZuul
+          .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
+      if (CollectionUtils.isEmpty(providers)) {
+        lockUmsService.removeLock(mapCriteria);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+      }
 
-    try {
+      try {
 
-      // remove country group permission
-      securityProviderInterfaceService.removeContributorFromUserGroup(Optional.empty(),
-          userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
-              .getGroupName(userNationalCoordinatorVO.getCountryCode()));
-      // datasets in this country
-      List<ResourceAssignationVO> resourcesForNC =
-          getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.FALSE);
+        // remove country group permission
+        securityProviderInterfaceService.removeContributorFromUserGroup(Optional.empty(),
+            userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
+                .getGroupName(userNationalCoordinatorVO.getCountryCode()));
+        // datasets in this country
+        List<ResourceAssignationVO> resourcesForNC =
+            getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.FALSE);
 
-      // finally add all permissions
-      securityProviderInterfaceService.removeContributorsFromUserGroup(resourcesForNC);
+        // finally add all permissions
+        securityProviderInterfaceService.removeContributorsFromUserGroup(resourcesForNC);
 
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
+        // sent notification
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
 
-    } catch (Exception e) {
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
-      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED);
+        lockUmsService.removeLock(mapCriteria);
+
+      } catch (Exception e) {
+        lockUmsService.removeLock(mapCriteria);
+        // sent notification
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED);
+      }
+    } else {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ANOTHER_DELETING_PROCESS_IN_PROGRESS_EVENT, null, notificationVO);
     }
   }
 

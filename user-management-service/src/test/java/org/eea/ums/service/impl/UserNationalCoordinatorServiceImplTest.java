@@ -9,7 +9,9 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.service.LockService;
 import org.eea.security.jwt.utils.AuthenticationDetails;
+import org.eea.ums.service.LockUmsService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
@@ -61,6 +63,12 @@ public class UserNationalCoordinatorServiceImplTest {
   @Mock
   private KafkaSenderUtils kafkaSenderUtils;
 
+  @Mock
+  private LockService lockService;
+
+  @Mock
+  private LockUmsService lockUmsService = new LockUmsServiceImpl(lockService);
+
   /**
    * Sets the up.
    *
@@ -75,6 +83,9 @@ public class UserNationalCoordinatorServiceImplTest {
     details.put(AuthenticationDetails.USER_ID, "userId");
     authentication.setDetails(details);
     SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    Mockito.when(lockUmsService.lockNotExists(Mockito.any(), Mockito.any())).thenReturn(true);
+
   }
 
   /**
