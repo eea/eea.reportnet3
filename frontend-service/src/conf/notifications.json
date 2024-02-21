@@ -1314,6 +1314,8 @@
         { "key": "EXPORT_FILE_START_EVENT" },
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" },
         { "key": "EXTERNAL_EXPORT_DESIGN_INIT" },
+        { "key": "NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT" },
+        { "key": "NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT" },
         {
           "key": "FINISHED_VALIDATION_WITH_CANCELED_TASKS",
           "navigateTo": {

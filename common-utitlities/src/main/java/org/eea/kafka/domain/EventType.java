@@ -603,6 +603,12 @@ public enum EventType {
       "adding_national_coordinator_failed_event", true),
 
   DELETING_NATIONAL_COORDINATOR_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "deleting_national_coordinator_failed_event", true),
+
+  NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "deleting_national_coordinator_failed_event", true),
+
+  NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "deleting_national_coordinator_failed_event", true);
 
 
