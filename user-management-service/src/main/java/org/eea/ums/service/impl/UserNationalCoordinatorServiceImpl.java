@@ -105,12 +105,15 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
 
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT, null, notificationVO);
+
     checkUser(userNationalCoordinatorVO);
 
     // check Country
     List<DataProviderVO> providers = representativeControllerZuul
         .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
     if (CollectionUtils.isEmpty(providers)) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
       throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
     }
 
@@ -152,12 +155,15 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     NotificationVO notificationVO = NotificationVO.builder()
         .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
 
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT, null, notificationVO);
+
     checkUser(userNationalCoordinatorVO);
 
     // check Country
     List<DataProviderVO> providers = representativeControllerZuul
         .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
     if (CollectionUtils.isEmpty(providers)) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
       throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
     }
 

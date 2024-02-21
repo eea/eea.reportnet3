@@ -1661,6 +1661,8 @@
     "addingNationalCoordinatorFinishedEvent": "National coordinator has been added successfully",
     "deletingNationalCoordinatorFinishedEvent": "National coordinator has been deleted successfully",
     "addingNationalCoordinatorFailedEvent": "National coordinator has not been added",
-    "deletingNationalCoordinatorFailedEvent": "National coordinator has not been deleted"
+    "deletingNationalCoordinatorFailedEvent": "National coordinator has not been deleted",
+    "nationalCoordinatorAddingProcessStartedEvent": "National coordinator adding process has been started please wait...",
+    "nationalCoordinatorDeletingProcessStartedEvent": "National coordinator deleting process has been started please wait..."
   }
 }
