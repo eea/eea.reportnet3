@@ -1,16 +1,10 @@
 package org.eea.ums.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletResponse;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.apache.commons.collections.CollectionUtils;
@@ -60,11 +54,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * The Class UserManagementControllerImpl.
@@ -849,7 +850,6 @@ public class UserManagementControllerImpl implements UserManagementController {
       @ApiParam(value = "dataflowId") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(value = "dataProviderId") @PathVariable("dataProviderId") Long dataProviderId) {
 
-    LOG.info("getUserRolesByDataflowAndCountry started");
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
 
@@ -1007,7 +1007,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   public void createNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
     try {
+      LOG.info("INSIDE createNationalCoordinator before create");
       userNationalCoordinatorService.createNationalCoordinator(nationalCoordinatorVO);
+      LOG.info("INSIDE createNationalCoordinator after create");
     } catch (EEAException e) {
       if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
           .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
@@ -1052,7 +1054,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   public void deleteNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
     try {
+      LOG.info("INSIDE deleteNationalCoordinator before delete");
       userNationalCoordinatorService.deleteNationalCoordinator(nationalCoordinatorVO);
+      LOG.info("INSIDE deleteNationalCoordinator after delete");
     } catch (EEAException e) {
       if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
           .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
