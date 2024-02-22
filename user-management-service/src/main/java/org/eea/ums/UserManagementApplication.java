@@ -1,6 +1,5 @@
 package org.eea.ums;
 
-import org.eea.lock.annotation.EnableLockAspect;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -15,7 +14,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableDiscoveryClient
 @EnableCircuitBreaker
 @EnableEEASwagger
-@EnableLockAspect
 @EnableCaching
 public class UserManagementApplication {
 

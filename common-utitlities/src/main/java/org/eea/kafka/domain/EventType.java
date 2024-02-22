@@ -606,16 +606,10 @@ public enum EventType {
       "deleting_national_coordinator_failed_event", true),
 
   NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "national_coordinator_adding_process_started_event", true),
+      "deleting_national_coordinator_failed_event", true),
 
   NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "national_coordinator_deleting_process_started_event", true),
-
-  NATIONAL_COORDINATOR_ANOTHER_ADDING_PROCESS_IN_PROGRESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "national_coordinator_another_adding_process_in_progress_event", true),
-
-  NATIONAL_COORDINATOR_ANOTHER_DELETING_PROCESS_IN_PROGRESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "national_coordinator_another_deleting_process_in_progress_event", true);
+      "deleting_national_coordinator_failed_event", true);
 
 
 
