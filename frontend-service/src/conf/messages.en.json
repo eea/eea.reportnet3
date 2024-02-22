@@ -1657,6 +1657,12 @@
     "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
     "canceled_by_admin": "Canceled by admin",
     "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks",
-    "exportFileStartEvent": "Exporting file {:fileName}"
+    "exportFileStartEvent": "Exporting file {:fileName}",
+    "addingNationalCoordinatorFinishedEvent": "National coordinator has been added successfully",
+    "deletingNationalCoordinatorFinishedEvent": "National coordinator has been deleted successfully",
+    "addingNationalCoordinatorFailedEvent": "National coordinator has not been added",
+    "deletingNationalCoordinatorFailedEvent": "National coordinator has not been deleted",
+    "nationalCoordinatorAddingProcessStartedEvent": "National coordinator adding process has been started, please wait...",
+    "nationalCoordinatorDeletingProcessStartedEvent": "National coordinator deleting process has been started, please wait..."
   }
 }
