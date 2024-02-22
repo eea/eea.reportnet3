@@ -22,6 +22,13 @@ public class LockUmsServiceImpl implements LockUmsService {
     this.lockService = lockUmsService;
   }
 
+  /**
+   * The method check if the lock exists in DB
+   *
+   * @param lockSignature The LockSignature must be unique
+   * @param mapCriteria   The criteria for the lock
+   * @return true , if lock does not exist on DB
+   */
   @Override
   public boolean lockNotExists(LockSignature lockSignature, Map<String, Object> mapCriteria) {
     mapCriteria.put("signature", lockSignature.getValue());
@@ -29,12 +36,25 @@ public class LockUmsServiceImpl implements LockUmsService {
     return lockVO == null;
   }
 
+  /**
+   * This method creates the lock
+   *
+   * @param mapCriteria The criteria for the lock
+   * @param userName The current userName
+   *
+   * @throws EEAException eeaException
+   */
   @Override
   public void createLock(Map<String, Object> mapCriteria, String userName) throws EEAException {
     lockService.createLock(new Timestamp(System.currentTimeMillis()), userName, LockType.METHOD,
         mapCriteria);
   }
 
+  /**
+   * Removes the lock from the DB
+   *
+   * @param mapCriteria The criteria for the lock
+   */
   @Override
   public void removeLock(Map<String, Object> mapCriteria) {
     lockService.removeLockByCriteria(mapCriteria);
