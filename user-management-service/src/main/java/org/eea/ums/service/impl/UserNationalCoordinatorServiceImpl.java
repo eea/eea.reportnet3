@@ -14,17 +14,12 @@ import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.domain.NotificationVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.UserNationalCoordinatorService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,9 +58,6 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
-
   /**
    * Gets the national coordinators.
    *
@@ -99,13 +91,8 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
    * @throws EEAException
    */
   @Override
-  @Async
   public void createNationalCoordinator(UserNationalCoordinatorVO userNationalCoordinatorVO)
       throws EEAException {
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
-
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT, null, notificationVO);
 
     checkUser(userNationalCoordinatorVO);
 
@@ -113,7 +100,6 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     List<DataProviderVO> providers = representativeControllerZuul
         .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
     if (CollectionUtils.isEmpty(providers)) {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
       throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
     }
 
@@ -132,12 +118,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
       // finally add all permissions
       securityProviderInterfaceService.addContributorsToUserGroup(resourcesForNC);
 
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
-
     } catch (Exception e) {
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
     }
   }
@@ -149,21 +130,14 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
    * @throws EEAException the EEA exception
    */
   @Override
-  @Async
   public void deleteNationalCoordinator(UserNationalCoordinatorVO userNationalCoordinatorVO)
       throws EEAException {
-    NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
-
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT, null, notificationVO);
-
     checkUser(userNationalCoordinatorVO);
 
     // check Country
     List<DataProviderVO> providers = representativeControllerZuul
         .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
     if (CollectionUtils.isEmpty(providers)) {
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
       throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
     }
 
@@ -179,13 +153,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
 
       // finally add all permissions
       securityProviderInterfaceService.removeContributorsFromUserGroup(resourcesForNC);
-
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
-
     } catch (Exception e) {
-      // sent notification
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED);
     }
   }
