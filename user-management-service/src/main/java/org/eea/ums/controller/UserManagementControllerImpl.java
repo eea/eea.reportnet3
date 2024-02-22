@@ -5,6 +5,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -848,7 +850,6 @@ public class UserManagementControllerImpl implements UserManagementController {
       @ApiParam(value = "dataflowId") @PathVariable("dataflowId") Long dataflowId,
       @ApiParam(value = "dataProviderId") @PathVariable("dataProviderId") Long dataProviderId) {
 
-    LOG.info("getUserRolesByDataflowAndCountry started");
     return userRoleService.getUserRolesByDataflowCountry(dataflowId, dataProviderId);
   }
 
@@ -1006,7 +1007,7 @@ public class UserManagementControllerImpl implements UserManagementController {
   public void createNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
     try {
-      userNationalCoordinatorService.createNationalCoordinator(nationalCoordinatorVO);//
+      userNationalCoordinatorService.createNationalCoordinator(nationalCoordinatorVO);
     } catch (EEAException e) {
       if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
           .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {

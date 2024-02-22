@@ -591,7 +591,32 @@ public enum EventType {
           "fme_import_job_failed_event", true),
 
   EXPORT_FILE_START_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "export_file_start_event", true);
+          "export_file_start_event", true),
+
+  ADDING_NATIONAL_COORDINATOR_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "deleting_national_coordinator_finished_event", true),
+
+  DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "adding_national_coordinator_finished_event", true),
+
+  ADDING_NATIONAL_COORDINATOR_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "adding_national_coordinator_failed_event", true),
+
+  DELETING_NATIONAL_COORDINATOR_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "deleting_national_coordinator_failed_event", true),
+
+  NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "national_coordinator_adding_process_started_event", true),
+
+  NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "national_coordinator_deleting_process_started_event", true),
+
+  NATIONAL_COORDINATOR_ANOTHER_ADDING_PROCESS_IN_PROGRESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "national_coordinator_another_adding_process_in_progress_event", true),
+
+  NATIONAL_COORDINATOR_ANOTHER_DELETING_PROCESS_IN_PROGRESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "national_coordinator_another_deleting_process_in_progress_event", true);
+
 
 
   /** The topic. */
