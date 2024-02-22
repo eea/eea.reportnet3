@@ -1,13 +1,5 @@
 package org.eea.ums.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
@@ -29,6 +21,15 @@ import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * The Class UserNationalCoordinatorServiceImpl.
@@ -118,7 +119,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
       securityProviderInterfaceService.addContributorsToUserGroup(resourcesForNC);
     } catch (Exception e) {
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
-    }
+    }//
   }
 
   /**
