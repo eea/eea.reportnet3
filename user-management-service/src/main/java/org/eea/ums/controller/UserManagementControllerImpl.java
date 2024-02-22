@@ -1005,7 +1005,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   public void createNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
     try {
+      LOG.info("INSIDE createNationalCoordinator before create");
       userNationalCoordinatorService.createNationalCoordinator(nationalCoordinatorVO);
+      LOG.info("INSIDE createNationalCoordinator after create");
     } catch (EEAException e) {
       if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
           .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
@@ -1050,7 +1052,9 @@ public class UserManagementControllerImpl implements UserManagementController {
   public void deleteNationalCoordinator(
       @RequestBody UserNationalCoordinatorVO nationalCoordinatorVO) {
     try {
+      LOG.info("INSIDE deleteNationalCoordinator before delete");
       userNationalCoordinatorService.deleteNationalCoordinator(nationalCoordinatorVO);
+      LOG.info("INSIDE deleteNationalCoordinator after delete");
     } catch (EEAException e) {
       if (EEAErrorMessage.USER_REQUEST_NOTFOUND.equals(e.getMessage()) || e.getMessage()
           .equals(String.format(EEAErrorMessage.NOT_EMAIL, nationalCoordinatorVO.getEmail()))) {
