@@ -150,14 +150,12 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
 
         // sent notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
-
-        lockUmsService.removeLock(mapCriteria);
-
       } catch (Exception e) {
-        lockUmsService.removeLock(mapCriteria);
         // sent notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
         throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+      } finally {
+        lockUmsService.removeLock(mapCriteria);
       }
     } else {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ANOTHER_ADDING_PROCESS_IN_PROGRESS_EVENT, null, notificationVO);
@@ -212,14 +210,12 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
 
         // sent notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
-
-        lockUmsService.removeLock(mapCriteria);
-
       } catch (Exception e) {
-        lockUmsService.removeLock(mapCriteria);
         // sent notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
         throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED);
+      } finally {
+        lockUmsService.removeLock(mapCriteria);
       }
     } else {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ANOTHER_DELETING_PROCESS_IN_PROGRESS_EVENT, null, notificationVO);
