@@ -310,8 +310,56 @@ public class JobControllerImpl implements JobController {
         return jobId;
     }
 
+    @Override
+    @HystrixCommand(commandProperties = {@HystrixProperty(
+            name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+    @PostMapping(value = "/addEtlImport/{datasetId}")
+    @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+    @ApiOperation(value = "Import file", hidden = true)
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully create"),
+            @ApiResponse(code = 400, message = "Execution error"),
+            @ApiResponse(code = 412, message = "Dataflow not releasable")})
+    public Long addEtlImportJob(@PathVariable("datasetId") Long datasetId,
+                                @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                @RequestParam(value = "providerId", required = false) Long providerId,
+                                @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus) {
+
+        ThreadPropertiesManager.setVariable("user",
+                SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("dataflowId", dataflowId);
+        parameters.put("datasetId", datasetId);
+        parameters.put("dataProviderId", providerId);
+        JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
+        if(jobStatus != null){
+            statusToInsert = jobStatus;
+        }
+
+        String dataflowName = null;
+        try{
+            dataflowName = dataFlowControllerZuul.findDataflowNameById(dataflowId);
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataflowId, e);
+        }
+
+        String datasetName = null;
+        try{
+            datasetName = dataSetMetabaseControllerZuul.findDatasetNameById(datasetId);
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
+        }
+
+        LOG.info("Adding etl import job for dataflowId={}, datasetId={}, providerId={} and creator={}", dataflowId, datasetId, providerId, SecurityContextHolder.getContext().getAuthentication().getName());
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.ETL_IMPORT, statusToInsert, false, null, dataflowName, datasetName);
+        LOG.info("Successfully added etl import job for dataflowId={}, datasetId={}, providerId={} and creator={}", dataflowId, datasetId, providerId, SecurityContextHolder.getContext().getAuthentication().getName());
+        return jobId;
+    }
+
     /**
-     * Adds a release job.
+     * Adds a copy to eu dataset job.
      */
     @Override
     @HystrixCommand
@@ -549,7 +597,7 @@ public class JobControllerImpl implements JobController {
     }
 
     @Override
-    @GetMapping(value = "/private/pollForJobStatus/{jobId}")
+    @GetMapping(value = "/pollForJobStatus/{jobId}")
     @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
     public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId,
                                                 @ApiParam(type = "Long", value = "Dataset id",
@@ -639,6 +687,26 @@ public class JobControllerImpl implements JobController {
     public void sendFmeImportFailedNotification(@RequestBody JobVO jobVO){
         jobUtils.sendKafkaImportNotification(jobVO, EventType.FME_IMPORT_JOB_FAILED_EVENT, "Fme job failed");
         LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT for jobId {} and fmeJobId {}", jobVO.getId(), jobVO.getFmeJobId());
+    }
+
+    /**
+     * Retrieves the status of a job
+     *
+     * @param jobId the job id
+     * @return
+     */
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping(value = "/getJobStatusByJobId/{jobId}")
+    public JobStatusEnum getJobStatusByJobId(@PathVariable("jobId") Long jobId){
+        try{
+            JobVO job = jobService.findById(jobId);
+            return job.getJobStatus();
+        }
+        catch(Exception e){
+            LOG.error("Could not retrieve status for jobId {}", jobId);
+            throw e;
+        }
     }
 }
 

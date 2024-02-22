@@ -1298,17 +1298,34 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
-
+    Long jobId = null;
     try {
+      //check eligibility of new job
+      List<Long> datasetIds = new ArrayList<>();
+      datasetIds.add(datasetId);
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus);
+      if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+        LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+        throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
+      }
+
       LOG.info("Calling etlImport for dataflowId {} datasetId {} and replaceData {}", dataflowId, datasetId, replaceData);
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData);
       LOG.info("Successfully called etlImport for dataflowId {} datasetId {} and replaceData {}", dataflowId, datasetId, replaceData);
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
     } catch (EEAException e) {
+      if (jobId != null){
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
       LOG_ERROR.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.IMPORTING_DATA_DATASET);
     } catch (Exception e) {
+      if (jobId != null){
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
       LOG_ERROR.error("Unexpected error! Error in etlImportDataset for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }

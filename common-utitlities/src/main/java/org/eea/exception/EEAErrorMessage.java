@@ -284,7 +284,7 @@ public final class EEAErrorMessage {
   public static final String INTEGRATION_NOT_FOUND = "Integration not found";
 
   /** The Constant DATASET_NOT_REPORTABLE: {@value}. */
-  public static final String DATASET_NOT_REPORTABLE = "Dataset %d is not Reportable";
+  public static final String DATASET_NOT_REPORTABLE = "Dataset %d closed for edition";
 
   /** The Constant NOT_EMAIL: {@value}. */
   public static final String NOT_EMAIL = "%s is not an email";
@@ -549,6 +549,10 @@ public final class EEAErrorMessage {
   /** The Constant IMPORTING_FILE_DATASET: {@value}. */
   public static final String IMPORTING_FILE_DATASET =
       "An unknown error happenned while importing a file into the dataset.";
+
+  /** The Constant IMPORTING_FILE_DATASET: {@value}. */
+  public static final String IMPORTING_REFUSED =
+          "An import can not be executed right now because there is another job being executed and is related to the same dataset id";
 
   /** The Constant EXPORTING_FILE_INTEGRATION: {@value}. */
   public static final String EXPORTING_FILE_INTEGRATION =
