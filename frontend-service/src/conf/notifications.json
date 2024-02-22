@@ -260,6 +260,12 @@
           "key": "RELEASE_BLOCKERS_FAILED_EVENT"
         },
         {
+          "key": "ADDING_NATIONAL_COORDINATOR_FAILED_EVENT"
+        },
+        {
+          "key": "DELETING_NATIONAL_COORDINATOR_FAILED_EVENT"
+        },
+        {
           "key": "ADD_DATASET_SCHEMA_SNAPSHOT_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
@@ -1218,6 +1224,8 @@
           }
         },
         { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
+        { "key": "ADDING_NATIONAL_COORDINATOR_FINISHED_EVENT" },
+        { "key": "DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT" },
         { "key": "AUTOMATICALLY_DOWNLOAD_SCHEMAS_INFO_FILE" },
         { "key": "AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE" },
         { "key": "AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE" },
@@ -1306,6 +1314,10 @@
         { "key": "EXPORT_FILE_START_EVENT" },
         { "key": "DOWNLOAD_SCHEMAS_INFO_START" },
         { "key": "EXTERNAL_EXPORT_DESIGN_INIT" },
+        { "key": "NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT" },
+        { "key": "NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT" },
+        { "key": "NATIONAL_COORDINATOR_ANOTHER_ADDING_PROCESS_IN_PROGRESS_EVENT" },
+        { "key": "NATIONAL_COORDINATOR_ANOTHER_DELETING_PROCESS_IN_PROGRESS_EVENT" },
         {
           "key": "FINISHED_VALIDATION_WITH_CANCELED_TASKS",
           "navigateTo": {
