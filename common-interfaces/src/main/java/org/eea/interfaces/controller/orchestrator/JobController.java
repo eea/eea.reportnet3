@@ -116,6 +116,21 @@ public interface JobController {
                       @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
                       @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
+    /**
+     * Adds an etl import job
+     *
+     * @param datasetId the id of the dataset
+     * @param dataflowId the id of the dataflow
+     * @param providerId the id of the provider
+     * @param jobStatus the status of the job
+     * @return the job id
+     */
+    @PostMapping(value = "/addEtlImport/{datasetId}")
+    Long addEtlImportJob(@PathVariable("datasetId") Long datasetId,
+                         @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                         @RequestParam(value = "providerId", required = false) Long providerId,
+                         @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
+
 
     /**
      * Adds a copy to eu dataset job
@@ -240,6 +255,15 @@ public interface JobController {
      */
     @PostMapping(value = "/private/sendFmeImportFailedNotification")
     void sendFmeImportFailedNotification(@RequestBody JobVO jobVO);
+
+    /**
+     * Retrieves the status of a job
+     *
+     * @param jobId the job id
+     * @return
+     */
+    @GetMapping(value = "/getJobStatusByJobId/{jobId}")
+    JobStatusEnum getJobStatusByJobId(@PathVariable("jobId") Long jobId);
 }
 
 
