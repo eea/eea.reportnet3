@@ -1304,11 +1304,11 @@ public class DatasetControllerImpl implements DatasetController {
       List<Long> datasetIds = new ArrayList<>();
       datasetIds.add(datasetId);
       JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus);
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
       }
+      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus);
 
       LOG.info("Calling etlImport for dataflowId {} datasetId {} and replaceData {}", dataflowId, datasetId, replaceData);
       fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData);
