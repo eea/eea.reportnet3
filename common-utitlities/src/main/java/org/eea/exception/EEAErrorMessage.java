@@ -284,7 +284,7 @@ public final class EEAErrorMessage {
   public static final String INTEGRATION_NOT_FOUND = "Integration not found";
 
   /** The Constant DATASET_NOT_REPORTABLE: {@value}. */
-  public static final String DATASET_NOT_REPORTABLE = "Dataset %d closed for edition";
+  public static final String DATASET_NOT_REPORTABLE = "Dataset %d is closed for edition";
 
   /** The Constant NOT_EMAIL: {@value}. */
   public static final String NOT_EMAIL = "%s is not an email";
