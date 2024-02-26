@@ -94,7 +94,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   public void createNationalCoordinator(UserNationalCoordinatorVO userNationalCoordinatorVO)
       throws EEAException {
 
-    checkUser(userNationalCoordinatorVO);
+    checkUser(userNationalCoordinatorVO);//
 
     // check Country
     List<DataProviderVO> providers = representativeControllerZuul
