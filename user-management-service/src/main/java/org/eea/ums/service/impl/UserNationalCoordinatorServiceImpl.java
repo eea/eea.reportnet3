@@ -175,11 +175,6 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT, null, notificationVO);
 
-      try {
-        Thread.sleep(60000);
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
       checkUser(userNationalCoordinatorVO);
 
       // check Country
