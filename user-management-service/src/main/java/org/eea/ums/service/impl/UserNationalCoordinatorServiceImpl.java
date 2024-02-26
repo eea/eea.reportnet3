@@ -8,18 +8,26 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.ums.ResourceAssignationVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
 import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.UserNationalCoordinatorService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -52,11 +60,17 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   /** The dataflow controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
-
-
   /** The security provider interface service. */
   @Autowired
   private SecurityProviderInterfaceService securityProviderInterfaceService;
+
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private RedisLockService redisLockService;
+
+  private static final long lockExpirationInMillis = 60000L;
 
   /**
    * Gets the national coordinators.
@@ -91,35 +105,54 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
    * @throws EEAException
    */
   @Override
+  @Async
   public void createNationalCoordinator(UserNationalCoordinatorVO userNationalCoordinatorVO)
       throws EEAException {
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
+
+    String lockKey = LockEnum.NATIONAL_COORDINATOR.getValue() + "_" + userNationalCoordinatorVO.getCountryCode();
+    String value = LockSignature.NATIONAL_COORDINATOR_CREATE.toString();
+
+    if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT, null, notificationVO);
 
     checkUser(userNationalCoordinatorVO);//
 
-    // check Country
-    List<DataProviderVO> providers = representativeControllerZuul
-        .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
-    if (CollectionUtils.isEmpty(providers)) {
-      throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
-    }
+      // check Country
+      List<DataProviderVO> providers = representativeControllerZuul
+          .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
+      if (CollectionUtils.isEmpty(providers)) {
+        redisLockService.releaseLock(lockKey, value);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+      }
 
-    try {
+      try {
 
-      // create country group
-      keycloakConnectorService
-          .createGroupDetail(getNationalCoordinatorGroup(userNationalCoordinatorVO));
-      securityProviderInterfaceService.addContributorToUserGroup(Optional.empty(),
-          userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
-              .getGroupName(userNationalCoordinatorVO.getCountryCode()));
-      // datasets in this country
-      List<ResourceAssignationVO> resourcesForNC =
-          getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.TRUE);
+        // create country group
+        keycloakConnectorService
+            .createGroupDetail(getNationalCoordinatorGroup(userNationalCoordinatorVO));
+        securityProviderInterfaceService.addContributorToUserGroup(Optional.empty(),
+            userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
+                .getGroupName(userNationalCoordinatorVO.getCountryCode()));
+        // datasets in this country
+        List<ResourceAssignationVO> resourcesForNC =
+            getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.TRUE);
 
-      // finally add all permissions
-      securityProviderInterfaceService.addContributorsToUserGroup(resourcesForNC);
+        // finally add all permissions
+        securityProviderInterfaceService.addContributorsToUserGroup(resourcesForNC);
 
-    } catch (Exception e) {
-      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
+
+      } catch (Exception e) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
+      } finally {
+        redisLockService.releaseLock(lockKey, value);
+      }
+    } else {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ANOTHER_PROCESS_IN_PROGRESS_EVENT, null, notificationVO);
     }
   }
 
@@ -130,31 +163,56 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
    * @throws EEAException the EEA exception
    */
   @Override
+  @Async
   public void deleteNationalCoordinator(UserNationalCoordinatorVO userNationalCoordinatorVO)
       throws EEAException {
-    checkUser(userNationalCoordinatorVO);
+    NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).build();
 
-    // check Country
-    List<DataProviderVO> providers = representativeControllerZuul
-        .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
-    if (CollectionUtils.isEmpty(providers)) {
-      throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
-    }
+    String lockKey = LockEnum.NATIONAL_COORDINATOR.getValue() + "_" + userNationalCoordinatorVO.getCountryCode();
+    String value = LockSignature.NATIONAL_COORDINATOR_DELETE.toString();
 
-    try {
+    if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT, null, notificationVO);
 
-      // remove country group permission
-      securityProviderInterfaceService.removeContributorFromUserGroup(Optional.empty(),
-          userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
-              .getGroupName(userNationalCoordinatorVO.getCountryCode()));
-      // datasets in this country
-      List<ResourceAssignationVO> resourcesForNC =
-          getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.FALSE);
+      try {
+        Thread.sleep(60000);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+      checkUser(userNationalCoordinatorVO);
 
-      // finally add all permissions
-      securityProviderInterfaceService.removeContributorsFromUserGroup(resourcesForNC);
-    } catch (Exception e) {
-      throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED);
+      // check Country
+      List<DataProviderVO> providers = representativeControllerZuul
+          .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
+      if (CollectionUtils.isEmpty(providers)) {
+        redisLockService.releaseLock(lockKey, value);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+      }
+
+      try {
+
+        // remove country group permission
+        securityProviderInterfaceService.removeContributorFromUserGroup(Optional.empty(),
+            userNationalCoordinatorVO.getEmail(), ResourceGroupEnum.PROVIDER_NATIONAL_COORDINATOR
+                .getGroupName(userNationalCoordinatorVO.getCountryCode()));
+        // datasets in this country
+        List<ResourceAssignationVO> resourcesForNC =
+            getResourcesForNCAndCreate(userNationalCoordinatorVO, providers, Boolean.FALSE);
+
+        // finally add all permissions
+        securityProviderInterfaceService.removeContributorsFromUserGroup(resourcesForNC);
+
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT, null, notificationVO);
+      } catch (Exception e) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+        throw new EEAException(EEAErrorMessage.PERMISSION_NOT_REMOVED);
+      } finally {
+        redisLockService.releaseLock(lockKey, value);
+      }
+    } else {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ANOTHER_PROCESS_IN_PROGRESS_EVENT, null, notificationVO);
     }
   }
 
