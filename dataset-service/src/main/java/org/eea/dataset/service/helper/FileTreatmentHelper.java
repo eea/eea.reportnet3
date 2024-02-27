@@ -597,12 +597,14 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param replaceData
      * @throws EEAException the EEA exception
      */
+    @Async
     public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
-                                 Long providerId, Boolean replaceData) throws EEAException {
+                                 Long providerId, Boolean replaceData, Long jobId) throws EEAException {
         // Get the datasetSchemaId by the datasetId
         LOG.info("Import data into dataset {}", datasetId);
         String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
         if (null == datasetSchemaId) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
             throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
         }
 
@@ -610,59 +612,71 @@ public class FileTreatmentHelper implements DisposableBean {
         DataSetSchema datasetSchema =
                 schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
         if (null == datasetSchema) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
             throw new EEAException(
                     String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
         }
 
-        // Obtain the data provider code to insert into the record
-        DataProviderVO provider =
-                providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
+        try {
 
-        // Get the partition for the partiton id
-        final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+            // Obtain the data provider code to insert into the record
+            DataProviderVO provider =
+                    providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
 
-        // Construct Maps to relate ids
-        Map<String, TableSchema> tableMap = new HashMap<>();
-        Map<String, FieldSchema> fieldMap = new HashMap<>();
-        Set<String> tableWithAttachmentFieldSet = new HashSet<>();
-        for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-            tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
-            // Match each fieldSchemaId with its headerName
-            for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-                fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
-                if (DataType.ATTACHMENT.equals(field.getType())) {
-                    LOG.warn("Table with id schema {} contains attachment field, processing",
-                            tableSchema.getIdTableSchema());
-                    tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
+            // Get the partition for the partiton id
+            final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+
+            // Construct Maps to relate ids
+            Map<String, TableSchema> tableMap = new HashMap<>();
+            Map<String, FieldSchema> fieldMap = new HashMap<>();
+            Set<String> tableWithAttachmentFieldSet = new HashSet<>();
+            for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+                tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
+                // Match each fieldSchemaId with its headerName
+                for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+                    fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
+                    if (DataType.ATTACHMENT.equals(field.getType())) {
+                        LOG.warn("Table with id schema {} contains attachment field, processing",
+                                tableSchema.getIdTableSchema());
+                        tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
+                    }
                 }
             }
+
+            // Construct object to be save
+            DatasetValue dataset = new DatasetValue();
+            List<TableValue> tables = new ArrayList<>();
+            List<String> readOnlyTables = new ArrayList<>();
+            List<String> fixedNumberTables = new ArrayList<>();
+
+            // Loops to build the entity
+            dataset.setId(datasetId);
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(dataset.getId());
+
+            etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
+                    readOnlyTables, fixedNumberTables, datasetType, replaceData);
+            dataset.setTableValues(tables);
+            dataset.setIdDatasetSchema(datasetSchemaId);
+
+            List<RecordValue> allRecords = new ArrayList<>();
+
+            tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
+                    tableWithAttachmentFieldSet, datasetSchema);
+            recordRepository.saveAll(allRecords);
+            LOG.info("Data saved for datasetId {}", datasetId);
+            // now the view is not updated, update the check to false
+            datasetService.updateCheckView(datasetId, false);
+            // delete the temporary table from etlExport
+            datasetService.deleteTempEtlExport(datasetId);
+            //update job status
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+            LOG.info("Etl import for jobId {} is completed", jobId);
         }
-
-        // Construct object to be save
-        DatasetValue dataset = new DatasetValue();
-        List<TableValue> tables = new ArrayList<>();
-        List<String> readOnlyTables = new ArrayList<>();
-        List<String> fixedNumberTables = new ArrayList<>();
-
-        // Loops to build the entity
-        dataset.setId(datasetId);
-        DatasetTypeEnum datasetType = datasetService.getDatasetType(dataset.getId());
-
-        etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
-                readOnlyTables, fixedNumberTables, datasetType, replaceData);
-        dataset.setTableValues(tables);
-        dataset.setIdDatasetSchema(datasetSchemaId);
-
-        List<RecordValue> allRecords = new ArrayList<>();
-
-        tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
-                tableWithAttachmentFieldSet, datasetSchema);
-        recordRepository.saveAll(allRecords);
-        LOG.info("Data saved for datasetId {}", datasetId);
-        // now the view is not updated, update the check to false
-        datasetService.updateCheckView(datasetId, false);
-        // delete the temporary table from etlExport
-        datasetService.deleteTempEtlExport(datasetId);
+        catch (Exception e){
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            LOG.error("EtlImport failed for jobId {} with error message {}", jobId, e.getMessage());
+            throw e;
+        }
     }
 
     /**

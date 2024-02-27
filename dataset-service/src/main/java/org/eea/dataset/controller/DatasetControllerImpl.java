@@ -1274,7 +1274,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported"),
       @ApiResponse(code = 500, message = "Error importing data"),
       @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
-  public void etlImportDataset(
+  public Map<String, Object> etlImportDataset(
       @ApiParam(type = "Long", value = "Dataset id",
           example = "0") @PathVariable("datasetId") Long datasetId,
       @ApiParam(value = "Data object") @RequestBody ETLDatasetVO etlDatasetVO,
@@ -1310,10 +1310,18 @@ public class DatasetControllerImpl implements DatasetController {
       }
       jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus);
 
-      LOG.info("Calling etlImport for dataflowId {} datasetId {} and replaceData {}", dataflowId, datasetId, replaceData);
-      fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData);
-      LOG.info("Successfully called etlImport for dataflowId {} datasetId {} and replaceData {}", dataflowId, datasetId, replaceData);
-      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+      LOG.info("Calling etlImport for jobId {} dataflowId {} datasetId {} and replaceData {}", jobId, dataflowId, datasetId, replaceData);
+      fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData, jobId);
+
+      Map<String, Object> result = new HashMap<>();
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if(providerId != null){
+        pollingUrl+= "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+
+      return result;
     } catch (EEAException e) {
       if (jobId != null){
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
@@ -1347,7 +1355,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported"),
       @ApiResponse(code = 500, message = "Error importing data"),
       @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
-  public void etlImportDatasetLegacy(
+  public Map<String, Object> etlImportDatasetLegacy(
       @ApiParam(type = "Long", value = "Dataset id",
           example = "0") @PathVariable("datasetId") Long datasetId,
       @ApiParam(value = "Data object") @RequestBody ETLDatasetVO etlDatasetVO,
@@ -1357,7 +1365,7 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(type = "Boolean", value = "Replace Data",
               example = "0") @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData) {
-    this.etlImportDataset(datasetId, etlDatasetVO, dataflowId, providerId, replaceData);
+    return this.etlImportDataset(datasetId, etlDatasetVO, dataflowId, providerId, replaceData);
   }
 
   /**

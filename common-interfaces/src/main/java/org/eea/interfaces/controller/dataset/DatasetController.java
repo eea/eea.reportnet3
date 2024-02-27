@@ -367,7 +367,7 @@ public interface DatasetController {
    * @param replaceData
    */
   @PostMapping("/v1/{datasetId}/etlImport")
-  void etlImportDataset(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "replaceData", required = false) Boolean replaceData);
@@ -382,7 +382,7 @@ public interface DatasetController {
    * @param replaceData
    */
   @PostMapping("/{datasetId}/etlImport")
-  void etlImportDatasetLegacy(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> etlImportDatasetLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "replaceData", required = false) Boolean replaceData);
