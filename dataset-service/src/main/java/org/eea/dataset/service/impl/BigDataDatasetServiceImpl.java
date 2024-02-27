@@ -20,7 +20,9 @@ import org.eea.interfaces.controller.dataflow.RepresentativeController.Represent
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -116,7 +118,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
-                              String fmeJobId, String filePathInS3) throws Exception {
+                              String fmeJobId, String filePathInS3, DataFlowVO dataflowVO) throws Exception {
         String fileName = (file != null) ? file.getOriginalFilename() : null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
@@ -184,7 +186,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 //delete objects ?
             }
 
-            //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+            //Retrieve providerId and providerCode
             List<Long> datasetIds = new ArrayList<>();
             datasetIds.add(datasetId);
             String providerCode = null;
@@ -204,10 +206,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, delimiter, integrationId, providerCode);
 
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
+            if (DatasetTypeEnum.REFERENCE.equals(datasetType) && dataflowVO.getStatus() == TypeStatusEnum.DRAFT) {
+                importFileInDremioInfo.setUpdateReferenceFolder(true);
+            }
+            else{
+                importFileInDremioInfo.setUpdateReferenceFolder(false);
+            }
+
             LOG.info("Importing file to s3 {}", importFileInDremioInfo);
             importDatasetDataToDremio(importFileInDremioInfo, file, s3File);
+            //the fme job for the first iteration should not be finished yet
             if(integrationId == null) {
-                //the fme job should not be finished yet
                 finishImportProcess(importFileInDremioInfo);
             }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
@@ -629,7 +639,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             // Delete the csv files.
             deleteFilesFromDirectoryWithExtension(new String[]{".csv", ".parquet"}, importFileInDremioInfo.getDatasetId().toString());
-
         }
 
         if (jobId!=null) {

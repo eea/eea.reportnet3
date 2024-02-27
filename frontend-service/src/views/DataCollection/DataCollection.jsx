@@ -147,6 +147,7 @@ export const DataCollection = () => {
     setExportButtonsList(internalExtensionsList);
   };
 
+
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });

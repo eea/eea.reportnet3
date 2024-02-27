@@ -213,9 +213,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //refresh the metadata
         refreshTableMetadataAndPromote(importFileInDremioInfo, dremioPathForParquetFolder, s3TablePathResolver, tableSchemaName);
 
-        DatasetTypeEnum datasetType = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
-        DataFlowVO dataflowVO = dataFlowControllerZuul.findById(importFileInDremioInfo.getDataflowId(), null);
-        if (DatasetTypeEnum.REFERENCE.equals(datasetType) && dataflowVO.getStatus() == TypeStatusEnum.DRAFT) {
+        if (importFileInDremioInfo.getUpdateReferenceFolder()) {
             LOG.info("For job {} the REFERENCE dataset files must be copied to reference folder", importFileInDremioInfo);
             handleReferenceDataset(importFileInDremioInfo, s3TablePathResolver);
         }

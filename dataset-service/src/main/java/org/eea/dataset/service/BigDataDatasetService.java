@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BigDataDatasetService {
@@ -19,10 +20,11 @@ public interface BigDataDatasetService {
      * @param jobId the jobId
      * @param fmeJobId the fmeJobId
      * @param filePathInS3 the filePathInS3
+     * @param dataflowVO the dataflowVO
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, String filePathInS3) throws Exception;
+                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, String filePathInS3, DataFlowVO dataflowVO) throws Exception;
 
     /**
      * Generate s3 presigned Url for import
