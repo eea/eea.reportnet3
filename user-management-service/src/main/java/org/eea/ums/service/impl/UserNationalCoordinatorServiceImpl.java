@@ -70,7 +70,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
   @Autowired
   private RedisLockService redisLockService;
 
-  private static final long lockExpirationInMillis = 60000L;
+  private static final long lockExpirationInMillis = 600000L;
 
   /**
    * Gets the national coordinators.
@@ -117,7 +117,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT, null, notificationVO);
 
-    checkUser(userNationalCoordinatorVO);
+      checkUser(userNationalCoordinatorVO);
 
       // check Country
       List<DataProviderVO> providers = representativeControllerZuul
