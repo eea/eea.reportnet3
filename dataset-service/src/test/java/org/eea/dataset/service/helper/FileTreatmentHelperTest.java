@@ -717,7 +717,6 @@ public class FileTreatmentHelperTest {
   @Test(expected = EEAException.class)
   public void etlImportDatasetSchemaIdNotFoundTest() throws EEAException {
     try {
-      Mockito.doNothing().when(jobControllerZuul).updateJobStatus(Mockito.anyLong(), Mockito.any());
       fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L, false, null);
     } catch (EEAException e) {
       assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
@@ -732,7 +731,6 @@ public class FileTreatmentHelperTest {
    */
   @Test(expected = EEAException.class)
   public void etlImportDatasetNotFoundTest() throws EEAException {
-    Mockito.doNothing().when(jobControllerZuul).updateJobStatus(Mockito.anyLong(), Mockito.any());
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
         .thenReturn("5cf0e9b3b793310e9ceca190");
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
@@ -803,7 +801,6 @@ public class FileTreatmentHelperTest {
     fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
     fieldValue.setValue("value");
 
-    Mockito.doNothing().when(jobControllerZuul).updateJobStatus(Mockito.anyLong(), Mockito.any());
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
         .thenReturn(new ObjectId().toString());
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetSchema));
@@ -884,7 +881,6 @@ public class FileTreatmentHelperTest {
     fieldValue.setIdFieldSchema("5cf0e9b3b793310e9ceca190");
     fieldValue.setValue("value");
 
-    Mockito.doNothing().when(jobControllerZuul).updateJobStatus(Mockito.anyLong(), Mockito.any());
     Mockito.when(datasetService.getDatasetType(anyLong())).thenReturn(DatasetTypeEnum.REFERENCE);
     Mockito.when(datasetRepository.findIdDatasetSchemaById(Mockito.any()))
         .thenReturn(new ObjectId().toString());
