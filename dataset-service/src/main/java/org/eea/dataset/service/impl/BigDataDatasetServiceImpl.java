@@ -717,9 +717,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema());
         }
-
-        // now the view is not updated, update the check to false
-        datasetService.updateCheckView(datasetId, false);
     }
 
 }
