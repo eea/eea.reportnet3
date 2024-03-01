@@ -32,9 +32,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
   const resourcesContext = useContext(ResourcesContext);
 
   const [deleteNationalCoordinator, setDeleteNationalCoordinator] = useState({});
-  const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [nationalCoordinatorsData, setNationalCoordinatorsData] = useState([]);
 
@@ -43,7 +41,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
 
   useEffect(() => {
     fetchData();
-  }, [isDataUpdated]);
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -51,7 +49,6 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
       const { data } = await UserRightService.getNationalCoordinators();
       setNationalCoordinatorsData(parseNationalCoordinatorsList(data));
       setData(parseNationalCoordinatorsList(data));
-      setIsDataUpdated(false);
     } catch (error) {
       console.error('NationalCoordinators - fetchData.', error);
       notificationContext.add({ type: 'LOAD_NATIONAL_COORDINATORS_ERROR' }, true);
@@ -76,14 +73,11 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
 
   const deleteNationalCoordinators = async () => {
     try {
-      setIsDeleting(true);
       await UserRightService.deleteNationalCoordinator(deleteNationalCoordinator);
-      setIsDataUpdated(true);
     } catch (error) {
       console.error('NationalCoordinators - deleteNationalCoordinator.', error);
       notificationContext.add({ type: 'DELETE_NATIONAL_COORDINATORS_ERROR' }, true);
     } finally {
-      setIsDeleting(false);
       setIsDeleteDialogVisible(false);
       setDeleteNationalCoordinator({});
     }
@@ -201,7 +195,7 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
     <div className={styles.buttonsDialogFooter}>
       <AddNationalCoordinator
         checkDuplicateNationalCoordinator={checkDuplicateNationalCoordinator}
-        onUpdateData={setIsDataUpdated}
+        onConfirmAddition={onCloseDialog}
       />
 
       <Button
@@ -229,12 +223,14 @@ export const ManageNationalCoordinators = ({ onCloseDialog, isDialogVisible }) =
       {isDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm="p-button-danger"
-          disabledConfirm={isDeleting}
           header={resourcesContext.messages['deleteNationalCoordinatorsHeader']}
-          iconConfirm={isDeleting ? 'spinnerAnimate' : 'check'}
+          iconConfirm={'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={() => deleteNationalCoordinators()}
+          onConfirm={() => {
+            deleteNationalCoordinators();
+            onCloseDialog();
+          }}
           onHide={onDeleteDialogClose}
           visible={isDeleteDialogVisible}>
           {resourcesContext.messages['deleteNationalCoordinatorsConfirm']}

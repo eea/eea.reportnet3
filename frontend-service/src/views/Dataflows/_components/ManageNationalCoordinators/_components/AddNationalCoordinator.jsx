@@ -18,14 +18,13 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { RegularExpressions } from 'views/_functions/Utils/RegularExpressions';
 
-export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoordinator }) => {
+export const AddNationalCoordinator = ({ onConfirmAddition, checkDuplicateNationalCoordinator }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [groupOfCountries, setGroupOfCountries] = useState([]);
   const [hasEmailError, setHasEmailError] = useState(false);
   const [isAddDialogVisible, setIsAddDialogVisible] = useState(false);
-  const [isAdding, setIsAdding] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [nationalCoordinator, setNationalCoordinator] = useState({ email: '' });
 
@@ -35,7 +34,6 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
 
   useEffect(() => {
     if (!isAddDialogVisible) {
-      setIsAdding(false);
       setNationalCoordinator({ email: '' });
       setHasEmailError(false);
     }
@@ -59,9 +57,7 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
 
   const addNationalCoordinator = async () => {
     try {
-      setIsAdding(true);
       await UserRightService.createNationalCoordinator(nationalCoordinator);
-      onUpdateData(true);
       setIsAddDialogVisible(false);
     } catch (error) {
       if (error?.response?.status === 404) {
@@ -70,8 +66,6 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
         notificationContext.add({ type: 'CREATE_NATIONAL_COORDINATORS_ERROR' }, true);
       }
       console.error('NationalCoordinators - createNationalCoordinator.', error);
-    } finally {
-      setIsAdding(false);
     }
   };
 
@@ -154,17 +148,19 @@ export const AddNationalCoordinator = ({ onUpdateData, checkDuplicateNationalCoo
           classNameConfirm="p-button-primary"
           confirmTooltip={getTooltipMessage()}
           disabledConfirm={
-            isAdding ||
             checkDuplicateNationalCoordinator(nationalCoordinator) ||
             !isValidEmail(nationalCoordinator.email) ||
             isEmpty(nationalCoordinator.email) ||
             isEmpty(nationalCoordinator.countryCode)
           }
           header={resourcesContext.messages['addNationalCoordinatorsDialogHeader']}
-          iconConfirm={isAdding ? 'spinnerAnimate' : 'check'}
+          iconConfirm={'check'}
           labelCancel={resourcesContext.messages['cancel']}
           labelConfirm={resourcesContext.messages['save']}
-          onConfirm={addNationalCoordinator}
+          onConfirm={() => {
+            addNationalCoordinator();
+            onConfirmAddition();
+          }}
           onHide={onAddDialogClose}
           visible={isAddDialogVisible}>
           {renderDialogContent()}
