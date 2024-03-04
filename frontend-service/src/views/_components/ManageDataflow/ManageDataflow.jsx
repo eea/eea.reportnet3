@@ -129,6 +129,7 @@ export const ManageDataflow = ({
 
   const onSave = () => {
     if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
+    resetObligations();
   };
 
   const renderCancelButton = action => (
