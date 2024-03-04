@@ -126,8 +126,6 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
         providers = representativeControllerZuul
             .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
         if (CollectionUtils.isEmpty(providers)) {
-          redisLockService.releaseLock(lockKey, value);
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
           throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
         }
       } catch (Exception e) {
@@ -196,8 +194,6 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
         providers = representativeControllerZuul
             .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
         if (CollectionUtils.isEmpty(providers)) {
-          redisLockService.releaseLock(lockKey, value);
-          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
           throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
         }
       } catch (Exception e) {
