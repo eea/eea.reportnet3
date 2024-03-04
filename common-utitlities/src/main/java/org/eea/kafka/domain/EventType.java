@@ -612,7 +612,10 @@ public enum EventType {
       "national_coordinator_deleting_process_started_event", true),
 
   NATIONAL_COORDINATOR_ANOTHER_PROCESS_IN_PROGRESS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "national_coordinator_another_process_in_progress_event", true);
+      "national_coordinator_another_process_in_progress_event", true),
+
+  EMAIL_NOT_FOUND_ERROR(LiteralConstants.DATA_REPORTING_TOPIC,
+      "email_not_found_error_event", true);
 
 
 
