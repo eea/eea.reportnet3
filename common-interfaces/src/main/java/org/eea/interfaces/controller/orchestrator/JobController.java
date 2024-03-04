@@ -219,9 +219,11 @@ public interface JobController {
      * Updates job info value
      * @param jobId
      * @param jobInfo
+     * @param lineNumber
      */
     @PostMapping(value = "/private/updateJobInfo/{jobId}")
-    void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo);
+    void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
+                       @RequestParam(value = "lineNumber") Integer lineNumber);
 
 
     /**

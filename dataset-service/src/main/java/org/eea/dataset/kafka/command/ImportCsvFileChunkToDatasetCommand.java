@@ -169,7 +169,7 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
         taskRepository.updateStatusAndFinishDate(task.get().getId(), ProcessStatusEnum.CANCELED.toString(), new Date());
         if(e.getMessage().equals(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING)){
           Long jobId = jobProcessControllerZuul.findJobIdByProcessId(task.get().getProcessId());
-          jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING);
+          jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING, null);
         }
       }
       else{

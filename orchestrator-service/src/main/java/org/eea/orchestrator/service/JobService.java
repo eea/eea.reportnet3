@@ -85,7 +85,7 @@ public interface JobService {
 
     File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException;
 
-    void updateJobInfo(Long jobId, JobInfoEnum jobInfo);
+    void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber);
 
     Long findProviderIdById(Long jobId);
 }

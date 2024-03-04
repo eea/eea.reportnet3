@@ -3811,7 +3811,7 @@ public class DatasetServiceImpl implements DatasetService {
     processControllerZuul.updateProcess(process.getDatasetId(), process.getDataflowId(),
             ProcessStatusEnum.CANCELED, ProcessTypeEnum.valueOf(process.getProcessType()), process.getProcessId(),
             process.getUser(), process.getPriority(), process.isReleased());
-    jobControllerZuul.updateJobInfo(jobId, jobInfo);
+    jobControllerZuul.updateJobInfo(jobId, jobInfo, null);
     Map<String, Object> importFileData = new HashMap<>();
     importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
     importFileData.put(LiteralConstants.DATASETID, datasetId);

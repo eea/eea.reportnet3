@@ -15,7 +15,13 @@ public enum JobInfoEnum {
 
     ERROR_EMPTY_FILENAME("Could not retrieve file name"),
 
-    WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES("Some of the imported files do not match the name of the dataset's tables");
+    WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES("Some of the imported files do not match the name of the dataset's tables"),
+
+    ERROR_CSV_ILLEGAL_CHARACTERS("An illegal character was found in the imported file"),
+
+    ERROR_CSV_MULTIPLE_QUOTES("Multiple quotes were found in the imported file"),
+
+    ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d");
 
     /** The value. */
     private final String value;
@@ -34,7 +40,10 @@ public enum JobInfoEnum {
      *
      * @return the value
      */
-    public String getValue() {
+    public String getValue(Integer lineNumber) {
+        if(lineNumber != null){
+            return String.format(value, lineNumber);
+        }
         return value;
     }
 }

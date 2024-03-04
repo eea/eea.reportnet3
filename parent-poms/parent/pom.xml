@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.3</api-gateway.version>
-      <communication.version>v3.3</communication.version>
-      <collaboration.version>v3.3</collaboration.version>
-      <dataflow.version>v3.3</dataflow.version>
-      <dataset.version>v3.3</dataset.version>
-      <document.version>v3.3</document.version>
-      <frontend.version>v3.3</frontend.version>
-      <indexsearch.version>v3.3</indexsearch.version>
-      <inspire.version>v3.3</inspire.version>
-      <recordstore.version>v3.3</recordstore.version>
-      <ums.version>v3.3</ums.version>
-      <validation.version>v3.3</validation.version>
-      <common-interfaces.version>v3.3</common-interfaces.version>
-      <common-utitlities.version>v3.3</common-utitlities.version>
-      <rod.version>v3.3</rod.version>
-      <orchestrator.version>v3.3</orchestrator.version>
+      <api-gateway.version>v3.3_IMPORT-STATUS-FEEDBACK</api-gateway.version>
+      <communication.version>v3.3_IMPORT-STATUS-FEEDBACK</communication.version>
+      <collaboration.version>v3.3_IMPORT-STATUS-FEEDBACK</collaboration.version>
+      <dataflow.version>v3.3_IMPORT-STATUS-FEEDBACK</dataflow.version>
+      <dataset.version>v3.3_IMPORT-STATUS-FEEDBACK</dataset.version>
+      <document.version>v3.3_IMPORT-STATUS-FEEDBACK</document.version>
+      <frontend.version>v3.3_IMPORT-STATUS-FEEDBACK</frontend.version>
+      <indexsearch.version>v3.3_IMPORT-STATUS-FEEDBACK</indexsearch.version>
+      <inspire.version>v3.3_IMPORT-STATUS-FEEDBACK</inspire.version>
+      <recordstore.version>v3.3_IMPORT-STATUS-FEEDBACK</recordstore.version>
+      <ums.version>v3.3_IMPORT-STATUS-FEEDBACK</ums.version>
+      <validation.version>v3.3_IMPORT-STATUS-FEEDBACK</validation.version>
+      <common-interfaces.version>v3.3_IMPORT-STATUS-FEEDBACK</common-interfaces.version>
+      <common-utitlities.version>v3.3_IMPORT-STATUS-FEEDBACK</common-utitlities.version>
+      <rod.version>v3.3_IMPORT-STATUS-FEEDBACK</rod.version>
+      <orchestrator.version>v3.3_IMPORT-STATUS-FEEDBACK</orchestrator.version>
   </properties>
 </project>
