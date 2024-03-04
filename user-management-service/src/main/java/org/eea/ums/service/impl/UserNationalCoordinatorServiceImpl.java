@@ -26,9 +26,11 @@ import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -117,15 +119,27 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_ADDING_PROCESS_STARTED_EVENT, null, notificationVO);
 
-      checkUser(userNationalCoordinatorVO);
-
-      // check Country
-      List<DataProviderVO> providers = representativeControllerZuul
-          .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
-      if (CollectionUtils.isEmpty(providers)) {
+      List<DataProviderVO> providers;
+      try {
+        checkUser(userNationalCoordinatorVO);
+        // check Country
+        providers = representativeControllerZuul
+            .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
+        if (CollectionUtils.isEmpty(providers)) {
+          redisLockService.releaseLock(lockKey, value);
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+          throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+        }
+      } catch (Exception e) {
         redisLockService.releaseLock(lockKey, value);
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
-        throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+        if (EEAErrorMessage.COUNTRY_CODE_NOTFOUND.equals(e.getMessage()) || e.getMessage()
+            .equals(String.format(EEAErrorMessage.USER_NOTFOUND, userNationalCoordinatorVO.getEmail()))) {
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EMAIL_NOT_FOUND_ERROR, null, notificationVO);
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        } else {
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ADDING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
       }
 
       try {
@@ -175,16 +189,23 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
     if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.NATIONAL_COORDINATOR_DELETING_PROCESS_STARTED_EVENT, null, notificationVO);
 
-      checkUser(userNationalCoordinatorVO);
-
-      // check Country
-      List<DataProviderVO> providers = representativeControllerZuul
-          .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
-      if (CollectionUtils.isEmpty(providers)) {
+      List<DataProviderVO> providers;
+      try {
+        checkUser(userNationalCoordinatorVO);
+        // check Country
+        providers = representativeControllerZuul
+            .findDataProvidersByCode(userNationalCoordinatorVO.getCountryCode());
+        if (CollectionUtils.isEmpty(providers)) {
+          redisLockService.releaseLock(lockKey, value);
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
+          throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+        }
+      } catch (Exception e) {
         redisLockService.releaseLock(lockKey, value);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETING_NATIONAL_COORDINATOR_FAILED_EVENT, null, notificationVO);
-        throw new EEAException(EEAErrorMessage.COUNTRY_CODE_NOTFOUND);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
       }
+
 
       try {
 
