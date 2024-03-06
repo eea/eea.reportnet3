@@ -247,7 +247,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (importFileInDremioInfo.getDelimiter() != null && importFileInDremioInfo.getDelimiter().length() > 1) {
             LOG.error("Error when importing file data to s3 {}. The size of the delimiter cannot be greater than 1", importFileInDremioInfo);
             datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_WRONG_DELIMITER_SIZE);
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_WRONG_DELIMITER_SIZE, null);
             throw new EEAException("The size of the delimiter cannot be greater than 1");
         }
 
@@ -270,7 +270,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         Boolean processUpdated = processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.IMPORT, processUUID,
                 SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
         if(!processUpdated){
-            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_UPDATING_PROCESS);
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_UPDATING_PROCESS, null);
             throw new Exception("Could not update process to status IN_QUEUE for processId=" + importFileInDremioInfo.getProcessId() + " and jobId "+ importFileInDremioInfo.getJobId());
         }
 
@@ -280,7 +280,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         if (null == schema) {
-            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_NOT_REPORTABLE_DATASET);
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_NOT_REPORTABLE_DATASET, null);
             throw new EEAException("Dataset is not reportable: datasetId=" + importFileInDremioInfo.getDatasetId() + ", tableSchemaId=" + importFileInDremioInfo.getTableSchemaId() + ", fileName=" + importFileInDremioInfo.getFileName());
         }
 
@@ -301,7 +301,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
 
         if (!processWasUpdated) {
-            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_UPDATING_PROCESS);
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_UPDATING_PROCESS, null);
             throw new Exception("Could not update process to status IN_PROGRESS for processId=" + importFileInDremioInfo.getProcessId() + " and jobId " + importFileInDremioInfo.getJobId());
         }
 
@@ -361,7 +361,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (!guessTableName || StringUtils.isNotBlank(tableSchemaId)) {
                 // obtains the file type from the extension
                 if (fileName == null) {
-                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_FILENAME);
+                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_FILENAME, null);
                     throw new EEAException(EEAErrorMessage.FILE_NAME);
                 }
                 final String fileMimeType = datasetService.getMimetype(fileName).toLowerCase();
@@ -395,7 +395,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         if(sendWrongFileNameWarning){
-            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES);
+            jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
         }
         importFileInDremioInfo.setSendWrongFileNameWarning(sendWrongFileNameWarning);
         return correctFilesForImport;
@@ -487,7 +487,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 return files;
             } else {
                 datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-                jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_ZIP);
+                jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_ZIP, null);
                 throw new EEAException("Error trying to import a zip file to s3 for datasetId " + importFileInDremioInfo.getDatasetId() + ". Empty zip file");
             }
 
@@ -566,7 +566,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 return files;
             } else {
                 datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(), DatasetRunningStatusEnum.ERROR_IN_IMPORT);
-                jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_ZIP);
+                jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_EMPTY_ZIP, null);
                 throw new EEAException("Error trying to import a zip file to s3 for datasetId " + importFileInDremioInfo.getDatasetId() + ". Empty zip file");
             }
 
@@ -595,12 +595,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         JobStatusEnum jobStatus;
         if (importFileInDremioInfo.getErrorMessage() != null) {
             if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(importFileInDremioInfo.getErrorMessage())) {
-                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME, null);
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                         : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
             } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(importFileInDremioInfo.getErrorMessage())) {
-                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING);
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING, null);
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
                         : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;

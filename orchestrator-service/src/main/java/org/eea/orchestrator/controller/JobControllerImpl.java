@@ -526,14 +526,16 @@ public class JobControllerImpl implements JobController {
      * Updates job info value
      * @param jobId
      * @param jobInfo
+     * @param lineNumber
      */
     @Override
     @PostMapping(value = "/private/updateJobInfo/{jobId}")
-    public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo){
+    public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
+                              @RequestParam(value = "lineNumber", required = false) Integer lineNumber){
         try {
-            jobService.updateJobInfo(jobId, jobInfo);
+            jobService.updateJobInfo(jobId, jobInfo, lineNumber);
         } catch (Exception e) {
-            LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(), e);
+            LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(lineNumber), e);
             throw e;
         }
     }
