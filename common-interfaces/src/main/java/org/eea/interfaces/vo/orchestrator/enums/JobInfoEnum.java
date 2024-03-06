@@ -19,7 +19,7 @@ public enum JobInfoEnum {
 
     ERROR_ALL_FILES_ARE_EMPTY("None of the imported files contain records"),
 
-    WARNING_SOME_FILES_ARE_EMPTY("Some of the imported files do not contain records");
+    WARNING_SOME_FILES_ARE_EMPTY("Some of the imported files do not contain records"),
 
     ERROR_CSV_ILLEGAL_CHARACTERS("An illegal character was found in the imported file"),
 
