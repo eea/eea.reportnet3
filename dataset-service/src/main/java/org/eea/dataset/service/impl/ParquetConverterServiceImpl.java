@@ -378,7 +378,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvPrinter.flush();
         } catch (IOException | UncheckedIOException e) {
             if(e.getClass().equals(UncheckedIOException.class) && ((UncheckedIOException) e).getMessage().contains("invalid char between encapsulated token and delimiter")){
-                Integer lineNumber = extractLineNumber(((UncheckedIOException) e).getMessage());
+                Integer lineNumber = extractCsvErrorLineNumber(((UncheckedIOException) e).getMessage());
                 if(lineNumber != -1){
                     jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM, lineNumber);
                 }
@@ -493,7 +493,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             }
         } catch (IOException | UncheckedIOException e) {
             if(e.getClass().equals(UncheckedIOException.class) && ((UncheckedIOException) e).getMessage().contains("invalid char between encapsulated token and delimiter")){
-                Integer lineNumber = extractLineNumber(((UncheckedIOException) e).getMessage());
+                Integer lineNumber = extractCsvErrorLineNumber(((UncheckedIOException) e).getMessage());
                 if(lineNumber != -1){
                     jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM, lineNumber);
                 }
@@ -678,7 +678,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         return fieldNames;
     }
 
-    private static Integer extractLineNumber(String errorMessage) {
+    private static Integer extractCsvErrorLineNumber(String errorMessage) {
         Pattern pattern = Pattern.compile("\\(line (\\d+)\\)");
         Matcher matcher = pattern.matcher(errorMessage);
 
