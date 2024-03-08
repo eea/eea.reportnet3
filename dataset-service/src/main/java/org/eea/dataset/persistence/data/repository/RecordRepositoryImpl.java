@@ -23,13 +23,16 @@ import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.eea.interfaces.vo.dataset.*;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ExportFilterVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.TableVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -61,8 +64,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -71,14 +72,33 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
@@ -1814,10 +1834,18 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         stringQuery.delete(stringQuery.lastIndexOf(" and "), stringQuery.length() - 1);
       }
     }
-    if (limit != null && limit != 0 && !getCount) {
+
+    boolean hasLimit = limit != null && limit != 0 && !getCount;
+    boolean hasOffset = offset != null && offset != 0 && !getCount;
+    boolean hasLimitOrOffset = (hasLimit) || (hasOffset);
+
+    if (hasLimitOrOffset) {
+      stringQuery.append(" order by ").append(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
+    }
+    if (hasLimit) {
       stringQuery.append(" limit ").append(limit);
     }
-    if (offset != null && offset != 0 && !getCount) {
+    if (hasOffset) {
       stringQuery.append(" offset ").append(offset);
     }
 
