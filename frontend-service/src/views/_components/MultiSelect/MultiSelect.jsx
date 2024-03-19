@@ -1,5 +1,4 @@
-import { Component, Fragment } from 'react';
-import PropTypes from 'prop-types';
+import { Fragment } from 'react';
 
 import classNames from 'classnames';
 
@@ -7,7 +6,7 @@ import styles from './MultiSelect.module.scss';
 
 import { MultiSelectHeader } from './_components/MultiSelectHeader';
 import { MultiSelectItem } from './_components/MultiSelectItem';
-import { MultiSelectPanel } from './_components/MultiSelectPanel';
+import MultiSelectPanel from './_components/MultiSelectPanel/MultiSelectPanel';
 import { Spinner } from 'views/_components/Spinner';
 
 import Tooltip from 'primereact/tooltip';
@@ -16,133 +15,25 @@ import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import MultiSelectUtils from './_functions/MultiSelectUtils';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 
-export class MultiSelect extends Component {
-  static defaultProps = {
-    addSpaceAfterSeparator: true,
-    appendTo: null,
-    ariaLabelledBy: null,
-    checkAllHeader: null,
-    className: null,
-    clearButton: true,
-    dataKey: null,
-    disabled: false,
-    filter: false,
-    filterBy: null,
-    filterMatchMode: 'contains',
-    filterPlaceholder: null,
-    fixedPlaceholder: false,
-    hasSelectedItemsLabel: true,
-    headerClassName: null,
-    id: null,
-    inputClassName: null,
-    inputId: null,
-    isFilter: false,
-    isLoadingData: false,
-    itemTemplate: null,
-    label: null,
-    maxSelectedLabels: 3,
-    notCheckAllHeader: null,
-    onBlur: null,
-    onChange: null,
-    onFilterInputChangeBackend: null,
-    onFocus: null,
-    optionLabel: null,
-    optionValue: null,
-    options: null,
-    panelClassName: null,
-    placeholder: null,
-    scrollHeight: '200px',
-    selectedItemTemplate: null,
-    selectedItemsLabel: '{0} items selected',
-    style: null,
-    tabIndex: '0',
-    tooltip: null,
-    tooltipOptions: null,
-    value: null,
-    valuesSeparator: ','
-  };
-
-  static propTypes = {
-    addSpaceAfterSeparator: PropTypes.bool,
-    appendTo: PropTypes.object,
-    ariaLabelledBy: PropTypes.string,
-    checkAllHeader: PropTypes.string,
-    className: PropTypes.string,
-    clearButton: PropTypes.bool,
-    dataKey: PropTypes.string,
-    disabled: PropTypes.bool,
-    filter: PropTypes.bool,
-    filterBy: PropTypes.string,
-    filterMatchMode: PropTypes.string,
-    filterPlaceholder: PropTypes.string,
-    fixedPlaceholder: PropTypes.bool,
-    hasSelectedItemsLabel: PropTypes.bool,
-    headerClassName: PropTypes.string,
-    id: PropTypes.string,
-    inputClassName: PropTypes.string,
-    inputId: PropTypes.string,
-    isFilter: PropTypes.bool,
-    itemTemplate: PropTypes.func,
-    label: PropTypes.string,
-    isLoadingData: PropTypes.bool,
-    maxSelectedLabels: PropTypes.number,
-    notCheckAllHeader: PropTypes.string,
-    onBlur: PropTypes.func,
-    onChange: PropTypes.func,
-    onFilterInputChangeBackend: PropTypes.func,
-    onFocus: PropTypes.func,
-    optionLabel: PropTypes.string,
-    options: PropTypes.array,
-    optionValue: PropTypes.string,
-    panelClassName: PropTypes.string,
-    placeholder: PropTypes.string,
-    scrollHeight: PropTypes.string,
-    selectedItemsLabel: PropTypes.string,
-    selectedItemTemplate: PropTypes.func,
-    style: PropTypes.object,
-    tabIndex: PropTypes.string,
-    tooltip: PropTypes.string,
-    tooltipOptions: PropTypes.object,
-    value: PropTypes.any,
-    valuesSeparator: PropTypes.string
-  };
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      filter: '',
-      isPanelVisible: false
-    };
-
-    this.onClick = this.onClick.bind(this);
-    this.onPanelClick = this.onPanelClick.bind(this);
-    this.onOptionClick = this.onOptionClick.bind(this);
-    this.onOptionKeyDown = this.onOptionKeyDown.bind(this);
-    this.onFocus = this.onFocus.bind(this);
-    this.onBlur = this.onBlur.bind(this);
-    this.onFilter = this.onFilter.bind(this);
-    this.onCloseClick = this.onCloseClick.bind(this);
-    this.onToggleAll = this.onToggleAll.bind(this);
-  }
-
-  onOptionClick(event) {
-    let optionValue = this.getOptionValue(event.option);
-    let selectionIndex = this.findSelectionIndex(optionValue);
+const MultiSelect = props => {
+  const onOptionClick = event => {
+    let optionValue = getOptionValue(event.option);
+    let selectionIndex = findSelectionIndex(optionValue);
     let newValue;
 
-    if (selectionIndex !== -1) newValue = this.props.value.filter((val, i) => i !== selectionIndex);
-    else newValue = [...(this.props.value || []), optionValue];
+    if (selectionIndex !== -1) newValue = props.value.filter((val, i) => i !== selectionIndex);
+    else newValue = [...(props.value || []), optionValue];
 
-    this.updateModel(event.originalEvent, newValue);
-  }
+    updateModel(event.originalEvent, newValue);
+  };
 
-  onOptionKeyDown(event) {
+  const onOptionKeyDown = event => {
     let listItem = event.originalEvent.currentTarget;
 
     switch (event.originalEvent.which) {
       //down
       case 40:
-        var nextItem = this.findNextItem(listItem);
+        var nextItem = findNextItem(listItem);
         if (nextItem) {
           nextItem.focus();
         }
@@ -152,7 +43,7 @@ export class MultiSelect extends Component {
 
       //up
       case 38:
-        var prevItem = this.findPrevItem(listItem);
+        var prevItem = findPrevItem(listItem);
         if (prevItem) {
           prevItem.focus();
         }
@@ -162,148 +53,148 @@ export class MultiSelect extends Component {
 
       //enter
       case 13:
-        this.onOptionClick(event);
+        onOptionClick(event);
         event.originalEvent.preventDefault();
         break;
 
       default:
         break;
     }
-  }
+  };
 
-  findNextItem(item) {
+  const findNextItem = item => {
     let nextItem = item.nextElementSibling;
 
-    if (nextItem) return !DomHandler.hasClass(nextItem, 'p-multiselect-item') ? this.findNextItem(nextItem) : nextItem;
+    if (nextItem) return !DomHandler.hasClass(nextItem, 'p-multiselect-item') ? findNextItem(nextItem) : nextItem;
     else return null;
-  }
+  };
 
-  findPrevItem(item) {
+  const findPrevItem = item => {
     let prevItem = item.previousElementSibling;
 
-    if (prevItem) return !DomHandler.hasClass(prevItem, 'p-multiselect-item') ? this.findPrevItem(prevItem) : prevItem;
+    if (prevItem) return !DomHandler.hasClass(prevItem, 'p-multiselect-item') ? findPrevItem(prevItem) : prevItem;
     else return null;
-  }
+  };
 
-  onClick() {
-    if (this.props.disabled) {
+  const onClick = () => {
+    if (props.disabled) {
       return;
     }
 
-    if (this.documentClickListener) {
-      this.selfClick = true;
+    if (documentClickListener) {
+      selfClick = true;
     }
 
-    if (!this.panelClick) {
-      if (this.panel.element.offsetParent) {
-        this.hide();
+    if (!panelClick) {
+      if (panel.element.offsetParent) {
+        hide();
       } else {
-        this.focusInput.focus();
-        this.show();
+        focusInput.focus();
+        show();
       }
     }
-  }
+  };
 
-  onToggleAll(event) {
+  const onToggleAll = event => {
     let newValue;
 
     if (event.checked) {
       newValue = [];
     } else {
-      let options = this.hasFilter() ? this.filterOptions(this.props.options) : this.props.options;
+      let options = hasFilter() ? filterOptions(props.options) : props.options;
       if (options) {
         newValue = [];
         for (let option of options) {
-          newValue.push(this.getOptionValue(option));
+          newValue.push(getOptionValue(option));
         }
       }
     }
 
-    this.updateModel(event.originalEvent, newValue);
-  }
+    updateModel(event.originalEvent, newValue);
+  };
 
-  updateModel(event, value) {
-    if (this.props.onChange) {
-      this.props.onChange({
+  const updateModel = (event, value) => {
+    if (props.onChange) {
+      props.onChange({
         originalEvent: event,
         value: value,
         stopPropagation: () => {},
         preventDefault: () => {},
         target: {
-          name: this.props.name,
-          id: this.props.id,
+          name: props.name,
+          id: props.id,
           value: value
         }
       });
     }
-  }
+  };
 
-  onFilter(event) {
-    if (this.props.onFilterInputChangeBackend) {
-      this.props.onFilterInputChangeBackend(event.query);
-      this.setState({ filter: event.query });
+  const onFilter = event => {
+    if (props.onFilterInputChangeBackend) {
+      props.onFilterInputChangeBackend(event.query);
+      setState({ filter: event.query });
     } else {
-      this.setState({ filter: event.query });
+      setState({ filter: event.query });
     }
-  }
+  };
 
-  onPanelClick() {
-    this.panelClick = true;
-  }
+  const onPanelClick = () => {
+    panelClick = true;
+  };
 
-  show() {
-    if (this.props.options && this.props.options.length) {
-      this.panel.element.style.zIndex = String(DomHandler.generateZIndex());
-      this.panel.element.style.display = 'block';
+  const show = () => {
+    if (props.options && props.options.length) {
+      panel.element.style.zIndex = String(DomHandler.generateZIndex());
+      panel.element.style.display = 'block';
 
       setTimeout(() => {
-        DomHandler.addClass(this.panel.element, 'p-input-overlay-visible');
-        DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+        DomHandler.addClass(panel.element, 'p-input-overlay-visible');
+        DomHandler.removeClass(panel.element, 'p-input-overlay-hidden');
       }, 1);
 
-      this.alignPanel();
-      this.bindDocumentClickListener();
-      this.setState({ isPanelVisible: true });
+      alignPanel();
+      bindDocumentClickListener();
+      setState({ isPanelVisible: true });
     }
-  }
+  };
 
-  hide() {
-    DomHandler.addClass(this.panel.element, 'p-input-overlay-hidden');
-    DomHandler.removeClass(this.panel.element, 'p-input-overlay-visible');
-    this.unbindDocumentClickListener();
-    this.clearClickState();
+  const hide = () => {
+    DomHandler.addClass(panel.element, 'p-input-overlay-hidden');
+    DomHandler.removeClass(panel.element, 'p-input-overlay-visible');
+    unbindDocumentClickListener();
+    clearClickState();
 
     setTimeout(() => {
-      if (this.panel) {
-        this.panel.element.style.display = 'none';
-        DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
-        this.clearFilter();
-        this.setState({ isPanelVisible: false });
+      if (panel) {
+        panel.element.style.display = 'none';
+        DomHandler.removeClass(panel.element, 'p-input-overlay-hidden');
+        clearFilter();
+        setState({ isPanelVisible: false });
       }
     }, 150);
-  }
+  };
 
-  alignPanel() {
-    if (this.props.appendTo) {
-      this.panel.element.style.minWidth = DomHandler.getWidth(this.container) + 'px';
-      DomHandler.absolutePosition(this.panel.element, this.container);
+  const alignPanel = () => {
+    if (props.appendTo) {
+      panel.element.style.minWidth = DomHandler.getWidth(container) + 'px';
+      DomHandler.absolutePosition(panel.element, container);
     } else {
-      DomHandler.relativePosition(this.panel.element, this.container);
+      DomHandler.relativePosition(panel.element, container);
     }
-  }
+  };
 
-  onCloseClick(event) {
-    this.hide();
+  const onCloseClick = event => {
+    hide();
     event.preventDefault();
     event.stopPropagation();
-  }
+  };
 
-  findSelectionIndex(value) {
+  const findSelectionIndex = value => {
     let index = -1;
 
-    if (this.props.value) {
-      for (let i = 0; i < this.props.value.length; i++) {
-        if (ObjectUtils.equals(this.props.value[i], value, this.props.dataKey)) {
+    if (props.value) {
+      for (let i = 0; i < props.value.length; i++) {
+        if (ObjectUtils.equals(props.value[i], value, props.dataKey)) {
           index = i;
           break;
         }
@@ -311,328 +202,299 @@ export class MultiSelect extends Component {
     }
 
     return index;
-  }
+  };
 
-  isSelected(option) {
-    return this.findSelectionIndex(this.getOptionValue(option)) !== -1;
-  }
+  const isSelected = option => {
+    return findSelectionIndex(getOptionValue(option)) !== -1;
+  };
 
-  findLabelByValue(val) {
+  const findLabelByValue = val => {
     let label = null;
-    if (this.props.options) {
-      for (let i = 0; i < this.props.options.length; i++) {
-        let option = this.props.options[i];
-        let optionValue = this.getOptionValue(option);
+    if (props.options) {
+      for (let i = 0; i < props.options.length; i++) {
+        let option = props.options[i];
+        let optionValue = getOptionValue(option);
 
         if (ObjectUtils.equals(optionValue, val)) {
-          label = this.getOptionLabel(option);
+          label = getOptionLabel(option);
           break;
         }
       }
     }
 
     return label;
-  }
+  };
 
-  onFocus(event) {
-    DomHandler.addClass(this.container, 'p-focus');
+  const onFocus = event => {
+    DomHandler.addClass(container, 'p-focus');
 
-    if (this.props.onFocus) {
-      this.props.onFocus(event);
+    if (props.onFocus) {
+      props.onFocus(event);
     }
-  }
+  };
 
-  onBlur(event) {
-    DomHandler.removeClass(this.container, 'p-focus');
+  const onBlur = event => {
+    DomHandler.removeClass(container, 'p-focus');
 
-    if (this.props.onBlur) {
-      this.props.onBlur(event);
+    if (props.onBlur) {
+      props.onBlur(event);
     }
-  }
+  };
 
-  bindDocumentClickListener() {
-    if (!this.documentClickListener) {
-      this.documentClickListener = this.onDocumentClick.bind(this);
-      document.addEventListener('click', this.documentClickListener);
+  const bindDocumentClickListener = () => {
+    if (!documentClickListener) {
+      documentClickListener = onDocumentClick.bind(this);
+      document.addEventListener('click', documentClickListener);
     }
-  }
+  };
 
-  unbindDocumentClickListener() {
-    if (this.documentClickListener) {
-      document.removeEventListener('click', this.documentClickListener);
-      this.documentClickListener = null;
+  const unbindDocumentClickListener = () => {
+    if (documentClickListener) {
+      document.removeEventListener('click', documentClickListener);
+      documentClickListener = null;
     }
-  }
+  };
 
-  componentDidMount() {
-    if (this.props.tooltip) {
-      this.renderTooltip();
+  const componentDidMount = () => {
+    if (props.tooltip) {
+      renderTooltip();
     }
-  }
+  };
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.tooltip !== this.props.tooltip) {
-      if (this.tooltip) this.tooltip.updateContent(this.props.tooltip);
-      else this.renderTooltip();
+  const componentDidUpdate = prevProps => {
+    if (prevProps.tooltip !== props.tooltip) {
+      if (tooltip) tooltip.updateContent(props.tooltip);
+      else renderTooltip();
     }
-  }
+  };
 
-  componentWillUnmount() {
-    this.unbindDocumentClickListener();
+  const componentWillUnmount = () => {
+    unbindDocumentClickListener();
 
-    if (this.tooltip) {
-      this.tooltip.destroy();
-      this.tooltip = null;
+    if (tooltip) {
+      tooltip.destroy();
+      tooltip = null;
     }
-  }
+  };
 
-  onDocumentClick() {
-    if (!this.selfClick && !this.panelClick && this.panel.element.offsetParent) {
-      this.hide();
+  const onDocumentClick = () => {
+    if (!selfClick && !panelClick && panel.element.offsetParent) {
+      hide();
     }
 
-    this.clearClickState();
-  }
+    clearClickState();
+  };
 
-  clearClickState() {
-    this.selfClick = false;
-    this.panelClick = false;
-  }
+  const clearClickState = () => {
+    selfClick = false;
+    panelClick = false;
+  };
 
-  clearFilter() {
-    if (this.props.onFilterInputChangeBackend) {
-      this.props.onFilterInputChangeBackend('');
-      this.setState({ filter: '' });
+  const clearFilter = () => {
+    if (props.onFilterInputChangeBackend) {
+      props.onFilterInputChangeBackend('');
+      setState({ filter: '' });
     } else {
-      this.setState({ filter: '' });
+      setState({ filter: '' });
     }
-  }
+  };
 
-  hasFilter() {
-    return this.state.filter && this.state.filter.trim().length > 0;
-  }
+  const hasFilter = () => {
+    return filter && filter.trim().length > 0;
+  };
 
-  isAllChecked(visibleOptions) {
-    if (this.hasFilter()) {
-      return this.props?.value?.length === visibleOptions?.length;
+  const isAllChecked = visibleOptions => {
+    if (hasFilter()) {
+      return props?.value?.length === visibleOptions?.length;
     } else {
-      return this.props?.value?.length === this.props?.options?.length;
+      return props?.value?.length === props?.options?.length;
     }
-  }
+  };
 
-  filterOptions(options) {
-    let filterValue = this.state.filter.trim().toLowerCase();
-    let searchFields = this.props.filterBy
-      ? this.props.filterBy.split(this.props.valuesSeparator)
-      : [this.props.optionLabel || 'label'];
-    return MultiSelectUtils.filter(options, searchFields, filterValue, this.props.filterMatchMode);
-  }
+  const filterOptions = options => {
+    let filterValue = state.filter.trim().toLowerCase();
+    let searchFields = props.filterBy ? props.filterBy.split(props.valuesSeparator) : [props.optionLabel || 'label'];
+    return MultiSelectUtils.filter(options, searchFields, filterValue, props.filterMatchMode);
+  };
 
-  getOptionLabel(option) {
-    return this.props.optionLabel
-      ? ObjectUtils.resolveFieldData(option, this.props.optionLabel)
+  const getOptionLabel = option => {
+    return props.optionLabel
+      ? ObjectUtils.resolveFieldData(option, props.optionLabel)
       : option['label'] !== undefined
       ? option['label']
       : option;
-  }
+  };
 
-  getOptionValue(option) {
-    return this.props.optionValue
-      ? ObjectUtils.resolveFieldData(option, this.props.optionValue)
+  const getOptionValue = option => {
+    return props.optionValue
+      ? ObjectUtils.resolveFieldData(option, props.optionValue)
       : option['value'] !== undefined
       ? option['value']
       : option;
-  }
+  };
 
-  isEmpty() {
-    return !this.props.value || this.props.value.length === 0;
-  }
+  const isEmpty = () => {
+    return !props.value || props.value.length === 0;
+  };
 
-  getSelectedItemsLabel() {
+  const getSelectedItemsLabel = () => {
     let pattern = /{(.*?)}/;
-    if (pattern.test(this.props.selectedItemsLabel)) {
-      return this.props.selectedItemsLabel.replace(
-        this.props.selectedItemsLabel.match(pattern)[0],
-        this.props.value.length + ''
-      );
+    if (pattern.test(props.selectedItemsLabel)) {
+      return props.selectedItemsLabel.replace(props.selectedItemsLabel.match(pattern)[0], props.value.length + '');
     }
 
-    return this.props.selectedItemsLabel;
-  }
+    return props.selectedItemsLabel;
+  };
 
-  getLabel() {
-    if (this.isEmpty() || this.props.fixedPlaceholder) {
+  const getLabel = () => {
+    if (isEmpty() || props.fixedPlaceholder) {
       return '';
     }
 
-    if (this.props.hasSelectedItemsLabel) {
-      const label = this.props.value
-        .map(value => this.findLabelByValue(value))
+    if (props.hasSelectedItemsLabel) {
+      const label = props.value
+        .map(value => findLabelByValue(value))
         .filter(item => item !== null)
-        .join(this.props.addSpaceAfterSeparator ? `${this.props.valuesSeparator} ` : this.props.valuesSeparator);
+        .join(props.addSpaceAfterSeparator ? `${props.valuesSeparator} ` : props.valuesSeparator);
 
       if (label === '') {
         return [];
       }
 
-      if (this.props.value.length <= this.props.maxSelectedLabels) {
+      if (props.value.length <= props.maxSelectedLabels) {
         return label;
       } else {
-        return this.getSelectedItemsLabel();
+        return getSelectedItemsLabel();
       }
     }
-  }
+  };
 
-  getLabelContent() {
-    if (this.props.selectedItemTemplate) {
-      if (!this.isEmpty()) {
-        if (this.props.value.length <= this.props.maxSelectedLabels) {
-          return this.props.value.map(val => {
-            return <Fragment key={val}>{this.props.selectedItemTemplate(val)}</Fragment>;
+  const getLabelContent = () => {
+    if (props.selectedItemTemplate) {
+      if (!isEmpty()) {
+        if (props.value.length <= props.maxSelectedLabels) {
+          return props.value.map(val => {
+            return <Fragment key={val}>{props.selectedItemTemplate(val)}</Fragment>;
           });
         } else {
-          return this.getSelectedItemsLabel();
+          return getSelectedItemsLabel();
         }
       } else {
-        return this.props.selectedItemTemplate();
+        return props.selectedItemTemplate();
       }
     } else {
-      return this.getLabel();
+      return getLabel();
     }
-  }
+  };
 
-  renderTooltip() {
-    this.tooltip = new Tooltip({
-      target: this.container,
-      content: this.props.tooltip,
-      options: this.props.tooltipOptions
+  const renderTooltip = () => {
+    tooltip = new Tooltip({
+      target: container,
+      content: props.tooltip,
+      options: props.tooltipOptions
     });
-  }
+  };
 
-  onFilterInputChange(event) {
-    if (this.props.onFilterInputChangeBackend) {
-      this.props.onFilterInputChangeBackend(event.target.value);
-      this.setState({ filter: event.target.value });
+  const onFilterInputChange = event => {
+    if (props.onFilterInputChangeBackend) {
+      props.onFilterInputChangeBackend(event.target.value);
+      setState({ filter: event.target.value });
     } else {
-      this.setState({ filter: event.target.value });
+      setState({ filter: event.target.value });
     }
-  }
+  };
 
-  renderHeader(items) {
+  const renderHeader = items => {
     return (
       <MultiSelectHeader
-        allChecked={this.isAllChecked(items)}
-        checkAllHeader={this.props.checkAllHeader}
-        clearButton={this.props.clearButton}
-        filter={this.props.filter}
-        filterPlaceholder={this.props.filterPlaceholder}
-        filterValue={this.state.filter}
-        headerClassName={this.props.headerClassName}
-        id={this.props.id}
-        isPanelVisible={this.state.isPanelVisible}
-        notCheckAllHeader={this.props.notCheckAllHeader}
-        onClose={this.onCloseClick}
-        onFilter={this.onFilter}
-        onToggleAll={this.onToggleAll}
+        allChecked={isAllChecked(items)}
+        checkAllHeader={props.checkAllHeader}
+        clearButton={props.clearButton}
+        filter={props.filter}
+        filterPlaceholder={props.filterPlaceholder}
+        filterValue={state.filter}
+        headerClassName={props.headerClassName}
+        id={props.id}
+        isPanelVisible={state.isPanelVisible}
+        notCheckAllHeader={props.notCheckAllHeader}
+        onClose={onCloseClick}
+        onFilter={onFilter}
+        onToggleAll={onToggleAll}
       />
     );
-  }
+  };
 
-  renderLabel() {
-    const empty = this.isEmpty();
-    const content = this.getLabelContent();
+  const renderLabel = () => {
+    const empty = isEmpty();
+    const content = getLabelContent();
     const className = classNames('p-multiselect-label', {
-      'p-placeholder': empty && this.props.placeholder,
-      'p-multiselect-label-empty': empty && !this.props.placeholder && !this.props.selectedItemTemplate
+      'p-placeholder': empty && props.placeholder,
+      'p-multiselect-label-empty': empty && !props.placeholder && !props.selectedItemTemplate
     });
 
-    return this.props.hasSelectedItemsLabel ? (
-      this.props.isLoadingData ? (
+    return props.hasSelectedItemsLabel ? (
+      props.isLoadingData ? (
         <Spinner className={styles.spinner} />
       ) : (
         <div
           className="p-multiselect-label-container"
           style={{
-            position: this.props.isFilter ? 'absolute' : 'relative',
+            position: props.isFilter ? 'absolute' : 'relative',
             top: '0',
             paddingTop: '0.1rem',
             width: '100%'
           }}>
-          <label className={className}>{content || this.props.placeholder || 'empty'}</label>
+          <label className={className}>{content || props.placeholder || 'empty'}</label>
         </div>
       )
     ) : null;
-  }
+  };
 
-  render() {
-    let className = classNames('p-multiselect p-component', this.props.className, {
-      'p-disabled': this.props.disabled
-    });
-    let label = this.renderLabel();
-    let items = this.props.options;
+  const className = classNames('p-multiselect p-component', propClassName, {
+    'p-disabled': disabled
+  });
 
-    if (items) {
-      if (this.hasFilter()) {
-        items = this.filterOptions(items);
-      }
+  const header = renderHeader(items);
+  const labelContent = getLabelContent();
 
-      items = items.map(option => {
-        let optionLabel = this.getOptionLabel(option);
+  let items = propOptions;
 
-        return (
-          <MultiSelectItem
-            disabled={option.disabled}
-            key={optionLabel}
-            label={optionLabel}
-            onClick={this.onOptionClick}
-            onKeyDown={this.onOptionKeyDown}
-            option={option}
-            selected={this.isSelected(option)}
-            tabIndex={this.props.tabIndex}
-            template={this.props.itemTemplate}
-          />
-        );
-      });
+  if (items) {
+    if (hasFilter()) {
+      items = filterOptions(items);
     }
 
-    let header = this.renderHeader(items);
-    let labelContent = this.getLabelContent();
+    items = items.map(option => {
+      const optionLabel = getOptionLabel(option);
 
-    return (
-      <div
-        className={className}
-        id={this.props.id}
-        onClick={this.onClick}
-        ref={el => (this.container = el)}
-        style={this.props.style}>
-        <div className={`p-hidden-accessible ${this.props.inputClassName}`}>
-          <input
-            aria-haspopup="listbox"
-            aria-labelledby={this.props.ariaLabelledBy}
-            className={labelContent ? 'p-filled' : ''}
-            id={this.props.inputId}
-            onBlur={this.onBlur}
-            onFocus={this.onFocus}
-            ref={el => (this.focusInput = el)}
-            type="text"
-          />
-          <label htmlFor={this.props.inputId}>{this.props.label}</label>
-        </div>
-        {label}
-        <div className="p-multiselect-trigger">
-          <span className="p-multiselect-trigger-icon pi pi-chevron-down p-c"></span>
-        </div>
-        <MultiSelectPanel
-          appendTo={this.props.appendTo}
-          header={header}
-          label={this.props.label}
-          onClick={this.onPanelClick}
-          panelClassName={this.props.panelClassName}
-          ref={el => (this.panel = el)}
-          scrollHeight={this.props.scrollHeight}>
-          {items}
-        </MultiSelectPanel>
-      </div>
-    );
+      return (
+        <MultiSelectItem
+          disabled={option.disabled}
+          key={optionLabel}
+          label={optionLabel}
+          onClick={() => onOptionClick(option)}
+          onKeyDown={() => onOptionKeyDown(option)}
+          option={option}
+          selected={isSelected(option)}
+          tabIndex={tabIndex}
+          template={itemTemplate}
+        />
+      );
+    });
   }
-}
+
+  return (
+    <MultiSelectPanel
+      appendTo={this.props.appendTo}
+      header={header}
+      label={this.props.label}
+      onClick={this.onPanelClick}
+      panelClassName={this.props.panelClassName}
+      ref={el => (this.panel = el)}
+      scrollHeight={this.props.scrollHeight}>
+      {items}
+    </MultiSelectPanel>
+  );
+};
+
+export default MultiSelect;

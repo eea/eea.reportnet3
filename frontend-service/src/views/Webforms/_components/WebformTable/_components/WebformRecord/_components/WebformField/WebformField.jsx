@@ -16,7 +16,7 @@ import { DownloadFile } from 'views/_components/DownloadFile';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
-import { MultiSelect } from 'views/_components/MultiSelect';
+import MultiSelect from 'views/_components/MultiSelect/MultiSelect';
 
 import { DatasetService } from 'services/DatasetService';
 
