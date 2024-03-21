@@ -167,7 +167,7 @@ export const DataflowHelp = () => {
               if (isNil(datasetSchema.datasetId)) {
                 datasetSchema.datasetId = data.datasets.find(
                   dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
-                ).datasetId;
+                )?.datasetId;
               }
             });
 
