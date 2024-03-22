@@ -3,10 +3,13 @@ package org.eea.datalake.service.impl;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.s3configuration.types.S3Configuration;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -30,6 +33,7 @@ import java.util.List;
 import static org.eea.utils.LiteralConstants.*;
 
 @Service
+@Primary
 public class S3HelperImpl implements S3Helper {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3HelperImpl.class);
@@ -42,10 +46,10 @@ public class S3HelperImpl implements S3Helper {
     private S3Presigner s3Presigner;
 
     @Autowired
-    public S3HelperImpl(S3Service s3Service, S3Client s3Client, S3Presigner s3Presigner) {
+    public S3HelperImpl(S3Service s3Service, @Qualifier("s3LocalConfiguration") S3Configuration s3Configuration) {
         this.s3Service = s3Service;
-        this.s3Client = s3Client;
-        this.s3Presigner = s3Presigner;
+        this.s3Client = s3Configuration.getS3Client();
+        this.s3Presigner = s3Configuration.getS3Presigner();
     }
 
     /**

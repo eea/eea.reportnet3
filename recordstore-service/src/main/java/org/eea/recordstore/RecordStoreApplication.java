@@ -3,7 +3,7 @@ package org.eea.recordstore;
 import org.eea.lock.annotation.EnableLockAspect;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
-import org.eea.test.EnableS3Configuration;
+import org.eea.s3configuration.EnableS3Configuration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;

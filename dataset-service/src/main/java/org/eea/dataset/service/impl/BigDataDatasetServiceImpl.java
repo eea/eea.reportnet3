@@ -1,7 +1,5 @@
 package org.eea.dataset.service.impl;
 
-import feign.FeignException;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
@@ -43,6 +41,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -103,14 +102,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     public DremioHelperService dremioHelperService;
 
-    @Autowired
-    public S3Helper s3Helper;
+
+    public final S3Helper s3HelperLocal;
+    public final S3Helper s3HelperPublic;
 
     @Autowired
     FileCommonUtils fileCommonUtils;
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
+
+
+    public BigDataDatasetServiceImpl(@Qualifier("public") S3Helper s3HelperPublic, @Qualifier("local") S3Helper s3HelperLocal) {
+        this.s3HelperLocal = s3HelperLocal;
+        this.s3HelperPublic = s3HelperPublic;
+    }
 
 
     @Override
@@ -173,11 +179,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     folder.mkdir();
                 }
                 if(filePathInS3.endsWith(".csv")) {
-                    s3File = s3Helper.getFileFromS3(filePathInS3, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
+                    s3File = s3HelperLocal.getFileFromS3(filePathInS3, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
                     fileName = s3File.getName();
                 }
                 else if(filePathInS3.endsWith(".zip")){
-                    s3File = s3Helper.getFileFromS3(filePathInS3, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
+                    s3File = s3HelperLocal.getFileFromS3(filePathInS3, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
                     fileName = s3File.getName();
                 }
                 //todo handle other extensions
@@ -667,7 +673,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId);
         s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
         String filePath = s3Service.getS3Path(s3PathResolver);
-        return s3Helper.generatePresignedUrl(filePath);
+        return s3HelperPublic.generatePresignedUrl(filePath);
     }
 
     @Override
@@ -692,10 +698,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
         //remove folders that contain the previous parquet files
-        if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+        if (s3HelperLocal.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
             //demote table folder
             dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
-            s3Helper.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+            s3HelperLocal.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
     }
 

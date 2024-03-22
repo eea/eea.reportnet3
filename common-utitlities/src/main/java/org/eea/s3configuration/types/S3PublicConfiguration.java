@@ -1,6 +1,5 @@
-package org.eea.test;
+package org.eea.s3configuration.types;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -10,10 +9,7 @@ import software.amazon.awssdk.http.SdkHttpConfigurationOption;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutBucketEncryptionRequest;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionByDefault;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryptionConfiguration;
-import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.utils.AttributeMap;
 
@@ -49,14 +45,14 @@ public class S3PublicConfiguration implements S3Configuration {
         .build();
 
     // Encryption Configuration
-    s3Client.putBucketEncryption(PutBucketEncryptionRequest.builder()
+/*    s3Client.putBucketEncryption(PutBucketEncryptionRequest.builder()
         .bucket(S3_DEFAULT_BUCKET)
         .serverSideEncryptionConfiguration(ServerSideEncryptionConfiguration.builder()
             .rules(ServerSideEncryptionRule.builder()
                 .applyServerSideEncryptionByDefault(applyServerSideEncryptionByDefault())
                 .build())
             .build())
-        .build());
+        .build());*/
 
     return s3Client;
   }

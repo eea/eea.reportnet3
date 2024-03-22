@@ -1,4 +1,4 @@
-package org.eea.test;
+package org.eea.s3configuration;
 
 import org.springframework.context.annotation.Import;
 

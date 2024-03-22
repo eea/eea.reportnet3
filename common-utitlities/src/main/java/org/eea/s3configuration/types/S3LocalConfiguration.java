@@ -1,6 +1,5 @@
-package org.eea.test;
+package org.eea.s3configuration.types;
 
-import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
