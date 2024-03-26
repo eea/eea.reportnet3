@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({S3ApplicationConfig.class})
+@Import({PackageConfig.class})
 public @interface EnableS3Configuration {
 }
