@@ -9,7 +9,10 @@ import software.amazon.awssdk.http.SdkHttpConfigurationOption;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutBucketEncryptionRequest;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionByDefault;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryptionConfiguration;
+import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.utils.AttributeMap;
 
@@ -17,12 +20,18 @@ import java.net.URI;
 
 @Service
 public class S3PublicConfiguration implements S3Configuration {
-  @Value("${amazon.s3.endpoint}")
+  @Value("${amazon.s3.public.endpoint}")
   private String s3Endpoint;
-  @Value("${amazon.s3.accessKey}")
+  @Value("${amazon.s3.public.accessKey}")
   private String s3AccessKey;
-  @Value("${amazon.s3.secretKey}")
+  @Value("${amazon.s3.public.secretKey}")
   private String s3SecretKey;
+  @Value("${amazon.s3.public.needs.encryption}")
+  private boolean needsEncryption;
+  @Value("${amazon.s3.public.algorithm}")
+  private String algorithm;
+  @Value("${amazon.s3.public.kms}")
+  private String kms;
 
   @Value("${s3.default.bucket}")
   private String S3_DEFAULT_BUCKET;
@@ -45,14 +54,16 @@ public class S3PublicConfiguration implements S3Configuration {
         .build();
 
     // Encryption Configuration
-/*    s3Client.putBucketEncryption(PutBucketEncryptionRequest.builder()
-        .bucket(S3_DEFAULT_BUCKET)
-        .serverSideEncryptionConfiguration(ServerSideEncryptionConfiguration.builder()
-            .rules(ServerSideEncryptionRule.builder()
-                .applyServerSideEncryptionByDefault(applyServerSideEncryptionByDefault())
-                .build())
-            .build())
-        .build());*/
+    if (needsEncryption) {
+      s3Client.putBucketEncryption(PutBucketEncryptionRequest.builder()
+          .bucket(S3_DEFAULT_BUCKET)
+          .serverSideEncryptionConfiguration(ServerSideEncryptionConfiguration.builder()
+              .rules(ServerSideEncryptionRule.builder()
+                  .applyServerSideEncryptionByDefault(applyServerSideEncryptionByDefault())
+                  .build())
+              .build())
+          .build());
+    }
 
     return s3Client;
   }
@@ -72,8 +83,8 @@ public class S3PublicConfiguration implements S3Configuration {
 
   private ServerSideEncryptionByDefault applyServerSideEncryptionByDefault() {
     return ServerSideEncryptionByDefault.builder()
-        .sseAlgorithm("AES256")
-        .kmsMasterKeyID("My_KEY")
+        .sseAlgorithm(algorithm)
+        .kmsMasterKeyID(kms)
         .build();
   }
 }

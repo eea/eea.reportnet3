@@ -17,8 +17,8 @@ public class S3HelperConfig {
     this.s3Service = s3Service;
   }
 
-  @Bean
-  @Qualifier("local")
+/*  @Bean
+  @Qualifier("local")*/
   public S3Helper s3HelperLocal(@Qualifier("s3LocalConfiguration") S3Configuration s3LocalConfiguration) {
     return new S3HelperImpl(s3Service, s3LocalConfiguration);
   }

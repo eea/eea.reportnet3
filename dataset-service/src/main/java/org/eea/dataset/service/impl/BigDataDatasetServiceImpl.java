@@ -102,18 +102,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     public DremioHelperService dremioHelperService;
 
-
-    public final S3Helper s3HelperLocal;
-    public final S3Helper s3HelperPublic;
-
     @Autowired
     FileCommonUtils fileCommonUtils;
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
 
+    private final S3Helper s3HelperLocal;
+    private final S3Helper s3HelperPublic;
 
-    public BigDataDatasetServiceImpl(@Qualifier("public") S3Helper s3HelperPublic, @Qualifier("local") S3Helper s3HelperLocal) {
+
+    public BigDataDatasetServiceImpl(@Qualifier("public") S3Helper s3HelperPublic, S3Helper s3HelperLocal) {
         this.s3HelperLocal = s3HelperLocal;
         this.s3HelperPublic = s3HelperPublic;
     }
