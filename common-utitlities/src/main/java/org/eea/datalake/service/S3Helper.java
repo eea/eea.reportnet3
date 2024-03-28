@@ -128,5 +128,9 @@ public interface S3Helper {
      */
     void copyFileToAnotherDestination(String source, String destination);
 
+    /**
+     *  Deletes a file from S3
+     * @param key The file Path to delete
+     */
     void deleteFileFromS3(String key);
 }
