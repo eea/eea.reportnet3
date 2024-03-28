@@ -17,6 +17,8 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.util.*;
 import java.util.regex.*;
 import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -104,6 +106,7 @@ function boolean isDateYYYYMMDD( String value ){
     try {
       sdf.setLenient(false);
       dateDrools = sdf.parse(value);
+      LocalDate fieldDate = LocalDate.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     } catch( Exception e ){
         return false;
     }
