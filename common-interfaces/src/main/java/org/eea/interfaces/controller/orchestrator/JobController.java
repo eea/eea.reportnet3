@@ -116,7 +116,8 @@ public interface JobController {
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
                        @RequestParam(value = "delimiter", required = false) String delimiter,
                       @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
-                      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+                      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+                      @RequestParam(value = "preSignedURL", required = false) String preSignedURL);
 
 
     /**

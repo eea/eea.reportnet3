@@ -22,7 +22,7 @@ public interface BigDataDatasetService {
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, String filePathInS3) throws Exception;
+                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId) throws Exception;
 
     /**
      * Generate s3 presigned Url for import
@@ -31,7 +31,7 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      */
-    String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId);
+    String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName);
 
     /**
      * Delete table data

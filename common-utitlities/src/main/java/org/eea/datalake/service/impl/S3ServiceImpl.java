@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
 import static org.eea.utils.LiteralConstants.*;
@@ -92,6 +93,11 @@ public class S3ServiceImpl implements S3Service {
                     dataProviderFolder, datasetFolder, tableName);
                 break;
             case S3_PROVIDER_IMPORT_PATH:
+                if (fileName != null) {
+                    fileName = System.currentTimeMillis() + "_" + fileName;
+                }//generating unique name, avoiding conflicts
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, fileName);
+                break;
             case S3_CURRENT_PATH:
             case S3_SNAPSHOT_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
