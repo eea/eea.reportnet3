@@ -181,6 +181,16 @@ public class S3HelperImpl implements S3Helper {
         return file;
     }
 
+    @Override
+    public void deleteFileFromS3(String key) {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+            .key(key)
+            .bucket(S3_BUCKET_NAME)
+            .build();
+        s3Client.deleteObject(deleteObjectRequest);
+        LOG.info("File with key " + key + " deleted from S3 bucket.");
+    }
+
     /**
      * Gets file for export
      * @param key

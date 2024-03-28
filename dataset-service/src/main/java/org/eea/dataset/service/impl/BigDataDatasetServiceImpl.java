@@ -155,7 +155,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 List<Long> datasetIds = new ArrayList<>();
                 datasetIds.add(datasetId);
                 jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId, null);//?
+                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId, null);
                 if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
                     LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
                     datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, fileName);
@@ -183,7 +183,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     fileName = s3File.getName();
                 }
                 //todo handle other extensions
-                //delete objects ?
+                s3Helper.deleteFileFromS3(preSignedURL);
             }
 
             //check if there is already an import job with status IN_PROGRESS for the specific datasetId
