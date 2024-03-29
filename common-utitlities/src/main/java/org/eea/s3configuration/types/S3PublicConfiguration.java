@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.s3.model.ServerSideEncryptionRule;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.utils.AttributeMap;
 
+import javax.annotation.PostConstruct;
 import java.net.URI;
 
 @Service
@@ -26,6 +27,7 @@ public class S3PublicConfiguration implements S3Configuration {
   private String s3AccessKey;
   @Value("${amazon.s3.public.secretKey}")
   private String s3SecretKey;
+
   @Value("${amazon.s3.public.needs.encryption}")
   private boolean needsEncryption;
   @Value("${amazon.s3.public.algorithm}")
@@ -36,13 +38,19 @@ public class S3PublicConfiguration implements S3Configuration {
 
   private final static Region s3Region = Region.US_EAST_1;
 
+  private static AwsBasicCredentials awsCredentials;
+
+  @PostConstruct
+  public void getCredentials() {
+    awsCredentials = AwsBasicCredentials.create(s3AccessKey, s3SecretKey);
+  }
+
   @Override
   public S3Client getS3Client() {
     SdkHttpClient httpClient = UrlConnectionHttpClient.builder()
         .buildWithDefaults(AttributeMap.builder()
             .put(SdkHttpConfigurationOption.TRUST_ALL_CERTIFICATES, Boolean.TRUE)
             .build());
-    AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3AccessKey, s3SecretKey);
 
     S3Client s3Client = S3Client.builder()
         .endpointOverride(URI.create(s3Endpoint))
@@ -68,7 +76,6 @@ public class S3PublicConfiguration implements S3Configuration {
 
   @Override
   public S3Presigner getS3Presigner() {
-    AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(s3AccessKey, s3SecretKey);
     return S3Presigner.builder().endpointOverride(URI.create(s3Endpoint))
         .region(s3Region)
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).build();

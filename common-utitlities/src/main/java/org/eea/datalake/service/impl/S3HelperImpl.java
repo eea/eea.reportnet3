@@ -159,14 +159,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException {
-        GetObjectRequest objectRequest = GetObjectRequest
-            .builder()
-            .key(key)
-            .bucket(S3_BUCKET_NAME)
-            .build();
-
-        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
-        byte[] data = objectBytes.asByteArray();
+        byte[] data = getBytesFromS3(key);
 
         // Write the data to a local file.
         File file = new File(path + fileName + fileType);
@@ -195,14 +188,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
-        GetObjectRequest objectRequest = GetObjectRequest
-            .builder()
-            .key(key)
-            .bucket(S3_BUCKET_NAME)
-            .build();
-
-        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
-        byte[] data = objectBytes.asByteArray();
+        byte[] data = getBytesFromS3(key);
 
         // Write the data to a local file.
         File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
@@ -230,14 +216,11 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void uploadFileToBucket(String filePathInS3, String filePathInReportnet) {
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(LiteralConstants.S3_BUCKET_NAME)
-                .key(filePathInS3)
-                .build();
+        PutObjectRequest putObjectRequest = getPutObjectRequest(filePathInS3);
 
         java.nio.file.Path file = Paths.get(filePathInReportnet);
 
-        PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, file);
+        s3Client.putObject(putObjectRequest, file);
     }
 
     @Override
@@ -318,10 +301,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public String generatePresignedUrl(String filePath){
 
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(S3_BUCKET_NAME)
-                .key(filePath)
-                .build();
+        PutObjectRequest putObjectRequest = getPutObjectRequest(filePath);
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(10))
@@ -350,6 +330,24 @@ public class S3HelperImpl implements S3Helper {
                 .destinationKey(destination)
                 .build();
 
-        CopyObjectResponse copyObjectResponse = s3Client.copyObject(copyReq);
+        s3Client.copyObject(copyReq);
+    }
+
+    private PutObjectRequest getPutObjectRequest(String filePathInS3) {
+        return PutObjectRequest.builder()
+            .bucket(S3_BUCKET_NAME)
+            .key(filePathInS3)
+            .build();
+    }
+
+    private byte[] getBytesFromS3(String key) {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(key)
+            .bucket(S3_BUCKET_NAME)
+            .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        return objectBytes.asByteArray();
     }
 }
