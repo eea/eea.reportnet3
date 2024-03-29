@@ -84,7 +84,6 @@ public class S3PublicConfiguration implements S3Configuration {
   private ServerSideEncryptionByDefault applyServerSideEncryptionByDefault() {
     return ServerSideEncryptionByDefault.builder()
         .sseAlgorithm(algorithm)
-        .kmsMasterKeyID(kms)
         .build();
   }
 }
