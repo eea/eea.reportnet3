@@ -14,7 +14,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { LevelError } from 'views/_components/LevelError';
-import { MultiSelect } from 'views/_components/MultiSelect';
+import { MultiSelect } from '../MultiSelect';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';

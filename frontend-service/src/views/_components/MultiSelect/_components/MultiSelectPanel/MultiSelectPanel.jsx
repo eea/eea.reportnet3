@@ -1,51 +1,52 @@
-import React, { useRef } from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 
-const MultiSelectPanel = ({ appendTo, header, label, onClick, scrollHeight, children, panelClassName }) => {
-  const elementRef = useRef(null); 
+export class MultiSelectPanel extends Component {
+  static defaultProps = {
+    appendTo: null,
+    header: null,
+    label: null,
+    onClick: null,
+    scrollHeight: null
+  };
 
-  const renderElement = () => (
-    <div
-      className={classNames('p-multiselect-panel p-hidden p-input-overlay', panelClassName)}
-      onClick={onClick}
-      ref={elementRef} 
-    >
-      {header}
-      <div className="p-multiselect-items-wrapper" style={{ maxHeight: scrollHeight }}>
-        <ul
-          aria-label={label}
-          aria-multiselectable={true}
-          className="p-multiselect-items p-multiselect-list p-component"
-          role="listbox">
-          {children}
-        </ul>
+  static propTypes = {
+    appendTo: PropTypes.object,
+    header: PropTypes.any,
+    label: PropTypes.string,
+    onClick: PropTypes.func,
+    scrollHeight: PropTypes.string
+  };
+
+  renderElement() {
+    return (
+      <div
+        className={classNames('p-multiselect-panel p-hidden p-input-overlay', this.props.panelClassName)}
+        onClick={this.props.onClick}
+        ref={el => (this.element = el)}>
+        {this.props.header}
+        <div className="p-multiselect-items-wrapper" style={{ maxHeight: this.props.scrollHeight }}>
+          <ul
+            aria-label={this.props.label}
+            aria-multiselectable={true}
+            className="p-multiselect-items p-multiselect-list p-component"
+            role="listbox">
+            {this.props.children}
+          </ul>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  let element = renderElement();
+  render() {
+    let element = this.renderElement();
 
-  return appendTo ? ReactDOM.createPortal(element, appendTo) : element;
-};
-
-MultiSelectPanel.defaultProps = {
-  appendTo: null,
-  header: null,
-  label: null,
-  onClick: null,
-  scrollHeight: null
-};
-
-MultiSelectPanel.propTypes = {
-  appendTo: PropTypes.object,
-  header: PropTypes.any,
-  label: PropTypes.string,
-  onClick: PropTypes.func,
-  scrollHeight: PropTypes.string,
-  panelClassName: PropTypes.string,
-  children: PropTypes.node
-};
-
-export default MultiSelectPanel;
+    if (this.props.appendTo) {
+      return ReactDOM.createPortal(element, this.props.appendTo);
+    } else {
+      return element;
+    }
+  }
+}
