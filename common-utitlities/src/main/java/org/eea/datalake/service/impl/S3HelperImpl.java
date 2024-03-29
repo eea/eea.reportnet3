@@ -40,13 +40,13 @@ public class S3HelperImpl implements S3Helper {
     private static final String VALIDATION="validation";
     private static final String PARQUET_FILE_NAME="/0_0_0.parquet";
 
-    private S3Service s3Service;
-    private S3Client s3Client;
+    private final S3Service s3Service;
+    private final S3Client s3Client;
 
-    private S3Presigner s3Presigner;
+    private final S3Presigner s3Presigner;
 
     @Autowired
-    public S3HelperImpl(S3Service s3Service, @Qualifier("s3LocalConfiguration") S3Configuration s3Configuration) {
+    public S3HelperImpl(S3Service s3Service, @Qualifier("s3PrivateConfiguration") S3Configuration s3Configuration) {
         this.s3Service = s3Service;
         this.s3Client = s3Configuration.getS3Client();
         this.s3Presigner = s3Configuration.getS3Presigner();

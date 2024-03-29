@@ -108,12 +108,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     DatasetSchemaService datasetSchemaService;
 
-    private final S3Helper s3HelperLocal;
+    private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
 
 
-    public BigDataDatasetServiceImpl(@Qualifier("public") S3Helper s3HelperPublic, S3Helper s3HelperLocal) {
-        this.s3HelperLocal = s3HelperLocal;
+    public BigDataDatasetServiceImpl(@Qualifier("public") S3Helper s3HelperPublic, S3Helper s3HelperPrivate) {
+        this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
     }
 
@@ -178,11 +178,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     folder.mkdir();
                 }
                 if(filePathInS3.endsWith(".csv")) {
-                    s3File = s3HelperLocal.getFileFromS3(filePathInS3, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
+                    s3File = s3HelperPrivate.getFileFromS3(filePathInS3, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
                     fileName = s3File.getName();
                 }
                 else if(filePathInS3.endsWith(".zip")){
-                    s3File = s3HelperLocal.getFileFromS3(filePathInS3, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
+                    s3File = s3HelperPrivate.getFileFromS3(filePathInS3, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
                     fileName = s3File.getName();
                 }
                 //todo handle other extensions
@@ -697,10 +697,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
         //remove folders that contain the previous parquet files
-        if (s3HelperLocal.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+        if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
             //demote table folder
             dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
-            s3HelperLocal.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+            s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
     }
 

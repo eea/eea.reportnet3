@@ -15,7 +15,7 @@ import software.amazon.awssdk.utils.AttributeMap;
 import java.net.URI;
 
 @Service
-public class S3LocalConfiguration implements S3Configuration {
+public class S3PrivateConfiguration implements S3Configuration {
   @Value("${amazon.s3.endpoint}")
   private String s3Endpoint;
   @Value("${amazon.s3.accessKey}")

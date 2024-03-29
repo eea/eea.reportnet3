@@ -18,8 +18,8 @@ public class S3HelperConfig {
   }
 
 /*  @Bean
-  @Qualifier("local")*/
-  public S3Helper s3HelperLocal(@Qualifier("s3LocalConfiguration") S3Configuration s3LocalConfiguration) {
+  @Qualifier("private")*/
+  public S3Helper s3HelperPrivate(@Qualifier("s3PrivateConfiguration") S3Configuration s3LocalConfiguration) {
     return new S3HelperImpl(s3Service, s3LocalConfiguration);
   }
 
