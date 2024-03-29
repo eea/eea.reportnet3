@@ -30,8 +30,6 @@ public class S3PublicConfiguration implements S3Configuration {
   private boolean needsEncryption;
   @Value("${amazon.s3.public.algorithm}")
   private String algorithm;
-  @Value("${amazon.s3.public.kms}")
-  private String kms;
 
   @Value("${s3.default.bucket}")
   private String S3_DEFAULT_BUCKET;
