@@ -15,7 +15,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
-import { DropdownPanel } from './_components/DropdownPanel';
+import DropdownPanel from './_components/DropdownPanel/DropdownPanel';
 import { DropdownItem } from './_components/DropdownItem';
 import { Spinner } from 'views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
@@ -792,7 +792,7 @@ export class Dropdown extends Component {
       this.alignPanel();
     }
 
-    if (this.panel.element.offsetParent) {
+    if (this.panel.offsetParent) {
       let highlightItem = DomHandler.findSingle(this.panel.element, 'li.p-highlight');
       if (highlightItem) {
         DomHandler.scrollInView(this.panel.itemsWrapper, highlightItem);

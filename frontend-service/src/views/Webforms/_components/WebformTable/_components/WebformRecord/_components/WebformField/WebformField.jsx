@@ -17,6 +17,7 @@ import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { MultiSelect } from 'views/_components/MultiSelect';
+import DropdownWebform from 'views/_components/Dropdown/DropdownWebform';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -130,7 +131,7 @@ export const WebformField = ({
     }
 
     try {
-      webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: true });
+      // webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: true });
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
         datasetId,
         field.fieldSchemaId,
@@ -179,7 +180,7 @@ export const WebformField = ({
       console.error('WebformField - onFilter.', error);
       notificationContext.add({ type: 'GET_REFERENCED_LINK_VALUES_ERROR' }, true);
     } finally {
-      webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: false });
+      // webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: false });
     }
   };
 
@@ -380,7 +381,7 @@ export const WebformField = ({
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
           return (
-            <Dropdown
+            <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
               disabled={isLoadingData}
