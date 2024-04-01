@@ -334,9 +334,6 @@ public final class LiteralConstants {
   /** The Constant S3_VALIDATION: {@value}. */
   public static final String S3_VALIDATION = "validation";
 
-  /** The Constant S3_BUCKET_NAME: {@value}. */
-  public static final String S3_BUCKET_NAME = "rn3-dataset";
-
   /** The Constant PARQUET_RECORD_ID_COLUMN_HEADER: {@value}. */
   public static final String PARQUET_RECORD_ID_COLUMN_HEADER = "record_id";
 

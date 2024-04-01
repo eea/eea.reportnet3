@@ -7,4 +7,5 @@ public interface S3Configuration {
   S3Client getS3Client();
   S3Presigner getS3Presigner();
   String getDefaultBucket();
+  String getS3DefaultBucketName();
 }

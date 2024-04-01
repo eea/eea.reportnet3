@@ -23,8 +23,11 @@ public class S3PrivateConfiguration implements S3Configuration {
   private String s3AccessKey;
   @Value("${amazon.s3.secretKey}")
   private String s3SecretKey;
+
   @Value("${s3.default.bucket}")
   private String S3_DEFAULT_BUCKET;
+  @Value("${s3.default.bucket.name}")
+  private String S3_DEFAULT_BUCKET_NAME;
 
   private static AwsBasicCredentials awsCredentials;
 
@@ -57,5 +60,10 @@ public class S3PrivateConfiguration implements S3Configuration {
   @Override
   public String getDefaultBucket() {
     return S3_DEFAULT_BUCKET;
+  }
+
+  @Override
+  public String getS3DefaultBucketName() {
+    return S3_DEFAULT_BUCKET_NAME;
   }
 }
