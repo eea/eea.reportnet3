@@ -37,6 +37,8 @@ public class S3PublicConfiguration implements S3Configuration {
   private String S3_DEFAULT_BUCKET;
   @Value("${s3.default.bucket.name}")
   private String S3_DEFAULT_BUCKET_NAME;
+  @Value("${s3.default.bucket.path}")
+  private String S3_DEFAULT_BUCKET_PATH;
 
   private final static Region s3Region = Region.US_EAST_1;
 
@@ -91,6 +93,11 @@ public class S3PublicConfiguration implements S3Configuration {
   @Override
   public String getS3DefaultBucketName() {
     return S3_DEFAULT_BUCKET_NAME;
+  }
+
+  @Override
+  public String getS3DefaultBucketPath() {
+    return S3_DEFAULT_BUCKET_PATH;
   }
 
   private ServerSideEncryptionByDefault applyServerSideEncryptionByDefault() {

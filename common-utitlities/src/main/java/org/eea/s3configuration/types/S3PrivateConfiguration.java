@@ -28,6 +28,8 @@ public class S3PrivateConfiguration implements S3Configuration {
   private String S3_DEFAULT_BUCKET;
   @Value("${s3.default.bucket.name}")
   private String S3_DEFAULT_BUCKET_NAME;
+  @Value("${s3.default.bucket.path}")
+  private String S3_DEFAULT_BUCKET_PATH;
 
   private static AwsBasicCredentials awsCredentials;
 
@@ -65,5 +67,10 @@ public class S3PrivateConfiguration implements S3Configuration {
   @Override
   public String getS3DefaultBucketName() {
     return S3_DEFAULT_BUCKET_NAME;
+  }
+
+  @Override
+  public String getS3DefaultBucketPath() {
+    return S3_DEFAULT_BUCKET_PATH;
   }
 }
