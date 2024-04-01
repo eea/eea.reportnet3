@@ -1,4 +1,4 @@
-import { useState, memo, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
 
@@ -345,8 +345,6 @@ const DropdownWebform = props => {
   };
 
   const onFilterInputChange = event => {
-    console.log(event)
-
     if (onFilterInputChangeBackend) {
       onFilterInputChangeBackend(event.target.value);
       setFilterState(event.target.value);
