@@ -66,7 +66,7 @@ public class S3PublicConfiguration implements S3Configuration {
     // Encryption Configuration
     if (needsEncryption) {
       s3Client.putBucketEncryption(PutBucketEncryptionRequest.builder()
-          .bucket(S3_DEFAULT_BUCKET)
+          .bucket(getS3DefaultBucketName())
           .serverSideEncryptionConfiguration(ServerSideEncryptionConfiguration.builder()
               .rules(ServerSideEncryptionRule.builder()
                   .applyServerSideEncryptionByDefault(applyServerSideEncryptionByDefault())
