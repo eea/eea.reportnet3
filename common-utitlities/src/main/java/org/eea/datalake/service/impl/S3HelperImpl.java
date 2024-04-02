@@ -97,7 +97,6 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
-        LOG.info("checkFolderExist key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
@@ -109,7 +108,6 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver);
-        LOG.info("checkFolderExist key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
@@ -189,9 +187,7 @@ public class S3HelperImpl implements S3Helper {
             file.delete();
         }
         Path textFilePath = Paths.get(file.toString());
-        LOG.info("textFilePath {}", textFilePath);
         Files.createFile(textFilePath);
-        LOG.info("Local file {}", file);
         OutputStream os = new FileOutputStream(file);
         os.write(data);
         LOG.info("Successfully obtained bytes from file: {}", filePath);
@@ -226,9 +222,7 @@ public class S3HelperImpl implements S3Helper {
             file.delete();
         }
         Path textFilePath = Paths.get(file.toString());
-        LOG.info("textFilePath {}", textFilePath);
         Files.createFile(textFilePath);
-        LOG.info("Local file {}", file);
         OutputStream os = new FileOutputStream(file);
         os.write(data);
         LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
@@ -282,7 +276,6 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkTableNameDCProviderFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getS3Path(s3PathResolver);
-        LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
@@ -294,7 +287,6 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getS3Path(s3PathResolver);
-        LOG.info("Table name DC folder exist with key: {}", key);
         return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
