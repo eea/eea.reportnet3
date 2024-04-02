@@ -14,7 +14,6 @@ export const Footer = ({
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
-      (
       <Button
         className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
         disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
@@ -23,7 +22,6 @@ export const Footer = ({
         onClick={onAddClick}
         style={{ float: 'left' }}
       />
-      )
       {!bigData && (
         <Button
           className={`p-button-secondary ${

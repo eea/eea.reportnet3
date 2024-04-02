@@ -432,14 +432,21 @@ public interface DatasetController {
    * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    * @return the attachment
    */
   @GetMapping(value = "/v1/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   ResponseEntity<byte[]> getAttachment(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String fieldId, @RequestParam(value = "dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
-
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @RequestParam(value = "fieldName", required = false) String fieldName,
+      @RequestParam(value = "fileName", required = false) String fileName,
+      @RequestParam(value = "recordId", required = false) String recordId);
   /**
    * Gets the attachment legacy.
    *
@@ -447,13 +454,21 @@ public interface DatasetController {
    * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    * @return the attachment legacy
    */
   @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   ResponseEntity<byte[]> getAttachmentLegacy(@PathVariable("datasetId") Long datasetId,
       @PathVariable("fieldId") String fieldId, @RequestParam(value = "dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @RequestParam(value = "fieldName", required = false) String fieldName,
+      @RequestParam(value = "fileName", required = false) String fileName,
+      @RequestParam(value = "recordId", required = false) String recordId);
 
   /**
    * Update attachment.
@@ -463,12 +478,18 @@ public interface DatasetController {
    * @param providerId the provider id
    * @param idField the id field
    * @param file the file
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param recordId the recordId
    */
   @PutMapping("/v1/{datasetId}/field/{fieldId}/attachment")
   void updateAttachment(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
-      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file);
+      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @RequestParam(value = "fieldName", required = false) String fieldName,
+      @RequestParam(value = "recordId", required = false) String recordId);
 
   /**
    * Update attachment legacy.
@@ -478,40 +499,62 @@ public interface DatasetController {
    * @param providerId the provider id
    * @param idField the id field
    * @param file the file
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param recordId the recordId
    */
   @PutMapping("/{datasetId}/field/{fieldId}/attachment")
   void updateAttachmentLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
-      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file);
+      @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file,
+      @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @RequestParam(value = "fieldName", required = false) String fieldName,
+      @RequestParam(value = "recordId", required = false) String recordId);
 
   /**
    * Delete attachment.
    *
    * @param datasetId the dataset id
+   * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   * @param idField the id field
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    */
   @DeleteMapping("/v1/{datasetId}/field/{fieldId}/attachment")
   void deleteAttachment(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
-      @PathVariable("fieldId") String idField);
+      @PathVariable("fieldId") String idField,
+      @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @RequestParam(value = "fieldName", required = false) String fieldName,
+      @RequestParam(value = "fileName", required = false) String fileName,
+      @RequestParam(value = "recordId", required = false) String recordId);
 
   /**
    * Delete attachment legacy.
    *
    * @param datasetId the dataset id
+   * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   * @param idField the id field
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    */
   @DeleteMapping("/{datasetId}/field/{fieldId}/attachment")
   void deleteAttachmentLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
-      @PathVariable("fieldId") String idField);
+      @PathVariable("fieldId") String idField,
+      @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @RequestParam(value = "fieldName", required = false) String fieldName,
+      @RequestParam(value = "fileName", required = false) String fileName,
+      @RequestParam(value = "recordId", required = false) String recordId);
 
   /**
    * Delete data before replacing.

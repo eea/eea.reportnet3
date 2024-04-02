@@ -1,5 +1,6 @@
 package org.eea.datalake.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -135,6 +136,15 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
+     * Deletes file from s3
+     * @param filePath
+     */
+    @Override
+    public void deleteFile(String filePath){
+        s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(filePath));
+    }
+
+    /**
      * Gets filenames from table name folders
      * @param s3PathResolver
      * @return
@@ -165,7 +175,15 @@ public class S3HelperImpl implements S3Helper {
         byte[] data = objectBytes.asByteArray();
 
         // Write the data to a local file.
-        File file = new File(path + fileName + fileType);
+        String filePath = null;
+        if(StringUtils.isNotBlank(fileType)) {
+            filePath = path + fileName + fileType;
+        }
+        else{
+            filePath = path + fileName;
+        }
+        File file = new File(filePath);
+
         if(file.exists()){
             //if a file with the same name exists in the path, delete it so that it will be recreated
             file.delete();
@@ -176,7 +194,7 @@ public class S3HelperImpl implements S3Helper {
         LOG.info("Local file {}", file);
         OutputStream os = new FileOutputStream(file);
         os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
+        LOG.info("Successfully obtained bytes from file: {}", filePath);
         os.close();
         return file;
     }

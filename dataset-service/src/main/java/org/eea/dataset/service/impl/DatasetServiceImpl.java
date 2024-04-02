@@ -1,7 +1,9 @@
 package org.eea.dataset.service.impl;
 
+import lombok.SneakyThrows;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -25,10 +27,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.PaMService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.dataset.service.model.TruncateDataset;
@@ -86,6 +85,8 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.*;
@@ -335,6 +336,10 @@ public class DatasetServiceImpl implements DatasetService {
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
+
+  /** The dataschema service. */
+  @Autowired
+  private DatasetSchemaService dataschemaService;
 
   /**
    * The default process priority
@@ -1546,6 +1551,43 @@ public class DatasetServiceImpl implements DatasetService {
     return attachmentRepository.findByFieldValueId(idField);
   }
 
+
+  /**
+   * Gets the attachment for big data dataflows.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataset id
+   * @param providerId the dataset id
+   * @param fieldSchemaId the id field
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
+   * @return the attachment
+   *
+   */
+  @SneakyThrows
+  @Override
+  public AttachmentDLVO getAttachmentDL(Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                                        String fieldName, String fileName, String recordId) {
+
+    byte[] attachmentContent;
+
+    //retrieve file from s3
+    String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
+    S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+    String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
+    try {
+      File attachmentInS3 = s3Helper.getFileFromS3(attachmentPathInS3, fileName, importPath, null);
+      attachmentContent = FileUtils.readFileToByteArray(attachmentInS3);
+    } catch (Exception e) {
+      LOG.error("Could not retrieve file {} from s3 {}", attachmentPathInS3, e.getMessage());
+      throw e;
+    }
+    AttachmentDLVO attachmentDLVO = new AttachmentDLVO(fileName, attachmentContent);
+    return attachmentDLVO;
+  }
+
   /**
    * Delete attachment.
    *
@@ -1567,6 +1609,30 @@ public class DatasetServiceImpl implements DatasetService {
     updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetRepository.removeTempEtlExport(datasetId);
+  }
+
+  /**
+   * Delete attachment for big data dataflows.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataset id
+   * @param providerId the dataset id
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public void deleteAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                                 String fieldName, String fileName, String recordId) {
+    //todo remove filename from parquet
+    //remove attachment file from s3
+    String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
+    S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+    String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
+    s3Helper.deleteFile(attachmentPathInS3);
   }
 
   /**
@@ -1619,6 +1685,44 @@ public class DatasetServiceImpl implements DatasetService {
     updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
     datasetRepository.removeTempEtlExport(datasetId);
+  }
+
+  /**
+   * Update attachment for big data dataflows.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataset id
+   * @param providerId the dataset id
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param multipartFile the file
+   * @param recordId the recordId
+   */
+  @SneakyThrows
+  @Override
+  public void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                                 String fieldName, MultipartFile multipartFile, String recordId){
+    //todo modify parquet file to add value for file name
+
+    File folder = new File(importPath + "/" + datasetId);
+    if (!folder.exists()) {
+      folder.mkdir();
+    }
+    String filePathInReportnet = folder.getAbsolutePath() + "/" + multipartFile.getOriginalFilename();
+    File file = new File(filePathInReportnet);
+    try (FileOutputStream fos = new FileOutputStream(file)) {
+      FileCopyUtils.copy(multipartFile.getInputStream(), fos);
+    }
+    catch (Exception e){
+      LOG.error("Could not store file to disk for datasetId {} table {} and fileName {}", datasetId, tableSchemaName, file.getName());
+      throw e;
+    }
+
+    String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(file.getName());
+    S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+    String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
+    s3Helper.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
+    file.delete();
   }
 
   /**
