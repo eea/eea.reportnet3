@@ -1,6 +1,8 @@
 package org.eea.datalake.service.annotation;
 
+import org.eea.s3configuration.PackageConfig;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.*;
 
@@ -10,6 +12,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE) // on class level
 @Documented
-@ComponentScan("org.eea.datalake.service.impl")
+@Import({LakesPackageConfig.class})
 public @interface ImportDataLakeCommons {
 }

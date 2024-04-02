@@ -6,9 +6,11 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
@@ -19,12 +21,20 @@ import static org.eea.utils.LiteralConstants.*;
 
 
 @Service
+@Primary
 public class S3ServiceImpl implements S3Service {
 
-    @Autowired
-    private DataSetControllerZuul dataSetControllerZuul;
+    private final DataSetControllerZuul dataSetControllerZuul;
+    private final String S3_DEFAULT_BUCKET;
+    private final String S3_DEFAULT_BUCKET_PATH;
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
+
+    public S3ServiceImpl(DataSetControllerZuul dataSetControllerZuul, @Qualifier("s3PrivateConfiguration") S3Configuration s3PrivateConfiguration) {
+        this.dataSetControllerZuul = dataSetControllerZuul;
+        this.S3_DEFAULT_BUCKET = s3PrivateConfiguration.getDefaultBucket();
+        this.S3_DEFAULT_BUCKET_PATH = s3PrivateConfiguration.getS3DefaultBucketPath();
+    }
 
     @Override
     public String getS3Path(S3PathResolver s3PathResolver) {
@@ -253,6 +263,11 @@ public class S3ServiceImpl implements S3Service {
             s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
         }
         return s3PathResolver;
+    }
+
+    @Override
+    public String getS3DefaultBucketPath() {
+        return S3_DEFAULT_BUCKET_PATH;
     }
 
     private String formatSnapshotFolder(Long snapshotId) {

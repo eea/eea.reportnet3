@@ -127,4 +127,6 @@ public interface S3Helper {
      * @return
      */
     void copyFileToAnotherDestination(String source, String destination);
+
+    S3Service getS3Service();
 }

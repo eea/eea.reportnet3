@@ -11,21 +11,15 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class S3HelperConfig {
 
-  private final S3Service s3Service;
+  private final S3Service s3PublicService;
 
-  public S3HelperConfig(S3Service s3Service) {
-    this.s3Service = s3Service;
-  }
-
-/*  @Bean
-  @Qualifier("private")*/
-  public S3Helper s3HelperPrivate(@Qualifier("s3PrivateConfiguration") S3Configuration s3LocalConfiguration) {
-    return new S3HelperImpl(s3Service, s3LocalConfiguration);
+  public S3HelperConfig(@Qualifier("publicS3Service") S3Service s3PublicService) {
+    this.s3PublicService = s3PublicService;
   }
 
   @Bean
-  @Qualifier("public")
+  @Qualifier("publicS3Helper")
   public S3Helper s3HelperPublic(@Qualifier("s3PublicConfiguration") S3Configuration s3PublicConfiguration) {
-    return new S3HelperImpl(s3Service, s3PublicConfiguration);
+    return new S3HelperImpl(s3PublicService, s3PublicConfiguration);
   }
 }

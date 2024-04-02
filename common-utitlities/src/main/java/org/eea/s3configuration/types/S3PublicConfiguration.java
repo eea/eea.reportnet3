@@ -33,11 +33,11 @@ public class S3PublicConfiguration implements S3Configuration {
   @Value("${amazon.s3.public.algorithm}")
   private String algorithm;
 
-  @Value("${s3.default.bucket}")
+  @Value("${s3.default.public.bucket}")
   private String S3_DEFAULT_BUCKET;
-  @Value("${s3.default.bucket.name}")
+  @Value("${s3.default.public.bucket.name}")
   private String S3_DEFAULT_BUCKET_NAME;
-  @Value("${s3.default.bucket.path}")
+  @Value("${s3.default.public.bucket.path}")
   private String S3_DEFAULT_BUCKET_PATH;
 
   private final static Region s3Region = Region.US_EAST_1;

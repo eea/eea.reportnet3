@@ -40,4 +40,6 @@ public interface S3Service {
      * @return
      */
     S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName);
+
+    String getS3DefaultBucketPath();
 }

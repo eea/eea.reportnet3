@@ -331,6 +331,11 @@ public class S3HelperImpl implements S3Helper {
         s3Client.copyObject(copyReq);
     }
 
+    @Override
+    public S3Service getS3Service() {
+        return s3Service;
+    }
+
     private PutObjectRequest getPutObjectRequest(String filePathInS3) {
         return PutObjectRequest.builder()
             .bucket(S3_DEFAULT_BUCKET_NAME)

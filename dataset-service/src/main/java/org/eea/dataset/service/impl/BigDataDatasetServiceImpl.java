@@ -4,8 +4,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
-import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.*;
@@ -94,13 +94,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private KafkaSenderUtils kafkaSenderUtils;
 
     @Autowired
-    private S3ServiceImpl s3Service;
-
-    @Autowired
     public RepresentativeControllerZuul representativeControllerZuul;
-
-    @Autowired
-    public DremioHelperService dremioHelperService;
 
     @Autowired
     FileCommonUtils fileCommonUtils;
@@ -108,13 +102,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     DatasetSchemaService datasetSchemaService;
 
+    private final S3Service s3ServicePrivate;
+    private final S3Service s3ServicePublic;
     private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
+    private final DremioHelperService localDremioHelperService;
 
-
-    public BigDataDatasetServiceImpl(@Qualifier("public") S3Helper s3HelperPublic, S3Helper s3HelperPrivate) {
+    public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService localDremioHelperService) {
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
+        this.s3ServicePublic = s3HelperPublic.getS3Service();
+        this.s3ServicePrivate = s3HelperPrivate.getS3Service();
+        this.localDremioHelperService = localDremioHelperService;
     }
 
 
@@ -671,7 +670,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId);
         s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
-        String filePath = s3Service.getS3Path(s3PathResolver);
+        String filePath = s3ServicePublic.getS3Path(s3PathResolver);
         return s3HelperPublic.generatePresignedUrl(filePath);
     }
 
@@ -690,7 +689,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
         //path in s3 for the folder that contains the stored csv files
-        String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+        String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
         //remove csv files that are related to the table
         parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder);
@@ -699,7 +698,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //remove folders that contain the previous parquet files
         if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
             //demote table folder
-            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
+            localDremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
     }

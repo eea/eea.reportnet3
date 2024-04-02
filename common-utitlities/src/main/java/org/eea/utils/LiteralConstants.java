@@ -179,9 +179,6 @@ public final class LiteralConstants {
   /** The Constant S3_DEFAULT_BUCKET: {@value}. */
   public static final String S3_DEFAULT_BUCKET = "\"rn3-dataset\".\"rn3-dataset\"";
 
-  /** The Constant S3_DEFAULT_BUCKET_PATH: {@value}. */
-  public static final String S3_DEFAULT_BUCKET_PATH = "rn3-dataset/rn3-dataset";
-
   /** The Constant S3_LEFT_PAD: {@value}. */
   public static final String S3_LEFT_PAD= "0";
 
