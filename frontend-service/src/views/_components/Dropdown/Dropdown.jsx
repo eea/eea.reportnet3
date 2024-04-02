@@ -120,7 +120,7 @@ export class Dropdown extends Component {
     this.state = {
       filter: this.props.currentValue ? this.props.currentValue : ''
     };
-
+    this.panel = { element: null };
     this.onClick = this.onClick.bind(this);
     this.onInputFocus = this.onInputFocus.bind(this);
     this.onInputBlur = this.onInputBlur.bind(this);
@@ -157,7 +157,6 @@ export class Dropdown extends Component {
       DomHandler.hasClass(event.target, 'p-dropdown-clear-filter-icon');
     if (!this.overlayClick && !this.editableInputClick && !clearClick) {
       this.focusInput.focus();
-
       if (this.panel.element.offsetParent) {
         this.hide();
       } else {
@@ -861,7 +860,7 @@ export class Dropdown extends Component {
           onClick={this.panelClick}
           panelClassName={this.props.panelClassName}
           panelStyle={this.props.panelStyle}
-          ref={el => (this.panel = el)}
+          ref={el => (this.panel.element = el)}
           scrollHeight={this.props.scrollHeight}>
           {items}
         </DropdownPanel>
