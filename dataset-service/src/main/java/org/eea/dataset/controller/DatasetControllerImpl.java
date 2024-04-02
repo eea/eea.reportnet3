@@ -3,12 +3,16 @@ package org.eea.dataset.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
+import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -27,7 +31,9 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -1716,8 +1722,23 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.info("Updating attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
-        //todo check if table is read only
-        //todo validate attachment
+        //check if table is read only
+        String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+        if(StringUtils.isNotBlank(fieldSchemaId)){
+          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, fieldSchemaId, EntityTypeEnum.FIELD)) {
+            LOG.error("Error updating an attachment in the datasetId {}. In table {} field {} is read only",
+                    datasetId, tableSchemaName, fieldName);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+          }
+        }
+
+        //validate attachment
+        if (!validateAttachment(datasetId, idField, fileName, file.getSize(), tableSchemaName, fieldName, true)
+                || fileName.equals("")) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+        }
+
+        //upload attachment
         datasetService.updateAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, file, recordId);
       }
       else{
@@ -1728,7 +1749,7 @@ public class DatasetControllerImpl implements DatasetController {
                   datasetId);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
         }
-        if (!validateAttachment(datasetId, idField, fileName, file.getSize())
+        if (!validateAttachment(datasetId, idField, fileName, file.getSize(), tableSchemaName, fieldName, false)
                 || fileName.equals("")) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
         }
@@ -1824,13 +1845,21 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.info("Deleting attachment for dataflowId {}, datasetId {} and fieldId {}", dataflowId, datasetId, idField);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
-        //todo check if table is read only
+        //check if table is read only
+        String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+        if(StringUtils.isNotBlank(fieldSchemaId)){
+          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, fieldSchemaId, EntityTypeEnum.FIELD)) {
+            LOG.error("Error deleting an attachment in the datasetId {}. In table {} field {} is read only",
+                    datasetId, tableSchemaName, fieldName);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+          }
+        }
         datasetService.deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
       }
       else{
         if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
                 datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
-          LOG.error("Error updating an attachment in the datasetId {}. The table is read only",
+          LOG.error("Error deleting an attachment in the datasetId {}. The table is read only",
                   datasetId);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
         }
@@ -2443,7 +2472,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @throws EEAException the EEA exception
    */
   private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
-      Long size) throws EEAException {
+      Long size, String tableSchemaName, String fieldName, Boolean isBigDataDataflow) throws EEAException {
 
     LOG.info("Validating attachment for datasetId {}, fieldId {} and fileName {}", datasetId, idField, originalFilename);
 
@@ -2452,9 +2481,17 @@ public class DatasetControllerImpl implements DatasetController {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
     }
-    FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
+    String fieldSchemaId = null;
+    if(isBigDataDataflow){
+      fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+    }
+    else{
+      FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
+      fieldSchemaId = fieldVO.getIdFieldSchema();
+    }
+
     FieldSchemaVO fieldSchema =
-        datasetSchemaService.getFieldSchema(datasetSchemaId, fieldVO.getIdFieldSchema());
+        datasetSchemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }

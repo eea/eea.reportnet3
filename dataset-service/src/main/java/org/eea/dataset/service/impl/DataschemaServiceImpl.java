@@ -3520,4 +3520,39 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     return fieldName;
   }
+
+  /**
+   * Finds field schema id
+   * @param datasetId
+   * @param tableSchemaName
+   * @param fieldName
+   * @return the field schema id
+   */
+  @Override
+  public String getFieldSchemaIdByDatasetIdTableNameAndFieldName(Long datasetId, String tableSchemaName, String fieldName){
+    try {
+      String datasetSchemaId = getDatasetSchemaId(datasetId);
+      DataSetSchemaVO datasetSchema = getDataSchemaById(datasetSchemaId);
+      if (datasetSchema != null) {
+        String finalTableSchemaName = tableSchemaName;
+        Optional<TableSchemaVO> tableSchema = datasetSchema.getTableSchemas().stream()
+                .filter(t -> t.getNameTableSchema().equals(finalTableSchemaName)).findFirst();
+
+        if (tableSchema.isPresent()) {
+          Optional<FieldSchemaVO> fieldSchema = tableSchema.get().getRecordSchema().getFieldSchema().stream()
+                  .filter(f -> f.getName().equals(fieldName)).findFirst();
+
+          if (fieldSchema.isPresent()) {
+            return fieldSchema.get().getId();
+          }
+        }
+      }
+
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve field schema id for datasetId {} tableName {} and fieldName {}. Error Message: {}",
+              datasetId, tableSchemaName, fieldName, e.getMessage());
+    }
+    return null;
+  }
 }
