@@ -113,11 +113,24 @@ export const ActionsToolbar = ({
 
   const exportExtensionItems = config.exportTypes.exportTableTypes
 
-  .map(type => {
-    const extensionsTypes = !isNil(type.code) && type.code.split('+');
+    .map(type => {
+      const extensionsTypes = !isNil(type.code) && type.code.split('+');
 
-    if (bigData) {
-      if (!extensionsTypes?.includes('xlsx')) {
+      if (bigData) {
+        if (!extensionsTypes?.includes('xlsx')) {
+          return {
+            command: () => onExportTableData(type),
+            icon: type.code,
+            label: bigData
+              ? resourcesContext.messages[type.key] === resourcesContext.messages['exportFilteredCsv']
+                ? resourcesContext.messages['exportFilteredCsvDL']
+                : resourcesContext.messages[type.key]
+              : resourcesContext.messages[type.key]
+          };
+        } else {
+          return null;
+        }
+      } else {
         return {
           command: () => onExportTableData(type),
           icon: type.code,
@@ -127,22 +140,9 @@ export const ActionsToolbar = ({
               : resourcesContext.messages[type.key]
             : resourcesContext.messages[type.key]
         };
-      } else {
-        return null;
       }
-    } else {
-      return {
-        command: () => onExportTableData(type),
-        icon: type.code,
-        label: bigData
-          ? resourcesContext.messages[type.key] === resourcesContext.messages['exportFilteredCsv']
-            ? resourcesContext.messages['exportFilteredCsvDL']
-            : resourcesContext.messages[type.key]
-          : resourcesContext.messages[type.key]
-      };
-    }
-  })
-  .filter(item => item !== null);
+    })
+    .filter(item => item !== null);
 
   const onExportTableData = async type => {
     const action = 'TABLE_EXPORT';
