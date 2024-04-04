@@ -12,6 +12,8 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
 import { Button } from 'views/_components/Button';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
+import { Dialog } from 'views/_components/Dialog';
 import { Growl } from 'views/_components/Growl';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
@@ -29,6 +31,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
@@ -47,6 +50,7 @@ export const DataCollection = () => {
   const [datasetSchemaId, setDatasetSchemaId] = useState(null);
   const [dataViewerOptions, setDataViewerOptions] = useState({ activeIndex: null });
   const [exportButtonsList, setExportButtonsList] = useState([]);
+  const [isDatasetsInfoDialogVisible, setIsDatasetsInfoDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingFile, setIsLoadingFile] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
@@ -54,6 +58,9 @@ export const DataCollection = () => {
   const [metadata, setMetadata] = useState(undefined);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
 
   let exportMenuRef = useRef();
   let growlRef = useRef();
@@ -75,6 +82,16 @@ export const DataCollection = () => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
+    leftSideBarContext.addModels([
+      {
+        className: 'dataflow-help-datasets-info-step',
+        icon: 'listClipboard',
+        isVisible: true,
+        label: 'datasetsInfo',
+        onClick: () => setIsDatasetsInfoDialogVisible(true),
+        title: 'datasetsInfo'
+      }
+    ]);
     setExportButtonsList(internalExtensions);
     getMetadata();
   }, []);
@@ -263,6 +280,19 @@ export const DataCollection = () => {
 
   const onTabChange = table => setDataViewerOptions({ ...dataViewerOptions, tableSchemaId: table.tableSchemaId });
 
+  const renderDialogFooterCloseBtn = () => (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon="cancel"
+      label={resourcesContext.messages['close']}
+      onClick={() => {
+        setIsDatasetsInfoDialogVisible(false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
+    />
+  );
+
   const layout = children => {
     return (
       <MainLayout leftSideBarConfig={{ buttons: [] }}>
@@ -298,6 +328,18 @@ export const DataCollection = () => {
             />
           </div>
         </Toolbar>
+        {isDatasetsInfoDialogVisible && (
+          <Dialog
+            footer={renderDialogFooterCloseBtn()}
+            header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowId}`}
+            onHide={() => {
+              setIsDatasetsInfoDialogVisible(false);
+              resetDatasetInfoFiltersState();
+            }}
+            visible={isDatasetsInfoDialogVisible}>
+            <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowType} datasetId={datasetId} />
+          </Dialog>
+        )}
       </div>
       {onRenderTabsSchema}
     </Fragment>
