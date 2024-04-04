@@ -31,6 +31,7 @@ import { TabsSchema } from 'views/_components/TabsSchema';
 import { TabularSwitch } from 'views/_components/TabularSwitch';
 import { Title } from 'views/_components/Title';
 import { Toolbar } from 'views/_components/Toolbar';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 
 import { Webforms } from 'views/Webforms';
@@ -48,6 +49,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReporterDataset';
 
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
@@ -119,6 +121,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isDataset, setIsDataset] = useState(false);
   const [isDatasetReleased, setIsDatasetReleased] = useState(false);
+  const [isDatasetsInfoDialogVisible, setIsDatasetsInfoDialogVisible] = useState(false);
   const [isDatasetUpdatable, setIsDatasetUpdatable] = useState(false);
 
   const [isDownloadingQCRules, setIsDownloadingQCRules] = useState(false);
@@ -144,6 +147,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
 
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
 
@@ -160,6 +166,16 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
+    leftSideBarContext.addModels([
+      {
+        className: 'dataflow-help-datasets-info-step',
+        icon: 'listClipboard',
+        isVisible: true,
+        label: 'datasetsInfo',
+        onClick: () => setIsDatasetsInfoDialogVisible(true),
+        title: 'datasetsInfo'
+      }
+    ]);
     getMetadata();
     if (isEmpty(webformOptions)) {
       getWebformList();
@@ -218,6 +234,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
         if (isCustodianInReferenceDataset) {
           leftSideBarContext.addModels([
+            {
+              className: 'dataflow-help-datasets-info-step',
+              icon: 'listClipboard',
+              isVisible: true,
+              label: 'datasetsInfo',
+              onClick: () => setIsDatasetsInfoDialogVisible(true),
+              title: 'datasetsInfo'
+            },
             {
               className: 'dataflow-showPublicInfo-help-step',
               icon: 'lock',
@@ -1080,6 +1104,19 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   };
 
+  const renderDialogFooterCloseBtn = () => (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon="cancel"
+      label={resourcesContext.messages['close']}
+      onClick={() => {
+        setIsDatasetsInfoDialogVisible(false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
+    />
+  );
+
   const renderValidationsFooter = (
     <div className={styles.validationsFooter}>
       <Button
@@ -1441,6 +1478,23 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             </span>
           </label>
         </ConfirmDialog>
+      )}
+      {isDatasetsInfoDialogVisible && (
+        <Dialog
+          footer={renderDialogFooterCloseBtn()}
+          header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowId}`}
+          onHide={() => {
+            setIsDatasetsInfoDialogVisible(false);
+            resetDatasetInfoFiltersState();
+          }}
+          visible={isDatasetsInfoDialogVisible}>
+          <DatasetsInfo
+            dataflowId={dataflowId}
+            dataflowType={dataflowType}
+            datasetId={datasetId}
+            isReferenceDataset={isReferenceDatasetReferenceDataflow}
+          />
+        </Dialog>
       )}
       <Snapshots
         isLoadingSnapshotListData={isLoadingSnapshotListData}

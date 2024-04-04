@@ -1009,7 +1009,7 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
   @GetMapping("/{dataflowId}/datasetsSummary")
   @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
       hidden = true)
