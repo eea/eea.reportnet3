@@ -1308,7 +1308,6 @@ export const FieldDesigner = ({
             }`}
             disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
             id={fieldName !== '' ? fieldName : 'newField'}
-            keyfilter="schemaTableFields"
             maxLength={60}
             name={resourcesContext.messages['newFieldPlaceHolder']}
             onBlur={e => {
