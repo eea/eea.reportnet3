@@ -504,7 +504,7 @@ export const Feedback = () => {
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} any`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
-          maxFileSize={config.MAX_ATTACHMENT_SIZE}
+          maxFileSize={config.MAX_ATTACHMENT_SIZE_FEEDBACK}
           name="fileAttachment"
           onError={onImportFileError}
           onUpload={onUpload}
