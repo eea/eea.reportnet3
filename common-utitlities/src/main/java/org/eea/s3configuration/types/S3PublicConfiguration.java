@@ -40,7 +40,7 @@ public class S3PublicConfiguration implements S3Configuration {
   @Value("${s3.default.public.bucket.path}")
   private String S3_DEFAULT_BUCKET_PATH;
 
-  private final static Region s3Region = Region.US_EAST_1;
+  private final static Region s3Region = Region.EU_WEST_1;
 
   private static AwsBasicCredentials awsCredentials;
 
