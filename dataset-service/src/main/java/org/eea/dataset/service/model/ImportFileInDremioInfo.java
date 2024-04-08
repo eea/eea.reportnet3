@@ -21,6 +21,7 @@ public class ImportFileInDremioInfo {
     private String delimiter;
     private String errorMessage;
     private Boolean sendWrongFileNameWarning;
+    private Boolean sendEmptyFileWarning;
     private String dataProviderCode;
 
     public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData,

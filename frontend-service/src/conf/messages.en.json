@@ -791,6 +791,8 @@
     "importLeadReporters": "Import lead reporters",
     "importLeadReportersTooltip": "Import lead reporters from a CSV file (result file is downloaded afterwards)",
     "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
+    "importEmptyFilesWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: empty files were provided.",
+    "importEmptyFilesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all import files were empty.",
     "importOperationManageIntegration": "Import",
     "importPreviousData": "Other custom imports",
     "importPreviousDataConfirm": "Do you want to import using <strong>\"{:importName}\"</strong> integration?",

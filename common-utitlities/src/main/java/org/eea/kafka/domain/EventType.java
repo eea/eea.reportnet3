@@ -50,6 +50,14 @@ public enum EventType {
   IMPORT_NAMEFILE_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_namefile_warning_event", true),
 
+  /** The import empty files warning event. */
+  IMPORT_EMPTY_FILES_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_emptyFiles_warning_event", true),
+
+  /** The import empty files error event. */
+  IMPORT_EMPTY_FILES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_emptyFiles_error_event", true),
+
   /** The import reporting failed no headers matching event. */
   IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_no_headers_failed_event", true),

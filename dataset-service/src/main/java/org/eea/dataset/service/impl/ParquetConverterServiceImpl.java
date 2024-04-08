@@ -103,6 +103,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     @Override
     public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
         String tableSchemaName;
+        Integer numberOfEmptyFiles = 0;
         for(File csvFile: csvFiles){
             if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
                 tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
@@ -111,6 +112,19 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
             }
             convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName);
+            if(importFileInDremioInfo.getSendEmptyFileWarning()){
+                numberOfEmptyFiles++;
+            }
+        }
+        if(numberOfEmptyFiles != 0) {
+            if (numberOfEmptyFiles == csvFiles.size()) {
+                //all files were empty and an error (instead of a warning) must be thrown
+                importFileInDremioInfo.setSendEmptyFileWarning(false);
+                importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
+                throw new Exception(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
+            } else {
+                importFileInDremioInfo.setSendEmptyFileWarning(true);
+            }
         }
     }
 
@@ -124,6 +138,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         else{
             csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
+        }
+
+        if(csvFilesWithAddedColumns == null){
+           importFileInDremioInfo.setSendEmptyFileWarning(true);
+           return;
+        }
+        else{
+            importFileInDremioInfo.setSendEmptyFileWarning(false);
         }
 
         S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
@@ -318,6 +340,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         List<String> csvHeaders = new ArrayList<>();
         List<String> expectedHeaders;
+        int recordCounter = 0;
         //Reading csv file
         try (
                 Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
@@ -335,7 +358,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
             expectedHeaders = getFieldNames(importFileInDremioInfo.getTableSchemaId(), dataSetSchema, csvFile.getName());
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
-            int recordCounter = 0;
             for (CSVRecord csvRecord : csvParser) {
                 if(csvRecord.values().length == 0){
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
@@ -371,6 +393,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         finally {
             writer.close();
+        }
+        if(recordCounter == 0){
+            LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
+            return null;
         }
         modifiedCsvFiles.add(csvFileWithAddedColumns);
         return modifiedCsvFiles;
@@ -409,8 +435,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             expectedHeaders = getFieldNames(importFileInDremioInfo.getTableSchemaId(), dataSetSchema, csvFile.getName());
             
             int recordCounter = 0;
+            Boolean emptyFile = true;
 
             for (CSVRecord csvRecord : csvParser) {
+                emptyFile = false;
                 if(csvRecord.values().length == 0){
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
                     throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
@@ -459,6 +487,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 writer.close();
                 //add file to list
                 modifiedCsvFiles.add(csvFileWithAddedColumns);
+            }
+            if(emptyFile){
+                LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
+                return null;
             }
         } catch (IOException e) {
             LOG.error("Could not read csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
