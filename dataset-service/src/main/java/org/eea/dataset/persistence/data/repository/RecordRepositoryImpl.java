@@ -684,7 +684,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       File jsonFile) throws EEAException, SQLException, IOException {
     checkSql(filterValue);
     checkSql(columnName);
-    String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
     DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
         .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
     List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
@@ -1938,7 +1938,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
       checkSql(filterValue);
       checkSql(columnName);
-      String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
+      String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
       DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId)).orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
 
       List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
