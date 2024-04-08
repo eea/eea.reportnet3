@@ -229,6 +229,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
                 finishImportProcess(importFileInDremioInfo);
             }
+            throw e;
         }
     }
 
