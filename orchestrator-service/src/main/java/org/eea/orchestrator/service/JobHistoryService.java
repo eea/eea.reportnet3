@@ -12,5 +12,5 @@ public interface JobHistoryService {
 
     List<JobHistoryVO> getJobHistory(Long jobId);
 
-    void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo);
+    void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo, Integer lineNumber);
 }

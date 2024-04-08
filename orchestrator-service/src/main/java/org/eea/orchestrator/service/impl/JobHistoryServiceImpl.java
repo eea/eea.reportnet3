@@ -43,10 +43,10 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo){
+    public void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo, Integer lineNumber){
         Optional<JobHistory> optionalJobHistory = jobHistoryRepository.findFirstByJobIdOrderByIdDesc(jobId);
         if(optionalJobHistory.isPresent()){
-            optionalJobHistory.get().setJobInfo(jobInfo.getValue());
+            optionalJobHistory.get().setJobInfo(jobInfo.getValue(lineNumber));
             jobHistoryRepository.save(optionalJobHistory.get());
         }
     }
