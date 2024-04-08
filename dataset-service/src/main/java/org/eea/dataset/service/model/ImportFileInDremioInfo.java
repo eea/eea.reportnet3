@@ -1,6 +1,7 @@
 package org.eea.dataset.service.model;
 
 import lombok.*;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,6 +24,7 @@ public class ImportFileInDremioInfo {
     private Boolean sendWrongFileNameWarning;
     private Boolean sendEmptyFileWarning;
     private String dataProviderCode;
+    private Boolean updateReferenceFolder;
 
     public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData,
                                   String delimiter, Long integrationId, String dataProviderCode) {
