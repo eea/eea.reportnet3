@@ -18,6 +18,7 @@ import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { MultiSelect } from 'views/_components/MultiSelect';
 import DropdownWebform from 'views/_components/Dropdown/DropdownWebform';
+import MultiSelectWebform from 'views/_components/MultiSelect/MultiSelectWebform';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -357,7 +358,7 @@ export const WebformField = ({
       case 'LINK':
         if (field.pkHasMultipleValues) {
           return (
-            <MultiSelect
+            <MultiSelectWebform
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -408,7 +409,7 @@ export const WebformField = ({
         }
       case 'MULTISELECT_CODELIST':
         return (
-          <MultiSelect
+          <MultiSelectWebform
             appendTo={document.body}
             id={field.fieldId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
@@ -432,7 +433,7 @@ export const WebformField = ({
         );
       case 'CODELIST':
         return (
-          <Dropdown
+          <DropdownWebform
             appendTo={document.body}
             id={field.fieldId}
             onChange={event => {

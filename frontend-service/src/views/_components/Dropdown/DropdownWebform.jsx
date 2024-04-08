@@ -107,7 +107,7 @@ const DropdownWebform = props => {
     if (!overlayClick && !editableInputClick && !clearClick) {
       focusInputRef.current.focus();
 
-      if (panelRef.current && panelRef.current && panelRef.current.offsetParent) {
+      if (panelRef.current && panelRef.current.offsetParent) {
         hide();
       } else {
         show();
