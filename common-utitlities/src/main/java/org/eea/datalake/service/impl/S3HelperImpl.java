@@ -14,6 +14,8 @@ import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
@@ -291,13 +293,13 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
-     * Generate s3 presigned Url
+     * Generate s3 pre signed Url
      *
      * @param filePath the path where the file will be imported into
      * @return the url
      */
     @Override
-    public String generatePresignedUrl(String filePath){
+    public String generatePUTPreSignedUrl(String filePath){
 
         PutObjectRequest putObjectRequest = getPutObjectRequest(filePath);
 
@@ -309,6 +311,31 @@ public class S3HelperImpl implements S3Helper {
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
         URL url = presignedRequest.url();
 
+
+        return url.toString();
+    }
+
+    /**
+     * Generate s3 pre signed Url
+     *
+     * @param filePath the path where the file will be imported into
+     * @return the url
+     */
+    @Override
+    public String generateGETPreSignedUrl(String filePath) {
+
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .key(filePath)
+            .build();
+
+        GetObjectPresignRequest  presignRequest = GetObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofMinutes(10))
+            .getObjectRequest(getObjectRequest)
+            .build();
+
+        PresignedGetObjectRequest objectRequest = s3Presigner.presignGetObject(presignRequest);
+        URL url = objectRequest.url();
 
         return url.toString();
     }
@@ -334,6 +361,16 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public S3Service getS3Service() {
         return s3Service;
+    }
+
+    @Override
+    public void deleteFileFromS3(String key) {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+            .key(key)
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .build();
+        s3Client.deleteObject(deleteObjectRequest);
+        LOG.info("File with key " + key + " deleted from S3 public bucket.");
     }
 
     private PutObjectRequest getPutObjectRequest(String filePathInS3) {

@@ -108,6 +108,9 @@ public class S3ServiceImpl implements S3Service {
                     tableName);
                 break;
             case S3_PROVIDER_IMPORT_PATH:
+                fileName = System.currentTimeMillis() + "_" + fileName; //generating unique name, avoiding conflicts
+                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, fileName);
+                break;
             case S3_CURRENT_PATH:
             case S3_SNAPSHOT_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
