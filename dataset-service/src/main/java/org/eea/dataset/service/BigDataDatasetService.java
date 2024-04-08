@@ -50,8 +50,18 @@ public interface BigDataDatasetService {
      * @param datasetId the dataset id
      * @param dataflowId the dataflow id
      * @param providerId the provider id
-     * @param deletePrefilledData the deletePrefilledTables
+     * @param deletePrefilledTables the deletePrefilledTables
      */
     void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables) throws Exception;
+
+    /**
+     * Convert parquet to iceberg table
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaName the table schema id
+     */
+    void convertParquetToIcebergTable(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName) throws Exception;
 
 }

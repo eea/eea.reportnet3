@@ -46,6 +46,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.jobPolling.numberOfRetries}")
     private Integer numberOfRetriesForJobPolling;
 
+    @Value("${dremio.promote.numberOfRetries}")
+    private Integer numberOfRetriesForPromoting;
+
     @Autowired
     private DremioApiController dremioApiController;
     @Autowired
@@ -306,5 +309,26 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             }
         }
         return false;
+    }
+
+    @Override
+    public void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
+        String refreshTableAndPromoteQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
+        Boolean folderWasPromoted = false;
+        //we keep trying to promote the folder for a number of retries
+        for(int i=0; i < numberOfRetriesForPromoting; i++) {
+            executeSqlStatement(refreshTableAndPromoteQuery);
+            if(checkFolderPromoted(s3PathResolver, tableName)) {
+                LOG.info("For job {} promoted table {} in retry #{}", jobId, tablePath, i+1);
+                folderWasPromoted = true;
+                break;
+            }
+            else {
+                Thread.sleep(10000);
+            }
+        }
+        if(!folderWasPromoted) {
+            throw new Exception("Could not promote folder " + tablePath);
+        }
     }
 }

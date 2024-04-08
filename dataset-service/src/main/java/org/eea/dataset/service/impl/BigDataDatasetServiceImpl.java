@@ -722,4 +722,26 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         datasetService.updateCheckView(datasetId, false);
     }
 
+    /**
+     * Convert parquet to iceberg table
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaName the table schema name
+     */
+    @Override
+    public void convertParquetToIcebergTable(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName) throws Exception {
+        String icebergTablePath = "\"rn3-dataset-iceberg\".\"rn3-dataset-iceberg\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".\"t1\".\"t1_856d4bd6-dc17-4c81-a146-1efc8bad5308\"";
+        String parquetTablePath = "\"rn3-dataset\".\"rn3-dataset\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".t1";
+        String createIcebergTableQuery = "CREATE TABLE " + icebergTablePath + " AS SELECT * FROM " + parquetTablePath;
+        String processId = dremioHelperService.executeSqlStatement(createIcebergTableQuery);
+        if(!dremioHelperService.dremioProcessFinishedSuccessfully(processId)){
+            throw new Exception("Could not create iceberg table with path " + icebergTablePath);
+        }
+        //refresh the metadata
+        //todo fix bucket
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+        dremioHelperService.refreshTableMetadataAndPromote(null, icebergTablePath, s3PathResolver, tableSchemaName);
+    }
 }

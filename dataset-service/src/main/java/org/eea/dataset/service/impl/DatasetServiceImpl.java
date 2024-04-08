@@ -341,6 +341,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private DatasetSchemaService dataschemaService;
 
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
+
   /**
    * The default process priority
    */
@@ -1558,7 +1561,6 @@ public class DatasetServiceImpl implements DatasetService {
    * @param datasetId the dataset id
    * @param dataflowId the dataset id
    * @param providerId the dataset id
-   * @param fieldSchemaId the id field
    * @param tableSchemaName the table name
    * @param fieldName the field name
    * @param fileName the file name
@@ -1703,6 +1705,10 @@ public class DatasetServiceImpl implements DatasetService {
   public void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
                                  String fieldName, MultipartFile multipartFile, String recordId){
     //todo modify parquet file to add value for file name
+    //CREATE TABLE "rn3-dataset-iceberg"."rn3-dataset-iceberg"."df-0000157"."dp-0000000"."ds-0000839"."current"."t1"."t1_098b2252-7374-40fa-b6cc-88fd3156baac"."0_0_0.parquet"
+    // as select * from "rn3-dataset"."rn3-dataset"."df-0000157"."dp-0000000"."ds-0000839"."current".t1;
+    bigDataDatasetService.convertParquetToIcebergTable(dataflowId,  (providerId != null)? providerId : 0L, datasetId, tableSchemaName);
+    //update attachment value set filename where recordId = recordId
 
     File folder = new File(importPath + "/" + datasetId);
     if (!folder.exists()) {
