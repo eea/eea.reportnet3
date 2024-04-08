@@ -168,6 +168,7 @@ export const Dataflow = () => {
   const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowState.id, [
     config.permissions.roles.CUSTODIAN.key
   ]);
+  const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
 
   const isLeadDesigner = isSteward || isCustodian;
 
@@ -329,7 +330,7 @@ export const Dataflow = () => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      datasetsInfoBtn: isAdmin || isCustodian,
+      datasetsInfoBtn: isAdmin || isDataCustodian,
       editBtn: !isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
       editBusinessBtn: isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
