@@ -438,7 +438,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         List<String> csvHeaders = new ArrayList<>();
         List<String> expectedHeaders;
-        Integer numberOfRecord = 0;
         //Reading csv file
         try (
                 Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
@@ -460,7 +459,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
             for (CSVRecord csvRecord : csvParser) {
                 emptyFile = false;
-                numberOfRecord++;
                 if(csvRecord.values().length == 0){
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
                     throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
