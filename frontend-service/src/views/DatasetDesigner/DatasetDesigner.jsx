@@ -235,24 +235,32 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   });
 
   useEffect(() => {
-    leftSideBarContext.removeModels();
-
-    leftSideBarContext.addModels([
-      {
-        className: 'dataflow-help-datasets-info-step',
-        icon: 'listClipboard',
-        isVisible: true,
-        label: 'datasetsInfo',
-        onClick: () => manageDialogs('isDatasetsInfoDialogVisible', true),
-        title: 'datasetsInfo'
-      }
-    ]);
     onLoadSchema();
     callSetMetaData();
     if (isEmpty(webformOptions)) {
       getWebformList();
     }
   }, []);
+
+  useEffect(() => {
+    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+
+    leftSideBarContext.removeModels();
+
+    if (isAdmin || isDataCustodian) {
+      leftSideBarContext.addModels([
+        {
+          className: 'dataflow-help-datasets-info-step',
+          icon: 'listClipboard',
+          isVisible: true,
+          label: 'datasetsInfo',
+          onClick: () => manageDialogs('isDatasetsInfoDialogVisible', true),
+          title: 'datasetsInfo'
+        }
+      ]);
+    }
+  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {

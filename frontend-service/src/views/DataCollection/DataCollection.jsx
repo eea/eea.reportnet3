@@ -28,6 +28,7 @@ import { DatasetService } from 'services/DatasetService';
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
@@ -43,6 +44,7 @@ export const DataCollection = () => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [dataCollectionName, setDataCollectionName] = useState();
   const [dataflowName, setDataflowName] = useState('');
@@ -81,20 +83,29 @@ export const DataCollection = () => {
   );
 
   useEffect(() => {
-    leftSideBarContext.removeModels();
-    leftSideBarContext.addModels([
-      {
-        className: 'dataflow-help-datasets-info-step',
-        icon: 'listClipboard',
-        isVisible: true,
-        label: 'datasetsInfo',
-        onClick: () => setIsDatasetsInfoDialogVisible(true),
-        title: 'datasetsInfo'
-      }
-    ]);
     setExportButtonsList(internalExtensions);
     getMetadata();
   }, []);
+
+  useEffect(() => {
+    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+
+    leftSideBarContext.removeModels();
+
+    if (isAdmin || isDataCustodian) {
+      leftSideBarContext.addModels([
+        {
+          className: 'dataflow-help-datasets-info-step',
+          icon: 'listClipboard',
+          isVisible: true,
+          label: 'datasetsInfo',
+          onClick: () => setIsDatasetsInfoDialogVisible(true),
+          title: 'datasetsInfo'
+        }
+      ]);
+    }
+  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(metadata)) {

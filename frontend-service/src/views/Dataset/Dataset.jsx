@@ -165,22 +165,31 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   });
 
   useEffect(() => {
-    leftSideBarContext.removeModels();
-    leftSideBarContext.addModels([
-      {
-        className: 'dataflow-help-datasets-info-step',
-        icon: 'listClipboard',
-        isVisible: true,
-        label: 'datasetsInfo',
-        onClick: () => setIsDatasetsInfoDialogVisible(true),
-        title: 'datasetsInfo'
-      }
-    ]);
     getMetadata();
     if (isEmpty(webformOptions)) {
       getWebformList();
     }
   }, []);
+
+  useEffect(() => {
+    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+
+    leftSideBarContext.removeModels();
+
+    if (isAdmin || isDataCustodian) {
+      leftSideBarContext.addModels([
+        {
+          className: 'dataflow-help-datasets-info-step',
+          icon: 'listClipboard',
+          isVisible: true,
+          label: 'datasetsInfo',
+          onClick: () => setIsDatasetsInfoDialogVisible(true),
+          title: 'datasetsInfo'
+        }
+      ]);
+    }
+  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(metadata)) {
@@ -199,6 +208,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }, [tableSchema]);
 
   useEffect(() => {
+    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+
     if (isNil(dataset)) {
       return;
     }
@@ -232,7 +244,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         );
         setHasWritePermissions(isCustodianInReferenceDataset && isDatasetUpdatable);
 
-        if (isCustodianInReferenceDataset) {
+        if ((isAdmin || isDataCustodian) && isCustodianInReferenceDataset) {
           leftSideBarContext.addModels([
             {
               className: 'dataflow-help-datasets-info-step',
