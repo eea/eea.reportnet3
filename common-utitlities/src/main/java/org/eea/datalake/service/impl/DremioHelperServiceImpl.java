@@ -294,21 +294,26 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public Boolean dremioProcessFinishedSuccessfully(String processId) throws Exception {
+    public void ckeckIfDremioProcessFinishedSuccessfully(String query, String processId) throws Exception {
+        Boolean processIsFinished = false;
         for(int i=0; i < numberOfRetriesForJobPolling; i++) {
             DremioJobStatusResponse response = this.pollForJobStatus(processId);
             String jobState = response.getJobState().getValue();
             if(jobState.equals(DremioJobStatusEnum.COMPLETED.getValue())) {
-                return true;
+                processIsFinished = true;
+                break;
             }
             else if(jobState.equals(DremioJobStatusEnum.CANCELED.getValue()) || jobState.equals(DremioJobStatusEnum.FAILED.getValue())){
-                return false;
+                processIsFinished = false;
+                break;
             }
             else {
                 Thread.sleep(10000);
             }
         }
-        return false;
+        if(!processIsFinished){
+            throw new Exception("Could not execute dremio query " + query + " with dremio process Id " + processId);
+        }
     }
 
     @Override
@@ -330,5 +335,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if(!folderWasPromoted) {
             throw new Exception("Could not promote folder " + tablePath);
         }
+    }
+
+    /**
+     * Convert parquet to iceberg table
+     *
+     * @param parquetTablePath the path to the parquet table
+     * @param icebergTablePath the path to the iceberg table
+     */
+    @Override
+    public void convertParquetToIcebergTable(String parquetTablePath, String icebergTablePath) throws Exception {
+        String createIcebergTableQuery = "CREATE TABLE " + icebergTablePath + " AS SELECT * FROM " + parquetTablePath;
+        String processId = executeSqlStatement(createIcebergTableQuery);
+        ckeckIfDremioProcessFinishedSuccessfully(createIcebergTableQuery, processId);
     }
 }

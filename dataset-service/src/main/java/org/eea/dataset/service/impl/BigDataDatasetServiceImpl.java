@@ -1,7 +1,10 @@
 package org.eea.dataset.service.impl;
 
 import feign.FeignException;
+import lombok.SneakyThrows;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
@@ -21,6 +24,7 @@ import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuu
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
+import org.eea.interfaces.vo.dataset.AttachmentDLVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -39,6 +43,7 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.multitenancy.DatasetId;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +52,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -723,25 +729,121 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     /**
-     * Convert parquet to iceberg table
+     * Gets the attachment for big data dataflows.
      *
-     * @param dataflowId the dataflow id
-     * @param providerId the provider id
      * @param datasetId the dataset id
-     * @param tableSchemaName the table schema name
+     * @param dataflowId the dataset id
+     * @param providerId the dataset id
+     * @param tableSchemaName the table name
+     * @param fieldName the field name
+     * @param fileName the file name
+     * @param recordId the recordId
+     * @return the attachment
+     *
      */
+    @SneakyThrows
     @Override
-    public void convertParquetToIcebergTable(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName) throws Exception {
-        String icebergTablePath = "\"rn3-dataset-iceberg\".\"rn3-dataset-iceberg\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".\"t1\".\"t1_856d4bd6-dc17-4c81-a146-1efc8bad5308\"";
-        String parquetTablePath = "\"rn3-dataset\".\"rn3-dataset\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".t1";
-        String createIcebergTableQuery = "CREATE TABLE " + icebergTablePath + " AS SELECT * FROM " + parquetTablePath;
-        String processId = dremioHelperService.executeSqlStatement(createIcebergTableQuery);
-        if(!dremioHelperService.dremioProcessFinishedSuccessfully(processId)){
-            throw new Exception("Could not create iceberg table with path " + icebergTablePath);
+    public AttachmentDLVO getAttachmentDL(Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                                          String fieldName, String fileName, String recordId) {
+
+        byte[] attachmentContent;
+
+        //retrieve file from s3
+        String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
+        try {
+            File attachmentInS3 = s3Helper.getFileFromS3(attachmentPathInS3, fileName, importPath, null);
+            attachmentContent = FileUtils.readFileToByteArray(attachmentInS3);
+        } catch (Exception e) {
+            LOG.error("Could not retrieve file {} from s3 {}", attachmentPathInS3, e.getMessage());
+            throw e;
         }
-        //refresh the metadata
-        //todo fix bucket
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
-        dremioHelperService.refreshTableMetadataAndPromote(null, icebergTablePath, s3PathResolver, tableSchemaName);
+        AttachmentDLVO attachmentDLVO = new AttachmentDLVO(fileName, attachmentContent);
+        return attachmentDLVO;
+    }
+
+    /**
+     * Delete attachment for big data dataflows.
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataset id
+     * @param providerId the dataset id
+     * @param tableSchemaName the table name
+     * @param fieldName the field name
+     * @param fileName the file name
+     * @param recordId the recordId
+     *
+     * @throws EEAException the EEA exception
+     */
+    @SneakyThrows
+    @Override
+    public void deleteAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                                   String fieldName, String fileName, String recordId) {
+        //todo fix icebergTablePath
+        //update attachment file name in attachment field
+        String icebergTablePath = "\"rn3-dataset-iceberg\".\"rn3-dataset-iceberg\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".\"t1\"";
+        String updateFileNameColumn = "UPDATE " + icebergTablePath + " SET " + fieldName + "=''"
+                + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
+        String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
+        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
+
+        //remove attachment file from s3
+        String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
+        s3Helper.deleteFile(attachmentPathInS3);
+    }
+
+    /**
+     * Update attachment for big data dataflows.
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataset id
+     * @param providerId the dataset id
+     * @param tableSchemaName the table name
+     * @param fieldName the field name
+     * @param multipartFile the file
+     * @param recordId the recordId
+     */
+    @SneakyThrows
+    @Override
+    public void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                                   String fieldName, MultipartFile multipartFile, String recordId, String previousFileName){
+
+        //todo //todo parquet to iceberg conversion should not happen here.
+        // convert parquet table to iceberg table
+        String parquetTablePath = "\"rn3-dataset\".\"rn3-dataset\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".t1";
+        String icebergTablePath = "\"rn3-dataset-iceberg\".\"rn3-dataset-iceberg\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".\"t1\"";
+        //dremioHelperService.convertParquetToIcebergTable(parquetTablePath, icebergTablePath);
+
+        //delete previous file if it exists
+        deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, previousFileName, recordId);
+
+        //update attachment file name in attachment field
+        String updateFileNameColumn = "UPDATE " + icebergTablePath + " SET " + fieldName + "='" + multipartFile.getOriginalFilename()
+                + "' WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
+        String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
+        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
+
+        File folder = new File(importPath + "/" + datasetId);
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+        String filePathInReportnet = folder.getAbsolutePath() + "/" + multipartFile.getOriginalFilename();
+        File file = new File(filePathInReportnet);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            FileCopyUtils.copy(multipartFile.getInputStream(), fos);
+        }
+        catch (Exception e){
+            LOG.error("Could not store file to disk for datasetId {} table {} and fileName {}", datasetId, tableSchemaName, file.getName());
+            throw e;
+        }
+
+        String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(file.getName());
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
+        s3Helper.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
+        file.delete();
     }
 }

@@ -398,22 +398,6 @@ public interface DatasetService {
       throws EEAException, IOException;
 
   /**
-   * Gets the attachment for big data dataflows.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataset id
-   * @param providerId the dataset id
-   * @param tableSchemaName the table name
-   * @param fieldName the field name
-   * @param fileName the file name
-   * @param recordId the recordId
-   * @return the attachment
-   *
-   */
-  AttachmentDLVO getAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
-                                 String fieldName, String fileName, String recordId);
-
-  /**
    * Delete attachment.
    *
    * @param datasetId the dataset id
@@ -422,22 +406,6 @@ public interface DatasetService {
    * @throws EEAException the EEA exception
    */
   void deleteAttachment(@DatasetId Long datasetId, String idField) throws EEAException;
-
-  /**
-   * Delete attachment for big data dataflows.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataset id
-   * @param providerId the dataset id
-   * @param tableSchemaName the table name
-   * @param fieldName the field name
-   * @param fileName the file name
-   * @param recordId the recordId
-   *
-   * @throws EEAException the EEA exception
-   */
-  void deleteAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
-                          String fieldName, String fileName, String recordId);
 
   /**
    * Update attachment.
@@ -452,20 +420,6 @@ public interface DatasetService {
    */
   void updateAttachment(@DatasetId Long datasetId, String idField, String fileName, InputStream is)
       throws EEAException, IOException;
-
-  /**
-   * Update attachment for big data dataflows.
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataset id
-   * @param providerId the dataset id
-   * @param tableSchemaName the table name
-   * @param fieldName the field name
-   * @param multipartFile the file
-   * @param recordId the recordId
-   */
-  void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
-                          String fieldName, MultipartFile multipartFile, String recordId);
 
 
   /**

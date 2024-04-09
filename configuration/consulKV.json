@@ -1996,7 +1996,7 @@
     "value": "bWFyaWE="
   },
   {
-    "key": "config/dataset/dremio.promote.numberOfRetries",
+    "key": "config/application/dremio.promote.numberOfRetries",
     "value": "bWFyaWE="
   },
   {

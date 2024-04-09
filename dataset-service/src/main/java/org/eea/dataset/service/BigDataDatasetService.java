@@ -1,6 +1,8 @@
 package org.eea.dataset.service;
 
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.AttachmentDLVO;
+import org.eea.multitenancy.DatasetId;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BigDataDatasetService {
@@ -55,13 +57,50 @@ public interface BigDataDatasetService {
     void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables) throws Exception;
 
     /**
-     * Convert parquet to iceberg table
+     * Gets the attachment for big data dataflows.
      *
-     * @param dataflowId the dataflow id
-     * @param providerId the provider id
      * @param datasetId the dataset id
-     * @param tableSchemaName the table schema id
+     * @param dataflowId the dataset id
+     * @param providerId the dataset id
+     * @param tableSchemaName the table name
+     * @param fieldName the field name
+     * @param fileName the file name
+     * @param recordId the recordId
+     * @return the attachment
+     *
      */
-    void convertParquetToIcebergTable(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName) throws Exception;
+    AttachmentDLVO getAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                                   String fieldName, String fileName, String recordId);
+
+    /**
+     * Delete attachment for big data dataflows.
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataset id
+     * @param providerId the dataset id
+     * @param tableSchemaName the table name
+     * @param fieldName the field name
+     * @param fileName the file name
+     * @param recordId the recordId
+     *
+     * @throws EEAException the EEA exception
+     */
+    void deleteAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                            String fieldName, String fileName, String recordId);
+
+    /**
+     * Update attachment for big data dataflows.
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataset id
+     * @param providerId the dataset id
+     * @param tableSchemaName the table name
+     * @param fieldName the field name
+     * @param multipartFile the file
+     * @param recordId the recordId
+     * @param previousFileName the previousFileName
+     */
+    void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
+                            String fieldName, MultipartFile multipartFile, String recordId, String previousFileName);
 
 }

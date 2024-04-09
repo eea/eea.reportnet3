@@ -1616,7 +1616,7 @@ public class DatasetControllerImpl implements DatasetController {
       byte[] file = null;
       String filename = null;
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
-        AttachmentDLVO attachment = datasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
+        AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
         file = attachment.getContent();
         filename = attachment.getFileName();
       }
@@ -1686,6 +1686,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param tableSchemaName the table name
    * @param fieldName the field name
    * @param recordId the recordId
+   * @param previousFileName the previousFileName
    */
   @Override
   @HystrixCommand
@@ -1708,7 +1709,8 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(value = "file") @RequestParam("file") MultipartFile file,
       @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
-      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
+      @ApiParam(type = "String", value = "Previous File Name", example = "file.txt") @RequestParam(value = "previousFileName", required = false) String previousFileName) {
 
     try {
       LOG.info("Method updateAttachment was called for dataflowId {} datasetId {} and fieldId {}", dataflowId, datasetId, idField);
@@ -1739,7 +1741,7 @@ public class DatasetControllerImpl implements DatasetController {
         }
 
         //upload attachment
-        datasetService.updateAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, file, recordId);
+        bigDataDatasetService.updateAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, file, recordId, previousFileName);
       }
       else{
         // Not allow insert attachment if the table is marked as read only. This not applies to design datasets
@@ -1771,7 +1773,7 @@ public class DatasetControllerImpl implements DatasetController {
 
 
   /**
-   * Update attachment legacy.
+   * Update attachment.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
@@ -1781,6 +1783,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param tableSchemaName the table name
    * @param fieldName the field name
    * @param recordId the recordId
+   * @param previousFileName the previousFileName
    */
   @Override
   @HystrixCommand
@@ -1802,8 +1805,9 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(value = "file") @RequestParam("file") MultipartFile file,
       @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
-      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
-    this.updateAttachment(datasetId, dataflowId, providerId, idField, file, tableSchemaName, fieldName, recordId);
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
+      @ApiParam(type = "String", value = "Previous File Name", example = "file.txt") @RequestParam(value = "previousFileName", required = false) String previousFileName) {
+    this.updateAttachment(datasetId, dataflowId, providerId, idField, file, tableSchemaName, fieldName, recordId, previousFileName);
   }
 
   /**
@@ -1854,7 +1858,7 @@ public class DatasetControllerImpl implements DatasetController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
           }
         }
-        datasetService.deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
+        bigDataDatasetService.deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
       }
       else{
         if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,

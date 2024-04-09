@@ -489,7 +489,8 @@ public interface DatasetController {
       @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file,
       @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @RequestParam(value = "fieldName", required = false) String fieldName,
-      @RequestParam(value = "recordId", required = false) String recordId);
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "previousFileName", required = false) String previousFileName);
 
   /**
    * Update attachment legacy.
@@ -510,7 +511,8 @@ public interface DatasetController {
       @PathVariable("fieldId") String idField, @RequestParam("file") MultipartFile file,
       @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @RequestParam(value = "fieldName", required = false) String fieldName,
-      @RequestParam(value = "recordId", required = false) String recordId);
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "previousFileName", required = false) String previousFileName);
 
   /**
    * Delete attachment.
