@@ -13,10 +13,8 @@ import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DownloadFile } from 'views/_components/DownloadFile';
-import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
-import { MultiSelect } from 'views/_components/MultiSelect';
 import DropdownWebform from 'views/_components/Dropdown/DropdownWebform';
 import MultiSelectWebform from 'views/_components/MultiSelect/MultiSelectWebform';
 

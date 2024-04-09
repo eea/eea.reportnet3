@@ -137,9 +137,8 @@ const MultiSelectWebform = props => {
     if (documentClickListener) {
       selfClick = true;
     }
-
-    if (!panelClick && panelRef.current.element) {
-      if (panelRef.current.element.offsetParent) {
+    if (!panelClick) {
+      if (panelRef && panelRef.current.element && panelRef.current.element.offsetParent) {
         hide();
       } else {
         focusInputRef.current.focus();
@@ -200,7 +199,6 @@ const MultiSelectWebform = props => {
       if (options && options.length) {
         panelRef.current.element.style.zIndex = String(DomHandler.generateZIndex());
         panelRef.current.element.style.display = 'block';
-
         setTimeout(() => {
           DomHandler.addClass(panelRef.current.element, 'p-input-overlay-visible');
           DomHandler.removeClass(panelRef.current.element, 'p-input-overlay-hidden');
@@ -244,12 +242,11 @@ const MultiSelectWebform = props => {
     event.stopPropagation();
   };
 
-  const findSelectionIndex = value => {
+  const findSelectionIndex = val => {
     let index = -1;
-
     if (value) {
       for (let i = 0; i < value.length; i++) {
-        if (ObjectUtils.equals(value[i], value, dataKey)) {
+        if (ObjectUtils.equals(value[i], val, dataKey)) {
           index = i;
           break;
         }
@@ -298,7 +295,14 @@ const MultiSelectWebform = props => {
 
   const bindDocumentClickListener = () => {
     if (!documentClickListener) {
-      documentClickListener = onDocumentClick.bind(this);
+      documentClickListener = () => {
+        if (!selfClick) {
+          hide();
+        }
+
+        clearClickState();
+      };
+
       document.addEventListener('click', documentClickListener);
     }
   };
@@ -309,13 +313,6 @@ const MultiSelectWebform = props => {
       documentClickListener = null;
     }
   };
-
-  // componentDidUpdate(prevProps) {
-  //   if (prevProps.tooltip !== tooltip) {
-  //     if (tooltip) tooltip.updateContent(tooltip);
-  //     else renderTooltip();
-  //   }
-  // }
 
   // Component willMount/willUnmount with UseEffect hook
   useEffect(() => {
@@ -337,14 +334,6 @@ const MultiSelectWebform = props => {
       }
     };
   }, []);
-
-  const onDocumentClick = () => {
-    if (!selfClick && !panelClick && panelRef.current.element.offsetParent) {
-      hide();
-    }
-
-    clearClickState();
-  };
 
   const clearClickState = () => {
     selfClick = false;
@@ -514,9 +503,8 @@ const MultiSelectWebform = props => {
         items = filterOptions(items);
       }
 
-      items = items.map(option => {
+      return items.map(option => {
         let optionLabel = getOptionLabel(option);
-
         return (
           <MultiSelectItem
             disabled={option.disabled}
@@ -536,6 +524,7 @@ const MultiSelectWebform = props => {
 
   let header = renderHeader(items);
   let labelContent = getLabelContent();
+  let multiselectitems = renderMultiSelectItems();
 
   return (
     <div className={className} id={id} onClick={onClick} ref={containerRef} style={style}>
@@ -564,7 +553,7 @@ const MultiSelectWebform = props => {
         panelClassName={panelClassName}
         ref={panelRef}
         scrollHeight={scrollHeight}>
-        {renderMultiSelectItems()}
+        {multiselectitems}
       </MultiSelectPanel>
     </div>
   );
