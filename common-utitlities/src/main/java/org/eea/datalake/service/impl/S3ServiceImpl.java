@@ -1,5 +1,6 @@
 package org.eea.datalake.service.impl;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -10,6 +11,7 @@ import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,10 @@ public class S3ServiceImpl implements S3Service {
     private final DataSetControllerZuul dataSetControllerZuul;
     private final String S3_DEFAULT_BUCKET;
     private final String S3_DEFAULT_BUCKET_PATH;
+
+    @Value("${s3.iceberg.bucket}")
+    private String S3_ICEBERG_BUCKET_PATH;
+
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
 
@@ -206,6 +212,10 @@ public class S3ServiceImpl implements S3Service {
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder,
                     s3PathResolver.getTableName());
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
+                if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
+                    return S3_ICEBERG_BUCKET_PATH + String.format(path, dataflowFolder, dataProviderFolder,
+                            datasetFolder, s3PathResolver.getTableName());
+                }
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
                     datasetFolder, s3PathResolver.getTableName());
             case S3_IMPORT_TABLE_NAME_FOLDER_PATH:

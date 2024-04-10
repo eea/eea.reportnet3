@@ -1357,19 +1357,6 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
-  @Override
-  @GetMapping("/testApiPost")
-  public void testApiPost() {
-    try {
-      String createTableQuery = "select * from \"rn3-dataset\".\"rn3-dataset\".\"df-0000156\".\"dp-0000042\".\"ds-0002621\".\"current\".\"lakestab\"";
-      String result = dremioHelperService.executeSqlStatementPost(createTableQuery);
-      LOG.info("result {}", result);
-    } catch (Exception e) {
-      LOG_ERROR.error("Error:",e);
-      throw e;
-    }
-  }
-
   /**
    * Etl export dataset legacy.
    *

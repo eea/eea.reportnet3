@@ -817,9 +817,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void deleteAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
                                    String fieldName, String fileName, String recordId) {
-        //todo fix icebergTablePath
+        providerId = providerId != null ? providerId : 0L;
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
         //update attachment file name in attachment field
-        String icebergTablePath = "\"rn3-dataset-iceberg\".\"rn3-dataset-iceberg\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".\"t1\"";
         String updateFileNameColumn = "UPDATE " + icebergTablePath + " SET " + fieldName + "=''"
                 + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
@@ -827,7 +830,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         //remove attachment file from s3
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
         String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
         s3HelperPrivate.deleteFile(attachmentPathInS3);
     }
@@ -848,10 +851,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
                                    String fieldName, MultipartFile multipartFile, String recordId, String previousFileName){
 
-        //todo //todo parquet to iceberg conversion should not happen here.
+        //todo parquet to iceberg conversion should not happen here.
         // convert parquet table to iceberg table
-        String parquetTablePath = "\"rn3-dataset\".\"rn3-dataset\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".t1";
-        String icebergTablePath = "\"rn3-dataset-iceberg\".\"rn3-dataset-iceberg\".\"df-0000157\".\"dp-0000000\".\"ds-0000839\".\"current\".\"t1\"";
+        providerId = providerId != null ? providerId : 0L;
+        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+
+        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         //dremioHelperService.convertParquetToIcebergTable(parquetTablePath, icebergTablePath);
 
         //delete previous file if it exists
@@ -878,8 +886,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(file.getName());
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
-        String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
+        S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
         s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
         file.delete();
     }
