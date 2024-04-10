@@ -215,7 +215,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 //the fme job should not be finished yet
                 finishImportProcess(importFileInDremioInfo);
             }
-            s3HelperPublic.deleteFileFromS3(preSignedURL);
+            //remove file from public S3 if job is finished
+            if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
+                s3HelperPublic.deleteFileFromS3(preSignedURL);
+            }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {
             LOG.error("File import failed: for jobId {} dataflowId={} datasetId={}, tableSchemaId={}, fileName={} ", jobId, dataflowId, datasetId,
