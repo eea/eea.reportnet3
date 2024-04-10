@@ -116,14 +116,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private final S3Service s3ServicePublic;
     private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
-    private final DremioHelperService localDremioHelperService;
+    private final DremioHelperService dremioHelperService;
 
-    public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService localDremioHelperService) {
+    public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService) {
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
         this.s3ServicePrivate = s3HelperPrivate.getS3Service();
-        this.localDremioHelperService = localDremioHelperService;
+        this.dremioHelperService = dremioHelperService;
     }
 
 
@@ -727,7 +727,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //remove folders that contain the previous parquet files
         if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
             //demote table folder
-            localDremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
+            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
     }
@@ -787,9 +787,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //retrieve file from s3
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
-        String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
+        String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
         try {
-            File attachmentInS3 = s3Helper.getFileFromS3(attachmentPathInS3, fileName, importPath, null);
+            File attachmentInS3 = s3HelperPrivate.getFileFromS3(attachmentPathInS3, fileName, importPath, null);
             attachmentContent = FileUtils.readFileToByteArray(attachmentInS3);
         } catch (Exception e) {
             LOG.error("Could not retrieve file {} from s3 {}", attachmentPathInS3, e.getMessage());
@@ -827,8 +827,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //remove attachment file from s3
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
-        String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
-        s3Helper.deleteFile(attachmentPathInS3);
+        String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
+        s3HelperPrivate.deleteFile(attachmentPathInS3);
     }
 
     /**
@@ -878,8 +878,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(file.getName());
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
-        String attachmentPathInS3 = s3Service.getS3Path(s3PathResolver);
-        s3Helper.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
+        String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
+        s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
         file.delete();
     }
 }

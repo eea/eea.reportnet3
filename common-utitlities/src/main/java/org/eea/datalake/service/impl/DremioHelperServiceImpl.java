@@ -42,6 +42,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.jobPolling.numberOfRetries}")
     private Integer numberOfRetriesForJobPolling;
 
+    @Value("${dremio.promote.numberOfRetries}")
+    private Integer numberOfRetriesForPromoting;
+
     private static final String PROMOTED = "PROMOTED";
     private static final String BEARER = "Bearer ";
     public static String token = null;
