@@ -122,7 +122,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
-                              String fmeJobId, String filePathInS3, DataFlowVO dataflowVO) throws Exception {
+                              String fmeJobId, DataFlowVO dataflowVO) throws Exception {
         String preSignedURL = null;
         String fileName = (file != null) ? file.getOriginalFilename() : null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;

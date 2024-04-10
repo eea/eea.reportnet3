@@ -28,10 +28,6 @@ public class S3ServiceImpl implements S3Service {
     private final String S3_DEFAULT_BUCKET;
     private final String S3_DEFAULT_BUCKET_PATH;
 
-    /** The Constant S3_DEFAULT_BUCKET: {@value}. */
-    @Value("${s3.default.bucket}")
-    private String S3_DEFAULT_BUCKET;
-
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
 
     public S3ServiceImpl(DataSetControllerZuul dataSetControllerZuul, @Qualifier("s3PrivateConfiguration") S3Configuration s3PrivateConfiguration) {
