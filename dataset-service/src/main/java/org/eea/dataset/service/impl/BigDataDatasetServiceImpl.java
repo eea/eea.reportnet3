@@ -235,7 +235,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             //remove file from public S3 if job is finished
             if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
-                s3HelperPublic.deleteFileFromS3(preSignedURL);
+                s3HelperPublic.deleteFileFromS3(getFilePath(datasetId, dataflowId, providerId, fileName, true));
             }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {
@@ -695,12 +695,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public String generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
-        return s3HelperPublic.generatePUTPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName));
+        return s3HelperPublic.generatePUTPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName, false));
     }
 
     @Override
     public String generateExportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
-        return s3HelperPublic.generateGETPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName));
+        return s3HelperPublic.generateGETPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName, false));
     }
 
     @Override
@@ -752,7 +752,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
-    private String getFilePath(Long datasetId, Long dataflowId, Long providerId, String fileName) {
+    private String getFilePath(Long datasetId, Long dataflowId, Long providerId, String fileName, boolean deleteFile) {
         if (dataflowId == null){
             dataflowId = datasetService.getDataFlowIdById(datasetId);
         }
@@ -761,6 +761,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, fileName);
         s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
+        s3PathResolver.setDeleteFile(deleteFile);
         return s3ServicePublic.getS3Path(s3PathResolver);
     }
 
