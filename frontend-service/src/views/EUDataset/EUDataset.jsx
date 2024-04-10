@@ -10,6 +10,8 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { routes } from 'conf/routes';
 
 import { Button } from 'views/_components/Button';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
+import { Dialog } from 'views/_components/Dialog';
 import { MainLayout } from 'views/_components/Layout';
 import { Menu } from 'views/_components/Menu';
 import { Spinner } from 'views/_components/Spinner';
@@ -23,11 +25,13 @@ import { DatasetService } from 'services/DatasetService';
 import { LeftSideBarContext } from 'views/_functions/Contexts/LeftSideBarContext';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { euDatasetReducer } from './_functions/Reducers/euDatasetReducer';
 
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
@@ -39,6 +43,7 @@ export const EUDataset = () => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const userContext = useContext(UserContext);
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     dataflowName: '',
@@ -51,6 +56,7 @@ export const EUDataset = () => {
     datasetSchemaName: '',
     dataViewerOptions: { activeIndex: null },
     exportExtensionsList: [],
+    isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
     isGroupedValidationSelected: false,
     isLoading: true,
@@ -76,14 +82,36 @@ export const EUDataset = () => {
     tableSchemaColumns
   } = euDatasetState;
 
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+
   let exportMenuRef = useRef();
 
   useEffect(() => {
-    leftSideBarContext.removeModels();
     setMetadata();
     getDataflowDetails();
     getExportExtensionsList();
   }, []);
+
+  useEffect(() => {
+    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+
+    leftSideBarContext.removeModels();
+
+    if (isAdmin || isDataCustodian) {
+      leftSideBarContext.addModels([
+        {
+          className: 'dataflow-help-datasets-info-step',
+          icon: 'listClipboard',
+          isVisible: true,
+          label: 'datasetsInfo',
+          onClick: () => manageDialogs('isDatasetsInfoDialogVisible', true),
+          title: 'datasetsInfo'
+        }
+      ]);
+    }
+  }, [userContext]);
 
   useEffect(() => {
     onLoadDatasetSchema();
@@ -167,6 +195,10 @@ export const EUDataset = () => {
     } catch (error) {
       throw new Error('ERROR_STATISTICS_BY_ID_ERROR');
     }
+  };
+
+  const manageDialogs = (dialog, value, secondDialog, secondValue) => {
+    euDatasetDispatch({ type: 'MANAGE_DIALOGS', payload: { dialog, value, secondDialog, secondValue } });
   };
 
   const setIsLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
@@ -292,6 +324,19 @@ export const EUDataset = () => {
     false
   );
 
+  const renderDialogFooterCloseBtn = modalType => (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon="cancel"
+      label={resourcesContext.messages['close']}
+      onClick={() => {
+        manageDialogs(modalType, false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
+    />
+  );
+
   const renderTabsSchema = () => (
     <TabsSchema
       dataflowType={dataflowType}
@@ -337,6 +382,18 @@ export const EUDataset = () => {
             />
           </div>
         </Toolbar>
+        {euDatasetState.isDatasetsInfoDialogVisible && (
+          <Dialog
+            footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
+            header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowId}`}
+            onHide={() => {
+              manageDialogs('isDatasetsInfoDialogVisible', false);
+              resetDatasetInfoFiltersState();
+            }}
+            visible={euDatasetState.isDatasetsInfoDialogVisible}>
+            <DatasetsInfo dataflowId={dataflowId} dataflowType={dataflowType} datasetId={datasetId} />
+          </Dialog>
+        )}
       </div>
       {renderTabsSchema()}
     </Fragment>
