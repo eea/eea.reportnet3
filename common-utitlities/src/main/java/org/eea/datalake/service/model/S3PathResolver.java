@@ -40,6 +40,8 @@ public class S3PathResolver {
     /** The data provider name. */
     private String dataProviderName;
 
+    private boolean deleteFile;
+
     public S3PathResolver(long dataflowId, long dataProviderId, long datasetId) {
         this.dataflowId = dataflowId;
         this.dataProviderId = dataProviderId;
