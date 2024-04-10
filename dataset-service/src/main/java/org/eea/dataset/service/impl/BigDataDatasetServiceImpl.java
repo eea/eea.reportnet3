@@ -1,13 +1,11 @@
 package org.eea.dataset.service.impl;
 
-import feign.FeignException;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
-import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.*;
@@ -45,6 +43,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -97,16 +96,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private KafkaSenderUtils kafkaSenderUtils;
 
     @Autowired
-    private S3ServiceImpl s3Service;
-
-    @Autowired
     public RepresentativeControllerZuul representativeControllerZuul;
-
-    @Autowired
-    public DremioHelperService dremioHelperService;
-
-    @Autowired
-    public S3Helper s3Helper;
 
     @Autowired
     FileCommonUtils fileCommonUtils;
@@ -114,11 +104,26 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     DatasetSchemaService datasetSchemaService;
 
+    private final S3Service s3ServicePrivate;
+    private final S3Service s3ServicePublic;
+    private final S3Helper s3HelperPrivate;
+    private final S3Helper s3HelperPublic;
+    private final DremioHelperService localDremioHelperService;
+
+    public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService localDremioHelperService) {
+        this.s3HelperPrivate = s3HelperPrivate;
+        this.s3HelperPublic = s3HelperPublic;
+        this.s3ServicePublic = s3HelperPublic.getS3Service();
+        this.s3ServicePrivate = s3HelperPrivate.getS3Service();
+        this.localDremioHelperService = localDremioHelperService;
+    }
+
 
     @Override
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
                               String fmeJobId, String filePathInS3, DataFlowVO dataflowVO) throws Exception {
+        String preSignedURL = null;
         String fileName = (file != null) ? file.getOriginalFilename() : null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
@@ -150,12 +155,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 else if(job.getJobStatus().equals(JobStatusEnum.QUEUED)){
                     jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
                 }
+                preSignedURL = job.getParameters().get("preSignedURL").toString();
             }else{
                 //check if there is already an import job with status IN_PROGRESS for the specific datasetId
                 List<Long> datasetIds = new ArrayList<>();
                 datasetIds.add(datasetId);
                 jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId);
+                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId, null);
                 if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
                     LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
                     datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, fileName);
@@ -164,26 +170,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             if(file == null){
-                if(StringUtils.isBlank(filePathInS3)){
+                if(StringUtils.isBlank(preSignedURL)){
                     throw new EEAException("Empty file and file path");
                 }
-                String[] filePathInS3Split = filePathInS3.split("/");
+                String[] filePathInS3Split = preSignedURL.split("/");
                 String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
                 String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
                 File folder = new File(importPath + "/" + datasetId);
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
-                if(filePathInS3.endsWith(".csv")) {
-                    s3File = s3Helper.getFileFromS3(filePathInS3, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
+                if(preSignedURL.endsWith(".csv")) {
+                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
                     fileName = s3File.getName();
                 }
-                else if(filePathInS3.endsWith(".zip")){
-                    s3File = s3Helper.getFileFromS3(filePathInS3, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
+                else if(preSignedURL.endsWith(".zip")){
+                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
                     fileName = s3File.getName();
                 }
                 //todo handle other extensions
-                //delete objects ?
             }
 
             //Retrieve providerId and providerCode
@@ -219,6 +224,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             //the fme job for the first iteration should not be finished yet
             if(integrationId == null) {
                 finishImportProcess(importFileInDremioInfo);
+            }
+            //remove file from public S3 if job is finished
+            if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
+                s3HelperPublic.deleteFileFromS3(preSignedURL);
             }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {
@@ -677,17 +686,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId){
-        if (dataflowId == null){
-            dataflowId = datasetService.getDataFlowIdById(datasetId);
-        }
-        if (providerId == null){
-            providerId = 0L;
-        }
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId);
-        s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
-        String filePath = s3Service.getS3Path(s3PathResolver);
-        return s3Helper.generatePresignedUrl(filePath);
+    public String generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
+        return s3HelperPublic.generatePUTPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName));
+    }
+
+    @Override
+    public String generateExportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
+        return s3HelperPublic.generateGETPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName));
     }
 
     @Override
@@ -705,17 +710,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
         //path in s3 for the folder that contains the stored csv files
-        String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+        String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
         //remove csv files that are related to the table
         parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder);
 
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
         //remove folders that contain the previous parquet files
-        if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+        if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
             //demote table folder
-            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
-            s3Helper.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+            localDremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
+            s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
     }
 
@@ -737,6 +742,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema());
         }
+    }
+
+    private String getFilePath(Long datasetId, Long dataflowId, Long providerId, String fileName) {
+        if (dataflowId == null){
+            dataflowId = datasetService.getDataFlowIdById(datasetId);
+        }
+        if (providerId == null){
+            providerId = 0L;
+        }
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, fileName);
+        s3PathResolver.setPath(LiteralConstants.S3_PROVIDER_IMPORT_PATH);
+        return s3ServicePublic.getS3Path(s3PathResolver);
     }
 
 }

@@ -209,7 +209,7 @@ public final class LiteralConstants {
   public static final String S3_IMPORT_PATH = "/%s/%s/%s/current/import";
 
   /** The Constant S3_PROVIDER_IMPORT_PATH: {@value}. */
-  public static final String S3_PROVIDER_IMPORT_PATH = "%s/%s/%s/current/provider_import";
+  public static final String S3_PROVIDER_IMPORT_PATH = "%s/%s/%s/current/provider_import/%s";
 
   /** The Constant S3_IMPORT_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_IMPORT_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/current/import/%s";

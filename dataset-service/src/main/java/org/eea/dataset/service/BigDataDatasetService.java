@@ -33,7 +33,9 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      */
-    String generateImportPresignedUrl(Long datasetId, Long dataflowId, Long providerId);
+    String generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName);
+
+    String generateExportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName);
 
     /**
      * Delete table data
