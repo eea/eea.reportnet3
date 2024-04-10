@@ -101,7 +101,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
-        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
     /**
@@ -112,7 +112,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver);
-        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
     /**
@@ -143,7 +143,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void deleteFile(String filePath){
-        s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(filePath));
+        s3Client.deleteObject(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).key(filePath));
     }
 
     /**
@@ -263,7 +263,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkTableNameDCProviderFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getS3Path(s3PathResolver);
-        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
     /**
@@ -274,7 +274,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkTableNameDCFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getS3Path(s3PathResolver);
-        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents().size() > 0;
+        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents().size() > 0;
     }
 
 
