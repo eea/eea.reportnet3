@@ -12,6 +12,7 @@ import { ApiKeyDialog } from 'views/_components/ApiKeyDialog';
 import { BigButtonListReference } from './_components/BigButtonListReference';
 import { Button } from 'views/_components/Button';
 import { DatasetsInfo } from 'views/_components/DatasetsInfo';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { MainLayout } from 'views/_components/Layout';
 import { ReferencingDataflows } from './_components/ReferencingDataflows';
 import { routes } from 'conf/routes';
@@ -19,6 +20,7 @@ import { Spinner } from 'views/_components/Spinner';
 import { Title } from 'views/_components/Title';
 import { ShareRights } from 'views/_components/ShareRights';
 
+import { DataflowService } from 'services/DataflowService';
 import { DatasetService } from 'services/DatasetService';
 import { ReferenceDataflowService } from 'services/ReferenceDataflowService';
 import { UserService } from 'services/UserService';
@@ -40,6 +42,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 
 export const ReferenceDataflow = () => {
   const navigate = useNavigate();
@@ -63,6 +66,8 @@ export const ReferenceDataflow = () => {
     isCreatingReferenceDatasets: false,
     isCustodian: false,
     isEditDialogVisible: false,
+    isExportDialogVisible: false,
+    isExporting: false,
     isDatasetsInfoDialogVisible: false,
     isImportingDataflow: false,
     isLoading: false,
@@ -104,6 +109,10 @@ export const ReferenceDataflow = () => {
     datasetsInfoBtn: dataflowState.isAdmin,
     editBtn:
       (dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian) || dataflowState.isAdmin,
+    exportBtn:
+      dataflowState.bigData &&
+      (dataflowState.isCustodian || dataflowState.isAdmin) &&
+      dataflowState.designDatasetSchemas.length > 0,
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:
@@ -131,7 +140,23 @@ export const ReferenceDataflow = () => {
   }
 
   const onEditDataflow = (name, description) => {
-    dataflowDispatch({ type: 'ON_EDIT_DATAFLOW', payload: { description, name } });
+    dataflowDispatch({ type: 'ON_EDIT_DATAFLOW', payload: { description, name, isExportDialogVisible: false } });
+  };
+
+  const onConfirmExport = async () => {
+    try {
+      dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: true });
+      const { data } = await DataflowService.exportSchemas(referenceDataflowId);
+      if (!isNil(data)) {
+        DownloadFile(data, `${dataflowState.data.name}_${new Date(Date.now()).toDateString().replace(' ', '_')}.zip`);
+      }
+    } catch (error) {
+      console.error('Dataflow - onConfirmExport.', error);
+      notificationContext.add({ type: 'EXPORT_DATASET_SCHEMA_FAILED_EVENT' }, true);
+    } finally {
+      manageDialogs('isExportDialogVisible', false);
+      dataflowDispatch({ type: 'SET_IS_EXPORTING', payload: false });
+    }
   };
 
   function refreshPage() {
@@ -409,6 +434,19 @@ export const ReferenceDataflow = () => {
           isCustodian={true}
           manageDialogs={manageDialogs}
         />
+      )}
+
+      {dataflowState.isExportDialogVisible && (
+        <ConfirmDialog
+          disabledConfirm={dataflowState.isExporting}
+          header={resourcesContext.messages['exportSchema']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onConfirmExport}
+          onHide={() => manageDialogs('isExportDialogVisible', false)}
+          visible={dataflowState.isExportDialogVisible}>
+          {resourcesContext.messages['confirmExportSchema']}
+        </ConfirmDialog>
       )}
 
       {dataflowState.isReferencingDataflowsDialogVisible && (

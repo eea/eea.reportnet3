@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import isUndefined from 'lodash/isUndefined';
@@ -32,6 +32,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { isNil } from 'lodash';
 
 export const EUDataset = () => {
   const navigate = useNavigate();
@@ -40,6 +41,8 @@ export const EUDataset = () => {
   const leftSideBarContext = useContext(LeftSideBarContext);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+
+  const [bigData, setBigData] = useState(false)
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     bigData: false,
@@ -128,6 +131,16 @@ export const EUDataset = () => {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} }, true);
     }
   };
+// Ticket 262014: bigdataref is not updated soon enough for the extension list to be rendered correctly. 
+// bigdataref.current remains false on occasion, during initial population of the extensionlist making it so
+// that the bigdata check is unreliable and thus wrong content is shown. Below is a workaround using a useState
+  useEffect(()=>{
+    if(euDatasetState?.bigData && !bigData) setBigData(true)
+  },[euDatasetState?.bigData])
+
+  useEffect(()=>{
+    getExportExtensionsList()
+  },[bigData])
 
   const getDataSchema = async () => {
     try {
@@ -147,19 +160,30 @@ export const EUDataset = () => {
     }
   };
 
-  const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(
-    exportType => exportType.code !== 'xlsx+validations'
-  );
-
   const getExportExtensionsList = () => {
-    const internalExtensionList = internalExtensionsList.map(type => {
-      const extensionsTypes = type.code.split('+');
-      return {
-        command: () => onExportDataInternalExtension(type.code),
-        icon: extensionsTypes[0],
-        label: resourcesContext.messages[type.key]
-      };
-    });
+    const internalExtensionList = config.exportTypes.exportDatasetTypes
+      .map(type => {
+        const extensionsTypes = !isNil(type.code) && type.code.split('+');
+
+        if (bigData) {
+          if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
+            return {
+              command: () => onExportDataInternalExtension(type.code),
+              icon: extensionsTypes[0],
+              label: resourcesContext.messages[type.key]
+            };
+          } else {
+            return null;
+          }
+        } else {
+          return {
+            command: () => onExportDataInternalExtension(type.code),
+            icon: extensionsTypes[0],
+            label: resourcesContext.messages[type.key]
+          };
+        }
+      })
+      .filter(item => item !== null);
 
     euDatasetDispatch({
       type: 'GET_EXPORT_EXTENSIONS_LIST',

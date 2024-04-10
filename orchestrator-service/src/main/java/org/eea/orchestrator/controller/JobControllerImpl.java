@@ -269,7 +269,9 @@ public class JobControllerImpl implements JobController {
             example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
                               @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
                               @ApiParam(type = "String", value = "Fme Job Id",
-                                      example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                                      example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+                              @ApiParam(type = "String", value = "File path URL",
+                                  example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv") @RequestParam(value = "preSignedURL", required = false) String preSignedURL)  {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -280,11 +282,11 @@ public class JobControllerImpl implements JobController {
         parameters.put("dataProviderId", providerId);
         parameters.put("tableSchemaId", tableSchemaId);
         parameters.put("fileName", fileName);
-        parameters.put("dataProviderId", providerId);
         parameters.put("replace", replace);
         parameters.put("integrationId", integrationId);
         parameters.put("delimiter", delimiter);
         parameters.put("fmeCallback", false);
+        parameters.put("preSignedURL", preSignedURL);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
@@ -526,14 +528,16 @@ public class JobControllerImpl implements JobController {
      * Updates job info value
      * @param jobId
      * @param jobInfo
+     * @param lineNumber
      */
     @Override
     @PostMapping(value = "/private/updateJobInfo/{jobId}")
-    public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo){
+    public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
+                              @RequestParam(value = "lineNumber", required = false) Integer lineNumber){
         try {
-            jobService.updateJobInfo(jobId, jobInfo);
+            jobService.updateJobInfo(jobId, jobInfo, lineNumber);
         } catch (Exception e) {
-            LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(), e);
+            LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(lineNumber), e);
             throw e;
         }
     }
@@ -552,7 +556,7 @@ public class JobControllerImpl implements JobController {
     }
 
     @Override
-    @GetMapping(value = "/private/pollForJobStatus/{jobId}")
+    @GetMapping(value = "/pollForJobStatus/{jobId}")
     @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
     public Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId,
                                                 @ApiParam(type = "Long", value = "Dataset id",

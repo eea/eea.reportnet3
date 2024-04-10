@@ -1401,7 +1401,7 @@
   },
   {
     "key": "config/dataset/importStorePath",
-    "value": "JHtEQVRBU0VUX1BBVEg6L2hvbWUvbWFyaWEvRG93bmxvYWRzL3JlcG9ydG5ldDMvcGF0aHMvaW1wb3J0RmlsZXN9"
+    "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
   },
   {
     "key": "config/dataset/pathPublicFile",
@@ -1829,23 +1829,23 @@
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.validation.task.max.time",
-    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+    "value": "MTgw"
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.import.task.max.ms.restart",
-    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+    "value": "MTgw"
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.import.task.max.ms.fail",
-    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+    "value": "MTgw"
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.import.jobs.without.tasks.max.time",
-    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+    "value": "MTgw"
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.fme.import.jobs.without.tasks.max.time",
-    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX1RBU0tfTUFYX1RJTUU6MTgwfQ=="
+    "value": "MTgw"
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.import.maximum.jobs",
@@ -1881,7 +1881,7 @@
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.import.job.completed.task.max.time",
-    "value": "JHtJTl9QUk9HUkVTU19WQUxJREFUSU9OX0pPQl9GSU5JU0hFRF9UQVNLX01BWF9USU1FOjMwfQ=="
+    "value": "MzA="
   },
   {
     "key": "config/application/spring.datasource.orchestratorDb.driver-class-name",
@@ -1949,11 +1949,11 @@
   },
   {
     "key": "config/orchestrator/scheduling.inQueue.process.inProgress.job.max.ms",
-    "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
+    "value": "MTAwMDAw"
   },
   {
     "key": "config/orchestrator/scheduling.inProgress.import.fme.jobs.without.callback.max.time",
-    "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
+    "value": "MTAw"
   },
   {
     "key": "config/application/amazon.s3.endpoint",
@@ -1961,11 +1961,11 @@
   },
   {
     "key": "config/application/amazon.s3.accessKey",
-    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+    "value": "YWNjZXNza2V5"
   },
   {
     "key": "config/application/amazon.s3.secretKey",
-    "value": "JHtISUJFUk5BVEVfRElBTEVDVDpvcmcuaGliZXJuYXRlLmRpYWxlY3QuUG9zdGdyZVNRTERpYWxlY3R9"
+    "value": "c2VjcmV0a2V5"
   },
   {
     "key": "config/application/dremio.driver-class-name",
@@ -1973,11 +1973,11 @@
   },
   {
     "key": "config/application/dremio.jobPolling.numberOfRetries",
-    "value": "bWFyaWE="
+    "value": "MjA="
   },
   {
     "key": "config/application/dremio.password",
-    "value": "ZHJlbW1hcmlhNw=="
+    "value": "cGFzcw=="
   },
   {
     "key": "config/application/dremio.url",
@@ -1985,19 +1985,31 @@
   },
   {
     "key": "config/application/dremio.username",
-    "value": "bWFyaWE="
+    "value": "dXNlcg=="
   },
   {
     "key": "config/dataset/dremio.parquetConverter.custom",
-    "value": "bWFyaWE="
+    "value": "ZmFsc2U="
   },
   {
     "key": "config/dataset/dremio.parquetConverter.custom.maxCsvLinesPerFile",
-    "value": "bWFyaWE="
+    "value": "MjAwMDAw"
   },
   {
     "key": "config/application/dremio.promote.numberOfRetries",
     "value": "bWFyaWE="
+  },
+  {
+    "key": "config/application/s3.default.bucket",
+    "value": "InJuMy1kYXRhc2V0Ii4icm4zLWRhdGFzZXQi"
+  },
+  {
+    "key": "config/application/s3.default.bucket.name",
+    "value": "cm4zLWRhdGFzZXQ="
+  },
+  {
+    "key": "config/application/s3.default.bucket.path",
+    "value": "cm4zLWRhdGFzZXQvcm4zLWRhdGFzZXQ="
   },
   {
     "key": "config/application/s3.iceberg.bucket",

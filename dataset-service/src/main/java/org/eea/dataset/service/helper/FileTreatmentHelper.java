@@ -1783,12 +1783,12 @@ public class FileTreatmentHelper implements DisposableBean {
             JobStatusEnum jobStatus;
             if (null != error) {
                 if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
-                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME);
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME, null);
                     eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
                 } else if (EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING.equals(error)) {
-                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING);
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_HEADERS_MATCHING, null);
                     eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT
                             : EventType.IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT;

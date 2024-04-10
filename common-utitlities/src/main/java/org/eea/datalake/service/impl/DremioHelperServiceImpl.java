@@ -1,13 +1,9 @@
 package org.eea.datalake.service.impl;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import feign.FeignException;
-import net.minidev.json.parser.ParseException;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
@@ -15,13 +11,12 @@ import org.eea.datalake.service.model.DremioItemTypeEnum;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.controller.dremio.controller.DremioApiController;
 import org.eea.interfaces.vo.dremio.*;
-import org.json.JSONObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.*;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -32,6 +27,7 @@ import java.util.Optional;
 import static org.eea.utils.LiteralConstants.*;
 
 @Service
+@Primary
 public class DremioHelperServiceImpl implements DremioHelperService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioHelperServiceImpl.class);
@@ -46,16 +42,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.jobPolling.numberOfRetries}")
     private Integer numberOfRetriesForJobPolling;
 
-    @Value("${dremio.promote.numberOfRetries}")
-    private Integer numberOfRetriesForPromoting;
-
-    @Autowired
-    private DremioApiController dremioApiController;
-    @Autowired
-    private S3Service s3Service;
-
-    @Autowired
-    JdbcTemplate dremioJdbcTemplate;
     private static final String PROMOTED = "PROMOTED";
     private static final String BEARER = "Bearer ";
     public static String token = null;
@@ -65,9 +51,15 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public static final String ENTITY_TYPE = "dataset";
     public static final String DREMIO_CONSTANT = "dremio:/";
 
+    private final S3Service s3Service;
+    private final DremioApiController dremioApiController;
+
+    private final String S3_DEFAULT_BUCKET_PATH;
+
     public DremioHelperServiceImpl(DremioApiController dremioApiController, S3Service s3Service) {
         this.dremioApiController = dremioApiController;
         this.s3Service = s3Service;
+        this.S3_DEFAULT_BUCKET_PATH = s3Service.getS3DefaultBucketPath();
     }
 
     @Override

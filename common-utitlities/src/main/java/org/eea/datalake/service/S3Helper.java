@@ -125,7 +125,9 @@ public interface S3Helper {
      * @param filePath the path where the file will be imported into
      * @return the url
      */
-    String generatePresignedUrl(String filePath);
+    String generatePUTPreSignedUrl(String filePath);
+
+    String generateGETPreSignedUrl(String filePath);
 
     /**
      * Copies a file from one destination to another
@@ -134,4 +136,16 @@ public interface S3Helper {
      * @return
      */
     void copyFileToAnotherDestination(String source, String destination);
+
+    /**
+     * Returns the S3Service object from the specific S3Helper
+     * @return The S3Service Object
+     */
+    S3Service getS3Service();
+
+    /**
+     *  Deletes a file from S3
+     * @param key The file Path to delete
+     */
+    void deleteFileFromS3(String key);
 }

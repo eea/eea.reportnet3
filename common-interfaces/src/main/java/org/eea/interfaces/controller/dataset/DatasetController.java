@@ -606,8 +606,7 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
-      @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
 
   /**
@@ -635,8 +634,7 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
-      @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
   /**
    * Import file data legacy.
@@ -663,8 +661,7 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
-      @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
 
   /**
@@ -855,6 +852,7 @@ public interface DatasetController {
            @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
            @RequestParam(value = "replace", required = false) boolean replace,
            @RequestParam(value = "integrationId", required = false) Long integrationId,
-           @RequestParam(value = "delimiter", required = false) String delimiter);
+           @RequestParam(value = "delimiter", required = false) String delimiter,
+           @RequestParam(value = "fileName", required = false) String fileName);
 
 }

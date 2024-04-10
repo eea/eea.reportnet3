@@ -29,11 +29,11 @@ import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.dremio.DremioJobStatusEnum;
-import org.eea.interfaces.vo.dremio.DremioJobStatusResponse;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,10 +45,13 @@ import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.*;
+import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -97,9 +100,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     @Autowired
     DataFlowControllerZuul dataFlowControllerZuul;
 
+    @Autowired
+    JobControllerZuul jobControllerZuul;
+
     @Override
     public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
         String tableSchemaName;
+        Integer numberOfEmptyFiles = 0;
         for(File csvFile: csvFiles){
             if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
                 tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
@@ -108,6 +115,19 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
             }
             convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName);
+            if(importFileInDremioInfo.getSendEmptyFileWarning()){
+                numberOfEmptyFiles++;
+            }
+        }
+        if(numberOfEmptyFiles != 0) {
+            if (numberOfEmptyFiles == csvFiles.size()) {
+                //all files were empty and an error (instead of a warning) must be thrown
+                importFileInDremioInfo.setSendEmptyFileWarning(false);
+                importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
+                throw new Exception(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
+            } else {
+                importFileInDremioInfo.setSendEmptyFileWarning(true);
+            }
         }
     }
 
@@ -121,6 +141,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         else{
             csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
+        }
+
+        if(csvFilesWithAddedColumns == null){
+           importFileInDremioInfo.setSendEmptyFileWarning(true);
+           return;
+        }
+        else{
+            importFileInDremioInfo.setSendEmptyFileWarning(false);
         }
 
         S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
@@ -186,9 +214,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //refresh the metadata
         dremioHelperService.refreshTableMetadataAndPromote(importFileInDremioInfo.getJobId(), dremioPathForParquetFolder, s3TablePathResolver, tableSchemaName);
 
-        DatasetTypeEnum datasetType = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
-        DataFlowVO dataflowVO = dataFlowControllerZuul.findById(importFileInDremioInfo.getDataflowId(), null);
-        if (DatasetTypeEnum.REFERENCE.equals(datasetType) && dataflowVO.getStatus() == TypeStatusEnum.DRAFT) {
+        if (importFileInDremioInfo.getUpdateReferenceFolder()) {
             LOG.info("For job {} the REFERENCE dataset files must be copied to reference folder", importFileInDremioInfo);
             handleReferenceDataset(importFileInDremioInfo, s3TablePathResolver);
         }
@@ -290,9 +316,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MODIFIED_CSV_SUFFIX, randomStrForNewFolderSuffix);
         File csvFileWithAddedColumns = new File(modifiedFilePath);
         BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
-
         List<String> csvHeaders = new ArrayList<>();
-        List<String> expectedHeaders;
+        int recordCounter = 0;
         //Reading csv file
         try (
                 Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
@@ -307,10 +332,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
-            checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
-            expectedHeaders = getFieldNames(importFileInDremioInfo.getTableSchemaId(), dataSetSchema, csvFile.getName());
+
+            List<String> expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
-            int recordCounter = 0;
             for (CSVRecord csvRecord : csvParser) {
                 if(csvRecord.values().length == 0){
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
@@ -332,7 +356,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                             row.add(csvRecord.get(expectedHeader));
                         }
                         else{
-                            row.add("");
+                            //check if header contains bom
+                            String headerWithBom = "\uFEFF" + expectedHeader;
+                            if(csvRecord.isMapped(headerWithBom)){
+                                row.add(csvRecord.get(headerWithBom));
+                            }
+                            else {
+                                row.add("");
+                            }
                         }
 
                     }
@@ -340,12 +371,28 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 csvPrinter.printRecord(row);
             }
             csvPrinter.flush();
-        } catch (IOException e) {
+        } catch (IOException | UncheckedIOException e) {
+            if(e.getClass().equals(UncheckedIOException.class) && ((UncheckedIOException) e).getMessage().contains("invalid char between encapsulated token and delimiter")){
+                Integer lineNumber = extractCsvErrorLineNumber(((UncheckedIOException) e).getMessage());
+                if(lineNumber != -1){
+                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM, lineNumber);
+                }
+                else{
+                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_MULTIPLE_QUOTES, null);
+                }
+            }
+            else if (e.getClass().equals(MalformedInputException.class)){
+                jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_ILLEGAL_CHARACTERS, null);
+            }
             LOG.error("Could not read csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
             throw new Exception("Could not read csv file " + csvFile.getPath());
         }
         finally {
             writer.close();
+        }
+        if(recordCounter == 0){
+            LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
+            return null;
         }
         modifiedCsvFiles.add(csvFileWithAddedColumns);
         return modifiedCsvFiles;
@@ -380,12 +427,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
-            checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
-            expectedHeaders = getFieldNames(importFileInDremioInfo.getTableSchemaId(), dataSetSchema, csvFile.getName());
-            
+            expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
+
             int recordCounter = 0;
+            Boolean emptyFile = true;
 
             for (CSVRecord csvRecord : csvParser) {
+                emptyFile = false;
                 if(csvRecord.values().length == 0){
                     LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
                     throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
@@ -414,7 +462,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                             row.add(csvRecord.get(expectedHeader));
                         }
                         else{
-                            row.add("");
+                            //check if header contains bom
+                            String headerWithBom = "\uFEFF" + expectedHeader;
+                            if(csvRecord.isMapped(headerWithBom)){
+                                row.add(csvRecord.get(headerWithBom));
+                            }
+                            else {
+                                row.add("");
+                            }
                         }
 
                     }
@@ -435,10 +490,27 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 //add file to list
                 modifiedCsvFiles.add(csvFileWithAddedColumns);
             }
-        } catch (IOException e) {
+            if(emptyFile){
+                LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
+                return null;
+            }
+        } catch (IOException | UncheckedIOException e) {
+            if(e.getClass().equals(UncheckedIOException.class) && ((UncheckedIOException) e).getMessage().contains("invalid char between encapsulated token and delimiter")){
+                Integer lineNumber = extractCsvErrorLineNumber(((UncheckedIOException) e).getMessage());
+                if(lineNumber != -1){
+                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM, lineNumber);
+                }
+                else{
+                    jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_MULTIPLE_QUOTES, null);
+                }
+            }
+            else if (e.getClass().equals(MalformedInputException.class)){
+                jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.ERROR_CSV_ILLEGAL_CHARACTERS, null);
+            }
             LOG.error("Could not read csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
             throw new Exception("Could not read csv file " + csvFile.getPath());
         }
+
         return modifiedCsvFiles;
     }
 
@@ -547,9 +619,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         LOG.info("Finished writing to Parquet file: {}. {}", parquetFilePath, importFileInDremioInfo);
     }
 
-    private List<FieldSchema> checkIfCSVHeadersAreCorrect(List<String> csvHeaders, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String csvFileName) throws EEAException {
+    private List<String> checkIfCSVHeadersAreCorrect(List<String> csvHeaders, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String csvFileName) throws EEAException {
         boolean atLeastOneFieldSchema = false;
-        List<FieldSchema> headers = new ArrayList<>();
 
         String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
         if (StringUtils.isBlank(tableSchemaId)) {
@@ -557,22 +628,15 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         for (String csvHeader : csvHeaders) {
-            FieldSchema header = new FieldSchema();
+            if (csvHeader.startsWith("\uFEFF")){
+                //remove BOM
+                csvHeader = csvHeader.replace("\uFEFF", "");
+            }
             if (tableSchemaId != null) {
                 final FieldSchema fieldSchema = fileCommonUtils.findIdFieldSchema(csvHeader, tableSchemaId, dataSetSchema);
                 if (fieldSchema != null) {
                     atLeastOneFieldSchema = true;
-                    header.setIdFieldSchema(fieldSchema.getIdFieldSchema());
-                    header.setType(fieldSchema.getType());
-                    header.setReadOnly(
-                            fieldSchema.getReadOnly() == null ? Boolean.FALSE : fieldSchema.getReadOnly());
-                    header.setHeaderName(csvHeader);
-                    headers.add(header);
-                }
-                else if(csvHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER) || csvHeader.equals(PARQUET_PROVIDER_CODE_COLUMN_HEADER)){
-                    header.setReadOnly(Boolean.TRUE);
-                    header.setHeaderName(csvHeader);
-                    headers.add(header);
+                    break;
                 }
             }
         }
@@ -583,7 +647,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
             throw new EEAException(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);
         }
-        return headers;
+
+        return getFieldNames(tableSchemaId, dataSetSchema, csvFileName);
     }
 
     /**
@@ -614,5 +679,16 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         return fieldNames;
+    }
+
+    private static Integer extractCsvErrorLineNumber(String errorMessage) {
+        Pattern pattern = Pattern.compile("\\(line (\\d+)\\)");
+        Matcher matcher = pattern.matcher(errorMessage);
+
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group(1));
+        } else {
+            return -1;
+        }
     }
 }

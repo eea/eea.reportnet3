@@ -4,15 +4,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.utils.LiteralConstants;
+import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
@@ -31,22 +35,22 @@ import java.util.List;
 import static org.eea.utils.LiteralConstants.*;
 
 @Service
+@Primary
 public class S3HelperImpl implements S3Helper {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3HelperImpl.class);
-    private static final String VALIDATION="validation";
-    private static final String PARQUET_FILE_NAME="/0_0_0.parquet";
 
-    private S3Service s3Service;
-    private S3Client s3Client;
-
-    private S3Presigner s3Presigner;
+    private final S3Service s3Service;
+    private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
+    private final String S3_DEFAULT_BUCKET_NAME;
 
     @Autowired
-    public S3HelperImpl(S3Service s3Service, S3Client s3Client, S3Presigner s3Presigner) {
+    public S3HelperImpl(S3Service s3Service, @Qualifier("s3PrivateConfiguration") S3Configuration s3Configuration) {
         this.s3Service = s3Service;
-        this.s3Client = s3Client;
-        this.s3Presigner = s3Presigner;
+        this.s3Client = s3Configuration.getS3Client();
+        this.s3Presigner = s3Configuration.getS3Presigner();
+        this.S3_DEFAULT_BUCKET_NAME = s3Configuration.getS3DefaultBucketName();
     }
 
     /**
@@ -119,16 +123,16 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public void deleteFolder(S3PathResolver s3PathResolver, String folderPath) {
         String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
-        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
-        GetBucketVersioningResponse bucketVersioning = s3Client.getBucketVersioning(builder -> builder.bucket(S3_BUCKET_NAME));
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(folderName));
+        GetBucketVersioningResponse bucketVersioning = s3Client.getBucketVersioning(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME));
         if (bucketVersioning.status()!=null && (bucketVersioning.status().equals(BucketVersioningStatus.ENABLED) || bucketVersioning.status().equals(BucketVersioningStatus.SUSPENDED))) {
             result.contents().forEach(s3Object -> {
-                ListObjectVersionsResponse versions = s3Client.listObjectVersions(builder -> builder.bucket(S3_BUCKET_NAME).prefix(s3Object.key()));
-                versions.versions().forEach(version -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key()).versionId(version.versionId())));
+                ListObjectVersionsResponse versions = s3Client.listObjectVersions(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).prefix(s3Object.key()));
+                versions.versions().forEach(version -> s3Client.deleteObject(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).key(s3Object.key()).versionId(version.versionId())));
             });
         } else {
             result.contents().forEach(s3Object -> {
-                s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key()));
+                s3Client.deleteObject(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).key(s3Object.key()));
             });
         }
     }
@@ -150,7 +154,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public List<S3Object> getFilenamesFromTableNames(S3PathResolver s3PathResolver) {
         String key = s3Service.getS3Path(s3PathResolver);
-        return s3Client.listObjects(b -> b.bucket(S3_BUCKET_NAME).prefix(key)).contents();
+        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents();
     }
 
     /**
@@ -163,14 +167,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException {
-        GetObjectRequest objectRequest = GetObjectRequest
-            .builder()
-            .key(key)
-            .bucket(S3_BUCKET_NAME)
-            .build();
-
-        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
-        byte[] data = objectBytes.asByteArray();
+        byte[] data = getBytesFromS3(key);
 
         // Write the data to a local file.
         String filePath = null;
@@ -205,14 +202,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
-        GetObjectRequest objectRequest = GetObjectRequest
-            .builder()
-            .key(key)
-            .bucket(S3_BUCKET_NAME)
-            .build();
-
-        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
-        byte[] data = objectBytes.asByteArray();
+        byte[] data = getBytesFromS3(key);
 
         // Write the data to a local file.
         File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
@@ -238,21 +228,18 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void uploadFileToBucket(String filePathInS3, String filePathInReportnet) {
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(LiteralConstants.S3_BUCKET_NAME)
-                .key(filePathInS3)
-                .build();
+        PutObjectRequest putObjectRequest = getPutObjectRequest(filePathInS3);
 
         java.nio.file.Path file = Paths.get(filePathInReportnet);
 
-        PutObjectResponse putObjectResponse = s3Client.putObject(putObjectRequest, file);
+        s3Client.putObject(putObjectRequest, file);
     }
 
     @Override
     public List<ObjectIdentifier> listObjectsInBucket(String prefix){
         List<ObjectIdentifier> objectKeys = new ArrayList<>();
         ListObjectsRequest listObjectsRequest = ListObjectsRequest.builder()
-                .bucket(LiteralConstants.S3_BUCKET_NAME)
+                .bucket(S3_DEFAULT_BUCKET_NAME)
                 .prefix(prefix)
                 .build();
         ListObjectsResponse listObjectsResponse;
@@ -298,8 +285,8 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public void deleteTableNameDCFolder(S3PathResolver s3PathResolver) {
         String folderName = s3Service.getS3Path(s3PathResolver);
-        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
-        result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(folderName));
+        result.contents().forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).key(s3Object.key())));
     }
 
     /**
@@ -309,25 +296,22 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public void deleteSnapshotFolder(S3PathResolver s3PathResolver) {
         String folderName = s3Service.getS3Path(s3PathResolver);
-        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_BUCKET_NAME).prefix(folderName));
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(folderName));
         result.contents().stream()
             .filter(path -> path.key().contains("/snap-"+s3PathResolver.getSnapshotId()+"-"))
-            .forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_BUCKET_NAME).key(s3Object.key())));
+            .forEach(s3Object -> s3Client.deleteObject(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).key(s3Object.key())));
     }
 
     /**
-     * Generate s3 presigned Url
+     * Generate s3 pre signed Url
      *
      * @param filePath the path where the file will be imported into
      * @return the url
      */
     @Override
-    public String generatePresignedUrl(String filePath){
+    public String generatePUTPreSignedUrl(String filePath){
 
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(S3_BUCKET_NAME)
-                .key(filePath)
-                .build();
+        PutObjectRequest putObjectRequest = getPutObjectRequest(filePath);
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(10))
@@ -342,6 +326,31 @@ public class S3HelperImpl implements S3Helper {
     }
 
     /**
+     * Generate s3 pre signed Url
+     *
+     * @param filePath the path where the file will be imported into
+     * @return the url
+     */
+    @Override
+    public String generateGETPreSignedUrl(String filePath) {
+
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .key(filePath)
+            .build();
+
+        GetObjectPresignRequest  presignRequest = GetObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofMinutes(10))
+            .getObjectRequest(getObjectRequest)
+            .build();
+
+        PresignedGetObjectRequest objectRequest = s3Presigner.presignGetObject(presignRequest);
+        URL url = objectRequest.url();
+
+        return url.toString();
+    }
+
+    /**
      * Copies a file from one destination to another
      * @param source
      * @param destination
@@ -350,12 +359,45 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public void copyFileToAnotherDestination(String source, String destination){
         CopyObjectRequest copyReq = CopyObjectRequest.builder()
-                .sourceBucket(S3_BUCKET_NAME)
+                .sourceBucket(S3_DEFAULT_BUCKET_NAME)
                 .sourceKey(source)
-                .destinationBucket(S3_BUCKET_NAME)
+                .destinationBucket(S3_DEFAULT_BUCKET_NAME)
                 .destinationKey(destination)
                 .build();
 
-        CopyObjectResponse copyObjectResponse = s3Client.copyObject(copyReq);
+        s3Client.copyObject(copyReq);
+    }
+
+    @Override
+    public S3Service getS3Service() {
+        return s3Service;
+    }
+
+    @Override
+    public void deleteFileFromS3(String key) {
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+            .key(key)
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .build();
+        s3Client.deleteObject(deleteObjectRequest);
+        LOG.info("File with key " + key + " deleted from S3 public bucket.");
+    }
+
+    private PutObjectRequest getPutObjectRequest(String filePathInS3) {
+        return PutObjectRequest.builder()
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .key(filePathInS3)
+            .build();
+    }
+
+    private byte[] getBytesFromS3(String key) {
+        GetObjectRequest objectRequest = GetObjectRequest
+            .builder()
+            .key(key)
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
+        return objectBytes.asByteArray();
     }
 }

@@ -352,7 +352,7 @@ public class JobServiceImpl implements JobService {
     @Transactional
     @Override
     public void deleteFinishedJobsBasedOnDuration() {
-        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue())));
+        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue(), JobStatusEnum.CANCELED_BY_ADMIN.getValue())));
     }
 
     @Transactional
@@ -527,9 +527,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void updateJobInfo(Long jobId, JobInfoEnum jobInfo){
-        jobRepository.updateJobInfo(jobId, jobInfo.getValue());
-        jobHistoryService.updateJobInfoOfLastHistoryEntry(jobId, jobInfo);
+    public void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber){
+        jobRepository.updateJobInfo(jobId, jobInfo.getValue(lineNumber));
+        jobHistoryService.updateJobInfoOfLastHistoryEntry(jobId, jobInfo, lineNumber);
     }
 
     private void removeLocksAndSendNotification(JobVO jobVO, Map<String, Object> value, String user) throws EEAException {

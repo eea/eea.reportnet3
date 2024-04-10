@@ -116,7 +116,8 @@ public interface JobController {
                        @RequestParam(value = "integrationId", required = false) Long integrationId,
                        @RequestParam(value = "delimiter", required = false) String delimiter,
                       @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
-                      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+                      @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
+                      @RequestParam(value = "preSignedURL", required = false) String preSignedURL);
 
 
     /**
@@ -155,7 +156,7 @@ public interface JobController {
     @PostMapping(value = "/private/updateFmeJobId/{jobId}/{fmeJobId}")
     void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
 
-    @GetMapping(value = "/private/pollForJobStatus/{jobId}")
+    @GetMapping(value = "/pollForJobStatus/{jobId}")
     Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId, @RequestParam("datasetId") Long datasetId,
                                         @RequestParam("dataflowId") Long dataflowId,
                                         @RequestParam(value = "providerId", required = false) Long providerId);
@@ -219,9 +220,11 @@ public interface JobController {
      * Updates job info value
      * @param jobId
      * @param jobInfo
+     * @param lineNumber
      */
     @PostMapping(value = "/private/updateJobInfo/{jobId}")
-    void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo);
+    void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
+                       @RequestParam(value = "lineNumber") Integer lineNumber);
 
 
     /**

@@ -26,6 +26,15 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       title: 'edit'
     };
 
+    const exportSchemaBtn = {
+      className: 'dataflow-export-schema-help-step',
+      icon: 'download',
+      isVisible: buttonsVisibility.exportBtn,
+      label: 'exportSchema',
+      onClick: () => manageDialogs('isExportDialogVisible', true),
+      title: 'exportSchema'
+    };
+
     const manageRequestersBtn = {
       className: 'dataflow-manage-rights-help-step',
       icon: 'userConfig',
@@ -62,7 +71,15 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
       title: 'datasetsInfo'
     };
 
-    const allButtons = [propertiesBtn, editBtn, apiKeyBtn, manageRequestersBtn, reportingDataflowsBtn, datasetsInfoBtn];
+    const allButtons = [
+      propertiesBtn,
+      editBtn,
+      exportSchemaBtn,
+      apiKeyBtn,
+      manageRequestersBtn,
+      reportingDataflowsBtn,
+      datasetsInfoBtn
+    ];
 
     leftSideBarContext.addModels(allButtons.filter(button => button.isVisible));
   }, [
@@ -70,6 +87,7 @@ export const useLeftSideBar = (dataflowState, getLeftSidebarButtonsVisibility, m
     dataflowState.status,
     dataflowState.datasetId,
     dataflowState.isAdmin,
-    dataflowState.hasCustodianPermissions
+    dataflowState.hasCustodianPermissions,
+    dataflowState.designDatasetSchemas.length
   ]);
 };

@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.eea.datalake.service.S3ConvertService;
+import org.eea.datalake.service.S3Helper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +37,9 @@ public class TestDremioControllerImpl {
     @Autowired
     S3ConvertService s3ConvertService;
 
-    @Qualifier("getS3Client")
+/*    @Qualifier("getS3Client")
     @Autowired
-    S3Client s3Client;
+    S3Client s3Client;*/
 
     private static final Logger LOG = LoggerFactory.getLogger(TestDremioControllerImpl.class);
 

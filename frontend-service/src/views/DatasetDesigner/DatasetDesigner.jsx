@@ -368,28 +368,28 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     const { externalOperationsList } = designerState;
 
     const internalExtensionsList = config.exportTypes.exportDatasetTypes
-    .map(type => {
-      const extensionsTypes = !isNil(type.code) && type.code.split('+');
+      .map(type => {
+        const extensionsTypes = !isNil(type.code) && type.code.split('+');
 
-      if (designerState?.bigData) {
-        if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
+        if (designerState?.bigData) {
+          if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
+            return {
+              command: () => onExportDataInternalExtension(type.code),
+              icon: extensionsTypes[0],
+              label: resourcesContext.messages[type.key]
+            };
+          } else {
+            return null;
+          }
+        } else {
           return {
             command: () => onExportDataInternalExtension(type.code),
             icon: extensionsTypes[0],
             label: resourcesContext.messages[type.key]
           };
-        } else {
-          return null;
         }
-      } else {
-        return {
-          command: () => onExportDataInternalExtension(type.code),
-          icon: extensionsTypes[0],
-          label: resourcesContext.messages[type.key]
-        };
-      }
-    })
-    .filter(item => item !== null);
+      })
+      .filter(item => item !== null);
 
     const externalIntegrationsNames = !isEmpty(externalOperationsList.export)
       ? [

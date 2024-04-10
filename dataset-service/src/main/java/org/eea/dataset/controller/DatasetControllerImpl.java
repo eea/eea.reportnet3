@@ -321,7 +321,6 @@ public class DatasetControllerImpl implements DatasetController {
    * @param delimiter the delimiter
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
-   * @param filePathInS3 the filePathInS3
    */
   @SneakyThrows
   @Override
@@ -354,10 +353,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Job Id",
               example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
       @ApiParam(type = "String", value = "Fme Job Id",
-              example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
-      @ApiParam(type = "String", value = "File path in S3",
-              example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
-      @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
+              example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -365,7 +361,7 @@ public class DatasetControllerImpl implements DatasetController {
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, jobId, fmeJobId, filePathInS3);
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -396,7 +392,7 @@ public class DatasetControllerImpl implements DatasetController {
           List<Long> datasetIds = new ArrayList<>();
           datasetIds.add(datasetId);
           jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId);
+          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId, null);
           if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
             LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
             datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
@@ -448,7 +444,6 @@ public class DatasetControllerImpl implements DatasetController {
    * @param delimiter the delimiter
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
-   * @param filePathInS3 the filePathInS3
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
@@ -482,13 +477,10 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Job Id",
               example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
       @ApiParam(type = "String", value = "Fme Job Id",
-              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
-      @ApiParam(type = "String", value = "File path in S3",
-              example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
-      @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-            integrationId, delimiter, jobId, fmeJobId, filePathInS3);
+            integrationId, delimiter, jobId, fmeJobId);
   }
 
   /**
@@ -504,7 +496,6 @@ public class DatasetControllerImpl implements DatasetController {
    * @param delimiter the delimiter
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
-   * @param filePathInS3 the filePathInS3
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
@@ -536,12 +527,9 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Job Id",
               example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
       @ApiParam(type = "String", value = "Fme Job Id",
-              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
-      @ApiParam(type = "String", value = "File path in S3",
-              example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv")
-      @RequestParam(value = "filePathInS3", required = false) String filePathInS3) {
+              example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
-        integrationId, delimiter, jobId, fmeJobId, filePathInS3);
+        integrationId, delimiter, jobId, fmeJobId);
   }
 
   /**
@@ -2687,10 +2675,11 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Table schema id", example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
           @ApiParam(type = "boolean", value = "Replace current data", example = "true") @RequestParam(value = "replace", required = false) boolean replace,
           @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(value = "integrationId", required = false) Long integrationId,
-          @ApiParam(type = "String", value = "File delimiter", example = ",") @RequestParam(value = "delimiter", required = false) String delimiter){
-    JobPresignedUrlInfo info = null;
+          @ApiParam(type = "String", value = "File delimiter", example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+          @ApiParam(type = "String", value = "File name", example = "fileName") @RequestParam(value = "fileName", required = false) String fileName){
+    JobPresignedUrlInfo info;
     try{
-      String presignedUrl = bigDataDatasetService.generateImportPresignedUrl(datasetId, dataflowId, providerId);
+      String preSignedUrl = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
       LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {}", dataflowId, datasetId, providerId);
 
       //check eligibility of job and add new import job
@@ -2701,13 +2690,13 @@ public class DatasetControllerImpl implements DatasetController {
         //if this endpoint is called we want to iniatialize an import job with status QUEUED instead of IN_PROGRESS
         jobStatus = JobStatusEnum.QUEUED;
       }
-      Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null);
+      Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null, preSignedUrl);
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, null);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
       }
-      info = new JobPresignedUrlInfo(jobId, presignedUrl);
+      info = new JobPresignedUrlInfo(jobId, preSignedUrl);
     }
     catch (Exception e){
       LOG.error("Could not generate import presigned url for datasetId {}, dataflowId {} and providerId {}", datasetId, dataflowId, providerId);
