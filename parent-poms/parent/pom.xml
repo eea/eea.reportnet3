@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2.17</api-gateway.version>
-    <communication.version>v3.2.17</communication.version>
-    <collaboration.version>v3.2.17</collaboration.version>
-    <dataflow.version>v3.2.17</dataflow.version>
-    <dataset.version>v3.2.17</dataset.version>
-    <document.version>v3.2.17</document.version>
-    <frontend.version>v3.2.17</frontend.version>
-    <indexsearch.version>v3.2.17</indexsearch.version>
-    <inspire.version>v3.2.17</inspire.version>
-    <recordstore.version>v3.2.17</recordstore.version>
-    <ums.version>v3.2.17</ums.version>
-    <validation.version>v3.2.17</validation.version>
-    <common-interfaces.version>v3.2.17</common-interfaces.version>
-    <common-utitlities.version>v3.2.17</common-utitlities.version>
-    <rod.version>v3.2.17</rod.version>
-    <orchestrator.version>v3.2.17</orchestrator.version>
+    <api-gateway.version>v3.2.17-delete-job</api-gateway.version>
+    <communication.version>v3.2.17-delete-job</communication.version>
+    <collaboration.version>v3.2.17-delete-job</collaboration.version>
+    <dataflow.version>v3.2.17-delete-job</dataflow.version>
+    <dataset.version>v3.2.17-delete-job</dataset.version>
+    <document.version>v3.2.17-delete-job</document.version>
+    <frontend.version>v3.2.17-delete-job</frontend.version>
+    <indexsearch.version>v3.2.17-delete-job</indexsearch.version>
+    <inspire.version>v3.2.17-delete-job</inspire.version>
+    <recordstore.version>v3.2.17-delete-job</recordstore.version>
+    <ums.version>v3.2.17-delete-job</ums.version>
+    <validation.version>v3.2.17-delete-job</validation.version>
+    <common-interfaces.version>v3.2.17-delete-job</common-interfaces.version>
+    <common-utitlities.version>v3.2.17-delete-job</common-utitlities.version>
+    <rod.version>v3.2.17-delete-job</rod.version>
+    <orchestrator.version>v3.2.17-delete-job</orchestrator.version>
   </properties>
 </project>

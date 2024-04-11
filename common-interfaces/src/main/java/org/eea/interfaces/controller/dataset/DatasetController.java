@@ -114,7 +114,7 @@ public interface DatasetController {
    * @param deletePrefilledTables the delete prefilled tables
    */
   @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
-  void deleteDatasetData(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> deleteDatasetData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",

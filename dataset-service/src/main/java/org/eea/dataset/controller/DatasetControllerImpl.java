@@ -641,7 +641,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiResponse(code = 403, message = "Dataset not belong dataflow"),
       @ApiResponse(code = 401, message = "Unauthorize"),
       @ApiResponse(code = 500, message = "Error deleting data")})
-  public void deleteDatasetData(
+  public Map<String, Object> deleteDatasetData(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @ApiParam(type = "Long", value = "Dataflow id",
@@ -667,11 +667,45 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+
+    Long jobId = null;
     try {
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
+              false, dataflowId, providerId, Collections.singletonList(datasetId));
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, dataflowId, providerId,
+              deletePrefilledTables, jobStatus);
+
+      if (JobStatusEnum.REFUSED.equals(jobStatus)) {
+        throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
+      }
+
       LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+      deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false, jobId);
       LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+
+      Map<String, Object> result = new HashMap<>();
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if(providerId != null){
+        pollingUrl+= "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+
+      return result;
     } catch (Exception e) {
+
+      if (jobId != null){
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
+
+      // Release the lock manually
+      Map<String, Object> deleteDatasetValues = new HashMap<>();
+      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+              LockSignature.DELETE_DATASET_VALUES.getValue());
+      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+      lockService.removeLockByCriteria(deleteDatasetValues);
+
       LOG_ERROR.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }
@@ -711,7 +745,7 @@ public class DatasetControllerImpl implements DatasetController {
     }
     try {
       LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+      deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted, null);
       LOG.info("Successfully privately deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error privately deleting dataset data for dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId, e.getMessage());

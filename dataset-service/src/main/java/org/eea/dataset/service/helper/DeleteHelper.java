@@ -6,10 +6,12 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -92,6 +94,10 @@ public class DeleteHelper {
   @Autowired
   private RecordRepository recordRepository;
 
+  /** The job controller zuul */
+  @Autowired
+  private JobController.JobControllerZuul jobControllerZuul;
+
 
   /**
    * Instantiates a new file loader helper.
@@ -149,13 +155,14 @@ public class DeleteHelper {
   /**
    * Execute delete dataset process.
    *
-   * @param datasetId the dataset id
+   * @param datasetId             the dataset id
    * @param deletePrefilledTables the delete prefilled tables
-   * @param technicallyAccepted the technically accepted
+   * @param technicallyAccepted   the technically accepted
+   * @param jobId                 the job ID
    */
   @Async
   public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables,
-      boolean technicallyAccepted) {
+                                          boolean technicallyAccepted, Long jobId) {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
     // now the view is not updated, update the check to false
@@ -194,6 +201,8 @@ public class DeleteHelper {
         LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
       }
     }
+
+    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
     LOG.info("Successfully deleted dataset data for datasetId {}", datasetId);
   }
 
