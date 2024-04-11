@@ -5,7 +5,8 @@ import lombok.Getter;
 @Getter
 public enum LockEnum {
 
-  NATIONAL_COORDINATOR("NATIONAL_COORDINATOR");
+  NATIONAL_COORDINATOR("NATIONAL_COORDINATOR"),
+  TASK_SCHEDULER("TASK_SCHEDULER");
 
   private final String value;
 
