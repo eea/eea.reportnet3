@@ -57,6 +57,9 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
         S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
+        if(tableSchemaVO.getIcebergTableIsCreated()){
+            s3PathResolver.setIsIcebergTable(true);
+        }
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
         if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
             StringBuilder dataQuery = new StringBuilder();
