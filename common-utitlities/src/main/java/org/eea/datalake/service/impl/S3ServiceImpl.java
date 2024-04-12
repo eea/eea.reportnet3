@@ -31,7 +31,7 @@ public class S3ServiceImpl implements S3Service {
     private final String S3_DEFAULT_BUCKET_PATH;
 
     @Value("${s3.iceberg.bucket}")
-    private String S3_ICEBERG_BUCKET_PATH;
+    private String S3_ICEBERG_BUCKET;
 
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
@@ -213,7 +213,7 @@ public class S3ServiceImpl implements S3Service {
                     s3PathResolver.getTableName());
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
                 if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
-                    return S3_ICEBERG_BUCKET_PATH + String.format(path, dataflowFolder, dataProviderFolder,
+                    return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
                             datasetFolder, s3PathResolver.getTableName());
                 }
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,

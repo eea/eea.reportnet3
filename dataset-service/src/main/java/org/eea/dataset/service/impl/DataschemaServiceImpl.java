@@ -531,6 +531,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getFixedNumber()) {
       tableSchemaVO.setFixedNumber(false);
     }
+    if (null == tableSchemaVO.getDataAreManuallyEditable()) {
+      tableSchemaVO.setDataAreManuallyEditable(false);
+    }
+    if (null == tableSchemaVO.getIcebergTableIsCreated()) {
+      tableSchemaVO.setIcebergTableIsCreated(false);
+    }
 
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
@@ -581,7 +587,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     releaseCreateUpdateView(datasetId,
         SecurityContextHolder.getContext().getAuthentication().getName(), false);
-
   }
 
   /**
@@ -610,6 +615,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     if (tableSchemaVO.getFixedNumber() != null) {
       tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
+    }
+    if (tableSchemaVO.getDataAreManuallyEditable() != null) {
+      tableSchema.put("dataAreManuallyEditable", tableSchemaVO.getDataAreManuallyEditable());
+    }
+    if (tableSchemaVO.getIcebergTableIsCreated() != null) {
+      tableSchema.put("icebergTableIsCreated", tableSchemaVO.getIcebergTableIsCreated());
     }
     if (tableSchemaVO.getNotEmpty() != null) {
       Boolean oldValue = tableSchema.getBoolean("notEmpty");

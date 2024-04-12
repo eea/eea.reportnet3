@@ -619,7 +619,6 @@ public interface DatasetController {
    * @param delimiter the delimiter
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
-   * @param filePathInS3 the filePathInS3
    */
   @PostMapping("/v1/{datasetId}/importFileData")
   void importFileData(@PathVariable("datasetId") Long datasetId,
@@ -646,7 +645,6 @@ public interface DatasetController {
    * @param delimiter the delimiter
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
-   * @param filePathInS3 the filePathInS3
    */
   @PostMapping("/{datasetId}/importFileData")
   void importFileDataLegacy(@PathVariable("datasetId") Long datasetId,
@@ -851,5 +849,35 @@ public interface DatasetController {
            @RequestParam(value = "integrationId", required = false) Long integrationId,
            @RequestParam(value = "delimiter", required = false) String delimiter,
            @RequestParam(value = "fileName", required = false) String fileName);
+
+  /**
+   * Convert Parquet To Iceberg Table
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the tableSchemaId
+   *
+   */
+  @PostMapping("/convertParquetToIcebergTable/{datasetId}")
+  void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
+                                                 @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                                 @RequestParam(value = "providerId", required = false) Long providerId,
+                                                 @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
+
+  /**
+   * Convert Iceberg To Parquet Table
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the tableSchemaId
+   *
+   */
+  @PostMapping("/convertIcebergToParquetTable/{datasetId}")
+  void convertIcebergToParquetTable(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId") Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId,
+                                    @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
 
 }

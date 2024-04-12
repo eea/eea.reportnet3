@@ -828,6 +828,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
 
+        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
+        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
+        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
+
         //remove attachment file from s3
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
@@ -851,25 +855,26 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void updateAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
                                    String fieldName, MultipartFile multipartFile, String recordId, String previousFileName){
 
-        //todo parquet to iceberg conversion should not happen here.
-        // convert parquet table to iceberg table
         providerId = providerId != null ? providerId : 0L;
-        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
-        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-        //dremioHelperService.convertParquetToIcebergTable(parquetTablePath, icebergTablePath);
 
         //delete previous file if it exists
-        deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, previousFileName, recordId);
+        if(previousFileName != null) {
+            deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, previousFileName, recordId);
+        }
 
         //update attachment file name in attachment field
         String updateFileNameColumn = "UPDATE " + icebergTablePath + " SET " + fieldName + "='" + multipartFile.getOriginalFilename()
                 + "' WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
+
+        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
+        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
+        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
 
         File folder = new File(importPath + "/" + datasetId);
         if (!folder.exists()) {
@@ -890,5 +895,54 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
         s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
         file.delete();
+    }
+
+    @Override
+    public void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception {
+        providerId = providerId != null ? providerId : 0L;
+        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+
+        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
+
+        tableSchemaVO.setIcebergTableIsCreated(true);
+        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO);
+    }
+
+    @Override
+    public void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception {
+        providerId = providerId != null ? providerId : 0L;
+        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), UUID.randomUUID().toString(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+
+        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String parquetInnerFolderQueryPath = parquetTablePath + ".\"" + s3TablePathResolver.getFilename() + "\"";
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        //remove old parquet table because it will be recreated
+        dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+        LOG.info("Removing parquet files for table in path {}", parquetTablePath);
+        if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        }
+
+        dremioHelperService.createTableFromAnotherTable(icebergTablePath, parquetInnerFolderQueryPath);
+        //refresh the metadata
+        dremioHelperService.refreshTableMetadataAndPromote(null, parquetTablePath, s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+
+        //remove iceberg table
+        dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
+        LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
+        //remove folders that contain the previous parquet files because data will be replaced
+        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        }
+
+        tableSchemaVO.setIcebergTableIsCreated(false);
+        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO);
     }
 }

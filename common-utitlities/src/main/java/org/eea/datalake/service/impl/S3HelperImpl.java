@@ -1,5 +1,6 @@
 package org.eea.datalake.service.impl;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
@@ -9,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
@@ -44,6 +46,9 @@ public class S3HelperImpl implements S3Helper {
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final String S3_DEFAULT_BUCKET_NAME;
+
+    @Value("${s3.iceberg.bucket.name}")
+    private String S3_ICEBERG_BUCKET_NAME;
 
     @Autowired
     public S3HelperImpl(S3Service s3Service, @Qualifier("s3PrivateConfiguration") S3Configuration s3Configuration) {
@@ -101,7 +106,8 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
-        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents().size() > 0;
+        String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
+        return s3Client.listObjects(b -> b.bucket(bucketName).prefix(key)).contents().size() > 0;
     }
 
     /**
@@ -112,7 +118,8 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver);
-        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents().size() > 0;
+        String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
+        return s3Client.listObjects(b -> b.bucket(bucketName).prefix(key)).contents().size() > 0;
     }
 
     /**
@@ -122,17 +129,18 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public void deleteFolder(S3PathResolver s3PathResolver, String folderPath) {
+        String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
         String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
-        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(folderName));
-        GetBucketVersioningResponse bucketVersioning = s3Client.getBucketVersioning(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME));
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(bucketName).prefix(folderName));
+        GetBucketVersioningResponse bucketVersioning = s3Client.getBucketVersioning(builder -> builder.bucket(bucketName));
         if (bucketVersioning.status()!=null && (bucketVersioning.status().equals(BucketVersioningStatus.ENABLED) || bucketVersioning.status().equals(BucketVersioningStatus.SUSPENDED))) {
             result.contents().forEach(s3Object -> {
-                ListObjectVersionsResponse versions = s3Client.listObjectVersions(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).prefix(s3Object.key()));
-                versions.versions().forEach(version -> s3Client.deleteObject(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).key(s3Object.key()).versionId(version.versionId())));
+                ListObjectVersionsResponse versions = s3Client.listObjectVersions(builder -> builder.bucket(bucketName).prefix(s3Object.key()));
+                versions.versions().forEach(version -> s3Client.deleteObject(builder -> builder.bucket(bucketName).key(s3Object.key()).versionId(version.versionId())));
             });
         } else {
             result.contents().forEach(s3Object -> {
-                s3Client.deleteObject(builder -> builder.bucket(S3_DEFAULT_BUCKET_NAME).key(s3Object.key()));
+                s3Client.deleteObject(builder -> builder.bucket(bucketName).key(s3Object.key()));
             });
         }
     }
@@ -153,8 +161,9 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public List<S3Object> getFilenamesFromTableNames(S3PathResolver s3PathResolver) {
+        String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
         String key = s3Service.getS3Path(s3PathResolver);
-        return s3Client.listObjects(b -> b.bucket(S3_DEFAULT_BUCKET_NAME).prefix(key)).contents();
+        return s3Client.listObjects(b -> b.bucket(bucketName).prefix(key)).contents();
     }
 
     /**
@@ -310,7 +319,6 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public String generatePUTPreSignedUrl(String filePath){
-
         PutObjectRequest putObjectRequest = getPutObjectRequest(filePath);
 
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
@@ -333,7 +341,6 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public String generateGETPreSignedUrl(String filePath) {
-
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
             .bucket(S3_DEFAULT_BUCKET_NAME)
             .key(filePath)

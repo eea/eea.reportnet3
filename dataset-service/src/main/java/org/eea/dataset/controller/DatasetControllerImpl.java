@@ -7,9 +7,11 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -73,6 +75,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+
+import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
 
 /**
  * The Class DatasetControllerImpl.
@@ -2690,5 +2694,61 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
     return info;
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/convertParquetToIcebergTable/{datasetId}")
+  public void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId") Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId,
+                                    @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
+
+      try{
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && !BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          bigDataDatasetService.convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO);
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table is already created");
+        }
+      }
+      catch (Exception e){
+        LOG.error("Could not convert parquet table to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", e.getMessage());
+        throw e;
+      }
+  }
+
+  /**
+   * Convert Iceberg To Parquet Table
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the tableSchemaId
+   *
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/convertIcebergToParquetTable/{datasetId}")
+  public void convertIcebergToParquetTable(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId") Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId,
+                                    @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
+    try{
+      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+      if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO);
+      }
+      else{
+        throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", e.getMessage());
+      throw e;
+    }
   }
 }

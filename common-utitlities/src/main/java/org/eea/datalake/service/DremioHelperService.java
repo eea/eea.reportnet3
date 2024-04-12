@@ -30,5 +30,5 @@ public interface DremioHelperService {
 
     void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception;
 
-    void convertParquetToIcebergTable(String parquetTablePath, String icebergTablePath) throws Exception;
+    void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception;
 }
