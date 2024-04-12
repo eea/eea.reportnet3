@@ -3,12 +3,18 @@ package org.eea.dataset.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
+import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.types.ObjectId;
 import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -27,7 +33,9 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -67,6 +75,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+
+import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
 
 /**
  * The Class DatasetControllerImpl.
@@ -1351,19 +1361,6 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
-  @Override
-  @GetMapping("/testApiPost")
-  public void testApiPost() {
-    try {
-      String createTableQuery = "select * from \"rn3-dataset\".\"rn3-dataset\".\"df-0000156\".\"dp-0000042\".\"ds-0002621\".\"current\".\"lakestab\"";
-      String result = dremioHelperService.executeSqlStatementPost(createTableQuery);
-      LOG.info("result {}", result);
-    } catch (Exception e) {
-      LOG_ERROR.error("Error:",e);
-      throw e;
-    }
-  }
-
   /**
    * Etl export dataset legacy.
    *
@@ -1559,9 +1556,13 @@ public class DatasetControllerImpl implements DatasetController {
    * Gets the attachment.
    *
    * @param datasetId the dataset id
-   * @param idField the id field
+   * @param idField the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    * @return the attachment
    */
   @Override
@@ -1582,23 +1583,35 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Dataflow id",
           example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Provider id",
-          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
+      @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
 
     LOG.info("Downloading attachment from the datasetId {}", datasetId);
     try {
-      AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
-      byte[] file = attachment.getContent();
-      String filename = attachment.getFileName();
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+      byte[] file = null;
+      String filename = null;
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+        AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
+        file = attachment.getContent();
+        filename = attachment.getFileName();
+      }
+      else{
+        AttachmentValue attachment = datasetService.getAttachment(datasetId, idField);
+        file = attachment.getContent();
+        filename = attachment.getFileName();
+      }
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error downloading attachment from the datasetId {} and fieldId {}, with message: {}",
-          datasetId, idField, e.getMessage());
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
+      LOG.error("Error downloading attachment from the datasetId {} and fieldId {}, with message: {}", datasetId, idField, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving attachment for dataflowId {} datasetId {} fieldId {} and providerId {} Message: {}", dataflowId, datasetId, idField, providerId, e.getMessage());
       throw e;
     }
   }
@@ -1607,9 +1620,13 @@ public class DatasetControllerImpl implements DatasetController {
    * Gets the attachment legacy.
    *
    * @param datasetId the dataset id
-   * @param idField the id field
+   * @param idField the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    * @return the attachment legacy
    */
   @Override
@@ -1629,8 +1646,12 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Dataflow id",
           example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
       @ApiParam(type = "Long", value = "Provider id",
-          example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    return this.getAttachment(datasetId, idField, dataflowId, providerId);
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
+      @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
+    return this.getAttachment(datasetId, idField, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
   }
 
   /**
@@ -1641,6 +1662,10 @@ public class DatasetControllerImpl implements DatasetController {
    * @param providerId the provider id
    * @param idField the id field
    * @param file the file
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param recordId the recordId
+   * @param previousFileName the previousFileName
    */
   @Override
   @HystrixCommand
@@ -1660,30 +1685,59 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(type = "String", value = "Field id",
           example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
-      @ApiParam(value = "file") @RequestParam("file") MultipartFile file) {
+      @ApiParam(value = "file") @RequestParam("file") MultipartFile file,
+      @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
+      @ApiParam(type = "String", value = "Previous File Name", example = "file.txt") @RequestParam(value = "previousFileName", required = false) String previousFileName) {
 
     try {
       LOG.info("Method updateAttachment was called for dataflowId {} datasetId {} and fieldId {}", dataflowId, datasetId, idField);
-      // Not allow insert attachment if the table is marked as read only. This not applies to design
-      // datasets
-      if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-          datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
-        LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
-            datasetId);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-      }
+
 
       // Remove comma "," character to avoid error with special characters
       String fileName = file.getOriginalFilename();
       fileName = StringUtils.isNotBlank(fileName) ? fileName.replace(",", "") : "";
 
-      if (!validateAttachment(datasetId, idField, fileName, file.getSize())
-          || fileName.equals("")) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
-      }
-      InputStream is = file.getInputStream();
+
       LOG.info("Updating attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      datasetService.updateAttachment(datasetId, idField, fileName, is);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+        //check if table is read only
+        String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+        if(StringUtils.isNotBlank(fieldSchemaId)){
+          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, fieldSchemaId, EntityTypeEnum.FIELD)) {
+            LOG.error("Error updating an attachment in the datasetId {}. In table {} field {} is read only",
+                    datasetId, tableSchemaName, fieldName);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+          }
+        }
+
+        //validate attachment
+        if (!validateAttachment(datasetId, idField, fileName, file.getSize(), tableSchemaName, fieldName, true)
+                || fileName.equals("")) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+        }
+
+        //upload attachment
+        bigDataDatasetService.updateAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, file, recordId, previousFileName);
+      }
+      else{
+        // Not allow insert attachment if the table is marked as read only. This not applies to design datasets
+        if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
+                datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
+          LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
+                  datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+        }
+        if (!validateAttachment(datasetId, idField, fileName, file.getSize(), tableSchemaName, fieldName, false)
+                || fileName.equals("")) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILE_FORMAT);
+        }
+        InputStream is = file.getInputStream();
+        datasetService.updateAttachment(datasetId, idField, fileName, is);
+      }
+
       LOG.info("Successfully updated attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (EEAException | IOException e) {
       LOG_ERROR.error("Error updating attachment from the dataflowId {} and datasetId {}, with message: {}", dataflowId,
@@ -1698,13 +1752,17 @@ public class DatasetControllerImpl implements DatasetController {
 
 
   /**
-   * Update attachment legacy.
+   * Update attachment.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param idField the id field
    * @param file the file
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param recordId the recordId
+   * @param previousFileName the previousFileName
    */
   @Override
   @HystrixCommand
@@ -1723,17 +1781,25 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(type = "String", value = "Field id",
           example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
-      @ApiParam(value = "file") @RequestParam("file") MultipartFile file) {
-    this.updateAttachment(datasetId, dataflowId, providerId, idField, file);
+      @ApiParam(value = "file") @RequestParam("file") MultipartFile file,
+      @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
+      @ApiParam(type = "String", value = "Previous File Name", example = "file.txt") @RequestParam(value = "previousFileName", required = false) String previousFileName) {
+    this.updateAttachment(datasetId, dataflowId, providerId, idField, file, tableSchemaName, fieldName, recordId, previousFileName);
   }
 
   /**
    * Delete attachment.
    *
    * @param datasetId the dataset id
+   * @param idField the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   * @param idField the id field
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    */
   @Override
   @HystrixCommand
@@ -1752,16 +1818,36 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Provider id",
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(type = "String", value = "Field id",
-          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField) {
-    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-        datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
-      LOG_ERROR.error("Error updating an attachment in the datasetId {}. The table is read only",
-          datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-    }
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
+      @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
+      @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
+
     try {
       LOG.info("Deleting attachment for dataflowId {}, datasetId {} and fieldId {}", dataflowId, datasetId, idField);
-      datasetService.deleteAttachment(datasetId, idField);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+        //check if table is read only
+        String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+        if(StringUtils.isNotBlank(fieldSchemaId)){
+          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, fieldSchemaId, EntityTypeEnum.FIELD)) {
+            LOG.error("Error deleting an attachment in the datasetId {}. In table {} field {} is read only",
+                    datasetId, tableSchemaName, fieldName);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+          }
+        }
+        bigDataDatasetService.deleteAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
+      }
+      else{
+        if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
+                datasetService.findFieldSchemaIdById(datasetId, idField), EntityTypeEnum.FIELD)) {
+          LOG.error("Error deleting an attachment in the datasetId {}. The table is read only",
+                  datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+        }
+        datasetService.deleteAttachment(datasetId, idField);
+      }
       LOG.info("Successfully deleted attachment for dataflowId {}, datasetId {} and fieldId {}", dataflowId, datasetId, idField);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting attachment from dataflowId {}, datasetId {} and fieldId {}, with message: {}",
@@ -1779,9 +1865,13 @@ public class DatasetControllerImpl implements DatasetController {
    * Delete attachment legacy.
    *
    * @param datasetId the dataset id
+   * @param idField the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
-   * @param idField the id field
+   * @param tableSchemaName the table name
+   * @param fieldName the field name
+   * @param fileName the file name
+   * @param recordId the recordId
    */
   @Override
   @HystrixCommand
@@ -1799,8 +1889,12 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "Long", value = "Provider id",
           example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(type = "String", value = "Field id",
-          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField) {
-    this.deleteAttachment(datasetId, dataflowId, providerId, idField);
+          example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("fieldId") String idField,
+      @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
+      @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
+      @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
+      @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
+    this.deleteAttachment(datasetId, dataflowId, providerId, idField, tableSchemaName, fieldName, fileName, recordId);
   }
 
   /**
@@ -2361,7 +2455,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @throws EEAException the EEA exception
    */
   private boolean validateAttachment(Long datasetId, String idField, String originalFilename,
-      Long size) throws EEAException {
+      Long size, String tableSchemaName, String fieldName, Boolean isBigDataDataflow) throws EEAException {
 
     LOG.info("Validating attachment for datasetId {}, fieldId {} and fileName {}", datasetId, idField, originalFilename);
 
@@ -2370,9 +2464,17 @@ public class DatasetControllerImpl implements DatasetController {
     if (datasetSchemaId == null) {
       throw new EEAException(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND);
     }
-    FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
+    String fieldSchemaId = null;
+    if(isBigDataDataflow){
+      fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
+    }
+    else{
+      FieldVO fieldVO = datasetService.getFieldById(datasetId, idField);
+      fieldSchemaId = fieldVO.getIdFieldSchema();
+    }
+
     FieldSchemaVO fieldSchema =
-        datasetSchemaService.getFieldSchema(datasetSchemaId, fieldVO.getIdFieldSchema());
+        datasetSchemaService.getFieldSchema(datasetSchemaId, fieldSchemaId);
     if (fieldSchema == null || fieldSchema.getId() == null) {
       throw new EEAException(EEAErrorMessage.FIELD_SCHEMA_ID_NOT_FOUND);
     }
@@ -2592,5 +2694,61 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
     return info;
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/convertParquetToIcebergTable/{datasetId}")
+  public void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId") Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId,
+                                    @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
+
+      try{
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && !BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          bigDataDatasetService.convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO);
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table is already created");
+        }
+      }
+      catch (Exception e){
+        LOG.error("Could not convert parquet table to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", e.getMessage());
+        throw e;
+      }
+  }
+
+  /**
+   * Convert Iceberg To Parquet Table
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the tableSchemaId
+   *
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PostMapping("/convertIcebergToParquetTable/{datasetId}")
+  public void convertIcebergToParquetTable(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId") Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId,
+                                    @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
+    try{
+      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+      if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO);
+      }
+      else{
+        throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", e.getMessage());
+      throw e;
+    }
   }
 }

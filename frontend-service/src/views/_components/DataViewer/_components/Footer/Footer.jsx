@@ -14,16 +14,14 @@ export const Footer = ({
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
-      {!bigData && (
-        <Button
-          className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
-          disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
-          icon="add"
-          label={resourcesContext.messages['addRecord']}
-          onClick={onAddClick}
-          style={{ float: 'left' }}
-        />
-      )}
+      <Button
+        className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
+        disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
+        icon="add"
+        label={resourcesContext.messages['addRecord']}
+        onClick={onAddClick}
+        style={{ float: 'left' }}
+      />
       {!bigData && (
         <Button
           className={`p-button-secondary ${

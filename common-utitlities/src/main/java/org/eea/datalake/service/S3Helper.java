@@ -48,6 +48,13 @@ public interface S3Helper {
     void deleteFolder(S3PathResolver s3PathResolver, String folderPath);
 
     /**
+     * Deletes file from s3
+     * @param filePath
+     */
+    void deleteFile(String filePath);
+
+
+    /**
      * Gets filenames from table name folders
      * @param s3PathResolver
      * @return

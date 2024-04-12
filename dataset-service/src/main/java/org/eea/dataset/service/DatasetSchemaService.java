@@ -598,4 +598,13 @@ public interface DatasetSchemaService {
    */
   String getFieldName(String datasetSchemaId, String tableSchemaId, List<String> parameters, String ruleReferenceId,
                       String ruleReferenceFieldSchemaPKId) throws EEAException;
+
+  /**
+   * Finds field schema id
+   * @param datasetId
+   * @param tableSchemaName
+   * @param fieldName
+   * @return the field schema id
+   */
+  String getFieldSchemaIdByDatasetIdTableNameAndFieldName(Long datasetId, String tableSchemaName, String fieldName);
 }

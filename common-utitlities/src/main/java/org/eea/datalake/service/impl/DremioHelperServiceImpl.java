@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
@@ -42,6 +43,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.jobPolling.numberOfRetries}")
     private Integer numberOfRetriesForJobPolling;
 
+    @Value("${dremio.promote.numberOfRetries}")
+    private Integer numberOfRetriesForPromoting;
+
     private static final String PROMOTED = "PROMOTED";
     private static final String BEARER = "Bearer ";
     public static String token = null;
@@ -55,6 +59,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     private final DremioApiController dremioApiController;
 
     private final String S3_DEFAULT_BUCKET_PATH;
+
+    @Value("${s3.iceberg.bucket.path}")
+    private String S3_ICEBERG_BUCKET_PATH;
 
     public DremioHelperServiceImpl(DremioApiController dremioApiController, S3Service s3Service) {
         this.dremioApiController = dremioApiController;
@@ -73,8 +80,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public boolean checkFolderPromoted(S3PathResolver s3PathResolver, String folderName) {
         DremioDirectoryItemsResponse directoryItems = getDirectoryItems(s3PathResolver, folderName);
         if (directoryItems!=null) {
-            LOG.info("directoryItems : {}", directoryItems.toString());
-            LOG.info("directoryItems getChildren : {}", directoryItems.getChildren());
             Integer itemPosition;
             if (S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
                 itemPosition = 8;
@@ -88,9 +93,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
             Optional<DremioDirectoryItem> itemOptional = directoryItems.getChildren().stream().filter(di -> di.getPath().get(itemPosition).equals(folderName)).findFirst();
             if (itemOptional.isPresent()) {
-                LOG.info("itemOptional : {}", itemOptional.toString());
                 DremioDirectoryItem item = itemOptional.get();
-                LOG.info("item : {}", item);
                 if (item.getType().equals(DremioItemTypeEnum.DATASET.getValue()) && item.getDatasetType().equals(PROMOTED)) {
                     return true;
                 }
@@ -101,19 +104,19 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
     @Override
     public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName) {
+        String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_PATH : S3_DEFAULT_BUCKET_PATH;
         String directoryPath = null;
         if(S3_IMPORT_FILE_PATH.equals(s3PathResolver.getPath())) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver,
                 S3_IMPORT_TABLE_NAME_FOLDER_PATH);
         } else if (S3_TABLE_NAME_ROOT_DC_FOLDER_PATH.equals(s3PathResolver.getPath())
             || S3_EU_SNAPSHOT_ROOT_PATH.equals(s3PathResolver.getPath())) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getS3Path(s3PathResolver);
+            directoryPath = bucketName + "/" + s3Service.getS3Path(s3PathResolver);
         } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
         } else {
-            directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
         }
-        LOG.info("directoryPath : {}", directoryPath);
         DremioDirectoryItemsResponse directoryItems = null;
         try {
             directoryItems = dremioApiController.getDirectoryItems(token, directoryPath);
@@ -170,8 +173,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         if(checkFolderPromoted(s3PathResolver, folderName)){
             LOG.info("Folder {} is already promoted", directoryPath);
             return;
-        }else {
-            LOG.info("Folder {} is not promoted ", directoryPath);
         }
 
         folderId = getFolderId(s3PathResolver, folderName);
@@ -191,7 +192,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
     @Override
     public void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName) {
-        String directoryPath = S3_DEFAULT_BUCKET_PATH + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, s3PathResolver.getPath());
+        String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_PATH : S3_DEFAULT_BUCKET_PATH;
+        String directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, s3PathResolver.getPath());
         if(!checkFolderPromoted(s3PathResolver, folderName)){
             LOG.info("Folder {} is not promoted", directoryPath);
             return;
@@ -218,7 +220,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             try {
                 Files.delete(path);
             } catch (IOException e) {
-                LOG.error("Could not delete file {}.", parquetFile);
                 throw new Exception("Could not delete file " + parquetFile);
             }
         }
@@ -286,20 +287,59 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public Boolean dremioProcessFinishedSuccessfully(String processId) throws Exception {
+    public void ckeckIfDremioProcessFinishedSuccessfully(String query, String processId) throws Exception {
+        Boolean processIsFinished = false;
         for(int i=0; i < numberOfRetriesForJobPolling; i++) {
             DremioJobStatusResponse response = this.pollForJobStatus(processId);
             String jobState = response.getJobState().getValue();
             if(jobState.equals(DremioJobStatusEnum.COMPLETED.getValue())) {
-                return true;
+                processIsFinished = true;
+                break;
             }
             else if(jobState.equals(DremioJobStatusEnum.CANCELED.getValue()) || jobState.equals(DremioJobStatusEnum.FAILED.getValue())){
-                return false;
+                processIsFinished = false;
+                break;
             }
             else {
                 Thread.sleep(10000);
             }
         }
-        return false;
+        if(!processIsFinished){
+            throw new Exception("Could not execute dremio query " + query + " with dremio process Id " + processId);
+        }
+    }
+
+    @Override
+    public void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception {
+        String refreshTableAndPromoteQuery = "ALTER TABLE " + tablePath + " REFRESH METADATA AUTO PROMOTION";
+        Boolean folderWasPromoted = false;
+        //we keep trying to promote the folder for a number of retries
+        for(int i=0; i < numberOfRetriesForPromoting; i++) {
+            executeSqlStatement(refreshTableAndPromoteQuery);
+            if(checkFolderPromoted(s3PathResolver, tableName)) {
+                LOG.info("For job {} and datasetId {} promoted table {} in retry #{}", jobId, tablePath, i+1);
+                folderWasPromoted = true;
+                break;
+            }
+            else {
+                Thread.sleep(10000);
+            }
+        }
+        if(!folderWasPromoted) {
+            throw new Exception("Could not promote folder " + tablePath);
+        }
+    }
+
+    /**
+     * Create a table from another table
+     *
+     * @param oldTablePathInDremio the old path
+     * @param newTablePathInDremio the new path
+     */
+    @Override
+    public void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception {
+        String createNewTableQuery = "CREATE TABLE " + newTablePathInDremio + " AS SELECT * FROM " + oldTablePathInDremio;
+        String processId = executeSqlStatement(createNewTableQuery);
+        ckeckIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId);
     }
 }

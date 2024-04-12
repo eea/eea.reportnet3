@@ -1996,8 +1996,8 @@
     "value": "MjAwMDAw"
   },
   {
-    "key": "config/dataset/dremio.promote.numberOfRetries",
-    "value": "MjA="
+    "key": "config/application/dremio.promote.numberOfRetries",
+    "value": "bWFyaWE="
   },
   {
     "key": "config/application/s3.default.bucket",
@@ -2010,5 +2010,17 @@
   {
     "key": "config/application/s3.default.bucket.path",
     "value": "cm4zLWRhdGFzZXQvcm4zLWRhdGFzZXQ="
+  },
+  {
+    "key": "config/application/s3.iceberg.bucket",
+    "value": "bWFyaWE="
+  },
+  {
+    "key": "config/application/s3.iceberg.bucket.name",
+    "value": "bWFyaWE="
+  },
+  {
+    "key": "config/application/s3.iceberg.bucket.path",
+    "value": "bWFyaWE="
   }
 ]

@@ -531,6 +531,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null == tableSchemaVO.getFixedNumber()) {
       tableSchemaVO.setFixedNumber(false);
     }
+    if (null == tableSchemaVO.getDataAreManuallyEditable()) {
+      tableSchemaVO.setDataAreManuallyEditable(false);
+    }
+    if (null == tableSchemaVO.getIcebergTableIsCreated()) {
+      tableSchemaVO.setIcebergTableIsCreated(false);
+    }
 
     RecordSchema recordSchema = new RecordSchema();
     recordSchema.setIdRecordSchema(recordSchemaId);
@@ -581,7 +587,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     releaseCreateUpdateView(datasetId,
         SecurityContextHolder.getContext().getAuthentication().getName(), false);
-
   }
 
   /**
@@ -610,6 +615,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     if (tableSchemaVO.getFixedNumber() != null) {
       tableSchema.put("fixedNumber", tableSchemaVO.getFixedNumber());
+    }
+    if (tableSchemaVO.getDataAreManuallyEditable() != null) {
+      tableSchema.put("dataAreManuallyEditable", tableSchemaVO.getDataAreManuallyEditable());
+    }
+    if (tableSchemaVO.getIcebergTableIsCreated() != null) {
+      tableSchema.put("icebergTableIsCreated", tableSchemaVO.getIcebergTableIsCreated());
     }
     if (tableSchemaVO.getNotEmpty() != null) {
       Boolean oldValue = tableSchema.getBoolean("notEmpty");
@@ -3519,5 +3530,40 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     }
     return fieldName;
+  }
+
+  /**
+   * Finds field schema id
+   * @param datasetId
+   * @param tableSchemaName
+   * @param fieldName
+   * @return the field schema id
+   */
+  @Override
+  public String getFieldSchemaIdByDatasetIdTableNameAndFieldName(Long datasetId, String tableSchemaName, String fieldName){
+    try {
+      String datasetSchemaId = getDatasetSchemaId(datasetId);
+      DataSetSchemaVO datasetSchema = getDataSchemaById(datasetSchemaId);
+      if (datasetSchema != null) {
+        String finalTableSchemaName = tableSchemaName;
+        Optional<TableSchemaVO> tableSchema = datasetSchema.getTableSchemas().stream()
+                .filter(t -> t.getNameTableSchema().equals(finalTableSchemaName)).findFirst();
+
+        if (tableSchema.isPresent()) {
+          Optional<FieldSchemaVO> fieldSchema = tableSchema.get().getRecordSchema().getFieldSchema().stream()
+                  .filter(f -> f.getName().equals(fieldName)).findFirst();
+
+          if (fieldSchema.isPresent()) {
+            return fieldSchema.get().getId();
+          }
+        }
+      }
+
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve field schema id for datasetId {} tableName {} and fieldName {}. Error Message: {}",
+              datasetId, tableSchemaName, fieldName, e.getMessage());
+    }
+    return null;
   }
 }

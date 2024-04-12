@@ -1,5 +1,6 @@
 package org.eea.datalake.service.impl;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -10,6 +11,7 @@ import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,10 @@ public class S3ServiceImpl implements S3Service {
     private final String S3_DEFAULT_BUCKET;
     private final String S3_DEFAULT_BUCKET_PATH;
 
+    @Value("${s3.iceberg.bucket}")
+    private String S3_ICEBERG_BUCKET;
+
+
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
 
     public S3ServiceImpl(DataSetControllerZuul dataSetControllerZuul, @Qualifier("s3PrivateConfiguration") S3Configuration s3PrivateConfiguration) {
@@ -39,33 +45,28 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String getS3Path(S3PathResolver s3PathResolver) {
         String s3Path = calculateS3Path(s3PathResolver);
-        LOG.info("Method calculateS3Path returns Path: {}", s3Path);
         return s3Path;
     }
 
     @Override
     public String getTableAsFolderQueryPath(S3PathResolver s3PathResolver, String path) {
         String s3TableNamePath = calculateS3TableAsFolderPath(s3PathResolver, path);
-        LOG.info("Method getTableAsFolderQueryPath returns S3 Table Name Path: {}", s3TableNamePath);
         return s3TableNamePath;
     }
 
     @Override
     public String getTableAsFolderQueryPath(S3PathResolver s3PathResolver) {
         String s3TableNamePath = calculateS3TableAsFolderPath(s3PathResolver);
-        LOG.info("Method getTableAsFolderQueryPath returns S3 Table Name Path: {}", s3TableNamePath);
         return s3TableNamePath;
     }
 
     @Override
     public String getTableDCAsFolderQueryPath(S3PathResolver s3PathResolver, String path) {
         String s3TableNamePath = calculateS3TableDCAsFolderPath(s3PathResolver, path);
-        LOG.info("Method getTableDCAsFolderQueryPath returns S3 Table Name Path: {}", s3TableNamePath);
         return s3TableNamePath;
     }
 
     private String calculateS3Path(S3PathResolver s3PathResolver) {
-        LOG.info("Method calculateS3Path called with s3PathResolver: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataProviderFolder = (s3PathResolver.getDataProviderName() == null)
             ? formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN)
@@ -92,8 +93,9 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_PATH:
             case S3_VALIDATION_RULE_PATH:
             case S3_TABLE_NAME_VALIDATE_PATH:
-                path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
-                    tableName, fileName);
+            case S3_ATTACHMENTS_PATH:
+                path = String.format(path, dataflowFolder,
+                    dataProviderFolder, datasetFolder, tableName, fileName);
                 break;
             case S3_VALIDATION_QUERY_PATH:
                 path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
@@ -190,7 +192,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private String calculateS3TableAsFolderPath(S3PathResolver s3PathResolver, String path) {
-        LOG.info("Method calculateS3Path called with s3Path: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
@@ -211,6 +212,10 @@ public class S3ServiceImpl implements S3Service {
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder,
                     s3PathResolver.getTableName());
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
+                if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
+                    return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
+                            datasetFolder, s3PathResolver.getTableName());
+                }
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
                     datasetFolder, s3PathResolver.getTableName());
             case S3_IMPORT_TABLE_NAME_FOLDER_PATH:
@@ -228,7 +233,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private String calculateS3TableAsFolderPath(S3PathResolver s3PathResolver) {
-        LOG.info("Method calculateS3Path called with s3Path: {}", s3PathResolver);
         String path = s3PathResolver.getPath();
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
@@ -256,7 +260,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     private String calculateS3TableDCAsFolderPath(S3PathResolver s3PathResolver, String path) {
-        LOG.info("Method calculateS3TableDCAsFolderPath called with s3Path: {}", s3PathResolver);
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
         String dataProviderId =  formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);

@@ -52,6 +52,14 @@ public class TableSchema {
   @Field(value = "recordSchema")
   private RecordSchema recordSchema;
 
+  /** The dataAreManuallyEditable. */
+  @Field(value = "dataAreManuallyEditable")
+  private Boolean dataAreManuallyEditable;
+
+  /** The icebergTableIsCreated. */
+  @Field(value = "icebergTableIsCreated")
+  private Boolean icebergTableIsCreated;
+
   /**
    * Hash code.
    *
@@ -60,7 +68,7 @@ public class TableSchema {
   @Override
   public int hashCode() {
     return Objects.hash(idDataSet, idTableSchema, nameTableSchema, recordSchema, description,
-        notEmpty);
+        notEmpty, dataAreManuallyEditable, icebergTableIsCreated);
   }
 
   /**
@@ -83,6 +91,8 @@ public class TableSchema {
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema)
         && Objects.equals(description, other.description)
-        && Objects.equals(notEmpty, other.notEmpty);
+        && Objects.equals(notEmpty, other.notEmpty)
+        && Objects.equals(dataAreManuallyEditable, other.dataAreManuallyEditable)
+        && Objects.equals(icebergTableIsCreated, other.icebergTableIsCreated);
   }
 }

@@ -407,8 +407,7 @@ export const useSetColumns = (
           }`}
           editor={
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
-            (!bigData &&
-              hasWebformWritePermissions &&
+            (hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
               !isDataflowOpen &&
@@ -490,7 +489,7 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      hasWritePermissions & !bigData ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
     }
 
     if (hasCountryCode) {

@@ -1326,9 +1326,7 @@ public class ValidationHelper implements DisposableBean {
           String validateTable = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
           String query = "ALTER TABLE " + validateTable + " REFRESH METADATA AUTO PROMOTION";
           String id = dremioHelperService.executeSqlStatement(query);
-          if(!dremioHelperService.dremioProcessFinishedSuccessfully(id)){
-            throw new EEAException("Failed promoting table " + validateTable);
-          }
+          dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(query, id);
         } catch (Exception e) {
           throw new EEAException(e.getCause().getCause().getMessage());
         }

@@ -26,5 +26,9 @@ public interface DremioHelperService {
 
     String executeSqlStatementPost(String sqlStatement);
 
-    Boolean dremioProcessFinishedSuccessfully(String processId) throws Exception;
+    void ckeckIfDremioProcessFinishedSuccessfully(String query, String processId) throws Exception;
+
+    void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception;
+
+    void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception;
 }
