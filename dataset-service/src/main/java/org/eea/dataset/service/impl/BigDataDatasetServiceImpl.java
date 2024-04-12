@@ -1,8 +1,6 @@
 package org.eea.dataset.service.impl;
 
-import feign.FeignException;
 import lombok.SneakyThrows;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
