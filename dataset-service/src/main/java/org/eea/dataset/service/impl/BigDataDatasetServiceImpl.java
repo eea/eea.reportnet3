@@ -1,8 +1,6 @@
 package org.eea.dataset.service.impl;
 
-import feign.FeignException;
 import lombok.SneakyThrows;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -13,7 +11,13 @@ import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.service.*;
+import org.eea.dataset.service.BigDataDatasetService;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.PaMService;
+import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
