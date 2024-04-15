@@ -100,6 +100,21 @@ public class S3PublicConfiguration implements S3Configuration {
     return S3_DEFAULT_BUCKET_PATH;
   }
 
+  @Override
+  public String getIcebergBucket() {
+    return null;
+  }
+
+  @Override
+  public String getS3IcebergBucketName() {
+    return null;
+  }
+
+  @Override
+  public String getS3IcebergBucketPath() {
+    return null;
+  }
+
   private ServerSideEncryptionByDefault applyServerSideEncryptionByDefault() {
     return ServerSideEncryptionByDefault.builder()
         .sseAlgorithm(algorithm)

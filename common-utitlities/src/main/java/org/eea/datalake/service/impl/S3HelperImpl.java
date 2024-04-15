@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
@@ -47,8 +46,7 @@ public class S3HelperImpl implements S3Helper {
     private final S3Presigner s3Presigner;
     private final String S3_DEFAULT_BUCKET_NAME;
 
-    @Value("${s3.iceberg.bucket.name}")
-    private String S3_ICEBERG_BUCKET_NAME;
+    private final String S3_ICEBERG_BUCKET_NAME;
 
     @Autowired
     public S3HelperImpl(S3Service s3Service, @Qualifier("s3PrivateConfiguration") S3Configuration s3Configuration) {
@@ -56,6 +54,7 @@ public class S3HelperImpl implements S3Helper {
         this.s3Client = s3Configuration.getS3Client();
         this.s3Presigner = s3Configuration.getS3Presigner();
         this.S3_DEFAULT_BUCKET_NAME = s3Configuration.getS3DefaultBucketName();
+        this.S3_ICEBERG_BUCKET_NAME = s3Configuration.getS3IcebergBucketName();
     }
 
     /**

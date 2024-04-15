@@ -42,4 +42,8 @@ public interface S3Service {
     S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName);
 
     String getS3DefaultBucketPath();
+
+    String getS3IcebergBucket();
+
+    String getS3IcebergBucketPath();
 }

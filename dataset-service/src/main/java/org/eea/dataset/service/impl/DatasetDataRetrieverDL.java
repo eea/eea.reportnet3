@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import cdjd.org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
@@ -57,7 +58,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
         S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
-        if(tableSchemaVO.getIcebergTableIsCreated()){
+        if(BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
             s3PathResolver.setIsIcebergTable(true);
         }
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
