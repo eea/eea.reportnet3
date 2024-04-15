@@ -1528,7 +1528,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteDatasetData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), );
+        Mockito.anyBoolean(), Mockito.anyBoolean(), null);
   }
 
   /**
@@ -1541,7 +1541,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteImportDataLegacy(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), );
+        Mockito.anyBoolean(), Mockito.anyBoolean(), null);
   }
 
 
@@ -1553,7 +1553,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     datasetControllerImpl.deleteDatasetData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), );
+        Mockito.anyBoolean(), Mockito.anyBoolean(), null);
   }
 
   /**
@@ -1563,7 +1563,7 @@ public class DatasetControllerImplTest {
   public void privateDeleteDatasetDataTest() {
     datasetControllerImpl.privateDeleteDatasetData(1L, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean(), );
+        Mockito.anyBoolean(), Mockito.anyBoolean(), null);
   }
 
   /**
@@ -1612,7 +1612,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), null);
   }
 
   /**
@@ -1625,7 +1625,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteImportTableLegacy(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), null);
   }
 
   @Test
@@ -1636,7 +1636,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), null);
   }
 
   @Test(expected = ResponseStatusException.class)

@@ -75,7 +75,7 @@ public class DeleteHelperTest {
     dfVO.setName("dfName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
-    deleteHelper.executeDeleteTableProcess(1L, "");
+    deleteHelper.executeDeleteTableProcess(1L, "", null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -95,7 +95,7 @@ public class DeleteHelperTest {
     dfVO.setName("dfName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
-    deleteHelper.executeDeleteDatasetProcess(1L, false, false, );
+    deleteHelper.executeDeleteDatasetProcess(1L, false, false, null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

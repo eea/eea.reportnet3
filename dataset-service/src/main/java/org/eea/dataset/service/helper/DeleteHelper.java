@@ -109,11 +109,12 @@ public class DeleteHelper {
   /**
    * Execute delete table process.
    *
-   * @param datasetId the dataset id
+   * @param datasetId     the dataset id
    * @param tableSchemaId the table schema id
+   * @param jobId         the job ID of the delete process
    */
   @Async
-  public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId) {
+  public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId, Long jobId) {
     LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
     datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
     // now the view is not updated, update the check to false
@@ -123,13 +124,6 @@ public class DeleteHelper {
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
         ? EventType.DELETE_TABLE_COMPLETED_EVENT
         : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
-
-    // Release the lock manually
-    Map<String, Object> deleteImportTable = new HashMap<>();
-    deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
-    deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
-    deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
-    lockService.removeLockByCriteria(deleteImportTable);
 
     // after the table has been deleted, an event is sent to notify it
     Map<String, Object> value = new HashMap<>();
@@ -148,6 +142,10 @@ public class DeleteHelper {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
       LOG_ERROR.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+    }
+
+    if (jobId != null) {
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
     }
     LOG.info("Successfully deleted table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
   }
@@ -202,7 +200,9 @@ public class DeleteHelper {
       }
     }
 
-    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+    if (jobId != null) {
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+    }
     LOG.info("Successfully deleted dataset data for datasetId {}", datasetId);
   }
 

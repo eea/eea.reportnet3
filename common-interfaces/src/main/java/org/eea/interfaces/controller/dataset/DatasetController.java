@@ -156,7 +156,7 @@ public interface DatasetController {
    * @param providerId the provider id
    */
   @DeleteMapping("/v1/{datasetId}/deleteTableData/{tableSchemaId}")
-  void deleteTableData(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> deleteTableData(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);

@@ -805,7 +805,7 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiResponse(code = 403, message = "Dataset not belong dataflow"),
       @ApiResponse(code = 401, message = "Unauthorize"),
       @ApiResponse(code = 500, message = "Error deleting data")})
-  public void deleteTableData(
+  public Map<String, Object> deleteTableData(
       @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
           name = "datasetId") @PathVariable("datasetId") Long datasetId,
       @ApiParam(type = "String", value = "Table schema id",
@@ -823,22 +823,59 @@ public class DatasetControllerImpl implements DatasetController {
     notificationControllerZuul.createUserNotificationPrivate("DELETE_TABLE_DATA_INIT",
         userNotificationContentVO);
 
+    Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
+    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+
     // Rest API only: Check if the dataflow belongs to the dataset
-    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
       String errorMessage =
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
       LOG_ERROR.error(errorMessage);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+
+    Long jobId = null;
     try {
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
+              false, dataflowId, providerId, Collections.singletonList(datasetId));
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, dataflowId, providerId,
+              null, jobStatus);
+
+      if (JobStatusEnum.REFUSED.equals(jobStatus)) {
+        throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_TABLE_DATA_REFUSED);
+      }
+
       LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-      // This method will release the lock
-      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+      deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId, jobId);
       LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+
+      Map<String, Object> result = new HashMap<>();
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if(providerId != null){
+        pollingUrl+= "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+
+      return result;
     } catch (Exception e) {
+
+      if (jobId != null){
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
+
       LOG_ERROR.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
+    }
+    finally {
+      // Release the lock manually
+      Map<String, Object> deleteImportTable = new HashMap<>();
+      deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
+      deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+      deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+      lockService.removeLockByCriteria(deleteImportTable);
     }
   }
 
