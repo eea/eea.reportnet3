@@ -188,7 +188,7 @@ public interface JobController {
     @PostMapping(value = "/private/updateFmeJobId/{jobId}/{fmeJobId}")
     void updateFmeJobId(@PathVariable("jobId") Long jobId, @PathVariable("fmeJobId") String fmeJobId);
 
-    @GetMapping(value = "/private/pollForJobStatus/{jobId}")
+    @GetMapping(value = "/pollForJobStatus/{jobId}")
     Map<String, Object> pollForJobStatus(@PathVariable("jobId") Long jobId, @RequestParam("datasetId") Long datasetId,
                                         @RequestParam("dataflowId") Long dataflowId,
                                         @RequestParam(value = "providerId", required = false) Long providerId);
