@@ -698,10 +698,6 @@ public class DatasetControllerImpl implements DatasetController {
 
       return result;
     } catch (Exception e) {
-      if (jobId != null && !JobStatusEnum.REFUSED.equals(jobStatus)){
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      }
-
       LOG_ERROR.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }
@@ -855,10 +851,6 @@ public class DatasetControllerImpl implements DatasetController {
 
       return result;
     } catch (Exception e) {
-      if (jobId != null && !JobStatusEnum.REFUSED.equals(jobStatus)){
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      }
-
       LOG_ERROR.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
     }
