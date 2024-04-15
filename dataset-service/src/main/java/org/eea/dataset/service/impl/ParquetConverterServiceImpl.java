@@ -21,7 +21,6 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -90,9 +89,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     @Autowired
     private S3Helper s3Helper;
-
-    @Autowired
-    private DatasetService datasetService;
 
     @Autowired
     DataFlowControllerZuul dataFlowControllerZuul;
@@ -676,6 +672,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         return fieldNames;
+    }
+
+    @Override
+    public FileTreatmentHelper getFileTreatmentHelper(){
+        return this.fileTreatmentHelper;
     }
 
     private static Integer extractCsvErrorLineNumber(String errorMessage) {

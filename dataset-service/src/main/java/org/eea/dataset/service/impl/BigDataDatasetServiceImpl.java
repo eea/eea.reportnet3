@@ -15,8 +15,6 @@ import org.eea.dataset.service.BigDataDatasetService;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.PaMService;
 import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -85,8 +83,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DatasetService datasetService;
-
-    @Autowired
     ParquetConverterService parquetConverterService;
 
     @Autowired
@@ -101,7 +97,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     ProcessControllerZuul processControllerZuul;
 
-    @Autowired
     private FileTreatmentHelper fileTreatmentHelper;
 
     @Autowired
@@ -122,12 +117,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private final S3Helper s3HelperPublic;
     private final DremioHelperService dremioHelperService;
 
-    public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService) {
+    public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService, ParquetConverterService parquetConverterService) {
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
         this.s3ServicePrivate = s3HelperPrivate.getS3Service();
         this.dremioHelperService = dremioHelperService;
+        this.parquetConverterService = parquetConverterService;
+        this.fileTreatmentHelper = parquetConverterService.getFileTreatmentHelper();
     }
 
 
