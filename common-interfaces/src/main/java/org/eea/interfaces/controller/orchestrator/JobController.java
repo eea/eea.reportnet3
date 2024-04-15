@@ -142,7 +142,7 @@ public interface JobController {
      * @param jobStatus the status of the job
      * @return the job id
      */
-    @DeleteMapping(value="/addDeleteData/{datasetId}")
+    @PostMapping(value="/addDeleteData/{datasetId}")
     Long addDeleteDataJob(@PathVariable("datasetId") Long datasetId,
                           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                           @RequestParam(value = "dataflowId", required = false) Long dataflowId,

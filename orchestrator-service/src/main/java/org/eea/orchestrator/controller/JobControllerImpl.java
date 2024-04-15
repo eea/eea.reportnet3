@@ -579,8 +579,11 @@ public class JobControllerImpl implements JobController {
      */
     @Override
     @GetMapping(value = "/checkEligibility")
-    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release,
-                                               @RequestParam("dataflowId") Long dataflowId, @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets) {
+    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType,
+                                               @RequestParam("release") boolean release,
+                                               @RequestParam("dataflowId") Long dataflowId,
+                                               @RequestParam(value="dataProviderID", required = false) Long dataProviderId,
+                                               @RequestParam("datasets") List<Long> datasets) {
         return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release);
     }
 

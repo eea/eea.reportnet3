@@ -659,8 +659,11 @@ public class DatasetControllerImpl implements DatasetController {
     notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
         userNotificationContentVO);
 
+    Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
+    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+
     // Rest API only: Check if the dataflow belongs to the dataset
-    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
       String errorMessage =
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
       LOG_ERROR.error(errorMessage);
