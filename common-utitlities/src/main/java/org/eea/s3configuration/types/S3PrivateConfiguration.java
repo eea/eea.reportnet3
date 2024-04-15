@@ -31,6 +31,17 @@ public class S3PrivateConfiguration implements S3Configuration {
   @Value("${s3.default.bucket.path}")
   private String S3_DEFAULT_BUCKET_PATH;
 
+  @Value("${s3.iceberg.bucket}")
+  private String S3_ICEBERG_BUCKET;
+
+  @Value("${s3.iceberg.bucket.name}")
+  private String S3_ICEBERG_BUCKET_NAME;
+
+  @Value("${s3.iceberg.bucket.path}")
+  private String S3_ICEBERG_BUCKET_PATH;
+
+
+
   private static AwsBasicCredentials awsCredentials;
 
   private final static Region s3Region = Region.US_EAST_1;
@@ -73,4 +84,21 @@ public class S3PrivateConfiguration implements S3Configuration {
   public String getS3DefaultBucketPath() {
     return S3_DEFAULT_BUCKET_PATH;
   }
+
+  @Override
+  public String getIcebergBucket() {
+    return S3_ICEBERG_BUCKET;
+  }
+
+  @Override
+  public String getS3IcebergBucketName() {
+    return S3_ICEBERG_BUCKET_NAME;
+  }
+
+  @Override
+  public String getS3IcebergBucketPath() {
+    return S3_ICEBERG_BUCKET_PATH;
+  }
+
+
 }

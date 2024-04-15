@@ -60,13 +60,13 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
     private final String S3_DEFAULT_BUCKET_PATH;
 
-    @Value("${s3.iceberg.bucket.path}")
-    private String S3_ICEBERG_BUCKET_PATH;
+    private final String S3_ICEBERG_BUCKET_PATH;
 
     public DremioHelperServiceImpl(DremioApiController dremioApiController, S3Service s3Service) {
         this.dremioApiController = dremioApiController;
         this.s3Service = s3Service;
         this.S3_DEFAULT_BUCKET_PATH = s3Service.getS3DefaultBucketPath();
+        this.S3_ICEBERG_BUCKET_PATH = s3Service.getS3IcebergBucketPath();
     }
 
     @Override

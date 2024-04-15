@@ -9,4 +9,7 @@ public interface S3Configuration {
   String getDefaultBucket();
   String getS3DefaultBucketName();
   String getS3DefaultBucketPath();
+  String getIcebergBucket();
+  String getS3IcebergBucketName();
+  String getS3IcebergBucketPath();
 }
