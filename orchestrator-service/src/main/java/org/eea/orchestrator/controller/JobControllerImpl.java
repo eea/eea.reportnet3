@@ -419,7 +419,6 @@ public class JobControllerImpl implements JobController {
             LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
         }
 
-//        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.DELETE.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
         LOG.info("Adding delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
         Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.DELETE, statusToInsert, false, null, dataflowName, datasetName);
         LOG.info("Successfully added delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());

@@ -671,9 +671,10 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
     Long jobId = null;
     try {
-      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
+      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
               false, dataflowId, providerId, Collections.singletonList(datasetId));
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, dataflowId, providerId,
@@ -697,18 +698,6 @@ public class DatasetControllerImpl implements DatasetController {
 
       return result;
     } catch (Exception e) {
-
-      if (jobId != null){
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      }
-
-      // Release the lock manually
-      Map<String, Object> deleteDatasetValues = new HashMap<>();
-      deleteDatasetValues.put(LiteralConstants.SIGNATURE,
-              LockSignature.DELETE_DATASET_VALUES.getValue());
-      deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
-      lockService.removeLockByCriteria(deleteDatasetValues);
-
       LOG_ERROR.error("Unexpected error! Error deleting dataset data for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }
@@ -835,9 +824,10 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
     Long jobId = null;
     try {
-      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
+      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
               false, dataflowId, providerId, Collections.singletonList(datasetId));
 
       jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, dataflowId, providerId,
@@ -861,21 +851,8 @@ public class DatasetControllerImpl implements DatasetController {
 
       return result;
     } catch (Exception e) {
-
-      if (jobId != null){
-        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
-      }
-
       LOG_ERROR.error("Unexpected error! Error deleting table data for dataflowId {} datasetId {} tableSchemaId {} and providerId {} Message: {}", dataflowId, datasetId, tableSchemaId, providerId, e.getMessage());
       throw e;
-    }
-    finally {
-      // Release the lock manually
-      Map<String, Object> deleteImportTable = new HashMap<>();
-      deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
-      deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
-      deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
-      lockService.removeLockByCriteria(deleteImportTable);
     }
   }
 
