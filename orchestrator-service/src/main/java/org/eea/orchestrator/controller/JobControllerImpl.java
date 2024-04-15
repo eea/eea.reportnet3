@@ -358,6 +358,74 @@ public class JobControllerImpl implements JobController {
         return jobId;
     }
 
+
+    /**
+     * Creates a delete job for either the dataset data or the table data
+     * if the tableSchemaId is provided.
+     */
+    @Override
+    @HystrixCommand(commandProperties = {@HystrixProperty(
+            name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+    @PostMapping(value="/addDeleteData/{datasetId}")
+    @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR checkApiKey(#dataflowId,#providerId, #datasetId, 'DATASCHEMA_CUSTODIAN', 'DATASCHEMA_STEWARD', 'DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE', 'EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+    @ApiOperation(value = "Delete table data",
+            notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+    @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully created"),
+            @ApiResponse(code = 403, message = "Dataset does not belong dataflow"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Error deleting data")})
+    public Long addDeleteDataJob(
+            @ApiParam(type = "Long", value = "Dataset id", example = "0") @PathVariable("datasetId") Long datasetId,
+            @ApiParam(type = "String", value = "Table schema id",
+                    example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+                    required = false) String tableSchemaId,
+            @ApiParam(type = "Long", value = "Dataflow id",
+                    example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+            @ApiParam(type = "Long", value = "Provider id",
+                    example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+            @ApiParam(type = "boolean", value = "Delete prefilled tables",
+                    example = "true") @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
+                    required = false) Boolean deletePrefilledTables,
+            @ApiParam(type = "JobStatusEnum", value = "Job status",
+                    example = "0") @RequestParam(value = "jobStatus",
+                    required = false) JobStatusEnum jobStatus) {
+
+        ThreadPropertiesManager.setVariable("user", SecurityContextHolder.getContext().getAuthentication().getName());
+        String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("datasetId", datasetId);
+        parameters.put("tableSchemaId", tableSchemaId);
+        parameters.put("dataflowId", dataflowId);
+        parameters.put("providerId", providerId);
+        parameters.put("deletePrefilledTables", deletePrefilledTables);
+        parameters.put("userId", userId);
+
+        JobStatusEnum statusToInsert = jobStatus != null ? jobStatus : JobStatusEnum.IN_PROGRESS;
+
+        String dataflowName = null;
+        try{
+            dataflowName = dataFlowControllerZuul.findDataflowNameById(dataflowId);
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataflow name for dataflowId {} ", dataflowId, e);
+        }
+
+        String datasetName = null;
+        try{
+            datasetName = dataSetMetabaseControllerZuul.findDatasetNameById(datasetId);
+        }
+        catch (Exception e) {
+            LOG.error("Error when trying to receive dataset name for datasetId {} ", datasetId, e);
+        }
+
+//        JobStatusEnum statusToInsert = jobService.checkEligibilityOfJob(JobTypeEnum.DELETE.toString(), dataflowId, providerId, Arrays.asList(datasetId), false);
+        LOG.info("Adding delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        Long jobId = jobService.addJob(dataflowId, providerId, datasetId, parameters, JobTypeEnum.DELETE, statusToInsert, false, null, dataflowName, datasetName);
+        LOG.info("Successfully added delete data job for dataflowId={}, datasetId={}, providerId={}, tableSchemaId={} and creator={} with status {}", dataflowId, datasetId, providerId, tableSchemaId, SecurityContextHolder.getContext().getAuthentication().getName(), statusToInsert.getValue());
+        return jobId;
+    }
+
     /**
      * Adds a copy to eu dataset job.
      */
@@ -511,8 +579,11 @@ public class JobControllerImpl implements JobController {
      */
     @Override
     @GetMapping(value = "/checkEligibility")
-    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType, @RequestParam("release") boolean release,
-                                               @RequestParam("dataflowId") Long dataflowId, @RequestParam(value="dataProviderID", required = false) Long dataProviderId, @RequestParam("datasets") List<Long> datasets) {
+    public JobStatusEnum checkEligibilityOfJob(@RequestParam("jobType") String jobType,
+                                               @RequestParam("release") boolean release,
+                                               @RequestParam("dataflowId") Long dataflowId,
+                                               @RequestParam(value="dataProviderID", required = false) Long dataProviderId,
+                                               @RequestParam("datasets") List<Long> datasets) {
         return jobService.checkEligibilityOfJob(jobType, dataflowId, dataProviderId, datasets, release);
     }
 

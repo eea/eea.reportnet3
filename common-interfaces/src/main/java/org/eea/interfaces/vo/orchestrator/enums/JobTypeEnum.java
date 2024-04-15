@@ -21,7 +21,10 @@ public enum JobTypeEnum {
     FILE_EXPORT("FILE_EXPORT"),
 
     /** The etl import type. */
-    ETL_IMPORT("ETL_IMPORT");
+    ETL_IMPORT("ETL_IMPORT"),
+
+    /** The delete type. */
+    DELETE("DELETE");
 
     /** The value. */
     private final String value;

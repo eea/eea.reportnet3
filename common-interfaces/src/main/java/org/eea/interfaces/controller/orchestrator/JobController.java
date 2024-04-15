@@ -131,6 +131,26 @@ public interface JobController {
                          @RequestParam(value = "providerId", required = false) Long providerId,
                          @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
 
+    /**
+     * Adds a delete data job
+     *
+     * @param datasetId the ID of the dataset
+     * @param tableSchemaId the table schema id
+     * @param dataflowId the of the dataflow
+     * @param providerId the id of the provider
+     * @param deletePrefilledTables whether it will delete the prefilled tables or not
+     * @param jobStatus the status of the job
+     * @return the job id
+     */
+    @PostMapping(value="/addDeleteData/{datasetId}")
+    Long addDeleteDataJob(@PathVariable("datasetId") Long datasetId,
+                          @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                          @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                          @RequestParam(value = "providerId", required = false) Long providerId,
+                          @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
+                                  required = false) Boolean deletePrefilledTables,
+                          @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus);
+
 
     /**
      * Adds a copy to eu dataset job
