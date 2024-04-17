@@ -664,6 +664,8 @@ public class FileTreatmentHelper implements DisposableBean {
                     tableWithAttachmentFieldSet, datasetSchema);
             recordRepository.saveAll(allRecords);
             LOG.info("Data saved for datasetId {}", datasetId);
+            //update geometries
+            updateGeometry(datasetId, datasetSchema);
             // now the view is not updated, update the check to false
             datasetService.updateCheckView(datasetId, false);
             // delete the temporary table from etlExport
