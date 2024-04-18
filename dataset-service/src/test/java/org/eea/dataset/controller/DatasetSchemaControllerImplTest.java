@@ -612,6 +612,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void updateTableSchemaTest() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
@@ -632,6 +635,9 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTestException() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -654,6 +660,9 @@ public class DatasetSchemaControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTestException2() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -678,6 +687,9 @@ public class DatasetSchemaControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTestException3() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();
@@ -701,6 +713,9 @@ public class DatasetSchemaControllerImplTest {
 
   @Test
   public void updateTableSchemaNameTableSchemaNullTest() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
@@ -716,6 +731,9 @@ public class DatasetSchemaControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void updateTableSchemaTableNotFoundNotNullTest() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     DataFlowVO dataflowVO = new DataFlowVO();

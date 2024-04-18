@@ -33,10 +33,7 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.*;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
@@ -972,7 +969,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, null);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId);
         deleteHelper.releaseDeleteTableDataLocksAndSendNotification(datasetId, tableSchemaId);
       }
       else {
@@ -1079,6 +1076,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param mimeType the mime type
    * @param exportFilterVO the export filter VO
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @PostMapping(value = "/exportFileDL")

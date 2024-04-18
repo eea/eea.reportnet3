@@ -52,9 +52,8 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaId the table schema id
-     * @param tableSchemaName the table schema id
      */
-    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName) throws Exception;
+    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId) throws Exception;
 
     /**
      * Delete dataset data

@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
@@ -707,11 +708,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName) throws Exception {
-        if(tableSchemaName == null) {
-            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-            tableSchemaName = datasetSchemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId) throws Exception {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+            throw new Exception("Can not delete table data because iceberg table is created");
         }
+        String tableSchemaName = tableSchemaVO.getNameTableSchema();
+
         if(providerId == null){
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
             providerId = dataSetMetabaseVO.getDataProviderId();
@@ -737,6 +741,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables) throws Exception {
+
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+        for(TableSchemaIdNameVO entry: tableSchemas){
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+                throw new Exception("Can not delete table data because iceberg table is created");
+            }
+        }
+
         DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         if(providerId == null){
             providerId = dataSetMetabaseVO.getDataProviderId();
@@ -751,7 +765,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     continue;
                 }
             }
-            deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema());
+            deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema());
         }
     }
 
