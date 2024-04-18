@@ -398,7 +398,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       ]
     : [];
 
-    const internalExtensions = config.exportTypes.exportDatasetTypes
+  const internalExtensions = config.exportTypes.exportDatasetTypes
     .map(type => {
       const extensionsTypes = !isNil(type.code) && type.code.split('+');
 
@@ -845,7 +845,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
           return {
+            dataAreManuallyEditable: tableSchema.dataAreManuallyEditable,
             description: tableSchema.description || tableSchema.tableSchemaDescription,
+            icebergTableIsCreated: tableSchema.icebergTableIsCreated,
             id: tableSchema.tableSchemaId,
             name: tableSchema.tableSchemaName,
             notEmpty: tableSchema.notEmpty,

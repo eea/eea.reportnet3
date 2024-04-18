@@ -1,7 +1,12 @@
 export const DatasetConfig = {
-  uploadAttachment: '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}',
+  uploadAttachment:
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
   uploadAttachmentWithProviderId:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
+  convertIcebergToParquet:
+    '/dataset/convertIcebergToParquetTable/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}',
+  convertParquetToIceberg:
+    '/dataset/convertParquetToIcebergTable/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}',
   createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record',
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
@@ -13,9 +18,10 @@ export const DatasetConfig = {
     '/dataset/TableValueDatasetDL/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&qcCodes={:qcCodes}',
   downloadTableDefinitions: '/dataschema/v1/dataset/{:datasetSchemaId}/exportFieldSchemas',
   deleteSchema: '/dataschema/dataset/{:datasetId}',
-  deleteAttachment: '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}',
+  deleteAttachment:
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
   deleteAttachmentWithProviderId:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
   deleteData: '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}',
   deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}',
   deleteRecord: '/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}',
@@ -28,9 +34,10 @@ export const DatasetConfig = {
   downloadExportFile: '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}',
   downloadExportFileWithProviderId:
     '/fme/downloadExportFile?datasetId={:datasetId}&fileName={:fileName}&providerId={:providerId}',
-  downloadFileData: '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}',
+  downloadFileData:
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
   downloadFileDataWithProviderId:
-    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}',
+    '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
   downloadPublicReferenceDatasetFileData: '/dataset/exportPublicFile/dataflow/{:dataflowId}?fileName={:fileName}',
   downloadTableData: '/dataset/{:datasetId}/downloadFile?fileName={:fileName}',
   downloadTableDataDL: '/dataset/{:datasetId}/downloadFileDL?fileName={:fileName}',

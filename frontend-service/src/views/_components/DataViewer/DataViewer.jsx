@@ -60,11 +60,13 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DataViewer = ({
   bigData,
+  dataAreManuallyEditable,
   dataProviderId,
   datasetSchemaId,
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
+  icebergTableIsCreated,
   isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
@@ -73,6 +75,7 @@ export const DataViewer = ({
   isGroupedValidationSelected,
   isReferenceDataset,
   isReportingWebform,
+  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
   reporting,
@@ -111,6 +114,9 @@ export const DataViewer = ({
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditRecordsManuallyEnabled, setIsEditRecordsManuallyEnabled] = useState(
+    icebergTableIsCreated ? icebergTableIsCreated : false
+  );
   const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
@@ -151,10 +157,13 @@ export const DataViewer = ({
     pastedRecords: undefined,
     recordsPerPage: userContext.userProps.rowsPerPage,
     selectedFieldId: '',
+    selectedFieldName: '',
     selectedFieldSchemaId: '',
     selectedMapCells: {},
     selectedMaxSize: '',
+    selectedFileName: '',
     selectedRecord: {},
+    selectedRecordId: '',
     selectedValidExtensions: [],
     totalFilteredRecords: 0,
     totalRecords: 0
@@ -242,21 +251,33 @@ export const DataViewer = ({
   const onCoordinatesMoreInfoClick = geoJson =>
     dispatchRecords({ type: 'OPEN_COORDINATES_MORE_INFO', payload: geoJson });
 
-  const onFileDownload = async (fileName, fieldId) => {
+  const onFileDownload = async (fileName, fieldId, recordId, fieldName) => {
     try {
-      const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
+      const { data } = await DatasetService.downloadFileData({
+        dataflowId,
+        datasetId,
+        fieldId,
+        dataProviderId,
+        fileName,
+        recordId,
+        tableSchemaName: tableName,
+        fieldName
+      });
       DownloadFile(data, fileName);
     } catch (error) {
       console.error('DataViewer - onFileDownload.', error);
     }
   };
 
-  const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
-    dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId, validExtensions, maxSize } });
+  const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize, fileName, fieldName, recordId) => {
+    dispatchRecords({
+      type: 'SET_FIELD_IDS',
+      payload: { fieldId, fieldSchemaId, validExtensions, maxSize, fileName, fieldName, recordId }
+    });
   };
 
-  const onFileDeleteVisible = (fieldId, fieldSchemaId) => {
-    dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId } });
+  const onFileDeleteVisible = (fieldId, fieldSchemaId, fileName, fieldName, recordId) => {
+    dispatchRecords({ type: 'SET_FIELD_IDS', payload: { fieldId, fieldSchemaId, fileName, fieldName, recordId } });
     setIsDeleteAttachmentVisible(true);
   };
 
@@ -289,8 +310,14 @@ export const DataViewer = ({
     setIsAttachFileVisible,
     setIsColumnInfoVisible,
     validationsTemplate,
-    reporting
+    reporting,
+    dataAreManuallyEditable,
+    isEditRecordsManuallyEnabled
   );
+
+  useEffect(() => {
+    onChangeButtonsVisibility(isEditRecordsManuallyEnabled);
+  }, [isEditRecordsManuallyEnabled]);
 
   useEffect(() => {
     if (isGroupedValidationSelected) {
@@ -630,7 +657,16 @@ export const DataViewer = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(dataflowId, datasetId, records.selectedFieldId, dataProviderId);
+      await DatasetService.deleteAttachment({
+        dataflowId,
+        datasetId,
+        fieldId: records.selectedFieldId,
+        dataProviderId,
+        tableSchemaName: tableName,
+        fieldName: records.selectedFieldName,
+        fileName: records.selectedFileName,
+        recordId: records.selectedRecordId
+      });
       RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
       setIsDeleteAttachmentVisible(false);
     } catch (error) {
@@ -751,6 +787,10 @@ export const DataViewer = ({
     if (!isEditing) {
       setIsEditing(true);
     }
+  };
+
+  const onEnableManualEdit = checked => {
+    setIsEditRecordsManuallyEnabled(checked);
   };
 
   const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
@@ -1179,14 +1219,18 @@ export const DataViewer = ({
       <ActionsToolbar
         bigData={bigData}
         colsSchema={colsSchema}
+        dataAreManuallyEditable={dataAreManuallyEditable}
         dataflowId={dataflowId}
+        dataProviderId={dataProviderId}
         datasetId={datasetId}
         hasCountryCode={hasCountryCode}
         hasWritePermissions={
           (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
         }
+        icebergTableIsCreated={icebergTableIsCreated}
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+        isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
         isExportable={isExportable}
         isFilterable={isFilterable}
         isFilterValidationsActive={isFilterValidationsActive}
@@ -1195,6 +1239,7 @@ export const DataViewer = ({
         levelErrorTypesWithCorrects={levelErrorAllTypes}
         levelErrorValidations={levelErrorValidations}
         onConfirmDeleteTable={onConfirmDeleteTable}
+        onEnableManualEdit={onEnableManualEdit}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onRefresh={onRefresh}
         onSetVisible={onSetVisible}
@@ -1203,9 +1248,9 @@ export const DataViewer = ({
         prevFilterValue={prevFilterValue}
         records={records}
         selectedRuleId={selectedRuleId}
-        selectedShortCode={selectedShortCode}
         selectedRuleLevelError={selectedRuleLevelError}
         selectedRuleMessage={selectedRuleMessage}
+        selectedShortCode={selectedShortCode}
         selectedTableSchemaId={selectedTableSchemaId}
         setColumns={setColumns}
         showGroupedValidationFilter={showGroupedValidationFilter}
@@ -1227,11 +1272,13 @@ export const DataViewer = ({
             (hasWritePermissions && isReferenceDataset) ? (
               <Footer
                 bigData={bigData}
+                dataAreManuallyEditable={dataAreManuallyEditable}
                 hasWritePermissions={
                   (hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
                 }
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
                 onAddClick={() => {
                   setIsNewRecord(true);
                   setAddDialogVisible(true);
@@ -1360,13 +1407,21 @@ export const DataViewer = ({
               ? getUrl(DatasetConfig.uploadAttachment, {
                   dataflowId,
                   datasetId,
-                  fieldId: records.selectedFieldId
+                  fieldId: records.selectedFieldId,
+                  tableSchemaName: tableName,
+                  fieldName: records.selectedFieldName,
+                  recordId: records.selectedRecordId,
+                  previousFileName: records.selectedFileName
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
                   datasetId,
                   fieldId: records.selectedFieldId,
-                  providerId: dataProviderId
+                  providerId: dataProviderId,
+                  tableSchemaName: tableName,
+                  fieldName: records.selectedFieldName,
+                  recordId: records.selectedRecordId,
+                  previousFileName: records.selectedFileName
                 })
           }`}
         />

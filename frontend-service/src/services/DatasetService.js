@@ -21,6 +21,12 @@ import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetService = {
+  convertIcebergToParquet: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
+    await DatasetRepository.convertIcebergToParquet({ datasetId, dataflowId, providerId, tableSchemaId }),
+
+  convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
+    await DatasetRepository.convertParquetToIceberg({ datasetId, dataflowId, providerId, tableSchemaId }),
+
   createRecordDesign: async (datasetId, datasetTableRecordField) => {
     const datasetTableFieldDesign = new DatasetTableField({});
     datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
@@ -79,8 +85,26 @@ export const DatasetService = {
   deleteData: async (datasetId, arePrefilledTablesDeleted) =>
     await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
 
-  deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId) =>
-    await DatasetRepository.deleteAttachment(dataflowId, datasetId, fieldId, dataProviderId),
+  deleteAttachment: async ({
+    dataflowId,
+    datasetId,
+    fieldId,
+    dataProviderId,
+    tableSchemaName,
+    fieldName,
+    fileName,
+    recordId
+  }) =>
+    await DatasetRepository.deleteAttachment({
+      dataflowId,
+      datasetId,
+      fieldId,
+      dataProviderId,
+      tableSchemaName,
+      fieldName,
+      fileName,
+      recordId
+    }),
 
   deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
@@ -103,8 +127,26 @@ export const DatasetService = {
   downloadExportFile: async (datasetId, fileName, providerId) =>
     await DatasetRepository.downloadExportFile(datasetId, fileName, providerId),
 
-  downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId) =>
-    await DatasetRepository.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId),
+  downloadFileData: async ({
+    dataflowId,
+    datasetId,
+    fieldId,
+    dataProviderId,
+    fileName,
+    recordId,
+    tableSchemaName,
+    fieldName
+  }) =>
+    await DatasetRepository.downloadFileData({
+      dataflowId,
+      datasetId,
+      fieldId,
+      dataProviderId,
+      fileName,
+      recordId,
+      tableSchemaName,
+      fieldName
+    }),
 
   downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
     await DatasetRepository.downloadPublicDatasetFile(dataflowId, dataProviderId, fileName),
@@ -435,9 +477,15 @@ export const DatasetService = {
         : null;
 
       return new DatasetTable({
+        dataAreManuallyEditable: isNull(datasetTableDTO.dataAreManuallyEditable)
+          ? false
+          : datasetTableDTO.dataAreManuallyEditable,
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
+        icebergTableIsCreated: isNull(datasetTableDTO.icebergTableIsCreated)
+          ? false
+          : datasetTableDTO.icebergTableIsCreated,
         tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
@@ -708,7 +756,8 @@ export const DatasetService = {
     tableSchemaIsReadOnly,
     datasetId,
     tableSchemaNotEmpty,
-    tableSchemaFixedNumber
+    tableSchemaFixedNumber,
+    dataAreManuallyEditable
   ) =>
     await DatasetRepository.updateTableDesign(
       tableSchemaToPrefill,
@@ -717,7 +766,8 @@ export const DatasetService = {
       tableSchemaIsReadOnly,
       datasetId,
       tableSchemaNotEmpty,
-      tableSchemaFixedNumber
+      tableSchemaFixedNumber,
+      dataAreManuallyEditable
     ),
 
   updateTableNameDesign: async (tableSchemaId, tableSchemaName, datasetId) =>

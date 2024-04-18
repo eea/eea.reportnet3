@@ -147,7 +147,6 @@ export const DataCollection = () => {
     setExportButtonsList(internalExtensionsList);
   };
 
-
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
@@ -220,9 +219,11 @@ export const DataCollection = () => {
         datasetSchema.tables.map(tableSchema => {
           tableSchemaNamesList.push(tableSchema.tableSchemaName);
           return {
+            dataAreManuallyEditable: tableSchema['dataAreManuallyEditable'],
             description: tableSchema['tableSchemaDescription'],
             fixedNumber: tableSchema['tableSchemaFixedNumber'],
             hasInfoTooltip: true,
+            icebergTableIsCreated: tableSchema['icebergTableIsCreated'],
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
             notEmpty: tableSchema['tableSchemaNotEmpty'],

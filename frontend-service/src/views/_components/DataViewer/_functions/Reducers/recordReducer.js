@@ -162,7 +162,10 @@ export const recordReducer = (state, { type, payload }) => {
         selectedFieldId: payload.fieldId,
         selectedFieldSchemaId: payload.fieldSchemaId,
         selectedValidExtensions: payload.validExtensions,
-        selectedMaxSize: payload.maxSize
+        selectedMaxSize: payload.maxSize,
+        selectedFileName: payload.fileName,
+        selectedFieldName: payload.fieldName,
+        selectedRecordId: payload.recordId
       };
 
     case 'SAVE_MAP_COORDINATES':
