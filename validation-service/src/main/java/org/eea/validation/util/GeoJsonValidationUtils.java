@@ -38,6 +38,7 @@ public class GeoJsonValidationUtils {
     return validateGeometryField(fieldValue.getValue(), fieldValue.getType());
   }
 
+  //fieldValue should be of type {"type":"Feature","geometry":{"type":"Point","coordinates":[45545,40]},"properties":{"srid":"4326"}}
   public static boolean validateGeometryDremio(String fieldValue, DataType type) {
     return validateGeometryField(fieldValue, type).isEmpty();
   }
