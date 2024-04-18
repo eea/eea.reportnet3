@@ -56,6 +56,7 @@ export const DatasetService = {
         const newField = new DatasetTableField({});
         newField.id = null;
         newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
+        newField.name = dataTableFieldDTO.fieldData.name;
         newField.type = dataTableFieldDTO.fieldData.type;
         newField.value = DatasetUtils.parseValue({
           type: dataTableFieldDTO.fieldData.type,
@@ -108,8 +109,8 @@ export const DatasetService = {
 
   deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
-  deleteRecord: async (datasetId, recordId, deleteInCascade) =>
-    await DatasetRepository.deleteRecord(datasetId, recordId, deleteInCascade),
+  deleteRecord: async ({ datasetId, recordId, tableSchemaId, deleteInCascade }) =>
+    await DatasetRepository.deleteRecord({ datasetId, recordId, tableSchemaId, deleteInCascade }),
 
   deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
 
@@ -707,11 +708,12 @@ export const DatasetService = {
     return await DatasetRepository.updateFieldDesign(datasetId, datasetTableFieldDesign);
   },
 
-  updateRecord: async (datasetId, record, updateInCascade) => {
+  updateRecord: async ({ datasetId, record, tableSchemaId, updateInCascade }) => {
     const fields = record.dataRow.map(dataTableFieldDTO => {
       const newField = new DatasetTableField({});
       newField.id = dataTableFieldDTO.fieldData.id;
       newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
+      newField.name = dataTableFieldDTO.fieldData.fieldName;
       newField.type = dataTableFieldDTO.fieldData.type;
       newField.value = DatasetUtils.parseValue({
         type: dataTableFieldDTO.fieldData.type,
@@ -729,7 +731,7 @@ export const DatasetService = {
     datasetTableRecord.idRecordSchema = record.recordSchemaId;
     datasetTableRecord.id = record.recordId;
     //The service will take an array of objects(records). Actually the frontend only allows one record CRUD
-    return await DatasetRepository.updateRecord(datasetId, [datasetTableRecord], updateInCascade);
+    return await DatasetRepository.updateRecord(datasetId, [datasetTableRecord], tableSchemaId, updateInCascade);
   },
 
   updateReferenceDatasetStatus: async (datasetId, updatable) =>

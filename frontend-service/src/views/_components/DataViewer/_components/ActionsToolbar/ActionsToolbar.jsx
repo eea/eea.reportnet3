@@ -305,6 +305,7 @@ export const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
+            isEditRecordsManuallyEnabled ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             actionsContext.importDatasetProcessing ||
@@ -342,7 +343,7 @@ export const ActionsToolbar = ({
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
             if (e) {
-              onDisableEditButton(e);
+              onDisableEditButton(e.checked);
             }
 
             convertTable(e.checked);
@@ -496,6 +497,7 @@ export const ActionsToolbar = ({
         />
         <DeleteDialog
           disabled={
+            isEditRecordsManuallyEnabled ||
             !hasWritePermissions ||
             isUndefined(records.totalRecords) ||
             isDataflowOpen ||

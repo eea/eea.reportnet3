@@ -230,11 +230,7 @@ const getLinkValue = (linkOptions, value) => {
 
 const getMultiselectValues = (multiselectItemsOptions, value) => {
   if (!isUndefined(value) && value !== '' && !isUndefined(value[0]) && !isUndefined(multiselectItemsOptions)) {
-    const splittedValue = (
-      !Array.isArray(value)
-        ? TextUtils.splitByChar(value, ';')
-        : value
-    )
+    const splittedValue = (!Array.isArray(value) ? TextUtils.splitByChar(value, ';') : value)
       .filter(val => !!val)
       .filter(val => val !== '');
     return intersection(
@@ -271,7 +267,7 @@ const createEmptyObject = (columnsSchema, data) => {
   let fields;
   if (!isUndefined(columnsSchema)) {
     fields = columnsSchema.map(column => ({
-      fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field }
+      fieldData: { [column.field]: null, type: column.type, fieldSchemaId: column.field, name: column.header }
     }));
   }
 

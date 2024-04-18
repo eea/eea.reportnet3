@@ -72,9 +72,9 @@ export const DatasetRepository = {
           })
     }),
 
-  deleteRecord: async (datasetId, recordId, deleteInCascade = false) =>
+  deleteRecord: async ({ datasetId, recordId, tableSchemaId, deleteInCascade = false }) =>
     await HTTPRequester.delete({
-      url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
+      url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId, tableSchemaId })
     }),
 
   deleteFieldDesign: async (datasetId, fieldSchemaId) =>
@@ -389,9 +389,9 @@ export const DatasetRepository = {
       data: datasetTableRecordField
     }),
 
-  updateRecord: async (datasetId, datasetTableRecords, updateInCascade = false) =>
+  updateRecord: async (datasetId, datasetTableRecords, tableSchemaId, updateInCascade = false) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateRecord, { datasetId, updateInCascade }),
+      url: getUrl(DatasetConfig.updateRecord, { datasetId, tableSchemaId, updateInCascade }),
       data: datasetTableRecords
     }),
 

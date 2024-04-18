@@ -66,7 +66,7 @@ export const DataViewer = ({
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
-  icebergTableIsCreated,
+  isEditRecordsManuallyEnabled,
   isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
@@ -76,6 +76,7 @@ export const DataViewer = ({
   isReferenceDataset,
   isReportingWebform,
   onChangeButtonsVisibility,
+  onEnableManualEdit,
   onHideSelectGroupedValidation,
   onLoadTableData,
   reporting,
@@ -115,9 +116,6 @@ export const DataViewer = ({
   const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isEditButtonDisabled, setIsEditButtonDisabled] = useState(false);
-  const [isEditRecordsManuallyEnabled, setIsEditRecordsManuallyEnabled] = useState(
-    icebergTableIsCreated ? icebergTableIsCreated : false
-  );
   const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
@@ -680,7 +678,11 @@ export const DataViewer = ({
 
   const onConfirmDeleteRow = async () => {
     try {
-      await DatasetService.deleteRecord(datasetId, records.selectedRecord.recordId);
+      await DatasetService.deleteRecord({
+        datasetId,
+        recordId: records.selectedRecord.recordId,
+        tableSchemaId: tableId
+      });
       const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
       const page =
         (calcRecords - 1) / records.recordsPerPage === 1
@@ -791,10 +793,6 @@ export const DataViewer = ({
     if (!isEditing) {
       setIsEditing(true);
     }
-  };
-
-  const onEnableManualEdit = checked => {
-    setIsEditRecordsManuallyEnabled(checked);
   };
 
   const onDisableEditButton = checked => {
@@ -931,7 +929,7 @@ export const DataViewer = ({
     } else {
       try {
         setIsSaving(true);
-        await DatasetService.updateRecord(datasetId, parseMultiselect(record));
+        await DatasetService.updateRecord({ datasetId, record: parseMultiselect(record), tableSchemaId: tableId });
         onRefresh();
       } catch (error) {
         if (error.response.status === 423) {
@@ -1235,7 +1233,6 @@ export const DataViewer = ({
         hasWritePermissions={
           (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
         }
-        icebergTableIsCreated={icebergTableIsCreated}
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
         isEditButtonDisabled={isEditButtonDisabled}

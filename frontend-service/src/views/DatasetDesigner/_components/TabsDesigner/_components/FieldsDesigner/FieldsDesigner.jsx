@@ -83,6 +83,9 @@ export const FieldsDesigner = ({
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isEditRecordsManuallyEnabled, setIsEditRecordsManuallyEnabled] = useState(
+    table?.icebergTableIsCreated ? table.icebergTableIsCreated : false
+  );
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPkChecked, setIsPkChecked] = useState(false);
@@ -169,6 +172,10 @@ export const FieldsDesigner = ({
     } else {
       setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
     }
+  };
+
+  const onEnableManualEdit = checked => {
+    setIsEditRecordsManuallyEnabled(checked);
   };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
@@ -506,15 +513,16 @@ export const FieldsDesigner = ({
           dataAreManuallyEditable={table.dataAreManuallyEditable}
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
-          icebergTableIsCreated={table.icebergTableIsCreated}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onChangeButtonsVisibility={onChangeButtonsVisibility}
+          onEnableManualEdit={onEnableManualEdit}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           reporting={false}
@@ -1048,7 +1056,9 @@ export const FieldsDesigner = ({
               ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
               checked={dataAreManuallyEditable}
               className={styles.fieldDesignerItem}
-              disabled={isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
+              disabled={
+                isEditRecordsManuallyEnabled || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset
+              }
               id={`${table.tableSchemaId}_check_manual_edit`}
               inputId={`${table.tableSchemaId}_check_manual_edit`}
               label="Default"

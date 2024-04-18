@@ -24,7 +24,8 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&fileName={:fileName}&recordId={:recordId}',
   deleteData: '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}',
   deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}',
-  deleteRecord: '/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}',
+  deleteRecord:
+    '/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}?tableSchemaId={:tableSchemaId}',
   deleteFieldDesign: '/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}',
   deleteTableDesign: '/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}',
   downloadPublicDatasetFile:
@@ -73,7 +74,7 @@ export const DatasetConfig = {
   updateFieldDesign: '/dataschema/{:datasetId}/fieldSchema',
   updateReferenceDatasetStatus: '/referenceDataset/{:datasetId}?updatable={:updatable}',
   updateField: '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}',
-  updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}',
+  updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',
   validateAllSql: '/rules/validateAllRules?datasetId={:datasetId}',
