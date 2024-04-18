@@ -114,6 +114,7 @@ export const DataViewer = ({
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditButtonDisabled, setIsEditButtonDisabled] = useState(false);
   const [isEditRecordsManuallyEnabled, setIsEditRecordsManuallyEnabled] = useState(
     icebergTableIsCreated ? icebergTableIsCreated : false
   );
@@ -317,6 +318,9 @@ export const DataViewer = ({
 
   useEffect(() => {
     onChangeButtonsVisibility(isEditRecordsManuallyEnabled);
+    if (isEditRecordsManuallyEnabled) {
+      setIsEditButtonDisabled(!isEditRecordsManuallyEnabled);
+    }
   }, [isEditRecordsManuallyEnabled]);
 
   useEffect(() => {
@@ -793,6 +797,10 @@ export const DataViewer = ({
     setIsEditRecordsManuallyEnabled(checked);
   };
 
+  const onDisableEditButton = checked => {
+    setIsEditButtonDisabled(checked);
+  };
+
   const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
     dispatchRecords({ type: 'OPEN_MAP', payload: { coordinates, fieldType, mapCells, readOnly } });
 
@@ -1230,6 +1238,7 @@ export const DataViewer = ({
         icebergTableIsCreated={icebergTableIsCreated}
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+        isEditButtonDisabled={isEditButtonDisabled}
         isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
         isExportable={isExportable}
         isFilterable={isFilterable}
@@ -1239,6 +1248,7 @@ export const DataViewer = ({
         levelErrorTypesWithCorrects={levelErrorAllTypes}
         levelErrorValidations={levelErrorValidations}
         onConfirmDeleteTable={onConfirmDeleteTable}
+        onDisableEditButton={onDisableEditButton}
         onEnableManualEdit={onEnableManualEdit}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onRefresh={onRefresh}

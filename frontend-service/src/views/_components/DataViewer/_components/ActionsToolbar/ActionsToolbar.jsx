@@ -46,6 +46,7 @@ export const ActionsToolbar = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isEditButtonDisabled,
   isEditRecordsManuallyEnabled,
   isExportable,
   isFilterable = true,
@@ -56,6 +57,7 @@ export const ActionsToolbar = ({
   levelErrorValidations,
   onHideSelectGroupedValidation,
   onConfirmDeleteTable,
+  onDisableEditButton,
   onEnableManualEdit,
   onUpdateData,
   originalColumns,
@@ -186,6 +188,7 @@ export const ActionsToolbar = ({
     } catch (error) {
       console.error('ActionsToolbar - convertTable.', error);
       notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
+      onDisableEditButton(false);
     }
   };
 
@@ -334,10 +337,14 @@ export const ActionsToolbar = ({
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
           checked={isEditRecordsManuallyEnabled && dataAreManuallyEditable}
-          disabled={!dataAreManuallyEditable}
+          disabled={!dataAreManuallyEditable || isEditButtonDisabled}
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
+            if (e) {
+              onDisableEditButton(e);
+            }
+
             convertTable(e.checked);
           }}
           role="checkbox"
@@ -345,7 +352,7 @@ export const ActionsToolbar = ({
         <label
           id="check_edit_records_manually_label"
           style={{
-            color: dataAreManuallyEditable ? 'var(--main-font-color)' : '#9A9A9A',
+            color: dataAreManuallyEditable && !isEditButtonDisabled ? 'var(--main-font-color)' : '#9A9A9A',
             cursor: 'auto',
             fontSize: '11pt',
             marginLeft: '6px',

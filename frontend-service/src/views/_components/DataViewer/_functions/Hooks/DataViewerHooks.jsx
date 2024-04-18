@@ -138,25 +138,32 @@ export const useSetColumns = (
             onClick={() => onFileDownload(value, fieldId, recordId, fieldName)}
           />
         )}
-        {hasWritePermissions && !isDataflowOpen && !isDesignDatasetEditorRead && (!colSchema.readOnly || !isReporting) && (
-          <Button
-            className="p-button-animated-blink p-button-secondary-transparent"
-            icon="import"
-            onClick={() => {
-              setIsAttachFileVisible(true);
-              onFileUploadVisible(
-                fieldId,
-                fieldSchemaId,
-                !isNil(colSchema) ? colSchema.validExtensions : [],
-                colSchema.maxSize,
-                value,
-                fieldName,
-                recordId
-              );
-            }}
-          />
-        )}
-        {hasWritePermissions &&
+        {dataAreManuallyEditable &&
+          isEditRecordsManuallyEnabled &&
+          hasWritePermissions &&
+          !isDataflowOpen &&
+          !isDesignDatasetEditorRead &&
+          (!colSchema.readOnly || !isReporting) && (
+            <Button
+              className="p-button-animated-blink p-button-secondary-transparent"
+              icon="import"
+              onClick={() => {
+                setIsAttachFileVisible(true);
+                onFileUploadVisible(
+                  fieldId,
+                  fieldSchemaId,
+                  !isNil(colSchema) ? colSchema.validExtensions : [],
+                  colSchema.maxSize,
+                  value,
+                  fieldName,
+                  recordId
+                );
+              }}
+            />
+          )}
+        {dataAreManuallyEditable &&
+          isEditRecordsManuallyEnabled &&
+          hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
           (!colSchema.readOnly || !isReporting) &&
