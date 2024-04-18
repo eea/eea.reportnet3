@@ -139,9 +139,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         else{
             csvModification = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
-            if (csvModification != null) {
-                csvFilesWithAddedColumns = csvModification.getModifiedCsvFiles();
-            }
+            csvFilesWithAddedColumns = csvModification.getModifiedCsvFiles();
         }
 
         if(csvFilesWithAddedColumns == null){
@@ -207,7 +205,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
             } else {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-                if (csvModification != null) { //if it is null that means that there are no records to implement
+                if (csvModification != null) {
                     String createTableQuery = getTableQuery(csvModification, parquetInnerFolderPath, dremioPathForCsvFile);
                     String processId = dremioHelperService.executeSqlStatement(createTableQuery);
                     dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
@@ -407,7 +405,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         if(recordCounter == 0){
             LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
-            return null;
+            return new CsvModification(null, csvHeaders);
         }
         modifiedCsvFiles.add(csvFileWithAddedColumns);
         return new CsvModification(modifiedCsvFiles, csvHeaders);
