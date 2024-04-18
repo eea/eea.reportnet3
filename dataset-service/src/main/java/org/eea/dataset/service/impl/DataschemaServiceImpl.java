@@ -560,12 +560,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update table schema.
    *
    * @param datasetId the dataset id
-   * @param tableSchemaVO the table schema VO
+   * @param tableSchemaVO the table schema
+   * @param updateMaterializedViews the updateMaterializedViews
    *
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateTableSchema(Long datasetId, TableSchemaVO tableSchemaVO) throws EEAException {
+  public void updateTableSchema(Long datasetId, TableSchemaVO tableSchemaVO, Boolean updateMaterializedViews) throws EEAException {
 
     String datasetSchemaId = getDatasetSchemaId(datasetId);
 
@@ -585,8 +586,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       throw new EEAException(e);
     }
 
-    releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
+    if(updateMaterializedViews) {
+      releaseCreateUpdateView(datasetId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), false);
+    }
   }
 
   /**
@@ -2580,7 +2583,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       table.setToPrefill(referenceDataset);
       table.setReadOnly(referenceDataset);
       try {
-        updateTableSchema(datasetId, table);
+        updateTableSchema(datasetId, table, true);
       } catch (EEAException e) {
         LOG_ERROR.error(
             "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",

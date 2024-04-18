@@ -614,7 +614,7 @@ public class DatasetSchemaControllerImplTest {
   public void updateTableSchemaTest() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
@@ -622,7 +622,7 @@ public class DatasetSchemaControllerImplTest {
     TableSchemaVO tableSchemaVO = new TableSchemaVO();
     tableSchemaVO.setNameTableSchema("tableName");
     dataSchemaControllerImpl.updateTableSchema(1L, tableSchemaVO);
-    Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
+    Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -639,7 +639,7 @@ public class DatasetSchemaControllerImplTest {
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     doThrow(EEAException.class).when(dataschemaService).updateTableSchema(Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
     try {
       TableSchemaVO tableSchema = new TableSchemaVO();
       tableSchema.setIdTableSchema("");
@@ -662,7 +662,7 @@ public class DatasetSchemaControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     EEAException exception =
         new EEAException(String.format(EEAErrorMessage.ERROR_UPDATING_TABLE_SCHEMA, "", 1L));
-    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
     try {
       TableSchemaVO tableSchema = new TableSchemaVO();
       tableSchema.setIdTableSchema("");
@@ -686,7 +686,7 @@ public class DatasetSchemaControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     EEAException exception =
         new EEAException(String.format(EEAErrorMessage.TABLE_NOT_FOUND, "", 1L));
-    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
     try {
       TableSchemaVO tableSchema = new TableSchemaVO();
       tableSchema.setIdTableSchema("");
@@ -703,7 +703,7 @@ public class DatasetSchemaControllerImplTest {
   public void updateTableSchemaNameTableSchemaNullTest() throws EEAException {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    doNothing().when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflowVO);
@@ -711,7 +711,7 @@ public class DatasetSchemaControllerImplTest {
     TableSchemaVO tableSchemaVO = new TableSchemaVO();
     tableSchemaVO.setNameTableSchema(null);
     dataSchemaControllerImpl.updateTableSchema(1L, tableSchemaVO);
-    Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
+    Mockito.verify(dataschemaService, times(1)).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test(expected = ResponseStatusException.class)
@@ -724,7 +724,7 @@ public class DatasetSchemaControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.anyLong())).thenReturn(1L);
     EEAException exception = Mockito.mock(EEAException.class);
     Mockito.when(exception.getMessage()).thenReturn(null).thenReturn("mesage").thenReturn("mesage");
-    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any());
+    doThrow(exception).when(dataschemaService).updateTableSchema(Mockito.any(), Mockito.any(), Mockito.any());
 
     try {
       TableSchemaVO tableSchema = new TableSchemaVO();

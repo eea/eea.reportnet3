@@ -115,10 +115,12 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param records the records
    * @param updateCascadePK the update cascade PK
+   * @param tableSchemaId the tableSchemaId
    */
   @PutMapping("/{id}/updateRecord")
   void updateRecords(@PathVariable("id") Long datasetId, @RequestBody List<RecordVO> records,
-      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK);
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
 
   /**
    * Delete record.

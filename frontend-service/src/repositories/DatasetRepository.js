@@ -15,7 +15,7 @@ export const DatasetRepository = {
 
   convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
     await HTTPRequester.post({
-      url: getUrl(DatasetConfig.convertIcebergToParquet, { datasetId, dataflowId, providerId, tableSchemaId })
+      url: getUrl(DatasetConfig.convertParquetToIceberg, { datasetId, dataflowId, providerId, tableSchemaId })
     }),
 
   createRecordDesign: async (datasetId, datasetTableRecordField) =>

@@ -557,6 +557,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param records the records
    * @param updateCascadePK the update cascade PK
+   * @param tableSchemaId the tableSchemaId
    */
   @Override
   @HystrixCommand
@@ -572,7 +573,8 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @ApiParam(value = "list of records") @RequestBody List<RecordVO> records,
       @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
-          value = "updateCascadePK", required = false) boolean updateCascadePK) {
+          value = "updateCascadePK", required = false) boolean updateCascadePK,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error(
           "Error updating records. The datasetId or the records to update are emtpy or null");
@@ -586,7 +588,23 @@ public class DatasetControllerImpl implements DatasetController {
     }
     try {
       LOG.info("Updating records for datasetId {}", datasetId);
-      updateRecordHelper.executeUpdateProcess(datasetId, records, updateCascadePK);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        Long providerId = datasetService.getDataProviderIdById(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          bigDataDatasetService.updateRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records, updateCascadePK);
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+        }
+      }
+      else{
+        updateRecordHelper.executeUpdateProcess(datasetId, records, updateCascadePK);
+      }
       LOG.info("Successfully updated records for datasetId {}", datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating records in the datasetId {}. Message: {}", datasetId,
@@ -2705,10 +2723,12 @@ public class DatasetControllerImpl implements DatasetController {
                                     @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
 
       try{
+        LOG.info("Converting parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && !BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
           bigDataDatasetService.convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO);
+          LOG.info("Converted parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
         }
         else{
           throw new Exception("The table data are not manually editable or the iceberg table is already created");
@@ -2737,10 +2757,12 @@ public class DatasetControllerImpl implements DatasetController {
                                     @RequestParam(value = "providerId", required = false) Long providerId,
                                     @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
     try{
+      LOG.info("Converting iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
       if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
         bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO);
+        LOG.info("Converted iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       }
       else{
         throw new Exception("The table data are not manually editable or the iceberg table has not been created");

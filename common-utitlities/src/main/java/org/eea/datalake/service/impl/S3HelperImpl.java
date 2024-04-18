@@ -175,7 +175,7 @@ public class S3HelperImpl implements S3Helper {
      */
     @Override
     public File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException {
-        byte[] data = getBytesFromS3(key);
+        byte[] data = getBytesFromS3(key, false);
 
         // Write the data to a local file.
         String filePath = null;
@@ -206,11 +206,12 @@ public class S3HelperImpl implements S3Helper {
      * @param fileName
      * @param path
      * @param fileType
+     * @param getFileFromIcebergTable
      * @return
      */
     @Override
-    public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
-        byte[] data = getBytesFromS3(key);
+    public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId, Boolean getFileFromIcebergTable) throws IOException {
+        byte[] data = getBytesFromS3(key, getFileFromIcebergTable);
 
         // Write the data to a local file.
         File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
@@ -396,11 +397,12 @@ public class S3HelperImpl implements S3Helper {
             .build();
     }
 
-    private byte[] getBytesFromS3(String key) {
+    private byte[] getBytesFromS3(String key, Boolean getFileFromIcebergTable) {
+        String bucketName = getFileFromIcebergTable ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
             .key(key)
-            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .bucket(bucketName)
             .build();
 
         ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);

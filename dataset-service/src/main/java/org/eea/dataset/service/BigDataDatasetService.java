@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.AttachmentDLVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface BigDataDatasetService {
 
@@ -131,5 +134,18 @@ public interface BigDataDatasetService {
      *
      */
     void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception;
+
+    /**
+     * Update records manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaName the tableSchemaName
+     * @param records the new editted records
+     * @param updateCascadePK the updateCascadePK
+     *
+     */
+    void updateRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records, boolean updateCascadePK) throws Exception;
 
 }

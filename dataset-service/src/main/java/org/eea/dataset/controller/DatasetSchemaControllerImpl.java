@@ -473,9 +473,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       filterName(nameTrimmed, isSchema);
       tableSchemaVO.setNameTableSchema(nameTrimmed);
     }
-
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     if (!TypeStatusEnum.DESIGN.equals(dataflowControllerZuul
-        .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+        .getMetabaseById(dataflowId).getStatus())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid dataflow status");
     }
 
@@ -483,10 +483,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
         SecurityContextHolder.getContext().getAuthentication().getName());
 
     try {
-      dataschemaService.updateTableSchema(datasetId, tableSchemaVO);
-      // recordStoreControllerZuul.createUpdateQueryView(datasetId, false);
-      dataschemaService.releaseCreateUpdateView(datasetId,
-          SecurityContextHolder.getContext().getAuthentication().getName(), false);
+      Boolean updateMaterializedViews = true;
+      DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        updateMaterializedViews = false;
+      }
+      dataschemaService.updateTableSchema(datasetId, tableSchemaVO, updateMaterializedViews);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating table schema for datasetId {}. Message: {}", datasetId, e.getMessage(), e);
       if (e.getMessage() != null

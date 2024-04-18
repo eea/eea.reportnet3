@@ -30,6 +30,8 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.AttachmentDLVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
@@ -910,7 +912,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
 
         tableSchemaVO.setIcebergTableIsCreated(true);
-        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO);
+        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO, false);
     }
 
     @Override
@@ -944,6 +946,34 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         tableSchemaVO.setIcebergTableIsCreated(false);
-        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO);
+        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO, false);
+    }
+
+
+    @Override
+    public void updateRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records, boolean updateCascadePK) throws Exception {
+        providerId = providerId != null ? providerId : 0L;
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        for (RecordVO record: records){
+            //create update query for the record
+            StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE " + icebergTablePath + " SET ");
+            for(int i=0; i< record.getFields().size(); i++){
+                FieldVO field = record.getFields().get(i);
+                updateQueryBuilder.append(field.getName() + " = '" + field.getValue() + "'");
+                updateQueryBuilder.append((i != record.getFields().size() -1) ? ", " : " ");
+            }
+            updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + record.getId() + "'");
+            String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
+            dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
+        }
+
+        //refresh metadata
+        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
+        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
+        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
     }
 }
