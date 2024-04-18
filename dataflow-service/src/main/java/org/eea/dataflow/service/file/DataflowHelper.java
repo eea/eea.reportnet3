@@ -216,6 +216,7 @@ public class DataflowHelper {
           datasetSchemaControllerZuul.findDataSchemaByDatasetIdPrivate(designDatasetVO.getId());
       for (TableSchemaVO table : datasetSchemaVO.getTableSchemas()) {
         tableNames.put(table.getIdTableSchema(), table.getNameTableSchema());
+        tableNames.put(table.getRecordSchema().getIdRecordSchema(), table.getNameTableSchema());
         for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
           fieldNames.put(field.getId(), field.getName());
           tableNames.put(field.getId(), table.getNameTableSchema());
