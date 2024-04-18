@@ -207,10 +207,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
             } else {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-
-                String createTableQuery = getTableQuery(csvModification, parquetInnerFolderPath, dremioPathForCsvFile);
-                String processId = dremioHelperService.executeSqlStatement(createTableQuery);
-                dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
+                if (csvModification != null) {
+                    String createTableQuery = getTableQuery(csvModification, parquetInnerFolderPath, dremioPathForCsvFile);
+                    String processId = dremioHelperService.executeSqlStatement(createTableQuery);
+                    dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
+                }
             }
         }
         //refresh the metadata
