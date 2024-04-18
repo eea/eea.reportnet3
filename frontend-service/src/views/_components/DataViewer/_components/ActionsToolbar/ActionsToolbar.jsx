@@ -152,19 +152,35 @@ export const ActionsToolbar = ({
   const convertTable = async checked => {
     try {
       if (checked) {
-        await DatasetService.convertParquetToIceberg({
-          datasetId,
-          dataflowId,
-          providerId: dataProviderId,
-          tableSchemaId: tableId
-        });
+        if (dataProviderId) {
+          await DatasetService.convertParquetToIceberg({
+            datasetId,
+            dataflowId,
+            providerId: dataProviderId,
+            tableSchemaId: tableId
+          });
+        } else {
+          await DatasetService.convertParquetToIceberg({
+            datasetId,
+            dataflowId,
+            tableSchemaId: tableId
+          });
+        }
       } else {
-        await DatasetService.convertIcebergToParquet({
-          datasetId,
-          dataflowId,
-          providerId: dataProviderId,
-          tableSchemaId: tableId
-        });
+        if (dataProviderId) {
+          await DatasetService.convertIcebergToParquet({
+            datasetId,
+            dataflowId,
+            providerId: dataProviderId,
+            tableSchemaId: tableId
+          });
+        } else {
+          await DatasetService.convertIcebergToParquet({
+            datasetId,
+            dataflowId,
+            tableSchemaId: tableId
+          });
+        }
       }
       onEnableManualEdit(checked);
     } catch (error) {
