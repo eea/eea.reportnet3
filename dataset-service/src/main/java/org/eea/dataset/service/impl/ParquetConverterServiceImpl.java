@@ -207,7 +207,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
             } else {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-                if (csvModification != null) {
+                if (csvModification != null) { //if it is null that means that there are no records to implement
                     String createTableQuery = getTableQuery(csvModification, parquetInnerFolderPath, dremioPathForCsvFile);
                     String processId = dremioHelperService.executeSqlStatement(createTableQuery);
                     dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
