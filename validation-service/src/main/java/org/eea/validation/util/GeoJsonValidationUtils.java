@@ -1,26 +1,20 @@
 package org.eea.validation.util;
 
-import java.util.List;
-import org.eea.validation.persistence.data.domain.FieldValue;
-import org.eea.validation.util.geojsonvalidator.GeoJsonObject;
-import org.eea.validation.util.geojsonvalidator.GeometryCollection;
-import org.eea.validation.util.geojsonvalidator.LineString;
-import org.eea.validation.util.geojsonvalidator.LngLatAlt;
-import org.eea.validation.util.geojsonvalidator.MultiLineString;
-import org.eea.validation.util.geojsonvalidator.MultiPoint;
-import org.eea.validation.util.geojsonvalidator.MultiPolygon;
-import org.eea.validation.util.geojsonvalidator.Point;
-import org.eea.validation.util.geojsonvalidator.Polygon;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.boot.configurationprocessor.json.JSONException;
-import org.springframework.boot.configurationprocessor.json.JSONObject;
-import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.validation.persistence.data.domain.FieldValue;
+import org.eea.validation.util.geojsonvalidator.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * The Class GeoJsonValidationUtils.
@@ -41,13 +35,20 @@ public class GeoJsonValidationUtils {
    * @return the string
    */
   public static String checkGeoJson(FieldValue fieldValue) {
+    return validateGeometryField(fieldValue.getValue(), fieldValue.getType());
+  }
+
+  public static boolean validateGeometryDremio(String fieldValue, DataType type) {
+    return validateGeometryField(fieldValue, type).isEmpty();
+  }
+
+  private static String validateGeometryField(String fieldValue, DataType type) {
     String result = "";
     try {
-      String aux = fieldValue.getValue();
-      if (!aux.isEmpty() && !locateSpecialChar(aux)) {
-        JSONObject jsonObject = new JSONObject(aux);
+      if (!fieldValue.isEmpty() && !locateSpecialChar(fieldValue)) {
+        JSONObject jsonObject = new JSONObject(fieldValue);
         String auxGEometry = jsonObject.get("geometry").toString();
-        switch (fieldValue.getType()) {
+        switch (type) {
           case POINT:
             Point point = new ObjectMapper().readValue(auxGEometry, Point.class);
             result = validatePoint(point);
@@ -84,13 +85,13 @@ public class GeoJsonValidationUtils {
         }
       }
       if (result.length() == 0) {
-        verifyJson(aux);
+        verifyJson(fieldValue);
       }
     } catch (JsonProcessingException | JSONException | JsonSyntaxException
         | IllegalArgumentException e) {
       if (e.getMessage().contains("VALUE_NULL")) {
         result = String.format("This Field constains null tokens on column: %s value: %s",
-            fieldValue.getValue().indexOf("null"), fieldValue.getValue());
+            fieldValue.indexOf("null"), fieldValue);
       } else {
         result = e.getMessage();
       }

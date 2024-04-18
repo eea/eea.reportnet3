@@ -57,10 +57,16 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
     private static final String DREMIO_NON_SQL_VALIDATION_UTILS = "org.eea.validation.util.datalake.DremioNonSQLValidationUtils";
     private static final String VALIDATION_DROOLS_UTILS = "org.eea.validation.util.ValidationDroolsUtils";
+    private static final String GEOMETRY_VALIDATION_UTILS = "org.eea.validation.util.GeometryValidationUtils";
+    private static final String GEO_JSON_VALIDATION_UTILS = "org.eea.validation.util.GeoJsonValidationUtils";
     private static final String IS_MULTI_SELECT_CODE_LIST_VALIDATE = "isMultiSelectCodelistValidate";
     private static final String MULTI_SELECT_CODE_LIST_VALIDATE = "multiSelectCodelistValidate";
     private static final String IS_CODE_LIST_INSENSITIVE = "isCodelistInsensitive";
     private static final String CODE_LIST_VALIDATE = "codelistValidate";
+    private static final String IS_GEOMETRY = "isGeometry";
+    private static final String CHECK_EPSGSRID = "checkEPSGSRID";
+    private static final String CHECK_EPSGSRID_VALIDATION = "checkEPSGSRIDValidation";
+    private static final String VALIDATE_GEOMETRY_DREMIO = "validateGeometryDremio";
     private static final String FALSE = "false";
     private static final Logger LOG = LoggerFactory.getLogger(DremioNonSqlRulesExecuteServiceImpl.class);
 
@@ -101,6 +107,10 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             } else if (ruleMethodName.equals(IS_CODE_LIST_INSENSITIVE)) {
                 ruleMethodName = CODE_LIST_VALIDATE;
                 parameters.add(FALSE);
+            } else if (ruleMethodName.equals(IS_GEOMETRY)) {
+                ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
+            } else if (ruleMethodName.equals(CHECK_EPSGSRID)) {
+                ruleMethodName = CHECK_EPSGSRID_VALIDATION;
             }
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
@@ -110,7 +120,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
             Method method = null;
-            List<String> classes = new ArrayList<>(Arrays.asList(DREMIO_NON_SQL_VALIDATION_UTILS, VALIDATION_DROOLS_UTILS));
+            List<String> classes = new ArrayList<>(Arrays.asList(DREMIO_NON_SQL_VALIDATION_UTILS, VALIDATION_DROOLS_UTILS, GEOMETRY_VALIDATION_UTILS, GEO_JSON_VALIDATION_UTILS));
             Class<?> cls = null;
             for (String className : classes) {
                 cls = Class.forName(className);
@@ -345,17 +355,25 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      */
     private static boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
         boolean isValid = false;
-        int parameterLength = method.getParameters().length;
-        switch (parameterLength) {
-            case 1:
-                isValid = (boolean) method.invoke(object, rs.getString(fieldName));  //DremioNonSQLValidationUtils methods
-                break;
-            case 2:
-                isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1));  //ValidationDroolsUtils methods
-                break;
-            case 3:
-                isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method
-                break;
+        if (method.getName().contains("Geo")) {
+            if (method.getName().equals(VALIDATE_GEOMETRY_DREMIO)) {
+                isValid = (boolean) method.invoke(object, "fieldValue", "fieldType");  //GeoJsonValidationUtils
+            } else if (method.getName().equals(CHECK_EPSGSRID_VALIDATION)) {
+                isValid = (boolean) method.invoke(object, "fieldValue");  //GeometryValidationUtils
+            }
+        } else {
+            int parameterLength = method.getParameters().length;
+            switch (parameterLength) {
+                case 1:
+                    isValid = (boolean) method.invoke(object, rs.getString(fieldName));  //DremioNonSQLValidationUtils methods
+                    break;
+                case 2:
+                    isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1));  //ValidationDroolsUtils methods
+                    break;
+                case 3:
+                    isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method
+                    break;
+            }
         }
         return isValid;
     }
