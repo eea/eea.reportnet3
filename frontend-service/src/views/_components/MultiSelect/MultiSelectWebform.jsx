@@ -25,6 +25,7 @@ const MultiSelectWebform = props => {
     clearButton = true,
     dataKey = null,
     disabled = false,
+    filter=false,
     filterBy = null,
     filterMatchMode = 'contains',
     filterPlaceholder = null,
@@ -209,7 +210,7 @@ const MultiSelectWebform = props => {
         setIsPanelVisible(true);
       }
     }
-  }, [panelRef]);
+  }, [panelRef, options]);
 
   const hide = () => {
     DomHandler.addClass(panelRef.current.element, 'p-input-overlay-hidden');
@@ -451,7 +452,7 @@ const MultiSelectWebform = props => {
         allChecked={isAllChecked(items)}
         checkAllHeader={checkAllHeader}
         clearButton={clearButton}
-        filter={filterState}
+        filter={filter}
         filterPlaceholder={filterPlaceholder}
         filterValue={filterState}
         headerClassName={headerClassName}
@@ -525,7 +526,6 @@ const MultiSelectWebform = props => {
   let header = renderHeader(items);
   let labelContent = getLabelContent();
   let multiselectitems = renderMultiSelectItems();
-
   return (
     <div className={className} id={id} onClick={onClick} ref={containerRef} style={style}>
       <div className={`p-hidden-accessible ${inputClassName}`}>

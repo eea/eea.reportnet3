@@ -1,8 +1,9 @@
 import classNames from 'classnames';
 
 import styles from './MultiSelectItem.module.scss';
+import { memo } from 'react';
 
-export const MultiSelectItem = ({
+export const MultiSelectItem = memo(({
   disabled = false,
   label,
   onClick,
@@ -72,4 +73,4 @@ export const MultiSelectItem = ({
       <label className={getClassNameLabel()}>{content}</label>
     </li>
   );
-};
+})

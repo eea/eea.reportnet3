@@ -73,7 +73,6 @@ export const TableWebform = ({ dataflowId, dataProviderId, datasetId, isReportin
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(tableWebformState.isVisible))[0];
     const visibleContent = tableWebformState.data.filter(table => table.name === visibleTitle)[0];
-
     return (
       <WebformTable
         dataflowId={dataflowId}

@@ -264,7 +264,7 @@ export const WebformView = ({
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(isVisible))[0];
     const visibleContent = data.filter(table => table.name === visibleTitle && table.isVisible)[0];
-
+    
     return (
       <WebformTable
         calculateSingle={calculateSingle}
