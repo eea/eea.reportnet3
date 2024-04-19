@@ -377,9 +377,9 @@ export const DatasetRepository = {
       data: datasetSchema
     }),
 
-  updateField: async (datasetId, datasetTableRecords, updateInCascade = false) =>
+  updateField: async (datasetId, recordId, tableSchemaId, datasetTableRecords, updateInCascade = false) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateField, { datasetId, updateInCascade }),
+      url: getUrl(DatasetConfig.updateField, { datasetId, recordId, tableSchemaId, updateInCascade }),
       data: datasetTableRecords
     }),
 

@@ -756,7 +756,10 @@ export const DataViewer = ({
             field.type === 'MULTISELECT_CODELIST' ||
               ((field.type === 'LINK' || field.type === 'EXTERNAL_LINK') && Array.isArray(value))
               ? value.join(';')
-              : value
+              : value,
+            field.fieldName,
+            record.recordId,
+            tableId
           );
         } catch (error) {
           if (error.response.status === 423) {

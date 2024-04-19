@@ -73,7 +73,8 @@ export const DatasetConfig = {
   updateDatasetDesign: '/dataschema/{:datasetId}/datasetSchema',
   updateFieldDesign: '/dataschema/{:datasetId}/fieldSchema',
   updateReferenceDatasetStatus: '/referenceDataset/{:datasetId}?updatable={:updatable}',
-  updateField: '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}',
+  updateField:
+    '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',

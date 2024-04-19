@@ -673,10 +673,21 @@ export const DatasetService = {
 
   downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
 
-  updateField: async (datasetId, fieldSchemaId, fieldId, fieldType, fieldValue, updateInCascade) => {
+  updateField: async (
+    datasetId,
+    fieldSchemaId,
+    fieldId,
+    fieldType,
+    fieldValue,
+    fieldName,
+    recordId,
+    tableSchemaId,
+    updateInCascade
+  ) => {
     const datasetTableField = new DatasetTableField({});
     datasetTableField.id = fieldId;
     datasetTableField.idFieldSchema = fieldSchemaId;
+    datasetTableField.name = fieldName;
     datasetTableField.type = fieldType;
     datasetTableField.value = DatasetUtils.parseValue({
       type: fieldType,
@@ -684,7 +695,7 @@ export const DatasetService = {
       splitSRID: true
     });
 
-    return await DatasetRepository.updateField(datasetId, datasetTableField, updateInCascade);
+    return await DatasetRepository.updateField(datasetId, recordId, tableSchemaId, datasetTableField, updateInCascade);
   },
 
   updateFieldDesign: async (datasetId, record) => {
