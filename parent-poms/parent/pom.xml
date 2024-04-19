@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-    <api-gateway.version>v3.2-266723_Delete_Job_Type</api-gateway.version>
-    <communication.version>v3.2-266723_Delete_Job_Type</communication.version>
-    <collaboration.version>v3.2-266723_Delete_Job_Type</collaboration.version>
-    <dataflow.version>v3.2-266723_Delete_Job_Type</dataflow.version>
-    <dataset.version>v3.2-266723_Delete_Job_Type</dataset.version>
-    <document.version>v3.2-266723_Delete_Job_Type</document.version>
-    <frontend.version>v3.2-266723_Delete_Job_Type</frontend.version>
-    <indexsearch.version>v3.2-266723_Delete_Job_Type</indexsearch.version>
-    <inspire.version>v3.2-266723_Delete_Job_Type</inspire.version>
-    <recordstore.version>v3.2-266723_Delete_Job_Type</recordstore.version>
-    <ums.version>v3.2-266723_Delete_Job_Type</ums.version>
-    <validation.version>v3.2-266723_Delete_Job_Type</validation.version>
-    <common-interfaces.version>v3.2-266723_Delete_Job_Type</common-interfaces.version>
-    <common-utitlities.version>v3.2-266723_Delete_Job_Type</common-utitlities.version>
-    <rod.version>v3.2-266723_Delete_Job_Type</rod.version>
-    <orchestrator.version>v3.2-266723_Delete_Job_Type</orchestrator.version>
+    <api-gateway.version>v3.1.6-ARCHITECTURE</api-gateway.version>
+    <communication.version>v3.1.6-ARCHITECTURE</communication.version>
+    <collaboration.version>v3.1.6-ARCHITECTURE</collaboration.version>
+    <dataflow.version>v3.1.6-ARCHITECTURE</dataflow.version>
+    <dataset.version>v3.1.6-ARCHITECTURE</dataset.version>
+    <document.version>v3.1.6-ARCHITECTURE</document.version>
+    <frontend.version>v3.1.6-ARCHITECTURE</frontend.version>
+    <indexsearch.version>v3.1.6-ARCHITECTURE</indexsearch.version>
+    <inspire.version>v3.1.6-ARCHITECTURE</inspire.version>
+    <recordstore.version>v3.1.6-ARCHITECTURE</recordstore.version>
+    <ums.version>v3.1.6-ARCHITECTURE</ums.version>
+    <validation.version>v3.1.6-ARCHITECTURE</validation.version>
+    <common-interfaces.version>v3.1.6-ARCHITECTURE</common-interfaces.version>
+    <common-utitlities.version>v3.1.6-ARCHITECTURE</common-utitlities.version>
+    <rod.version>v3.1.6-ARCHITECTURE</rod.version>
+    <orchestrator.version>v3.1.6-ARCHITECTURE</orchestrator.version>
   </properties>
 </project>
