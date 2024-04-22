@@ -536,7 +536,7 @@ public class DatasetControllerImplTest {
   public void testupdateFieldSuccess() throws Exception {
     doNothing().when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
-    datasetControllerImpl.updateField(1L, new FieldVO(), false);
+    datasetControllerImpl.updateField(1L, new FieldVO(), false, null, null);
     Mockito.verify(updateRecordHelper, times(1)).executeFieldUpdateProcess(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
   }
@@ -551,7 +551,7 @@ public class DatasetControllerImplTest {
   public void testupdateFieldNotFoundException() throws Exception {
     doThrow(new EEAException()).when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
-    datasetControllerImpl.updateField(1L, new FieldVO(), false);
+    datasetControllerImpl.updateField(1L, new FieldVO(), false, null, null);
   }
 
   /**
@@ -565,7 +565,7 @@ public class DatasetControllerImplTest {
       Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
-      datasetControllerImpl.updateField(1L, new FieldVO(), false);
+      datasetControllerImpl.updateField(1L, new FieldVO(), false, null, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;

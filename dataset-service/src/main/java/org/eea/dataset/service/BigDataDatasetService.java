@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.AttachmentDLVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
@@ -135,6 +136,18 @@ public interface BigDataDatasetService {
     void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception;
 
     /**
+     * Insert records manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaName the tableSchemaName
+     * @param records the new editted records
+     *
+     */
+    void insertRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records) throws Exception;
+
+    /**
      * Update records manually
      *
      * @param dataflowId the dataflow id
@@ -147,4 +160,30 @@ public interface BigDataDatasetService {
      */
     void updateRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records, boolean updateCascadePK) throws Exception;
 
+    /**
+     * Update field manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param recordId the recordId
+     * @param tableSchemaName the tableSchemaName
+     * @param field the new field
+     * @param updateCascadePK the updateCascadePK
+     *
+     */
+    void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, String tableSchemaName, boolean updateCascadePK) throws Exception;
+
+    /**
+     * Delete record manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaName the tableSchemaName
+     * @param recordId the record id to be removed
+     * @param deleteCascadePK the deleteCascadePK
+     *
+     */
+    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, String recordId, boolean deleteCascadePK) throws Exception;
 }

@@ -131,7 +131,8 @@ public interface DatasetController {
    */
   @DeleteMapping("/{id}/record/{recordId}")
   void deleteRecord(@PathVariable("id") Long datasetId, @PathVariable("recordId") String recordId,
-      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK);
+      @RequestParam(value = "deleteCascadePK", required = false) boolean deleteCascadePK,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId);
 
   /**
    * Delete import data.
@@ -256,10 +257,14 @@ public interface DatasetController {
    * @param datasetId the dataset id
    * @param field the field
    * @param updateCascadePK the update cascade PK
+   * @param recordId the recordId
+   * @param tableSchemaId the tableSchemaId
    */
   @PutMapping("/{id}/updateField")
   void updateField(@PathVariable("id") Long datasetId, @RequestBody FieldVO field,
-      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK);
+      @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK,
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId);
 
   /**
    * Gets the field values referenced.
