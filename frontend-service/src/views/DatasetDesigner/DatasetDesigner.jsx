@@ -80,6 +80,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { resetFilterState } = useApplyFilters('uniqueConstraints');
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
+  const [buttonsDisabled, setButtonsDisabled] = useState(true);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
@@ -688,6 +689,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         );
       }
     }
+  };
+
+  const onChangeButtonsVisibility = disabled => {
+    setButtonsDisabled(disabled);
   };
 
   const onHideDelete = () => {
@@ -1701,6 +1706,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  buttonsDisabled ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1731,6 +1737,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  buttonsDisabled ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1759,6 +1766,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
+                  buttonsDisabled ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1781,6 +1789,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
                 disabled={
+                  buttonsDisabled ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
@@ -1897,6 +1906,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isReferenceDataset={designerState.referenceDataset}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
+            onChangeButtonsVisibility={onChangeButtonsVisibility}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}

@@ -351,7 +351,7 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsNullEntry() throws Exception {
-    datasetControllerImpl.updateRecords(null, new ArrayList<>(), false);
+    datasetControllerImpl.updateRecords(null, new ArrayList<>(), false, null);
   }
 
   /**
@@ -361,7 +361,7 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsNull() throws Exception {
-    datasetControllerImpl.updateRecords(-2L, null, false);
+    datasetControllerImpl.updateRecords(-2L, null, false, null);
   }
 
   /**
@@ -371,7 +371,7 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsEmpty() throws Exception {
-    datasetControllerImpl.updateRecords(1L, new ArrayList<>(), false);
+    datasetControllerImpl.updateRecords(1L, new ArrayList<>(), false, null);
   }
 
   /**
@@ -381,9 +381,13 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void testupdateRecordsSuccess() throws Exception {
+    Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     doNothing().when(updateRecordHelper).executeUpdateProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
-    datasetControllerImpl.updateRecords(1L, records, false);
+    datasetControllerImpl.updateRecords(1L, records, false, null);
     Mockito.verify(updateRecordHelper, times(1)).executeUpdateProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
   }
@@ -398,7 +402,7 @@ public class DatasetControllerImplTest {
     try {
       Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
-      datasetControllerImpl.updateRecords(1L, records, false);
+      datasetControllerImpl.updateRecords(1L, records, false, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;
@@ -412,9 +416,13 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testupdateRecordsNotFoundException() throws Exception {
+    Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     doThrow(new EEAException()).when(updateRecordHelper).executeUpdateProcess(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
-    datasetControllerImpl.updateRecords(1L, records, false);
+    datasetControllerImpl.updateRecords(1L, records, false, null);
   }
 
 
@@ -425,9 +433,13 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void testdeleteRecordSuccess() throws Exception {
+    Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
-    datasetControllerImpl.deleteRecord(1L, recordId, false);
+    datasetControllerImpl.deleteRecord(1L, recordId, false, null);
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
   }
@@ -439,11 +451,15 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void testdeleteRecordSuccessDatasetTypeDesign() throws Exception {
+    Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.DESIGN);
     doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
-    datasetControllerImpl.deleteRecord(1L, recordId, false);
+    datasetControllerImpl.deleteRecord(1L, recordId, false, null);
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
   }
@@ -456,10 +472,14 @@ public class DatasetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordReadOnlyException() throws Exception {
     try {
+      Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
+      DataFlowVO mockDataflow = new DataFlowVO();
+      mockDataflow.setBigData(false);
+      Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
       Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
-      datasetControllerImpl.deleteRecord(1L, recordId, false);
+      datasetControllerImpl.deleteRecord(1L, recordId, false, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;
@@ -479,7 +499,7 @@ public class DatasetControllerImplTest {
       Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
-      datasetControllerImpl.deleteRecord(1L, recordId, false);
+      datasetControllerImpl.deleteRecord(1L, recordId, false, null);
     } catch (ResponseStatusException e) {
       assertEquals(String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
           datasetService.findRecordSchemaIdById(1L, recordId)), e.getReason());
@@ -494,9 +514,13 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testdeleteRecordNotFoundException() throws Exception {
+    Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
-    datasetControllerImpl.deleteRecord(1L, recordId, false);
+    datasetControllerImpl.deleteRecord(1L, recordId, false, null);
   }
 
   /**
@@ -506,9 +530,12 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void testupdateFieldSuccess() throws Exception {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(0L, null)).thenReturn(mockDataflow);
     doNothing().when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
-    datasetControllerImpl.updateField(1L, new FieldVO(), false);
+    datasetControllerImpl.updateField(1L, new FieldVO(), false, null, null);
     Mockito.verify(updateRecordHelper, times(1)).executeFieldUpdateProcess(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
   }
@@ -521,9 +548,12 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void testupdateFieldNotFoundException() throws Exception {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(0L, null)).thenReturn(mockDataflow);
     doThrow(new EEAException()).when(updateRecordHelper).executeFieldUpdateProcess(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
-    datasetControllerImpl.updateField(1L, new FieldVO(), false);
+    datasetControllerImpl.updateField(1L, new FieldVO(), false, null, null);
   }
 
   /**
@@ -537,7 +567,7 @@ public class DatasetControllerImplTest {
       Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
-      datasetControllerImpl.updateField(1L, new FieldVO(), false);
+      datasetControllerImpl.updateField(1L, new FieldVO(), false, null, null);
     } catch (ResponseStatusException e) {
       assertEquals(EEAErrorMessage.TABLE_READ_ONLY, e.getReason());
       throw e;
@@ -1308,6 +1338,9 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void insertRecordsTest() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(0L, null)).thenReturn(mockDataflow);
     ArrayList<RecordVO> records = new ArrayList<RecordVO>();
     RecordVO record = new RecordVO();
     record.setId(recordId);
@@ -1323,7 +1356,10 @@ public class DatasetControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void inserRecordsExceptionTest() throws EEAException {
+  public void insertRecordsExceptionTest() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(0L, null)).thenReturn(mockDataflow);
     Mockito.doThrow(EEAException.class).when(updateRecordHelper)
         .executeCreateProcess(Mockito.anyLong(), Mockito.any(), Mockito.any());
     try {
@@ -1392,6 +1428,9 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void insertRecordsDatasetTypeDesignTest() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(0L, null)).thenReturn(mockDataflow);
     Mockito.when(datasetMetabaseService.getDatasetType(1L)).thenReturn(DatasetTypeEnum.DESIGN);
     ArrayList<RecordVO> records = new ArrayList<RecordVO>();
     RecordVO record = new RecordVO();
@@ -1410,6 +1449,9 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void insertRecordsDatasetTypeReferenceTest() throws EEAException {
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.findById(0L, null)).thenReturn(mockDataflow);
     Mockito.when(datasetMetabaseService.getDatasetType(1L)).thenReturn(DatasetTypeEnum.REFERENCE);
     ArrayList<RecordVO> records = new ArrayList<RecordVO>();
     RecordVO record = new RecordVO();

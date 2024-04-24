@@ -5,23 +5,27 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const Footer = ({
   bigData,
+  dataAreManuallyEditable,
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isEditRecordsManuallyEnabled,
   onAddClick,
   onPasteClick
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
-      <Button
-        className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
-        disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
-        icon="add"
-        label={resourcesContext.messages['addRecord']}
-        onClick={onAddClick}
-        style={{ float: 'left' }}
-      />
+      {isEditRecordsManuallyEnabled && dataAreManuallyEditable && (
+        <Button
+          className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
+          disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
+          icon="add"
+          label={resourcesContext.messages['addRecord']}
+          onClick={onAddClick}
+          style={{ float: 'left' }}
+        />
+      )}
       {!bigData && (
         <Button
           className={`p-button-secondary ${

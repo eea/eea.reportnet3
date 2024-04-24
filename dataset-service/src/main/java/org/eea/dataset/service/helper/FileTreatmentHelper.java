@@ -10,6 +10,7 @@ import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3ConvertService;
@@ -63,6 +64,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
@@ -626,7 +628,13 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Async
     public void exportFileDL(Long datasetId, String mimeType, String tableSchemaId, String tableName,
-                           ExportFilterVO filters) throws EEAException, IOException {
+                           ExportFilterVO filters) throws Exception {
+
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+            throw new Exception("Can not delete table data because iceberg table is created");
+        }
 
         NotificationVO notificationVO = NotificationVO
             .builder()
@@ -652,7 +660,6 @@ public class FileTreatmentHelper implements DisposableBean {
                 LOG.info("For datasetId {} s3PathResolver : {}", dataset.getId(), s3PathResolver);
                 LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
                 if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
-                    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataset.getDatasetSchema());
                     StringBuilder dataQuery = createDataQuery(tableName, filters, dataset, s3PathResolver, tableSchemaVO);
                     List<String> headers = getHeadersForFileDL(includeCountryCode, tableSchemaVO);
                     File csvFile = new File(new File(exportDLPath, "dataset-" + dataset.getId()), tableName + CSV_TYPE);
@@ -1016,7 +1023,15 @@ public class FileTreatmentHelper implements DisposableBean {
 
 
     @Async
-    public void exportDatasetFileDL(Long datasetId, String mimeType) throws EEAException {
+    public void exportDatasetFileDL(Long datasetId, String mimeType) throws Exception {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+        for(TableSchemaIdNameVO entry: tableSchemas){
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+                throw new Exception("Can not delete table data because iceberg table is created");
+            }
+        }
         try {
             String[] type = mimeType.split(" ");
             String extension = "";

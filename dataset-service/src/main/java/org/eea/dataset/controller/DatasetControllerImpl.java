@@ -33,10 +33,7 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
-import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.*;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
@@ -557,6 +554,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param records the records
    * @param updateCascadePK the update cascade PK
+   * @param tableSchemaId the tableSchemaId
    */
   @Override
   @HystrixCommand
@@ -572,7 +570,8 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @LockCriteria(name = "datasetId") @PathVariable("id") Long datasetId,
       @ApiParam(value = "list of records") @RequestBody List<RecordVO> records,
       @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
-          value = "updateCascadePK", required = false) boolean updateCascadePK) {
+          value = "updateCascadePK", required = false) boolean updateCascadePK,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception {
     if (datasetId == null || records == null || records.isEmpty()) {
       LOG_ERROR.error(
           "Error updating records. The datasetId or the records to update are emtpy or null");
@@ -586,7 +585,23 @@ public class DatasetControllerImpl implements DatasetController {
     }
     try {
       LOG.info("Updating records for datasetId {}", datasetId);
-      updateRecordHelper.executeUpdateProcess(datasetId, records, updateCascadePK);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        Long providerId = datasetService.getDataProviderIdById(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          bigDataDatasetService.updateRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records, updateCascadePK);
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+        }
+      }
+      else{
+        updateRecordHelper.executeUpdateProcess(datasetId, records, updateCascadePK);
+      }
       LOG.info("Successfully updated records for datasetId {}", datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating records in the datasetId {}. Message: {}", datasetId,
@@ -605,6 +620,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param recordId the record id
    * @param deleteCascadePK the delete cascade PK
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @DeleteMapping("/{id}/record/{recordId}")
@@ -620,13 +636,8 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "record Id",
           example = "19D0B971B7E0D2FB66B77F2A8DBA4964") @PathVariable("recordId") String recordId,
       @ApiParam(type = "boolean", value = "delete cascade", example = "true") @RequestParam(
-          value = "deleteCascadePK", required = false) boolean deleteCascadePK) {
-    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-        datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
-      LOG_ERROR.error("Error deleting record with id {} in the datasetId {}. The table is read only",
-          recordId, datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-    }
+          value = "deleteCascadePK", required = false) boolean deleteCascadePK,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
     if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
         && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
             datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
@@ -639,7 +650,38 @@ public class DatasetControllerImpl implements DatasetController {
     }
     try {
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
-      updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        Long providerId = datasetService.getDataProviderIdById(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+
+          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
+                  tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
+            LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
+                    recordId, datasetId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+          }
+
+          bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), recordId, deleteCascadePK);
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+        }
+      }
+      else {
+        if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
+                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
+          LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
+                  recordId, datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+        }
+        updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
+      }
       LOG.info("Successfully deleted record with id {} for datasetId {}", recordId, datasetId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error deleting record with id {} in the datasetId {}. Message: {}", recordId, datasetId,
@@ -658,6 +700,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param tableSchemaId the id table schema
    * @param records the records
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @PostMapping("/{datasetId}/table/{tableSchemaId}/record")
@@ -673,12 +716,6 @@ public class DatasetControllerImpl implements DatasetController {
       @ApiParam(type = "String", value = "table schema Id",
           example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId,
       @ApiParam(value = "list of records") @RequestBody List<RecordVO> records) {
-    if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
-        EntityTypeEnum.RECORD)) {
-      LOG_ERROR.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table is read only",
-          datasetId, tableSchemaId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-    }
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
     if ((!DatasetTypeEnum.DESIGN.equals(datasetType)
         && !DatasetTypeEnum.REFERENCE.equals(datasetType))
@@ -690,8 +727,30 @@ public class DatasetControllerImpl implements DatasetController {
           .format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, records.get(0).getIdRecordSchema()));
     }
     try {
+      if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
+              EntityTypeEnum.RECORD)) {
+        LOG.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table is read only",
+                datasetId, tableSchemaId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+      }
       LOG.info("Inserting records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
-      updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        Long providerId = datasetService.getDataProviderIdById(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          bigDataDatasetService.insertRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records);
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+        }
+      }
+      else {
+        updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
+      }
       LOG.info("Successfully inserted records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException e) {
       LOG_ERROR.error("Error inserting records for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
@@ -954,7 +1013,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, null);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId);
         deleteHelper.releaseDeleteTableDataLocksAndSendNotification(datasetId, tableSchemaId);
       }
       else {
@@ -1061,6 +1120,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param mimeType the mime type
    * @param exportFilterVO the export filter VO
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @PostMapping(value = "/exportFileDL")
@@ -1174,7 +1234,10 @@ public class DatasetControllerImpl implements DatasetController {
    * @param datasetId the dataset id
    * @param field the field
    * @param updateCascadePK the update cascade PK
+   * @param recordId the recordId
+   * @param tableSchemaId the tableSchemaId
    */
+  @SneakyThrows
   @Override
   @HystrixCommand
   @PutMapping("/{id}/updateField")
@@ -1188,7 +1251,9 @@ public class DatasetControllerImpl implements DatasetController {
           example = "0") @PathVariable("id") Long datasetId,
       @ApiParam(value = "Field Object") @RequestBody FieldVO field,
       @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
-          value = "updateCascadePK", required = false) boolean updateCascadePK) {
+          value = "updateCascadePK", required = false) boolean updateCascadePK,
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
     if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, field.getIdFieldSchema(),
         EntityTypeEnum.FIELD)) {
       LOG_ERROR.error("Error updating a field in the dataset {}. The table is read only",
@@ -1196,7 +1261,23 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
     }
     try {
-      updateRecordHelper.executeFieldUpdateProcess(datasetId, field, updateCascadePK);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        Long providerId = datasetService.getDataProviderIdById(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO.getNameTableSchema(), updateCascadePK);
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+        }
+      }
+      else {
+        updateRecordHelper.executeFieldUpdateProcess(datasetId, field, updateCascadePK);
+      }
     } catch (EEAException e) {
       LOG_ERROR.error("Error updating a field in the dataset {}. Message: {}", datasetId,
           e.getMessage(), e);
@@ -2705,10 +2786,12 @@ public class DatasetControllerImpl implements DatasetController {
                                     @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
 
       try{
+        LOG.info("Converting parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && !BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
           bigDataDatasetService.convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO);
+          LOG.info("Converted parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
         }
         else{
           throw new Exception("The table data are not manually editable or the iceberg table is already created");
@@ -2737,10 +2820,12 @@ public class DatasetControllerImpl implements DatasetController {
                                     @RequestParam(value = "providerId", required = false) Long providerId,
                                     @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
     try{
+      LOG.info("Converting iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
       if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
         bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO);
+        LOG.info("Converted iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       }
       else{
         throw new Exception("The table data are not manually editable or the iceberg table has not been created");

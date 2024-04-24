@@ -56,6 +56,7 @@ export const FieldsDesigner = ({
   manageUniqueConstraint,
   onChangeFields,
   onChangeTableProperties,
+  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
   selectedRuleId,
@@ -82,10 +83,14 @@ export const FieldsDesigner = ({
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
+  const [isEditRecordsManuallyEnabled, setIsEditRecordsManuallyEnabled] = useState(
+    table?.icebergTableIsCreated ? table.icebergTableIsCreated : false
+  );
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPkChecked, setIsPkChecked] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
+  const [dataAreManuallyEditable, setDataAreManuallyEditable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
   const [refElement, setRefElement] = useState();
@@ -99,6 +104,7 @@ export const FieldsDesigner = ({
       setFields([]);
     }
     if (!isUndefined(table)) {
+      setDataAreManuallyEditable(table.dataAreManuallyEditable || false);
       setTableDescriptionValue(table.description || '');
       setIsReadOnlyTable(table.readOnly || false);
       setToPrefill(table.toPrefill || false);
@@ -166,6 +172,10 @@ export const FieldsDesigner = ({
     } else {
       setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
     }
+  };
+
+  const onEnableManualEdit = checked => {
+    setIsEditRecordsManuallyEnabled(checked);
   };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
@@ -273,12 +283,24 @@ export const FieldsDesigner = ({
     if (checked) {
       setToPrefill(true);
     }
-    updateTableDesign({ fixedNumber, notEmpty, readOnly: checked, toPrefill: checked === false ? toPrefill : true });
+    updateTableDesign({
+      fixedNumber,
+      notEmpty,
+      readOnly: checked,
+      toPrefill: checked === false ? toPrefill : true,
+      dataAreManuallyEditable
+    });
   };
 
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill: checked, fixedNumber, notEmpty });
+    updateTableDesign({
+      readOnly: isReadOnlyTable,
+      toPrefill: checked,
+      fixedNumber,
+      notEmpty,
+      dataAreManuallyEditable
+    });
   };
 
   const onChangeFixedNumber = checked => {
@@ -290,13 +312,31 @@ export const FieldsDesigner = ({
       fixedNumber: checked,
       notEmpty,
       readOnly: isReadOnlyTable,
-      toPrefill: checked === false ? toPrefill : true
+      toPrefill: checked === false ? toPrefill : true,
+      dataAreManuallyEditable
     });
   };
 
   const onChangeNotEmpty = checked => {
     setNotEmpty(checked);
-    updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, fixedNumber, notEmpty: checked });
+    updateTableDesign({
+      readOnly: isReadOnlyTable,
+      toPrefill,
+      fixedNumber,
+      notEmpty: checked,
+      dataAreManuallyEditable
+    });
+  };
+
+  const onChangeManualEdit = checked => {
+    setDataAreManuallyEditable(checked);
+    updateTableDesign({
+      readOnly: isReadOnlyTable,
+      toPrefill,
+      fixedNumber,
+      notEmpty,
+      dataAreManuallyEditable: checked
+    });
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName, upDownOrder = false, order) =>
@@ -470,15 +510,19 @@ export const FieldsDesigner = ({
       return (
         <DataViewer
           bigData={bigData}
+          dataAreManuallyEditable={table.dataAreManuallyEditable}
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
+          onChangeButtonsVisibility={onChangeButtonsVisibility}
+          onEnableManualEdit={onEnableManualEdit}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           reporting={false}
@@ -758,7 +802,7 @@ export const FieldsDesigner = ({
     </div>
   );
 
-  const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill }) => {
+  const updateTableDesign = async ({ fixedNumber, notEmpty, readOnly, toPrefill, dataAreManuallyEditable }) => {
     try {
       if (initialTableDescription !== tableDescriptionValue) {
         await DatasetService.updateTableDesign(
@@ -768,9 +812,18 @@ export const FieldsDesigner = ({
           readOnly,
           datasetId,
           notEmpty,
-          fixedNumber
+          fixedNumber,
+          dataAreManuallyEditable
         );
-        onChangeTableProperties(table.tableSchemaId, tableDescriptionValue, readOnly, toPrefill, notEmpty, fixedNumber);
+        onChangeTableProperties(
+          table.tableSchemaId,
+          tableDescriptionValue,
+          readOnly,
+          toPrefill,
+          notEmpty,
+          fixedNumber,
+          dataAreManuallyEditable
+        );
       }
     } catch (error) {
       console.error('FieldsDesigner - updateTableDesign.', error);
@@ -888,7 +941,15 @@ export const FieldsDesigner = ({
             disabled={isDataflowOpen || isDesignDatasetEditorRead}
             id="tableDescription"
             key="tableDescription"
-            onBlur={() => updateTableDesign({ readOnly: isReadOnlyTable, toPrefill, notEmpty, fixedNumber })}
+            onBlur={() =>
+              updateTableDesign({
+                readOnly: isReadOnlyTable,
+                toPrefill,
+                notEmpty,
+                fixedNumber,
+                dataAreManuallyEditable
+              })
+            }
             onChange={e => setTableDescriptionValue(e.target.value)}
             onFocus={e => {
               setInitialTableDescription(e.target.value);
@@ -982,6 +1043,29 @@ export const FieldsDesigner = ({
             />
             <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_not_empty`}>
               {resourcesContext.messages['notEmpty']}
+            </label>
+          </div>
+          <div>
+            <span
+              className={styles.switchTextInput}
+              id={`${table.tableSchemaId}_check_manual_edit_label`}
+              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+              {resourcesContext.messages['manualEdit']}
+            </span>
+            <Checkbox
+              ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
+              checked={dataAreManuallyEditable}
+              className={styles.fieldDesignerItem}
+              disabled={
+                isEditRecordsManuallyEnabled || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset
+              }
+              id={`${table.tableSchemaId}_check_manual_edit`}
+              inputId={`${table.tableSchemaId}_check_manual_edit`}
+              label="Default"
+              onChange={e => onChangeManualEdit(e.checked)}
+            />
+            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
+              {resourcesContext.messages['manualEdit']}
             </label>
           </div>
         </div>

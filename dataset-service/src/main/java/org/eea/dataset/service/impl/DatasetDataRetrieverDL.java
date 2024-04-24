@@ -58,7 +58,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
         S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
-        if(BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
             s3PathResolver.setIsIcebergTable(true);
         }
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);

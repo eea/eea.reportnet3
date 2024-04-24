@@ -76,11 +76,13 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   bigData={bigData}
+                  dataAreManuallyEditable={table.dataAreManuallyEditable}
                   dataflowType={dataflowType}
                   dataProviderId={dataProviderId}
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
+                  icebergTableIsCreated={table.icebergTableIsCreated}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
