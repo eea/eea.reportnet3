@@ -1024,13 +1024,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             for(int i=0; i< record.getFields().size(); i++){
                 FieldVO field = record.getFields().get(i);
                 insertQueryBuilder.append(", " + field.getName() + " ");
-
-                if(field.getValue() == null){
-                    insertQueryValuesBuilder.append(", " + field.getValue() + " ");
-                }
-                else{
-                    insertQueryValuesBuilder.append(", '" + field.getValue() + "' ");
-                }
+                String fieldValue = (field.getValue() != null) ? field.getValue() : "";
+                insertQueryValuesBuilder.append(", '" + fieldValue + "' ");
             }
             insertQueryValuesBuilder.append(" )");
             String finalInsertQuery = insertQueryBuilder.toString() + insertQueryValuesBuilder.toString();
@@ -1059,7 +1054,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE " + icebergTablePath + " SET ");
             for(int i=0; i< record.getFields().size(); i++){
                 FieldVO field = record.getFields().get(i);
-                updateQueryBuilder.append(field.getName() + " = '" + field.getValue() + "'");
+                String fieldValue = (field.getValue() != null) ? field.getValue() : "";
+                updateQueryBuilder.append(field.getName() + " = '" + fieldValue + "'");
                 updateQueryBuilder.append((i != record.getFields().size() -1) ? ", " : " ");
             }
             updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + record.getId() + "'");
@@ -1084,7 +1080,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         //create update query for the record
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE " + icebergTablePath + " SET ");
-        updateQueryBuilder.append(field.getName() + " = '" + field.getValue() + "'");
+        String fieldValue = (field.getValue() != null) ? field.getValue() : "";
+        updateQueryBuilder.append(field.getName() + " = '" + fieldValue + "'");
         updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'");
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);

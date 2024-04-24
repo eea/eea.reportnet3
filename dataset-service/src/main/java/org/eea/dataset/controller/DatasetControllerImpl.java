@@ -649,7 +649,6 @@ public class DatasetControllerImpl implements DatasetController {
               datasetService.findRecordSchemaIdById(datasetId, recordId)));
     }
     try {
-      //todo checkIfDatasetLockedOrReadOnly
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
@@ -658,7 +657,16 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+
+          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
+                  tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
+            LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
+                    recordId, datasetId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+          }
+
           bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), recordId, deleteCascadePK);
         }
         else{
@@ -668,7 +676,7 @@ public class DatasetControllerImpl implements DatasetController {
       else {
         if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
                 datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
-          LOG_ERROR.error("Error deleting record with id {} in the datasetId {}. The table is read only",
+          LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
                   recordId, datasetId);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
         }
@@ -719,7 +727,12 @@ public class DatasetControllerImpl implements DatasetController {
           .format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS, records.get(0).getIdRecordSchema()));
     }
     try {
-      //todo checkIfDatasetLockedOrReadOnly
+      if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
+              EntityTypeEnum.RECORD)) {
+        LOG.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table is read only",
+                datasetId, tableSchemaId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+      }
       LOG.info("Inserting records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
@@ -736,12 +749,6 @@ public class DatasetControllerImpl implements DatasetController {
         }
       }
       else {
-        if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, records.get(0).getIdRecordSchema(),
-                EntityTypeEnum.RECORD)) {
-          LOG_ERROR.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table is read only",
-                  datasetId, tableSchemaId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-        }
         updateRecordHelper.executeCreateProcess(datasetId, records, tableSchemaId);
       }
       LOG.info("Successfully inserted records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
