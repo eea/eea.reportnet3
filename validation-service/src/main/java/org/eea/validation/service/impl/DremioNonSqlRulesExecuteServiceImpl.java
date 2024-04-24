@@ -11,10 +11,13 @@ import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
+import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioValidationException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
@@ -116,7 +119,10 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
-            query.append("select record_id,").append(fieldName != null ? fieldName : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+            SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(Collections.singletonList(fieldName));
+            StringBuilder header = spatialDataHandling.geoJsonHeadersIsNotEmpty(true) ? spatialDataHandling.convertToJson() : spatialDataHandling.getSimpleHeaders();
+
+            query.append("select record_id,").append(header).append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
             Method method = null;
@@ -256,7 +262,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                         writer.write(record);
                     }
                 } catch (Exception e1) {
-                    LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
+                    LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
                     throw e1;
                 }
                 validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, subFile, ruleVO.getRuleId().length(), parquetFile);
@@ -355,11 +361,13 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      */
     private static boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
         boolean isValid = false;
-        if (method.getName().contains("Geo") || method.getName().contains("EPSGSR")) {
+        if (method.getName().contains("Geo") || method.getName().contains("EPSGSR")) {//
             if (method.getName().equals(VALIDATE_GEOMETRY_DREMIO)) {
-                isValid = (boolean) method.invoke(object, "fieldValue", "fieldType");  //GeoJsonValidationUtils
+                String converted = rs.getString(fieldName);
+                isValid = (boolean) method.invoke(object, converted, DataType.fromValue(fieldName.toUpperCase()));  //GeoJsonValidationUtils
             } else if (method.getName().equals(CHECK_EPSGSRID_VALIDATION)) {
-                isValid = (boolean) method.invoke(object, "fieldValue");  //GeometryValidationUtils
+                String converted = rs.getString(fieldName);
+                isValid = (boolean) method.invoke(object, converted);  //GeometryValidationUtils
             }
         } else {
             int parameterLength = method.getParameters().length;

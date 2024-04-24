@@ -22,6 +22,15 @@ import java.util.List;
 @Component
 public class GeoJsonValidationUtils {
 
+  private static GeoJsonValidationUtils instance;
+
+  public static synchronized GeoJsonValidationUtils getInstance() {
+    if (instance == null) {
+      instance = new GeoJsonValidationUtils();
+    }
+    return instance;
+  }
+
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(GeoJsonValidationUtils.class);
 

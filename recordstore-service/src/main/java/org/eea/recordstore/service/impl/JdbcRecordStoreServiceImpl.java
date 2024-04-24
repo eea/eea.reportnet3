@@ -1143,7 +1143,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         isMaterialized);
     DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
-    if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+    if (dataFlowVO !=null && Boolean.TRUE.equals(dataFlowVO.getBigData())) {
       LOG.info("Skipping createUpdateView. Dataset {} belongs to big dataflow {}", datasetId, dataFlowVO.getId());
       return;
     }

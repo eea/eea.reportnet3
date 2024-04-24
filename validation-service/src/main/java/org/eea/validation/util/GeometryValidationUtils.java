@@ -11,6 +11,7 @@ import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.util.datalake.DremioNonSQLValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,15 @@ import java.util.regex.Pattern;
  */
 @Component
 public class GeometryValidationUtils {
+
+  private static GeometryValidationUtils instance;
+
+  public static synchronized GeometryValidationUtils getInstance() {
+    if (instance == null) {
+      instance = new GeometryValidationUtils();
+    }
+    return instance;
+  }
 
 
   /** The rules repository. */
