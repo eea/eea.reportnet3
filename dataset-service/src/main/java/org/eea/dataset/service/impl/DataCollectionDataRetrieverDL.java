@@ -55,13 +55,10 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
         TableVO result = new TableVO();
         S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
-        LOG.info("For datasetId {} s3PathResolver : {}", datasetId, s3PathResolver);
-        LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_DC_FOLDER_PATH) : {}", folderExist);
         if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName())) {
             s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
             totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQueryDC(s3PathResolver), Long.class);
             result.setTotalRecords(totalRecords);
-            LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
             pageable = DataLakeDataRetrieverUtils.calculatePageable(pageable, totalRecords);
             Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
             FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
@@ -82,7 +79,6 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
             StringBuilder dataQuery = new StringBuilder();
             dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ");
             dataQuery.append(filteredQuery);
-            LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
             List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
             result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
             result.setRecords(recordVOS);

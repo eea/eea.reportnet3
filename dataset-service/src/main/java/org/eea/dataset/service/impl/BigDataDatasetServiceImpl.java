@@ -992,7 +992,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         s3IcebergTablePathResolver.setIsIcebergTable(true);
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        String dataProviderCode = null;
+        String dataProviderCode = "''";
         if(providerId != 0L) {
             DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
             dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderCode + "'" : dataProviderCode;
