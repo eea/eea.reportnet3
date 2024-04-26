@@ -22,6 +22,8 @@ import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
+import { DatasetService } from 'services/DatasetService';
+
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
@@ -35,6 +37,8 @@ export const CustomFileUpload = ({
   cancelLabel = 'Reset',
   chooseLabel = 'Choose',
   className = null,
+  dataflowId,
+  datasetId,
   dialogClassName = null,
   dialogHeader = null,
   dialogOnHide = null,
@@ -87,6 +91,7 @@ export const CustomFileUpload = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
+  const [presignedUrl, setPresignedUrl] = useState();
 
   const _files = useRef([]);
   const content = useRef(null);
@@ -96,6 +101,12 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (hasFiles() && auto) upload();
   }, [state]);
+
+  useEffect(() => {
+    if (presignedUrl) {
+      upload();
+    }
+  }, [presignedUrl]);
 
   useEffect(() => {
     if (state.isUploadClicked) upload();
@@ -317,7 +328,7 @@ export const CustomFileUpload = ({
       }
     };
 
-    let nUrl = url;
+    let nUrl = bigData ? presignedUrl : url;
 
     if (replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
@@ -440,6 +451,12 @@ export const CustomFileUpload = ({
         />
       </span>
     );
+  };
+
+  const onGetPresignedUrl = async () => {
+    const fileName = state?.files[0].name;
+    const data = await DatasetService.getPresignedUrl({ datasetId, dataflowId, fileName });
+    setPresignedUrl(data?.presignedUrl);
   };
 
   const renderFiles = () => {
@@ -578,7 +595,11 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                upload();
+                if (bigData) {
+                  onGetPresignedUrl();
+                } else {
+                  upload();
+                }
               }
             }}
           />

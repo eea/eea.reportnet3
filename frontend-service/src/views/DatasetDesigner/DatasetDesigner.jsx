@@ -2024,6 +2024,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             bigData={designerState.bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
+            dataflowId={dataflowId}
+            datasetId={datasetId}
             dialogHeader={selectedCustomImportIntegration.name}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);

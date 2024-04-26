@@ -278,6 +278,11 @@ export const DatasetService = {
     });
   },
 
+  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) => {
+    const presignedUrl = await DatasetRepository.getPresignedUrl({ datasetId, dataflowId, fileName });
+    return presignedUrl.data;
+  },
+
   getReferencedFieldValues: async (
     datasetId,
     fieldSchemaId,
