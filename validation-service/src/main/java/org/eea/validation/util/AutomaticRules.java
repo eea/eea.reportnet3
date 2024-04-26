@@ -429,10 +429,10 @@ public class AutomaticRules {
     String sql;
     String sqlResult;
     if (isBigData) {
-      sql = "select record_id, ST_isValidReason(multipoint) as reason " +
+      sql = "select record_id, ST_isValidReason(%s_id) as reason" +
           "  from %s" +
-          "  where ST_isValid(multipoint) = false";
-      sqlResult = String.format(sql, tableName);
+          "  where ST_isValid(%s) = false";
+      sqlResult = String.format(sql, fieldName,tableName, fieldName);
     } else {
       sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","
           + " public.ST_isValidReason(public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'),"
