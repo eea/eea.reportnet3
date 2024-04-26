@@ -416,7 +416,7 @@ public class AutomaticRules {
    */
   public static Rule createGeometryAutomaticRuleCheckGeometries(Long datasetId, Document document,
       DataType typeData, String referenceId, EntityTypeEnum typeEntityEnum, String nameRule,
-      String shortCode, AutomaticRuleTypeEnum automaticType, String description) {
+      String shortCode, AutomaticRuleTypeEnum automaticType, String description, boolean isBigData, String tableName) {
     ObjectId ruleId = new ObjectId();
 
     String message = "Geometry is not valid. Reason: {%reason%}";
@@ -426,16 +426,24 @@ public class AutomaticRules {
 
     String fieldName = document.getString("headerName");
 
-    String sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","
-        + " public.ST_isValidReason(public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'),"
-        + " ((fv.value::json->'properties')::json->>'srid')::integer)) as reason,"
-        + " public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'), "
-        + " ((fv.value::json->'properties')::json->>'srid')::integer) as value "
-        + " from dataset_%s.field_value fv inner join dataset_%s.record_value rv "
-        + " on rv.id = fv.id_record where fv.value <> '' and public.is_valid_json(fv.value) and geometry is null ) tableAux "
-        + " where public.ST_isValid(value) = false;";
-
-    String sqlResult = String.format(sql, fieldName, datasetId, datasetId);
+    String sql;
+    String sqlResult;
+    if (isBigData) {
+      sql = "select record_id, ST_isValidReason(multipoint) as reason " +
+          "  from %s" +
+          "  where ST_isValid(multipoint) = false";
+      sqlResult = String.format(sql, tableName);
+    } else {
+      sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","
+          + " public.ST_isValidReason(public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'),"
+          + " ((fv.value::json->'properties')::json->>'srid')::integer)) as reason,"
+          + " public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'), "
+          + " ((fv.value::json->'properties')::json->>'srid')::integer) as value "
+          + " from dataset_%s.field_value fv inner join dataset_%s.record_value rv "
+          + " on rv.id = fv.id_record where fv.value <> '' and public.is_valid_json(fv.value) and geometry is null ) tableAux "
+          + " where public.ST_isValid(value) = false;";
+       sqlResult = String.format(sql, fieldName, datasetId, datasetId);
+    }
 
     return composeRule(ruleId, referenceId, typeEntityEnum, nameRule, whenCondition, message,
         ErrorTypeEnum.BLOCKER.getValue(), shortCode, automaticType, description, sqlResult);

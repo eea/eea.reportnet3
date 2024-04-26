@@ -86,7 +86,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class ValidationService.
@@ -784,15 +784,34 @@ public class RulesServiceImpl implements RulesService {
               new ObjectId(referenceId)) == null) {
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
             document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+
+            /*Check if is big dataflow*/
+            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+            boolean isBigDataflow = dataflow.getBigData() != null;
+
+            /*find table path*/
+            Document tableSchemaDoc = schemasRepository.findTableSchema(datasetSchemaId,getTableSchemaIdFromIdFieldSchema(schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId)), referenceId));
+            String tableName = tableSchemaDoc.get("nameTableSchema").toString();
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+            S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+            dataTableResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+            String key = s3Helper.getS3Service().getS3Path(dataTableResolver);
+
             // Validate Geometry
             ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckGeometries(datasetId,
                 document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, isBigDataflow, key));
             // ST_Transform
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
-            ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckSTtransform(datasetId,
-                document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+
+            /*if big data and geometry  do not check if transforms*/
+
+            if (!isBigDataflow) {
+              ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckSTtransform(datasetId,
+                  document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
+                  "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+            }
           }
           break;
         default:
@@ -1894,7 +1913,7 @@ public class RulesServiceImpl implements RulesService {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
         String newSqlSentence = rule.getSqlSentence();
         newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
-        rule.setSqlSentence(newSqlSentence);
+        rule.setSqlSentence(newSqlSentence);//
       });
     }
 
