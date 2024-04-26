@@ -667,7 +667,7 @@ public class DatasetControllerImpl implements DatasetController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
           }
 
-          bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), recordId, deleteCascadePK);
+          bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, recordId, deleteCascadePK);
         }
         else{
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");

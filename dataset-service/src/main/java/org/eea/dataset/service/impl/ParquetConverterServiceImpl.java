@@ -156,6 +156,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             //remove tables and folders that contain the previous csv files because data will be replaced
             LOG.info("Removing csv files for job {}", importFileInDremioInfo);
             removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder);
+
+            //delete attachments if they exist
+            if (s3Helper.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
+                s3Helper.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
+            }
         }
 
         Boolean needToDemoteTable = true;

@@ -30,9 +30,11 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.*;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
@@ -738,6 +740,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
+
+        //delete attachments if they exist
+        if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
+            s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
+        }
     }
 
     @Override
@@ -851,10 +858,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
 
         //remove attachment file from s3
-        String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
-        String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
-        s3HelperPrivate.deleteFile(attachmentPathInS3);
+        removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaName, fieldName, FilenameUtils.getExtension(fileName), recordId);
     }
 
     /**
@@ -1095,12 +1099,26 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteRecord(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, String recordId, boolean deleteCascadePK) throws Exception{
+    public void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception{
         providerId = providerId != null ? providerId : 0L;
-        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), UUID.randomUUID().toString(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        //check if we need to remove attachments
+        List<FieldSchemaVO> fields = tableSchemaVO.getRecordSchema().getFieldSchema();
+        for(FieldSchemaVO field: fields){
+            if(field.getType() == DataType.ATTACHMENT){
+                //get fileName
+                String getFileNameQuery = "SELECT " + field.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'";
+                String getFileNameResult = dremioJdbcTemplate.queryForObject(getFileNameQuery, String.class);
+                if(StringUtils.isNotBlank(getFileNameResult)){
+                    removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), field.getName(), FilenameUtils.getExtension(getFileNameResult), recordId);
+                }
+            }
+        }
 
         //get current number of records
         String recordsCountQuery = "select count(record_id) from " + icebergTablePath;
@@ -1117,16 +1135,29 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
             String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
+
+
         }
         else{
             //we must remove the table
-            dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaName);
+            dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
             LOG.info("Removing parquet files for table in path {}", icebergTablePath);
             if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
                 s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
             }
-        }
 
+            //delete attachments if they exist
+            if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
+                s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
+            }
+        }
         //todo handle deleteCascadePK
+    }
+
+    private void removeAttachmentFromS3(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, String fieldName, String extension, String recordId){
+        String fileNameInS3 = fieldName + "_" + recordId + "." + extension;
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
+        s3HelperPrivate.deleteFile(attachmentPathInS3);
     }
 }
