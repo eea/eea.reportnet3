@@ -185,6 +185,7 @@ export const ActionsToolbar = ({
         }
       }
       onEnableManualEdit(checked);
+      onDisableEditButton(false);
     } catch (error) {
       console.error('ActionsToolbar - convertTable.', error);
       notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
@@ -342,9 +343,7 @@ export const ActionsToolbar = ({
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
-            if (e) {
-              onDisableEditButton(e.checked);
-            }
+            onDisableEditButton(true);
 
             convertTable(e.checked);
           }}

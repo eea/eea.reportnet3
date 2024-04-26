@@ -123,7 +123,6 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             DataLakeDataRetrieverUtils.buildPaginationQuery(pageable, filteredQuery);
         }
         dataQuery.append(filteredQuery);
-        LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
         List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
         result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
         result.setRecords(recordVOS);

@@ -180,10 +180,10 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param datasetId the dataset id
-     * @param tableSchemaName the tableSchemaName
+     * @param tableSchemaVO the tableSchemaVO
      * @param recordId the record id to be removed
      * @param deleteCascadePK the deleteCascadePK
      *
      */
-    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, String recordId, boolean deleteCascadePK) throws Exception;
+    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception;
 }
