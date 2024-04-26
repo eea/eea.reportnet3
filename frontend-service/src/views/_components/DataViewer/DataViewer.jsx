@@ -316,9 +316,6 @@ export const DataViewer = ({
 
   useEffect(() => {
     onChangeButtonsVisibility(isEditRecordsManuallyEnabled);
-    if (isEditRecordsManuallyEnabled) {
-      setIsEditButtonDisabled(!isEditRecordsManuallyEnabled);
-    }
   }, [isEditRecordsManuallyEnabled]);
 
   useEffect(() => {
