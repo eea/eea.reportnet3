@@ -66,7 +66,6 @@ export const DataViewer = ({
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
-  isEditRecordsManuallyEnabled,
   isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
@@ -79,6 +78,7 @@ export const DataViewer = ({
   onEnableManualEdit,
   onHideSelectGroupedValidation,
   onLoadTableData,
+  isTableEditable,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -115,7 +115,7 @@ export const DataViewer = ({
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isEditButtonDisabled, setIsEditButtonDisabled] = useState(false);
+  const [isEditRecordsManuallyButtonDisabled, setIsEditRecordsManuallyButtonDisabled] = useState(false);
   const [isFilterValidationsActive, setIsFilterValidationsActive] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isNewRecord, setIsNewRecord] = useState(false);
@@ -311,12 +311,12 @@ export const DataViewer = ({
     validationsTemplate,
     reporting,
     dataAreManuallyEditable,
-    isEditRecordsManuallyEnabled
+    isTableEditable
   );
 
   useEffect(() => {
-    onChangeButtonsVisibility(isEditRecordsManuallyEnabled);
-  }, [isEditRecordsManuallyEnabled]);
+    onChangeButtonsVisibility(isTableEditable);
+  }, [isTableEditable]);
 
   useEffect(() => {
     if (isGroupedValidationSelected) {
@@ -796,7 +796,7 @@ export const DataViewer = ({
   };
 
   const onDisableEditButton = checked => {
-    setIsEditButtonDisabled(checked);
+    setIsEditRecordsManuallyButtonDisabled(checked);
   };
 
   const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
@@ -1235,13 +1235,13 @@ export const DataViewer = ({
         }
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-        isEditButtonDisabled={isEditButtonDisabled}
-        isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
+        isEditRecordsManuallyButtonDisabled={isEditRecordsManuallyButtonDisabled}
         isExportable={isExportable}
         isFilterable={isFilterable}
         isFilterValidationsActive={isFilterValidationsActive}
         isGroupedValidationSelected={isGroupedValidationSelected}
         isLoading={isLoading}
+        isTableEditable={isTableEditable}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
         levelErrorValidations={levelErrorValidations}
         onConfirmDeleteTable={onConfirmDeleteTable}
@@ -1285,7 +1285,7 @@ export const DataViewer = ({
                 }
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-                isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
+                isTableEditable={isTableEditable}
                 onAddClick={() => {
                   setIsNewRecord(true);
                   setAddDialogVisible(true);

@@ -83,7 +83,7 @@ export const FieldsDesigner = ({
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isEditRecordsManuallyEnabled, setIsEditRecordsManuallyEnabled] = useState(
+  const [isTableEditable, setIsTableEditable] = useState(
     table?.icebergTableIsCreated ? table.icebergTableIsCreated : false
   );
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
@@ -175,7 +175,7 @@ export const FieldsDesigner = ({
   };
 
   const onEnableManualEdit = checked => {
-    setIsEditRecordsManuallyEnabled(checked);
+    setIsTableEditable(checked);
   };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
@@ -515,10 +515,10 @@ export const FieldsDesigner = ({
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-          isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
+          isTableEditable={isTableEditable}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onChangeButtonsVisibility={onChangeButtonsVisibility}
@@ -1056,9 +1056,7 @@ export const FieldsDesigner = ({
               ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
               checked={dataAreManuallyEditable}
               className={styles.fieldDesignerItem}
-              disabled={
-                isEditRecordsManuallyEnabled || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset
-              }
+              disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
               id={`${table.tableSchemaId}_check_manual_edit`}
               inputId={`${table.tableSchemaId}_check_manual_edit`}
               label="Default"

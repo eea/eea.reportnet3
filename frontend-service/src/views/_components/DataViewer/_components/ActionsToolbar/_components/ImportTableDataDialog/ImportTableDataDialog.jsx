@@ -22,7 +22,7 @@ export const ImportTableDataDialog = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
-  isEditRecordsManuallyEnabled,
+  isTableEditable,
   showWriteButtons,
   tableId,
   tableName
@@ -116,7 +116,7 @@ export const ImportTableDataDialog = ({
             !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
-            isEditRecordsManuallyEnabled ||
+            isTableEditable ||
             !hasWritePermissions ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||

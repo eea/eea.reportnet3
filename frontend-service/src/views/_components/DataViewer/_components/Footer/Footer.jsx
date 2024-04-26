@@ -9,14 +9,14 @@ export const Footer = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
-  isEditRecordsManuallyEnabled,
+  isTableEditable,
   onAddClick,
   onPasteClick
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
-      {isEditRecordsManuallyEnabled && dataAreManuallyEditable && (
+      {isTableEditable && dataAreManuallyEditable && (
         <Button
           className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
           disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
