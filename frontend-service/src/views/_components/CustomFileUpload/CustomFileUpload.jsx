@@ -102,11 +102,11 @@ export const CustomFileUpload = ({
     if (hasFiles() && auto) upload();
   }, [state]);
 
-  useEffect(() => {
-    if (presignedUrl) {
-      upload();
-    }
-  }, [presignedUrl]);
+  // useEffect(() => {
+  //   if (presignedUrl) {
+  //     upload();
+  //   }
+  // }, [presignedUrl]);
 
   useEffect(() => {
     if (state.isUploadClicked) upload();
@@ -328,7 +328,8 @@ export const CustomFileUpload = ({
       }
     };
 
-    let nUrl = bigData ? presignedUrl : url;
+    // let nUrl = bigData ? presignedUrl : url;
+    let nUrl = url;
 
     if (replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
@@ -595,11 +596,12 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                if (bigData) {
-                  onGetPresignedUrl();
-                } else {
-                  upload();
-                }
+                upload();
+                // if (bigData) {
+                //   onGetPresignedUrl();
+                // } else {
+                //   upload();
+                // }
               }
             }}
           />
