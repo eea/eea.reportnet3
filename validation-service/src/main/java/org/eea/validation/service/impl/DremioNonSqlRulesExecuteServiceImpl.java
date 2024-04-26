@@ -105,16 +105,21 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
-            if (ruleMethodName.equals(IS_MULTI_SELECT_CODE_LIST_VALIDATE)) {
-                ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
-            } else if (ruleMethodName.equals(IS_CODE_LIST_INSENSITIVE)) {
-                ruleMethodName = CODE_LIST_VALIDATE;
-                parameters.add(FALSE);
-            } else if (ruleMethodName.equals(IS_GEOMETRY)) {
-                ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
-            } else if (ruleMethodName.equals(CHECK_EPSGSRID)) {
-                ruleMethodName = CHECK_EPSGSRID_VALIDATION;
-            }
+          switch (ruleMethodName) {
+            case IS_MULTI_SELECT_CODE_LIST_VALIDATE:
+              ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
+              break;
+            case IS_CODE_LIST_INSENSITIVE:
+              ruleMethodName = CODE_LIST_VALIDATE;
+              parameters.add(FALSE);
+              break;
+            case IS_GEOMETRY:
+              ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
+              break;
+            case CHECK_EPSGSRID:
+              ruleMethodName = CHECK_EPSGSRID_VALIDATION;
+              break;
+          }
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
