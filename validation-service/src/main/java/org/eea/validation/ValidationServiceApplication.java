@@ -1,6 +1,7 @@
 package org.eea.validation;
 
 import org.eea.lock.annotation.EnableLockAspect;
+import org.eea.lock.redis.EnableRedisLock;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
@@ -19,6 +20,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EeaEnableSecurity
 @EnableLockAspect
 @EnableCaching
+@EnableRedisLock
 public class ValidationServiceApplication {
 
   /**

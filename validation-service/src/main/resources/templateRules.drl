@@ -66,6 +66,10 @@ function boolean isBlank(String value){
 	return !StringUtils.isBlank(value);
 }
 
+function boolean isNotEmpty(String value) {
+	return !StringUtils.isEmpty(value);
+}
+
 //////////////////////////////////////////VALIDATION EMPTY POINT VALUE////////////////////////////////////////////////////////////
 function boolean isBlankPoint(FieldValue fieldValue){
 	if(fieldValue.getGeometry() != null) {
@@ -83,7 +87,7 @@ function boolean isBlankPoint(FieldValue fieldValue){
 
 //////////////////////////////////////////VALIDATION BOOLEAN////////////////////////////////////////////////////////////
 function boolean isBoolean(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
 	if((!value.equalsIgnoreCase("TRUE") && !value.equalsIgnoreCase("FALSE"))){
@@ -94,12 +98,12 @@ function boolean isBoolean(String value){
 
 //////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
 function boolean isDateYYYYMMDD( String value ){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
 
- SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
- 	if(!isBlank(value)){
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+ 	if(!isNotEmpty(value)){
 		return true;
 	}
  	Date dateDrools = null;
@@ -116,7 +120,7 @@ function boolean isDateYYYYMMDD( String value ){
 
 //////////////////////////////////////////VALIDATION DATETIME////////////////////////////////////////////////////////////
 function boolean isDateTime( String value ){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
 
@@ -124,8 +128,8 @@ function boolean isDateTime( String value ){
         return false;
     }
 
- SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
- 	if(!isBlank(value)){
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+ 	if(!isNotEmpty(value)){
 		return true;
 	}
  	Date dateDrools = null;
@@ -141,7 +145,7 @@ function boolean isDateTime( String value ){
 
 //////////////////////////////////////////VALIDATION NUMBER_INTEGER///////////////////////////////////////////////////////////
 function boolean isNumberInteger(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
     try {
@@ -154,7 +158,7 @@ function boolean isNumberInteger(String value){
 
 //////////////////////////////////////////VALIDATION NUMBER_DECIMAL///////////////////////////////////////////////////////////
 function boolean isNumberDecimal(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
     try {
@@ -167,7 +171,7 @@ function boolean isNumberDecimal(String value){
 
 //////////////////////////////////////////VALIDATION URL///////////////////////////////////////////////////////////
 function boolean isURL( String value ){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
 	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_URL");
@@ -175,7 +179,7 @@ function boolean isURL( String value ){
 
 //////////////////////////////////////////VALIDATION EMAIL///////////////////////////////////////////////////////////
 function boolean isEmail(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
 	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_EMAIL");
@@ -183,7 +187,7 @@ function boolean isEmail(String value){
 
  //////////////////////////////////////////VALIDATION PHONE///////////////////////////////////////////////////////////
 function boolean isPhone(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
 	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_PHONE");

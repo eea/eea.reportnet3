@@ -4,9 +4,12 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.job.JobScheduler;
 import org.eea.kafka.domain.EEAEventVO;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.message.MessageReceiver;
 import org.eea.validation.persistence.data.metabase.domain.Task;
 import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
@@ -49,6 +52,9 @@ public class ValidationScheduler extends MessageReceiver {
   @Autowired
   private JobScheduler scheduler;
 
+  @Autowired
+  private RedisLockService redisLockService;
+
   /** The delay. */
   @Value("${validation.scheduled.consumer}")
   private Long delay;
@@ -67,6 +73,8 @@ public class ValidationScheduler extends MessageReceiver {
 
   /** The task read strategy. */
   private TaskReadStrategy taskReadStrategy;
+
+  private static final long lockExpirationInMillis = 600000L;
 
 
   /**
@@ -91,22 +99,31 @@ public class ValidationScheduler extends MessageReceiver {
       int freeThreads = checkFreeThreads();
       if (freeThreads > 0) {
         for (Task task : taskReadStrategy.getTasks(freeThreads)) {
+          String lockKey = LockEnum.TASK_SCHEDULER.getValue() + "_" + task.getId();
+          String value = task.getStatus().toString();
           try {
-            task.setStartingDate(new Date());
-            task.setPod(serviceInstanceId);
-            task.setStatus(ProcessStatusEnum.IN_PROGRESS);
-            taskRepository.save(task);
-            taskRepository.flush();
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
-            Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
-            message.getPayload().getData().put("task_id", task.getId());
-            consumeMessage(message);
+            if (redisLockService.checkAndAcquireLock(lockKey, value, lockExpirationInMillis)) {
+              task.setStartingDate(new Date());
+              task.setPod(serviceInstanceId);
+              if (task.getStatus() == ProcessStatusEnum.IN_PROGRESS) {
+                continue;
+              }
+              task.setStatus(ProcessStatusEnum.IN_PROGRESS);
+              taskRepository.save(task);
+              taskRepository.flush();
+              ObjectMapper objectMapper = new ObjectMapper();
+              objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+              EEAEventVO event = objectMapper.readValue(task.getJson(), EEAEventVO.class);
+              Message<EEAEventVO> message = MessageBuilder.withPayload(event).build();
+              message.getPayload().getData().put("task_id", task.getId());
+              consumeMessage(message);
+            }
           } catch (EEAException | JsonProcessingException e) {
             LOG_ERROR.error("failed the validation task shedule because of {} ", e);
           } catch (ObjectOptimisticLockingFailureException e) {
             newDelay = 1L;
+          } finally {
+            redisLockService.releaseLock(lockKey, value);
           }
         }
       }
