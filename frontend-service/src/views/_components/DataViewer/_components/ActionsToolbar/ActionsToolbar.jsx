@@ -46,13 +46,13 @@ export const ActionsToolbar = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
-  isEditButtonDisabled,
-  isEditRecordsManuallyEnabled,
+  isEditRecordsManuallyButtonDisabled,
   isExportable,
   isFilterable = true,
   isFilterValidationsActive,
   isGroupedValidationSelected,
   isLoading,
+  isTableEditable,
   levelErrorTypesWithCorrects,
   levelErrorValidations,
   onHideSelectGroupedValidation,
@@ -306,7 +306,7 @@ export const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
-            isEditRecordsManuallyEnabled ||
+            isTableEditable ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             actionsContext.importDatasetProcessing ||
@@ -338,8 +338,8 @@ export const ActionsToolbar = ({
       <div>
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
-          checked={isEditRecordsManuallyEnabled && dataAreManuallyEditable}
-          disabled={!dataAreManuallyEditable || isEditButtonDisabled}
+          checked={isTableEditable && dataAreManuallyEditable}
+          disabled={!dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
@@ -352,7 +352,8 @@ export const ActionsToolbar = ({
         <label
           id="check_edit_records_manually_label"
           style={{
-            color: dataAreManuallyEditable && !isEditButtonDisabled ? 'var(--main-font-color)' : '#9A9A9A',
+            color:
+              dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled ? 'var(--main-font-color)' : '#9A9A9A',
             cursor: 'auto',
             fontSize: '11pt',
             marginLeft: '6px',
@@ -461,7 +462,7 @@ export const ActionsToolbar = ({
       hasWritePermissions={hasWritePermissions}
       isDataflowOpen={isDataflowOpen}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-      isEditRecordsManuallyEnabled={isEditRecordsManuallyEnabled}
+      isTableEditable={isTableEditable}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
       tableName={tableName}
@@ -496,7 +497,7 @@ export const ActionsToolbar = ({
         />
         <DeleteDialog
           disabled={
-            isEditRecordsManuallyEnabled ||
+            isTableEditable ||
             !hasWritePermissions ||
             isUndefined(records.totalRecords) ||
             isDataflowOpen ||

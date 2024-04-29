@@ -108,7 +108,7 @@ export const useSetColumns = (
   validationsTemplate,
   isReporting,
   dataAreManuallyEditable,
-  isEditRecordsManuallyEnabled
+  isTableEditable
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
@@ -139,7 +139,7 @@ export const useSetColumns = (
           />
         )}
         {dataAreManuallyEditable &&
-          isEditRecordsManuallyEnabled &&
+          isTableEditable &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
@@ -162,7 +162,7 @@ export const useSetColumns = (
             />
           )}
         {dataAreManuallyEditable &&
-          isEditRecordsManuallyEnabled &&
+          isTableEditable &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
@@ -428,7 +428,7 @@ export const useSetColumns = (
           editor={
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
             (dataAreManuallyEditable &&
-              isEditRecordsManuallyEnabled &&
+              isTableEditable &&
               hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
@@ -511,7 +511,7 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      dataAreManuallyEditable && isEditRecordsManuallyEnabled && hasWritePermissions
+      dataAreManuallyEditable && isTableEditable && hasWritePermissions
         ? columnsArr.unshift(editCol, validationCol)
         : columnsArr.unshift(validationCol);
     }
@@ -535,7 +535,7 @@ export const useSetColumns = (
     initialCellValue,
     records.selectedRecord.recordId,
     dataAreManuallyEditable,
-    isEditRecordsManuallyEnabled
+    isTableEditable
   ]);
 
   return {

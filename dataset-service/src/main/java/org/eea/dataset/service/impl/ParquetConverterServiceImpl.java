@@ -31,6 +31,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -351,7 +352,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
 
-            List<String> expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
+            String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
+            if (StringUtils.isBlank(tableSchemaId)) {
+                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+            }
+            List<String> expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName(), tableSchemaId);
+            Map<String, DataType> fieldNameAndTypeMap = getFieldNameAndTypeMap(tableSchemaId, dataSetSchema);
+
             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
             for (CSVRecord csvRecord : csvParser) {
                 if(csvRecord.values().length == 0){
@@ -365,6 +372,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 List<String> row = new ArrayList<>();
                 String recordIdValue = UUID.randomUUID().toString();
                 for (String expectedHeader : expectedHeaders) {
+                    DataType fieldType = fieldNameAndTypeMap.get(expectedHeader);
+                    if(fieldType == DataType.ATTACHMENT){
+                        //do not add any value to attachment fields
+                        row.add("");
+                        continue;
+                    }
                     if (expectedHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
                         row.add(recordIdValue);
                     } else if (expectedHeader.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
@@ -445,7 +458,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             csvHeaders.addAll(csvParser.getHeaderMap().keySet());
             csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
 
-            expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName());
+            String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
+            if (StringUtils.isBlank(tableSchemaId)) {
+                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+            }
+            expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName(), tableSchemaId);
+            Map<String, DataType> fieldNameAndTypeMap = getFieldNameAndTypeMap(tableSchemaId, dataSetSchema);
 
             int recordCounter = 0;
             Boolean emptyFile = true;
@@ -471,6 +489,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 List<String> row = new ArrayList<>();
                 String recordIdValue = UUID.randomUUID().toString();
                 for (String expectedHeader : expectedHeaders) {
+                    DataType fieldType = fieldNameAndTypeMap.get(expectedHeader);
+                    if(fieldType == DataType.ATTACHMENT){
+                        //do not add any value to attachment fields
+                        row.add("");
+                        continue;
+                    }
                     if (expectedHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
                         row.add(recordIdValue);
                     } else if (expectedHeader.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
@@ -637,13 +661,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         LOG.info("Finished writing to Parquet file: {}. {}", parquetFilePath, importFileInDremioInfo);
     }
 
-    private List<String> checkIfCSVHeadersAreCorrect(List<String> csvHeaders, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String csvFileName) throws EEAException {
+    private List<String> checkIfCSVHeadersAreCorrect(List<String> csvHeaders, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, String csvFileName, String tableSchemaId) throws EEAException {
         boolean atLeastOneFieldSchema = false;
-
-        String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
-        if (StringUtils.isBlank(tableSchemaId)) {
-            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFileName, false);
-        }
 
         for (String csvHeader : csvHeaders) {
             if (csvHeader.startsWith("\uFEFF")){
@@ -697,6 +716,21 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         return fieldNames;
+    }
+
+    private Map<String, DataType> getFieldNameAndTypeMap(String tableSchemaId, DataSetSchema dataSetSchema){
+        Map<String, DataType> fieldNameAndType = new HashMap<>();
+        fieldNameAndType.put(PARQUET_RECORD_ID_COLUMN_HEADER, DataType.TEXT);
+        fieldNameAndType.put(PARQUET_PROVIDER_CODE_COLUMN_HEADER, DataType.TEXT);
+        for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+            if (tableSchemaId.equals(tableSchema.getIdTableSchema().toString())) {
+                for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+                    fieldNameAndType.put(fieldSchema.getHeaderName(), fieldSchema.getType());
+                }
+                break;
+            }
+        }
+        return fieldNameAndType;
     }
 
     @Override
