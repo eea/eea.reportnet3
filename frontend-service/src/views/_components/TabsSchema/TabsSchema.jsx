@@ -29,6 +29,7 @@ export const TabsSchema = ({
   isReferenceDataset,
   isReportingWebform,
   levelErrorTypes,
+  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
@@ -91,6 +92,7 @@ export const TabsSchema = ({
                   isReportingWebform={isReportingWebform}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
+                  onChangeButtonsVisibility={onChangeButtonsVisibility}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   reporting={reporting}

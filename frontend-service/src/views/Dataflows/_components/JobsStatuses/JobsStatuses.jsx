@@ -387,16 +387,16 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getCancelButton = job => (
     <ActionsColumn
-      disabledButtons={
-        !(
-          job.jobStatus === 'IN_PROGRESS' &&
-          (job.jobType === 'IMPORT' ||
-            job.jobType === 'VALIDATION' ||
-            job.jobType === 'RELEASE' ||
-            job.jobType === 'FILE_EXPORT') &&
-          getDateDifferenceInMinutes(job.dateStatusChanged) > 9
-        )
-      }
+      // disabledButtons={
+      //   !(
+      //     job.jobStatus === 'IN_PROGRESS' &&
+      //     (job.jobType === 'IMPORT' ||
+      //       job.jobType === 'VALIDATION' ||
+      //       job.jobType === 'RELEASE' ||
+      //       job.jobType === 'FILE_EXPORT') &&
+      //     getDateDifferenceInMinutes(job.dateStatusChanged) > 9
+      //   )
+      // }
       onDeleteClick={() => {
         setIsDeleteDialogVisible(true);
         setJobStatus(job);

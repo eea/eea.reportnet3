@@ -73,6 +73,8 @@ export const CustomFileUpload = ({
   replaceCheckLabel = 'Replace data',
   replaceCheckLabelMessage = '',
   replaceCheckDisabled = false,
+  s3Check = false,
+  s3CheckLabel = 'S3',
   style = null,
   uploadLabel = 'Upload',
   url = null,
@@ -86,7 +88,8 @@ export const CustomFileUpload = ({
     isUploading: false,
     isValid: true,
     msgs: [],
-    replace: false
+    replace: false,
+    uploadWithS3: false
   });
 
   const [isValidating, setIsValidating] = useState(false);
@@ -102,11 +105,11 @@ export const CustomFileUpload = ({
     if (hasFiles() && auto) upload();
   }, [state]);
 
-  // useEffect(() => {
-  //   if (presignedUrl) {
-  //     upload();
-  //   }
-  // }, [presignedUrl]);
+  useEffect(() => {
+    if (presignedUrl) {
+      upload();
+    }
+  }, [presignedUrl]);
 
   useEffect(() => {
     if (state.isUploadClicked) upload();
@@ -328,15 +331,14 @@ export const CustomFileUpload = ({
       }
     };
 
-    // let nUrl = bigData ? presignedUrl : url;
-    let nUrl = url;
+    let nUrl = bigData && state.uploadWithS3 ? presignedUrl : url;
 
     if (replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
       nUrl += 'replace=' + state.replace;
     }
 
-    xhr.open(operation, nUrl, true);
+    xhr.open(bigData && state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
     const tokens = LocalUserStorageUtils.getTokens();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
@@ -508,7 +510,7 @@ export const CustomFileUpload = ({
 
   const renderReplaceCheck = () => {
     return (
-      <div className={styles.checkboxWrapper}>
+      <div className={styles.replaceCheckboxWrapper}>
         <Checkbox
           checked={state.replace}
           disabled={replaceCheckDisabled}
@@ -534,6 +536,24 @@ export const CustomFileUpload = ({
             tooltipOptions={{ position: 'top' }}
           />
         )}
+      </div>
+    );
+  };
+  const renderS3Check = () => {
+    return (
+      <div className={styles.s3CheckboxWrapper}>
+        <Checkbox
+          checked={state.uploadWithS3}
+          id="s3Checkbox"
+          inputId="s3Checkbox"
+          onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}
+          role="checkbox"
+        />
+        <label htmlFor="s3Checkbox">
+          <span onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}>
+            {s3CheckLabel}
+          </span>
+        </label>
       </div>
     );
   };
@@ -563,6 +583,7 @@ export const CustomFileUpload = ({
             {filesList}
           </div>
           {replaceCheck && renderReplaceCheck()}
+          {bigData && s3Check && renderS3Check()}
         </div>
         <p className={`${styles.invalidExtensionMsg} ${state.isValid ? styles.isValid : undefined}`}>
           {invalidExtensionMessage}
@@ -596,12 +617,11 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                upload();
-                // if (bigData) {
-                //   onGetPresignedUrl();
-                // } else {
-                //   upload();
-                // }
+                if (bigData && state.uploadWithS3) {
+                  onGetPresignedUrl();
+                } else {
+                  upload();
+                }
               }
             }}
           />
