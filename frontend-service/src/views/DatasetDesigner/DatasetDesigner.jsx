@@ -80,7 +80,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { resetFilterState } = useApplyFilters('uniqueConstraints');
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
-  const [buttonsDisabled, setButtonsDisabled] = useState(true);
+  const [isIcebergTableCreated, setIsIcebergTableCreated] = useState(false);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
@@ -692,7 +692,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onChangeButtonsVisibility = disabled => {
-    setButtonsDisabled(disabled);
+    setIsIcebergTableCreated(disabled);
   };
 
   const onHideDelete = () => {
@@ -901,6 +901,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           datasetId,
           dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
+
+        setIsIcebergTableCreated(dataset.tables.find(table => table.icebergTableIsCreated === true));
 
         setIsLoading(false);
         designerDispatch({
@@ -1706,7 +1708,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  buttonsDisabled ||
+                  isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1737,7 +1739,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  buttonsDisabled ||
+                  isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1766,7 +1768,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
-                  buttonsDisabled ||
+                  isIcebergTableCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1789,7 +1791,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
                 disabled={
-                  buttonsDisabled ||
+                  isIcebergTableCreated ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
@@ -2044,6 +2046,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
+            s3Check={true}
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(selectedCustomImportIntegration.id)
                 ? getUrl(DatasetConfig.importFileDatasetUpd, {

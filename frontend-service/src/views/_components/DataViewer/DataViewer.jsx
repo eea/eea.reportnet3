@@ -759,7 +759,7 @@ export const DataViewer = ({
             tableId
           );
         } catch (error) {
-          if (error.response.status === 423) {
+          if (error.response?.status === 423) {
             notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
           } else {
             console.error('DataViewer - onEditorSubmitValue.', error);
@@ -932,7 +932,7 @@ export const DataViewer = ({
         await DatasetService.updateRecord({ datasetId, record: parseMultiselect(record), tableSchemaId: tableId });
         onRefresh();
       } catch (error) {
-        if (error.response.status === 423) {
+        if (error.response?.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onSaveRecord - update.', error);

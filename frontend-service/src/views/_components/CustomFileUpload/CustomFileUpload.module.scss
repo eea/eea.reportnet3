@@ -12,6 +12,11 @@
   border-bottom: 0 none;
 }
 
+.p-fileupload-buttonbar {
+  padding: 0.5em;
+  border-bottom: 0 none;
+}
+
 .p-fileupload-buttonbar .p-button {
   vertical-align: middle;
   margin-right: 0.25em;
@@ -169,8 +174,29 @@
   }
 }
 
-.checkboxWrapper {
+.replaceCheckboxWrapper {
   margin-top: 1rem;
+  display: inline-block;
+  :global .p-checkbox {
+    margin-left: 0 !important;
+  }
+  label {
+    margin-left: 0.5rem !important;
+    user-select: none;
+    cursor: pointer;
+    span {
+      color: var(--main-font-color);
+    }
+    span:hover {
+      color: var(--main-font-color);
+    }
+  }
+}
+
+.s3CheckboxWrapper {
+  margin-top: 1rem;
+  display: inline-block;
+  margin-left: 1rem;
   :global .p-checkbox {
     margin-left: 0 !important;
   }

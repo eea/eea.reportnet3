@@ -1103,6 +1103,8 @@ export const FieldsDesigner = ({
             accept=".csv"
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
+            dataflowId={dataflowId}
+            datasetId={datasetId}
             dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
             dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
             dialogVisible={designerState.isImportTableSchemaDialogVisible}
@@ -1116,6 +1118,7 @@ export const FieldsDesigner = ({
             replaceCheck={true}
             replaceCheckDisabled={hasPKReferenced}
             replaceCheckLabelMessage={resourcesContext.messages['replaceDataPKInUse']}
+            s3Check={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
               datasetSchemaId: designerState.datasetSchemaId,
               datasetId: datasetId,
