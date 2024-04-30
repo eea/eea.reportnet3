@@ -328,6 +328,8 @@ export const EUDataset = () => {
     false
   );
 
+  const onChangeButtonsVisibility = disabled => {};
+
   const renderTabsSchema = () => (
     <TabsSchema
       bigData={euDatasetState.bigData}
@@ -339,6 +341,7 @@ export const EUDataset = () => {
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}
       levelErrorTypes={levelErrorTypes}
+      onChangeButtonsVisibility={onChangeButtonsVisibility}
       onLoadTableData={onLoadTableData}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
