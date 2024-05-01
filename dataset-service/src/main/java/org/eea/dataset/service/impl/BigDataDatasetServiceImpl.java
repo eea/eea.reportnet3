@@ -953,10 +953,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String parquetInnerFolderQueryPath = parquetTablePath + ".\"" + s3TablePathResolver.getFilename() + "\"";
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        //remove old parquet table because it will be recreated
-        dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
-        LOG.info("Removing parquet files for table in path {}", parquetTablePath);
+
         if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            //remove old parquet table because it will be recreated
+            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+            LOG.info("Removing parquet files for table in path {}", parquetTablePath);
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 

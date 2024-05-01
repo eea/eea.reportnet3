@@ -2798,7 +2798,8 @@ public class DatasetControllerImpl implements DatasetController {
         }
       }
       catch (Exception e){
-        LOG.error("Could not convert parquet table to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", e.getMessage());
+        LOG.error("Could not convert parquet table to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
+                providerId, datasetId, tableSchemaId, e.getMessage());
         throw e;
       }
   }
@@ -2832,7 +2833,8 @@ public class DatasetControllerImpl implements DatasetController {
       }
     }
     catch (Exception e){
-      LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", e.getMessage());
+      LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
+              providerId, datasetId, tableSchemaId, e.getMessage());
       throw e;
     }
   }

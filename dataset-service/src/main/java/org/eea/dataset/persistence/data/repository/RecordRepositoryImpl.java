@@ -668,7 +668,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
         .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
     List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
-    String tableName = "";
 
     // create primary json
     if (tableSchemaId != null) {
@@ -704,7 +703,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       bw.write("]}");
       bw.flush();
     } catch (Exception e) {
-      LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
+      LOG.error("Error in convert method for jsonOutputFile {} and tableSchemaId {}", jsonFile, tableSchemaId, e);
       throw e;
     }
 
