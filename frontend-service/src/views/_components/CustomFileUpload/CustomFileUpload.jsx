@@ -340,7 +340,7 @@ export const CustomFileUpload = ({
 
     xhr.open(bigData && state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
     const tokens = LocalUserStorageUtils.getTokens();
-    xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
+    if(!state.uploadWithSe3) xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (onBeforeSend) {
       onBeforeSend({ xhr: xhr, formData: formData });
