@@ -146,12 +146,10 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 field.set(object, dremioJdbcTemplate);
                 Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
 
-                /*Here we should handle the SQL for big data and geometries*/
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
             }
 
             if (!recordIds.isEmpty()) {
-                /*Here we should handle the SQL for big data and geometries*/
                 runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName);
             }
         } catch (Exception e) {
