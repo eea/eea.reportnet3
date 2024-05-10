@@ -1029,7 +1029,7 @@ public class FileTreatmentHelper implements DisposableBean {
         for(TableSchemaIdNameVO entry: tableSchemas){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
             if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
-                throw new Exception("Can not delete table data because iceberg table is created");
+                throw new Exception("Can not export table data because iceberg table is created");
             }
         }
         try {
@@ -2763,8 +2763,6 @@ public class FileTreatmentHelper implements DisposableBean {
             DataSetSchema datasetSchema =
                 schemasRepository.findById(new ObjectId(datasetVO.getDatasetSchema())).orElse(null);
 
-            LOG.info("datasetSchema {}", datasetSchema);
-
             TableSchema tableSchema = datasetSchema.getTableSchemas().stream()
                 .filter(t -> t.getRecordSchema().getIdTableSchema().toString().equals(tableSchemaId))
                 .findAny().orElse(null);
@@ -2772,10 +2770,7 @@ public class FileTreatmentHelper implements DisposableBean {
             List<String> headers = new ArrayList<>();
             if (tableSchema != null) {
                 List<FieldSchema> fieldSchema = tableSchema.getRecordSchema().getFieldSchema();
-
-                LOG.info("fieldSchema {}", fieldSchema);
                 headers = fieldSchema.stream().map(FieldSchema::getHeaderName).collect(Collectors.toList());
-                LOG.info("headers {}", headers);
             }
 
             return headers;

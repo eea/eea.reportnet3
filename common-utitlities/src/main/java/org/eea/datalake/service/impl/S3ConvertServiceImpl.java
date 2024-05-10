@@ -135,7 +135,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 }
                 String[] columns = new String[size];
                 for (int j = 0; j < size; j++) {
-                    columns[j] = record.get(j).toString();
+                    columns[j] = (record.get(j) != null) ? record.get(j).toString() : "";
                 }
                 csvWriter.writeNext(columns, false);
             }

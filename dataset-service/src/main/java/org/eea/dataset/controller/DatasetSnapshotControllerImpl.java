@@ -2,14 +2,18 @@ package org.eea.dataset.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.*;
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -17,6 +21,8 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
@@ -93,6 +99,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataset metabase controller zuul */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
   /**
    * The default release process priority
@@ -751,6 +760,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
    * @param dataflowId the dataflow id
    * @param dataProviderId the data provider id
    */
+  @SneakyThrows
   @Override
   @LockMethod(removeWhenFinish = false)
   @HystrixCommand
@@ -803,6 +813,18 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
     LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} with jobId {} is {}",
         dataflowId, dataProviderId, jobId, user);
+
+    List<DataSetMetabaseVO> datasets = dataSetMetabaseControllerZuul.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
+    for(DataSetMetabaseVO dataset: datasets){
+      List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
+      for(TableSchemaIdNameVO table: tables){
+        String datasetSchemaId = dataset.getDatasetSchema();
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          throw new Exception("Can not release for jobId " + jobId + " because there is an iceberg table");
+        }
+      }
+    }
 
     DataFlowVO dataflow = dataflowControllerZull.getMetabaseById(dataflowId);
     if (null != dataflow && dataflow.isReleasable()) {
