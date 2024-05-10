@@ -534,6 +534,10 @@ public final class EEAErrorMessage {
   public static final String IMPORTING_FILE_DATASET =
       "An unknown error happenned while importing a file into the dataset.";
 
+  /** The Constant IMPORTING_FILE_ICEBERG: {@value}. */
+  public static final String IMPORTING_FILE_ICEBERG =
+          "Can not import because the table is iceberg";
+
   /** The Constant EXPORTING_FILE_INTEGRATION: {@value}. */
   public static final String EXPORTING_FILE_INTEGRATION =
       "An unknown error happenned while exporting a file through integration.";

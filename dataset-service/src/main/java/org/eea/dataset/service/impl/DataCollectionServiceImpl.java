@@ -1,5 +1,7 @@
 package org.eea.dataset.service.impl;
 
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.BooleanUtils;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -11,10 +13,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DesignDatasetService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.dataset.service.model.IntegrityDataCollection;
 import org.eea.exception.EEAErrorMessage;
@@ -40,6 +39,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -68,6 +68,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -253,6 +254,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private S3Helper s3Helper;
 
+  /** The big data dataset service */
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
+
 
   /**
    * Gets the dataflow status.
@@ -388,11 +393,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @param stopAndNotifyPKError the stop and notify PK error
    */
+  @SneakyThrows
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
+
+    //check if there are tables converted to Iceberg and convert them back to Parquet
+    List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
+    for(DataSetMetabaseVO dataset: datasets){
+      List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
+      for(TableSchemaIdNameVO table: tables){
+        String datasetSchemaId = dataset.getDatasetSchema();
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          bigDataDatasetService.convertIcebergToParquetTable(dataset.getId(), dataflowId, dataset.getDataProviderId(), tableSchemaVO);
+          LOG.info("Converted iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, dataset.getDataProviderId(), dataset.getId(), table.getIdTableSchema());
+        }
+      }
+    }
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
         referenceDataflow, stopAndNotifyPKError);
