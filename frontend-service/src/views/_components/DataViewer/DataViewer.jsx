@@ -112,6 +112,7 @@ export const DataViewer = ({
   const [initialCellValue, setInitialCellValue] = useState();
   const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
   const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
+  const [isConfirmDeleteButtonDisabled, setIsConfirmDeleteButtonDisabled] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -675,6 +676,7 @@ export const DataViewer = ({
 
   const onConfirmDeleteRow = async () => {
     try {
+      setIsConfirmDeleteButtonDisabled(true);
       await DatasetService.deleteRecord({
         datasetId,
         recordId: records.selectedRecord.recordId,
@@ -687,7 +689,9 @@ export const DataViewer = ({
           : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
+      setIsConfirmDeleteButtonDisabled(false);
     } catch (error) {
+      setIsConfirmDeleteButtonDisabled(false);
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
@@ -1515,7 +1519,9 @@ export const DataViewer = ({
       {confirmDeleteVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isConfirmDeleteButtonDisabled}
           header={resourcesContext.messages['deleteRow']}
+          iconConfirm={isConfirmDeleteButtonDisabled ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteRow}
