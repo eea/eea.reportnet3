@@ -226,8 +226,8 @@ public class ValidationControllerImpl implements ValidationController {
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
         //check if there are tables converted to Iceberg and throw error
         List<TableSchemaIdNameVO> tables = datasetSchemaController.getTableSchemasIds(dataset.getId(), dataflow.getId(), dataset.getDataProviderId());
+        String datasetSchemaId = dataset.getDatasetSchema();
         for(TableSchemaIdNameVO table: tables){
-          String datasetSchemaId = dataset.getDatasetSchema();
           TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
             throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
@@ -246,7 +246,7 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.error("Error validating datasetId {} with jobId {}. Message {}", datasetId, jobId, e.getMessage(), e);
       validationHelper.deleteLockToReleaseProcess(datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error validating dataset data for datasetId {} with jobId {}. Message: {}", datasetId, jobId, e.getMessage());
+      LOG.error("Unexpected error! Error validating dataset data for datasetId {} with jobId {}. Message: {}", datasetId, jobId, e.getMessage());
       throw e;
     }
   }
