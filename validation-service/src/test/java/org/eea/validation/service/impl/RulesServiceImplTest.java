@@ -2662,6 +2662,7 @@ public class RulesServiceImplTest {
     dataset.setId(1L);
     dataset.setDatasetSchema("5e44110d6a9e3a270ce13fac");
     dataset.setDataflowId(1L);
+    dataflow.setBigData(true);
     Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
         .thenReturn(dataset);
 
