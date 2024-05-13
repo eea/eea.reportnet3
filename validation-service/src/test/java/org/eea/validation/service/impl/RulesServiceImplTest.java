@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -128,6 +131,12 @@ public class RulesServiceImplTest {
 
   @Mock
   private UserManagementControllerZull userManagementControllerZuul;
+
+  @Mock
+  private S3Helper s3Helper;
+
+  @Mock
+  private S3Service s3Service;
 
   /** The rules service impl. */
   @InjectMocks
@@ -1129,6 +1138,7 @@ public class RulesServiceImplTest {
     rule.setShortCode("ft01");
     rules.add(rule);
     ruleSchema.setRules(rules);
+    findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTIPOLYGON, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
@@ -1147,6 +1157,7 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    findServerPath();
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.POINT, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(4)).createNewRule(Mockito.any(), Mockito.any());
@@ -1163,6 +1174,7 @@ public class RulesServiceImplTest {
     rule.setShortCode("ft01");
     rules.add(rule);
     ruleSchema.setRules(rules);
+    findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
 
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1182,6 +1194,7 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    findServerPath();
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.LINESTRING, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(4)).createNewRule(Mockito.any(), Mockito.any());
@@ -1198,6 +1211,7 @@ public class RulesServiceImplTest {
     rule.setShortCode("ft01");
     rules.add(rule);
     ruleSchema.setRules(rules);
+    findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.MULTILINESTRING, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
@@ -1215,6 +1229,7 @@ public class RulesServiceImplTest {
     rule.setShortCode("ft01");
     rules.add(rule);
     ruleSchema.setRules(rules);
+    findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.POLYGON, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
@@ -1233,6 +1248,8 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+    findServerPath();
+
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
         DataType.GEOMETRYCOLLECTION, EntityTypeEnum.FIELD, 1L, Boolean.FALSE);
     Mockito.verify(rulesRepository, times(4)).createNewRule(Mockito.any(), Mockito.any());
@@ -2637,6 +2654,46 @@ public class RulesServiceImplTest {
     rulesServiceImpl.deleteRuleRequired(new ObjectId().toString(), new ObjectId().toString(),
         DataType.POINT);
     Mockito.verify(rulesRepository, times(1)).deleteRulePointRequired(Mockito.any(), Mockito.any());
+  }
+
+  private void findServerPath() {
+
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setId(1L);
+    dataset.setDatasetSchema("5e44110d6a9e3a270ce13fac");
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(Mockito.anyLong()))
+        .thenReturn(dataset);
+
+    DataSetSchema datasetSchema = new DataSetSchema();
+    List<TableSchema> tableSchemaList = new ArrayList<>();
+    TableSchema tableSchema = new TableSchema();
+    RecordSchema recordSchema = new RecordSchema();
+    FieldSchema fieldSchema = new FieldSchema();
+    List<FieldSchema> fieldSchemaList = new ArrayList<>();
+    fieldSchema.setIdFieldSchema(new ObjectId("5e44110d6a9e3a270ce13fac"));
+    fieldSchemaList.add(fieldSchema);
+    recordSchema.setFieldSchema(fieldSchemaList);
+    tableSchema.setRecordSchema(recordSchema);
+    tableSchema.setIdTableSchema(new ObjectId());
+    tableSchemaList.add(tableSchema);
+    datasetSchema.setTableSchemas(tableSchemaList);
+    datasetSchema.setIdDataSetSchema(new ObjectId());
+    when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
+    rulesServiceImpl.createUniqueConstraint("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
+        "5e44110d6a9e3a270ce13fac");
+
+    Document document = new Document();
+    document.put("nameTableSchema", "");
+    document.put("_id", "");
+
+    Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
+        .thenReturn(document);
+    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(1L))
+        .thenReturn(dataset);
+
+    Mockito.when(s3Helper.getS3Service()).thenReturn(s3Service);
+    Mockito.when(s3Service.getS3Path(new S3PathResolver(1L, 23, 1L, Mockito.any()))).thenReturn("dsfds");
   }
 
 
