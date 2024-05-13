@@ -57,9 +57,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Service("designDatasetService")
 public class DesignDatasetServiceImpl implements DesignDatasetService {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DesignDatasetServiceImpl.class);
 
@@ -300,7 +297,7 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       lockService.removeLockByCriteria(copyDatasetSchema);
 
     } catch (Exception e) {
-      LOG_ERROR.error("Error during the copy. Message: {}", e.getMessage(), e);
+      LOG.error("Error during the copy. Message: {}", e.getMessage(), e);
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }

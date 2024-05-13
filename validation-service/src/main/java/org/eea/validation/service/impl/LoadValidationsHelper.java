@@ -35,10 +35,6 @@ import org.springframework.stereotype.Component;
 public class LoadValidationsHelper {
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-  /**
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelper.class);
@@ -114,7 +110,7 @@ public class LoadValidationsHelper {
         errors.putAll(recordErrors.get());
         errors.putAll(fieldErrors.get());
       } catch (InterruptedException | ExecutionException e) {
-        LOG_ERROR.error("Error obtaining the errors ", e);
+        LOG.error("Error obtaining the errors ", e);
         if (e instanceof InterruptedException) {
           Thread.currentThread().interrupt();
         }

@@ -20,9 +20,6 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CheckManualRulesCommand.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   @Autowired
   private RulesService rulesService;
 
@@ -53,7 +50,7 @@ public class CheckManualRulesCommand extends AbstractEEAEventHandlerCommand {
       // validate all rules (SQL and non-SQL rules), then send a notification
       rulesService.validateAllRules(datasetId, checkNoSQL, user);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      LOG.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;
     }
   }

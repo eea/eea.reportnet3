@@ -47,8 +47,6 @@ import java.util.Map;
 @Component
 public class ValidationServiceHelper {
   private static final Logger LOG = LoggerFactory.getLogger(ValidationServiceHelper.class);
-
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
   private static final String TYPE_DATA = "typeData";
   private static final String KEYWORDS = "DELETE,INSERT,DROP";
@@ -98,7 +96,7 @@ public class ValidationServiceHelper {
         releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error validating all sql rules for datasetId: {}, checkNoSQL: {}, user: {}. Message: {}", datasetId, checkNoSQL, user, e.getMessage());
+      LOG.error("Unexpected error! Error validating all sql rules for datasetId: {}, checkNoSQL: {}, user: {}. Message: {}", datasetId, checkNoSQL, user, e.getMessage());
       throw e;
     }
   }
@@ -137,7 +135,7 @@ public class ValidationServiceHelper {
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     } catch (Exception e) {
       ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error updating rule state for datasetId {} and ruleId {}. Message: {}", datasetId, ruleId, e.getMessage());
+      LOG.error("Unexpected error! Error updating rule state for datasetId {} and ruleId {}. Message: {}", datasetId, ruleId, e.getMessage());
       throw e;
     }
   }
@@ -183,7 +181,7 @@ public class ValidationServiceHelper {
       return isCorrect;
     } catch (Exception e) {
       ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error validating rule state for datasetSchemaId {} and ruleId {}. Message: {}", datasetSchemaId, ruleId, e.getMessage());
+      LOG.error("Unexpected error! Error validating rule state for datasetSchemaId {} and ruleId {}. Message: {}", datasetSchemaId, ruleId, e.getMessage());
       throw e;
     }
   }
@@ -254,7 +252,7 @@ public class ValidationServiceHelper {
       return isCorrect;
     } catch (Exception e) {
       ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error validating rule with kiebase for ruleId {}. Message: {}", ruleId, e.getMessage());
+      LOG.error("Unexpected error! Error validating rule with kiebase for ruleId {}. Message: {}", ruleId, e.getMessage());
       throw e;
     }
   }
@@ -304,11 +302,11 @@ public class ValidationServiceHelper {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+      LOG.error("Unable to release notification: {}, {}", eventType, notificationVO);
     } catch (Exception e) {
       String eventTopic = (eventType != null) ? eventType.getTopic() : null;
       Long datasetId = (notificationVO != null) ? notificationVO.getDatasetId() : null;
-      LOG_ERROR.error("Unexpected error! Error releasing notification for event topic {} and datasetId {}. Message: {}", eventTopic, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error releasing notification for event topic {} and datasetId {}. Message: {}", eventTopic, datasetId, e.getMessage());
       throw e;
     }
   }

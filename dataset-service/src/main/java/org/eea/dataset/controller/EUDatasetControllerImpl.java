@@ -53,13 +53,6 @@ public class EUDatasetControllerImpl implements EUDatasetController {
   private static final Logger LOG = LoggerFactory.getLogger(EUDatasetControllerImpl.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
-
-  /**
    * Find EU dataset by dataflow id.
    *
    * @param idDataflow the id dataflow
@@ -108,9 +101,9 @@ public class EUDatasetControllerImpl implements EUDatasetController {
       LOG.info("Populating data for dataflowId {}", dataflowId);
       euDatasetService.populateEUDatasetWithDataCollection(dataflowId, jobId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error populating the EU Dataset for dataflowId {} because: {}", dataflowId, e.getMessage());
+      LOG.error("Error populating the EU Dataset for dataflowId {} because: {}", dataflowId, e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error populating data from data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error populating data from data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }

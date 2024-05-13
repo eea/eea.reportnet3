@@ -73,9 +73,6 @@ public class DocumentControllerImpl implements DocumentController {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DocumentControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /**
    * Upload document.
    *
@@ -130,17 +127,17 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error("Error uploading document to dataflow help: Dataflow {} is not DRAFT",
+        LOG.error("Error uploading document to dataflow help: Dataflow {} is not DRAFT",
             dataflowId);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error("Error uploading document to dataflow help: DataflowId {}. Message: {}",
+      LOG.error("Error uploading document to dataflow help: DataflowId {}. Message: {}",
           dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
     } catch (Exception e) {
       String filename = (file != null) ? file.getName() : null;
-      LOG_ERROR.error("Unexpected error! Error uploading document {} to dataflow help for dataflowId {} Message: {}", filename, dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error uploading document {} to dataflow help for dataflowId {} Message: {}", filename, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -195,7 +192,7 @@ public class DocumentControllerImpl implements DocumentController {
       FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
       return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
-      LOG_ERROR.error("Error retrieving document with documentId {} for dataflowId {}. Message: {}", documentId, dataflowId,
+      LOG.error("Error retrieving document with documentId {} for dataflowId {}. Message: {}", documentId, dataflowId,
               e.getMessage(), e);
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
@@ -203,7 +200,7 @@ public class DocumentControllerImpl implements DocumentController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving document {} for dataflowId {} Message: {}", documentId, dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving document {} for dataflowId {} Message: {}", documentId, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -256,16 +253,16 @@ public class DocumentControllerImpl implements DocumentController {
       }
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
+        LOG.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
             e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
+      LOG.error("Error retrieving public document: DocumentId {}. Message: {}", documentId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving public document {} Message: {}", documentId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving public document {} Message: {}", documentId, e.getMessage());
       throw e;
     }
   }
@@ -313,21 +310,21 @@ public class DocumentControllerImpl implements DocumentController {
       documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
       LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
     } catch (final FeignException e) {
-      LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+      LOG.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
           documentId, dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+        LOG.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
             documentId, dataflowId, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
+      LOG.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
           documentId, dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error removing document {} from dataflowId {} Message: {}", documentId, dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error removing document {} from dataflowId {} Message: {}", documentId, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -423,16 +420,16 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Successfully updated document with id {} for dataflowId {}", idDocument, dataflowId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
+        LOG.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
             idDocument, dataflowId, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
+      LOG.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
           idDocument, dataflowId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.UPDATING_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating document {} Message: {}", idDocument, e.getMessage());
+      LOG.error("Unexpected error! Error updating document {} Message: {}", idDocument, e.getMessage());
       throw e;
     }
   }
@@ -542,18 +539,18 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Successfully uploaded schema snapshot document {} for designDatasetId {}", fileName, designDatasetId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error updating schema snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
             designDatasetId, fileName, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error(
+      LOG.error(
           "Error updating schema snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
           designDatasetId, fileName, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.UPDATING_SCHEMA_SNAPSHOT_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error uploading schema snapshot document {} from designDatasetId {} Message: {}", fileName, designDatasetId, e.getMessage());
+      LOG.error("Unexpected error! Error uploading schema snapshot document {} from designDatasetId {} Message: {}", fileName, designDatasetId, e.getMessage());
       throw e;
     }
   }
@@ -585,18 +582,18 @@ public class DocumentControllerImpl implements DocumentController {
       return resource.getByteArray();
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error retrieving snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
             idDesignDataset, fileName, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error(
+      LOG.error(
           "Error retrieving snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
           idDesignDataset, fileName, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_SNAPSHOT_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving snapshot document {} from designDatasetId {} Message: {}", fileName, idDesignDataset, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving snapshot document {} from designDatasetId {} Message: {}", fileName, idDesignDataset, e.getMessage());
       throw e;
     }
   }
@@ -629,18 +626,18 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Successfully deleted schema snapshot document {} for designDatasetId {}", fileName, idDesignDataset);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error deleting snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
             idDesignDataset, fileName, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error(
+      LOG.error(
           "Error deleting snapshot document: DesignDatasetId {}. FileName {}. Message: {}",
           idDesignDataset, fileName, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_SNAPSHOT_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error removing schema snapshot document {} from designDatasetId {} Message: {}", fileName, idDesignDataset, e.getMessage());
+      LOG.error("Unexpected error! Error removing schema snapshot document {} from designDatasetId {} Message: {}", fileName, idDesignDataset, e.getMessage());
       throw e;
     }
   }
@@ -681,18 +678,18 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", fileName, dataflowId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error uploading collaboration document: DataflowId {}. FileName {}. Message: {}",
             dataflowId, fileName, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error(
+      LOG.error(
           "Error uploading collaboration document: DataflowId {}. FileName {}. Message: {}",
           dataflowId, fileName, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.UPDATING_COLLABORATION_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error uploading collaboration document {} for dataflowId {} and messageId {} Message: {}", fileName, dataflowId, messageId, e.getMessage());
+      LOG.error("Unexpected error! Error uploading collaboration document {} for dataflowId {} and messageId {} Message: {}", fileName, dataflowId, messageId, e.getMessage());
       throw e;
     }
   }
@@ -726,18 +723,18 @@ public class DocumentControllerImpl implements DocumentController {
       LOG.info("Successfully deleted collaboration document {} for dataflowId {}", fileName, dataflowId);
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error deleting collaboration document: DataflowId {}. FileName {}. Message: {}",
             dataflowId, fileName, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error(
+      LOG.error(
           "Error deleting collaboration document: DataflowId {}. FileName {}. Message: {}",
           dataflowId, fileName, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.DELETING_COLLABORATION_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error removing collaboration document {} for dataflowId {} and messageId {} Message: {}", fileName, dataflowId, messageId, e.getMessage());
+      LOG.error("Unexpected error! Error removing collaboration document {} for dataflowId {} and messageId {} Message: {}", fileName, dataflowId, messageId, e.getMessage());
       throw e;
     }
   }
@@ -770,18 +767,18 @@ public class DocumentControllerImpl implements DocumentController {
       return resource.getByteArray();
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error retrieving collaboration document: DataflowId {}. FileName {}. Message: {}",
             dataflowId, fileName, e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      LOG_ERROR.error(
+      LOG.error(
           "Error retrieving collaboration document: DataflowId {}. FileName {}. Message: {}",
           dataflowId, fileName, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.RETRIEVING_COLLABORATION_DOCUMENT);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving collaboration document {} for dataflowId {} and messageId {} Message: {}", fileName, dataflowId, messageId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving collaboration document {} for dataflowId {} and messageId {} Message: {}", fileName, dataflowId, messageId, e.getMessage());
       throw e;
     }
   }

@@ -108,11 +108,6 @@ public class UserManagementControllerImpl implements UserManagementController {
   @Autowired
   private UserNationalCoordinatorService userNationalCoordinatorService;
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   private static final Logger LOG = LoggerFactory.getLogger(UserManagementControllerImpl.class);
 
   /**
@@ -340,11 +335,11 @@ public class UserManagementControllerImpl implements UserManagementController {
       securityProviderInterfaceService.addUserToUserGroup(userId,
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
-      LOG_ERROR.error("Error adding user to resource. Message: {}", e.getMessage(), e);
+      LOG.error("Error adding user to resource. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not add user {} to resource with id {} Message: {}", userId, idResource, e.getMessage());
+      LOG.error("Unexpected error! Could not add user {} to resource with id {} Message: {}", userId, idResource, e.getMessage());
       throw e;
     }
   }
@@ -384,12 +379,12 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       backupManagmentControlerService.readAndSaveUsers(file.getInputStream());
     } catch (IOException e) {
-      LOG_ERROR.error("Error creating users", e);
+      LOG.error("Error creating users", e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.CREATING_USERS_THROUGH_FILE);
     } catch(Exception e){
       String filename = (file != null) ? file.getName() : null;
-      LOG_ERROR.error("Unexpected error! Could not create users from file {} Message: {}", filename, e.getMessage());
+      LOG.error("Unexpected error! Could not create users from file {} Message: {}", filename, e.getMessage());
       throw e;
     }
   }
@@ -484,7 +479,7 @@ public class UserManagementControllerImpl implements UserManagementController {
       List<String> imageList = attributes.get("userImage");
       if (CollectionUtils.isNotEmpty(imageList) && !imageList.get(0)
           .matches("^000~data:image/(png|jpg|gif|jpeg|bmp);base64,([A-Za-z0-9+/]{4})*?$")) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error updating the attributes of the user with id {}. The image is not valid", userId);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             String.format(EEAErrorMessage.FILE_FORMAT));
@@ -549,11 +544,11 @@ public class UserManagementControllerImpl implements UserManagementController {
       securityProviderInterfaceService.addContributorToUserGroup(Optional.empty(), userMail,
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
-      LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
+      LOG.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not add contributor to resource {} Message: {}", idResource, e.getMessage());
+      LOG.error("Unexpected error! Could not add contributor to resource {} Message: {}", idResource, e.getMessage());
       throw e;
     }
   }
@@ -580,11 +575,11 @@ public class UserManagementControllerImpl implements UserManagementController {
       securityProviderInterfaceService.removeContributorFromUserGroup(null, userMail,
           resourceGroupEnum.getGroupName(idResource));
     } catch (EEAException e) {
-      LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
+      LOG.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not remove contributor from resource {} Message: {}", idResource, e.getMessage());
+      LOG.error("Unexpected error! Could not remove contributor from resource {} Message: {}", idResource, e.getMessage());
       throw e;
     }
   }
@@ -604,11 +599,11 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       securityProviderInterfaceService.addContributorsToUserGroup(resources);
     } catch (EEAException e) {
-      LOG_ERROR.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
+      LOG.error(ERROR_ADDING_CONTRIBUTOR, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not add contributor to resources. Message: {}", e.getMessage());
+      LOG.error("Unexpected error! Could not add contributor to resources. Message: {}", e.getMessage());
       throw e;
     }
   }
@@ -628,11 +623,11 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       securityProviderInterfaceService.removeContributorsFromUserGroup(resources);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error removing contributor to resource. Message: {}", e.getMessage(), e);
+      LOG.error("Error removing contributor to resource. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not remove contributors from resources. Message: {}", e.getMessage());
+      LOG.error("Unexpected error! Could not remove contributors from resources. Message: {}", e.getMessage());
       throw e;
     }
   }
@@ -657,11 +652,11 @@ public class UserManagementControllerImpl implements UserManagementController {
         securityProviderInterfaceService.addUserToUserGroup(userId,
             resource.getResourceGroup().getGroupName(resource.getResourceId()));
       } catch (EEAException e) {
-        LOG_ERROR.error("Error adding user to resource. Message: {}", e.getMessage(), e);
+        LOG.error("Error adding user to resource. Message: {}", e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.PERMISSION_NOT_CREATED);
       } catch(Exception e){
-        LOG_ERROR.error("Unexpected error! Could not add user {} to resources. Message: {}", userId, e.getMessage());
+        LOG.error("Unexpected error! Could not add user {} to resources. Message: {}", userId, e.getMessage());
         throw e;
       }
     }
@@ -687,11 +682,11 @@ public class UserManagementControllerImpl implements UserManagementController {
         securityProviderInterfaceService.removeUserFromUserGroup(userId,
             resource.getResourceGroup().getGroupName(resource.getResourceId()));
       } catch (EEAException e) {
-        LOG_ERROR.error("Error removing user to resource. Message: {}", e.getMessage(), e);
+        LOG.error("Error removing user to resource. Message: {}", e.getMessage(), e);
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
             EEAErrorMessage.PERMISSION_NOT_CREATED);
       } catch(Exception e){
-        LOG_ERROR.error("Unexpected error! Could not remove user {} to resources. Message: {}", userId, e.getMessage());
+        LOG.error("Unexpected error! Could not remove user {} to resources. Message: {}", userId, e.getMessage());
         throw e;
       }
     }
@@ -723,11 +718,11 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       return securityProviderInterfaceService.createApiKey(userId, dataflowId, dataProvider);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      LOG.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not create api key for dataflowId {} dataProviderId {} and user {} Message: {}", dataflowId, dataProvider, userId, e.getMessage());
+      LOG.error("Unexpected error! Could not create api key for dataflowId {} dataProviderId {} and user {} Message: {}", dataflowId, dataProvider, userId, e.getMessage());
       throw e;
     }
   }
@@ -904,11 +899,11 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       return securityProviderInterfaceService.getApiKey(userId, dataflowId, dataProvider);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
+      LOG.error("Error adding ApiKey to user. Message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
           EEAErrorMessage.PERMISSION_NOT_CREATED);
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not retrieve api key for dataflowId {} dataProviderId {} and user {} Message: {}", dataflowId, dataProvider, userId, e.getMessage());
+      LOG.error("Unexpected error! Could not retrieve api key for dataflowId {} dataProviderId {} and user {} Message: {}", dataflowId, dataProvider, userId, e.getMessage());
       throw e;
     }
   }
@@ -934,10 +929,10 @@ public class UserManagementControllerImpl implements UserManagementController {
     try {
       userRoleService.exportUsersByCountry(dataflowId, dataProviderId);
     } catch (IOException | EEAException e) {
-      LOG_ERROR.error("Error exporting users by country from dataflow {}. Message: {}", dataflowId,
+      LOG.error("Error exporting users by country from dataflow {}. Message: {}", dataflowId,
           e.getMessage());
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not export users by country for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Could not export users by country for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -979,14 +974,14 @@ public class UserManagementControllerImpl implements UserManagementController {
       FileUtils.forceDelete(file);
 
     } catch (IOException | ResponseStatusException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Downloading file generated when exporting Users by country. Dataflow Id {}. Filename {}. Error message: {}",
           dataflowId, fileName, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
           "Trying to download a file generated during the export users by country process but the file is not found, dataflowId: %s + filename: %s",
           dataflowId, fileName));
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Could not download users by country for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Could not download users by country for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -1017,7 +1012,7 @@ public class UserManagementControllerImpl implements UserManagementController {
       }
     } catch(Exception e){
       String countryCode = (nationalCoordinatorVO != null) ? nationalCoordinatorVO.getCountryCode() : null;
-      LOG_ERROR.error("Unexpected error! Could not create national coordinator for countryCode {}. Message: {}", countryCode, e.getMessage());
+      LOG.error("Unexpected error! Could not create national coordinator for countryCode {}. Message: {}", countryCode, e.getMessage());
       throw e;
     }
   }
@@ -1062,7 +1057,7 @@ public class UserManagementControllerImpl implements UserManagementController {
       }
     } catch(Exception e){
       String countryCode = (nationalCoordinatorVO != null) ? nationalCoordinatorVO.getCountryCode() : null;
-      LOG_ERROR.error("Unexpected error! Could not delete national coordinator for countryCode {}. Message: {}", countryCode, e.getMessage());
+      LOG.error("Unexpected error! Could not delete national coordinator for countryCode {}. Message: {}", countryCode, e.getMessage());
       throw e;
     }
 

@@ -27,12 +27,6 @@ public class KafkaSender {
   private static final Logger LOG = LoggerFactory.getLogger(KafkaSender.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
-  /**
    * The kafka template.
    */
   @Autowired
@@ -74,14 +68,14 @@ public class KafkaSender {
             event, event.getEventType().getTopic(), result.getRecordMetadata().offset(),
             result.getRecordMetadata().partition());
       } catch (InterruptedException | ExecutionException e) {
-        LOG_ERROR.error("Unable to send message=[ {} ] to topic=[ {} ] due to: {} ", event,
+        LOG.error("Unable to send message=[ {} ] to topic=[ {} ] due to: {} ", event,
             event.getEventType().getTopic(), e.getMessage());
         sendResult = false;
         if (e instanceof InterruptedException) {
           Thread.currentThread().interrupt();
         }
       } catch (Exception e) {
-        LOG_ERROR.error("Unexpected error! Error sending message=[ {} ] to topic=[ {} ] Error message: {}", event, event.getEventType().getTopic(), e.getMessage());
+        LOG.error("Unexpected error! Error sending message=[ {} ] to topic=[ {} ] Error message: {}", event, event.getEventType().getTopic(), e.getMessage());
         throw e;
       }
       return sendResult;

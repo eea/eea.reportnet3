@@ -422,7 +422,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     } catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_USERS_BY_COUNTRY_FAILED_EVENT,
           null, notificationVO);
-      LOG_ERROR.info(String.format(EEAErrorMessage.CSV_FILE_ERROR, e, "DataflowId: " + dataflowId));
+      LOG_ERROR.error(String.format(EEAErrorMessage.CSV_FILE_ERROR, e, "DataflowId: " + dataflowId));
       return;
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportUsersByCountry in csvWriter.writeNext for dataflowId {}. Message: {}", dataflowId, e.getMessage());

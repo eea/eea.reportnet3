@@ -28,9 +28,6 @@ import org.springframework.web.server.ResponseStatusException;
 @Component
 public class FMEIntegrationManager extends AbstractCrudManager {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationManager.class);
 
@@ -84,7 +81,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
           integrationRepository.findByInternalOperationParameter(parameter, value);
       results = integrationMapper.entityListToClass(integrationList);
     } else {
-      LOG_ERROR.error("No filters in the query to find integrations");
+      LOG.error("No filters in the query to find integrations");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }
@@ -113,7 +110,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
             && internalParameter.getValue().equals(integrationSchemaId)) {
           if (!IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integrationAux.getOperation())
               && integrationAux.getName().trim().equalsIgnoreCase(integration.getName().trim())) {
-            LOG_ERROR.error(
+            LOG.error(
                 "Error creating an integration: Integration {} with name {} is duplicated in Dataflow: {}",
                 integration.getId(), integration.getName(), integration.getDataflow());
             throw new EEAException(
@@ -145,7 +142,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
         || IntegrationOperationTypeEnum.EXPORT_EU_DATASET.equals(integrationVO.getOperation()))
         && !integration.getOperation().equals(integrationVO.getOperation())) {
 
-      LOG_ERROR.error(
+      LOG.error(
           "Error updating an integration: Cannot modify the operation type from/to EXPORT_EU_DATASET. integration = {}, integrationVO = {}",
           integration, integrationVO);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -157,7 +154,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
         || !integrationVO.getInternalParameters().containsKey(IntegrationParams.DATAFLOW_ID)
         || !integrationVO.getInternalParameters()
             .containsKey(IntegrationParams.DATASET_SCHEMA_ID)) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error updating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
@@ -183,7 +180,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
         || !integrationVO.getInternalParameters().containsKey(IntegrationParams.DATAFLOW_ID)
         || !integrationVO.getInternalParameters()
             .containsKey(IntegrationParams.DATASET_SCHEMA_ID)) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error creating an integration: Internal parameters don't have dataflowId or datasetSchemaId");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
@@ -209,7 +206,7 @@ public class FMEIntegrationManager extends AbstractCrudManager {
       integrationRepository.deleteById(integrationId);
       LOG.info("Integration with Id {} deleted", integrationId);
     } else {
-      LOG_ERROR.error("IntegrationId missing");
+      LOG.error("IntegrationId missing");
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.MISSING_PARAMETERS_INTEGRATION);
     }

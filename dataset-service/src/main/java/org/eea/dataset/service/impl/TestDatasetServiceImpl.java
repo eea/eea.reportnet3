@@ -20,9 +20,6 @@ public class TestDatasetServiceImpl implements TestDatasetService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(TestDatasetServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /** The Test dataset repository. */
   @Autowired

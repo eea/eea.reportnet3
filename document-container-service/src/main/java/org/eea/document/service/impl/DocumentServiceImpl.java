@@ -42,11 +42,6 @@ public class DocumentServiceImpl implements DocumentService {
   private static final Logger LOG = LoggerFactory.getLogger(DocumentServiceImpl.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
    * The Constant PATH_DELIMITER.
    */
   private static final String PATH_DELIMITER = "/";
@@ -140,7 +135,7 @@ public class DocumentServiceImpl implements DocumentService {
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
               .dataflowId((documentVO != null) ? documentVO.getDataflowId() : null)
               .fileName(fileName).error(e.getMessage()).build());
-      LOG_ERROR.error("Error in uploadDocument {} due to exception: {}", fileName, e.getMessage(), e);
+      LOG.error("Error in uploadDocument {} due to exception: {}", fileName, e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
       inputStream.close();
@@ -171,10 +166,10 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("Successfully updated document with id {}", documentVO.getId());
     } catch (EEAException e) {
       if(documentVO != null){
-        LOG_ERROR.error("Error in updateDocument for file with id {} and dataflowId {} due to exception {}", documentVO.getId(), documentVO.getDataflowId(), e.getMessage(), e);
+        LOG.error("Error in updateDocument for file with id {} and dataflowId {} due to exception {}", documentVO.getId(), documentVO.getDataflowId(), e.getMessage(), e);
       }
       else{
-        LOG_ERROR.error("Error in updateDocument due to exception {}", e.getMessage(), e);
+        LOG.error("Error in updateDocument due to exception {}", e.getMessage(), e);
       }
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     }
@@ -207,7 +202,7 @@ public class DocumentServiceImpl implements DocumentService {
           Long.toString(documentId));
       LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
-      LOG_ERROR.error("Error in getDocument due to", e);
+      LOG.error("Error in getDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -256,7 +251,7 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
       LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataFlowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Error in deleteDocument with id {} for dataflowId {} due to", documentId, dataFlowId, e);
+      LOG.error("Error in deleteDocument with id {} for dataflowId {} due to", documentId, dataFlowId, e);
       // Release finish event
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_FAILED_EVENT, null,
           NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
@@ -305,7 +300,7 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("Successfully uploaded schema snapshot document {} for designDatasetId {}", filename, designDataset);
 
     } catch (RepositoryException | EEAException e) {
-      LOG_ERROR.error("Error in uploadSnapshotSchema, document {}, designDatasetId {} due to {}", filename, designDataset,
+      LOG.error("Error in uploadSnapshotSchema, document {}, designDatasetId {} due to {}", filename, designDataset,
           e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
@@ -343,7 +338,7 @@ public class DocumentServiceImpl implements DocumentService {
           PATH_DELIMITER_SNAPSHOT + idDesignDataset, documentName);
       LOG.info("Fething the file... {}", documentName);
     } catch (IOException | RepositoryException e) {
-      LOG_ERROR.error("Error in getDocument due to", e);
+      LOG.error("Error in getDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -382,7 +377,7 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
       LOG.info("Successfully deleted schema snapshot document {} for designDatasetId {}", documentName, designDatasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Error in deleteSnapshotDocument for file {} and designDatasetId {} due to", documentName, designDatasetId, e);
+      LOG.error("Error in deleteSnapshotDocument for file {} and designDatasetId {} due to", documentName, designDatasetId, e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -433,7 +428,7 @@ public class DocumentServiceImpl implements DocumentService {
       LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", filename, dataflowId);
 
     } catch (RepositoryException | EEAException e) {
-      LOG_ERROR.error("Error in uploadCollaborationDocument, document {} dataflowId {} due to {}", filename, dataflowId,
+      LOG.error("Error in uploadCollaborationDocument, document {} dataflowId {} due to {}", filename, dataflowId,
           e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     } finally {
@@ -471,7 +466,7 @@ public class DocumentServiceImpl implements DocumentService {
       oakRepositoryUtils.deleteBlobsFromRepository(ns);
       LOG.info("Successfully deleted collaboration document {} for dataflowId {}", documentName, dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Error deleting file {} for dataflowId {} in deleteCollaborationDocument due to", documentName, dataflowId,
+      LOG.error("Error deleting file {} for dataflowId {} in deleteCollaborationDocument due to", documentName, dataflowId,
           e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
@@ -509,7 +504,7 @@ public class DocumentServiceImpl implements DocumentService {
           PATH_DELIMITER_COLLABORATION_DATAFLOW + dataflowId, messageId + "_" + documentName);
       LOG.info("Fething the file... {}", documentName);
     } catch (IOException | RepositoryException e) {
-      LOG_ERROR.error("Error in getDocument due to", e);
+      LOG.error("Error in getDocument due to", e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }

@@ -31,9 +31,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 public class ValidationScheduler extends MessageReceiver {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationScheduler.class);
 
@@ -104,7 +101,7 @@ public class ValidationScheduler extends MessageReceiver {
             message.getPayload().getData().put("task_id", task.getId());
             consumeMessage(message);
           } catch (EEAException | JsonProcessingException e) {
-            LOG_ERROR.error("failed the validation task shedule because of {} ", e);
+            LOG.error("failed the validation task shedule because of {} ", e);
           } catch (ObjectOptimisticLockingFailureException e) {
             newDelay = delay;
           }
@@ -129,9 +126,9 @@ public class ValidationScheduler extends MessageReceiver {
       try {
         handler.processMessage(message.getPayload());
       } catch (EEAException e) {
-        LOG_ERROR.error("Error processing event {} due to reason {}", message.getPayload(), e);
+        LOG.error("Error processing event {} due to reason {}", message.getPayload(), e);
       } catch (Exception e) {
-        LOG_ERROR.error("Undetermined  processing message {} due to reason {}", message, e);
+        LOG.error("Undetermined  processing message {} due to reason {}", message, e);
       }
     }
   }

@@ -57,9 +57,6 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowServiceWebLinkImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant REGEX_URL. */
   private static final String REGEX_URL =
       "^(sftp:\\/\\/www\\.|sftp:\\/\\/|ftp:\\/\\/www\\.|ftp:\\/\\/|http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-zA-Z0-9]+([\\-\\.]{1}[a-zA-Z0-9]+)*\\.[a-zA-Z]{2,63}(:[0-9]{1,5})?(\\/.*)?$"; // NOSONAR
@@ -157,7 +154,7 @@ public class DataflowServiceWebLinkImpl implements DataflowWebLinkService {
     try {
       webLinkRepository.deleteById(webLinkId);
     } catch (EmptyResultDataAccessException e) {
-      LOG_ERROR.error("Error when removing link with id {}", webLinkId);
+      LOG.error("Error when removing link with id {}", webLinkId);
       throw new EntityNotFoundException(EEAErrorMessage.ID_LINK_INCORRECT, e);
     }
     LOG.info("Deleted the link with id : {}", webLinkId);

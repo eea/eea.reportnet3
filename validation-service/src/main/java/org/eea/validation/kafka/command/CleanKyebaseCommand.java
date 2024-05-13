@@ -16,9 +16,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class CleanKyebaseCommand extends AbstractEEAEventHandlerCommand {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /**
    * The Constant LOG.
    */
@@ -53,7 +50,7 @@ public class CleanKyebaseCommand extends AbstractEEAEventHandlerCommand {
       LOG.info("Removing kieBase for process {}", processId);
       validationHelper.finishProcessInMap(processId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      LOG.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;
     }
   }

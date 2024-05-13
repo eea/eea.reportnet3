@@ -30,9 +30,6 @@ public class ReceiptPDFGenerator {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ReceiptPDFGenerator.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant BACKGROUND. */
   private static final String BACKGROUND = "pdf/receipt_background.png";
 
@@ -74,7 +71,7 @@ public class ReceiptPDFGenerator {
         LOG.info("Receipt generated: representative={}, dataflowId={}, dataflowName={}",
             receipt.getProviderAssignation(), receipt.getIdDataflow(), receipt.getDataflowName());
       } catch (IOException e) {
-        LOG_ERROR.error("Unexpected exception: ", e);
+        LOG.error("Unexpected exception: ", e);
       } catch (Exception e) {
         Long dataflowId = (receipt != null) ? receipt.getIdDataflow() : null;
         LOG.error("Unexpected error! Error in generatePDF for dataflowId {}. Message: {}", dataflowId, e.getMessage());
