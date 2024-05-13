@@ -817,8 +817,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     List<DataSetMetabaseVO> datasets = dataSetMetabaseControllerZuul.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
     for(DataSetMetabaseVO dataset: datasets){
       List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
+      String datasetSchemaId = dataset.getDatasetSchema();
       for(TableSchemaIdNameVO table: tables){
-        String datasetSchemaId = dataset.getDatasetSchema();
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
           throw new Exception("Can not release for jobId " + jobId + " because there is an iceberg table");

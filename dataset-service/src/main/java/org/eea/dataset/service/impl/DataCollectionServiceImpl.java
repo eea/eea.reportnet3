@@ -404,12 +404,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
     for(DataSetMetabaseVO dataset: datasets){
       List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
+      String datasetSchemaId = dataset.getDatasetSchema();
       for(TableSchemaIdNameVO table: tables){
-        String datasetSchemaId = dataset.getDatasetSchema();
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
-          bigDataDatasetService.convertIcebergToParquetTable(dataset.getId(), dataflowId, dataset.getDataProviderId(), tableSchemaVO);
-          LOG.info("Converted iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, dataset.getDataProviderId(), dataset.getId(), table.getIdTableSchema());
+          throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
         }
       }
     }
