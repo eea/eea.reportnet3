@@ -788,7 +788,7 @@ public class RulesServiceImpl implements RulesService {
             /*Check if is big dataflow*/
             DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
             DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
-            boolean isBigDataflow = dataflow.getBigData() != null;
+            boolean isBigDataflow = dataflow.getBigData() != null && dataflow.getBigData();
 
             /*find table path*/
             Document tableSchemaDoc = schemasRepository.findTableSchema(datasetSchemaId,getTableSchemaIdFromIdFieldSchema(schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId)), referenceId));

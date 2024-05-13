@@ -366,7 +366,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      */
     private static boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
         boolean isValid = false;
-        if (method.getName().contains("Geo") || method.getName().contains("EPSGSR")) {//
+        if (method.getName().contains("Geo") || method.getName().contains("EPSGSR")) {
             if (method.getName().equals(VALIDATE_GEOMETRY_DREMIO)) {
                 String converted = rs.getString(fieldName);
                 isValid = (boolean) method.invoke(object, converted, DataType.fromValue(fieldName.toUpperCase()));  //GeoJsonValidationUtils

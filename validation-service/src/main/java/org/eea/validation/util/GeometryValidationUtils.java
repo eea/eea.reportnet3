@@ -122,7 +122,7 @@ public class GeometryValidationUtils {
     if (!rtn && existRSID(fieldValue)) {
       // Obtain the SRID code removing all other characters from geojson
       // The cases are the SRID supported in reportnet
-      Pattern p = Pattern.compile("\"srid\"+:\"+[0-9]+\"");
+      Pattern p = Pattern.compile("\"srid\"\\s*:\\s*\"+[0-9]+\"");
       Matcher m = p.matcher(fieldValue);
       List<String> srids = new ArrayList<>();
       while (m.find()) {
