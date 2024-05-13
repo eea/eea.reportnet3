@@ -11,10 +11,13 @@ import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
+import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioValidationException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
@@ -57,10 +60,16 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
     private static final String DREMIO_NON_SQL_VALIDATION_UTILS = "org.eea.validation.util.datalake.DremioNonSQLValidationUtils";
     private static final String VALIDATION_DROOLS_UTILS = "org.eea.validation.util.ValidationDroolsUtils";
+    private static final String GEOMETRY_VALIDATION_UTILS = "org.eea.validation.util.GeometryValidationUtils";
+    private static final String GEO_JSON_VALIDATION_UTILS = "org.eea.validation.util.GeoJsonValidationUtils";
     private static final String IS_MULTI_SELECT_CODE_LIST_VALIDATE = "isMultiSelectCodelistValidate";
     private static final String MULTI_SELECT_CODE_LIST_VALIDATE = "multiSelectCodelistValidate";
     private static final String IS_CODE_LIST_INSENSITIVE = "isCodelistInsensitive";
     private static final String CODE_LIST_VALIDATE = "codelistValidate";
+    private static final String IS_GEOMETRY = "isGeometry";
+    private static final String CHECK_EPSGSRID = "checkEPSGSRID";
+    private static final String CHECK_EPSGSRID_VALIDATION = "checkEPSGSRIDValidation";
+    private static final String VALIDATE_GEOMETRY_DREMIO = "validateGeometryDremio";
     private static final String FALSE = "false";
     private static final Logger LOG = LoggerFactory.getLogger(DremioNonSqlRulesExecuteServiceImpl.class);
 
@@ -96,21 +105,33 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             int endIndex = ruleVO.getWhenConditionMethod().indexOf(CLOSE_PARENTHESIS);
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
-            if (ruleMethodName.equals(IS_MULTI_SELECT_CODE_LIST_VALIDATE)) {
-                ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
-            } else if (ruleMethodName.equals(IS_CODE_LIST_INSENSITIVE)) {
-                ruleMethodName = CODE_LIST_VALIDATE;
-                parameters.add(FALSE);
-            }
+          switch (ruleMethodName) {
+            case IS_MULTI_SELECT_CODE_LIST_VALIDATE:
+              ruleMethodName = MULTI_SELECT_CODE_LIST_VALIDATE;
+              break;
+            case IS_CODE_LIST_INSENSITIVE:
+              ruleMethodName = CODE_LIST_VALIDATE;
+              parameters.add(FALSE);
+              break;
+            case IS_GEOMETRY:
+              ruleMethodName = VALIDATE_GEOMETRY_DREMIO;
+              break;
+            case CHECK_EPSGSRID:
+              ruleMethodName = CHECK_EPSGSRID_VALIDATION;
+              break;
+          }
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
-            query.append("select record_id,").append(fieldName != null ? fieldName : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+            SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(Collections.singletonList(fieldName));
+            StringBuilder header = spatialDataHandling.geoJsonHeadersIsNotEmpty(true) ? spatialDataHandling.convertToJson() : spatialDataHandling.getSimpleHeaders();
+
+            query.append("select record_id,").append(header).append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
             Method method = null;
-            List<String> classes = new ArrayList<>(Arrays.asList(DREMIO_NON_SQL_VALIDATION_UTILS, VALIDATION_DROOLS_UTILS));
+            List<String> classes = new ArrayList<>(Arrays.asList(DREMIO_NON_SQL_VALIDATION_UTILS, VALIDATION_DROOLS_UTILS, GEOMETRY_VALIDATION_UTILS, GEO_JSON_VALIDATION_UTILS));
             Class<?> cls = null;
             for (String className : classes) {
                 cls = Class.forName(className);
@@ -246,7 +267,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                         writer.write(record);
                     }
                 } catch (Exception e1) {
-                    LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
+                    LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
                     throw e1;
                 }
                 validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, subFile, ruleVO.getRuleId().length(), parquetFile);
@@ -345,17 +366,27 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      */
     private static boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
         boolean isValid = false;
-        int parameterLength = method.getParameters().length;
-        switch (parameterLength) {
-            case 1:
-                isValid = (boolean) method.invoke(object, rs.getString(fieldName));  //DremioNonSQLValidationUtils methods
-                break;
-            case 2:
-                isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1));  //ValidationDroolsUtils methods
-                break;
-            case 3:
-                isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method
-                break;
+        if (method.getName().contains("Geo") || method.getName().contains("EPSGSR")) {//
+            if (method.getName().equals(VALIDATE_GEOMETRY_DREMIO)) {
+                String converted = rs.getString(fieldName);
+                isValid = (boolean) method.invoke(object, converted, DataType.fromValue(fieldName.toUpperCase()));  //GeoJsonValidationUtils
+            } else if (method.getName().equals(CHECK_EPSGSRID_VALIDATION)) {
+                String converted = rs.getString(fieldName);
+                isValid = (boolean) method.invoke(object, converted);  //GeometryValidationUtils
+            }
+        } else {
+            int parameterLength = method.getParameters().length;
+            switch (parameterLength) {
+                case 1:
+                    isValid = (boolean) method.invoke(object, rs.getString(fieldName));  //DremioNonSQLValidationUtils methods
+                    break;
+                case 2:
+                    isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1));  //ValidationDroolsUtils methods
+                    break;
+                case 3:
+                    isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method
+                    break;
+            }
         }
         return isValid;
     }

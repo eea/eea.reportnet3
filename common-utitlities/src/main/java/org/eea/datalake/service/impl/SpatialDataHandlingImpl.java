@@ -1,6 +1,6 @@
-package org.eea.dataset.service.impl;
+package org.eea.datalake.service.impl;
 
-import org.eea.dataset.service.SpatialDataHandling;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 
 import java.util.ArrayList;

@@ -149,7 +149,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
             }
 
-            if (recordIds.size() > 0) {
+            if (!recordIds.isEmpty()) {
                 runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName);
             }
         } catch (Exception e) {
@@ -198,7 +198,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             }
             validationQuery.append("))");
             String valQuery = validationQuery.toString();
-            if (recordIds.size() > 0) {
+            if (!recordIds.isEmpty()) {
                 valQuery = processValidationQuery(dataTableResolver, ruleVO, fieldName, ruleIdLength, valQuery);
                 dremioHelperService.executeSqlStatement(valQuery);
             }

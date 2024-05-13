@@ -2501,7 +2501,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       importRules.setDictionaryOriginTargetObjectId(dictionaryOriginTargetObjectId);
       importRules.setIntegritiesVO(importClasses.getIntegrities());
       importRules.setQcRulesBytes(importClasses.getQcRulesBytes());
-      rulesControllerZuul.importRulesSchema(importRules);
+      rulesControllerZuul.importRulesSchema(importRules);//
       LOG.info("Rules have been imported for dataflowId {} during the import schemas process", dataflowId);
 
       // Import the external integrations
