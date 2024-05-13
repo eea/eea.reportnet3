@@ -275,7 +275,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         try {
             DremioApiJob dremioApiJob = objectMapper.readValue(result, DremioApiJob.class);
             Object results = dremioApiController.sqlApiResults(token, dremioApiJob.getId());
-            System.out.println(results);
         } catch (JsonMappingException e) {
             throw new RuntimeException(e);
         } catch (JsonParseException e) {

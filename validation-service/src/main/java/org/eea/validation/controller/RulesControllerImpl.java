@@ -66,15 +66,12 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/rules")
 public class RulesControllerImpl implements RulesController {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesControllerImpl.class);
 
   /** The Constant DELETE_RULES_SUCCESSFULLY: {@value}. */
   private static final String DELETE_RULES_SUCCESSFULLY =
-      "Delete the rules with referenceId {} in datasetSchema {} successfully";
+          "Delete the rules with referenceId {} in datasetSchema {} successfully";
 
   /** The rules service. */
   @Autowired
@@ -97,7 +94,7 @@ public class RulesControllerImpl implements RulesController {
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @ApiOperation(value = "Validate all rules", hidden = true)
   public void validateAllRules(
-      @RequestParam(value = "datasetId") Long datasetId
+          @RequestParam(value = "datasetId") Long datasetId
   ) throws Exception {
     if (datasetId == null ) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.DATASET_ID_IS_NULL);
@@ -108,7 +105,7 @@ public class RulesControllerImpl implements RulesController {
       rulesService.validateAllRules(datasetId, checkNoSQL, userName);
     } catch (Exception e) {
       LOG.error("Error validating QC's for datasetId: {}, user: {}, message: {}",
-          datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), e.getMessage());
+              datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), e.getMessage());
       throw e;
     }
   }
@@ -125,15 +122,15 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping("/private/createEmptyRulesSchema")
   @ApiOperation(value = "Creates an empty rules schema", hidden = true)
   public void createEmptyRulesSchema(@ApiParam(value = "Id dataset schema",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("idDataSetSchema") String datasetSchemaId,
-      @ApiParam(value = "Id rules schema",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("idRulesSchema") String rulesSchemaId) {
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("idDataSetSchema") String datasetSchemaId,
+                                     @ApiParam(value = "Id rules schema",
+                                             example = "5cf0e9b3b793310e9ceca190") @RequestParam("idRulesSchema") String rulesSchemaId) {
     try {
       rulesService.createEmptyRulesSchema(datasetSchemaId, rulesSchemaId);
       LOG.info("Creating Schema rules with id {} in datasetSchema {} successfully", rulesSchemaId,
               datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating empty rules schema with id {} for datasetSchemaId {} Message: {}", rulesSchemaId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error creating empty rules schema with id {} for datasetSchemaId {} Message: {}", rulesSchemaId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -149,18 +146,18 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/{datasetSchemaId}/dataflow/{dataflowId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_READ','DATAFLOW_REPORTER_WRITE','DATAFLOW_NATIONAL_COORDINATOR','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATAFLOW',#dataflowId))")
   @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
   public RulesSchemaVO findRuleSchemaByDatasetId(@ApiParam(
-      value = "Dataset schema id used in the search",
-      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Dataflow Id",
-          example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
+          value = "Dataset schema id used in the search",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+                                                 @ApiParam(value = "Dataflow Id",
+                                                         example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
     try {
       return rulesService.getRulesSchemaByDatasetId(datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving rules schema for dataflowId {} and datasetSchemaId {} Message: {}", dataflowId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving rules schema for dataflowId {} and datasetSchemaId {} Message: {}", dataflowId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -175,17 +172,17 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/{datasetSchemaId}/dataflow/{dataflowId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Retrieves a rules schema based on a given dataset id", hidden = true)
   public RulesSchemaVO findRuleSchemaByDatasetIdPrivate(@ApiParam(
-      value = "Dataset schema id used in the search",
-      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Dataflow Id",
-          example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
+          value = "Dataset schema id used in the search",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId,
+                                                        @ApiParam(value = "Dataflow Id",
+                                                                example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataflowId") Long dataflowId) {
     try {
       return rulesService.getRulesSchemaByDatasetId(datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error privately retrieving rules schema for dataflowId {} and datasetSchemaId {} Message: {}", dataflowId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error privately retrieving rules schema for dataflowId {} and datasetSchemaId {} Message: {}", dataflowId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -201,14 +198,14 @@ public class RulesControllerImpl implements RulesController {
   @DeleteMapping("/private/deleteRulesSchema")
   @ApiOperation(value = "Deletes a schema using a schema Id as criteria.", hidden = true)
   public void deleteRulesSchema(
-      @ApiParam(value = "Dataset schema id used in the delete process.",
-          example = "5cf0e9b3b793310e9ceca190") String datasetSchemaId,
-      @ApiParam(value = "Dataset id used in the delete process", example = "5") Long datasetId) {
+          @ApiParam(value = "Dataset schema id used in the delete process.",
+                  example = "5cf0e9b3b793310e9ceca190") String datasetSchemaId,
+          @ApiParam(value = "Dataset id used in the delete process", example = "5") Long datasetId) {
     try {
       rulesService.deleteEmptyRulesSchema(datasetSchemaId, datasetId);
       LOG.info("Deleted empty rules schema for datasetSchemaId {} and datasetId {}", datasetSchemaId, datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting rules schema for datasetId {} Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting rules schema for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
     }
   }
@@ -226,18 +223,18 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Deletes a rule using a rule id as criteria.", hidden = true)
   @ApiResponse(code = 400, message = "Couldn't delete the rule using the specified criteria.")
   public void deleteRuleById(
-      @ApiParam(value = "Dataset id used in the delete process",
-          example = "5") @RequestParam("datasetId") long datasetId,
-      @ApiParam(value = "Rule id used in the delete process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("ruleId") String ruleId) {
+          @ApiParam(value = "Dataset id used in the delete process",
+                  example = "5") @RequestParam("datasetId") long datasetId,
+          @ApiParam(value = "Rule id used in the delete process",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("ruleId") String ruleId) {
     try {
       rulesService.deleteRuleById(datasetId, ruleId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting rule {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage(), e);
+      LOG.error("Error deleting rule {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_DELETING_RULE);
+              EEAErrorMessage.ERROR_DELETING_RULE);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
       throw e;
     }
   }
@@ -253,15 +250,15 @@ public class RulesControllerImpl implements RulesController {
   @DeleteMapping("/private/deleteRuleByReferenceId")
   @ApiOperation(value = "Deletes a rule using a rule reference id as criteria.", hidden = true)
   public void deleteRuleByReferenceId(@ApiParam(
-      value = "Dataset schema id used in the delete process",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Rule reference id used in the delete process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId) {
+          value = "Dataset schema id used in the delete process",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                      @ApiParam(value = "Rule reference id used in the delete process",
+                                              example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId) {
     try {
       rulesService.deleteRuleByReferenceId(datasetSchemaId, referenceId);
       LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting rule with referenceId {} for datasetSchemaId {} Message: {}", referenceId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting rule with referenceId {} for datasetSchemaId {} Message: {}", referenceId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -276,17 +273,17 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @DeleteMapping("/private/deleteRuleByReferenceFieldSchemaPKId")
   @ApiOperation(value = "Deletes a rule using a reference field schema primary key id as criteria.",
-      hidden = true)
+          hidden = true)
   public void deleteRuleByReferenceFieldSchemaPKId(@ApiParam(
-      value = "Dataset schema id used in the delete process",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Reference field schema primary key id used in the delete process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceFieldSchemaPKId") String referenceFieldSchemaPKId) {
+          value = "Dataset schema id used in the delete process",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                                   @ApiParam(value = "Reference field schema primary key id used in the delete process",
+                                                           example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceFieldSchemaPKId") String referenceFieldSchemaPKId) {
     try {
       rulesService.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId, referenceFieldSchemaPKId);
       LOG.info(DELETE_RULES_SUCCESSFULLY, referenceFieldSchemaPKId, datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting rule with referenceFieldSchemaPKId {} for datasetSchemaId {} Message: {}", referenceFieldSchemaPKId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting rule with referenceFieldSchemaPKId {} for datasetSchemaId {} Message: {}", referenceFieldSchemaPKId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -304,26 +301,26 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Creates a new rule using a rule object.", hidden = true)
   @ApiResponse(code = 400, message = "Couldn't create a new rule with given parameters.")
   public void createNewRule(
-      @ApiParam(value = "Dataset id used in the creation process",
-          example = "15") @RequestParam("datasetId") long datasetId,
-      @ApiParam(value = "Rule object used in the creation process") @RequestBody RuleVO ruleVO) {
+          @ApiParam(value = "Dataset id used in the creation process",
+                  example = "15") @RequestParam("datasetId") long datasetId,
+          @ApiParam(value = "Rule object used in the creation process") @RequestBody RuleVO ruleVO) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
+              SecurityContextHolder.getContext().getAuthentication().getName());
 
       rulesService.createNewRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error(
-          "Error creating rule: {} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
-          e.getMessage(), ruleVO.getReferenceId(), ruleVO.getDescription(), ruleVO.getRuleName(),
-          ruleVO.getWhenCondition(), ruleVO.getThenCondition(), ruleVO.getShortCode(),
-          ruleVO.getType(), e);
+      LOG.error(
+              "Error creating rule: {} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+              e.getMessage(), ruleVO.getReferenceId(), ruleVO.getDescription(), ruleVO.getRuleName(),
+              ruleVO.getWhenCondition(), ruleVO.getThenCondition(), ruleVO.getShortCode(),
+              ruleVO.getType(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_CREATING_RULE);
+              EEAErrorMessage.ERROR_CREATING_RULE);
     } catch (Exception e) {
       String ruleId = (ruleVO != null) ? ruleVO.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error creating new rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error creating new rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
       throw e;
     }
   }
@@ -344,42 +341,42 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Creates an automatic rule for the given parameters.", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.ERROR_CREATING_RULE)
   public void createAutomaticRule(@ApiParam(
-      value = "Dataset schema id used in the creation process",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("idDatasetSchema") String datasetSchemaId,
-      @ApiParam(value = "Reference id used in the creation process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId,
-      @ApiParam(value = "Data type used in the creation process",
-          example = "BOOLEAN") @RequestParam("typeData") DataType typeData,
-      @ApiParam(value = "Entity type used in the creation process",
-          example = "DATASET") @RequestParam("typeEntityEnum") EntityTypeEnum typeEntityEnum,
-      @ApiParam(value = "Dataset id used in the creation process",
-          example = "5") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "Is the rule required?",
-          example = "true") @RequestParam("requiredRule") boolean requiredRule) {
+          value = "Dataset schema id used in the creation process",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("idDatasetSchema") String datasetSchemaId,
+                                  @ApiParam(value = "Reference id used in the creation process",
+                                          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId,
+                                  @ApiParam(value = "Data type used in the creation process",
+                                          example = "BOOLEAN") @RequestParam("typeData") DataType typeData,
+                                  @ApiParam(value = "Entity type used in the creation process",
+                                          example = "DATASET") @RequestParam("typeEntityEnum") EntityTypeEnum typeEntityEnum,
+                                  @ApiParam(value = "Dataset id used in the creation process",
+                                          example = "5") @RequestParam("datasetId") Long datasetId,
+                                  @ApiParam(value = "Is the rule required?",
+                                          example = "true") @RequestParam("requiredRule") boolean requiredRule) {
 
     // we use the required value to differentiate if the rule to create is a required rule or if the
     // rules is a automatic rule for any type (boolean, number)
     try {
       rulesService.createAutomaticRules(datasetSchemaId, referenceId, typeData, typeEntityEnum,
-          datasetId, requiredRule);
+              datasetId, requiredRule);
     } catch (EEAException e) {
       if (requiredRule) {
-        LOG_ERROR.error(
-            "Error creating the required rule for idDatasetSchema {} and field with id {} ",
-            datasetSchemaId, referenceId);
+        LOG.error(
+                "Error creating the required rule for idDatasetSchema {} and field with id {} ",
+                datasetSchemaId, referenceId);
       } else {
-        LOG_ERROR.error(
-            "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
-            datasetSchemaId, referenceId, typeData);
+        LOG.error(
+                "Error creating the automatic rule for idDatasetSchema {} and field with id {} for a {} ",
+                datasetSchemaId, referenceId, typeData);
       }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_CREATING_RULE);
+              EEAErrorMessage.ERROR_CREATING_RULE);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating automatic rules for datasetSchemaId {} datasetId {} and referenceId {} Message: {}", datasetSchemaId, datasetId, referenceId, e.getMessage());
+      LOG.error("Unexpected error! Error creating automatic rules for datasetSchemaId {} datasetId {} and referenceId {} Message: {}", datasetSchemaId, datasetId, referenceId, e.getMessage());
       throw e;
     }
     LOG.info("creation automatic rule for a type {} at lv of {} successfully", typeData,
-        typeEntityEnum);
+            typeEntityEnum);
   }
 
   /**
@@ -395,26 +392,26 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Updates an existing rule with the given rule object.", hidden = true)
   @ApiResponse(code = 400, message = "Error updating the rule with the given object.")
   public void updateRule(
-      @ApiParam(value = "Dataset id used in the update process",
-          example = "15") @RequestParam("datasetId") long datasetId,
-      @ApiParam(value = "Rule object used in the update process") @RequestBody RuleVO ruleVO) {
+          @ApiParam(value = "Dataset id used in the update process",
+                  example = "15") @RequestParam("datasetId") long datasetId,
+          @ApiParam(value = "Rule object used in the update process") @RequestBody RuleVO ruleVO) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
+              SecurityContextHolder.getContext().getAuthentication().getName());
 
       rulesService.updateRule(datasetId, ruleVO);
     } catch (EEAException e) {
-      LOG_ERROR.error(
-          "Error updating rule: {} - ruleId={} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
-          e.getMessage(), ruleVO.getRuleId(), ruleVO.getReferenceId(), ruleVO.getDescription(),
-          ruleVO.getRuleName(), ruleVO.getWhenCondition(), ruleVO.getThenCondition(),
-          ruleVO.getShortCode(), ruleVO.getType(), e);
+      LOG.error(
+              "Error updating rule: {} - ruleId={} - referenceId={} - description={} - ruleName={} - whenCondition={} - thenCondition={} - shortCode={} - type={}",
+              e.getMessage(), ruleVO.getRuleId(), ruleVO.getReferenceId(), ruleVO.getDescription(),
+              ruleVO.getRuleName(), ruleVO.getWhenCondition(), ruleVO.getThenCondition(),
+              ruleVO.getShortCode(), ruleVO.getType(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_UPDATING_RULE);
+              EEAErrorMessage.ERROR_UPDATING_RULE);
     } catch (Exception e) {
       String ruleId = (ruleVO != null) ? ruleVO.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error updating rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error updating rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
       throw e;
     }
   }
@@ -432,23 +429,23 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Updates an automatic rule with the given rule object.", hidden = true)
   @ApiResponse(code = 400, message = "Error updating the automatic rule with the given object.")
   public void updateAutomaticRule(
-      @ApiParam(value = "Dataset id used in the update process",
-          example = "15") @PathVariable("datasetId") long datasetId,
-      @ApiParam(value = "Rule object used in the update process") @RequestBody RuleVO ruleVO) {
+          @ApiParam(value = "Dataset id used in the update process",
+                  example = "15") @PathVariable("datasetId") long datasetId,
+          @ApiParam(value = "Rule object used in the update process") @RequestBody RuleVO ruleVO) {
     try {
       rulesService.updateAutomaticRule(datasetId, ruleVO);
     } catch (EEAException e) {
       if(ruleVO != null){
-        LOG_ERROR.error("Error updating automatic rule {} for datasetId {} Message: {}", ruleVO.getRuleId(), datasetId, e.getMessage());
+        LOG.error("Error updating automatic rule {} for datasetId {} Message: {}", ruleVO.getRuleId(), datasetId, e.getMessage());
       }
       else{
-        LOG_ERROR.error("Error updating automatic rule for datasetId {} ruleVO is null. Message: {}", datasetId, e.getMessage());
+        LOG.error("Error updating automatic rule for datasetId {} ruleVO is null. Message: {}", datasetId, e.getMessage());
       }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.ERROR_UPDATING_RULE);
+              EEAErrorMessage.ERROR_UPDATING_RULE);
     } catch (Exception e) {
       String ruleId = (ruleVO != null) ? ruleVO.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error updating automatic rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error updating automatic rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
       throw e;
     }
   }
@@ -464,10 +461,10 @@ public class RulesControllerImpl implements RulesController {
   @PutMapping("/private/existsRuleRequired")
   @ApiOperation(value = "Returns if the given rule exists.", hidden = true)
   public boolean existsRuleRequired(@ApiParam(
-      value = "Dataset schema id used to search for the rule",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Reference id used to search for the rule",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId) {
+          value = "Dataset schema id used to search for the rule",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                    @ApiParam(value = "Reference id used to search for the rule",
+                                            example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId) {
     return rulesService.existsRuleRequired(datasetSchemaId, referenceId);
   }
 
@@ -481,15 +478,15 @@ public class RulesControllerImpl implements RulesController {
   @PutMapping("/private/deleteRuleRequired")
   @ApiOperation(value = "Deletes the rule if exists based on the parameters given", hidden = true)
   public void deleteRuleRequired(@ApiParam(value = "Dataset schema id used to delete the rule",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Reference id used to delete the rule",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId,
-      @ApiParam(value = "Data type of the rule",
-          example = "POINT") @RequestParam("typeData") DataType typeData) {
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                 @ApiParam(value = "Reference id used to delete the rule",
+                                         example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId,
+                                 @ApiParam(value = "Data type of the rule",
+                                         example = "POINT") @RequestParam("typeData") DataType typeData) {
     try {
       rulesService.deleteRuleRequired(datasetSchemaId, referenceId, typeData);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting rule with referenceId {} for datasetSchemaId {} Message: {}", referenceId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting rule with referenceId {} for datasetSchemaId {} Message: {}", referenceId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -505,16 +502,16 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping("/private/createUniqueConstraintRule")
   @ApiOperation(value = "Creates a unique constraint rule.", hidden = true)
   public void createUniqueConstraintRule(
-      @ApiParam(value = "Dataset schema id used to create the rule",
-          example = "5cf0e9b3b793310e9ceca190") String datasetSchemaId,
-      @ApiParam(value = "Table schema id used to create the rule",
-          example = "5cf0e9b3b793310e9ceca190") String tableSchemaId,
-      @ApiParam(value = "Unique id used to create the rule", example = "1") String uniqueId) {
+          @ApiParam(value = "Dataset schema id used to create the rule",
+                  example = "5cf0e9b3b793310e9ceca190") String datasetSchemaId,
+          @ApiParam(value = "Table schema id used to create the rule",
+                  example = "5cf0e9b3b793310e9ceca190") String tableSchemaId,
+          @ApiParam(value = "Unique id used to create the rule", example = "1") String uniqueId) {
     try {
       rulesService.createUniqueConstraint(datasetSchemaId, tableSchemaId, uniqueId);
     } catch (Exception e) {
-    LOG_ERROR.error("Unexpected error! Error creating unique constraint rule with id {} for datasetSchemaId {} and tableSchemaId {} Message: {}", uniqueId, datasetSchemaId, tableSchemaId, e.getMessage());
-    throw e;
+      LOG.error("Unexpected error! Error creating unique constraint rule with id {} for datasetSchemaId {} and tableSchemaId {} Message: {}", uniqueId, datasetSchemaId, tableSchemaId, e.getMessage());
+      throw e;
     }
   }
 
@@ -528,14 +525,14 @@ public class RulesControllerImpl implements RulesController {
   @DeleteMapping("/private/deleteUniqueConstraintRule")
   @ApiOperation(value = "Deletes a unique constraint rule.", hidden = true)
   public void deleteUniqueConstraintRule(@ApiParam(
-      value = "Dataset schema id used to delete the rule",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Unique id used to delete the rule",
-          example = "1") @RequestParam("uniqueId") String uniqueId) {
+          value = "Dataset schema id used to delete the rule",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                         @ApiParam(value = "Unique id used to delete the rule",
+                                                 example = "1") @RequestParam("uniqueId") String uniqueId) {
     try {
       rulesService.deleteUniqueConstraint(datasetSchemaId, uniqueId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting unique constraint rule with id {} for datasetSchemaId {} Message: {}", uniqueId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting unique constraint rule with id {} for datasetSchemaId {} Message: {}", uniqueId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -551,13 +548,13 @@ public class RulesControllerImpl implements RulesController {
   @DeleteMapping("/private/deleteRuleHighLevelLike")
   @ApiOperation(value = "Deletes a high level rule.", hidden = true)
   public void deleteRuleHighLevelLike(@ApiParam(value = "Dataset schema id used to delete the rule",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Field schema id used to delete the rule",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("fieldSchemaId") String fieldSchemaId) {
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                      @ApiParam(value = "Field schema id used to delete the rule",
+                                              example = "5cf0e9b3b793310e9ceca190") @RequestParam("fieldSchemaId") String fieldSchemaId) {
     try {
       rulesService.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting high level rule for datasetSchemaId {} and fieldSchemaId {} Message: {}", datasetSchemaId, fieldSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting high level rule for datasetSchemaId {} and fieldSchemaId {} Message: {}", datasetSchemaId, fieldSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -571,16 +568,16 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByIdFieldSchema")
   @ApiOperation(value = "Deletes a rule and its integrity based on a field schema id",
-      hidden = true)
+          hidden = true)
   public void deleteDatasetRuleAndIntegrityByFieldSchemaId(
-      @ApiParam(value = "Field schema id used to delete the rule",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("fieldSchemaId") String fieldSchemaId,
-      @ApiParam(value = "Dataset id used to delete the rule",
-          example = "1") @RequestParam("datasetId") Long datasetId) {
+          @ApiParam(value = "Field schema id used to delete the rule",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("fieldSchemaId") String fieldSchemaId,
+          @ApiParam(value = "Dataset id used to delete the rule",
+                  example = "1") @RequestParam("datasetId") Long datasetId) {
     try {
       rulesService.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId, datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting dataset rule and integrity for datasetId {} and fieldSchemaId {} Message: {}", datasetId, fieldSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting dataset rule and integrity for datasetId {} and fieldSchemaId {} Message: {}", datasetId, fieldSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -594,16 +591,16 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @DeleteMapping("/private/deleteDatasetRuleAndIntegrityByDatasetSchemaId")
   @ApiOperation(value = "Deletes a rule and its integrity based on a dataset schema id",
-      hidden = true)
+          hidden = true)
   public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(@ApiParam(
-      value = "Dataset schema id used to delete the rule",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Dataset id used to delete the rule",
-          example = "1") @RequestParam("datasetId") Long datasetId) {
+          value = "Dataset schema id used to delete the rule",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                                             @ApiParam(value = "Dataset id used to delete the rule",
+                                                                     example = "1") @RequestParam("datasetId") Long datasetId) {
     try {
       rulesService.deleteDatasetRuleAndIntegrityByDatasetSchemaId(datasetSchemaId, datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting dataset rule and integrity for datasetId {} and datasetSchemaId {} Message: {}", datasetId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting dataset rule and integrity for datasetId {} and datasetSchemaId {} Message: {}", datasetId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -619,19 +616,19 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Copies a rule schema based on a copy schema object", hidden = true)
   @ApiResponse(code = 400, message = "Error copying the rule provided in the object")
   public Map<String, String> copyRulesSchema(
-      @ApiParam(value = "Copy schema used to copy the rule") @RequestBody CopySchemaVO copy) {
+          @ApiParam(value = "Copy schema used to copy the rule") @RequestBody CopySchemaVO copy) {
     try {
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
+              SecurityContextHolder.getContext().getAuthentication().getName());
 
       return rulesService.copyRulesSchema(copy);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error copying rule: {}", e.getMessage(), e);
+      LOG.error("Error copying rule: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.COPYING_RULE);
     } catch (Exception e) {
       Long dataflowId = (copy != null) ? copy.getDataflowIdDestination() : null;
-      LOG_ERROR.error("Unexpected error! Error copying rules schema to dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error copying rules schema to dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -645,16 +642,16 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @GetMapping("/private/deleteNotEmptyRule")
   @ApiOperation(value = "Deletes a non empty rule based on a dataset and tableschema ids",
-      hidden = true)
+          hidden = true)
   public void deleteNotEmptyRule(
-      @ApiParam(value = "Table schema id used on the delete process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("tableSchemaId") String tableSchemaId,
-      @ApiParam(value = "Dataset id used on the delete process",
-          example = "1") @RequestParam("datasetId") Long datasetId) {
+          @ApiParam(value = "Table schema id used on the delete process",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("tableSchemaId") String tableSchemaId,
+          @ApiParam(value = "Dataset id used on the delete process",
+                  example = "1") @RequestParam("datasetId") Long datasetId) {
     try {
       rulesService.deleteNotEmptyRule(tableSchemaId, datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting not empty rule for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting not empty rule for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -669,11 +666,11 @@ public class RulesControllerImpl implements RulesController {
   @GetMapping("/private/updateSequence")
   @ApiOperation(value = "Updates the sequence", hidden = true)
   public Long updateSequence(@ApiParam(value = "Dataset schema id used on the update process",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     try {
       return rulesService.updateSequence(datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating sequence for datasetSchemaId {} Message: {}", datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error updating sequence for datasetSchemaId {} Message: {}", datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -688,12 +685,12 @@ public class RulesControllerImpl implements RulesController {
   @GetMapping("/private/findSqlSentencesByDatasetSchemaId")
   @ApiOperation(value = "Returns a SQL rule based on a dataset schema id", hidden = true)
   public List<RuleVO> findSqlSentencesByDatasetSchemaId(@ApiParam(
-      value = "Dataset schema id used on the search process",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
+          value = "Dataset schema id used on the search process",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId) {
     try {
       return rulesService.findSqlSentencesByDatasetSchemaId(datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error finding sql sentences for datasetSchemaId {} Message: {}", datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error finding sql sentences for datasetSchemaId {} Message: {}", datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -709,19 +706,19 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @PostMapping("/private/validateSqlRuleDataCollection")
   @ApiOperation(
-      value = "Validates the SQL rule pertaining to a dataset when executing data collection",
-      hidden = true)
+          value = "Validates the SQL rule pertaining to a dataset when executing data collection",
+          hidden = true)
   public boolean validateSqlRuleDataCollection(
-      @ApiParam(value = "Dataset id used on the validation process",
-          example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "Dataset schema id used on the validation process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Rule object about to be validated") @RequestBody RuleVO ruleVO) {
+          @ApiParam(value = "Dataset id used on the validation process",
+                  example = "1") @RequestParam("datasetId") Long datasetId,
+          @ApiParam(value = "Dataset schema id used on the validation process",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+          @ApiParam(value = "Rule object about to be validated") @RequestBody RuleVO ruleVO) {
     try {
       return sqlRulesService.validateSQLRuleFromDatacollection(datasetId, datasetSchemaId, ruleVO);
     } catch (Exception e) {
       String ruleId = (ruleVO != null) ? ruleVO.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error validating sql rule {} from data collection for datasetId {} and datasetSchemaId {} Message: {}", ruleId, datasetId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error validating sql rule {} from data collection for datasetId {} and datasetSchemaId {} Message: {}", ruleId, datasetId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -739,16 +736,16 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping("/validateSqlRule")
   @ApiOperation(value = "Validates the SQL rule pertaining to a dataset", hidden = true)
   public void validateSqlRule(
-      @ApiParam(value = "Dataset id used on the validation process",
-          example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "Dataset schema id used on the validation process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Rule object about to be validated") @RequestBody RuleVO ruleVO) {
+          @ApiParam(value = "Dataset id used on the validation process",
+                  example = "1") @RequestParam("datasetId") Long datasetId,
+          @ApiParam(value = "Dataset schema id used on the validation process",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+          @ApiParam(value = "Rule object about to be validated") @RequestBody RuleVO ruleVO) {
     try {
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, ruleMapper.classToEntity(ruleVO));
     } catch (Exception e) {
       String ruleId = (ruleVO != null) ? ruleVO.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error validating sql rule {} for datasetId {} and datasetSchemaId {} Message: {}", ruleId, datasetId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error validating sql rule {} for datasetId {} and datasetSchemaId {} Message: {}", ruleId, datasetId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -767,17 +764,17 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping("/validateSqlRules")
   @ApiOperation(value = "Validates all the SQL rules pertaining to a dataset", hidden = true)
   public void validateSqlRules(
-      @ApiParam(value = "Dataset id used on the validation process",
-          example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "Dataset schema id used on the validation process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Should a notification be sent?", example = "false",
-          defaultValue = "true") @RequestParam(value = "showNotification", required = false,
-              defaultValue = "true") Boolean showNotification) {
+          @ApiParam(value = "Dataset id used on the validation process",
+                  example = "1") @RequestParam("datasetId") Long datasetId,
+          @ApiParam(value = "Dataset schema id used on the validation process",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+          @ApiParam(value = "Should a notification be sent?", example = "false",
+                  defaultValue = "true") @RequestParam(value = "showNotification", required = false,
+                  defaultValue = "true") Boolean showNotification) {
     try {
       sqlRulesService.validateSQLRules(datasetId, datasetSchemaId, showNotification);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error validating sql rules for datasetId {} and datasetSchemaId {} Message: {}", datasetId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error validating sql rules for datasetId {} and datasetSchemaId {} Message: {}", datasetId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -793,9 +790,9 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping("/private/getAllDisabledRules")
   @ApiOperation(value = "Returns all the disabled rules pertaining to a dataflow id", hidden = true)
   public Integer getAllDisabledRules(
-      @ApiParam(value = "Dataflow id used on the get process",
-          example = "1") @RequestParam("dataflowId") Long dataflowId,
-      @RequestBody List<DesignDatasetVO> designs) {
+          @ApiParam(value = "Dataflow id used on the get process",
+                  example = "1") @RequestParam("dataflowId") Long dataflowId,
+          @RequestBody List<DesignDatasetVO> designs) {
     return rulesService.getAllDisabledRules(dataflowId, designs);
   }
 
@@ -810,11 +807,11 @@ public class RulesControllerImpl implements RulesController {
   @Override
   @PostMapping("/private/getAllUncheckedRules")
   @ApiOperation(value = "Returns all the unchecked rules pertaining to a dataflow id",
-      hidden = true)
+          hidden = true)
   public Integer getAllUncheckedRules(
-      @ApiParam(value = "Dataflow id used on the get process",
-          example = "1") @RequestParam("dataflowId") Long dataflowId,
-      @RequestBody List<DesignDatasetVO> designs) {
+          @ApiParam(value = "Dataflow id used on the get process",
+                  example = "1") @RequestParam("dataflowId") Long dataflowId,
+          @RequestBody List<DesignDatasetVO> designs) {
     return rulesService.getAllUncheckedRules(dataflowId, designs);
   }
 
@@ -831,15 +828,15 @@ public class RulesControllerImpl implements RulesController {
   @DeleteMapping("/private/deleteAutomaticRuleByReferenceId")
   @ApiOperation(value = "Deletes an automatic rule by reference id", hidden = true)
   public void deleteAutomaticRuleByReferenceId(@ApiParam(
-      value = "Dataset schema id used on the delete process",
-      example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
-      @ApiParam(value = "Reference id used on the delete process",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId) {
+          value = "Dataset schema id used on the delete process",
+          example = "5cf0e9b3b793310e9ceca190") @RequestParam("datasetSchemaId") String datasetSchemaId,
+                                               @ApiParam(value = "Reference id used on the delete process",
+                                                       example = "5cf0e9b3b793310e9ceca190") @RequestParam("referenceId") String referenceId) {
     try {
       rulesService.deleteAutomaticRuleByReferenceId(datasetSchemaId, referenceId);
       LOG.info(DELETE_RULES_SUCCESSFULLY, referenceId, datasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting automatic rule with referenceId {} for datasetSchemaId {} Message: {}", referenceId, datasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting automatic rule with referenceId {} for datasetSchemaId {} Message: {}", referenceId, datasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -855,10 +852,10 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @GetMapping("/private/getIntegrityRules/{datasetSchemaId}")
   @ApiOperation(value = "Gets the integrity schemas of a rule based on a dataset schema id",
-      hidden = true)
+          hidden = true)
   public List<IntegrityVO> getIntegrityRulesByDatasetSchemaId(@ApiParam(
-      value = "Dataset schema id used on the delete process",
-      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId) {
+          value = "Dataset schema id used on the delete process",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId) {
     return rulesService.getIntegritySchemas(datasetSchemaId);
   }
 
@@ -873,11 +870,11 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping("/private/insertIntegrities")
   @ApiOperation(value = "Inserts the integrity schemas", hidden = true)
   public void insertIntegritySchema(@ApiParam(
-      value = "Integrities object to be inserted") @RequestBody List<IntegrityVO> integritiesVO) {
+          value = "Integrities object to be inserted") @RequestBody List<IntegrityVO> integritiesVO) {
     try {
       rulesService.insertIntegritySchemas(integritiesVO);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error inserting integrities Message: {}", e.getMessage());
+      LOG.error("Unexpected error! Error inserting integrities Message: {}", e.getMessage());
       throw e;
     }
   }
@@ -895,19 +892,19 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Imports all the data from a rule based on a schema", hidden = true)
   @ApiResponse(code = 400, message = "Couldn't retrieve a rule using the provided object.")
   public Map<String, String> importRulesSchema(@ApiParam(
-      value = "Schema object used in the import process.") @RequestBody ImportSchemaVO importRules) {
+          value = "Schema object used in the import process.") @RequestBody ImportSchemaVO importRules) {
     try {
 
       // Set the user name on the thread
       ThreadPropertiesManager.setVariable("user",
-          SecurityContextHolder.getContext().getAuthentication().getName());
+              SecurityContextHolder.getContext().getAuthentication().getName());
       return rulesService.importRulesSchema(importRules.getQcRulesBytes(),
-          importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
+              importRules.getDictionaryOriginTargetObjectId(), importRules.getIntegritiesVO());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error importing the rules: {}", e.getMessage(), e);
+      LOG.error("Error importing the rules: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_RULE);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error importing rules schema Message: {}", e.getMessage());
+      LOG.error("Unexpected error! Error importing rules schema Message: {}", e.getMessage());
       throw e;
     }
   }
@@ -923,20 +920,20 @@ public class RulesControllerImpl implements RulesController {
   @PostMapping(value = "/exportQC/{datasetId}")
   @ApiOperation(value = "Exports all the QCs into a CSV file", hidden = true)
   public void exportQCCSV(@ApiParam(value = "Dataset id used in the export process.",
-      example = "10") @PathVariable("datasetId") Long datasetId) {
+          example = "10") @PathVariable("datasetId") Long datasetId) {
     LOG.info("Export dataset QC from datasetId {}, with type .csv", datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_QC_RULES_START",
-        userNotificationContentVO);
+            userNotificationContentVO);
 
     try {
       rulesService.exportQCCSV(datasetId);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error exporting QCS from the dataset {}.  Message: {}", datasetId,
-          e.getMessage());
+      LOG.error("Error exporting QCS from the dataset {}.  Message: {}", datasetId,
+              e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error exporting qc to csv for datasetId {} Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error exporting qc to csv for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
     }
   }
@@ -954,14 +951,14 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Download the generated CSV file containing the QCs", hidden = true)
   @ApiResponse(code = 404, message = "Couldn't find a file with the specified name.")
   public void downloadQCCSV(
-      @ApiParam(value = "Dataset id used in the export process.",
-          example = "10") @PathVariable Long datasetId,
-      @ApiParam(value = "The filename the export process assigned to the QC Export file.",
-          example = "dataset-10-QCS-yyyy-MM-dd HH.mm.ss") @RequestParam String fileName,
-      HttpServletResponse response) {
+          @ApiParam(value = "Dataset id used in the export process.",
+                  example = "10") @PathVariable Long datasetId,
+          @ApiParam(value = "The filename the export process assigned to the QC Export file.",
+                  example = "dataset-10-QCS-yyyy-MM-dd HH.mm.ss") @RequestParam String fileName,
+          HttpServletResponse response) {
     try {
       LOG.info("Downloading file generated when exporting QC Rules. DatasetId {}. Filename {}",
-          datasetId, fileName);
+              datasetId, fileName);
       File file = rulesService.downloadQCCSV(datasetId, fileName);
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
@@ -974,14 +971,14 @@ public class RulesControllerImpl implements RulesController {
       // delete the file after downloading it
       FileUtils.forceDelete(file);
     } catch (IOException | ResponseStatusException e) {
-      LOG_ERROR.error(
-          "Downloading file generated when exporting QC Rules. DatasetId {}. Filename {}. Error message: {}",
-          datasetId, fileName, e.getMessage());
+      LOG.error(
+              "Downloading file generated when exporting QC Rules. DatasetId {}. Filename {}. Error message: {}",
+              datasetId, fileName, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
-          "Trying to download a file generated during the export QC Rules process but the file is not found, datasetID: %s + filename: %s.",
-          datasetId, fileName));
+              "Trying to download a file generated during the export QC Rules process but the file is not found, datasetID: %s + filename: %s.",
+              datasetId, fileName));
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error downloading qc to csv for datasetId {} Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error downloading qc to csv for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
     }
   }
@@ -996,22 +993,22 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
-      name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PostMapping(value = "/runSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Runs a SQL rule obtaining a limited amount of records", hidden = true)
   @ApiResponses(value = {
-      @ApiResponse(code = 400,
-          message = "There was an error trying to execute the SQL Rule. Check your SQL Syntax."),
-      @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
-      @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
+          @ApiResponse(code = 400,
+                  message = "There was an error trying to execute the SQL Rule. Check your SQL Syntax."),
+          @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
+          @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
   public List<List<ValueVO>> runSqlRule(
-      @ApiParam(value = "Dataset id used on the run process",
-          example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be executed") @RequestBody SqlRuleVO sqlRule,
-      @ApiParam(value = "Show internal fields in query results",
-          defaultValue = "false") @RequestParam(
-              defaultValue = "false") boolean showInternalFields) {
+          @ApiParam(value = "Dataset id used on the run process",
+                  example = "1") @RequestParam("datasetId") Long datasetId,
+          @ApiParam(value = "SQL rule that is going to be executed") @RequestBody SqlRuleVO sqlRule,
+          @ApiParam(value = "Show internal fields in query results",
+                  defaultValue = "false") @RequestParam(
+                  defaultValue = "false") boolean showInternalFields) {
     List<List<ValueVO>> obtainedTableValues = new ArrayList<>();
     try {
       if(sqlRule != null){
@@ -1021,34 +1018,34 @@ public class RulesControllerImpl implements RulesController {
         LOG.info("Sql rule is null for datasetId {}", datasetId);
       }
       obtainedTableValues =
-          sqlRulesService.runSqlRule(datasetId, sqlRule.getSqlRule(), showInternalFields);
+              sqlRulesService.runSqlRule(datasetId, sqlRule.getSqlRule(), showInternalFields);
       LOG.info("Successfully ran sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
     } catch (EEAInvalidSQLException e) {
-      LOG_ERROR.error(
-          "There was an error trying to execute the SQL Rule: {} for datasetId {}. Check your SQL Syntax.",
-          sqlRule.getSqlRule(), datasetId, e);
+      LOG.error(
+              "There was an error trying to execute the SQL Rule: {} for datasetId {}. Check your SQL Syntax.",
+              sqlRule.getSqlRule(), datasetId, e);
       String sqlError = e.getCause().getCause().getCause().getMessage() != null
-          ? e.getCause().getCause().getCause().getMessage()
-          : "";
+              ? e.getCause().getCause().getCause().getMessage()
+              : "";
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, sqlError);
     } catch (EEAForbiddenSQLCommandException e) {
-      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {} for datasetId {}. Exception: {}",
-          sqlRule.getSqlRule(), datasetId, e.getMessage());
+      LOG.error("SQL Command not allowed in SQL Rule: {} for datasetId {}. Exception: {}",
+              sqlRule.getSqlRule(), datasetId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED);
+              EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED);
     } catch (EEAException e) {
-      LOG_ERROR.error("User doesn't have access to datasetId {}. Sql rule is: {}", datasetId, sqlRule.getSqlRule(),
-          e);
+      LOG.error("User doesn't have access to datasetId {}. Sql rule is: {}", datasetId, sqlRule.getSqlRule(),
+              e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.RUNNING_RULE);
     } catch (NumberFormatException e) {
-      LOG_ERROR.error("Wrong id for dataset in SQL Rule execution: {}", sqlRule.getSqlRule(), e);
+      LOG.error("Wrong id for dataset in SQL Rule execution: {}", sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RUNNING_RULE);
     } catch (StringIndexOutOfBoundsException e) {
-      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
+      LOG.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.RUNNING_RULE);
     } catch (Exception e) {
       String rule = (sqlRule != null) ? sqlRule.getSqlRule() : null;
-      LOG_ERROR.error("Unexpected error! Error running sql rule {} for datasetId {} Message: {}", rule, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error running sql rule {} for datasetId {} Message: {}", rule, datasetId, e.getMessage());
       throw e;
     }
 
@@ -1065,19 +1062,19 @@ public class RulesControllerImpl implements RulesController {
    */
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
-      name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @PostMapping(value = "/evaluateSqlRule", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Evaluates an SQL Rule obtaining its cost from its explain plan.",
-      hidden = true)
+          hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400,
-      message = "There was an error trying to execute the SQL Rule or the explain plan. Check your SQL Syntax."),
-      @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
-      @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
+          message = "There was an error trying to execute the SQL Rule or the explain plan. Check your SQL Syntax."),
+          @ApiResponse(code = 401, message = "The user doesn't have access to one of the datasets"),
+          @ApiResponse(code = 422, message = "Forbidden command used in the SQL sentence.")})
   public Double evaluateSqlRule(
-      @ApiParam(value = "Dataset id used on the evaluation process",
-          example = "1") @RequestParam("datasetId") Long datasetId,
-      @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody SqlRuleVO sqlRule) {
+          @ApiParam(value = "Dataset id used on the evaluation process",
+                  example = "1") @RequestParam("datasetId") Long datasetId,
+          @ApiParam(value = "SQL rule that is going to be evaluated") @RequestBody SqlRuleVO sqlRule) {
     double sqlCost = 0;
     try {
       if(sqlRule != null){
@@ -1090,30 +1087,30 @@ public class RulesControllerImpl implements RulesController {
       LOG.info("Successfully evaluated sql rule {} for datasetId {}", sqlRule.getSqlRule(), datasetId);
 
     } catch (ParseException e) {
-      LOG_ERROR.error("There was an error trying to parse the explain plan: {} for datasetId {}",
-          sqlRule.getSqlRule(), datasetId, e);
+      LOG.error("There was an error trying to parse the explain plan: {} for datasetId {}",
+              sqlRule.getSqlRule(), datasetId, e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
 
     } catch (EEAInvalidSQLException e) {
-      LOG_ERROR.error(
-          "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
-          sqlRule.getSqlRule(), e);
+      LOG.error(
+              "There was an error trying to execute the SQL Rule: {}. Check your SQL Syntax.",
+              sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     } catch (EEAForbiddenSQLCommandException e) {
-      LOG_ERROR.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
-          sqlRule.getSqlRule(), e.getMessage());
+      LOG.error("SQL Command not allowed in SQL Rule: {}. Exception: {}",
+              sqlRule.getSqlRule(), e.getMessage());
       throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-          EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED);
+              EEAErrorMessage.SQL_COMMAND_NOT_ALLOWED);
     } catch (EEAException e) {
-      LOG_ERROR.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
-          e);
+      LOG.error("User doesn't have access to one of the datasets: {}", sqlRule.getSqlRule(),
+              e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
     } catch (StringIndexOutOfBoundsException e) {
-      LOG_ERROR.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
+      LOG.error("SQL sentence has wrong format, please check: {}", sqlRule.getSqlRule(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
     } catch (Exception e) {
       String rule = (sqlRule != null) ? sqlRule.getSqlRule() : null;
-      LOG_ERROR.error("Unexpected error! Error evaluating sql rule {} for datasetId {} Message: {}", rule, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error evaluating sql rule {} for datasetId {} Message: {}", rule, datasetId, e.getMessage());
       throw e;
     }
 
@@ -1133,18 +1130,18 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Get a historic information about the updates of a rule", hidden = true)
   @GetMapping(value = "/historicInfo")
   public List<RuleHistoricInfoVO> getRuleHistoric(
-      @ApiParam(value = "Dataset id used in the get of a historic rule",
-          example = "1") @RequestParam("datasetId") long datasetId,
-      @ApiParam(value = "Rule id used in the get of a historic rule",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("ruleId") String ruleId) {
+          @ApiParam(value = "Dataset id used in the get of a historic rule",
+                  example = "1") @RequestParam("datasetId") long datasetId,
+          @ApiParam(value = "Rule id used in the get of a historic rule",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("ruleId") String ruleId) {
     try {
       return rulesService.getRuleHistoricInfo(datasetId, ruleId);
     } catch (EEAException e) {
-      LOG_ERROR.error("Not found rule historic information, please check rule with id: {}", ruleId);
+      LOG.error("Not found rule historic information, please check rule with id: {}", ruleId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
+              EEAErrorMessage.HISTORIC_QC_NOT_FOUND);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving rule historic of ruleId {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving rule historic of ruleId {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
       throw e;
     }
   }
@@ -1159,15 +1156,15 @@ public class RulesControllerImpl implements RulesController {
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   @ApiOperation(value = "Get the historic information of the all rules in the dataset",
-      hidden = true)
+          hidden = true)
   @GetMapping(value = "/historicDatasetRules")
   public List<DatasetHistoricRuleVO> getRuleHistoricByDatasetId(
-      @ApiParam(value = "Dataset id used in the get of a historic rule",
-          example = "1") @RequestParam("datasetId") long datasetId) {
+          @ApiParam(value = "Dataset id used in the get of a historic rule",
+                  example = "1") @RequestParam("datasetId") long datasetId) {
     try {
       return rulesService.getRuleHistoricInfoByDatasetId(datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving rule historic for datasetId {} Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving rule historic for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
     }
   }

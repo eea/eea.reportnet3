@@ -37,9 +37,6 @@ public class ProcessControllerImpl implements ProcessController {
   @Autowired
   private ProcessService processService;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ProcessControllerImpl.class);
 
@@ -106,7 +103,7 @@ public class ProcessControllerImpl implements ProcessController {
       return processService.updateProcess(datasetId, dataflowId, status, type, processId, user,
               priority, released);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating process with id {} for datasetId {} to status {} Message: {}", processId, datasetId, status.toString(), e.getMessage());
+      LOG.error("Unexpected error! Error updating process with id {} for datasetId {} to status {} Message: {}", processId, datasetId, status.toString(), e.getMessage());
       throw e;
     }
   }
@@ -129,7 +126,7 @@ public class ProcessControllerImpl implements ProcessController {
     try {
       processService.updatePriority(processId, priority);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating priority of process with id {} to value {} Message: {}", processId, priority, e.getMessage());
+      LOG.error("Unexpected error! Error updating priority of process with id {} to value {} Message: {}", processId, priority, e.getMessage());
       throw e;
     }
   }
@@ -185,7 +182,7 @@ public class ProcessControllerImpl implements ProcessController {
     try {
       return processService.isProcessFinished(processId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error checking if process with id {} is finished. Message: {}", processId, e.getMessage());
+      LOG.error("Unexpected error! Error checking if process with id {} is finished. Message: {}", processId, e.getMessage());
       throw e;
     }
   }
@@ -204,7 +201,7 @@ public class ProcessControllerImpl implements ProcessController {
     try {
       return processService.findNextProcess(processId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error finding next process with id {} Message: {}", processId, e.getMessage());
+      LOG.error("Unexpected error! Error finding next process with id {} Message: {}", processId, e.getMessage());
       throw e;
     }
   }

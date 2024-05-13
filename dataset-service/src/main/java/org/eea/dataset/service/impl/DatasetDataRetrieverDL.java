@@ -58,7 +58,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
         S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
-        if(BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
             s3PathResolver.setIsIcebergTable(true);
         }
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
@@ -80,7 +80,10 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
             Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
             s3PathResolver.setTableName(S3_VALIDATION);
+            //validations only exist in the parquet bucket
+            s3PathResolver.setIsIcebergTable(false);
             String validationTablePath = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            s3PathResolver.setIsIcebergTable(true);
             StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
             if (filteredQuery.toString().isEmpty() && levelError!=null && levelError.length==0) {
                 result.setTotalFilteredRecords(0L);
@@ -123,11 +126,12 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             DataLakeDataRetrieverUtils.buildPaginationQuery(pageable, filteredQuery);
         }
         dataQuery.append(filteredQuery);
-        LOG.info("For datasetId {} dataQuery.toString() : {}", dataset.getId(), dataQuery);
         List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
         result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
         result.setRecords(recordVOS);
 
+        //validations only exist in the parquet bucket
+        s3PathResolver.setIsIcebergTable(false);
         if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
             if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION)) {
                 dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION);

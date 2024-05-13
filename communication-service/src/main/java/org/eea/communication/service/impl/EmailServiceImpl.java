@@ -30,9 +30,6 @@ public class EmailServiceImpl implements EmailService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /**
    * Send simple message.
    *
@@ -59,7 +56,7 @@ public class EmailServiceImpl implements EmailService {
         LOG.error("Mail Service is disabled in this server");
       }
     } catch (MailException e) {
-      LOG_ERROR.error("Error sending email. Message {}", e.getMessage(), e);
+      LOG.error("Error sending email. Message {}", e.getMessage(), e);
     }
   }
 

@@ -123,7 +123,8 @@ const parseData = data =>
           [field.fieldSchemaId]: field.value,
           type: field.type,
           id: field.fieldId,
-          fieldSchemaId: field.fieldSchemaId
+          fieldSchemaId: field.fieldSchemaId,
+          fieldName: field.name
         },
         fieldValidations: field.validations
       };

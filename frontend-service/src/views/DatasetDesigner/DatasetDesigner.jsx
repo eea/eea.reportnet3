@@ -80,6 +80,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { resetFilterState } = useApplyFilters('uniqueConstraints');
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
+  const [isIcebergTableCreated, setIsIcebergTableCreated] = useState(false);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
@@ -690,6 +691,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
+  const onChangeButtonsVisibility = disabled => {
+    setIsIcebergTableCreated(disabled);
+  };
+
   const onHideDelete = () => {
     onResetDelete();
   };
@@ -896,6 +901,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           datasetId,
           dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
+
+        setIsIcebergTableCreated(dataset.tables.find(table => table.icebergTableIsCreated === true));
 
         setIsLoading(false);
         designerDispatch({
@@ -1701,6 +1708,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1731,6 +1739,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1759,6 +1768,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
+                  isIcebergTableCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1781,6 +1791,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
                 disabled={
+                  isIcebergTableCreated ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
@@ -1897,6 +1908,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isReferenceDataset={designerState.referenceDataset}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
+            onChangeButtonsVisibility={onChangeButtonsVisibility}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
@@ -2014,6 +2026,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             bigData={designerState.bigData}
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
+            dataflowId={dataflowId}
+            datasetId={datasetId}
             dialogHeader={selectedCustomImportIntegration.name}
             dialogOnHide={() => {
               manageDialogs('isImportDatasetDialogVisible', false);
@@ -2032,6 +2046,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
+            s3Check={true}
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(selectedCustomImportIntegration.id)
                 ? getUrl(DatasetConfig.importFileDatasetUpd, {

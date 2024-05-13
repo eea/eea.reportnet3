@@ -2,6 +2,8 @@ package org.eea.dataset.service;
 
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.AttachmentDLVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 public interface BigDataDatasetService {
 
@@ -49,9 +53,8 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaId the table schema id
-     * @param tableSchemaName the table schema id
      */
-    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName) throws Exception;
+    void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId) throws Exception;
 
     /**
      * Delete dataset data
@@ -132,4 +135,55 @@ public interface BigDataDatasetService {
      */
     void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception;
 
+    /**
+     * Insert records manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaName the tableSchemaName
+     * @param records the new editted records
+     *
+     */
+    void insertRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records) throws Exception;
+
+    /**
+     * Update records manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaName the tableSchemaName
+     * @param records the new editted records
+     * @param updateCascadePK the updateCascadePK
+     *
+     */
+    void updateRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records, boolean updateCascadePK) throws Exception;
+
+    /**
+     * Update field manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param recordId the recordId
+     * @param tableSchemaName the tableSchemaName
+     * @param field the new field
+     * @param updateCascadePK the updateCascadePK
+     *
+     */
+    void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, String tableSchemaName, boolean updateCascadePK) throws Exception;
+
+    /**
+     * Delete record manually
+     *
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param datasetId the dataset id
+     * @param tableSchemaVO the tableSchemaVO
+     * @param recordId the record id to be removed
+     * @param deleteCascadePK the deleteCascadePK
+     *
+     */
+    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception;
 }

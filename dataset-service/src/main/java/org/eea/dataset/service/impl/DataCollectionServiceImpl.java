@@ -1,5 +1,7 @@
 package org.eea.dataset.service.impl;
 
+import lombok.SneakyThrows;
+import org.apache.commons.lang3.BooleanUtils;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -11,10 +13,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DataCollectionService;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DesignDatasetService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.dataset.service.model.IntegrityDataCollection;
 import org.eea.exception.EEAErrorMessage;
@@ -40,6 +39,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -68,6 +68,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -83,9 +84,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant CHUNK_SIZE. */
   private static final int CHUNK_SIZE = 10;
@@ -253,6 +251,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private S3Helper s3Helper;
 
+  /** The big data dataset service */
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
+
 
   /**
    * Gets the dataflow status.
@@ -266,7 +268,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
       return (dataflowVO != null) ? dataflowVO.getStatus() : null;
     } catch (Exception e) {
-      LOG_ERROR.error("Error in isDesignDataflow", e);
+      LOG.error("Error in isDesignDataflow", e);
       return null;
     }
   }
@@ -283,7 +285,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
       return (dataflowVO != null) ? dataflowVO : null;
     } catch (Exception e) {
-      LOG_ERROR.error("Error getting dataflow {} metabase", dataflowId, e);
+      LOG.error("Error getting dataflow {} metabase", dataflowId, e);
       return null;
     }
   }
@@ -347,6 +349,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       failEvent = EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT;
     }
 
+    if(errorMessage.equals(EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS)){
+      failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS;
+    }
+
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();
     lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
@@ -360,7 +366,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).error(errorMessage).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", failEvent, e);
+      LOG.error("Error releasing {} event: ", failEvent, e);
     }
   }
 
@@ -388,11 +394,26 @@ public class DataCollectionServiceImpl implements DataCollectionService {
    * @param referenceDataflow the reference dataflow
    * @param stopAndNotifyPKError the stop and notify PK error
    */
+  @SneakyThrows
   @Override
   @Async
   public void createEmptyDataCollection(Long dataflowId, LocalDateTime dueDate,
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
+
+    //check if there are tables converted to Iceberg and convert them back to Parquet
+    List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
+    for(DataSetMetabaseVO dataset: datasets){
+      List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
+      String datasetSchemaId = dataset.getDatasetSchema();
+      for(TableSchemaIdNameVO table: tables){
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS, true, false);
+          throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
+        }
+      }
+    }
 
     manageDataCollection(dataflowId, dueDate, true, stopAndNotifySQLErrors, manualCheck,
         referenceDataflow, stopAndNotifyPKError);
@@ -463,7 +484,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       if (referenceDataflow && stopAndNotifyPKError) {
         hasPk = checkIfSchemasHavePk(designs);
         if (!hasPk) {
-          LOG_ERROR.error(
+          LOG.error(
               "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
               dataflowId);
           releaseLockAndNotification(dataflowId, "No primary key in any schemas in the dataflow",
@@ -529,14 +550,14 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         .user(SecurityContextHolder.getContext().getAuthentication().getName())
         .dataflowId(dataflowId).build();
     if (Boolean.TRUE.equals(referenceDataflow) && referenceDatasets.isEmpty()) {
-      LOG_ERROR.error(
+      LOG.error(
           "No reference schemas for dataflowId {}. So error in the process to create the reference dataset",
           dataflowId);
       releaseNotification(EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT, notificationErrorVO);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.NOT_REFERENCE_TO_PROCESS);
     } else if (Boolean.FALSE.equals(referenceDataflow) && designs.isEmpty()) {
-      LOG_ERROR.error("No design datasets for dataflowId {}. So error creating the DC",
+      LOG.error("No design datasets for dataflowId {}. So error creating the DC",
           dataflowId);
       releaseNotification(EventType.ADD_DATACOLLECTION_FAILED_EVENT, notificationErrorVO);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -582,7 +603,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             referenceDataflow);
 
       } catch (SQLException e) {
-        LOG_ERROR.error("Error rolling back manageDataCollection for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
+        LOG.error("Error rolling back manageDataCollection for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
       } catch (Exception e) {
         LOG.error("Unexpected error! Error in processDataCollectionAndRoles for dataflowId {}. Message: {}", dataflowId, e.getMessage());
         throw e;
@@ -638,7 +659,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               datasetSchemaService.propagateRulesAfterUpdateSchema(reference.getDatasetSchema(),
                   field, type, reference.getId());
             } catch (EEAException e) {
-              LOG_ERROR.error(
+              LOG.error(
                   "Link from reference dataset to regular schema detected. Error trying to change the field to Text type. DatasetId {}.Message {}",
                   reference.getId(), e.getMessage(), e);
             }
@@ -876,10 +897,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       // This method will release the lock
       recordStoreControllerZuul.createSchemas(datasetIdsAndSchemaIds, dataflowId, isCreation, true);
     } catch (SQLException e) {
-      LOG_ERROR.error("Error persisting changes. Rolling back...", e);
+      LOG.error("Error persisting changes. Rolling back...", e);
       releaseLockAndRollback(connection, dataflowId, isCreation);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error creating permissions. Rolling back...", e);
+      LOG.error("Error creating permissions. Rolling back...", e);
       releaseLockAndRollback(connection, dataflowId, isCreation);
     } finally {
       connection.setAutoCommit(true);
@@ -1789,7 +1810,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+      LOG.error("Unable to release notification: {}, {}", eventType, notificationVO);
     }
   }
 

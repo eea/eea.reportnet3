@@ -403,6 +403,13 @@
           }
         },
         {
+          "key": "ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "USER_SERVICE_OLD_LOGIN_ERROR"
         },
         {
@@ -950,6 +957,7 @@
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
         { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" },
+        { "key": "CONVERT_TABLE_ERROR" },
         {
           "key": "VALIDATION_CANCELED_EVENT",
           "navigateTo": {
@@ -1329,7 +1337,8 @@
       "lifeTime": 20000,
       "fixed": false,
       "types": [
-        { "key": "IMPORT_EMPTY_FILES_WARNING_EVENT",
+        {
+          "key": "IMPORT_EMPTY_FILES_WARNING_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]

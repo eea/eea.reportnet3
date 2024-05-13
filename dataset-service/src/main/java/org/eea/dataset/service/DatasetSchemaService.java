@@ -107,9 +107,10 @@ public interface DatasetSchemaService {
    *
    * @param datasetId the dataset id
    * @param tableSchema the table schema
+   * @param updateMaterializedViews the updateMaterializedViews
    * @throws EEAException the EEA exception
    */
-  void updateTableSchema(Long datasetId, TableSchemaVO tableSchema) throws EEAException;
+  void updateTableSchema(Long datasetId, TableSchemaVO tableSchema, Boolean updateMaterializedViews) throws EEAException;
 
   /**
    * Delete table schema.

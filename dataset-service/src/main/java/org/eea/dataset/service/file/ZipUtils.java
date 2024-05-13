@@ -46,12 +46,6 @@ public class ZipUtils {
   private static final Logger LOG = LoggerFactory.getLogger(ZipUtils.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
-  /**
    * The integration controller.
    */
   @Autowired
@@ -87,7 +81,7 @@ public class ZipUtils {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   public ImportSchemas unZipImportSchema(InputStream is, String fileName)
-      throws EEAException, IOException {
+          throws EEAException, IOException {
 
     ImportSchemas fileUnziped = new ImportSchemas();
     String multipartFileMimeType = getMimetype(fileName);
@@ -163,7 +157,7 @@ public class ZipUtils {
    * @return the byte[]
    */
   public byte[] zipSchema(List<DesignDataset> designs, List<DataSetSchema> schemas,
-      Long dataflowId) {
+                          Long dataflowId) {
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     Map<String, String> schemaNames = new HashMap<>();
@@ -173,8 +167,8 @@ public class ZipUtils {
 
         // Put the datasetSchemaId and the dataset name into a map to store later in the zip file
         DesignDataset design = designs.stream()
-            .filter(d -> d.getDatasetSchema().equals(schema.getIdDataSetSchema().toString()))
-            .findFirst().orElse(new DesignDataset());
+                .filter(d -> d.getDatasetSchema().equals(schema.getIdDataSetSchema().toString()))
+                .findFirst().orElse(new DesignDataset());
         schemaNames.put(schema.getIdDataSetSchema().toString(), design.getDataSetName());
         schemaDatasetsId.put(schema.getIdDataSetSchema().toString(), design.getId());
 
@@ -201,7 +195,7 @@ public class ZipUtils {
 
 
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in zipSchema for dataflowId {}. Message: {}", dataflowId , e.getMessage());
+      LOG.error("Unexpected error! Error in zipSchema for dataflowId {}. Message: {}", dataflowId , e.getMessage());
     }
     return bos.toByteArray();
 
@@ -217,7 +211,7 @@ public class ZipUtils {
    * @return the byte[]
    */
   public byte[] zipArrayListFieldSchemas(List<byte[]> listBytes, Long datasetId,
-      List<String> tableNames) {
+                                         List<String> tableNames) {
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     try (ZipOutputStream zos = new ZipOutputStream(bos)) {
@@ -230,8 +224,8 @@ public class ZipUtils {
       }
 
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in zipArrayListFieldSchemas from the dataset {} to a ZIP file. Message {}",
-          datasetId, e.getMessage(), e);
+      LOG.error("Unexpected error! Error in zipArrayListFieldSchemas from the dataset {} to a ZIP file. Message {}",
+              datasetId, e.getMessage(), e);
     }
     return bos.toByteArray();
   }
@@ -261,9 +255,9 @@ public class ZipUtils {
       InputStream schemaStream = new ByteArrayInputStream(objectMapper.writeValueAsBytes(schema));
       zippingClasses(zos, nameFile, schemaStream);
     } catch (IOException e) {
-      LOG_ERROR.error(
-          "Error exporting the schema of the dataflow {} with datasetSchemaId {} into the zip. {}",
-          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
+      LOG.error(
+              "Error exporting the schema of the dataflow {} with datasetSchemaId {} into the zip. {}",
+              schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -277,7 +271,7 @@ public class ZipUtils {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void zippingClasses(ZipOutputStream zos, String fileName, InputStream stream)
-      throws IOException {
+          throws IOException {
     ZipEntry zeSchem = new ZipEntry(fileName);
     zos.putNextEntry(zeSchem);
 
@@ -299,13 +293,13 @@ public class ZipUtils {
       ObjectMapper objectMapperRules = new ObjectMapper();
       String nameFileRules = fileName + ".qcrules";
       InputStream rulesStream =
-          new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(rules));
+              new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(rules));
       zippingClasses(zos, nameFileRules, rulesStream);
 
     } catch (IOException e) {
-      LOG_ERROR.error(
-          "Error exporting the qcRules of the dataflow {} with datasetSchemaId {} into the zip. {}",
-          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
+      LOG.error(
+              "Error exporting the qcRules of the dataflow {} with datasetSchemaId {} into the zip. {}",
+              schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -319,16 +313,16 @@ public class ZipUtils {
   private void zipUniqueClasses(DataSetSchema schema, ZipOutputStream zos, String fileName) {
     try {
       List<UniqueConstraintSchema> listUnique =
-          uniqueConstraintRepository.findByDatasetSchemaId(schema.getIdDataSetSchema());
+              uniqueConstraintRepository.findByDatasetSchemaId(schema.getIdDataSetSchema());
       ObjectMapper objectMapperUnique = new ObjectMapper();
       String nameFileUnique = fileName + ".unique";
       InputStream uniqueStream =
-          new ByteArrayInputStream(objectMapperUnique.writeValueAsBytes(listUnique));
+              new ByteArrayInputStream(objectMapperUnique.writeValueAsBytes(listUnique));
       zippingClasses(zos, nameFileUnique, uniqueStream);
     } catch (IOException e) {
-      LOG_ERROR.error(
-          "Error exporting the unique rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
-          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
+      LOG.error(
+              "Error exporting the unique rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
+              schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -342,17 +336,17 @@ public class ZipUtils {
   private void zipIntegrityClasses(DataSetSchema schema, ZipOutputStream zos, String fileName) {
     try {
       List<IntegrityVO> listIntegrity = rulesControllerZuul
-          .getIntegrityRulesByDatasetSchemaId(schema.getIdDataSetSchema().toString());
+              .getIntegrityRulesByDatasetSchemaId(schema.getIdDataSetSchema().toString());
       ObjectMapper objectMapperIntegrity = new ObjectMapper();
       String nameFileIntegrity = fileName + ".integrity";
       InputStream integrityStream =
-          new ByteArrayInputStream(objectMapperIntegrity.writeValueAsBytes(listIntegrity));
+              new ByteArrayInputStream(objectMapperIntegrity.writeValueAsBytes(listIntegrity));
       zippingClasses(zos, nameFileIntegrity, integrityStream);
 
     } catch (IOException e) {
-      LOG_ERROR.error(
-          "Error exporting the integrity rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
-          schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
+      LOG.error(
+              "Error exporting the integrity rules of the dataflow {} with datasetSchemaId {} into the zip. {}",
+              schema.getIdDataFlow(), schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -365,7 +359,7 @@ public class ZipUtils {
    * @param fileName the file name
    */
   private void zipExternalIntegrationClasses(DataSetSchema schema, Long dataflowId,
-      ZipOutputStream zos, String fileName) {
+                                             ZipOutputStream zos, String fileName) {
     try {
       IntegrationVO integration = new IntegrationVO();
       Map<String, String> internalParameters = new HashMap<>();
@@ -373,17 +367,17 @@ public class ZipUtils {
       internalParameters.put("datasetSchemaId", schema.getIdDataSetSchema().toString());
       integration.setInternalParameters(internalParameters);
       List<IntegrationVO> extIntegrations =
-          integrationController.findAllIntegrationsByCriteria(integration);
+              integrationController.findAllIntegrationsByCriteria(integration);
       ObjectMapper objectMapperIntegration = new ObjectMapper();
       InputStream extIntegrationStream =
-          new ByteArrayInputStream(objectMapperIntegration.writeValueAsBytes(extIntegrations));
+              new ByteArrayInputStream(objectMapperIntegration.writeValueAsBytes(extIntegrations));
       String nameFileExtIntegrations = fileName + ".extintegrations";
       zippingClasses(zos, nameFileExtIntegrations, extIntegrationStream);
 
     } catch (IOException e) {
-      LOG_ERROR.error(
-          "Error exporting the external integrations of the dataflow {} with datasetSchemaId {} into the zip. {}",
-          dataflowId, schema.getIdDataSetSchema(), e.getMessage(), e);
+      LOG.error(
+              "Error exporting the external integrations of the dataflow {} with datasetSchemaId {} into the zip. {}",
+              dataflowId, schema.getIdDataSetSchema(), e.getMessage(), e);
     }
   }
 
@@ -398,10 +392,10 @@ public class ZipUtils {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       InputStream schemaNamesStream =
-          new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaNames));
+              new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaNames));
       zippingClasses(zos, "datasetSchemaNames.names", schemaNamesStream);
     } catch (IOException e) {
-      LOG_ERROR.error("Error exporting the dataset names into the zip. {}", e.getMessage(), e);
+      LOG.error("Error exporting the dataset names into the zip. {}", e.getMessage(), e);
     }
   }
 
@@ -415,10 +409,10 @@ public class ZipUtils {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       InputStream schemaDatasetsIdsStream =
-          new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaDatasetsId));
+              new ByteArrayInputStream(objectMapper.writeValueAsBytes(schemaDatasetsId));
       zippingClasses(zos, "datasetSchemaIds.ids", schemaDatasetsIdsStream);
     } catch (IOException e) {
-      LOG_ERROR.error("Error exporting the dataset ids into the zip. {}", e.getMessage(), e);
+      LOG.error("Error exporting the dataset ids into the zip. {}", e.getMessage(), e);
     }
   }
 
@@ -432,7 +426,7 @@ public class ZipUtils {
    * @return the list
    */
   private List<DataSetSchema> unzippingSchemaClasses(ZipInputStream zip,
-      List<DataSetSchema> schemas) {
+                                                     List<DataSetSchema> schemas) {
 
     try {
       byte[] content = IOUtils.toByteArray(zip);
@@ -443,8 +437,8 @@ public class ZipUtils {
         schemas.add(schema);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error unzipping the schemas classes during the import process. Message {}",
-          e.getMessage(), e);
+      LOG.error("Error unzipping the schemas classes during the import process. Message {}",
+              e.getMessage(), e);
     }
     return schemas;
   }
@@ -465,8 +459,8 @@ public class ZipUtils {
         qcrulesBytes.add(content);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error unzipping the qcrules during the import process. Message {}",
-          e.getMessage(), e);
+      LOG.error("Error unzipping the qcrules during the import process. Message {}",
+              e.getMessage(), e);
     }
     return qcrulesBytes;
   }
@@ -480,18 +474,18 @@ public class ZipUtils {
    * @return the list
    */
   private List<UniqueConstraintSchema> unzippingUniqueClasses(ZipInputStream zip,
-      List<UniqueConstraintSchema> uniques) {
+                                                              List<UniqueConstraintSchema> uniques) {
     try {
       byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         uniques
-            .addAll(Arrays.asList(objectMapper.readValue(content, UniqueConstraintSchema[].class)));
+                .addAll(Arrays.asList(objectMapper.readValue(content, UniqueConstraintSchema[].class)));
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error unzipping the unique rules during the import process. Message {}",
-          e.getMessage(), e);
+      LOG.error("Error unzipping the unique rules during the import process. Message {}",
+              e.getMessage(), e);
     }
     return uniques;
   }
@@ -506,7 +500,7 @@ public class ZipUtils {
    * @return the map
    */
   private Map<String, String> unzippingDatasetNamesClasses(ZipInputStream zip,
-      Map<String, String> schemaNames) {
+                                                           Map<String, String> schemaNames) {
     try {
       byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
@@ -515,8 +509,8 @@ public class ZipUtils {
         schemaNames = objectMapper.readValue(content, Map.class);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error unzipping the dataset names during the import process. Message {}",
-          e.getMessage(), e);
+      LOG.error("Error unzipping the dataset names during the import process. Message {}",
+              e.getMessage(), e);
     }
     return schemaNames;
   }
@@ -531,7 +525,7 @@ public class ZipUtils {
    * @return the map
    */
   private Map<String, Long> unzippingDatasetIdsClasses(ZipInputStream zip,
-      Map<String, Long> schemaIds) {
+                                                       Map<String, Long> schemaIds) {
     try {
       byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
@@ -540,8 +534,8 @@ public class ZipUtils {
         schemaIds = objectMapper.readValue(content, Map.class);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error unzipping the dataset ids during the import process. Message {}",
-          e.getMessage(), e);
+      LOG.error("Error unzipping the dataset ids during the import process. Message {}",
+              e.getMessage(), e);
     }
     return schemaIds;
   }
@@ -556,19 +550,19 @@ public class ZipUtils {
    * @return the list
    */
   private List<IntegrationVO> unzippingExtIntegrationsClasses(ZipInputStream zip,
-      List<IntegrationVO> extIntegrations) {
+                                                              List<IntegrationVO> extIntegrations) {
     try {
       byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         extIntegrations
-            .addAll(Arrays.asList(objectMapper.readValue(content, IntegrationVO[].class)));
+                .addAll(Arrays.asList(objectMapper.readValue(content, IntegrationVO[].class)));
       }
     } catch (Exception e) {
-      LOG_ERROR.error(
-          "Error unzipping the external integrations during the import process. Message {}",
-          e.getMessage(), e);
+      LOG.error(
+              "Error unzipping the external integrations during the import process. Message {}",
+              e.getMessage(), e);
     }
     return extIntegrations;
   }
@@ -582,7 +576,7 @@ public class ZipUtils {
    * @return the list
    */
   private List<IntegrityVO> unzippingIntegrityQcClasses(ZipInputStream zip,
-      List<IntegrityVO> integrities) {
+                                                        List<IntegrityVO> integrities) {
     try {
       byte[] content = IOUtils.toByteArray(zip);
       if (content != null && content.length > 0) {
@@ -591,11 +585,9 @@ public class ZipUtils {
         integrities.addAll(Arrays.asList(objectMapper.readValue(content, IntegrityVO[].class)));
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error unzipping the integration rules during the import process. Message {}",
-          e.getMessage(), e);
+      LOG.error("Error unzipping the integration rules during the import process. Message {}",
+              e.getMessage(), e);
     }
     return integrities;
   }
-
-
 }

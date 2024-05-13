@@ -101,10 +101,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DataschemaServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The time to wait before continue copy.
@@ -315,7 +311,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       dataSetSchema.setReferenceDataset(true);
     }
     if (dataflow != null && (TypeDataflowEnum.REPORTING.equals(dataflow.getType())
-        || TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflow.getType()))) {
+            || TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflow.getType()))) {
       dataSetSchema.setAvailableInPublic(true);
     }
 
@@ -323,7 +319,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     schemasRepository.updateDatasetSchemaWebForm(idDataSetSchema.toString(), new Webform());
     // create the rules schema
     rulesControllerZuul.createEmptyRulesSchema(idDataSetSchema.toString(),
-        new ObjectId().toString());
+            new ObjectId().toString());
 
     LOG.info("Empty dataset schema created with id {} for dataflowId {}", idDataSetSchema, dataflowId);
 
@@ -340,7 +336,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void deleteGroup(Long datasetId, ResourceTypeEnum resourceTypeEnum) {
     // We find all types of data of this schema and delete it
     List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
-        .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
+            .getGroupsByIdResourceType(datasetId, ResourceTypeEnum.DATA_SCHEMA);
     resourceManagementControllerZull.deleteResource(resourceCustodian);
     LOG.info("Deleted group for datasetId {}", datasetId);
   }
@@ -379,15 +375,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public DataSetSchemaVO getDataSchemaByDatasetId(Boolean addRules, Long datasetId)
-      throws EEAException {
+          throws EEAException {
 
     DataSetMetabase metabase = obtainDatasetMetabase(datasetId);
     DataSetSchema dataschema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(metabase.getDatasetSchema()));
+            schemasRepository.findByIdDataSetSchema(new ObjectId(metabase.getDatasetSchema()));
     LOG.info("Schema retrived by datasetId {}", datasetId);
     DataSetSchemaVO dataschemaVO =
-        Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
-            : noRulesDataSchemaMapper.entityToClass(dataschema);
+            Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
+                    : noRulesDataSchemaMapper.entityToClass(dataschema);
     setNameSchema(metabase.getDatasetSchema(), dataschemaVO);
     return dataschemaVO;
 
@@ -401,7 +397,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void setNameSchema(String schemaId, DataSetSchemaVO dataschemaVO) {
     Optional<DesignDataset> designDataset =
-        designDatasetRepository.findFirstByDatasetSchema(schemaId);
+            designDatasetRepository.findFirstByDatasetSchema(schemaId);
     if (designDataset.isPresent()) {
       dataschemaVO.setNameDatasetSchema(designDataset.get().getDataSetName());
     }
@@ -432,7 +428,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private DataSetMetabase obtainDatasetMetabase(final Long datasetId) throws EEAException {
     final DataSetMetabase datasetMetabase =
-        dataSetMetabaseRepository.findById(datasetId).orElse(null);
+            dataSetMetabaseRepository.findById(datasetId).orElse(null);
     if (datasetMetabase == null) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -466,14 +462,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public TableSchema getTableSchema(String tableSchemaId, String datasetSchemaId) {
 
     DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+            schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     TableSchema tableSchema = null;
 
     if (null != datasetSchema && null != datasetSchema.getTableSchemas()
-        && ObjectId.isValid(tableSchemaId)) {
+            && ObjectId.isValid(tableSchemaId)) {
       ObjectId oid = new ObjectId(tableSchemaId);
       tableSchema = datasetSchema.getTableSchemas().stream()
-          .filter(ts -> oid.equals(ts.getIdTableSchema())).findFirst().orElse(null);
+              .filter(ts -> oid.equals(ts.getIdTableSchema())).findFirst().orElse(null);
     }
 
     return tableSchema;
@@ -490,13 +486,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   @Transactional
   public void replaceSchema(String idSchema, DataSetSchema schema, Long idDataset,
-      Long idSnapshot, String processId) {
+                            Long idSnapshot, String processId) {
     schemasRepository.deleteDatasetSchemaById(idSchema);
     schemasRepository.save(schema);
     // Call to recordstores to make the restoring of the dataset data (table, records and fields
     // values)
     recordStoreControllerZuul.restoreSnapshotData(idDataset, idSnapshot, 0L, DatasetTypeEnum.DESIGN,
-        true, true, false, processId);
+            true, true, false, processId);
   }
 
   /**
@@ -560,33 +556,36 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * Update table schema.
    *
    * @param datasetId the dataset id
-   * @param tableSchemaVO the table schema VO
+   * @param tableSchemaVO the table schema
+   * @param updateMaterializedViews the updateMaterializedViews
    *
    * @throws EEAException the EEA exception
    */
   @Override
-  public void updateTableSchema(Long datasetId, TableSchemaVO tableSchemaVO) throws EEAException {
+  public void updateTableSchema(Long datasetId, TableSchemaVO tableSchemaVO, Boolean updateMaterializedViews) throws EEAException {
 
     String datasetSchemaId = getDatasetSchemaId(datasetId);
 
     try {
       Document tableSchema =
-          schemasRepository.findTableSchema(datasetSchemaId, tableSchemaVO.getIdTableSchema());
+              schemasRepository.findTableSchema(datasetSchemaId, tableSchemaVO.getIdTableSchema());
 
       if (tableSchema != null) {
         tableSchemaAddAtributes(datasetId, tableSchemaVO, datasetSchemaId, tableSchema);
       } else {
         LOG.error("Table with schema {} from the datasetId {} not found",
-            tableSchemaVO.getIdTableSchema(), datasetId);
+                tableSchemaVO.getIdTableSchema(), datasetId);
         throw new EEAException(String.format(EEAErrorMessage.TABLE_NOT_FOUND,
-            tableSchemaVO.getIdTableSchema(), datasetId));
+                tableSchemaVO.getIdTableSchema(), datasetId));
       }
     } catch (IllegalArgumentException e) {
       throw new EEAException(e);
     }
 
-    releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
+    if(updateMaterializedViews) {
+      releaseCreateUpdateView(datasetId,
+              SecurityContextHolder.getContext().getAuthentication().getName(), false);
+    }
   }
 
   /**
@@ -600,7 +599,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private void tableSchemaAddAtributes(Long datasetId, TableSchemaVO tableSchemaVO,
-      String datasetSchemaId, Document tableSchema) throws EEAException {
+                                       String datasetSchemaId, Document tableSchema) throws EEAException {
     if (tableSchemaVO.getDescription() != null) {
       tableSchema.put("description", tableSchemaVO.getDescription());
     }
@@ -643,30 +642,30 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   @Transactional
   public void deleteTableSchema(String datasetSchemaId, String tableSchemaId, Long datasetId)
-      throws EEAException {
+          throws EEAException {
     TableSchema tableSchema = getTableSchema(tableSchemaId, datasetSchemaId);
     if (tableSchema == null) {
       LOG.error("Table with schema {} from the datasetId {} not found", tableSchemaId, datasetId);
       throw new EEAException(
-          String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaId, datasetId));
+              String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaId, datasetId));
     }
     // when we delete a table we need to delete all rules of this table, we mean, rules of the
     // records fields, etc
     Document recordSchemadocument =
-        schemasRepository.findRecordSchema(datasetSchemaId, tableSchemaId);
+            schemasRepository.findRecordSchema(datasetSchemaId, tableSchemaId);
     // if the table havent got any record he hasnt any document too
     if (null != recordSchemadocument) {
       List<?> fieldSchemasList = (ArrayList<?>) recordSchemadocument.get(FIELDSCHEMAS);
       fieldSchemasList.stream().forEach(document -> {
         rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId,
-            ((Document) document).get("_id").toString());
+                ((Document) document).get("_id").toString());
         // we delete the ruleIntegrity for each fields that we have in this table
         // document.
         rulesControllerZuul.deleteDatasetRuleAndIntegrityByFieldSchemaId(
-            ((Document) document).get("_id").toString(), datasetId);
+                ((Document) document).get("_id").toString(), datasetId);
       });
       rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId,
-          recordSchemadocument.get("_id").toString());
+              recordSchemadocument.get("_id").toString());
     }
 
     schemasRepository.deleteTableSchemaById(tableSchemaId);
@@ -692,12 +691,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public Boolean orderTableSchema(String datasetSchemaId, String tableSchemaId, Integer position)
-      throws EEAException {
+          throws EEAException {
     Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
     if (tableSchema != null) {
       schemasRepository.deleteTableSchemaById(tableSchemaId);
       return schemasRepository.insertTableInPosition(datasetSchemaId, tableSchema, position)
-          .getModifiedCount() == 1;
+              .getModifiedCount() == 1;
     }
     return false;
   }
@@ -714,14 +713,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public String createFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO)
-      throws EEAException {
+          throws EEAException {
 
     // we check if the field name already exist in schema
     if (checkIfFieldNameAlreadyExist(datasetSchemaId, fieldSchemaVO)) {
       LOG.error(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, fieldSchemaVO.getName(),
-          fieldSchemaVO.getIdRecord(), datasetSchemaId));
+              fieldSchemaVO.getIdRecord(), datasetSchemaId));
       throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED,
-          fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
+              fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
     }
 
     try {
@@ -730,7 +729,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (fieldSchemaVO.getReferencedField() != null) {
         // We need to update the fieldSchema is referenced, the property isPKreferenced to true
         updateIsPkReferencedInFieldSchema(fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
-            fieldSchemaVO.getReferencedField().getIdPk(), true);
+                fieldSchemaVO.getReferencedField().getIdPk(), true);
       }
       if (null == fieldSchemaVO.getReadOnly()) {
         fieldSchemaVO.setReadOnly(false);
@@ -738,7 +737,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // we create this if to clean blank space at begining and end of any codelistItem
       // n codelist and multiselect
       if (fieldSchemaVO.getCodelistItems() != null
-          && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+              && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
               || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
         String[] codelistItems = fieldSchemaVO.getCodelistItems();
         for (int i = 0; i < codelistItems.length; i++) {
@@ -754,7 +753,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         fieldSchemaVO.setValidExtensions(validExtensions);
       }
       if (fieldSchemaVO.getMaxSize() == null || fieldSchemaVO.getMaxSize() == 0
-          || fieldSchemaVO.getMaxSize() > 100) {
+              || fieldSchemaVO.getMaxSize() > 100) {
         fieldSchemaVO.setMaxSize(100f);
       }
 
@@ -763,8 +762,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
 
       return schemasRepository
-          .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
-          .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
+              .createFieldSchema(datasetSchemaId, fieldSchemaNoRulesMapper.classToEntity(fieldSchemaVO))
+              .getModifiedCount() == 1 ? fieldSchemaVO.getId() : "";
     } catch (IllegalArgumentException e) {
       throw new EEAException(e.getMessage());
     }
@@ -782,21 +781,21 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public DataType updateFieldSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
-      Long datasetId, boolean cloningOrImporting) throws EEAException {
+                                    Long datasetId, boolean cloningOrImporting) throws EEAException {
 
     // we check if the field name already exist in schema
     if (null != fieldSchemaVO.getName()
-        && checkIfFieldNameAlreadyExist(datasetSchemaId, fieldSchemaVO)) {
+            && checkIfFieldNameAlreadyExist(datasetSchemaId, fieldSchemaVO)) {
       LOG.error(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED, fieldSchemaVO.getName(),
-          fieldSchemaVO.getIdRecord(), datasetSchemaId));
+              fieldSchemaVO.getIdRecord(), datasetSchemaId));
       throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_DUPLICATED,
-          fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
+              fieldSchemaVO.getName(), fieldSchemaVO.getIdRecord(), datasetSchemaId));
     }
     boolean typeModified = false;
     try {
       // Retrieve the FieldSchema from MongoDB
       Document fieldSchema =
-          schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+              schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
       if (fieldSchema != null) {
         // First of all, we update the previous data in the catalog
         updatePreviousDataInCatalog(fieldSchema, datasetId, cloningOrImporting);
@@ -809,7 +808,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         // Save the modified FieldSchema in the MongoDB
         UpdateResult updateResult =
-            schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
+                schemasRepository.updateFieldSchema(datasetSchemaId, fieldSchema);
         if (updateResult.getMatchedCount() == 1) {
           if (updateResult.getModifiedCount() == 1 && typeModified) {
             return fieldSchemaVO.getType();
@@ -836,7 +835,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private boolean modifySchemaInUpdate(FieldSchemaVO fieldSchemaVO, boolean typeModified,
-      Document fieldSchema) throws EEAException {
+                                       Document fieldSchema) throws EEAException {
     // Modify it based on FieldSchemaVO data received
     typeModified = modifyIsTrueAndCodeListConstants(fieldSchemaVO, typeModified, fieldSchema);
     if (fieldSchemaVO.getDescription() != null) {
@@ -854,7 +853,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     pkFieldSchemaValues(fieldSchemaVO, fieldSchema);
     Float size = 100f;
     if (fieldSchemaVO.getMaxSize() != null && fieldSchemaVO.getMaxSize() != 0
-        && fieldSchemaVO.getMaxSize() < 100) {
+            && fieldSchemaVO.getMaxSize() < 100) {
       size = fieldSchemaVO.getMaxSize();
     }
     fieldSchema.put("maxSize", size);
@@ -868,16 +867,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     modifyValidExtensions(fieldSchemaVO, fieldSchema);
     if (fieldSchemaVO.getReferencedField() != null && (DataType.LINK.equals(fieldSchemaVO.getType())
-        || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
+            || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
       ReferencedFieldSchemaVO referencedField = fieldSchemaVO.getReferencedField();
       Document referenced = fillReferencedDocument(referencedField);
       fieldSchema.put(LiteralConstants.REFERENCED_FIELD, referenced);
       // We need to update the fieldSchema that is referenced, the property isPKreferenced to
       // true
       updateIsPkReferencedInFieldSchema(referencedField.getIdDatasetSchema(),
-          referencedField.getIdPk(), true);
+              referencedField.getIdPk(), true);
     } else if (fieldSchema.get(LiteralConstants.REFERENCED_FIELD) != null
-        && !(DataType.LINK.equals(fieldSchemaVO.getType())
+            && !(DataType.LINK.equals(fieldSchemaVO.getType())
             || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
       // If the field is not a Link type, delete the referenced field to avoid problems
       fieldSchema.put(LiteralConstants.REFERENCED_FIELD, null);
@@ -895,7 +894,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private Document fillReferencedDocument(ReferencedFieldSchemaVO referencedField) {
     Document referenced = new Document();
     referenced.put(LiteralConstants.ID_DATASET_SCHEMA,
-        new ObjectId(referencedField.getIdDatasetSchema()));
+            new ObjectId(referencedField.getIdDatasetSchema()));
     referenced.put("idPk", new ObjectId(referencedField.getIdPk()));
     if (StringUtils.isNotBlank(referencedField.getLabelId())) {
       referenced.put("labelId", new ObjectId(referencedField.getLabelId()));
@@ -904,13 +903,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     if (StringUtils.isNotBlank(referencedField.getLinkedConditionalFieldId())) {
       referenced.put("linkedConditionalFieldId",
-          new ObjectId(referencedField.getLinkedConditionalFieldId()));
+              new ObjectId(referencedField.getLinkedConditionalFieldId()));
     } else {
       referenced.put("linkedConditionalFieldId", null);
     }
     if (StringUtils.isNotBlank(referencedField.getMasterConditionalFieldId())) {
       referenced.put("masterConditionalFieldId",
-          new ObjectId(referencedField.getMasterConditionalFieldId()));
+              new ObjectId(referencedField.getMasterConditionalFieldId()));
     } else {
       referenced.put("masterConditionalFieldId", null);
     }
@@ -958,9 +957,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return true, if successful
    */
   private boolean modifiedCodelist(FieldSchemaVO fieldSchemaVO, boolean typeModified,
-      Document fieldSchema) {
+                                   Document fieldSchema) {
     if (fieldSchemaVO.getCodelistItems() != null
-        && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
+            && (DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
             || DataType.CODELIST.equals(fieldSchemaVO.getType()))) {
       // we clean blank space in codelist and multiselect
       String[] codelistItems = fieldSchemaVO.getCodelistItems();
@@ -1001,14 +1000,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return true, if successful
    */
   private boolean modifyIsTrueAndCodeListConstants(FieldSchemaVO fieldSchemaVO,
-      boolean typeModified, Document fieldSchema) {
+                                                   boolean typeModified, Document fieldSchema) {
     if (fieldSchemaVO.getType() != null
-        && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
+            && !fieldSchema.put(LiteralConstants.TYPE_DATA, fieldSchemaVO.getType().getValue())
             .equals(fieldSchemaVO.getType().getValue())) {
       typeModified = true;
       if (!(DataType.MULTISELECT_CODELIST.equals(fieldSchemaVO.getType())
-          || DataType.CODELIST.equals(fieldSchemaVO.getType()))
-          && fieldSchema.containsKey(LiteralConstants.CODELIST_ITEMS)) {
+              || DataType.CODELIST.equals(fieldSchemaVO.getType()))
+              && fieldSchema.containsKey(LiteralConstants.CODELIST_ITEMS)) {
         fieldSchema.remove(LiteralConstants.CODELIST_ITEMS);
       }
     }
@@ -1025,7 +1024,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private void updateUniqueConstraints(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
-      Document fieldSchema) throws EEAException {
+                                       Document fieldSchema) throws EEAException {
     if (fieldSchemaVO.getPk() != fieldSchema.get(LiteralConstants.PK)) {
       if (Boolean.TRUE.equals(fieldSchemaVO.getPk())) {
         if (null == fieldSchemaVO.getIdRecord()) {
@@ -1047,16 +1046,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private void updatePreviousDataInCatalog(Document fieldSchema, Long datasetId,
-      boolean cloningOrImporting) throws EEAException {
+                                           boolean cloningOrImporting) throws EEAException {
     if (DataType.LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
-        || DataType.EXTERNAL_LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
+            || DataType.EXTERNAL_LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))) {
       // Proceed to the changes needed. Remove the previous reference
       Document previousReferenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
       if (previousReferenced != null && previousReferenced.get("idPk") != null) {
         String previousId = fieldSchema.get("_id").toString();
         String previousIdPk = previousReferenced.get("idPk").toString();
         String previousIdDatasetReferenced =
-            previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
+                previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
         PkCatalogueSchema catalogue = pkCatalogueRepository.findByIdPk(new ObjectId(previousIdPk));
         if (catalogue != null) {
           catalogue.getReferenced().remove(new ObjectId(previousId));
@@ -1074,11 +1073,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           if (!cloningOrImporting && previousReferenced.get("dataflowId") != null) {
             Long dataflowId = Long.valueOf(previousReferenced.get("dataflowId").toString());
             DataflowReferencedSchema dataflowReferenced =
-                dataflowReferencedRepository.findByDataflowId(dataflowId);
+                    dataflowReferencedRepository.findByDataflowId(dataflowId);
             if (null != dataflowReferenced
-                && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+                    && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
               dataflowReferenced.getReferencedByDataflow()
-                  .remove(datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+                      .remove(datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
               dataflowReferencedRepository.deleteByDataflowId(dataflowId);
               if (!dataflowReferenced.getReferencedByDataflow().isEmpty()) {
                 dataflowReferencedRepository.save(dataflowReferenced);
@@ -1104,7 +1103,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public boolean deleteFieldSchema(String datasetSchemaId, String fieldSchemaId, Long datasetId)
-      throws EEAException {
+          throws EEAException {
 
     // now we find if we have any record rule related with that fieldSchema to delete it
     rulesControllerZuul.deleteRuleHighLevelLike(datasetSchemaId, fieldSchemaId);
@@ -1114,7 +1113,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     rulesControllerZuul.deleteDatasetRuleAndIntegrityByFieldSchemaId(fieldSchemaId, datasetId);
 
     return schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId)
-        .getModifiedCount() == 1;
+            .getModifiedCount() == 1;
   }
 
 
@@ -1131,12 +1130,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public Boolean orderFieldSchema(String datasetSchemaId, String fieldSchemaId, Integer position)
-      throws EEAException {
+          throws EEAException {
     Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
     if (fieldSchema != null) {
       schemasRepository.deleteFieldSchema(datasetSchemaId, fieldSchemaId);
       return schemasRepository.insertFieldInPosition(datasetSchemaId, fieldSchema, position)
-          .getModifiedCount() == 1;
+              .getModifiedCount() == 1;
     }
     return false;
   }
@@ -1212,52 +1211,52 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void propagateRulesAfterUpdateSchema(String datasetSchemaId, FieldSchemaVO fieldSchemaVO,
-      DataType type, Long datasetId) {
+                                              DataType type, Long datasetId) {
 
     if (type != null) {
       // if we change the type we need to delete all rules
       rulesControllerZuul.deleteAutomaticRuleByReferenceId(datasetSchemaId, fieldSchemaVO.getId());
       // Delete FK Rules
       rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
-          fieldSchemaVO.getId());
+              fieldSchemaVO.getId());
 
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(), type,
-            EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
+                EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
       }
 
       rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-          fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
+              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       // update the dataset field value
       TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
       datasetService.updateFieldValueType(datasetId, fieldSchemaVO.getId(), type);
 
       releaseCreateUpdateView(datasetId,
-          SecurityContextHolder.getContext().getAuthentication().getName(), false);
+              SecurityContextHolder.getContext().getAuthentication().getName(), false);
 
     } else {
       if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
         if (!rulesControllerZuul.existsRuleRequired(datasetSchemaId, fieldSchemaVO.getId())) {
           rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-              fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
+                  fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.TRUE);
         }
       } else {
         rulesControllerZuul.deleteRuleRequired(datasetSchemaId, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType());
+                fieldSchemaVO.getType());
       }
       // If the type is Link, delete and create again the rule, the field pkMustBeUsed maybe has
       // changed
       if (DataType.LINK.equals(fieldSchemaVO.getType())
-          || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
+              || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
         // Delete previous fk rule and insert it again
         rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
-            fieldSchemaVO.getId());
+                fieldSchemaVO.getId());
         rulesControllerZuul.createAutomaticRule(datasetSchemaId, fieldSchemaVO.getId(),
-            fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
+                fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId, Boolean.FALSE);
       }
 
       releaseCreateUpdateView(datasetId,
-          SecurityContextHolder.getContext().getAuthentication().getName(), false);
+              SecurityContextHolder.getContext().getAuthentication().getName(), false);
     }
 
 
@@ -1283,8 +1282,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         TableSchemaVO table = null;
         for (TableSchemaVO tableVO : schema.getTableSchemas()) {
           if (tableVO.getRecordSchema() != null
-              && tableVO.getRecordSchema().getFieldSchema() != null
-              && tableVO.getRecordSchema().getFieldSchema().stream()
+                  && tableVO.getRecordSchema().getFieldSchema() != null
+                  && tableVO.getRecordSchema().getFieldSchema().stream()
                   .anyMatch(field -> field.getId().equals(fieldSchemaVO.getId()))) {
             table = tableVO;
             break;
@@ -1314,7 +1313,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     for (FieldSchemaVO field : table.getRecordSchema().getFieldSchema()) {
       if (field.getPk() != null && field.getPk() && !field.getId().equals(fieldSchemaVO.getId())) {
         allow = false;
-        LOG_ERROR.error("There is actually an existing PK on the table. Update denied");
+        LOG.error("There is actually an existing PK on the table. Update denied");
       }
     }
     return allow;
@@ -1331,12 +1330,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private Boolean checkPkReferenced(FieldSchemaVO fieldSchemaVO, Boolean allow) {
     if (Boolean.FALSE.equals(fieldSchemaVO.getPk())) {
       PkCatalogueSchema catalogue =
-          pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
+              pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null && catalogue.getReferenced() != null
-          && !catalogue.getReferenced().isEmpty()) {
+              && !catalogue.getReferenced().isEmpty()) {
         allow = false;
-        LOG_ERROR.error(
-            "The PK the user is trying to delete is being referenced by a FK. Update denied");
+        LOG.error(
+                "The PK the user is trying to delete is being referenced by a FK. Update denied");
       }
     }
     return allow;
@@ -1356,9 +1355,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
       PkCatalogueSchema catalogue =
-          pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
+              pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null && catalogue.getReferenced() != null
-          && !catalogue.getReferenced().isEmpty()) {
+              && !catalogue.getReferenced().isEmpty()) {
         isReferenced = true;
       }
 
@@ -1382,7 +1381,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (null != schema && null != schema.getTableSchemas() && !schema.getTableSchemas().isEmpty()) {
       for (TableSchemaVO tableVO : schema.getTableSchemas()) {
         if (tableVO.getRecordSchema() != null
-            && tableVO.getRecordSchema().getFieldSchema() != null) {
+                && tableVO.getRecordSchema().getFieldSchema() != null) {
           for (FieldSchemaVO field : tableVO.getRecordSchema().getFieldSchema()) {
             allow = fieldAllowedForDeletion(idDatasetSchema, allow, field);
           }
@@ -1402,15 +1401,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the boolean
    */
   private Boolean fieldAllowedForDeletion(String idDatasetSchema, Boolean allow,
-      FieldSchemaVO field) {
+                                          FieldSchemaVO field) {
     if (field.getPk() != null && field.getPk() && field.getPkReferenced() != null
-        && Boolean.TRUE.equals(field.getPkReferenced())) {
+            && Boolean.TRUE.equals(field.getPkReferenced())) {
       PkCatalogueSchema catalogue = pkCatalogueRepository.findByIdPk(new ObjectId(field.getId()));
       if (catalogue != null && catalogue.getReferenced() != null
-          && !catalogue.getReferenced().isEmpty()) {
+              && !catalogue.getReferenced().isEmpty()) {
         for (ObjectId referenced : catalogue.getReferenced()) {
           Document fieldSchema =
-              schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
+                  schemasRepository.findFieldSchema(idDatasetSchema, referenced.toString());
           if (fieldSchema == null) {
             allow = false;
           }
@@ -1431,14 +1430,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public void addToPkCatalogue(FieldSchemaVO fieldSchemaVO, Long datasetId) {
 
     if (fieldSchemaVO.getReferencedField() != null && (DataType.LINK.equals(fieldSchemaVO.getType())
-        || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
+            || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
-          .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+              .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
 
       if (catalogue != null && catalogue.getIdPk() != null) {
         catalogue.getReferenced().add(new ObjectId(fieldSchemaVO.getId()));
         pkCatalogueRepository
-            .deleteByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+                .deleteByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
       } else {
         catalogue = new PkCatalogueSchema();
         catalogue.setIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
@@ -1450,14 +1449,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // insert the dataflow referenced from external link into the DataflowReferenced collection
       if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
         DataflowReferencedSchema dataflowReferenced = dataflowReferencedRepository
-            .findByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+                .findByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
         if (dataflowReferenced != null) {
           if (null == dataflowReferenced.getReferencedByDataflow()) {
             dataflowReferenced.setReferencedByDataflow(new ArrayList<>());
           }
           dataflowReferenced.getReferencedByDataflow().add(dataflowId);
           dataflowReferencedRepository
-              .deleteByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+                  .deleteByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
         } else {
           dataflowReferenced = new DataflowReferencedSchema();
           dataflowReferenced.setDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
@@ -1479,32 +1478,32 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void deleteFromPkCatalogue(FieldSchemaVO fieldSchemaVO, Long datasetId)
-      throws EEAException {
+          throws EEAException {
     // For fielSchemas that are PK
     if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
       PkCatalogueSchema catalogue =
-          pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
+              pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaVO.getId()));
       if (catalogue != null) {
         pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
       }
     }
     // For fieldSchemas that are FK
     if ((DataType.LINK.equals(fieldSchemaVO.getType())
-        || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))
-        && fieldSchemaVO.getReferencedField() != null) {
+            || DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType()))
+            && fieldSchemaVO.getReferencedField() != null) {
       PkCatalogueSchema catalogue = pkCatalogueRepository
-          .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
+              .findByIdPk(new ObjectId(fieldSchemaVO.getReferencedField().getIdPk()));
       if (catalogue != null) {
         catalogue.getReferenced().remove(new ObjectId(fieldSchemaVO.getId()));
         if (fieldSchemaVO.getReferencedField().getDataflowId() != null) {
           DataflowReferencedSchema dataflowReferenced = dataflowReferencedRepository
-              .findByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+                  .findByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
           if (null != dataflowReferenced
-              && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
+                  && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
             dataflowReferenced.getReferencedByDataflow()
-                .remove(datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+                    .remove(datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
             dataflowReferencedRepository
-                .deleteByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
+                    .deleteByDataflowId(fieldSchemaVO.getReferencedField().getDataflowId());
             if (!dataflowReferenced.getReferencedByDataflow().isEmpty()) {
               dataflowReferencedRepository.save(dataflowReferenced);
             }
@@ -1516,8 +1515,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         // field that was FK
         if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
           this.updateIsPkReferencedInFieldSchema(
-              fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
-              fieldSchemaVO.getReferencedField().getIdPk(), false);
+                  fieldSchemaVO.getReferencedField().getIdDatasetSchema(),
+                  fieldSchemaVO.getReferencedField().getIdPk(), false);
         }
       }
     }
@@ -1534,14 +1533,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getReferencedField() != null) {
       if (DataType.LINK.equals(fieldSchemaVO.getType())) {
         datasetMetabaseService.addForeignRelation(idDatasetOrigin,
-            this.getDesignDatasetIdDestinationFromFk(
-                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+                this.getDesignDatasetIdDestinationFromFk(
+                        fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+                fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
       } else if (DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
         datasetMetabaseService.addForeignRelation(idDatasetOrigin,
-            this.getReferenceDatasetIdDestinationFromFk(
-                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+                this.getReferenceDatasetIdDestinationFromFk(
+                        fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+                fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
       }
     }
   }
@@ -1557,14 +1556,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getReferencedField() != null) {
       if (DataType.LINK.equals(fieldSchemaVO.getType())) {
         datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-            this.getDesignDatasetIdDestinationFromFk(
-                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+                this.getDesignDatasetIdDestinationFromFk(
+                        fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+                fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
       } else if (DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
         datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-            this.getReferenceDatasetIdDestinationFromFk(
-                fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
-            fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
+                this.getReferenceDatasetIdDestinationFromFk(
+                        fieldSchemaVO.getReferencedField().getIdDatasetSchema()),
+                fieldSchemaVO.getReferencedField().getIdPk(), fieldSchemaVO.getId());
       }
     }
   }
@@ -1578,32 +1577,32 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateForeignRelation(Long idDatasetOrigin, FieldSchemaVO fieldSchemaVO,
-      String datasetSchemaId) {
+                                    String datasetSchemaId) {
     Document fieldSchema =
-        schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+            schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
     if (fieldSchema != null && (DataType.LINK.getValue()
-        .equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
-        || DataType.EXTERNAL_LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA)))) {
+            .equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+            || DataType.EXTERNAL_LINK.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA)))) {
       // First of all, we delete the previous relation on the Metabase, if applies
       Document previousReferenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
       if (previousReferenced != null && previousReferenced.get("idPk") != null) {
         String previousIdPk = previousReferenced.get("idPk").toString();
         String previousIdDatasetReferenced =
-            previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
+                previousReferenced.get(LiteralConstants.ID_DATASET_SCHEMA).toString();
         if (DataType.LINK.equals(fieldSchemaVO.getType())) {
           datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-              this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
-              fieldSchemaVO.getId());
+                  this.getDesignDatasetIdDestinationFromFk(previousIdDatasetReferenced), previousIdPk,
+                  fieldSchemaVO.getId());
         } else if (DataType.EXTERNAL_LINK.equals(fieldSchemaVO.getType())) {
           datasetMetabaseService.deleteForeignRelation(idDatasetOrigin,
-              this.getReferenceDatasetIdDestinationFromFk(previousIdDatasetReferenced),
-              previousIdPk, fieldSchemaVO.getId());
+                  this.getReferenceDatasetIdDestinationFromFk(previousIdDatasetReferenced),
+                  previousIdPk, fieldSchemaVO.getId());
         }
       }
     }
     // If the type is Link, then we add the relation on the Metabase
     if (fieldSchemaVO.getType() != null
-        && (DataType.LINK.getValue().equals(fieldSchemaVO.getType().getValue())
+            && (DataType.LINK.getValue().equals(fieldSchemaVO.getType().getValue())
             || DataType.EXTERNAL_LINK.getValue().equals(fieldSchemaVO.getType().getValue()))) {
       this.addForeignRelation(idDatasetOrigin, fieldSchemaVO);
     }
@@ -1625,7 +1624,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaDoc != null) {
 
       JsonWriterSettings settings = JsonWriterSettings.builder()
-          .objectIdConverter((value, writer) -> writer.writeString(value.toString())).build();
+              .objectIdConverter((value, writer) -> writer.writeString(value.toString())).build();
 
       String json = fieldSchemaDoc.toJson(settings);
       ObjectMapper objectMapper = new ObjectMapper();
@@ -1635,7 +1634,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         FieldSchema schema = objectMapper.readValue(json, FieldSchema.class);
         fieldVO = fieldSchemaNoRulesMapper.entityToClass(schema);
       } catch (JsonProcessingException e) {
-        LOG_ERROR.error("Error getting the fieldSchemaVO {}", idFieldSchema);
+        LOG.error("Error getting the fieldSchemaVO {}", idFieldSchema);
       }
     }
     return fieldVO;
@@ -1653,7 +1652,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     Long datasetIdDestination = null;
 
     Optional<DesignDataset> designDataset =
-        designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema);
+            designDatasetRepository.findFirstByDatasetSchema(idDatasetSchema);
     if (designDataset.isPresent()) {
       datasetIdDestination = designDataset.get().getId();
     }
@@ -1671,7 +1670,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     Long datasetIdDestination = null;
 
     Optional<ReferenceDataset> referenceDataset =
-        referenceDatasetRepository.findFirstByDatasetSchema(idDatasetSchema);
+            referenceDatasetRepository.findFirstByDatasetSchema(idDatasetSchema);
     if (referenceDataset.isPresent()) {
       datasetIdDestination = referenceDataset.get().getId();
     }
@@ -1690,7 +1689,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updatePkCatalogueDeletingSchema(String idDatasetSchema, Long datasetId)
-      throws EEAException {
+          throws EEAException {
     Long dataflowId = datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId();
     Optional<DataSetSchema> dataschema = schemasRepository.findById(new ObjectId(idDatasetSchema));
     if (dataschema.isPresent()) {
@@ -1698,7 +1697,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
           if (field.getReferencedField() != null) {
             updateCatalogueDeleting(field,
-                datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+                    datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
             // also delete from the dataflow reference catalogue if the field it's an external link
             updateDataflowReferencedCatalogue(field, dataflowId);
           }
@@ -1717,7 +1716,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void updateCatalogueDeleting(FieldSchema field, Long dataflowId) throws EEAException {
     PkCatalogueSchema catalogue =
-        pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
+            pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
     if (catalogue != null) {
       catalogue.getReferenced().remove(field.getIdFieldSchema());
       pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
@@ -1726,8 +1725,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // only field that was FK
       if (catalogue.getReferenced() != null && catalogue.getReferenced().isEmpty()) {
         updateIsPkReferencedInFieldSchema(
-            field.getReferencedField().getIdDatasetSchema().toString(),
-            field.getReferencedField().getIdPk().toString(), false);
+                field.getReferencedField().getIdDatasetSchema().toString(),
+                field.getReferencedField().getIdPk().toString(), false);
         pkCatalogueRepository.deleteByIdPk(catalogue.getIdPk());
       }
 
@@ -1745,9 +1744,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void updateDataflowReferencedCatalogue(FieldSchema field, Long dataflowId) {
     if (DataType.EXTERNAL_LINK.equals(field.getType())
-        && field.getReferencedField().getDataflowId() != null) {
+            && field.getReferencedField().getDataflowId() != null) {
       DataflowReferencedSchema dataflowReferenced =
-          dataflowReferencedRepository.findByDataflowId(field.getReferencedField().getDataflowId());
+              dataflowReferencedRepository.findByDataflowId(field.getReferencedField().getDataflowId());
       if (null != dataflowReferenced && !dataflowReferenced.getReferencedByDataflow().isEmpty()) {
         dataflowReferenced.getReferencedByDataflow().remove(dataflowId);
         dataflowReferencedRepository.deleteByDataflowId(field.getReferencedField().getDataflowId());
@@ -1794,16 +1793,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void deleteFromPkCatalogue(String datasetSchemaId, String tableSchemaId, Long datasetId)
-      throws EEAException {
+          throws EEAException {
     TableSchema table = getTableSchema(tableSchemaId, datasetSchemaId);
     if (table != null && table.getRecordSchema() != null
-        && table.getRecordSchema().getFieldSchema() != null) {
+            && table.getRecordSchema().getFieldSchema() != null) {
       table.getRecordSchema().getFieldSchema().forEach(field -> {
         try {
           deleteFromPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field), datasetId);
         } catch (EEAException e) {
-          LOG_ERROR.error("Error deleting the PK from the catalogue. Message: {}", e.getMessage(),
-              e);
+          LOG.error("Error deleting the PK from the catalogue. Message: {}", e.getMessage(),
+                  e);
         }
       });
     }
@@ -1821,7 +1820,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updatePKCatalogueAndForeignsAfterSnapshot(String idDatasetSchema, Long idDataset)
-      throws EEAException {
+          throws EEAException {
 
     // After deleting the previous entries, we fill again the catalogue and references with the new
     // schema that has been restored
@@ -1834,9 +1833,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             pkCatalogueMethod(idDataset, field);
             // also, if the field it's external link, update the dataflow reference catalogue too
             if (DataType.EXTERNAL_LINK.equals(field.getType())
-                && field.getReferencedField().getDataflowId() != null) {
+                    && field.getReferencedField().getDataflowId() != null) {
               DataflowReferencedSchema dataflowReferenced = dataflowReferencedRepository
-                  .findByDataflowId(field.getReferencedField().getDataflowId());
+                      .findByDataflowId(field.getReferencedField().getDataflowId());
 
               if (dataflowReferenced != null) {
                 if (null == dataflowReferenced.getReferencedByDataflow()) {
@@ -1844,7 +1843,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
                 }
                 dataflowReferenced.getReferencedByDataflow().add(dataflowId);
                 dataflowReferencedRepository
-                    .deleteByDataflowId(field.getReferencedField().getDataflowId());
+                        .deleteByDataflowId(field.getReferencedField().getDataflowId());
               } else {
                 dataflowReferenced = new DataflowReferencedSchema();
                 dataflowReferenced.setDataflowId(field.getReferencedField().getDataflowId());
@@ -1869,7 +1868,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   private void pkCatalogueMethod(Long idDataset, FieldSchema field) throws EEAException {
     PkCatalogueSchema catalogue =
-        pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
+            pkCatalogueRepository.findByIdPk(field.getReferencedField().getIdPk());
 
     if (catalogue != null && catalogue.getIdPk() != null) {
       catalogue.getReferenced().add(field.getIdFieldSchema());
@@ -1883,7 +1882,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     pkCatalogueRepository.save(catalogue);
     // Update the PK referenced in field schema, to mark it as referenced=true
     updateIsPkReferencedInFieldSchema(field.getReferencedField().getIdDatasetSchema().toString(),
-        field.getReferencedField().getIdPk().toString(), true);
+            field.getReferencedField().getIdPk().toString(), true);
     // Add the relation into the metabase
     addForeignRelation(idDataset, fieldSchemaNoRulesMapper.entityToClass(field));
   }
@@ -1898,10 +1897,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private void updateIsPkReferencedInFieldSchema(String referencedIdDatasetSchema,
-      String referencedIdPk, Boolean referenced) throws EEAException {
+                                                 String referencedIdPk, Boolean referenced) throws EEAException {
 
     Document fieldSchemaReferenced =
-        schemasRepository.findFieldSchema(referencedIdDatasetSchema, referencedIdPk);
+            schemasRepository.findFieldSchema(referencedIdDatasetSchema, referencedIdPk);
     if (fieldSchemaReferenced != null) {
       fieldSchemaReferenced.put("pkReferenced", referenced);
       schemasRepository.updateFieldSchema(referencedIdDatasetSchema, fieldSchemaReferenced);
@@ -1919,7 +1918,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     uniqueConstraintVO.setUniqueId(new ObjectId().toString());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
     rulesControllerZuul.createUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
-        uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
+            uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
     LOG.info("unique constraint created with id {}", uniqueConstraintVO.getUniqueId());
   }
 
@@ -1949,7 +1948,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void deleteUniquesConstraintFromTable(String tableSchemaId) throws EEAException {
     List<UniqueConstraintSchema> constraints =
-        uniqueConstraintRepository.findByTableSchemaId(new ObjectId(tableSchemaId));
+            uniqueConstraintRepository.findByTableSchemaId(new ObjectId(tableSchemaId));
     for (UniqueConstraintSchema uniqueConstraintSchema : constraints) {
       deleteUniqueConstraint(uniqueConstraintSchema.getUniqueId().toString());
     }
@@ -1966,7 +1965,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void deleteUniquesConstraintFromField(String schemaId, String fieldSchemaId)
-      throws EEAException {
+          throws EEAException {
     List<UniqueConstraintVO> constraints = getUniqueConstraints(schemaId);
     for (UniqueConstraintVO uniqueConstraintVO : constraints) {
       if (uniqueConstraintVO.getFieldSchemaIds().contains(fieldSchemaId)) {
@@ -1985,11 +1984,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void deleteOnlyUniqueConstraintFromField(String schemaId, String fieldSchemaId)
-      throws EEAException {
+          throws EEAException {
     List<UniqueConstraintVO> constraints = getUniqueConstraints(schemaId);
     for (UniqueConstraintVO uniqueConstraintVO : constraints) {
       if (uniqueConstraintVO.getFieldSchemaIds().size() == 1
-          && uniqueConstraintVO.getFieldSchemaIds().contains(fieldSchemaId)) {
+              && uniqueConstraintVO.getFieldSchemaIds().contains(fieldSchemaId)) {
         deleteUniqueConstraint(uniqueConstraintVO.getUniqueId());
       }
     }
@@ -2021,10 +2020,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     LOG.info("updating constraint {}", uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.deleteByUniqueId(new ObjectId(uniqueConstraintVO.getUniqueId()));
     rulesControllerZuul.deleteUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
-        uniqueConstraintVO.getUniqueId());
+            uniqueConstraintVO.getUniqueId());
     uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
     rulesControllerZuul.createUniqueConstraintRule(uniqueConstraintVO.getDatasetSchemaId(),
-        uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
+            uniqueConstraintVO.getTableSchemaId(), uniqueConstraintVO.getUniqueId());
     LOG.info("unique constraint updated with id {}", uniqueConstraintVO.getUniqueId());
   }
 
@@ -2039,7 +2038,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public List<UniqueConstraintVO> getUniqueConstraints(String schemaId) {
     LOG.info("get all unique Constraints of dataset {}", schemaId);
     return uniqueConstraintMapper.entityListToClass(
-        uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
+            uniqueConstraintRepository.findByDatasetSchemaId(new ObjectId(schemaId)));
   }
 
 
@@ -2056,13 +2055,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   public UniqueConstraintVO getUniqueConstraint(String uniqueId) throws EEAException {
     LOG.info("get unique Constraints {}", uniqueId);
     Optional<UniqueConstraintSchema> uniqueResult =
-        uniqueConstraintRepository.findById(new ObjectId(uniqueId));
+            uniqueConstraintRepository.findById(new ObjectId(uniqueId));
     if (uniqueResult.isPresent()) {
       return uniqueConstraintMapper.entityToClass(uniqueResult.get());
     } else {
-      LOG_ERROR.error(
-          "Error finding the unique constraint from the catalogue. UniqueId: {} not found",
-          uniqueId);
+      LOG.error(
+              "Error finding the unique constraint from the catalogue. UniqueId: {} not found",
+              uniqueId);
       throw new EEAException(String.format(EEAErrorMessage.UNIQUE_NOT_FOUND, uniqueId));
     }
   }
@@ -2080,11 +2079,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (fieldSchemaVO.getPk() != null && fieldSchemaVO.getPk()) {
       // Get TableSchemaId
       DataSetSchema datasetSchema =
-          schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+              schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
       ObjectId idTableSchema = null;
       for (TableSchema table : datasetSchema.getTableSchemas()) {
         if (table.getRecordSchema().getIdRecordSchema().toString()
-            .equals(fieldSchemaVO.getIdRecord())) {
+                .equals(fieldSchemaVO.getIdRecord())) {
           idTableSchema = table.getIdTableSchema();
         }
       }
@@ -2099,7 +2098,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         List<ObjectId> fields = new ArrayList<>();
         fields.add(new ObjectId(fieldSchemaVO.getId()));
         List<UniqueConstraintSchema> uniques =
-            uniqueConstraintRepository.findByFieldSchemaIds(fields);
+                uniqueConstraintRepository.findByFieldSchemaIds(fields);
         if (uniques == null || uniques.isEmpty()) {
           createUniqueConstraint(unique);
         }
@@ -2116,7 +2115,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void copyUniqueConstraintsCatalogue(List<String> originDatasetSchemaIds,
-      Map<String, String> dictionaryOriginTargetObjectId) {
+                                             Map<String, String> dictionaryOriginTargetObjectId) {
     // We obtain the UniqueConstraints of the origin dataset schemas, and with the help of the
     // dictionary we replace the objectIds with the correct ones to finally save them. The result it
     // will be new constraints in the catalogue with correct data according to the new copied
@@ -2125,13 +2124,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       List<UniqueConstraintVO> uniques = getUniqueConstraints(datasetSchemaId);
       for (UniqueConstraintVO uniqueConstraintVO : uniques) {
         uniqueConstraintVO
-            .setUniqueId(dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getUniqueId()));
+                .setUniqueId(dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getUniqueId()));
         uniqueConstraintVO.setDatasetSchemaId(dictionaryOriginTargetObjectId.get(datasetSchemaId));
         uniqueConstraintVO.setTableSchemaId(
-            dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getTableSchemaId()));
+                dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getTableSchemaId()));
         for (int i = 0; i < uniqueConstraintVO.getFieldSchemaIds().size(); i++) {
           uniqueConstraintVO.getFieldSchemaIds().set(i,
-              dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
+                  dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
         }
         LOG.info("A unique constraint is going to be created during the copy process");
         uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
@@ -2154,11 +2153,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (schemaId != null) {
       LOG.info("Getting schema from id {}", schemaId);
       Optional<DesignDataset> designDataset =
-          designDatasetRepository.findFirstByDatasetSchema(schemaId);
+              designDatasetRepository.findFirstByDatasetSchema(schemaId);
       DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(schemaId));
       if (datasetSchema != null) {
         SimpleDatasetSchemaVO simpleDatasetSchema =
-            simpleDataSchemaMapper.entityToClass(datasetSchema);
+                simpleDataSchemaMapper.entityToClass(datasetSchema);
         if (designDataset.isPresent()) {
           simpleDatasetSchema.setDatasetName(designDataset.get().getDataSetName());
         }
@@ -2181,7 +2180,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void setCountryCodeField(Long datasetId, SimpleDatasetSchemaVO simpleDatasetSchema) {
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
     if (DatasetTypeEnum.EUDATASET.equals(datasetType)
-        || DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+            || DatasetTypeEnum.COLLECTION.equals(datasetType)) {
       SimpleFieldSchemaVO countryCode = new SimpleFieldSchemaVO();
       countryCode.setFieldName(LiteralConstants.COUNTRY_CODE);
       countryCode.setFieldType(DataType.TEXT);
@@ -2203,10 +2202,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public Boolean checkClearAttachments(Long datasetId, String datasetSchemaId,
-      FieldSchemaVO fieldSchemaVO) {
+                                       FieldSchemaVO fieldSchemaVO) {
     Boolean hasToClean = false;
     Document fieldSchema =
-        schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+            schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
     if (fieldSchema != null) {
       Double previousMaxSize = (Double) fieldSchema.get("maxSize");
       List<String> previousExtensions = (List<String>) fieldSchema.get("validExtensions");
@@ -2220,17 +2219,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
       // Clean if the data type was or is going to be an Attachment type
       if ((DataType.ATTACHMENT.getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
-          || DataType.ATTACHMENT.equals(fieldSchemaVO.getType()))
-          && !fieldSchema.get(LiteralConstants.TYPE_DATA)
+              || DataType.ATTACHMENT.equals(fieldSchemaVO.getType()))
+              && !fieldSchema.get(LiteralConstants.TYPE_DATA)
               .equals(fieldSchemaVO.getType().getValue())) {
         hasToClean = true;
       }
       // Clean if the type is still ATTACHMENT, but the maxSize or the list of file formats have
       // changed
       if (DataType.ATTACHMENT.equals(fieldSchemaVO.getType())
-          && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
-          && previousMaxSize != null && previousExtensions != null
-          && ((fieldSchemaVO.getMaxSize() != null
+              && fieldSchemaVO.getType().getValue().equals(fieldSchema.get(LiteralConstants.TYPE_DATA))
+              && previousMaxSize != null && previousExtensions != null
+              && ((fieldSchemaVO.getMaxSize() != null
               && (previousMaxSize != fieldSchemaVO.getMaxSize().doubleValue()))
               || !differentExtensions.isEmpty())) {
         hasToClean = true;
@@ -2253,12 +2252,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleVO.setType(EntityTypeEnum.TABLE);
     ruleVO.setAutomatic(true);
     ruleVO.setThenCondition(
-        Arrays.asList("Mandatory table has no records", ErrorTypeEnum.BLOCKER.getValue()));
+            Arrays.asList("Mandatory table has no records", ErrorTypeEnum.BLOCKER.getValue()));
     ruleVO
-        .setDescription("When a table is marked as mandatory, checks at least one record is added");
+            .setDescription("When a table is marked as mandatory, checks at least one record is added");
 
     Long shortcode = rulesControllerZuul
-        .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId));
+            .updateSequence(datasetMetabaseService.findDatasetSchemaIdById(datasetId));
     ruleVO.setShortCode("TB" + shortcode);
     ruleVO.setAutomaticType(AutomaticRuleTypeEnum.MANDATORY_TABLE);
 
@@ -2286,7 +2285,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    */
   private void updateNotEmptyRule(Boolean oldValue, Boolean newValue, String tableSchemaId,
-      Long datasetId) {
+                                  Long datasetId) {
     if (Boolean.TRUE.equals(oldValue)) {
       if (Boolean.FALSE.equals(newValue)) {
         deleteNotEmptyRule(tableSchemaId, datasetId);
@@ -2308,12 +2307,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public void updateWebform(String datasetSchemaId, WebformVO webformVO) {
     if (webformVO != null && StringUtils.isNotBlank(webformVO.getName())
-        && StringUtils.isBlank(webformVO.getType())) {
+            && StringUtils.isBlank(webformVO.getType())) {
       WebformMetabase webformMetabase = webformRepository.findByLabel(webformVO.getName());
       webformVO.setType(webformMetabase.getType().toString());
     }
     schemasRepository.updateDatasetSchemaWebForm(datasetSchemaId,
-        webFormMapper.classToEntity(webformVO));
+            webFormMapper.classToEntity(webformVO));
   }
 
   /**
@@ -2325,19 +2324,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return true, if successful
    */
   private boolean checkIfFieldNameAlreadyExist(String datasetSchemaId,
-      FieldSchemaVO fieldSchemaVO) {
+                                               FieldSchemaVO fieldSchemaVO) {
     boolean exist = false;
     Document document = schemasRepository.findRecordSchemaByRecordSchemaId(datasetSchemaId,
-        fieldSchemaVO.getIdRecord());
+            fieldSchemaVO.getIdRecord());
     List<Document> documentListField = null != document && null != document.get(FIELDSCHEMAS)
-        ? (List<Document>) document.get(FIELDSCHEMAS)
-        : new ArrayList();
+            ? (List<Document>) document.get(FIELDSCHEMAS)
+            : new ArrayList();
 
     // we found if we have the same name in the record , and check if the name that we found is
     // diferent form himself
     for (Document field : documentListField) {
       if (fieldSchemaVO.getName().equalsIgnoreCase(field.get("headerName").toString())
-          && !field.get("_id").toString().equalsIgnoreCase(fieldSchemaVO.getId())) {
+              && !field.get("_id").toString().equalsIgnoreCase(fieldSchemaVO.getId())) {
         exist = true;
         break;
       }
@@ -2403,7 +2402,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Async
   @Override
   public void importSchemas(Long dataflowId, InputStream is, String fileName)
-      throws IOException, EEAException {
+          throws IOException, EEAException {
 
     Map<String, String> dictionaryOriginTargetObjectId = new HashMap<>();
     Map<Long, DataSetSchema> mapDatasetsDestinyAndSchemasOrigin = new HashMap<>();
@@ -2416,9 +2415,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       List<DesignDataset> designs = designDatasetRepository.findByDataflowId(dataflowId);
       // If there are no schemas, error
       if (CollectionUtils.isEmpty(importClasses.getSchemas())) {
-        LOG_ERROR.error("No schemas from the zip file to import in the dataflowId {}", dataflowId);
+        LOG.error("No schemas from the zip file to import in the dataflowId {}", dataflowId);
         throw new EEAException(
-            "No schemas from the zip file to import in the dataflowId " + dataflowId);
+                "No schemas from the zip file to import in the dataflowId " + dataflowId);
       }
 
       validateNames(importClasses);
@@ -2428,17 +2427,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
         DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
         dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
-            newIdDatasetSchema);
+                newIdDatasetSchema);
 
         final Map<String, String> dictionaryOriginTargetTableObjectId = new HashMap<>();
         targetDatasetSchema.getTableSchemas().forEach(table -> {
           for (TableSchema tableSchema : schema.getTableSchemas()) {
             if (table.getNameTableSchema().equals(tableSchema.getNameTableSchema())) {
               dictionaryOriginTargetTableObjectId.put(tableSchema.getIdTableSchema().toString(),
-                  table.getIdTableSchema());
+                      table.getIdTableSchema());
               dictionaryOriginTargetTableObjectId.put(
-                  tableSchema.getRecordSchema().getIdRecordSchema().toString(),
-                  table.getRecordSchema().getIdRecordSchema());
+                      tableSchema.getRecordSchema().getIdRecordSchema().toString(),
+                      table.getRecordSchema().getIdRecordSchema());
             }
           }
         });
@@ -2446,15 +2445,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         // Create the schema in the metabase
         Future<Long> datasetId = datasetMetabaseService.createEmptyDataset(DatasetTypeEnum.DESIGN,
-            nameToImportedSchema(schema.getIdDataSetSchema().toString(),
-                importClasses.getSchemaNames(), designs),
-            newIdDatasetSchema, dataflowId, null, null, 0);
+                nameToImportedSchema(schema.getIdDataSetSchema().toString(),
+                        importClasses.getSchemaNames(), designs),
+                newIdDatasetSchema, dataflowId, null, null, 0);
 
         LOG.info("New dataset created in the import process with id {}", datasetId.get());
         mapDatasetsDestinyAndSchemasOrigin.put(datasetId.get(), schema);
         String newDataset = "dataset_" + datasetId.get().toString();
         String oldDataset =
-            "dataset_" + importClasses.getSchemaIds().get(schema.getIdDataSetSchema().toString());
+                "dataset_" + importClasses.getSchemaIds().get(schema.getIdDataSetSchema().toString());
         dictionaryOriginTargetObjectId.put(oldDataset, newDataset);
 
         // Time to wait before continuing the process. If the process goes too fast, it won't find
@@ -2468,16 +2467,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // After creating the datasets schemas on the DB, fill them and create the permissions
       List<String> newDatasetSchemasIds = new ArrayList<>();
       for (Map.Entry<Long, DataSetSchema> itemNewDatasetAndSchema : mapDatasetsDestinyAndSchemasOrigin
-          .entrySet()) {
+              .entrySet()) {
         contributorControllerZuul.createAssociatedPermissions(dataflowId,
-            itemNewDatasetAndSchema.getKey());
+                itemNewDatasetAndSchema.getKey());
         fillAndUpdateDesignDatasetImported(itemNewDatasetAndSchema.getValue(),
-            dictionaryOriginTargetObjectId
-                .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()),
-            dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
-            mapDatasetIdFKRelations);
+                dictionaryOriginTargetObjectId
+                        .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()),
+                dictionaryOriginTargetObjectId, itemNewDatasetAndSchema.getKey(),
+                mapDatasetIdFKRelations);
         newDatasetSchemasIds.add(dictionaryOriginTargetObjectId
-            .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()));
+                .get(itemNewDatasetAndSchema.getValue().getIdDataSetSchema().toString()));
       }
 
       LOG.info("Dataset schemas were filled with values for dataflowId {} during the import schemas process", dataflowId);
@@ -2503,42 +2502,42 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       // Import the external integrations
       createExternalIntegrations(importClasses.getExternalIntegrations(), dataflowId,
-          dictionaryOriginTargetObjectId, newDatasetSchemasIds);
+              dictionaryOriginTargetObjectId, newDatasetSchemasIds);
       LOG.info("External integrations have been created for dataflowId {} during the import schemas process", dataflowId);
 
       // Launch a SQL QC Validation
       mapDatasetsDestinyAndSchemasOrigin.forEach((Long datasetCreated, DataSetSchema schema) -> {
         rulesControllerZuul.validateSqlRules(datasetCreated,
-            dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()), false);
+                dictionaryOriginTargetObjectId.get(schema.getIdDataSetSchema().toString()), false);
       });
       LOG.info("SQL QC Validation was launched for dataflowId {} during the import schemas process", dataflowId);
 
       // Success notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_COMPLETED_EVENT,
-          null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .dataflowId(dataflowId).build());
+              null,
+              NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                      .dataflowId(dataflowId).build());
 
       LOG.info("Successfully imported schemas from the dataflowId {}", dataflowId);
 
     } catch (Exception e) {
-      LOG_ERROR.error("An error in the import process happened for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
+      LOG.error("An error in the import process happened for dataflowId {}. Message: {}", dataflowId, e.getMessage(), e);
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
-          null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .dataflowId(dataflowId).error("Error importing the schemas").build());
+              null,
+              NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                      .dataflowId(dataflowId).error("Error importing the schemas").build());
     } finally {
       Map<String, Object> importDatasetData = new HashMap<>();
       importDatasetData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_SCHEMAS.getValue());
       importDatasetData.put(LiteralConstants.DATAFLOWID, dataflowId);
 
       lockService.removeLockByCriteria(importDatasetData);
-      LOG_ERROR.info("Released import lock on the dataflowId {}", dataflowId);
+      LOG.info("Released import lock on the dataflowId {}", dataflowId);
     }
   }
 
@@ -2570,7 +2569,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public void updateReferenceDataset(Long datasetId, String datasetSchemaId,
-      boolean referenceDataset) {
+                                     boolean referenceDataset) {
 
     schemasRepository.updateReferenceDataset(datasetSchemaId, referenceDataset);
     DataSetSchemaVO schema = getDataSchemaById(datasetSchemaId);
@@ -2580,11 +2579,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       table.setToPrefill(referenceDataset);
       table.setReadOnly(referenceDataset);
       try {
-        updateTableSchema(datasetId, table);
+        updateTableSchema(datasetId, table, true);
       } catch (EEAException e) {
-        LOG_ERROR.error(
-            "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
-            datasetId, e.getMessage(), e);
+        LOG.error(
+                "Error updating the mandatory properties when a dataset becomes Reference. DatasetId {}. Message: {} ",
+                datasetId, e.getMessage(), e);
       }
     }
   }
@@ -2602,7 +2601,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Override
   public byte[] exportFieldsSchema(final Long datasetId, final String datasetSchemaId,
-      final String tableSchemaId) throws EEAException {
+                                   final String tableSchemaId) throws EEAException {
     LOG.info("starting csv file writter to field schemas in datasetId {}", datasetId);
 
     DataSetSchemaVO datasetSchema = getDataSchemaById(datasetSchemaId);
@@ -2610,7 +2609,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // Init the writer
     StringWriter writer = new StringWriter();
     CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-        CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
 
     setHeaderFields(csvWriter);
     setFieldLines(tableSchemaId, datasetSchema, csvWriter);
@@ -2633,17 +2632,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Async
   @Override
   public void importFieldsSchema(String tableSchemaId, String datasetSchemaId, Long datasetId,
-      InputStream file, boolean replace) {
+                                 InputStream file, boolean replace) {
 
     LOG.info("Init importing field schemas from file into dataset {}", datasetId);
     DataSetSchema datasetSchema =
-        schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
+            schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
     // Method to process the file
     String tableSchemaName = "";
     try {
       if (datasetSchema != null) {
         Optional<TableSchema> tableSchema = datasetSchema.getTableSchemas().stream()
-            .filter(t -> t.getIdTableSchema().equals(new ObjectId(tableSchemaId))).findFirst();
+                .filter(t -> t.getIdTableSchema().equals(new ObjectId(tableSchemaId))).findFirst();
 
         if (tableSchema.isPresent()) {
           tableSchemaName = tableSchema.get().getNameTableSchema();
@@ -2653,45 +2652,45 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
         // Success notification
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_COMPLETED_EVENT,
-            null,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
+                null,
+                NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(datasetId).tableSchemaName(tableSchemaName).build());
 
         LOG.info("Successfully imported field Schemas for datasetId {}", datasetId);
       } else {
-        LOG_ERROR.error("Error when importing field schemas for datasetId {}. datasetSchema is null", datasetId);
+        LOG.error("Error when importing field schemas for datasetId {}. datasetSchema is null", datasetId);
         throw new EEAException("datasetSchema is null");
       }
     } catch (
 
-    IOException e) {
-      LOG_ERROR.error("Problem with the file trying to import field schemas on datasetId {}",
-          datasetId, e);
+            IOException e) {
+      LOG.error("Problem with the file trying to import field schemas on datasetId {}",
+              datasetId, e);
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
-            null,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).tableSchemaName(tableSchemaName)
-                .error(InvalidFileException.ERROR_MESSAGE).build());
+                null,
+                NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(datasetId).tableSchemaName(tableSchemaName)
+                        .error(InvalidFileException.ERROR_MESSAGE).build());
       } catch (EEAException e1) {
-        LOG_ERROR.error(
-            "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
-            datasetId, e);
+        LOG.error(
+                "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
+                datasetId, e);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("Error importing field schemas on datasetId {}", datasetId, e);
+      LOG.error("Error importing field schemas on datasetId {}", datasetId, e);
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
-            null,
-            NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .datasetId(datasetId).error("Error importing fieldSchemas").build());
+                null,
+                NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(datasetId).error("Error importing fieldSchemas").build());
       } catch (EEAException e1) {
-        LOG_ERROR.error(
-            "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
-            datasetId, e);
+        LOG.error(
+                "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
+                datasetId, e);
       }
     }
   }
@@ -2713,15 +2712,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       // Error. There aren't field schemas to export in the dataflow
       LOG.error("No field schemas found to export in the dataset {}", datasetId);
       throw new EEAException(
-          String.format("No field schemas to export in the dataset %s", datasetId));
+              String.format("No field schemas to export in the dataset %s", datasetId));
     }
     DataSetSchema schema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(design.getDatasetSchema()));
+            schemasRepository.findByIdDataSetSchema(new ObjectId(design.getDatasetSchema()));
     List<byte[]> tablesSchema = new ArrayList<>();
     List<String> tableSchemaNames = new ArrayList<>();
     for (TableSchema table : schema.getTableSchemas()) {
       tablesSchema.add(exportFieldsSchema(datasetId, design.getDatasetSchema(),
-          table.getIdTableSchema().toString()));
+              table.getIdTableSchema().toString()));
       tableSchemaNames.add(table.getNameTableSchema());
     }
     return zipUtils.zipArrayListFieldSchemas(tablesSchema, datasetId, tableSchemaNames);
@@ -2741,14 +2740,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   private void readFieldLines(final InputStream inputStream, final String tableSchemaId,
-      Long datasetId, boolean replace, DataSetSchema datasetSchema)
-      throws EEAException, IOException {
+                              Long datasetId, boolean replace, DataSetSchema datasetSchema)
+          throws EEAException, IOException {
     LOG.info("Processing entries at method readFieldLines for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     // Init variables
     String[] line;
 
     try (Reader buf =
-        new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                 new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
       // Init the library of reader file
       final CSVParser csvParser = new CSVParserBuilder().withSeparator(delimiter).build();
@@ -2765,49 +2764,49 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       boolean isDesignDataset = fileCommon.isDesignDataset(datasetId);
       Boolean dataflowStatusOk = true;
       if (!TypeStatusEnum.DESIGN.equals(dataFlowControllerZuul
-          .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
+              .getMetabaseById(datasetService.getDataFlowIdById(datasetId)).getStatus())) {
         dataflowStatusOk = false;
       }
       if (!isDesignDataset || Boolean.FALSE.equals(dataflowStatusOk)) {
-        LOG_ERROR.error(
-            "Error importing field schemas on datasetId {} because this dataset is not a design dataset or the dataflow is not in the correct status",
-            datasetId);
+        LOG.error(
+                "Error importing field schemas on datasetId {} because this dataset is not a design dataset or the dataflow is not in the correct status",
+                datasetId);
         throw new IOException(
-            "This dataset is not a design dataset or the dataflow is not in the correct status. It's not possible to perform the operation");
+                "This dataset is not a design dataset or the dataflow is not in the correct status. It's not possible to perform the operation");
       }
 
       // If replace=true, delete all the fields of the table
       if (Boolean.TRUE.equals(replace)) {
         // if there's a PK in use in the table we want to replace -> error
         if (Boolean.FALSE.equals(checkPkInUse(fieldSchemas))) {
-          LOG_ERROR.error(
-              "Error importing field schemas on datasetId {} because the fields to replace have a PK in use",
-              datasetId);
+          LOG.error(
+                  "Error importing field schemas on datasetId {} because the fields to replace have a PK in use",
+                  datasetId);
           throw new IOException(
-              "This table has fields that have a PK already in use. It's not possible to perform the operation");
+                  "This table has fields that have a PK already in use. It's not possible to perform the operation");
         }
         List<FieldSchema> fieldsToRemove = new ArrayList<>();
         fieldsToRemove.addAll(deleteFieldsFromTable(fieldSchemas, datasetId,
-            datasetSchema.getIdDataSetSchema().toString()));
+                datasetSchema.getIdDataSetSchema().toString()));
         fieldSchemas.removeAll(fieldsToRemove);
       }
 
       // we have to check there's only one pk per table
       Boolean pkAlreadyInTable =
-          fieldSchemas.stream().anyMatch(f -> f.getPk() != null && f.getPk());
+              fieldSchemas.stream().anyMatch(f -> f.getPk() != null && f.getPk());
       FieldSchema existingFieldPk = fieldSchemas.stream()
-          .filter(f -> f.getPk() != null && f.getPk()).findFirst().orElse(null);
+              .filter(f -> f.getPk() != null && f.getPk()).findFirst().orElse(null);
       while ((line = reader.readNext()) != null) {
         final List<String> values = Arrays.asList(line);
         FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
         // if there's not a pk present, continue inserting/updating the field
         if (null != fieldSchemaVO && (Boolean.FALSE.equals(pkAlreadyInTable)
-            || (Boolean.TRUE.equals(pkAlreadyInTable) && Boolean.FALSE.equals(fieldSchemaVO.getPk())
+                || (Boolean.TRUE.equals(pkAlreadyInTable) && Boolean.FALSE.equals(fieldSchemaVO.getPk())
                 || (existingFieldPk != null
-                    && fieldSchemaVO.getName().equals(existingFieldPk.getHeaderName()))))) {
+                && fieldSchemaVO.getName().equals(existingFieldPk.getHeaderName()))))) {
           // SAVE
           if (fieldSchemas.stream()
-              .noneMatch(f -> f.getHeaderName().equals(fieldSchemaVO.getName()))) {
+                  .noneMatch(f -> f.getHeaderName().equals(fieldSchemaVO.getName()))) {
             saveImportFieldSchema(fieldSchemaVO, datasetSchema, datasetId);
           } else {
             // UPDATE
@@ -2818,8 +2817,8 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           }
         } else {
           LOG.info(
-              "Ommited one line of the file because the field schema to insert/update is a PK and there's already one in dataset {}",
-              datasetId);
+                  "Ommited one line of the file because the field schema to insert/update is a PK and there's already one in dataset {}",
+                  datasetId);
         }
       }
       LOG.info("Inserting Csv Field Schemas File Completed Into Dataset {} and tableSchemaId {}", datasetId, tableSchemaId);
@@ -2838,7 +2837,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private void saveImportFieldSchema(FieldSchemaVO fieldSchemaVO, DataSetSchema datasetSchema,
-      Long datasetId) throws EEAException {
+                                     Long datasetId) throws EEAException {
 
     LOG.info("Inserting new field schema into dataset {}", datasetId);
     createFieldSchema(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO);
@@ -2849,13 +2848,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     if (Boolean.TRUE.equals(fieldSchemaVO.getRequired())) {
       rulesControllerZuul.createAutomaticRule(datasetSchema.getIdDataSetSchema().toString(),
-          fieldSchemaVO.getId(), fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId,
-          Boolean.TRUE);
+              fieldSchemaVO.getId(), fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId,
+              Boolean.TRUE);
     }
     // and with it we create the others automatic rules like number etc
     rulesControllerZuul.createAutomaticRule(datasetSchema.getIdDataSetSchema().toString(),
-        fieldSchemaVO.getId(), fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId,
-        Boolean.FALSE);
+            fieldSchemaVO.getId(), fieldSchemaVO.getType(), EntityTypeEnum.FIELD, datasetId,
+            Boolean.FALSE);
 
     // Add the Pk if needed to the catalogue
     addToPkCatalogue(fieldSchemaVO, datasetId);
@@ -2868,7 +2867,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     // Create query view
     releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
+            SecurityContextHolder.getContext().getAuthentication().getName(), false);
   }
 
 
@@ -2882,43 +2881,43 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private void updateImportFieldSchema(FieldSchemaVO fieldSchemaVO, List<FieldSchema> fieldSchemas,
-      DataSetSchema datasetSchema, Long datasetId) throws EEAException {
+                                       DataSetSchema datasetSchema, Long datasetId) throws EEAException {
 
     LOG.info("Updating field schema into dataset {}", datasetId);
     Optional<FieldSchema> field = fieldSchemas.stream()
-        .filter(f -> f.getHeaderName().equals(fieldSchemaVO.getName())).findFirst();
+            .filter(f -> f.getHeaderName().equals(fieldSchemaVO.getName())).findFirst();
     if (field.isPresent()) {
       fieldSchemaVO.setId(field.get().getIdFieldSchema().toString());
     }
 
     if (Boolean.TRUE
-        .equals(checkPkAllowUpdate(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO))) {
+            .equals(checkPkAllowUpdate(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO))) {
 
       // Modify the register into the metabase fieldRelations
       updateForeignRelation(datasetId, fieldSchemaVO,
-          datasetSchema.getIdDataSetSchema().toString());
+              datasetSchema.getIdDataSetSchema().toString());
 
       // Clear the attachments if necessary
       if (Boolean.TRUE.equals(checkClearAttachments(datasetId,
-          datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO))) {
+              datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO))) {
         TenantResolver
-            .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
         datasetService.deleteAttachmentByFieldSchemaId(datasetId, fieldSchemaVO.getId());
       }
 
       DataType type = updateFieldSchema(datasetSchema.getIdDataSetSchema().toString(),
-          fieldSchemaVO, datasetId, false);
+              fieldSchemaVO, datasetId, false);
 
       // Create query view
       propagateRulesAfterUpdateSchema(datasetSchema.getIdDataSetSchema().toString(), fieldSchemaVO,
-          type, datasetId);
+              type, datasetId);
 
       // Add the Pk if needed to the catalogue
       addToPkCatalogue(fieldSchemaVO, datasetId);
     } else {
       LOG.info(
-          "Updating a previous field schema during import field schema on datasetId {}: there's a field that cannot be updated because is a PK already in use",
-          datasetId);
+              "Updating a previous field schema during import field schema on datasetId {}: there's a field that cannot be updated because is a PK already in use",
+              datasetId);
     }
   }
 
@@ -2963,7 +2962,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the field schema VO
    */
   private FieldSchemaVO sanitizeAndFillFieldSchema(final List<String> values,
-      final String recordSchemaId) {
+                                                   final String recordSchemaId) {
     FieldSchemaVO fieldSchema = null;
     // if the line is white then skip it
     if (null != values && !values.isEmpty() && values.size() >= 6) {
@@ -2992,7 +2991,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           }
         } catch (Exception e) {
           LOG.info("Importing field schema from field. Line ommited due to error: {}",
-              e.getMessage());
+                  e.getMessage());
           fieldSchema = null;
         }
       }
@@ -3010,7 +3009,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param csvWriter the csv writer
    */
   private void setFieldLines(final String idTableSchema, DataSetSchemaVO dataSetSchema,
-      CSVWriter csvWriter) {
+                             CSVWriter csvWriter) {
 
     List<FieldSchemaVO> fieldSchemas = fileCommon.getFieldSchemas(idTableSchema, dataSetSchema);
 
@@ -3038,9 +3037,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           columns.add(null);
         }
         columns.add(
-            fieldSchema.getDescription() != null && fieldSchema.getDescription().startsWith("=")
-                ? " " + fieldSchema.getDescription()
-                : fieldSchema.getDescription());
+                fieldSchema.getDescription() != null && fieldSchema.getDescription().startsWith("=")
+                        ? " " + fieldSchema.getDescription()
+                        : fieldSchema.getDescription());
         columns.add(fieldSchema.getType().toString());
         if (fieldSchema.getCodelistItems() != null && fieldSchema.getCodelistItems().length > 0) {
           String codelists = "";
@@ -3074,7 +3073,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
     // Field name,PK,Required,ReadOnly,Field description,Field type,Extra information
     List<String> headers = new ArrayList<>(Arrays.asList("Field name", "PK", "Required", "ReadOnly",
-        "Field description", "Field type", "Extra information"));
+            "Field description", "Field type", "Extra information"));
 
     csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
   }
@@ -3090,7 +3089,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the list
    */
   private List<FieldSchema> deleteFieldsFromTable(List<FieldSchema> fieldSchemas, Long datasetId,
-      String datasetSchemaId) {
+                                                  String datasetSchemaId) {
     List<FieldSchema> fieldSchemasRemoved = new ArrayList<>();
     fieldSchemas.stream().forEach(f -> {
 
@@ -3100,7 +3099,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           // Delete the fieldSchema from the datasetSchema
           if (!deleteFieldSchema(datasetSchemaId, fieldVO.getId(), datasetId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                EEAErrorMessage.INVALID_OBJECTID);
+                    EEAErrorMessage.INVALID_OBJECTID);
           }
           // Delete the rules from the fieldSchema
           rulesControllerZuul.deleteRuleByReferenceId(datasetSchemaId, fieldVO.getId());
@@ -3110,13 +3109,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
           // Delete FK rules
           if (null != fieldVO && (DataType.LINK.equals(fieldVO.getType())
-              || DataType.EXTERNAL_LINK.equals(fieldVO.getType()))) {
+                  || DataType.EXTERNAL_LINK.equals(fieldVO.getType()))) {
             rulesControllerZuul.deleteRuleByReferenceFieldSchemaPKId(datasetSchemaId,
-                fieldVO.getId());
+                    fieldVO.getId());
           }
           // Delete the fieldSchema from the dataset
           TenantResolver
-              .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+                  .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
           datasetService.deleteFieldValues(datasetId, fieldVO.getId());
 
           // Delete the Pk if needed from the catalogue
@@ -3128,19 +3127,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldSchemasRemoved.add(f);
 
         } catch (EEAException e) {
-          LOG_ERROR.error(
-              "Error deleting fieldSchemas during the import field schemas from file. DatasetId {}",
-              datasetId, e);
+          LOG.error(
+                  "Error deleting fieldSchemas during the import field schemas from file. DatasetId {}",
+                  datasetId, e);
         }
       } else {
         LOG.info(
-            "Deleting previous fields during import field schema on datasetId {}: there's a field that cannot be deleted because is a PK already in use",
-            datasetId);
+                "Deleting previous fields during import field schema on datasetId {}: there's a field that cannot be deleted because is a PK already in use",
+                datasetId);
       }
     });
     // Create query view
     releaseCreateUpdateView(datasetId,
-        SecurityContextHolder.getContext().getAuthentication().getName(), false);
+            SecurityContextHolder.getContext().getAuthentication().getName(), false);
 
     return fieldSchemasRemoved;
   }
@@ -3161,14 +3160,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @throws EEAException the EEA exception
    */
   private Map<String, String> fillAndUpdateDesignDatasetImported(DataSetSchema schemaOrigin,
-      String newIdDatasetSchema, Map<String, String> dictionaryOriginTargetObjectId, Long datasetId,
-      Map<Long, List<FieldSchema>> mapDatasetIdFKRelations) throws EEAException {
+                                                                 String newIdDatasetSchema, Map<String, String> dictionaryOriginTargetObjectId, Long datasetId,
+                                                                 Map<Long, List<FieldSchema>> mapDatasetIdFKRelations) throws EEAException {
 
     // We've got the new schema created during the import process. Now using the dictionary we'll
     // replace the objectIds of the schema, because at this moment the new schema has the origin
     // values, so we'll change it to new ObjectIds and finally we'll update it
     DataSetSchema schema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
+            schemasRepository.findByIdDataSetSchema(new ObjectId(newIdDatasetSchema));
     schema.setDescription(schemaOrigin.getDescription());
     schema.setWebform(schemaOrigin.getWebform());
     schema.setAvailableInPublic(schemaOrigin.isAvailableInPublic());
@@ -3180,7 +3179,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       ObjectId newTableId = new ObjectId();
       dictionaryOriginTargetObjectId.put(table.getIdTableSchema().toString(),
-          newTableId.toString());
+              newTableId.toString());
 
       table.setIdTableSchema(newTableId);
       // record level
@@ -3189,7 +3188,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       record.setIdRecordSchema(newRecordId);
       if (table.getRecordSchema() != null && table.getRecordSchema().getFieldSchema() != null) {
         dictionaryOriginTargetObjectId.put(table.getRecordSchema().getIdRecordSchema().toString(),
-            newRecordId.toString());
+                newRecordId.toString());
         record.setFieldSchema(new ArrayList<>());
         record.setIdTableSchema(newTableId);
         // field level
@@ -3199,15 +3198,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
           ObjectId newFieldId = new ObjectId();
           dictionaryOriginTargetObjectId.put(fieldOrigin.getIdFieldSchema().toString(),
-              newFieldId.toString());
+                  newFieldId.toString());
           FieldSchema field = fieldOrigin;
           field.setIdFieldSchema(newFieldId);
           field.setIdRecord(newRecordId);
           // check if the field has referencedField, but the type is no LINK, set the referenced
           // part as null
           if (!(DataType.LINK.equals(field.getType())
-              || DataType.EXTERNAL_LINK.equals(field.getType()))
-              && null != field.getReferencedField()) {
+                  || DataType.EXTERNAL_LINK.equals(field.getType()))
+                  && null != field.getReferencedField()) {
             field.setReferencedField(null);
           }
           record.getFieldSchema().add(field);
@@ -3246,9 +3245,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param fieldCreated the field created
    */
   private void mapLinkResult(Long datasetId, Map<Long, List<FieldSchema>> mapDatasetIdFKRelations,
-      FieldSchema fieldOrigin, FieldSchema fieldCreated) {
+                             FieldSchema fieldOrigin, FieldSchema fieldCreated) {
     if (DataType.LINK.equals(fieldCreated.getType())
-        || DataType.EXTERNAL_LINK.equals(fieldCreated.getType())) {
+            || DataType.EXTERNAL_LINK.equals(fieldCreated.getType())) {
       List<FieldSchema> listFK = new ArrayList<>();
       if (mapDatasetIdFKRelations.containsKey(datasetId)) {
         listFK = mapDatasetIdFKRelations.get(datasetId);
@@ -3266,7 +3265,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param mapDatasetIdFKRelations the map dataset id FK relations
    */
   private void processToModifyTheFK(Map<String, String> dictionaryOriginTargetObjectId,
-      Map<Long, List<FieldSchema>> mapDatasetIdFKRelations) {
+                                    Map<Long, List<FieldSchema>> mapDatasetIdFKRelations) {
     // With the help of the dictionary and the map of involved datasetIds and it's FieldSchema
     // objects, we replace the objects with the correct ones and finally we make an
     // updateFieldSchema
@@ -3274,17 +3273,17 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       for (FieldSchema field : listFields) {
         if (dictionaryOriginTargetObjectId.containsKey(field.getIdFieldSchema().toString())) {
           ObjectId newField =
-              new ObjectId(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema().toString()));
+                  new ObjectId(dictionaryOriginTargetObjectId.get(field.getIdFieldSchema().toString()));
           dictionaryOriginTargetObjectId.put(field.getIdFieldSchema().toString(),
-              newField.toString());
+                  newField.toString());
           field.setIdFieldSchema(newField);
         }
         if (dictionaryOriginTargetObjectId.containsKey(field.getIdRecord().toString())) {
           field.setIdRecord(
-              new ObjectId(dictionaryOriginTargetObjectId.get(field.getIdRecord().toString())));
+                  new ObjectId(dictionaryOriginTargetObjectId.get(field.getIdRecord().toString())));
         }
         if (field.getReferencedField() != null && (DataType.LINK.equals(field.getType())
-            || DataType.EXTERNAL_LINK.equals(field.getType()))) {
+                || DataType.EXTERNAL_LINK.equals(field.getType()))) {
           referenceFieldDictionary(dictionaryOriginTargetObjectId, field);
         }
         // with the field updated with the objectIds of the imported dataset, we modify the field to
@@ -3293,15 +3292,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         try {
           String datasetSchemaId = getDatasetSchemaId(datasetId);
           updateForeignRelation(datasetId, fieldSchemaNoRulesMapper.entityToClass(field),
-              datasetSchemaId);
+                  datasetSchemaId);
           DataType type = updateFieldSchema(datasetSchemaId,
-              fieldSchemaNoRulesMapper.entityToClass(field), datasetId, true);
+                  fieldSchemaNoRulesMapper.entityToClass(field), datasetId, true);
           propagateRulesAfterUpdateSchema(datasetSchemaId,
-              fieldSchemaNoRulesMapper.entityToClass(field), type, datasetId);
+                  fieldSchemaNoRulesMapper.entityToClass(field), type, datasetId);
           addToPkCatalogue(fieldSchemaNoRulesMapper.entityToClass(field), datasetId);
         } catch (EEAException e) {
           LOG.error("Error importing the schema on the datasetId {} when there are links: {}",
-              datasetId, e.getMessage(), e);
+                  datasetId, e.getMessage(), e);
         }
       }
     });
@@ -3315,35 +3314,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param field the field
    */
   private void referenceFieldDictionary(Map<String, String> dictionaryOriginTargetObjectId,
-      FieldSchema field) {
+                                        FieldSchema field) {
     if (dictionaryOriginTargetObjectId
-        .containsKey(field.getReferencedField().getIdDatasetSchema().toString())) {
+            .containsKey(field.getReferencedField().getIdDatasetSchema().toString())) {
       field.getReferencedField().setIdDatasetSchema(new ObjectId(dictionaryOriginTargetObjectId
-          .get(field.getReferencedField().getIdDatasetSchema().toString())));
+              .get(field.getReferencedField().getIdDatasetSchema().toString())));
     }
     if (dictionaryOriginTargetObjectId
-        .containsKey(field.getReferencedField().getIdPk().toString())) {
+            .containsKey(field.getReferencedField().getIdPk().toString())) {
       field.getReferencedField().setIdPk(new ObjectId(
-          dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdPk().toString())));
+              dictionaryOriginTargetObjectId.get(field.getReferencedField().getIdPk().toString())));
     }
     if (field.getReferencedField().getLabelId() != null && dictionaryOriginTargetObjectId
-        .containsKey(field.getReferencedField().getLabelId().toString())) {
+            .containsKey(field.getReferencedField().getLabelId().toString())) {
       field.getReferencedField().setLabelId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(field.getReferencedField().getLabelId().toString())));
+              dictionaryOriginTargetObjectId.get(field.getReferencedField().getLabelId().toString())));
     }
     if (field.getReferencedField().getLinkedConditionalFieldId() != null
-        && dictionaryOriginTargetObjectId
+            && dictionaryOriginTargetObjectId
             .containsKey(field.getReferencedField().getLinkedConditionalFieldId().toString())) {
       field.getReferencedField()
-          .setLinkedConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
-              .get(field.getReferencedField().getLinkedConditionalFieldId().toString())));
+              .setLinkedConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
+                      .get(field.getReferencedField().getLinkedConditionalFieldId().toString())));
     }
     if (field.getReferencedField().getMasterConditionalFieldId() != null
-        && dictionaryOriginTargetObjectId
+            && dictionaryOriginTargetObjectId
             .containsKey(field.getReferencedField().getMasterConditionalFieldId().toString())) {
       field.getReferencedField()
-          .setMasterConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
-              .get(field.getReferencedField().getMasterConditionalFieldId().toString())));
+              .setMasterConditionalFieldId(new ObjectId(dictionaryOriginTargetObjectId
+                      .get(field.getReferencedField().getMasterConditionalFieldId().toString())));
     }
   }
 
@@ -3358,15 +3357,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param newDatasetSchemasIds the new dataset schemas ids
    */
   private void createExternalIntegrations(List<IntegrationVO> extIntegrations, Long dataflowId,
-      Map<String, String> dictionaryOriginTargetObjectId, List<String> newDatasetSchemasIds) {
+                                          Map<String, String> dictionaryOriginTargetObjectId, List<String> newDatasetSchemasIds) {
 
     // Create the structure of the external integrations on the import schema process and send them
     // all to the integrationController to be created
     List<IntegrationVO> integrations = new ArrayList<>();
     for (IntegrationVO integration : extIntegrations) {
       integration.getInternalParameters().put(IntegrationParams.DATASET_SCHEMA_ID,
-          dictionaryOriginTargetObjectId
-              .get(integration.getInternalParameters().get("datasetSchemaId")));
+              dictionaryOriginTargetObjectId
+                      .get(integration.getInternalParameters().get("datasetSchemaId")));
       integration.getInternalParameters().put("dataflowId", String.valueOf(dataflowId));
       integration.setId(null);
       integrations.add(integration);
@@ -3382,10 +3381,10 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // then we create it
     if (!newDatasetSchemasIds.isEmpty()) {
       LOG.info(
-          "In the import process, found schemas {} that not have export eu dataset integration. Create it",
-          newDatasetSchemasIds);
+              "In the import process, found schemas {} that not have export eu dataset integration. Create it",
+              newDatasetSchemasIds);
       newDatasetSchemasIds.stream().forEach(datasetSchemaId -> integrationControllerZuul
-          .createDefaultIntegration(dataflowId, datasetSchemaId));
+              .createDefaultIntegration(dataflowId, datasetSchemaId));
     }
   }
 
@@ -3399,7 +3398,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the map
    */
   private Map<String, String> importUniqueConstraintsCatalogue(List<UniqueConstraintSchema> uniques,
-      Map<String, String> dictionaryOriginTargetObjectId) {
+                                                               Map<String, String> dictionaryOriginTargetObjectId) {
 
     List<UniqueConstraintVO> uniquesVo = uniqueConstraintMapper.entityListToClass(uniques);
     for (UniqueConstraintVO uniqueConstraintVO : uniquesVo) {
@@ -3407,15 +3406,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       dictionaryOriginTargetObjectId.put(uniqueConstraintVO.getUniqueId(), newUniqueId);
       uniqueConstraintVO.setUniqueId(newUniqueId);
       uniqueConstraintVO.setDatasetSchemaId(
-          dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getDatasetSchemaId()));
+              dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getDatasetSchemaId()));
       uniqueConstraintVO.setTableSchemaId(
-          dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getTableSchemaId()));
+              dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getTableSchemaId()));
       for (int i = 0; i < uniqueConstraintVO.getFieldSchemaIds().size(); i++) {
         uniqueConstraintVO.getFieldSchemaIds().set(i,
-            dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
+                dictionaryOriginTargetObjectId.get(uniqueConstraintVO.getFieldSchemaIds().get(i)));
       }
       LOG.info("A unique constraint is going to be created during the import process. UniqueId {}",
-          uniqueConstraintVO.getUniqueId());
+              uniqueConstraintVO.getUniqueId());
       uniqueConstraintRepository.save(uniqueConstraintMapper.classToEntity(uniqueConstraintVO));
     }
     return dictionaryOriginTargetObjectId;
@@ -3432,7 +3431,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the string
    */
   private String nameToImportedSchema(String datasetSchemaId, Map<String, String> schemaNames,
-      List<DesignDataset> designs) {
+                                      List<DesignDataset> designs) {
     // The name of the dataset copied will be IMPORTED_whatever. If it exists, it will be
     // IMPORTED_whatever (1) and so
     String name = schemaNames.get(datasetSchemaId);
@@ -3463,12 +3462,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     if (isSchema) {
       if (!Pattern.matches(REGEX_NAME_SCHEMA, nameTrimmed)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+                EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
       }
     } else {
       if (!Pattern.matches(REGEX_NAME, nameTrimmed)) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-            EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+                EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
       }
     }
   }

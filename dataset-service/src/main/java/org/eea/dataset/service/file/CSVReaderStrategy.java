@@ -38,9 +38,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CSVReaderStrategy implements ReaderStrategy {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVReaderStrategy.class);
 
@@ -230,7 +227,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
           dataset, manageFixedRecords, connectionDataVO);
 
     } catch (final IOException | SQLException e) {
-      LOG_ERROR.error("Error when reading lines from CSV file {} for datasetId {}. Message: ", fileName, datasetId, e.getMessage());
+      LOG.error("Error when reading lines from CSV file {} for datasetId {}. Message: ", fileName, datasetId, e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in readLines for file {}, datasetId {} and tableSchemaId {}. Message: {}", fileName, datasetId, idTableSchema, e.getMessage());
@@ -327,7 +324,7 @@ public class CSVReaderStrategy implements ReaderStrategy {
     }
 
     if (!atLeastOneFieldSchema) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}, expectedHeaders={}, actualHeaders={}",
           datasetId, idTableSchema, getFieldNames(idTableSchema, dataSetSchema), values);
       throw new EEAException(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);

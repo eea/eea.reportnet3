@@ -222,6 +222,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_IMPORT_TABLE_NAME_FOLDER_PATH:
             case S3_VALIDATION_TABLE_PATH:
             case S3_TABLE_NAME_FOLDER_PATH:
+            case S3_ATTACHMENTS_TABLE_PATH:
             case S3_CURRENT_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
                     s3PathResolver.getTableName());

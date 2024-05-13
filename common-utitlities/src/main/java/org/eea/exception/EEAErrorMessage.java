@@ -197,6 +197,9 @@ public final class EEAErrorMessage {
   /** The Constant DATA_COLLECTION_NOT_CREATED: {@value}. */
   public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
 
+  /** The Constant DATA_COLLECTION_FAILED_ICEBERG_EXISTS: {@value}. */
+  public static final String DATA_COLLECTION_FAILED_ICEBERG_EXISTS = "Error creating data collection. Iceberg table exists";
+
   /** The Constant ERROR_DELETING_RULE: {@value}. */
   public static final String ERROR_DELETING_RULE = "Error deleting rules";
 
@@ -533,6 +536,10 @@ public final class EEAErrorMessage {
   /** The Constant IMPORTING_FILE_DATASET: {@value}. */
   public static final String IMPORTING_FILE_DATASET =
       "An unknown error happenned while importing a file into the dataset.";
+
+  /** The Constant IMPORTING_FILE_ICEBERG: {@value}. */
+  public static final String IMPORTING_FILE_ICEBERG =
+          "Can not import because the table is iceberg";
 
   /** The Constant EXPORTING_FILE_INTEGRATION: {@value}. */
   public static final String EXPORTING_FILE_INTEGRATION =

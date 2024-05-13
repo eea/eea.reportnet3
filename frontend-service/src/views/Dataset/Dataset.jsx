@@ -124,6 +124,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
+  const [isIcebergTableCreated, setIsIcebergTableCreated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isReferenceDataset, setIsReferenceDataset] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
@@ -398,7 +399,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       ]
     : [];
 
-    const internalExtensions = config.exportTypes.exportDatasetTypes
+  const internalExtensions = config.exportTypes.exportDatasetTypes
     .map(type => {
       const extensionsTypes = !isNil(type.code) && type.code.split('+');
 
@@ -469,6 +470,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
     }
+  };
+
+  const onChangeButtonsVisibility = disabled => {
+    setIsIcebergTableCreated(disabled);
   };
 
   const onConfirmDelete = async () => {
@@ -844,8 +849,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
+          if (tableSchema.icebergTableIsCreated) {
+            setIsIcebergTableCreated(true);
+          }
           return {
+            dataAreManuallyEditable: tableSchema.dataAreManuallyEditable,
             description: tableSchema.description || tableSchema.tableSchemaDescription,
+            icebergTableIsCreated: tableSchema.icebergTableIsCreated,
             id: tableSchema.tableSchemaId,
             name: tableSchema.tableSchemaName,
             notEmpty: tableSchema.notEmpty,
@@ -1154,6 +1164,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         isReferenceDataset={isReferenceDataset}
         isReportingWebform={isReportingWebform}
         levelErrorTypes={levelErrorTypes}
+        onChangeButtonsVisibility={onChangeButtonsVisibility}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
@@ -1212,6 +1223,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
                   disabled={
+                    isIcebergTableCreated ||
                     !hasWritePermissions ||
                     actionsContext.importDatasetProcessing ||
                     actionsContext.exportDatasetProcessing ||
@@ -1241,6 +1253,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
               disabled={
+                isIcebergTableCreated ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||
@@ -1267,6 +1280,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
             <DatasetDeleteDataDialog
               disabled={
+                isIcebergTableCreated ||
                 !hasWritePermissions ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
@@ -1288,6 +1302,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           <div className="p-toolbar-group-right">
             <DatasetValidateDialog
               disabled={
+                isIcebergTableCreated ||
                 !hasWritePermissions ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
@@ -1394,6 +1409,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           bigData={metadata?.dataflow.bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
+          dataflowId={dataflowId}
+          datasetId={datasetId}
           dialogHeader={selectedCustomImportIntegration.name}
           dialogOnHide={() => {
             setIsImportDatasetDialogVisible(false);
@@ -1412,6 +1429,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           onError={onImportDatasetError}
           onUpload={onUpload}
           replaceCheck={true}
+          s3Check={true}
           url={`${window.env.REACT_APP_BACKEND}${
             isNil(selectedCustomImportIntegration.id)
               ? getUrl(DatasetConfig.importFileDatasetUpd, {

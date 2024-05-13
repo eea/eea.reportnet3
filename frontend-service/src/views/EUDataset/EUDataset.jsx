@@ -42,7 +42,7 @@ export const EUDataset = () => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
-  const [bigData, setBigData] = useState(false)
+  const [bigData, setBigData] = useState(false);
 
   const [euDatasetState, euDatasetDispatch] = useReducer(euDatasetReducer, {
     bigData: false,
@@ -131,16 +131,16 @@ export const EUDataset = () => {
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} }, true);
     }
   };
-// Ticket 262014: bigdataref is not updated soon enough for the extension list to be rendered correctly. 
-// bigdataref.current remains false on occasion, during initial population of the extensionlist making it so
-// that the bigdata check is unreliable and thus wrong content is shown. Below is a workaround using a useState
-  useEffect(()=>{
-    if(euDatasetState?.bigData && !bigData) setBigData(true)
-  },[euDatasetState?.bigData])
+  // Ticket 262014: bigdataref is not updated soon enough for the extension list to be rendered correctly.
+  // bigdataref.current remains false on occasion, during initial population of the extensionlist making it so
+  // that the bigdata check is unreliable and thus wrong content is shown. Below is a workaround using a useState
+  useEffect(() => {
+    if (euDatasetState?.bigData && !bigData) setBigData(true);
+  }, [euDatasetState?.bigData]);
 
-  useEffect(()=>{
-    getExportExtensionsList()
-  },[bigData])
+  useEffect(() => {
+    getExportExtensionsList();
+  }, [bigData]);
 
   const getDataSchema = async () => {
     try {
@@ -247,12 +247,14 @@ export const EUDataset = () => {
       const tableSchema = datasetSchema.tables.map(tableSchema => {
         tableSchemaNamesList.push(tableSchema.tableSchemaName);
         return {
+          dataAreManuallyEditable: tableSchema['dataAreManuallyEditable'],
           description: tableSchema['tableSchemaDescription'],
           fixedNumber: tableSchema['tableSchemaFixedNumber'],
           hasErrors: {
             ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
           }.hasErrors,
           hasInfoTooltip: true,
+          icebergTableIsCreated: tableSchema['icebergTableIsCreated'],
           id: tableSchema['tableSchemaId'],
           name: tableSchema['tableSchemaName'],
           notEmpty: tableSchema['tableSchemaNotEmpty'],
@@ -326,6 +328,8 @@ export const EUDataset = () => {
     false
   );
 
+  const onChangeButtonsVisibility = disabled => {};
+
   const renderTabsSchema = () => (
     <TabsSchema
       bigData={euDatasetState.bigData}
@@ -337,6 +341,7 @@ export const EUDataset = () => {
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}
       levelErrorTypes={levelErrorTypes}
+      onChangeButtonsVisibility={onChangeButtonsVisibility}
       onLoadTableData={onLoadTableData}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}

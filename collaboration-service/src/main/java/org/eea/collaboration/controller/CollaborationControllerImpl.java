@@ -52,9 +52,6 @@ import springfox.documentation.annotations.ApiIgnore;
 @RequestMapping("/collaboration")
 public class CollaborationControllerImpl implements CollaborationController {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CollaborationControllerImpl.class);
 
@@ -78,26 +75,26 @@ public class CollaborationControllerImpl implements CollaborationController {
   @PostMapping("/createMessage/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Creates a new message assigned to a Dataflow", hidden = true,
-      response = MessageVO.class)
+          response = MessageVO.class)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Error creating message"),
-      @ApiResponse(code = 403, message = "Error creating message")})
+          @ApiResponse(code = 403, message = "Error creating message")})
   public MessageVO createMessage(
-      @ApiParam(value = "Dataflow Id you're assigning the message to",
-          example = "0") @PathVariable("dataflowId") Long dataflowId, @ApiParam(value = "Message Object") @RequestBody MessageVO messageVO,
-      @ApiParam(value = "user") @RequestParam(required = false) String user, @ApiParam(value = "jobId") @RequestParam(required = false) Long jobId) {
+          @ApiParam(value = "Dataflow Id you're assigning the message to",
+                  example = "0") @PathVariable("dataflowId") Long dataflowId, @ApiParam(value = "Message Object") @RequestBody MessageVO messageVO,
+          @ApiParam(value = "user") @RequestParam(required = false) String user, @ApiParam(value = "jobId") @RequestParam(required = false) Long jobId) {
     try {
       return collaborationService.createMessage(dataflowId, messageVO, user, jobId);
     } catch (EEAIllegalArgumentException e) {
-      LOG_ERROR.error("Error creating message because of missing data: {}", e.getMessage(), e);
+      LOG.error("Error creating message because of missing data: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
-      LOG_ERROR.error("There were missing permissions while creating the message: {}",
-          e.getMessage(), e);
+      LOG.error("There were missing permissions while creating the message: {}",
+              e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating message for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error creating message for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -112,22 +109,22 @@ public class CollaborationControllerImpl implements CollaborationController {
    */
   @Override
   @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+          @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @PostMapping("/createMessage/dataflow/{dataflowId}/attachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Creates a new message attachment assigned to a Dataflow and a provider Id",
-      response = MessageVO.class, hidden = true)
+          response = MessageVO.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.FILE_FORMAT),
-      @ApiResponse(code = 403, message = "Error creating message attachment"),
-      @ApiResponse(code = 500, message = "Internal server error creating message attachment")})
+          @ApiResponse(code = 403, message = "Error creating message attachment"),
+          @ApiResponse(code = 500, message = "Internal server error creating message attachment")})
   public MessageVO createMessageAttachment(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
-      @ApiParam(
-          value = "The file which is going to be attached") @RequestPart("fileAttachment") MultipartFile fileAttachment) {
+          @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+          @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+          @ApiParam(
+                  value = "The file which is going to be attached") @RequestPart("fileAttachment") MultipartFile fileAttachment) {
     try {
       if (providerId == null || dataflowId == null || null == fileAttachment
-          || null == fileAttachment.getOriginalFilename()) {
+              || null == fileAttachment.getOriginalFilename()) {
         throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
       }
       if (fileAttachment.getSize() > 20971520) {
@@ -140,23 +137,23 @@ public class CollaborationControllerImpl implements CollaborationController {
 
       String fileSize = String.valueOf(fileAttachment.getSize());
       return collaborationService.createMessageAttachment(dataflowId, providerId, is, fileName,
-          fileSize, fileAttachment.getContentType());
+              fileSize, fileAttachment.getContentType());
     } catch (EEAIllegalArgumentException e) {
-      LOG_ERROR.error("Error creating message because of missing data: {}", e.getMessage(), e);
+      LOG.error("Error creating message because of missing data: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
-      LOG_ERROR.error("There were missing permissions while creating the message: {}",
-          e.getMessage(), e);
+      LOG.error("There were missing permissions while creating the message: {}",
+              e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (IOException e) {
-      LOG_ERROR.error("Error saving message attachment from the dataflowId {}, with message: {}",
-          dataflowId, e.getMessage());
+      LOG.error("Error saving message attachment from the dataflowId {}, with message: {}",
+              dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.CREATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating message attachment for dataflowId {} and dataProviderId {} Message: {}", dataflowId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error creating message attachment for dataflowId {} and dataProviderId {} Message: {}", dataflowId, providerId, e.getMessage());
       throw e;
     }
   }
@@ -173,22 +170,22 @@ public class CollaborationControllerImpl implements CollaborationController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Updates the message read status", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Error updating the message"),
-      @ApiResponse(code = 500, message = "Error updating the message")})
+          @ApiResponse(code = 500, message = "Error updating the message")})
   public void updateMessageReadStatus(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Message Object to be updated") @RequestBody List<MessageVO> messageVOs) {
+          @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+          @ApiParam(value = "Message Object to be updated") @RequestBody List<MessageVO> messageVOs) {
     try {
       collaborationService.updateMessageReadStatus(dataflowId, messageVOs);
     } catch (EEAIllegalArgumentException e) {
-      LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
+      LOG.error("Error updating messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAForbiddenException e) {
-      LOG_ERROR.error("Error updating messages: {}", e.getMessage(), e);
+      LOG.error("Error updating messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.UPDATING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating message read status for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error updating message read status for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -206,11 +203,11 @@ public class CollaborationControllerImpl implements CollaborationController {
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Deletes the message", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = "Error deleting the message"),
-      @ApiResponse(code = 404, message = "Error deleting the message")})
+          @ApiResponse(code = 404, message = "Error deleting the message")})
   public void deleteMessage(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
-      @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
+          @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+          @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+          @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
     try {
       if (providerId == null || dataflowId == null || messageId == null) {
         throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
@@ -218,16 +215,16 @@ public class CollaborationControllerImpl implements CollaborationController {
       collaborationService.deleteMessage(messageId);
 
     } catch (EEAIllegalArgumentException e) {
-      LOG_ERROR.error("Error deleting message: {}", e.getMessage(), e);
+      LOG.error("Error deleting message: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error deleting message, messageId {}, with message: {}", messageId,
-          e.getMessage());
+      LOG.error("Error deleting message, messageId {}, with message: {}", messageId,
+              e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
+              EEAErrorMessage.DELETING_A_MESSAGE_IN_A_DATAFLOW);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting message with id {} for dataflowId {} and dataProviderId {} Message: {}", messageId, dataflowId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting message with id {} for dataflowId {} and dataProviderId {} Message: {}", messageId, dataflowId, providerId, e.getMessage());
       throw e;
     }
   }
@@ -246,17 +243,17 @@ public class CollaborationControllerImpl implements CollaborationController {
   @GetMapping("/findMessages/dataflow/{dataflowId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Gets all the messages assigned to a Dataflow and a Provider",
-      hidden = true)
+          hidden = true)
   @ApiResponse(code = 403, message = "Error finding the messages.")
   public MessagePaginatedVO findMessages(@PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
-      @ApiParam(value = "Searching for read messages?", example = "true",
-          required = false) @RequestParam(value = "read", required = false) Boolean read,
-      @ApiParam(value = "Page number where the messaged are located",
-          example = "0") @RequestParam("page") int page) {
+                                         @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+                                         @ApiParam(value = "Searching for read messages?", example = "true",
+                                                 required = false) @RequestParam(value = "read", required = false) Boolean read,
+                                         @ApiParam(value = "Page number where the messaged are located",
+                                                 example = "0") @RequestParam("page") int page) {
     try {
       MessagePaginatedVO messagePaginatedVO =
-          collaborationService.findMessages(dataflowId, providerId, read, page);
+              collaborationService.findMessages(dataflowId, providerId, read, page);
       List<MessageVO> listMessageVO = messagePaginatedVO.getListMessage();
 
       for (MessageVO messageVO : listMessageVO) {
@@ -273,11 +270,11 @@ public class CollaborationControllerImpl implements CollaborationController {
       }
       return messagePaginatedVO;
     } catch (EEAForbiddenException e) {
-      LOG_ERROR.error("Error finding messages: {}", e.getMessage(), e);
+      LOG.error("Error finding messages: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          EEAErrorMessage.RETRIEVING_A_MESSAGE_FROM_A_DATAFLOW);
+              EEAErrorMessage.RETRIEVING_A_MESSAGE_FROM_A_DATAFLOW);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving messages for dataflowId {} and dataProviderId {} Message: {}", dataflowId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving messages for dataflowId {} and dataProviderId {} Message: {}", dataflowId, providerId, e.getMessage());
       throw e;
     }
   }
@@ -292,15 +289,15 @@ public class CollaborationControllerImpl implements CollaborationController {
    */
   @Override
   @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+          @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   @PreAuthorize("secondLevelAuthorize(#dataflowId, 'DATAFLOW_STEWARD', 'DATAFLOW_CUSTODIAN','DATAFLOW_LEAD_REPORTER', 'DATAFLOW_REPORTER_READ', 'DATAFLOW_REPORTER_WRITE','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Gets the attachment assigned to a message", hidden = true)
   @ApiResponse(code = 404, message = "Error getting the message attachment")
   public ResponseEntity<byte[]> getMessageAttachment(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
-      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
-      @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
+          @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+          @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+          @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
 
     LOG.info("Downloading message attachment from the dataflowId {}", dataflowId);
     try {
@@ -311,13 +308,13 @@ public class CollaborationControllerImpl implements CollaborationController {
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename);
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
-      LOG_ERROR.error(
-          "Error downloading message attachment from the dataflowId {}, with message: {}",
-          dataflowId, e.getMessage());
+      LOG.error(
+              "Error downloading message attachment from the dataflowId {}, with message: {}",
+              dataflowId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
+              EEAErrorMessage.DOWNLOADING_ATTACHMENT_IN_A_DATAFLOW);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving message attachment for messageId {} dataflowId {} and dataProviderId {} Message: {}", messageId, dataflowId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving message attachment for messageId {} dataflowId {} and dataProviderId {} Message: {}", messageId, dataflowId, providerId, e.getMessage());
       throw e;
     }
 
@@ -340,20 +337,20 @@ public class CollaborationControllerImpl implements CollaborationController {
   @GetMapping("/private/notifyNewMessages")
   @ApiOperation(value = "Notifies about a new message", hidden = true)
   public void notifyNewMessages(@RequestParam("dataflowId") Long dataflowId,
-      @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
-      @ApiParam(value = "Custodian User Name", example = "user") @RequestParam(value = "custodianUserName", required = false) String custodianUserName,
-      @ApiParam(value = "Modified Dataset Id",
-          example = "0") @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
-      @ApiParam(value = "The Dataset Status",
-          example = "RELEASED") @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
-      @ApiParam(value = "Dataset name",
-          example = "Im A Dataset") @RequestParam("datasetName") String datasetName,
-      @ApiParam(value = "Event type") @RequestParam("eventType") String eventType) {
+                                @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
+                                @ApiParam(value = "Custodian User Name", example = "user") @RequestParam(value = "custodianUserName", required = false) String custodianUserName,
+                                @ApiParam(value = "Modified Dataset Id",
+                                        example = "0") @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
+                                @ApiParam(value = "The Dataset Status",
+                                        example = "RELEASED") @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
+                                @ApiParam(value = "Dataset name",
+                                        example = "Im A Dataset") @RequestParam("datasetName") String datasetName,
+                                @ApiParam(value = "Event type") @RequestParam("eventType") String eventType) {
     try {
       collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, custodianUserName, modifiedDatasetId,
               datasetStatus, datasetName, eventType);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error releasing new message notifications for dataflowId {} providerId {} modifiedDatasetId {} and eventType {}. Message: {}", dataflowId, providerId, modifiedDatasetId, eventType, e.getMessage());
+      LOG.error("Unexpected error! Error releasing new message notifications for dataflowId {} providerId {} modifiedDatasetId {} and eventType {}. Message: {}", dataflowId, providerId, modifiedDatasetId, eventType, e.getMessage());
       throw e;
     }
   }

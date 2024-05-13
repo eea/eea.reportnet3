@@ -106,7 +106,9 @@ export const useSetColumns = (
   setIsAttachFileVisible,
   setIsColumnInfoVisible,
   validationsTemplate,
-  isReporting
+  isReporting,
+  dataAreManuallyEditable,
+  isTableEditable
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
@@ -123,7 +125,7 @@ export const useSetColumns = (
     <div className={styles.providerCode}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
   );
 
-  const renderAttachment = (value = '', fieldId, fieldSchemaId) => {
+  const renderAttachment = (value = '', fieldId, fieldSchemaId, recordId, fieldName) => {
     const colSchema = colsSchema.filter(colSchema => colSchema.field === fieldSchemaId)[0];
     return (
       <div className={styles.attachment}>
@@ -133,25 +135,35 @@ export const useSetColumns = (
             icon="export"
             iconPos="right"
             label={value}
-            onClick={() => onFileDownload(value, fieldId)}
+            onClick={() => onFileDownload(value, fieldId, recordId, fieldName)}
           />
         )}
-        {hasWritePermissions && !isDataflowOpen && !isDesignDatasetEditorRead && (!colSchema.readOnly || !isReporting) && (
-          <Button
-            className="p-button-animated-blink p-button-secondary-transparent"
-            icon="import"
-            onClick={() => {
-              setIsAttachFileVisible(true);
-              onFileUploadVisible(
-                fieldId,
-                fieldSchemaId,
-                !isNil(colSchema) ? colSchema.validExtensions : [],
-                colSchema.maxSize
-              );
-            }}
-          />
-        )}
-        {hasWritePermissions &&
+        {dataAreManuallyEditable &&
+          isTableEditable &&
+          hasWritePermissions &&
+          !isDataflowOpen &&
+          !isDesignDatasetEditorRead &&
+          (!colSchema.readOnly || !isReporting) && (
+            <Button
+              className="p-button-animated-blink p-button-secondary-transparent"
+              icon="import"
+              onClick={() => {
+                setIsAttachFileVisible(true);
+                onFileUploadVisible(
+                  fieldId,
+                  fieldSchemaId,
+                  !isNil(colSchema) ? colSchema.validExtensions : [],
+                  colSchema.maxSize,
+                  value,
+                  fieldName,
+                  recordId
+                );
+              }}
+            />
+          )}
+        {dataAreManuallyEditable &&
+          isTableEditable &&
+          hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
           (!colSchema.readOnly || !isReporting) &&
@@ -160,7 +172,7 @@ export const useSetColumns = (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
               icon="trash"
-              onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId)}
+              onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId, value, fieldName, recordId)}
             />
           )}
       </div>
@@ -321,6 +333,8 @@ export const useSetColumns = (
 
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
+    let recordId = rowData.recordId;
+    let fieldName = field.fieldData.fieldName;
 
     const renderField = () => {
       if (!isNil(field)) {
@@ -348,7 +362,13 @@ export const useSetColumns = (
               .join('; ');
           }
         } else if (field.fieldData.type === 'ATTACHMENT') {
-          return renderAttachment(field.fieldData[column.field], field.fieldData['id'], column.field);
+          return renderAttachment(
+            field.fieldData[column.field],
+            field.fieldData['id'],
+            column.field,
+            recordId,
+            fieldName
+          );
         } else if (field.fieldData.type === 'POINT') {
           return renderPoint(field.fieldData[column.field]);
         } else if (
@@ -407,7 +427,9 @@ export const useSetColumns = (
           }`}
           editor={
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
-            (hasWebformWritePermissions &&
+            (dataAreManuallyEditable &&
+              isTableEditable &&
+              hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
               !isDataflowOpen &&
@@ -489,7 +511,9 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      hasWritePermissions ? columnsArr.unshift(editCol, validationCol) : columnsArr.unshift(validationCol);
+      dataAreManuallyEditable && isTableEditable && hasWritePermissions
+        ? columnsArr.unshift(editCol, validationCol)
+        : columnsArr.unshift(validationCol);
     }
 
     if (hasCountryCode) {
@@ -509,7 +533,9 @@ export const useSetColumns = (
     hasWebformWritePermissions,
     hasWritePermissions,
     initialCellValue,
-    records.selectedRecord.recordId
+    records.selectedRecord.recordId,
+    dataAreManuallyEditable,
+    isTableEditable
   ]);
 
   return {

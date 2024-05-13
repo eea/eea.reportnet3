@@ -57,8 +57,6 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The data collection service. */
   @Autowired
@@ -98,7 +96,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId, isCreation);
       LOG.info("Successfully undid data collection creation for dataflowId {}", dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error undoing data collection creation for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error undoing data collection creation for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -170,7 +168,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           LockSignature.CREATE_DATA_COLLECTION.getValue());
       createDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
       lockService.removeLockByCriteria(createDataCollection);
-      LOG_ERROR.error("Error creating DataCollection: Dataflow {} is not DESIGN", dataflowId);
+      LOG.error("Error creating DataCollection: Dataflow {} is not DESIGN", dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.NOT_DESIGN_DATAFLOW);
     }
@@ -186,7 +184,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
               manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
       LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating empty data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
+
+      LOG.error("Unexpected error! Error creating empty data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -222,7 +221,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           LockSignature.UPDATE_DATA_COLLECTION.getValue());
       updateDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
       lockService.removeLockByCriteria(updateDataCollection);
-      LOG_ERROR.error("Error updating DataCollection: Dataflow {} is not DRAFT", dataflowId);
+      LOG.error("Error updating DataCollection: Dataflow {} is not DRAFT", dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NOT_DRAFT_DATAFLOW);
     }
 
@@ -236,7 +235,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
       LOG.info("DataCollection update for Dataflow {} started", dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error updating data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }

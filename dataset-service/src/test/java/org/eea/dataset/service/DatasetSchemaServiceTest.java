@@ -800,7 +800,7 @@ public class DatasetSchemaServiceTest {
     TableSchemaVO tableSchemaVOSend = new TableSchemaVO();
     tableSchemaVOSend.setIdTableSchema("idTableSchema");
     try {
-      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVOSend);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVOSend, true);
     } catch (EEAException e) {
       Assert.assertEquals(
           String.format(EEAErrorMessage.TABLE_NOT_FOUND, tableSchemaVOSend.getIdTableSchema(), 1L),
@@ -831,7 +831,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(tableSchema.put(Mockito.any(), Mockito.any())).thenReturn(null);
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 1L, null));
-    dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
+    dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO, true);
     Mockito.verify(schemasRepository, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
   }
 
@@ -856,7 +856,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
-      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO, true);
     } catch (NullPointerException e) {
       throw e;
     }
@@ -876,7 +876,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
         .thenThrow(IllegalArgumentException.class);
     try {
-      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO, true);
     } catch (EEAException e) {
       Assert.assertEquals(IllegalArgumentException.class, e.getCause().getClass());
       throw e;

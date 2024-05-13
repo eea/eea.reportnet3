@@ -4,9 +4,11 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
+import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAErrorMessage;
@@ -14,6 +16,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -25,6 +28,8 @@ import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -72,9 +77,6 @@ import static org.eea.utils.LiteralConstants.S3_VALIDATION;
 @RequestMapping(value = "/validation")
 public class ValidationControllerImpl implements ValidationController {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationControllerImpl.class);
 
@@ -121,6 +123,9 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
 
+  @Autowired
+  private DatasetSchemaController datasetSchemaController;
+
   /**
    * Executes the validation job
    *
@@ -129,6 +134,7 @@ public class ValidationControllerImpl implements ValidationController {
    * @param jobId the jobId
    * @return
    */
+  @SneakyThrows
   @Override
   @PutMapping(value = "/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')  OR hasAnyRole('ADMIN')")
@@ -215,6 +221,15 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.info("Executing validation for datasetId {} with jobId {}", datasetId, jobId);
       if (dataflow!=null && dataflow.getBigData()!=null && dataflow.getBigData()) {
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0, dataset.getId(), S3_VALIDATION);
+        //check if there are tables converted to Iceberg and throw error
+        List<TableSchemaIdNameVO> tables = datasetSchemaController.getTableSchemasIds(dataset.getId(), dataflow.getId(), dataset.getDataProviderId());
+        String datasetSchemaId = dataset.getDatasetSchema();
+        for(TableSchemaIdNameVO table: tables){
+          TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
+          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+            throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
+          }
+        }
         validationHelper.executeValidationDL(datasetId, uuid, released, s3PathResolver, createParquetWithSQL);
       } else {
         validationHelper.executeValidation(datasetId, uuid, released, true);
@@ -225,10 +240,10 @@ public class ValidationControllerImpl implements ValidationController {
     } catch (EEAException e) {
       datasetMetabaseControllerZuul.updateDatasetRunningStatus(datasetId,
           DatasetRunningStatusEnum.ERROR_IN_VALIDATION);
-      LOG_ERROR.error("Error validating datasetId {} with jobId {}. Message {}", datasetId, jobId, e.getMessage(), e);
+      LOG.error("Error validating datasetId {} with jobId {}. Message {}", datasetId, jobId, e.getMessage(), e);
       validationHelper.deleteLockToReleaseProcess(datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error validating dataset data for datasetId {} with jobId {}. Message: {}", datasetId, jobId, e.getMessage());
+      LOG.error("Unexpected error! Error validating dataset data for datasetId {} with jobId {}. Message: {}", datasetId, jobId, e.getMessage());
       throw e;
     }
   }
@@ -298,9 +313,9 @@ public class ValidationControllerImpl implements ValidationController {
       validations = loadValidationsHelper.getListValidations(datasetId, pageable, headers, asc,
           levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving validations for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
     }
 
@@ -373,9 +388,9 @@ public class ValidationControllerImpl implements ValidationController {
       validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
           levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
     }
 
@@ -434,9 +449,9 @@ public class ValidationControllerImpl implements ValidationController {
       validations = loadValidationsHelperDL.getListGroupValidationsDL(datasetId, pageable,
               levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
     }
 
@@ -465,10 +480,10 @@ public class ValidationControllerImpl implements ValidationController {
     try {
       validationService.exportValidationFile(datasetId);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error exporting validation data from the dataset {}.  Message: {}",
+      LOG.error("Error exporting validation data from the dataset {}.  Message: {}",
           datasetId, e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error validation data for datasetId {} to CSV. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error validation data for datasetId {} to CSV. Message: {}", datasetId, e.getMessage());
       throw e;
     }
   }
@@ -511,7 +526,7 @@ public class ValidationControllerImpl implements ValidationController {
       // delete the file after downloading it
       FileUtils.forceDelete(file);
     } catch (IOException | ResponseStatusException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
           datasetId, fileName, e.getMessage());
 
@@ -519,7 +534,7 @@ public class ValidationControllerImpl implements ValidationController {
           "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
           datasetId, fileName));
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error downloading validations file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error downloading validations file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
       throw e;
     }
   }

@@ -29,6 +29,7 @@ export const TabsSchema = ({
   isReferenceDataset,
   isReportingWebform,
   levelErrorTypes,
+  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
@@ -76,11 +77,13 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   bigData={bigData}
+                  dataAreManuallyEditable={table.dataAreManuallyEditable}
                   dataflowType={dataflowType}
                   dataProviderId={dataProviderId}
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
+                  icebergTableIsCreated={table.icebergTableIsCreated}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
@@ -89,6 +92,7 @@ export const TabsSchema = ({
                   isReportingWebform={isReportingWebform}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
+                  onChangeButtonsVisibility={onChangeButtonsVisibility}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   reporting={reporting}

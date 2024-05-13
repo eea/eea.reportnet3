@@ -70,9 +70,6 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   private DesignDatasetService designDatasetService;
 
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseControllerImpl.class);
 
@@ -88,7 +85,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PreAuthorize("checkAccessSuperUser('DATAFLOW',#dataflowId) OR checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Find reporting dataset id by dataflow id", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@ApiParam(type = "Long",
-      value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+          value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
     return reportingDatasetService.getDataSetIdByDataflowId(dataflowId);
   }
 
@@ -102,11 +99,11 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/findReportings/{schemaId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get reporting list id", hidden = true)
   public List<ReportingDatasetVO> getReportingsIdBySchemaId(
-      @ApiParam(type = "String", value = "Schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String schemaId) {
+          @ApiParam(type = "String", value = "Schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @PathVariable("schemaId") String schemaId) {
     return reportingDatasetService.getDataSetIdBySchemaId(schemaId);
   }
 
@@ -121,7 +118,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/private/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findDatasetMetabaseById(@ApiParam(type = "Long", value = "dataset Id",
-      example = "0") @PathVariable("datasetId") Long datasetId) {
+          example = "0") @PathVariable("datasetId") Long datasetId) {
     return datasetMetabaseService.findDatasetMetabase(datasetId);
   }
 
@@ -157,13 +154,13 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId)")
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findExternalDatasetMetabaseById(@ApiParam(type = "Long",
-      value = "dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
+          value = "dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
     try {
       return datasetMetabaseService.findDatasetMetabaseExternal(datasetId);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving external dataset metabase for datasetId {} Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving external dataset metabase for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
     }
   }
@@ -182,29 +179,29 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PostMapping(value = "/private/create")
   @ApiOperation(value = "create empty dataset", hidden = true)
   public void createEmptyDataSet(
-      @ApiParam(value = "dataset type", example = "REPORTING") @RequestParam(value = "datasetType",
-          required = true) final DatasetTypeEnum datasetType,
-      @RequestParam(value = "datasetName", required = true) final String datasetname,
-      @ApiParam(type = "String", value = "dataset schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "idDatasetSchema",
-              required = false) String idDatasetSchema,
-      @ApiParam(type = "Long", value = "dataflow Id",
-          example = "0") @RequestParam(value = "idDataflow", required = false) Long idDataflow) {
+          @ApiParam(value = "dataset type", example = "REPORTING") @RequestParam(value = "datasetType",
+                  required = true) final DatasetTypeEnum datasetType,
+          @RequestParam(value = "datasetName", required = true) final String datasetname,
+          @ApiParam(type = "String", value = "dataset schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "idDatasetSchema",
+                  required = false) String idDatasetSchema,
+          @ApiParam(type = "Long", value = "dataflow Id",
+                  example = "0") @RequestParam(value = "idDataflow", required = false) Long idDataflow) {
     if (StringUtils.isBlank(datasetname)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+              EEAErrorMessage.DATASET_INCORRECT_ID);
     }
     try {
       RepresentativeVO representative = new RepresentativeVO();
       representative.setDataProviderId(0L);
       datasetMetabaseService.createEmptyDataset(datasetType, datasetname, idDatasetSchema,
-          idDataflow, null, Arrays.asList(representative), 0);
+              idDataflow, null, Arrays.asList(representative), 0);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error when creating empty dataset {} with dataSchemaId {} for dataflowId {}. Message: {}", datasetname, idDatasetSchema, idDataflow, e.getMessage());
+      LOG.error("Error when creating empty dataset {} with dataSchemaId {} for dataflowId {}. Message: {}", datasetname, idDatasetSchema, idDataflow, e.getMessage());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_UNKNOW_TYPE);
+              EEAErrorMessage.DATASET_UNKNOW_TYPE);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating empty dataset {} with datasetSchemaId {} for dataflowId {} Message: {}", datasetname, idDatasetSchema, idDataflow, e.getMessage());
+      LOG.error("Unexpected error! Error creating empty dataset {} with datasetSchemaId {} for dataflowId {} Message: {}", datasetname, idDatasetSchema, idDataflow, e.getMessage());
       throw e;
     }
 
@@ -220,13 +217,13 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PutMapping(value = "/updateDatasetName")
   @ApiOperation(value = "Update dataset name", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated dataset name"),
-      @ApiResponse(code = 400, message = "Dataset id is incorrect or not informed")})
+          @ApiResponse(code = 400, message = "Dataset id is incorrect or not informed")})
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
   public void updateDatasetName(
-      @ApiParam(type = "Long", value = "Dataset Id",
-          example = "0") @RequestParam(value = "datasetId", required = true) Long datasetId,
-      @ApiParam(type = "String", value = "Dataset Name", example = "dataset1") @RequestParam(
-          value = "datasetName", required = false) String datasetName) {
+          @ApiParam(type = "Long", value = "Dataset Id",
+                  example = "0") @RequestParam(value = "datasetId", required = true) Long datasetId,
+          @ApiParam(type = "String", value = "Dataset Name", example = "dataset1") @RequestParam(
+                  value = "datasetName", required = false) String datasetName) {
 
     String nameTrimmed = datasetName.trim();
     filterName(nameTrimmed);
@@ -234,7 +231,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
 
     if (!datasetMetabaseService.updateDatasetName(datasetId, datasetName)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_INCORRECT_ID);
+              EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
 
@@ -247,18 +244,18 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PutMapping(value = "/updateDatasetStatus")
   @ApiOperation(value = "Update dataset Status", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated status"),
-      @ApiResponse(code = 500, message = "Error updating status")})
+          @ApiResponse(code = 500, message = "Error updating status")})
   @PreAuthorize("secondLevelAuthorize(#datasetStatusMessageVO.datasetId,'DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_STEWARD_SUPPORT')")
   public void updateDatasetStatus(@ApiParam(
-      value = "dataset Status message object") @RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
+          value = "dataset Status message object") @RequestBody DatasetStatusMessageVO datasetStatusMessageVO) {
     try {
       datasetMetabaseService.updateDatasetStatus(datasetStatusMessageVO);
     } catch (Exception e) {
       Long datasetId = (datasetStatusMessageVO != null) ? datasetStatusMessageVO.getDatasetId() : null;
       String datasetStatus = (datasetStatusMessageVO != null && datasetStatusMessageVO.getStatus() != null) ? datasetStatusMessageVO.getStatus().toString() : null;
-      LOG_ERROR.error("Unexpected error! Error updating dataset status with datasetId {} to status {}. Message: {}", datasetId, datasetStatus, e.getMessage());
+      LOG.error("Unexpected error! Error updating dataset status with datasetId {} to status {}. Message: {}", datasetId, datasetStatus, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.UPDATING_DATASET_STATUS);
+              EEAErrorMessage.UPDATING_DATASET_STATUS);
     }
   }
 
@@ -274,7 +271,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "Get design dataset id list", hidden = true)
   @GetMapping(value = "/private/design/dataflow/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DesignDatasetVO> findDesignDataSetIdByDataflowId(
-      @ApiParam(type = "Long", value = "dataflow Id", example = "0") Long idDataflow) {
+          @ApiParam(type = "Long", value = "dataflow Id", example = "0") Long idDataflow) {
 
     return designDatasetService.getDesignDataSetIdByDataflowId(idDataflow);
 
@@ -295,15 +292,15 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   // @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_READ','DATASET_REPORTER_WRITE','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','DATASCHEMA_CUSTODIAN','DATASCHEMA_STEWARD','DATASCHEMA_EDITOR_READ','DATASCHEMA_EDITOR_WRITE','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PreAuthorize("isAuthenticated()")
   public StatisticsVO getStatisticsById(@ApiParam(type = "Long", value = "dataset Id",
-      example = "0") @PathVariable("datasetId") Long datasetId) {
+          example = "0") @PathVariable("datasetId") Long datasetId) {
 
     StatisticsVO statistics = null;
     try {
       statistics = datasetMetabaseService.getStatistics(datasetId);
     } catch (EEAException | InstantiationException | IllegalAccessException e) {
-      LOG_ERROR.error("Error getting statistics for datasetId {}. Error message: {}",datasetId, e.getMessage(), e);
+      LOG.error("Error getting statistics for datasetId {}. Error message: {}",datasetId, e.getMessage(), e);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving statistics for datasetId {} Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving statistics for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
     }
 
@@ -321,23 +318,23 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/globalStatistics/dataflow/{dataflowId}/dataSchema/{dataschemaId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "get global statistics", hidden = true)
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
   public List<StatisticsVO> getGlobalStatisticsByDataschemaId(
-      @ApiParam(type = "String", value = "Dataset schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataschemaId") String dataschemaId,
-      @ApiParam(type = "Long", value = "Dataflow Id",
-          example = "0") @PathVariable("dataflowId") Long dataflowId) {
+          @ApiParam(type = "String", value = "Dataset schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @PathVariable("dataschemaId") String dataschemaId,
+          @ApiParam(type = "Long", value = "Dataflow Id",
+                  example = "0") @PathVariable("dataflowId") Long dataflowId) {
 
     List<StatisticsVO> statistics = null;
 
     try {
       statistics = datasetMetabaseService.getGlobalStatistics(dataschemaId);
     } catch (EEAException | InstantiationException | IllegalAccessException e) {
-      LOG_ERROR.error("Error getting global statistics for dataflowId {} and dataSchemaId {}. Error message: {}", dataflowId, dataschemaId, e.getMessage(), e);
+      LOG.error("Error getting global statistics for dataflowId {} and dataSchemaId {}. Error message: {}", dataflowId, dataschemaId, e.getMessage(), e);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving global statistics for datasetSchemaId {} and dataflowId {} Message: {}", dataschemaId, dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving global statistics for datasetSchemaId {} and dataflowId {} Message: {}", dataschemaId, dataflowId, e.getMessage());
       throw e;
     }
 
@@ -355,7 +352,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "find dataset schema by dataset Id", hidden = true)
   @GetMapping("/private/findDatasetSchemaIdById")
   public String findDatasetSchemaIdById(@ApiParam(type = "Long", value = "Dataset Id",
-      example = "0") @RequestParam("datasetId") long datasetId) {
+          example = "0") @RequestParam("datasetId") long datasetId) {
     return datasetMetabaseService.findDatasetSchemaIdById(datasetId);
   }
 
@@ -372,16 +369,16 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping("/private/getIntegrityDatasetId")
   @ApiOperation(value = "Get integrity dataset Id", hidden = true)
   public Long getIntegrityDatasetId(
-      @ApiParam(type = "Long", value = "Dataset Id Origin",
-          example = "0") @RequestParam("id") Long datasetIdOrigin,
-      @ApiParam(type = "String", value = "Dataset origin schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam(
-              value = "datasetOriginSchemaId") String datasetOriginSchemaId,
-      @ApiParam(type = "String", value = "Dataset reference schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam(
-              value = "datasetReferencedSchemaId") String datasetReferencedSchemaId) {
+          @ApiParam(type = "Long", value = "Dataset Id Origin",
+                  example = "0") @RequestParam("id") Long datasetIdOrigin,
+          @ApiParam(type = "String", value = "Dataset origin schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam(
+                  value = "datasetOriginSchemaId") String datasetOriginSchemaId,
+          @ApiParam(type = "String", value = "Dataset reference schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam(
+                  value = "datasetReferencedSchemaId") String datasetReferencedSchemaId) {
     return datasetMetabaseService.getIntegrityDatasetId(datasetIdOrigin, datasetOriginSchemaId,
-        datasetReferencedSchemaId);
+            datasetReferencedSchemaId);
   }
 
   /**
@@ -396,19 +393,19 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PostMapping("/private/createForeignRelationship")
   @ApiOperation(value = "create foreign relation", hidden = true)
   public void createDatasetForeignRelationship(
-      @ApiParam(type = "Long", value = "Dataset Id origin",
-          example = "0") @RequestParam("datasetOriginId") final long datasetOriginId,
-      @ApiParam(type = "Long", value = "Dataset Id referenced",
-          example = "0") @RequestParam("datasetReferencedId") final long datasetReferencedId,
-      @ApiParam(type = "String", value = "Dataset Origin schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
-      @ApiParam(type = "String", value = "Dataset reference schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
+          @ApiParam(type = "Long", value = "Dataset Id origin",
+                  example = "0") @RequestParam("datasetOriginId") final long datasetOriginId,
+          @ApiParam(type = "Long", value = "Dataset Id referenced",
+                  example = "0") @RequestParam("datasetReferencedId") final long datasetReferencedId,
+          @ApiParam(type = "String", value = "Dataset Origin schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+          @ApiParam(type = "String", value = "Dataset reference schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
     try {
       datasetMetabaseService.createForeignRelationship(datasetOriginId, datasetReferencedId,
               originDatasetSchemaId, referencedDatasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating foreign relationship for datasetOriginId {} datasetReferencedId {} originDatasetSchemaId {} and referencedDatasetSchemaId {} Message: {}", datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error creating foreign relationship for datasetOriginId {} datasetReferencedId {} originDatasetSchemaId {} and referencedDatasetSchemaId {} Message: {}", datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId, e.getMessage());
       throw e;
     }
 
@@ -426,19 +423,19 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PutMapping("/private/updateForeignRelationship")
   @ApiOperation(value = "Update foreign relation", hidden = true)
   public void updateDatasetForeignRelationship(
-      @ApiParam(type = "Long", value = "Dataset Id origin",
-          example = "0") @RequestParam("datasetOriginId") final long datasetOriginId,
-      @ApiParam(type = "Long", value = "Dataset Id reference",
-          example = "0") @RequestParam("datasetReferencedId") final long datasetReferencedId,
-      @ApiParam(type = "String", value = "Datasaet Origin schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
-      @ApiParam(type = "String", value = "Dataset reference schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
+          @ApiParam(type = "Long", value = "Dataset Id origin",
+                  example = "0") @RequestParam("datasetOriginId") final long datasetOriginId,
+          @ApiParam(type = "Long", value = "Dataset Id reference",
+                  example = "0") @RequestParam("datasetReferencedId") final long datasetReferencedId,
+          @ApiParam(type = "String", value = "Datasaet Origin schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("originDatasetSchemaId") final String originDatasetSchemaId,
+          @ApiParam(type = "String", value = "Dataset reference schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("referencedDatasetSchemaId") final String referencedDatasetSchemaId) {
     try {
       datasetMetabaseService.updateForeignRelationship(datasetOriginId, datasetReferencedId,
               originDatasetSchemaId, referencedDatasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating foreign relationship for datasetOriginId {} datasetReferencedId {} originDatasetSchemaId {} and referencedDatasetSchemaId {} Message: {}", datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error updating foreign relationship for datasetOriginId {} datasetReferencedId {} originDatasetSchemaId {} and referencedDatasetSchemaId {} Message: {}", datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -453,10 +450,10 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping("/private/getDatasetId/datasetSchema/{datasetSchemaId}")
   @ApiOperation(value = "Get design dataset id by dataset schema Id", hidden = true)
   public Long getDesignDatasetIdByDatasetSchemaId(@ApiParam(type = "String",
-      value = "Dataset schema Id",
-      example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId) {
+          value = "Dataset schema Id",
+          example = "5cf0e9b3b793310e9ceca190") @PathVariable("datasetSchemaId") String datasetSchemaId) {
     return datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId,
-        null);
+            null);
   }
 
 
@@ -472,14 +469,14 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @DeleteMapping("/private/deleteForeignRelationship")
   @ApiOperation(value = "Delete foreign relations", hidden = true)
   public void deleteForeignRelationship(
-      @ApiParam(type = "Long", value = "Dataset origin Id",
-          example = "0") @RequestParam("datasetOriginId") Long datasetOriginId,
-      @ApiParam(type = "Long", value = "Dataset referenced Id", example = "0") @RequestParam(
-          value = "datasetReferencedId", required = false) Long datasetReferencedId,
-      @ApiParam(type = "String", value = "origin dataset schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
-      @ApiParam(type = "String", value = "referenced Dataset schema Id",
-          example = "5cf0e9b3b793310e9ceca190") @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId) {
+          @ApiParam(type = "Long", value = "Dataset origin Id",
+                  example = "0") @RequestParam("datasetOriginId") Long datasetOriginId,
+          @ApiParam(type = "Long", value = "Dataset referenced Id", example = "0") @RequestParam(
+                  value = "datasetReferencedId", required = false) Long datasetReferencedId,
+          @ApiParam(type = "String", value = "origin dataset schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("originDatasetSchemaId") String originDatasetSchemaId,
+          @ApiParam(type = "String", value = "referenced Dataset schema Id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam("referencedDatasetSchemaId") String referencedDatasetSchemaId) {
 
     try {
 
@@ -490,7 +487,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
       datasetMetabaseService.deleteForeignRelation(datasetOriginId, datasetReferencedId,
               originDatasetSchemaId, referencedDatasetSchemaId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting foreign relationship for datasetOriginId {} datasetReferencedId {} originDatasetSchemaId {} and referencedDatasetSchemaId {} Message: {}", datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting foreign relationship for datasetOriginId {} datasetReferencedId {} originDatasetSchemaId {} and referencedDatasetSchemaId {} Message: {}", datasetOriginId, datasetReferencedId, originDatasetSchemaId, referencedDatasetSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -505,7 +502,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping("/private/getType/{datasetId}")
   @ApiOperation(value = "get dataset type", hidden = true)
   public DatasetTypeEnum getType(@ApiParam(type = "Long", value = "Dataset Id",
-      example = "0") @PathVariable("datasetId") Long datasetId) {
+          example = "0") @PathVariable("datasetId") Long datasetId) {
     return datasetMetabaseService.getDatasetType(datasetId);
   }
 
@@ -520,12 +517,12 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "get lists of dataset ids by dataflow id and provider Id", hidden = true)
   @GetMapping("/private/getDatasetIdsByDataflowIdAndDataProviderId")
   public List<Long> getDatasetIdsByDataflowIdAndDataProviderId(
-      @ApiParam(type = "Long", value = "dataflow Id",
-          example = "0") @RequestParam("dataflowId") Long dataflowId,
-      @ApiParam(type = "Long", value = "provider Id",
-          example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
+          @ApiParam(type = "Long", value = "dataflow Id",
+                  example = "0") @RequestParam("dataflowId") Long dataflowId,
+          @ApiParam(type = "Long", value = "provider Id",
+                  example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
     return datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
-        dataProviderId);
+            dataProviderId);
   }
 
   /**
@@ -538,7 +535,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping("/private/getUserProviderIdsByDataflowId")
   @ApiOperation(value = "get list of user provider ids by dataflow Id ", hidden = true)
   public List<Long> getUserProviderIdsByDataflowId(@ApiParam(type = "Long", value = "Dataflow Id",
-      example = "0") @RequestParam("dataflowId") Long dataflowId) {
+          example = "0") @RequestParam("dataflowId") Long dataflowId) {
     return datasetMetabaseService.getUserProviderIdsByDataflowId(dataflowId);
   }
 
@@ -551,14 +548,14 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/reportingPublic/dataflow/{id}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find reporting dataset public by dataflow Id", hidden = true)
   public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowId(@ApiParam(
-      type = "Long", value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
+          type = "Long", value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     try {
       return reportingDatasetService.getDataSetPublicByDataflow(dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving reporting dataset public for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving reporting dataset public for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -573,18 +570,18 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/reportingPublic/dataflow/{id}/provider/{providerId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find reporting dataset public by dataflow Id and provider id",
-      hidden = true)
+          hidden = true)
   public List<ReportingDatasetPublicVO> findReportingDataSetPublicByDataflowIdAndProviderId(
-      @ApiParam(type = "Long", value = "Dataflow Id",
-          example = "0") @PathVariable("id") Long dataflowId,
-      @ApiParam(type = "Long", value = "provider Id",
-          example = "0") @PathVariable("providerId") Long providerId) {
+          @ApiParam(type = "Long", value = "Dataflow Id",
+                  example = "0") @PathVariable("id") Long dataflowId,
+          @ApiParam(type = "Long", value = "provider Id",
+                  example = "0") @PathVariable("providerId") Long providerId) {
     try {
       return reportingDatasetService.getDataSetPublicByDataflowAndProviderId(dataflowId, providerId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving reporting dataset public for dataflowId {} and providerId {} Message: {}", dataflowId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving reporting dataset public for dataflowId {} and providerId {} Message: {}", dataflowId, providerId, e.getMessage());
       throw e;
     }
   }
@@ -600,18 +597,18 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/dataflow/{id}/dataProvider/{dataProviderId}",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find reporting datasets by dataflow Id and provider id", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowIdAndProviderId(
-      @ApiParam(type = "Long", value = "Dataflow Id",
-          example = "0") @PathVariable("id") Long dataflowId,
-      @ApiParam(type = "Long", value = "provider Id",
-          example = "0") @PathVariable("dataProviderId") Long dataProviderId) {
+          @ApiParam(type = "Long", value = "Dataflow Id",
+                  example = "0") @PathVariable("id") Long dataflowId,
+          @ApiParam(type = "Long", value = "provider Id",
+                  example = "0") @PathVariable("dataProviderId") Long dataProviderId) {
     try {
       return reportingDatasetService.getDataSetIdByDataflowIdAndDataProviderId(dataflowId,
               dataProviderId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving reporting dataset for dataflowId {} and dataProviderId {} Message: {}", dataflowId, dataProviderId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving reporting dataset for dataflowId {} and dataProviderId {} Message: {}", dataflowId, dataProviderId, e.getMessage());
       throw e;
     }
   }
@@ -626,10 +623,10 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/private/reportings/dataflowIds",
-      produces = MediaType.APPLICATION_JSON_VALUE)
+          produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find reporting datasets by dataflow Ids list", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetByDataflowIds(
-      @ApiParam(value = "Dataflow Ids list") @RequestParam("dataflowIds") List<Long> dataflowIds) {
+          @ApiParam(value = "Dataflow Ids list") @RequestParam("dataflowIds") List<Long> dataflowIds) {
     return reportingDatasetService.getReportingsByDataflowIds(dataflowIds);
   }
 
@@ -645,7 +642,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/private/datasets/dataflowIds", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find datasets by dataflow Ids list", hidden = true)
   public List<DataSetMetabaseVO> findDataSetByDataflowIds(
-      @ApiParam(value = "Dataflow Ids list") @RequestParam("dataflowIds") List<Long> dataflowIds) {
+          @ApiParam(value = "Dataflow Ids list") @RequestParam("dataflowIds") List<Long> dataflowIds) {
     return datasetMetabaseService.findDataSetByDataflowIds(dataflowIds);
   }
 
@@ -660,7 +657,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/private/providerIds", produces = MediaType.APPLICATION_JSON_VALUE)
   @ApiOperation(value = "Find datasets by Provider Ids list", hidden = true)
   public List<DataSetMetabaseVO> findReportingDataSetByProviderIds(
-      @ApiParam(value = "Provider Ids list") @RequestParam("providerIds") List<Long> providerIds) {
+          @ApiParam(value = "Provider Ids list") @RequestParam("providerIds") List<Long> providerIds) {
     return datasetMetabaseService.getDatasetsByProviderIds(providerIds);
   }
 
@@ -672,7 +669,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   private void filterName(String nameTrimmed) {
     if (!Pattern.matches(REGEX_NAME_SCHEMA, nameTrimmed)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-          EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
+              EEAErrorMessage.DATASET_SCHEMA_INVALID_NAME_ERROR);
     }
   }
 
@@ -685,13 +682,13 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @GetMapping(value = "/private/datasetsSummary/dataflow/{id}")
   @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
-      hidden = true)
+          hidden = true)
   public List<DatasetsSummaryVO> getDatasetsSummaryList(
-      @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
+          @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
     try {
       return datasetMetabaseService.getDatasetsSummaryList(dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving datasets summary list for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving datasets summary list for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -707,15 +704,15 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @PutMapping(value = "/private/updateDatasetRunningStatus/{id}")
   @ApiOperation(value = "Update dataset running status", hidden = true)
   public void updateDatasetRunningStatus(
-      @ApiParam(value = "Dataset Id", example = "0") @PathVariable("id") Long datasetId,
-      @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus) {
+          @ApiParam(value = "Dataset Id", example = "0") @PathVariable("id") Long datasetId,
+          @RequestParam("datasetRunningStatus") DatasetRunningStatusEnum datasetRunningStatus) {
     try {
       datasetMetabaseService.updateDatasetRunningStatus(datasetId, datasetRunningStatus);
     } catch (Exception e) {
       String datasetStatus = (datasetRunningStatus != null) ? datasetRunningStatus.toString() : null;
-      LOG_ERROR.error("Unexpected error! Error updating dataset running status for datasetId {} to {} Message: {}", datasetId, datasetStatus, e.getMessage());
+      LOG.error("Unexpected error! Error updating dataset running status for datasetId {} to {} Message: {}", datasetId, datasetStatus, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-          EEAErrorMessage.UPDATING_DATASET_STATUS);
+              EEAErrorMessage.UPDATING_DATASET_STATUS);
     }
   }
 }

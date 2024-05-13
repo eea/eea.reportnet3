@@ -39,9 +39,6 @@ public class LockServiceImpl implements LockService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant SCHEDULER. */
   @Autowired
   private JobScheduler scheduler;
@@ -79,7 +76,7 @@ public class LockServiceImpl implements LockService {
       return lockVO;
     }
 
-    LOG_ERROR.error("Already locked: {}", lockVO.getId());
+    LOG.error("Already locked: {}", lockVO.getId());
     throw new EEAException(EEAErrorMessage.METHOD_LOCKED + ": " + lockVO);
   }
 

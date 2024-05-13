@@ -47,9 +47,6 @@ public class NotificationServiceImpl implements NotificationService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The template. */
   @Autowired
   private SimpMessagingTemplate template;
@@ -110,7 +107,7 @@ public class NotificationServiceImpl implements NotificationService {
       userNotificationRepository.save(userNotification);
       LOG.info("User Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("Error creating a User Notification");
+      LOG.error("Error creating a User Notification");
       throw new EEAException(e.getMessage());
     }
   }
@@ -136,7 +133,7 @@ public class NotificationServiceImpl implements NotificationService {
       template.convertAndSend(SYSTEM_NOTIFICATION_QUEUE_NAME, sysNotiVO);
       LOG.info("System Notification created succesfully in mongo");
     } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("Error creating a System Notification. {}", e.getMessage(), e);
+      LOG.error("Error creating a System Notification. {}", e.getMessage(), e);
       throw new EEAException(e.getMessage());
     }
   }
@@ -158,7 +155,7 @@ public class NotificationServiceImpl implements NotificationService {
       }
       LOG.info("System Notification deleted succesfully in mongo");
     } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("Error deleting a System Notification");
+      LOG.error("Error deleting a System Notification");
       throw new EEAException(e.getMessage());
     }
   }
@@ -191,7 +188,7 @@ public class NotificationServiceImpl implements NotificationService {
       LOG.info("System Notification updated succesfully in mongo");
 
     } catch (IllegalArgumentException e) {
-      LOG_ERROR.error("Error updating a System Notification");
+      LOG.error("Error updating a System Notification");
       throw new EEAException(e.getMessage());
     }
   }

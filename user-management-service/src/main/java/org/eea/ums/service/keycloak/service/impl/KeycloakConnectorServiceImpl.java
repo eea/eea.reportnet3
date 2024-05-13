@@ -56,11 +56,6 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   private static final Logger LOG = LoggerFactory.getLogger(KeycloakConnectorServiceImpl.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
    * The Constant GENERATE_TOKEN_URL: {@value}.
    */
   private static final String GENERATE_TOKEN_URL =
@@ -661,7 +656,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
       LOG.info("Group created: {}", groupInfo);
     } catch (HttpClientErrorException ex) {
       if (HttpStatus.CONFLICT.equals(ex.getStatusCode())) {
-        LOG_ERROR.error("Error creating permission, already created");
+        LOG.error("Error creating permission, already created");
       } else {
         throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED);
       }
@@ -713,7 +708,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
               .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
           HttpMethod.PUT, request, Void.class);
     } catch (Exception e) {
-      LOG_ERROR.error("Error creating permission due to reason {}", e.getMessage(), e);
+      LOG.error("Error creating permission due to reason {}", e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.PERMISSION_NOT_CREATED, e);
     }
   }
@@ -740,7 +735,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
               .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
           HttpMethod.DELETE, request, Void.class);
     } catch (Exception e) {
-      LOG_ERROR.error("Error removing permission due to reason {}", e.getMessage(), e);
+      LOG.error("Error removing permission due to reason {}", e.getMessage(), e);
       throw new EEAException(String.format(EEAErrorMessage.PERMISSION_NOT_REMOVED, groupId), e);
     }
   }
@@ -870,7 +865,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
         responseBody = tokenInfo.getBody();
       }
     } catch (RestClientException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error retrieving token from Keycloak host {} due to reason {} with following values {}",
           keycloakHost, e.getMessage(), map, e);
       throw e;

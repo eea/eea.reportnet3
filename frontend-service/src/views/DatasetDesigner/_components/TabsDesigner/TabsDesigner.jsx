@@ -46,6 +46,7 @@ export const TabsDesigner = ({
   manageUniqueConstraint,
   maxLength,
   onChangeReference,
+  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
@@ -126,9 +127,18 @@ export const TabsDesigner = ({
     }
   };
 
-  const onChangeTableProperties = (tabSchemaId, tableSchemaDescription, readOnly, toPrefill, notEmpty, fixedNumber) => {
+  const onChangeTableProperties = (
+    tabSchemaId,
+    tableSchemaDescription,
+    readOnly,
+    toPrefill,
+    notEmpty,
+    fixedNumber,
+    dataAreManuallyEditable
+  ) => {
     const inmTabs = [...tabs];
     const tabIdx = TabsUtils.getIndexByTableProperty(tabSchemaId, inmTabs, 'tableSchemaId');
+    inmTabs[tabIdx].dataAreManuallyEditable = dataAreManuallyEditable;
     inmTabs[tabIdx].description = tableSchemaDescription;
     inmTabs[tabIdx].fixedNumber = fixedNumber;
     inmTabs[tabIdx].notEmpty = notEmpty;
@@ -477,6 +487,7 @@ export const TabsDesigner = ({
                       key={tab.index}
                       manageDialogs={manageDialogs}
                       manageUniqueConstraint={manageUniqueConstraint}
+                      onChangeButtonsVisibility={onChangeButtonsVisibility}
                       onChangeFields={onChangeFields}
                       onChangeReference={onChangeReference}
                       onChangeTableProperties={onChangeTableProperties}

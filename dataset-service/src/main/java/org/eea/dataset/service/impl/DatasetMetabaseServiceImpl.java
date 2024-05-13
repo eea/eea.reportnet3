@@ -169,9 +169,6 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetMetabaseServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant STATUS_TECHNICALLY_ACCEPTED: {@value}. */
   private static final String STATUS_TECHNICALLY_ACCEPTED =
       "Feedback status changed: Technically Accepted, Message: ";
@@ -477,7 +474,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
       try {
         statistics.add(processStatistics(s));
       } catch (InstantiationException | IllegalAccessException e) {
-        LOG_ERROR.error("Error getting global statistics. Error message: {}", e.getMessage(), e);
+        LOG.error("Error getting global statistics. Error message: {}", e.getMessage(), e);
       }
     });
 
@@ -681,10 +678,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
         EventType failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT;
         if (null != dataflow && TypeDataflowEnum.REFERENCE.equals(dataflow.getType())) {
           failEvent = EventType.REFERENCE_DATAFLOW_PROCESS_FAILED_EVENT;
-          LOG_ERROR.error("Error processing the reference dataflow {}. Error message: {}",
+          LOG.error("Error processing the reference dataflow {}. Error message: {}",
               dataflowId, e.getMessage(), e);
         } else {
-          LOG_ERROR.error("Error creating a new empty data collection for dataflowId {}. Error message: {}",
+          LOG.error("Error creating a new empty data collection for dataflowId {}. Error message: {}",
               dataflowId, e.getMessage(), e);
         }
 

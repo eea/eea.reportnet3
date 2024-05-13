@@ -127,11 +127,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   private static final Logger LOG = LoggerFactory.getLogger(CheckBlockersDataSnapshotCommand.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
    * The default release process priority
    */
   private int defaultReleaseProcessPriority = 20;
@@ -286,7 +281,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
                 dateFormatter.format(dateRelease), false, processId);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      LOG.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
     }
   }
 
@@ -294,7 +289,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
     // Release the locks
     datasetSnapshotService.releaseLocksRelatedToRelease(dataset.getDataflowId(),
             dataset.getDataProviderId());
-    LOG_ERROR.error(
+    LOG.error(
             "Error in the releasing process of the dataflowId {}, dataProviderId {} and jobId {}, the datasets have blocker errors",
             dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
 

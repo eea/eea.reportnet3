@@ -8,6 +8,16 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.testImportProcess, { datasetId })
     }),
 
+  convertIcebergToParquet: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.convertIcebergToParquet, { datasetId, dataflowId, providerId, tableSchemaId })
+    }),
+
+  convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.convertParquetToIceberg, { datasetId, dataflowId, providerId, tableSchemaId })
+    }),
+
   createRecordDesign: async (datasetId, datasetTableRecordField) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.createRecordDesign, { datasetId }),
@@ -29,21 +39,42 @@ export const DatasetRepository = {
   deleteData: async (datasetId, deletePrefilledTables) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
 
-  deleteAttachment: async (dataflowId, datasetId, fieldId, dataProviderId = null) =>
+  deleteAttachment: async ({
+    dataflowId,
+    datasetId,
+    fieldId,
+    dataProviderId = null,
+    tableSchemaName,
+    fieldName,
+    fileName,
+    recordId
+  }) =>
     await HTTPRequester.delete({
       url: dataProviderId
         ? getUrl(DatasetConfig.deleteAttachmentWithProviderId, {
             dataflowId,
             datasetId,
             fieldId,
-            providerId: dataProviderId
+            providerId: dataProviderId,
+            tableSchemaName,
+            fieldName,
+            fileName,
+            recordId
           })
-        : getUrl(DatasetConfig.deleteAttachment, { dataflowId, datasetId, fieldId })
+        : getUrl(DatasetConfig.deleteAttachment, {
+            dataflowId,
+            datasetId,
+            fieldId,
+            tableSchemaName,
+            fieldName,
+            fileName,
+            recordId
+          })
     }),
 
-  deleteRecord: async (datasetId, recordId, deleteInCascade = false) =>
+  deleteRecord: async ({ datasetId, recordId, tableSchemaId, deleteInCascade = false }) =>
     await HTTPRequester.delete({
-      url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId })
+      url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId, tableSchemaId })
     }),
 
   deleteFieldDesign: async (datasetId, fieldSchemaId) =>
@@ -80,16 +111,37 @@ export const DatasetRepository = {
         : getUrl(DatasetConfig.downloadExportFile, { datasetId, fileName })
     }),
 
-  downloadFileData: async (dataflowId, datasetId, fieldId, dataProviderId = null) =>
+  downloadFileData: async ({
+    dataflowId,
+    datasetId,
+    fieldId,
+    dataProviderId = null,
+    fileName,
+    recordId,
+    tableSchemaName,
+    fieldName
+  }) =>
     await HTTPRequester.download({
       url: dataProviderId
         ? getUrl(DatasetConfig.downloadFileDataWithProviderId, {
             dataflowId,
             datasetId,
             fieldId,
-            providerId: dataProviderId
+            providerId: dataProviderId,
+            fileName,
+            recordId,
+            tableSchemaName,
+            fieldName
           })
-        : getUrl(DatasetConfig.downloadFileData, { dataflowId, datasetId, fieldId })
+        : getUrl(DatasetConfig.downloadFileData, {
+            dataflowId,
+            datasetId,
+            fieldId,
+            fileName,
+            recordId,
+            tableSchemaName,
+            fieldName
+          })
     }),
 
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
@@ -175,6 +227,9 @@ export const DatasetRepository = {
     }),
 
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
+
+  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getPresignedUrl, { datasetId, dataflowId, fileName }) }),
 
   getReferencedFieldValues: async (
     datasetId,
@@ -325,9 +380,9 @@ export const DatasetRepository = {
       data: datasetSchema
     }),
 
-  updateField: async (datasetId, datasetTableRecords, updateInCascade = false) =>
+  updateField: async (datasetId, recordId, tableSchemaId, datasetTableRecords, updateInCascade = false) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateField, { datasetId, updateInCascade }),
+      url: getUrl(DatasetConfig.updateField, { datasetId, recordId, tableSchemaId, updateInCascade }),
       data: datasetTableRecords
     }),
 
@@ -337,9 +392,9 @@ export const DatasetRepository = {
       data: datasetTableRecordField
     }),
 
-  updateRecord: async (datasetId, datasetTableRecords, updateInCascade = false) =>
+  updateRecord: async (datasetId, datasetTableRecords, tableSchemaId, updateInCascade = false) =>
     await HTTPRequester.update({
-      url: getUrl(DatasetConfig.updateRecord, { datasetId, updateInCascade }),
+      url: getUrl(DatasetConfig.updateRecord, { datasetId, tableSchemaId, updateInCascade }),
       data: datasetTableRecords
     }),
 
@@ -365,7 +420,8 @@ export const DatasetRepository = {
     tableSchemaIsReadOnly,
     datasetId,
     tableSchemaNotEmpty,
-    tableSchemaFixedNumber
+    tableSchemaFixedNumber,
+    dataAreManuallyEditable
   ) =>
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableDesign, { datasetId }),
@@ -375,7 +431,8 @@ export const DatasetRepository = {
         idTableSchema: tableSchemaId,
         notEmpty: tableSchemaNotEmpty,
         readOnly: tableSchemaIsReadOnly,
-        toPrefill: tableSchemaToPrefill
+        toPrefill: tableSchemaToPrefill,
+        dataAreManuallyEditable
       }
     }),
   validate: async datasetId => await HTTPRequester.update({ url: getUrl(DatasetConfig.validate, { datasetId }) }),

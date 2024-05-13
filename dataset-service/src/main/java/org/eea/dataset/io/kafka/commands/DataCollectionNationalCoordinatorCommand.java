@@ -63,12 +63,6 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
   @Autowired
   private DataFlowControllerZuul dataflowControllerZuul;
 
-
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG =
       LoggerFactory.getLogger(DataCollectionNationalCoordinatorCommand.class);
@@ -146,7 +140,7 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
         successEvent = EventType.REFERENCE_DATAFLOW_PROCESSED_EVENT;
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      LOG.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw e;
     }
 
@@ -156,10 +150,10 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
               .user(SecurityContextHolder.getContext().getAuthentication().getName())
               .dataflowId(dataflowId).build());
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing {} event: ", successEvent, e);
+      LOG.error("Error releasing {} event: ", successEvent, e);
     } catch (Exception e) {
       String topic = (successEvent != null) ? successEvent.getTopic() : null;
-      LOG_ERROR.error("Unexpected error! Error releasing event {} with topic {} Message: {}", eeaEventVO, topic, e.getMessage());
+      LOG.error("Unexpected error! Error releasing event {} with topic {} Message: {}", eeaEventVO, topic, e.getMessage());
       throw e;
     }
   }
@@ -195,7 +189,7 @@ public class DataCollectionNationalCoordinatorCommand extends AbstractEEAEventHa
       }
       return mapRepresentativeProviders;
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in mapRepresentativeProviders for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error in mapRepresentativeProviders for dataflowId {}. Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
