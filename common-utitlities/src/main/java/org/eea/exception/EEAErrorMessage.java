@@ -197,6 +197,9 @@ public final class EEAErrorMessage {
   /** The Constant DATA_COLLECTION_NOT_CREATED: {@value}. */
   public static final String DATA_COLLECTION_NOT_CREATED = "Data Collection not created";
 
+  /** The Constant DATA_COLLECTION_FAILED_ICEBERG_EXISTS: {@value}. */
+  public static final String DATA_COLLECTION_FAILED_ICEBERG_EXISTS = "Error creating data collection. Iceberg table exists";
+
   /** The Constant ERROR_DELETING_RULE: {@value}. */
   public static final String ERROR_DELETING_RULE = "Error deleting rules";
 

@@ -352,6 +352,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       failEvent = EventType.NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT;
     }
 
+    if(errorMessage.equals(EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS)){
+      failEvent = EventType.ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS;
+    }
+
     // Release the lock
     Map<String, Object> lockCriteria = new HashMap<>();
     lockCriteria.put(LiteralConstants.SIGNATURE, methodSignature);
@@ -408,6 +412,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       for(TableSchemaIdNameVO table: tables){
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS, true, false);
           throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
         }
       }

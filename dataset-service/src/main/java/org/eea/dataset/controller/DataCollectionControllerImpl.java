@@ -98,7 +98,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       dataCollectionService.undoDataCollectionCreation(datasetIds, dataflowId, isCreation);
       LOG.info("Successfully undid data collection creation for dataflowId {}", dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error undoing data collection creation for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error undoing data collection creation for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -186,7 +186,8 @@ public class DataCollectionControllerImpl implements DataCollectionController {
               manualCheck, showPublicInfo, referenceDataflow, stopAndNotifyPKError);
       LOG.info("DataCollection creation for Dataflow {} started", dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error creating empty data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
+
+      LOG.error("Unexpected error! Error creating empty data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -236,7 +237,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
       dataCollectionService.updateDataCollection(dataflowId, referenceDataflow);
       LOG.info("DataCollection update for Dataflow {} started", dataflowId);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error updating data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error updating data collection for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
   }
