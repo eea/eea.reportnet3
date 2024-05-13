@@ -290,8 +290,13 @@ export const CustomFileUpload = ({
     return true;
   };
 
-  const upload = () => {
-    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+  const upload = async () => {
+    presignedUrl
+      ? await fetch(presignedUrl, {
+          method: 'PUT',
+          body: state.files[0]
+        })
+      : dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
