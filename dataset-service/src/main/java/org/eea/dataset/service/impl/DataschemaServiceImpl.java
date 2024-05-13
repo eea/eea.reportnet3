@@ -2695,24 +2695,23 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public byte[] exportZipFieldSchemas(Long datasetId) throws EEAException {
 
-//    DesignDataset design = designDatasetRepository.findById(datasetId).orElse(null);
-//
-//    if (null == design) {
-//      // Error. There aren't field schemas to export in the dataflow
-//      LOG.error("No field schemas found to export in the dataset {}", datasetId);
-//      throw new EEAException(
-//          String.format("No field schemas to export in the dataset %s", datasetId));
-//    }
-//    DataSetSchema schema =
-//        schemasRepository.findByIdDataSetSchema(new ObjectId(design.getDatasetSchema()));
+    DataSetMetabase metabase = dataSetMetabaseRepository.findById(datasetId).orElse(null);
 
-    DataSetSchemaVO schemaVO = getDataSchemaByDatasetId(false, datasetId);
+    if (null == metabase) {
+      // Error. There aren't field schemas to export in the dataflow
+      LOG.error("No field schemas found to export in the dataset {}", datasetId);
+      throw new EEAException(
+              String.format("No field schemas to export in the dataset %s", datasetId));
+    }
+    DataSetSchema schema =
+            schemasRepository.findByIdDataSetSchema(new ObjectId(metabase.getDatasetSchema()));
+
     List<byte[]> tablesSchema = new ArrayList<>();
     List<String> tableSchemaNames = new ArrayList<>();
-    for (TableSchemaVO tableVO : schemaVO.getTableSchemas()) {
-      tablesSchema.add(exportFieldsSchema(datasetId, schemaVO.getIdDataSetSchema(),
-          tableVO.getIdTableSchema()));
-      tableSchemaNames.add(tableVO.getNameTableSchema());
+    for (TableSchema table : schema.getTableSchemas()) {
+      tablesSchema.add(exportFieldsSchema(datasetId, metabase.getDatasetSchema(),
+          table.getIdTableSchema().toString()));
+      tableSchemaNames.add(table.getNameTableSchema());
     }
     return zipUtils.zipArrayListFieldSchemas(tablesSchema, datasetId, tableSchemaNames);
   }
