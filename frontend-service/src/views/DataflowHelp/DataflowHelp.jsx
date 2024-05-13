@@ -164,7 +164,7 @@ export const DataflowHelp = () => {
 
           Promise.all(datasetSchemas).then(completed => {
             completed.forEach(datasetSchema => {
-              if (!isNil(completed.datasetId)) {
+              if (isNil(datasetSchema.datasetId)) {
                 datasetSchema.datasetId = data.datasets.find(
                   dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
                 ).datasetId;
