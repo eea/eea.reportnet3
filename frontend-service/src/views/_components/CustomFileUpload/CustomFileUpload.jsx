@@ -107,7 +107,7 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (presignedUrl) {
-      upload();
+      uploadToS3();
     }
   }, [presignedUrl]);
 
@@ -291,12 +291,7 @@ export const CustomFileUpload = ({
   };
 
   const upload = async () => {
-    presignedUrl
-      ? await fetch(presignedUrl, {
-          method: 'PUT',
-          body: state.files[0]
-        })
-      : dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
@@ -336,16 +331,16 @@ export const CustomFileUpload = ({
       }
     };
 
-    let nUrl = bigData && state.uploadWithS3 ? presignedUrl : url;
+    let nUrl = url;
 
     if (replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
       nUrl += 'replace=' + state.replace;
     }
 
-    xhr.open(bigData && state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
+    xhr.open(operation, nUrl, true);
     const tokens = LocalUserStorageUtils.getTokens();
-    if (!state.uploadWithS3) xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (onBeforeSend) {
       onBeforeSend({ xhr: xhr, formData: formData });
@@ -356,6 +351,15 @@ export const CustomFileUpload = ({
     xhr.send(formData);
 
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+  };
+
+  const uploadToS3 = async () => {
+    await fetch(presignedUrl, {
+      method: 'PUT',
+      body: state.files[0]
+    });
+
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploadClicked: false, isUploading: true } });
   };
 
   const clear = () => {

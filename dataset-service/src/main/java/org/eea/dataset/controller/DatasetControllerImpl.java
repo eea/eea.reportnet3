@@ -359,11 +359,13 @@ public class DatasetControllerImpl implements DatasetController {
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
-          LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+        if(StringUtils.isNotBlank(tableSchemaId)){
+          String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+          TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
+            LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+          }
         }
         bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO);
       } catch (Exception e) {
@@ -2781,7 +2783,7 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/convertParquetToIcebergTable/{datasetId}")
   public void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
@@ -2817,7 +2819,7 @@ public class DatasetControllerImpl implements DatasetController {
    *
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/convertIcebergToParquetTable/{datasetId}")
   public void convertIcebergToParquetTable(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
