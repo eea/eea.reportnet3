@@ -38,11 +38,6 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
    */
   private static final Logger LOG = LoggerFactory.getLogger(DockerInterfaceServiceImpl.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * The docker client.
@@ -149,7 +144,7 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     final String outcomeKo = new String(((ByteArrayOutputStream) errorOutput).toByteArray());
     LOG.info(outcomeOk);
     if (StringUtils.isNotBlank(outcomeKo)) {
-      LOG_ERROR.error(outcomeKo);
+      LOG.error(outcomeKo);
     }
 
     return commandOutcome;
@@ -196,12 +191,12 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
     final CountDownLatch completed = new CountDownLatch(1);
     try {
       if (!completed.await(timeToWait, TimeUnit.SECONDS)) {
-        LOG_ERROR.error("Container {} could not be started", container.getId());
+        LOG.error("Container {} could not be started", container.getId());
       }
       // wait timeToWait seconds for the database to
       // start
     } catch (final InterruptedException e) {
-      LOG_ERROR.error("Error starting container {}", container.getId(), e);
+      LOG.error("Error starting container {}", container.getId(), e);
       Thread.currentThread().interrupt();
     }
   }

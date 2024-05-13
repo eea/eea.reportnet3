@@ -30,9 +30,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class CSVWriterStrategy implements WriterStrategy {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CSVWriterStrategy.class);
 

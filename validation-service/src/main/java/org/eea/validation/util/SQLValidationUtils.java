@@ -79,9 +79,6 @@ public class SQLValidationUtils {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SQLValidationUtils.class);
 
@@ -94,37 +91,37 @@ public class SQLValidationUtils {
    * @throws EEAInvalidSQLException the EEA invalid SQL exception
    */
   public void executeValidationSQLRule(Long datasetId, String ruleId, String dataProviderCode)
-      throws EEAInvalidSQLException {
+          throws EEAInvalidSQLException {
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
     rule.setSqlSentence(rule.getSqlSentence().replace(";", ""));
     DataSetMetabaseVO dataSetMetabaseVO =
-        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     QueryVO queryVO = new QueryVO(null, rule, null, dataSetMetabaseVO, null, null);
     queryVO = getTableToEvaluate(queryVO, dataProviderCode);
     Integer totalRecords =
-        Integer.parseInt(datasetRepository.evaluateSqlRule(datasetId, "with tableAux as ("
-            + queryVO.getNewQuery() + ") select cast(count(*) as text) from tableaux;"));
+            Integer.parseInt(datasetRepository.evaluateSqlRule(datasetId, "with tableAux as ("
+                    + queryVO.getNewQuery() + ") select cast(count(*) as text) from tableaux;"));
     Optional<TableValue> tableValue = tableRepository.findById(queryVO.getIdTable());
     TableValue tableToEvaluate = null;
     Optional<DataSetSchema> dataSetSchema =
-        schemasRepository.findById(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+            schemasRepository.findById(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
     Long nHeaders = 0L;
     if (dataSetSchema.isPresent()) {
       TableSchema tableSchema = dataSetSchema
-          .get().getTableSchemas().stream().filter(tableSchemaAux -> tableValue.get()
-              .getIdTableSchema().equals(tableSchemaAux.getIdTableSchema().toString()))
-          .findFirst().orElse(null);
+              .get().getTableSchemas().stream().filter(tableSchemaAux -> tableValue.get()
+                      .getIdTableSchema().equals(tableSchemaAux.getIdTableSchema().toString()))
+              .findFirst().orElse(null);
       if (tableSchema != null) {
         nHeaders =
-            tableSchema.getRecordSchema().getFieldSchema().stream().collect(Collectors.counting());
+                tableSchema.getRecordSchema().getFieldSchema().stream().collect(Collectors.counting());
       }
     }
     int batchSize = 100000L / nHeaders < 30000 ? (int) (100000L / nHeaders) : 30000;
     for (int i = 0; i < totalRecords; i += batchSize) {
       tableToEvaluate = sqlRulesService
-          .queryTable(queryVO.getNewQuery() + " OFFSET " + i + " LIMIT " + batchSize, queryVO);
+              .queryTable(queryVO.getNewQuery() + " OFFSET " + i + " LIMIT " + batchSize, queryVO);
       if (null != tableToEvaluate && null != tableToEvaluate.getId()
-          && CollectionUtils.isNotEmpty(tableToEvaluate.getRecords())) {
+              && CollectionUtils.isNotEmpty(tableToEvaluate.getRecords())) {
         String tableName = "";
         if (tableValue.isPresent()) {
           tableName = getTableName(dataSetSchema, tableValue.get().getIdTableSchema());
@@ -136,7 +133,7 @@ public class SQLValidationUtils {
             break;
           case TABLE:
             executeTableSQLRuleValidation(rule, tableToEvaluate, dataSetSchema, tableValue,
-                tableName);
+                    tableName);
             break;
           case RECORD:
             executeRecordSQLRuleValidation(rule, tableToEvaluate, dataSetSchema, tableName);
@@ -170,7 +167,7 @@ public class SQLValidationUtils {
         String providerCodeAux = "XX";
         if (dataProviderCode != null && !"null".equals(dataProviderCode)) {
           DataProviderVO providerCode =
-              representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
+                  representativeControllerZuul.findDataProviderById(Long.valueOf(dataProviderCode));
           if (null != providerCode && StringUtils.isNotBlank(providerCode.getCode())) {
             providerCodeAux = providerCode.getCode();
           }
@@ -184,7 +181,7 @@ public class SQLValidationUtils {
         throw new EEAInvalidSQLException("No sql found");
       }
     } catch (EEAInvalidSQLException e) {
-      LOG_ERROR.error("SQL can't be executed: {}", e.getMessage(), e);
+      LOG.error("SQL can't be executed: {}", e.getMessage(), e);
     }
     return queryVO;
   }
@@ -218,7 +215,7 @@ public class SQLValidationUtils {
    * @return the field schema name
    */
   private String getFieldSchemaName(DataSetSchema datasetSchema, String tableSchemaId,
-      String fieldSchemaId) {
+                                    String fieldSchemaId) {
 
     String fieldSchemaName = "";
     TableSchema tmpTableSchema = null;
@@ -268,9 +265,9 @@ public class SQLValidationUtils {
    * @param tableName the table name
    */
   private void executeFieldSQLRuleValidation(Rule rule, TableValue tableToEvaluate,
-      Optional<DataSetSchema> dataSetSchema, String tableName) {
+                                             Optional<DataSetSchema> dataSetSchema, String tableName) {
     List<RecordValue> records = recordRepository.findByIds(
-        tableToEvaluate.getRecords().stream().map(RecordValue::getId).collect(Collectors.toList()));
+            tableToEvaluate.getRecords().stream().map(RecordValue::getId).collect(Collectors.toList()));
     if (!dataSetSchema.isPresent() || records.isEmpty()) {
       return;
     }
@@ -281,11 +278,11 @@ public class SQLValidationUtils {
     for (RecordValue record : records) {
       for (FieldValue field : record.getFields()) {
         if (fieldSchemaId.equals(field.getIdFieldSchema())
-            && fieldsToEvaluate.contains(field.getId())) {
+                && fieldsToEvaluate.contains(field.getId())) {
           FieldValidation fieldValidation = new FieldValidation();
           fieldValidation.setFieldValue(field);
           fieldValidation.setValidation(createValidation(rule, tableName, fieldSchemaName,
-              prepareSQLErrorMessage(field, rule, dataSetSchema, tableToEvaluate, record)));
+                  prepareSQLErrorMessage(field, rule, dataSetSchema, tableToEvaluate, record)));
           List<FieldValidation> fieldValidations = field.getFieldValidations();
           if (null == fieldValidations || fieldValidations.isEmpty()) {
             fieldValidations = new ArrayList<>();
@@ -313,12 +310,12 @@ public class SQLValidationUtils {
    * @param tableName the table name
    */
   private void executeRecordSQLRuleValidation(Rule rule, TableValue tableToEvaluate,
-      Optional<DataSetSchema> dataSetSchema, String tableName) {
+                                              Optional<DataSetSchema> dataSetSchema, String tableName) {
     List<RecordValue> records = recordRepository.findByIds(
-        tableToEvaluate.getRecords().stream().map(RecordValue::getId).collect(Collectors.toList()));
+            tableToEvaluate.getRecords().stream().map(RecordValue::getId).collect(Collectors.toList()));
     if (!records.isEmpty()) {
       List<String> recordsToEvauate = tableToEvaluate.getRecords().stream().map(RecordValue::getId)
-          .collect(Collectors.toList());
+              .collect(Collectors.toList());
       for (RecordValue record : records) {
         if (recordsToEvauate.contains(record.getId())) {
           List<RecordValidation> recordValidations = record.getRecordValidations();
@@ -328,7 +325,7 @@ public class SQLValidationUtils {
           RecordValidation recordValidation = new RecordValidation();
           recordValidation.setRecordValue(record);
           recordValidation.setValidation(createValidation(rule, tableName, null,
-              prepareSQLErrorMessage(record, rule, dataSetSchema, tableToEvaluate, record)));
+                  prepareSQLErrorMessage(record, rule, dataSetSchema, tableToEvaluate, record)));
           recordValidations.add(recordValidation);
           record.setRecordValidations(recordValidations);
         }
@@ -349,13 +346,13 @@ public class SQLValidationUtils {
    * @param tableName the table name
    */
   private void executeTableSQLRuleValidation(Rule rule, TableValue tableToEvaluate,
-      Optional<DataSetSchema> dataSetSchema, Optional<TableValue> tableValue, String tableName) {
+                                             Optional<DataSetSchema> dataSetSchema, Optional<TableValue> tableValue, String tableName) {
     if (tableValue.isPresent() && !tableToEvaluate.getRecords().isEmpty()) {
       TableValue table = tableValue.get();
       TableValidation tableValidation = new TableValidation();
       tableValidation.setTableValue(table);
       tableValidation.setValidation(createValidation(rule, tableName, null,
-          prepareSQLErrorMessage(table, rule, dataSetSchema, tableToEvaluate, null)));
+              prepareSQLErrorMessage(table, rule, dataSetSchema, tableToEvaluate, null)));
       table.getTableValidations().add(tableValidation);
       saveTable(table);
     }
@@ -370,19 +367,19 @@ public class SQLValidationUtils {
    * @param dataSetSchema the data set schema
    */
   private void executeDatasetSQLRuleValidation(Long datasetId, Rule rule, String tableName,
-      Optional<DataSetSchema> dataSetSchema) {
+                                               Optional<DataSetSchema> dataSetSchema) {
     DatasetValue dataset = datasetRepository.findById(datasetId).orElse(new DatasetValue());
     DataSetMetabaseVO datasetMetabase =
-        datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     Validation validationDataset = createValidation(rule, tableName, null,
-        prepareSQLErrorMessage(dataset, rule, dataSetSchema, null, null));
+            prepareSQLErrorMessage(dataset, rule, dataSetSchema, null, null));
     validationDataset.setTableName(datasetMetabase.getDataSetName());
     DatasetValidation datasetValidation = new DatasetValidation();
     datasetValidation.setDatasetValue(dataset);
     datasetValidation.setValidation(validationDataset);
     List<DatasetValidation> datasetValidations =
-        dataset.getDatasetValidations() != null ? dataset.getDatasetValidations()
-            : new ArrayList<>();
+            dataset.getDatasetValidations() != null ? dataset.getDatasetValidations()
+                    : new ArrayList<>();
     datasetValidations.add(datasetValidation);
     dataset.setDatasetValidations(datasetValidations);
     saveDataset(dataset);
@@ -398,7 +395,7 @@ public class SQLValidationUtils {
    * @return the validation
    */
   private Validation createValidation(Rule rule, String tableName, String fieldName,
-      String message) {
+                                      String message) {
     Validation validation = new Validation();
     validation.setIdRule(rule.getRuleId().toString());
     validation.setLevelError(ErrorTypeEnum.valueOf(rule.getThenCondition().get(1)));
@@ -458,7 +455,7 @@ public class SQLValidationUtils {
    * @return the string
    */
   private String prepareSQLErrorMessage(Object object, Rule rule,
-      Optional<DataSetSchema> dataSetSchema, TableValue tableToEvaluate, RecordValue record) {
+                                        Optional<DataSetSchema> dataSetSchema, TableValue tableToEvaluate, RecordValue record) {
     String errorMessage = rule.getThenCondition().get(0);
     if (dataSetSchema.isPresent()) {
       String sql = rule.getSqlSentence();
@@ -468,7 +465,7 @@ public class SQLValidationUtils {
         // get the fields from ruleMessage to replace later
         ArrayList<String> fieldsToReplace = getFieldsToReplace(errorMessage);
         errorMessage =
-            rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate, record);
+                rewriteMessage(object, errorMessage, fieldsToReplace, tableToEvaluate, record);
       } else {
         if (tableToEvaluate != null) {
           tableToEvaluate.getRecords().clear();
@@ -489,7 +486,7 @@ public class SQLValidationUtils {
    * @return the string
    */
   private String rewriteMessage(Object object, String errorMessage,
-      ArrayList<String> fieldsToReplace, TableValue tableToEvaluate, RecordValue rvAux) {
+                                ArrayList<String> fieldsToReplace, TableValue tableToEvaluate, RecordValue rvAux) {
     if (object instanceof FieldValue) {
       for (String field : fieldsToReplace) {
         errorMessage = errorMessage.replace(field, getReplacement(field, rvAux, tableToEvaluate));
@@ -533,8 +530,8 @@ public class SQLValidationUtils {
       if (record.getId().equals(rvAux.getId())) {
         for (FieldValue aux : record.getFields()) {
           if ((null != aux.getValue() || null != aux.getColumnName())
-              && field.equalsIgnoreCase(aux.getColumnName())
-              && (!aux.getColumnName().toLowerCase().contains("_id"))) {
+                  && field.equalsIgnoreCase(aux.getColumnName())
+                  && (!aux.getColumnName().toLowerCase().contains("_id"))) {
             replacement = aux.getValue();
             break;
           }

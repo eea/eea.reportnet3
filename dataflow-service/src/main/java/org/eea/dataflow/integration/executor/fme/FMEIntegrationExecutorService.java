@@ -52,9 +52,6 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMEIntegrationExecutorService.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The r 3 base. */
   @Value("${integration.fme.callback.urlbase}")
   private String r3base;
@@ -145,7 +142,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
         }
       }
     } catch (IllegalArgumentException | SecurityException e) {
-      LOG_ERROR.error("Error getting params in FME Integration Executor for jobId {} : {} ", jobId, e.getMessage());
+      LOG.error("Error getting params in FME Integration Executor for jobId {} : {} ", jobId, e.getMessage());
     }
     LOG.info("Extracted params in FME Integration Executor. jobId {} datasetId= {}, fileName= {}", jobId, datasetId, fileName);
     if (IntegrationOperationTypeEnum.EXPORT.equals(integrationOperationTypeEnum)) {
@@ -419,7 +416,7 @@ public class FMEIntegrationExecutorService extends AbstractIntegrationExecutorSe
       idFMEJob =
           fmeCommunicationService.submitAsyncJob(repository, workspace, fmeAsyncJob, dataflowId, jobVO);
     } catch (Exception e) {
-      LOG_ERROR.error("Error invoking FME due to reason {}", e.getMessage());
+      LOG.error("Error invoking FME due to reason {}", e.getMessage());
     }
     return idFMEJob;
   }

@@ -82,9 +82,6 @@ public class ValidationServiceImpl implements ValidationService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant ENTITY: {@value}. */
   private static final String ENTITY = "Entity";
 
@@ -246,7 +243,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Dataset Validation failed: {}", e.getMessage(), e);
+      LOG.error("The Dataset Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(dataset, e);
     }
     try {
@@ -254,7 +251,7 @@ public class ValidationServiceImpl implements ValidationService {
         result = dataset.getDatasetValidations();
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Problem accessing to the db getting the datasetValidations: { } ",
+      LOG.error("Problem accessing to the db getting the datasetValidations: { } ",
           e.getMessage(), e);
     }
     return result;
@@ -274,7 +271,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
+      LOG.error("The Table Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(table, e);
     }
     try {
@@ -282,7 +279,7 @@ public class ValidationServiceImpl implements ValidationService {
         result = table.getTableValidations();
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Problem accessing to the db getting the tableValidations: { } ",
+      LOG.error("Problem accessing to the db getting the tableValidations: { } ",
           e.getMessage(), e);
     }
     return result;
@@ -305,7 +302,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Record Validation failed: {}", e.getMessage(), e);
+      LOG.error("The Record Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(record, e);
     }
 
@@ -314,7 +311,7 @@ public class ValidationServiceImpl implements ValidationService {
         result = record.getRecordValidations();
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Problem accessing to the db getting the datasetValidations: { } ",
+      LOG.error("Problem accessing to the db getting the datasetValidations: { } ",
           e.getMessage(), e);
     }
     return result;
@@ -336,7 +333,7 @@ public class ValidationServiceImpl implements ValidationService {
     try {
       kieSession.fireAllRules();
     } catch (RuntimeException e) {
-      LOG_ERROR.error("The Field Validation failed: {}", e.getMessage(), e);
+      LOG.error("The Field Validation failed: {}", e.getMessage(), e);
       rulesErrorUtils.createRuleErrorException(field, e);
     }
     try {
@@ -344,7 +341,7 @@ public class ValidationServiceImpl implements ValidationService {
         result = field.getFieldValidations();
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Problem accessing to the db  getting the fieldValidations: { } ",
+      LOG.error("Problem accessing to the db  getting the fieldValidations: { } ",
           e.getMessage(), e);
     }
     return result;
@@ -368,7 +365,7 @@ public class ValidationServiceImpl implements ValidationService {
     } catch (FileNotFoundException e) {
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND, e);
     } catch (Exception e) {
-      LOG_ERROR.error(e.getMessage(), e);
+      LOG.error(e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.VALIDATION_SESSION_ERROR, e);
     }
     return kieBase;
@@ -440,7 +437,7 @@ public class ValidationServiceImpl implements ValidationService {
       }
     } catch (EEAInvalidSQLException e) {
       table = tableRepository.findById(idTable).orElse(null);
-      LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
+      LOG.error("The Table Validation failed: {}", e.getMessage(), e);
       if (table != null) {
         rulesErrorUtils.createRuleErrorException(table, new RuntimeException(e.getMessage()));
       }
@@ -795,7 +792,7 @@ public class ValidationServiceImpl implements ValidationService {
     catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
           null, notificationVO);
-      LOG_ERROR.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+      LOG.error(EEAErrorMessage.CSV_FILE_ERROR, e);
       return;
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportValidationFile for datasetId {}. Message: {}", datasetId, e.getMessage());
@@ -838,7 +835,7 @@ public class ValidationServiceImpl implements ValidationService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT,
                 null, notificationVO);
       } catch (Exception e) {
-        LOG_ERROR.info("Error exporting validation table data from dataset Id {}.", datasetId);
+        LOG.error("Error exporting validation table data from dataset Id {}.", datasetId);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
                 null, notificationVO);
         throw e;
@@ -864,7 +861,7 @@ public class ValidationServiceImpl implements ValidationService {
         new File(new File(pathPublicFile, "dataset-" + datasetId + "-validations"), fileName);
     if (!file.exists()) {
 
-      LOG_ERROR.error(String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
+      LOG.error(String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           String.format(EXCEPTIONERRORSTRING, datasetId, fileName));
     }
@@ -1048,7 +1045,7 @@ public class ValidationServiceImpl implements ValidationService {
       }
 
       if (CollectionUtils.isEmpty(validations.getErrors())) {
-        LOG_ERROR.error(
+        LOG.error(
             "Tried to create validations export from an empty validations dataset so it delivered an empty file.");
       }
 
@@ -1068,7 +1065,7 @@ public class ValidationServiceImpl implements ValidationService {
     catch (EEAException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
           null, notificationVO);
-      LOG_ERROR.error("Failed while filling the CSV file with data. Error message: {}",
+      LOG.error("Failed while filling the CSV file with data. Error message: {}",
           e.getMessage());
     }
   }

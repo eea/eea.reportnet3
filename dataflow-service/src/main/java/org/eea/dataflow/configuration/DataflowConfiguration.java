@@ -40,8 +40,6 @@ public class DataflowConfiguration implements WebMvcConfigurer {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowConfiguration.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The timeout. */
   @Value("${stream.download.timeout}")

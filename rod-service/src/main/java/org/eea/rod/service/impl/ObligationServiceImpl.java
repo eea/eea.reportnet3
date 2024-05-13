@@ -36,9 +36,6 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class ObligationServiceImpl implements ObligationService {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ObligationServiceImpl.class);
 

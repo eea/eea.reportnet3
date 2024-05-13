@@ -45,9 +45,6 @@ public class IntegrationServiceImpl implements IntegrationService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(IntegrationServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The crud manager factory. */
   @Autowired
   private CrudManagerFactory crudManagerFactory;
@@ -257,7 +254,7 @@ public class IntegrationServiceImpl implements IntegrationService {
       }
       return resultList;
     } else {
-      LOG_ERROR.error(
+      LOG.error(
           "Mismatching number of IntegrationVOs and EUDatasetVOs: integrationVOs={}, euDatasetVOs={}, map={}",
           integrationVOs, euDatasetVOs, map);
       throw new EEAException("Mismatching number of IntegrationVOs and EUDatasetVOs");
@@ -382,7 +379,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     }
 
     if (null == integrationVO) {
-      LOG_ERROR.error("No EXPORT integration: datasetSchemaId={}, integrationId={}",
+      LOG.error("No EXPORT integration: datasetSchemaId={}, integrationId={}",
           datasetSchemaId, integrationId);
     }
     return integrationVO;
@@ -429,7 +426,7 @@ public class IntegrationServiceImpl implements IntegrationService {
       if (null != integration && (Integer) integrationExecutorFactory
           .getExecutor(IntegrationToolTypeEnum.FME).execute(operation, null, datasetId, integration)
           .getExecutionResultParams().get("id") == 0) {
-        LOG_ERROR.error("Error executing external integration: datasetId={}, integration={}",
+        LOG.error("Error executing external integration: datasetId={}, integration={}",
             datasetId, integration);
         throw new EEAException("Error executing external integration");
       }
@@ -568,7 +565,7 @@ public class IntegrationServiceImpl implements IntegrationService {
     }
 
     if (null == integrationVO) {
-      LOG_ERROR.error("No integration: integrationId={}", integrationId);
+      LOG.error("No integration: integrationId={}", integrationId);
     }
     return integrationVO;
   }

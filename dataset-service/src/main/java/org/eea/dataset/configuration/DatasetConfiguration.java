@@ -49,8 +49,6 @@ public class DatasetConfiguration  {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetConfiguration.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /**
    * The dll.

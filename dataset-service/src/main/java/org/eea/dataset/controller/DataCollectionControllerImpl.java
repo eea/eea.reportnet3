@@ -57,8 +57,6 @@ public class DataCollectionControllerImpl implements DataCollectionController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataCollectionControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The data collection service. */
   @Autowired
@@ -170,7 +168,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           LockSignature.CREATE_DATA_COLLECTION.getValue());
       createDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
       lockService.removeLockByCriteria(createDataCollection);
-      LOG_ERROR.error("Error creating DataCollection: Dataflow {} is not DESIGN", dataflowId);
+      LOG.error("Error creating DataCollection: Dataflow {} is not DESIGN", dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.NOT_DESIGN_DATAFLOW);
     }
@@ -223,7 +221,7 @@ public class DataCollectionControllerImpl implements DataCollectionController {
           LockSignature.UPDATE_DATA_COLLECTION.getValue());
       updateDataCollection.put(LiteralConstants.DATAFLOWID, dataflowId);
       lockService.removeLockByCriteria(updateDataCollection);
-      LOG_ERROR.error("Error updating DataCollection: Dataflow {} is not DRAFT", dataflowId);
+      LOG.error("Error updating DataCollection: Dataflow {} is not DRAFT", dataflowId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NOT_DRAFT_DATAFLOW);
     }
 

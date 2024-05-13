@@ -28,9 +28,6 @@ public class SnapshotHelper implements DisposableBean {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SnapshotHelper.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The max running tasks. */
   @Value("${snapshot.task.parallelism}")
   private int maxRunningTasks;
@@ -178,7 +175,7 @@ public class SnapshotHelper implements DisposableBean {
             restorationTask.isSchemaSnapshot, restorationTask.deleteData,
             restorationTask.prefillingReference, restorationTask.processId);
       } catch (SQLException | IOException | RecordStoreAccessException e) {
-        LOG_ERROR.error("Error restoring snapshot for dataset {}, processId {}", restorationTask.datasetId, restorationTask.processId, e);
+        LOG.error("Error restoring snapshot for dataset {}, processId {}", restorationTask.datasetId, restorationTask.processId, e);
       } finally {
         Double totalTime = (System.currentTimeMillis() - currentTime) / MILISECONDS;
         LOG.info("Restoration task for snapshot {} finished, it has taken taken {} seconds",

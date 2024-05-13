@@ -46,9 +46,6 @@ public class EUDatasetServiceImpl implements EUDatasetService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(EUDatasetServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant SIGNATURE: {@value}. */
   private static final String SIGNATURE = "signature";
 
@@ -278,7 +275,7 @@ public class EUDatasetServiceImpl implements EUDatasetService {
     final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(datasetId, user).orElse(null);
     if (partition == null) {
-      LOG_ERROR.error(EEAErrorMessage.PARTITION_ID_NOTFOUND);
+      LOG.error(EEAErrorMessage.PARTITION_ID_NOTFOUND);
       throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
     }
     return partition;

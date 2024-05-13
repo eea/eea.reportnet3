@@ -69,7 +69,7 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
         Optional<Task> task = this.taskRepository.findById(taskId);
 
         if (this.shouldAbortCommandExecutionIfCSVImportTasksLeftInProgress(processId, taskId)) {
-            LOG_ERROR.info("Process with ID:" + processId + " has Tasks in Progress Status. Command: " + EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET + " will abort execution");
+            LOG_ERROR.error("Process with ID:" + processId + " has Tasks in Progress Status. Command: " + EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET + " will abort execution");
             //return status of task in_queue
             if (task.isPresent()) {
                 taskRepository.updateStatus(ProcessStatusEnum.IN_QUEUE.toString(), task.get().getId());

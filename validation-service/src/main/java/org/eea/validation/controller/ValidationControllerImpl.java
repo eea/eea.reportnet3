@@ -77,9 +77,6 @@ import static org.eea.utils.LiteralConstants.S3_VALIDATION;
 @RequestMapping(value = "/validation")
 public class ValidationControllerImpl implements ValidationController {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationControllerImpl.class);
 
@@ -316,9 +313,9 @@ public class ValidationControllerImpl implements ValidationController {
       validations = loadValidationsHelper.getListValidations(datasetId, pageable, headers, asc,
           levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving validations for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
     }
 
@@ -391,9 +388,9 @@ public class ValidationControllerImpl implements ValidationController {
       validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
           levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
     }
 
@@ -452,9 +449,9 @@ public class ValidationControllerImpl implements ValidationController {
       validations = loadValidationsHelperDL.getListGroupValidationsDL(datasetId, pageable,
               levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
     } catch (EEAException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving group validations for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
     }
 
@@ -483,10 +480,10 @@ public class ValidationControllerImpl implements ValidationController {
     try {
       validationService.exportValidationFile(datasetId);
     } catch (EEAException | IOException e) {
-      LOG_ERROR.error("Error exporting validation data from the dataset {}.  Message: {}",
+      LOG.error("Error exporting validation data from the dataset {}.  Message: {}",
           datasetId, e.getMessage());
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error validation data for datasetId {} to CSV. Message: {}", datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error validation data for datasetId {} to CSV. Message: {}", datasetId, e.getMessage());
       throw e;
     }
   }
@@ -529,7 +526,7 @@ public class ValidationControllerImpl implements ValidationController {
       // delete the file after downloading it
       FileUtils.forceDelete(file);
     } catch (IOException | ResponseStatusException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",
           datasetId, fileName, e.getMessage());
 
@@ -537,7 +534,7 @@ public class ValidationControllerImpl implements ValidationController {
           "Trying to download a file generated during the export dataset validation data process but the file is not found, datasetID: %s + filename: %s",
           datasetId, fileName));
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error downloading validations file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error downloading validations file {} for datasetId {}. Message: {}", fileName, datasetId, e.getMessage());
       throw e;
     }
   }

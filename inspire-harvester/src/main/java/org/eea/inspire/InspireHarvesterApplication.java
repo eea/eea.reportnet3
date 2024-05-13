@@ -31,11 +31,6 @@ public class InspireHarvesterApplication {
    */
   private static final Logger LOG = LoggerFactory.getLogger(InspireHarvesterApplication.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * The entry point of application.
@@ -64,7 +59,7 @@ public class InspireHarvesterApplication {
 
       ok = true;
     } catch (final Exception ex) {
-      LOG_ERROR.error("ERROR: {}", ex.getMessage(), ex);
+      LOG.error("ERROR: {}", ex.getMessage(), ex);
     }
     if (!ok) {
 

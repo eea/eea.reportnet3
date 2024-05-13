@@ -48,9 +48,6 @@ public class KieBaseManager {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(KieBaseManager.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant REGULATION_TEMPLATE_FILE. */
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
@@ -384,7 +381,7 @@ public class KieBaseManager {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+      LOG.error("Unable to release notification: {}, {}", eventType, notificationVO);
     }
   }
 }

@@ -64,9 +64,6 @@ public class CollaborationServiceImpl implements CollaborationService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(CollaborationServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The max message length. */
   @Value("${spring.health.db.check.frequency}")
   private int maxMessageLength;
@@ -267,7 +264,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     messages = stream.collect(Collectors.toList());
 
     if (previousSize != messages.size()) {
-      LOG_ERROR.error("Messaging authorization failed: not allowed to update all messages");
+      LOG.error("Messaging authorization failed: not allowed to update all messages");
       throw new EEAForbiddenException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
     }
 
@@ -294,7 +291,7 @@ public class CollaborationServiceImpl implements CollaborationService {
         messageRepository.delete(message);
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting message  with id {} Message: {}", messageId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting message  with id {} Message: {}", messageId, e.getMessage());
       throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGE_INCORRECT_ID);
     }
     LOG.info("Message {} deleted", messageId);
@@ -414,7 +411,7 @@ public class CollaborationServiceImpl implements CollaborationService {
       }
     }
 
-    LOG_ERROR.error("Messaging authorization failed: dataflowId={}, providerId={}", dataflowId,
+    LOG.error("Messaging authorization failed: dataflowId={}, providerId={}", dataflowId,
         providerId);
     throw new EEAForbiddenException(EEAErrorMessage.MESSAGING_AUTHORIZATION_FAILED);
   }

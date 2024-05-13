@@ -34,11 +34,6 @@ import java.util.regex.Pattern;
 public class RecordStoreServiceImpl implements RecordStoreService {
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(RecordStoreServiceImpl.class);
@@ -140,7 +135,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         commands.add(reader.readLine());
       }
     } catch (IOException e) {
-      LOG_ERROR.error("Error reading commands file to create the dataset. {}", e.getMessage());
+      LOG.error("Error reading commands file to create the dataset. {}", e.getMessage());
       throw new RecordStoreAccessException(
           String.format("Error reading commands file to create the dataset. %s", e.getMessage()),
           e);
@@ -155,7 +150,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
             "-U", userPostgreDb, "-p", "5432", "-d", DATASETS, "-c", command);
       } catch (final InterruptedException e) {
-        LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+        LOG.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
         Thread.currentThread().interrupt();
         throw new RecordStoreAccessException(
             String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
@@ -252,7 +247,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
         }
       }
     } catch (final InterruptedException e) {
-      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+      LOG.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
       Thread.currentThread().interrupt();
       throw new RecordStoreAccessException(
           String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);
@@ -374,7 +369,7 @@ public class RecordStoreServiceImpl implements RecordStoreService {
       dockerInterfaceService.executeCommandInsideContainer(container, "psql", "-h", ipPostgreDb,
           "-U", userPostgreDb, "-p", "5432", "-d", DATASETS, "-c", command);
     } catch (final InterruptedException e) {
-      LOG_ERROR.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
+      LOG.error(ERROR_EXECUTING_DOCKER_COMMAND_LOG, e.getMessage());
       Thread.currentThread().interrupt();
       throw new RecordStoreAccessException(
           String.format(ERROR_EXECUTING_DOCKER_COMMAND, e.getMessage()), e);

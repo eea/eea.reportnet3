@@ -37,9 +37,6 @@ public class ProcessServiceImpl implements ProcessService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ProcessServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The process repository. */
   @Autowired
   private ProcessRepository processRepository;

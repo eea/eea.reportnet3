@@ -57,9 +57,6 @@ public class DataflowHelper {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DataflowHelper.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The dataflow repository. */
   @Autowired
   private DataflowRepository dataflowRepository;
@@ -133,7 +130,7 @@ public class DataflowHelper {
     } catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.EXPORT_SCHEMA_INFORMATION_FAILED_EVENT, null, notificationVO);
-      LOG_ERROR.error(
+      LOG.error(
           "Error downloading file generated from export from the dataflowId {}. Filename {}. Message: {}",
           dataflowId, fileNameWithExtension, e.getMessage());
     } finally {
@@ -158,7 +155,7 @@ public class DataflowHelper {
     // we compound the route and create the file
     File file = new File(new File(pathExportDataflowSchemaInformation, folderName), fileName);
     if (!file.exists()) {
-      LOG_ERROR.error(String.format(DOWNLOAD_SCHEMA_INFORMATION_EXCEPTION, dataflowId, fileName));
+      LOG.error(String.format(DOWNLOAD_SCHEMA_INFORMATION_EXCEPTION, dataflowId, fileName));
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           String.format(DOWNLOAD_SCHEMA_INFORMATION_EXCEPTION, dataflowId, fileName));
     }
@@ -528,7 +525,7 @@ public class DataflowHelper {
 
       workbook.write(byteArrayOutputStream);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error in writeFile for dataflowId {}. Message: {}", dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error in writeFile for dataflowId {}. Message: {}", dataflowId, e.getMessage());
       throw e;
     }
 

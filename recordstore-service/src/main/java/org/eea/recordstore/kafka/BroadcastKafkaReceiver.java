@@ -21,11 +21,6 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
   private static final Logger LOG = LoggerFactory.getLogger(BroadcastKafkaReceiver.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  /**
    * Listen message.
    *
    * @param message the message
@@ -41,9 +36,9 @@ public class BroadcastKafkaReceiver extends KafkaReceiver {
       try {
         handler.processMessage(message.getPayload());
       } catch (EEAException e) {
-        LOG_ERROR.error("Error processing event {} due to reason {}", message.getPayload(), e);
+        LOG.error("Error processing event {} due to reason {}", message.getPayload(), e);
       } catch (Exception e) {
-        LOG_ERROR.error("Undetermined  processing message {} due to reason {}", message, e);
+        LOG.error("Undetermined  processing message {} due to reason {}", message, e);
       }
     }
   }
