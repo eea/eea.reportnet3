@@ -1106,7 +1106,7 @@ public class DatasetControllerImpl implements DatasetController {
       fileTreatmentHelper.exportFile(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
       LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException | IOException e) {
-      LOG.info("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+      LOG.error("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               EEAErrorMessage.EXECUTION_ERROR);
     } catch (Exception e) {
@@ -1154,7 +1154,7 @@ public class DatasetControllerImpl implements DatasetController {
       fileTreatmentHelper.exportFileDL(datasetId, mimeType, tableSchemaId, tableName, exportFilterVO);
       LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
     } catch (EEAException | IOException e) {
-      LOG.info("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+      LOG.error("Error exporting table data from dataset id {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               EEAErrorMessage.EXECUTION_ERROR);
     } catch (Exception e) {

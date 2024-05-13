@@ -835,7 +835,7 @@ public class ValidationServiceImpl implements ValidationService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_COMPLETED_EVENT,
                 null, notificationVO);
       } catch (Exception e) {
-        LOG.info("Error exporting validation table data from dataset Id {}.", datasetId);
+        LOG.error("Error exporting validation table data from dataset Id {}.", datasetId);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DOWNLOAD_VALIDATIONS_FAILED_EVENT,
                 null, notificationVO);
         throw e;

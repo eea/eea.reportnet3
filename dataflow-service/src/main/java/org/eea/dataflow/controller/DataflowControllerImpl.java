@@ -844,7 +844,7 @@ public class DataflowControllerImpl implements DataFlowController {
       return dataflowService.getPublicDataflowsByCountry(countryCode, sortField, asc, pageNum,
               pageSize, filters);
     } catch (EEAException e) {
-      LOG.info(
+      LOG.error(
               String.format("There was an error retrieving the public dataflows for the country: %s",
                       countryCode),
               e);
@@ -968,7 +968,7 @@ public class DataflowControllerImpl implements DataFlowController {
     try {
       return dataflowService.getPrivateDataflowById(dataflowId);
     } catch (EEAException e) {
-      LOG.info(String.format("Couldn't find a dataflow with id %s", dataflowId));
+      LOG.error(String.format("Couldn't find a dataflow with id %s", dataflowId));
     } catch (Exception e) {
       LOG.error("Unexpected error! Could not retrieve private dataflowId {}. Message {}", dataflowId, e.getMessage());
       throw e;
@@ -1023,7 +1023,7 @@ public class DataflowControllerImpl implements DataFlowController {
     try {
       datasetsSummary = dataflowService.getDatasetSummary(dataflowId);
     } catch (EEAException e) {
-      LOG.info(String.format("Error obtaining the dataset types for the dataflow with id %s.",
+      LOG.error(String.format("Error obtaining the dataset types for the dataflow with id %s.",
               dataflowId));
     } catch (Exception e) {
       LOG.error("Unexpected error! Could not retrieve dataset types for dataflowId {}. Message {}", dataflowId, e.getMessage());

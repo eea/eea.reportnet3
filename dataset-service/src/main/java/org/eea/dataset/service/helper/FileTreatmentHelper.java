@@ -669,7 +669,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
 
         } catch (Exception e) {
-            LOG.info("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
+            LOG.error("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null, notificationVO);
         }
     }
@@ -772,7 +772,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
             }*/
         } catch (Exception e) {
-            LOG.info("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
+            LOG.error("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
         }
     }
 
@@ -808,7 +808,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
             }*/
         } catch (Exception e) {
-            LOG.info("Error exporting table data from dataset Id {} with tableName {}.", datasetId, tableName, e);
+            LOG.error("Error exporting table data from dataset Id {} with tableName {}.", datasetId, tableName, e);
         }
     }
 
