@@ -118,7 +118,7 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (state.progress === 100 && bigData && !isImportLeadReportersDialog) {
       const timer = setTimeout(() => {
-        onUpload();
+        onUpload({ files: state.files });
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -340,7 +340,7 @@ export const CustomFileUpload = ({
 
     xhr.open(bigData && state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
     const tokens = LocalUserStorageUtils.getTokens();
-    if(!state.uploadWithS3) xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
+    if (!state.uploadWithS3) xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (onBeforeSend) {
       onBeforeSend({ xhr: xhr, formData: formData });
