@@ -41,6 +41,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -2694,22 +2695,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Override
   public byte[] exportZipFieldSchemas(Long datasetId) throws EEAException {
 
-    DesignDataset design = designDatasetRepository.findById(datasetId).orElse(null);
+//    DesignDataset design = designDatasetRepository.findById(datasetId).orElse(null);
+//
+//    if (null == design) {
+//      // Error. There aren't field schemas to export in the dataflow
+//      LOG.error("No field schemas found to export in the dataset {}", datasetId);
+//      throw new EEAException(
+//          String.format("No field schemas to export in the dataset %s", datasetId));
+//    }
+//    DataSetSchema schema =
+//        schemasRepository.findByIdDataSetSchema(new ObjectId(design.getDatasetSchema()));
 
-    if (null == design) {
-      // Error. There aren't field schemas to export in the dataflow
-      LOG.error("No field schemas found to export in the dataset {}", datasetId);
-      throw new EEAException(
-          String.format("No field schemas to export in the dataset %s", datasetId));
-    }
-    DataSetSchema schema =
-        schemasRepository.findByIdDataSetSchema(new ObjectId(design.getDatasetSchema()));
+    DataSetSchemaVO schemaVO = getDataSchemaByDatasetId(false, datasetId);
     List<byte[]> tablesSchema = new ArrayList<>();
     List<String> tableSchemaNames = new ArrayList<>();
-    for (TableSchema table : schema.getTableSchemas()) {
-      tablesSchema.add(exportFieldsSchema(datasetId, design.getDatasetSchema(),
-          table.getIdTableSchema().toString()));
-      tableSchemaNames.add(table.getNameTableSchema());
+    for (TableSchemaVO tableVO : schemaVO.getTableSchemas()) {
+      tablesSchema.add(exportFieldsSchema(datasetId, schemaVO.getIdDataSetSchema(),
+          tableVO.getIdTableSchema()));
+      tableSchemaNames.add(tableVO.getNameTableSchema());
     }
     return zipUtils.zipArrayListFieldSchemas(tablesSchema, datasetId, tableSchemaNames);
   }
