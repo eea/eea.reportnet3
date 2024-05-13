@@ -17,6 +17,7 @@
     "addAnotherOne": "Add another record",
     "addDatacollectionCompletedEvent": "Data collection created at <strong title='{:dataflowName}'>{:shortDataflowName}</strong>",
     "addDatacollectionFailedEvent": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a>",
+    "addDatacollectionFailedEventIcebergExists": "Failed creating data collection at <a href='{:navigateTo}' title='{:dataflowName}'>{:shortDataflowName}</a> because there is a manually editable table in the dataflow",
     "addDataProviderError": "There has been an error adding the representative",
     "addDatasetSchemaSnapshotCompletedEvent": "Schema copy created at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "addDatasetSchemaSnapshotFailedEvent": "Error creating schema copy at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",

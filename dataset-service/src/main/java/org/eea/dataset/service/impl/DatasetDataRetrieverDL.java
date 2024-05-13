@@ -80,7 +80,10 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
             Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
             s3PathResolver.setTableName(S3_VALIDATION);
+            //validations only exist in the parquet bucket
+            s3PathResolver.setIsIcebergTable(false);
             String validationTablePath = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            s3PathResolver.setIsIcebergTable(true);
             StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
             if (filteredQuery.toString().isEmpty() && levelError!=null && levelError.length==0) {
                 result.setTotalFilteredRecords(0L);
@@ -127,6 +130,8 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         result.setIdTableSchema(tableSchemaVO.getIdTableSchema());
         result.setRecords(recordVOS);
 
+        //validations only exist in the parquet bucket
+        s3PathResolver.setIsIcebergTable(false);
         if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
             if (!dremioHelperService.checkFolderPromoted(s3PathResolver, S3_VALIDATION)) {
                 dremioHelperService.promoteFolderOrFile(s3PathResolver, S3_VALIDATION);

@@ -336,6 +336,10 @@ public enum EventType {
   ADD_DATACOLLECTION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "add_datacollection_failed_event", true),
 
+  /** The add datacollection failed event iceberg exists. */
+  ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS(LiteralConstants.DATA_REPORTING_TOPIC,
+          "add_datacollection_failed_event_iceberg_exists", true),
+
   /** The update datacollection completed event. */
   UPDATE_DATACOLLECTION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "update_datacollection_completed_event", true),
