@@ -362,11 +362,13 @@ public class DatasetControllerImpl implements DatasetController {
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
-          LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+        if(StringUtils.isNotBlank(tableSchemaId)){
+          String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+          TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
+            LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+          }
         }
         bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO);
       } catch (Exception e) {
