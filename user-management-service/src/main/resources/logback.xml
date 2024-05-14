@@ -2,7 +2,7 @@
 <configuration>
   <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%-4relative [%thread] %d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level %logger{35} - %msg %n
+      <pattern>%-4relative [%thread] %d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level %logger{35}:%line - %msg %n
       </pattern>
     </encoder>
   </appender>
@@ -10,7 +10,7 @@
   <appender name="stderr" class="ch.qos.logback.core.ConsoleAppender">
     <target>System.err</target>
     <encoder>
-      <pattern>%-4relative [%thread] %d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level %logger{35} - %msg %n
+      <pattern>%-4relative [%thread] %d{yyyy-MM-dd_HH:mm:ss.SSS} %-5level %logger{35}:%line - %msg %n
       </pattern>
     </encoder>
   </appender>
