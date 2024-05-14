@@ -951,6 +951,7 @@
         { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" },
         { "key": "GET_VALIDATIONS_STATUSES_ERROR" },
         { "key": "GET_JOBS_STATUSES_ERROR" },
+        { "key": "UPLOAD_TO_S3_ERROR" },
         { "key": "GET_ORGANIZATIONS_ERROR" },
         { "key": "CREATE_ORGANIZATION_ERROR" },
         { "key": "GET_CONTROL_STATUSES_ERROR" },

@@ -108,7 +108,8 @@ export const useSetColumns = (
   validationsTemplate,
   isReporting,
   dataAreManuallyEditable,
-  isTableEditable
+  isTableEditable,
+  isEditRecordsManuallyButtonDisabled
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
@@ -132,6 +133,7 @@ export const useSetColumns = (
         {!isNil(value) && value !== '' && (
           <Button
             className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
+            disabled={isEditRecordsManuallyButtonDisabled}
             icon="export"
             iconPos="right"
             label={value}
@@ -146,6 +148,7 @@ export const useSetColumns = (
           (!colSchema.readOnly || !isReporting) && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
+              disabled={isEditRecordsManuallyButtonDisabled}
               icon="import"
               onClick={() => {
                 setIsAttachFileVisible(true);
@@ -171,6 +174,7 @@ export const useSetColumns = (
           value !== '' && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
+              disabled={isEditRecordsManuallyButtonDisabled}
               icon="trash"
               onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId, value, fieldName, recordId)}
             />
@@ -428,6 +432,7 @@ export const useSetColumns = (
           editor={
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
             (dataAreManuallyEditable &&
+              !isEditRecordsManuallyButtonDisabled &&
               isTableEditable &&
               hasWebformWritePermissions &&
               hasWritePermissions &&
@@ -535,7 +540,8 @@ export const useSetColumns = (
     initialCellValue,
     records.selectedRecord.recordId,
     dataAreManuallyEditable,
-    isTableEditable
+    isTableEditable,
+    isEditRecordsManuallyButtonDisabled
   ]);
 
   return {

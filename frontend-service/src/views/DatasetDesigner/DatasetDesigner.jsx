@@ -81,6 +81,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
   const [isIcebergTableCreated, setIsIcebergTableCreated] = useState(false);
+  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
@@ -757,6 +758,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       });
     }
   }, [snapshotState.isRestoring]);
+
+  const onTableConversion = conversionInProgress => {
+    setIsTableConversionInProgress(conversionInProgress);
+  };
 
   useEffect(() => {
     const validationFinished = notificationContext.toShow.find(
@@ -1708,6 +1713,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
@@ -1739,6 +1745,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
@@ -1768,6 +1775,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
@@ -1791,6 +1799,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1913,6 +1922,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
+            onTableConversion={onTableConversion}
             onUpdateSchema={onUpdateSchema}
             onUpdateTable={onUpdateTable}
             selectedRuleId={dataViewerOptions.selectedRuleId}
