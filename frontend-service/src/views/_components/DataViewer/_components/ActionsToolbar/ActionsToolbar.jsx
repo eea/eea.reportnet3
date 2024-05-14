@@ -306,6 +306,7 @@ export const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
+            isEditRecordsManuallyButtonDisabled ||
             isTableEditable ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
@@ -339,7 +340,9 @@ export const ActionsToolbar = ({
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
           checked={isTableEditable && dataAreManuallyEditable}
-          disabled={isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
+          disabled={
+            !hasWritePermissions || isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled
+          }
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
@@ -353,7 +356,7 @@ export const ActionsToolbar = ({
           id="check_edit_records_manually_label"
           style={{
             color:
-              !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
+              hasWritePermissions && !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
                 ? 'var(--main-font-color)'
                 : '#9A9A9A',
             cursor: 'auto',
@@ -464,7 +467,7 @@ export const ActionsToolbar = ({
       hasWritePermissions={hasWritePermissions}
       isDataflowOpen={isDataflowOpen}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-      isTableEditable={isTableEditable}
+      isTableEditable={isTableEditable || isEditRecordsManuallyButtonDisabled}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
       tableName={tableName}
@@ -499,6 +502,7 @@ export const ActionsToolbar = ({
         />
         <DeleteDialog
           disabled={
+            isEditRecordsManuallyButtonDisabled ||
             isTableEditable ||
             !hasWritePermissions ||
             isUndefined(records.totalRecords) ||

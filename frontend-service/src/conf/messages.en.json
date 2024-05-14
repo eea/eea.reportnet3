@@ -1549,6 +1549,7 @@
     "uploading": "Uploading",
     "uploadReplaceAttachment": "Replace file",
     "uploadTable": "Import data in table ",
+    "uploadToS3Error": "Error uploading file to S3",
     "url": "URL",
     "urlError": "Please enter a valid URL",
     "urlFieldFormatRestriction": "Maximum of 10000 characters",

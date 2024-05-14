@@ -9,6 +9,7 @@ export const Footer = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isEditRecordsManuallyButtonDisabled,
   isTableEditable,
   onAddClick,
   onPasteClick
@@ -19,7 +20,9 @@ export const Footer = ({
       {isTableEditable && dataAreManuallyEditable && (
         <Button
           className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
-          disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
+          disabled={
+            isEditRecordsManuallyButtonDisabled || !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead
+          }
           icon="add"
           label={resourcesContext.messages['addRecord']}
           onClick={onAddClick}

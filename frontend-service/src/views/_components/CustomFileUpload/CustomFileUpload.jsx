@@ -24,6 +24,7 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
 import { DatasetService } from 'services/DatasetService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
@@ -80,6 +81,7 @@ export const CustomFileUpload = ({
   url = null,
   withCredentials = false
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [state, dispatch] = useReducer(customFileUploadReducer, {
@@ -354,12 +356,21 @@ export const CustomFileUpload = ({
   };
 
   const uploadToS3 = async () => {
-    await fetch(presignedUrl, {
-      method: 'PUT',
-      body: state.files[0]
-    });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    try {
+      await fetch(presignedUrl, {
+        method: 'PUT',
+        body: state.files[0]
+      });
 
-    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploadClicked: false, isUploading: true } });
+      onUpload({ files: state.files });
+
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    } catch (error) {
+      console.error('CustomFileUpload - uploadToS3.', error);
+      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    }
   };
 
   const clear = () => {

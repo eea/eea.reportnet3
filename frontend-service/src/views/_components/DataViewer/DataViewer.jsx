@@ -78,6 +78,7 @@ export const DataViewer = ({
   onEnableManualEdit,
   onHideSelectGroupedValidation,
   onLoadTableData,
+  onTableConversion,
   isTableEditable,
   reporting,
   selectedRuleId,
@@ -225,7 +226,7 @@ export const DataViewer = ({
 
   const actionTemplate = () => (
     <ActionsColumn
-      disabledButtons={isDataflowOpen || isDesignDatasetEditorRead}
+      disabledButtons={isEditRecordsManuallyButtonDisabled || isDataflowOpen || isDesignDatasetEditorRead}
       hideDeletion={tableFixedNumber}
       hideEdition={RecordUtils.allAttachments(colsSchema)}
       onDeleteClick={() => setConfirmDeleteVisible(true)}
@@ -312,7 +313,8 @@ export const DataViewer = ({
     validationsTemplate,
     reporting,
     dataAreManuallyEditable,
-    isTableEditable
+    isTableEditable,
+    isEditRecordsManuallyButtonDisabled
   );
 
   useEffect(() => {
@@ -800,6 +802,7 @@ export const DataViewer = ({
   };
 
   const onDisableEditButton = checked => {
+    onTableConversion(checked);
     setIsEditRecordsManuallyButtonDisabled(checked);
   };
 
@@ -1289,6 +1292,7 @@ export const DataViewer = ({
                 }
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isEditRecordsManuallyButtonDisabled={isEditRecordsManuallyButtonDisabled}
                 isTableEditable={isTableEditable}
                 onAddClick={() => {
                   setIsNewRecord(true);

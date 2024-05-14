@@ -59,6 +59,7 @@ export const FieldsDesigner = ({
   onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
+  onTableConversion,
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -96,6 +97,10 @@ export const FieldsDesigner = ({
   const [refElement, setRefElement] = useState();
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
   const [toPrefill, setToPrefill] = useState(false);
+
+  useEffect(() => {
+    setIsTableEditable(table?.icebergTableIsCreated);
+  }, [table?.icebergTableIsCreated]);
 
   useEffect(() => {
     if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
@@ -525,6 +530,7 @@ export const FieldsDesigner = ({
           onEnableManualEdit={onEnableManualEdit}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
+          onTableConversion={onTableConversion}
           reporting={false}
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
