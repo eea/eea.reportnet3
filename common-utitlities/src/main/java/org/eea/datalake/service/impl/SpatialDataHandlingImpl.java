@@ -2,6 +2,9 @@ package org.eea.datalake.service.impl;
 
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.utils.LiteralConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +12,19 @@ import java.util.stream.Collectors;
 
 
 public class SpatialDataHandlingImpl implements SpatialDataHandling {
-  private final List<String> csvHeaders;
+  private final List<FieldSchemaVO> headerTypes;
 
-  public SpatialDataHandlingImpl(List<String> csvHeaders) {
-    this.csvHeaders = csvHeaders;
+  public SpatialDataHandlingImpl(TableSchemaVO tableSchemaVO) {
+    List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
+    FieldSchemaVO recordId = new FieldSchemaVO();
+    recordId.setName(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
+    FieldSchemaVO providerCode = new FieldSchemaVO();
+    providerCode.setName(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
+    fieldSchemas.add(recordId);
+    fieldSchemas.add(providerCode);
+    fieldSchemas.addAll(tableSchemaVO.getRecordSchema().getFieldSchema());
+
+    this.headerTypes = fieldSchemas;
   }
 
   @Override
@@ -46,17 +58,18 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   private List<String> getHeaders(boolean isGeoJsonHeaders) {
-    List<String> geoJsonEnums = new ArrayList<>();
-    geoJsonEnums.add(DataType.GEOMETRYCOLLECTION.getValue());
-    geoJsonEnums.add(DataType.MULTIPOINT.getValue());
-    geoJsonEnums.add(DataType.MULTIPOLYGON.getValue());
-    geoJsonEnums.add(DataType.POINT.getValue());
-    geoJsonEnums.add(DataType.POLYGON.getValue());
-    geoJsonEnums.add(DataType.LINESTRING.getValue());
-    geoJsonEnums.add(DataType.MULTILINESTRING.getValue());
+    List<DataType> geoJsonEnums = new ArrayList<>();
+    geoJsonEnums.add(DataType.GEOMETRYCOLLECTION);
+    geoJsonEnums.add(DataType.MULTIPOINT);
+    geoJsonEnums.add(DataType.MULTIPOLYGON);
+    geoJsonEnums.add(DataType.POINT);
+    geoJsonEnums.add(DataType.POLYGON);
+    geoJsonEnums.add(DataType.LINESTRING);
+    geoJsonEnums.add(DataType.MULTILINESTRING);
 
-    return csvHeaders.stream()
-        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.toUpperCase()))
+    return headerTypes.stream()
+        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .map(FieldSchemaVO::getName)
         .collect(Collectors.toList());
   }
 }

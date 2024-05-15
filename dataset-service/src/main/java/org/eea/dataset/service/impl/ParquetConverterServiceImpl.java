@@ -23,16 +23,20 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.datalake.service.SpatialDataHandling;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.FileCommonUtils;
-import org.eea.dataset.service.helper.CsvModification;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -102,6 +106,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     @Autowired
     JobControllerZuul jobControllerZuul;
 
+    @Autowired
+    DatasetMetabaseService datasetMetabaseService;
+
+    @Autowired
+    DatasetSchemaService datasetSchemaService;
+
     @Override
     public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
         String tableSchemaName;
@@ -135,13 +145,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
         //create a new csv file that contains records ids and data provider code as extra information
         List<File> csvFilesWithAddedColumns = null;
-        CsvModification csvModification = null;
+
         if(convertParquetWithCustomWay){
             csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
         }
         else{
-            csvModification = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
-            csvFilesWithAddedColumns = csvModification.getModifiedCsvFiles();
+            csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
         }
 
         if(csvFilesWithAddedColumns == null){
@@ -212,11 +221,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
             } else {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-                if (csvModification != null) {
-                    String createTableQuery = getTableQuery(csvModification, parquetInnerFolderPath, dremioPathForCsvFile);
-                    String processId = dremioHelperService.executeSqlStatement(createTableQuery);
-                    dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
-                }
+                String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile);
+                String processId = dremioHelperService.executeSqlStatement(createTableQuery);
+                dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
             }
         }
         //refresh the metadata
@@ -229,9 +236,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
 
-    private static String getTableQuery(CsvModification csvModification, String parquetInnerFolderPath, String dremioPathForCsvFile) {
+    private String getTableQuery(ImportFileInDremioInfo importFileInDremioInfo, String parquetInnerFolderPath, String dremioPathForCsvFile) {
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
+        String datasetSchemaId = dataset.getDatasetSchema();
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
+
         String createTableQuery;
-        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(csvModification.getCsvHeaders());
+        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
         if(spatialDataHandling.geoJsonHeadersIsNotEmpty(true)) {
             String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s %s FROM " + dremioPathForCsvFile;
             createTableQuery = String.format(initQuery, spatialDataHandling.getSimpleHeaders(), spatialDataHandling.getHeadersConvertedToBinary());
@@ -326,7 +337,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
     }
 
-    private CsvModification modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
+    private List<File> modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
         char delimiterChar = defaultDelimiter;
         if (!StringUtils.isBlank(importFileInDremioInfo.getDelimiter())){
             delimiterChar = importFileInDremioInfo.getDelimiter().charAt(0);
@@ -424,10 +435,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         if(recordCounter == 0){
             LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
-            return new CsvModification(null, csvHeaders);
+            return null;
         }
         modifiedCsvFiles.add(csvFileWithAddedColumns);
-        return new CsvModification(modifiedCsvFiles, csvHeaders);
+        return modifiedCsvFiles;
     }
 
 
