@@ -681,7 +681,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     value, notificationWarning);
         }
 
-        if(importFileInDremioInfo.getSendEmptyFileWarning()){
+        if(Boolean.TRUE.equals(importFileInDremioInfo.getSendEmptyFileWarning())){
             NotificationVO notificationWarning = NotificationVO.builder()
                     .user(SecurityContextHolder.getContext().getAuthentication().getName())
                     .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
