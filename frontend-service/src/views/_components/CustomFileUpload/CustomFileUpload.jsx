@@ -77,6 +77,7 @@ export const CustomFileUpload = ({
   s3Check = false,
   s3CheckLabel = 'S3',
   style = null,
+  tableSchemaId = null,
   uploadLabel = 'Upload',
   url = null,
   withCredentials = false
@@ -110,6 +111,7 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (presignedUrl) {
       uploadToS3();
+      importS3ToDlh();
     }
   }, [presignedUrl]);
 
@@ -370,6 +372,20 @@ export const CustomFileUpload = ({
       console.error('CustomFileUpload - uploadToS3.', error);
       notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
       dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    }
+  };
+
+  const importS3ToDlh = async () => {
+    try {
+      await DatasetService.importFileWithS3({
+        dataflowId,
+        datasetId,
+        delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+        tableSchemaId
+      });
+    } catch (error) {
+      console.error('CustomFileUpload - importS3ToDlh.', error);
+      notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
     }
   };
 
