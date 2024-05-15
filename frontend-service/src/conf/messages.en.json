@@ -804,6 +804,7 @@
     "importReportingFailedEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importReportingFailedNamefileEvent": "Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Table and file names are different.",
     "importReportingFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Field names or delimiter don't match.",
+    "importS3ToDlhError": "Error while importing file from S3 to DLH",
     "importSchema": "Import schema/s",
     "importTable": "Import table data",
     "importTableSchema": "Import definition",

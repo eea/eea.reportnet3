@@ -368,6 +368,11 @@ export const DatasetRepository = {
       })
     }),
 
+  importFileWithS3: async ({ dataflowId, datasetId, delimiter, tableSchemaId }) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.importFileWithS3, { dataflowId, datasetId, delimiter, tableSchemaId })
+    }),
+
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) =>
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDatasetFeedbackStatus),
