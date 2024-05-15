@@ -2809,7 +2809,7 @@ public class DatasetSchemaServiceTest {
     design.setId(1L);
     design.setDataSetName("DS");
     design.setDatasetSchema(new ObjectId().toString());
-    Mockito.when(designDatasetRepository.findById(Mockito.anyLong()))
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(design));
 
     DataSetSchema schema = new DataSetSchema();
@@ -2828,13 +2828,13 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
 
     dataSchemaServiceImpl.exportZipFieldSchemas(1L);
-    Mockito.verify(designDatasetRepository, times(1)).findById(Mockito.anyLong());
+    Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
   }
 
   @Test(expected = EEAException.class)
   public void testExportZipFieldSchemasException() throws IOException, EEAException {
 
-    Mockito.when(designDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
     try {
       dataSchemaServiceImpl.exportZipFieldSchemas(1L);
     } catch (EEAException e) {
