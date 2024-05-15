@@ -18,7 +18,10 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioValidationException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.utils.LiteralConstants;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
@@ -123,8 +126,9 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
+            TableSchemaVO tableSchemaVO = datasetSchemaControllerZuul.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
-            SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(Collections.singletonList(fieldName));
+            SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
             StringBuilder header = spatialDataHandling.geoJsonHeadersIsNotEmpty(true) ? spatialDataHandling.convertToJson() : spatialDataHandling.getSimpleHeaders();
 
             query.append("select record_id,").append(header).append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));

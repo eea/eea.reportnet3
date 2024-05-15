@@ -2,7 +2,11 @@ package org.eea.dataset.util;
 
 import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DremioRecordMapper;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
@@ -194,12 +198,8 @@ public class DataLakeDataRetrieverUtils {
     public static List<RecordVO> getRecordVOS(String datasetSchema , TableSchemaVO tableSchemaVO, StringBuilder dataQuery) {
         DremioRecordMapper recordMapper = new DremioRecordMapper();
         recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchema).setTableSchemaId(tableSchemaVO.getIdTableSchema());
-        List<String> headers = new ArrayList<>();
-        headers.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
-        headers.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
-        headers.addAll(tableSchemaVO.getRecordSchema().getFieldSchema().stream().map(FieldSchemaVO::getName).collect(Collectors.toList()));
 
-        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(headers);
+        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
 
         List<RecordVO> recordVOS;
         if (spatialDataHandling.geoJsonHeadersIsNotEmpty(true)) {
