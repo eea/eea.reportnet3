@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';
 
 import uniqueId from 'lodash/uniqueId';
+import { Icon } from '../Icon';
 
 export class Checkbox extends Component {
   static defaultProps = {
@@ -21,6 +22,7 @@ export class Checkbox extends Component {
     readOnly: false,
     required: false,
     style: null,
+    tableConversionInProgress: false,
     tooltip: null,
     tooltipOptions: null,
     value: null
@@ -41,6 +43,7 @@ export class Checkbox extends Component {
     readOnly: PropTypes.bool,
     required: PropTypes.bool,
     style: PropTypes.object,
+    tableConversionInProgress: PropTypes.bool,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object,
     value: PropTypes.any
@@ -170,6 +173,7 @@ export class Checkbox extends Component {
           className={boxClass}
           ref={el => (this.box = el)}
           role="checkbox">
+          {this.props.tableConversionInProgress && <Icon icon={'spinnerAnimate'} />}
           <span className={iconClass}></span>
         </div>
       </div>

@@ -17,7 +17,7 @@ export const Footer = ({
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
-      {isTableEditable && dataAreManuallyEditable && (
+      {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) && (
         <Button
           className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
           disabled={
@@ -29,12 +29,14 @@ export const Footer = ({
           style={{ float: 'left' }}
         />
       )}
-      {!bigData && (
+      {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) && (
         <Button
           className={`p-button-secondary ${
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={isDataflowOpen || isDesignDatasetEditorRead}
+          disabled={
+            isEditRecordsManuallyButtonDisabled || !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead
+          }
           icon="clipboard"
           label={resourcesContext.messages['pasteRecords']}
           onClick={async () => {
