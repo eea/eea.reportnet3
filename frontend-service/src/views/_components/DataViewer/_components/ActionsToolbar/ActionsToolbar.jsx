@@ -351,6 +351,7 @@ export const ActionsToolbar = ({
             convertTable(e.checked);
           }}
           role="checkbox"
+          tableConversionInProgress={isEditRecordsManuallyButtonDisabled}
         />
         <label
           id="check_edit_records_manually_label"
@@ -550,7 +551,7 @@ export const ActionsToolbar = ({
         />
         {renderFilterableButton()}
         {renderFilterSearch()}
-        {renderManualEditButton()}
+        {bigData && renderManualEditButton()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
         <span className={styles.input}>

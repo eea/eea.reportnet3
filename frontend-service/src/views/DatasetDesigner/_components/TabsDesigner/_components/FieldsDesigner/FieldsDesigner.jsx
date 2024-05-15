@@ -1051,27 +1051,29 @@ export const FieldsDesigner = ({
               {resourcesContext.messages['notEmpty']}
             </label>
           </div>
-          <div>
-            <span
-              className={styles.switchTextInput}
-              id={`${table.tableSchemaId}_check_manual_edit_label`}
-              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
-              {resourcesContext.messages['manualEdit']}
-            </span>
-            <Checkbox
-              ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
-              checked={dataAreManuallyEditable}
-              className={styles.fieldDesignerItem}
-              disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
-              id={`${table.tableSchemaId}_check_manual_edit`}
-              inputId={`${table.tableSchemaId}_check_manual_edit`}
-              label="Default"
-              onChange={e => onChangeManualEdit(e.checked)}
-            />
-            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
-              {resourcesContext.messages['manualEdit']}
-            </label>
-          </div>
+          {bigData && (
+            <div>
+              <span
+                className={styles.switchTextInput}
+                id={`${table.tableSchemaId}_check_manual_edit_label`}
+                style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+                {resourcesContext.messages['manualEdit']}
+              </span>
+              <Checkbox
+                ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
+                checked={dataAreManuallyEditable}
+                className={styles.fieldDesignerItem}
+                disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
+                id={`${table.tableSchemaId}_check_manual_edit`}
+                inputId={`${table.tableSchemaId}_check_manual_edit`}
+                label="Default"
+                onChange={e => onChangeManualEdit(e.checked)}
+              />
+              <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
+                {resourcesContext.messages['manualEdit']}
+              </label>
+            </div>
+          )}
         </div>
       </div>
       <div className={styles.contentTable}>

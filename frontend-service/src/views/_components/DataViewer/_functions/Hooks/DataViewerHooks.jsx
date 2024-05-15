@@ -140,8 +140,7 @@ export const useSetColumns = (
             onClick={() => onFileDownload(value, fieldId, recordId, fieldName)}
           />
         )}
-        {dataAreManuallyEditable &&
-          isTableEditable &&
+        {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
@@ -164,8 +163,7 @@ export const useSetColumns = (
               }}
             />
           )}
-        {dataAreManuallyEditable &&
-          isTableEditable &&
+        {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
@@ -431,9 +429,8 @@ export const useSetColumns = (
           }`}
           editor={
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
-            (dataAreManuallyEditable &&
-              !isEditRecordsManuallyButtonDisabled &&
-              isTableEditable &&
+            ((!bigData ||
+              (bigData && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled && isTableEditable)) &&
               hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
@@ -516,7 +513,7 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      dataAreManuallyEditable && isTableEditable && hasWritePermissions
+      (!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) && hasWritePermissions
         ? columnsArr.unshift(editCol, validationCol)
         : columnsArr.unshift(validationCol);
     }
