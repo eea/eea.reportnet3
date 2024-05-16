@@ -210,6 +210,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 needToDemoteTable = false;
             }
 
+            String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
+            if (StringUtils.isBlank(tableSchemaId)) {
+                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, tableSchemaName, false);
+            }
+
             //create parquet file
             if (convertParquetWithCustomWay) {
                 LOG.info("For import job {} the conversion of the csv to parquet will use the custom implementation", importFileInDremioInfo);
@@ -221,7 +226,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
             } else {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-                String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile);
+                String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile, tableSchemaId);
                 String processId = dremioHelperService.executeSqlStatement(createTableQuery);
                 dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
             }
@@ -236,10 +241,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
 
-    private String getTableQuery(ImportFileInDremioInfo importFileInDremioInfo, String parquetInnerFolderPath, String dremioPathForCsvFile) {
+    private String getTableQuery(ImportFileInDremioInfo importFileInDremioInfo, String parquetInnerFolderPath, String dremioPathForCsvFile, String tableSchemaId) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
         String datasetSchemaId = dataset.getDatasetSchema();
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
         String createTableQuery;
         SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
