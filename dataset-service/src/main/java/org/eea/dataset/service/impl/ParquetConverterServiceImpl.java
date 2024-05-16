@@ -233,10 +233,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         //demote reference table folder
         S3PathResolver s3ReferenceTablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
-        dremioHelperService.demoteFolderOrFile(s3ReferenceTablePathResolver, tableSchemaName);
-        if(importFileInDremioInfo.getReplaceData()){
-            //remove folders that contain the previous parquet files because data will be replaced
-            if (s3Helper.checkFolderExist(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH)) {
+        if (s3Helper.checkFolderExist(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH)) {
+            dremioHelperService.demoteFolderOrFile(s3ReferenceTablePathResolver, tableSchemaName);
+            if(importFileInDremioInfo.getReplaceData()){
+                //remove folders that contain the previous parquet files because data will be replaced
                 s3Helper.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
             }
         }
