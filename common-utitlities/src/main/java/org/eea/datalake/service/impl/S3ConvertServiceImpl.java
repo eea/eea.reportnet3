@@ -1,10 +1,11 @@
 package org.eea.datalake.service.impl;
 
 import com.opencsv.CSVWriter;
+import mil.nga.sf.geojson.Feature;
+import mil.nga.sf.geojson.FeatureConverter;
+import mil.nga.sf.wkb.GeometryReader;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -14,11 +15,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.ParquetStream;
-import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.utils.LiteralConstants;
-import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +22,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -114,30 +118,47 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
-        CSVWriter csvWriter) throws IOException {
+                                          CSVWriter csvWriter) throws IOException {
         int size = 0;
         int counter = 0;
         for (int i = 0; i < exportFilenames.size(); i++) {
-            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE,
-                datasetId);
-            InputStream inputStream = new FileInputStream(parquetFile);
-            ParquetStream parquetStream = new ParquetStream(inputStream);
-            ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
-            GenericRecord record;
+            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+            try (InputStream inputStream = new FileInputStream(parquetFile);
+                ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
+                GenericRecord record;
 
-            while ((record = r.read()) != null) {
-                if (i == 0 && counter == 0) {
-                    size = record.getSchema().getFields().size();
-                    List<String> headers =
-                        record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                    csvWriter.writeNext(headers.toArray(String[]::new), false);
-                    counter++;
+                while ((record = r.read()) != null) {
+                    if (i == 0 && counter == 0) {
+                        size = record.getSchema().getFields().size();
+                      csvWriter.writeNext(record.getSchema().getFields().stream()
+                          .map(Schema.Field::name).toArray(String[]::new), false);
+                        counter++;
+                    }
+                    String[] columns = new String[size];
+                    for (int j = 0; j < size; j++) {
+                        Object fieldValue = record.get(j);
+                        if (fieldValue instanceof ByteBuffer) {
+                            ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                            var geometry = GeometryReader.readGeometry(byteBuffer.array());
+                            //var geometryType = geometry.getGeometryType();
+
+                            Feature feature = FeatureConverter.toFeature(geometry);
+                            String featureContent = FeatureConverter.toStringValue(feature);
+
+                            String regex = "(\"properties\"\\s*:\\s*\\{)";
+                            Pattern pattern = Pattern.compile(regex);
+                            Matcher matcher = pattern.matcher(featureContent);
+
+
+                            String modifiedJson = matcher.find() ? matcher.replaceFirst("$1\"srid\":\"4326\",") : "";
+                            columns[j] = modifiedJson;
+
+                        } else {
+                            columns[j] = (fieldValue != null) ? fieldValue.toString() : "";
+                        }
+                    }
+                    csvWriter.writeNext(columns, false);
                 }
-                String[] columns = new String[size];
-                for (int j = 0; j < size; j++) {
-                    columns[j] = (record.get(j) != null) ? record.get(j).toString() : "";
-                }
-                csvWriter.writeNext(columns, false);
             }
         }
     }
