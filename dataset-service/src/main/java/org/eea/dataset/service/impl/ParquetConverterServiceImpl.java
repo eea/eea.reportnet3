@@ -212,7 +212,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
             String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
             if (StringUtils.isBlank(tableSchemaId)) {
-                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, tableSchemaName, false);
+                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
             }
 
             //create parquet file
