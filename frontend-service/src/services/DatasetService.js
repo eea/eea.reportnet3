@@ -679,11 +679,12 @@ export const DatasetService = {
 
   downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
 
-  importFileWithS3: async ({ dataflowId, datasetId, delimiter, tableSchemaId }) =>
+  importFileWithS3: async ({ dataflowId, datasetId, delimiter, jobId, tableSchemaId }) =>
     await DatasetRepository.importFileWithS3({
       dataflowId,
       datasetId,
       delimiter,
+      jobId,
       tableSchemaId
     }),
 

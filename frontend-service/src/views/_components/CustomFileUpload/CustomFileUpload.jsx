@@ -97,6 +97,7 @@ export const CustomFileUpload = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
+  const [jobId, setJobId] = useState();
   const [presignedUrl, setPresignedUrl] = useState();
 
   const _files = useRef([]);
@@ -381,6 +382,7 @@ export const CustomFileUpload = ({
         dataflowId,
         datasetId,
         delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+        jobId,
         tableSchemaId
       });
     } catch (error) {
@@ -495,6 +497,7 @@ export const CustomFileUpload = ({
   const onGetPresignedUrl = async () => {
     const fileName = state?.files[0].name;
     const data = await DatasetService.getPresignedUrl({ datasetId, dataflowId, fileName });
+    setJobId(data?.jobId);
     setPresignedUrl(data?.presignedUrl);
   };
 
