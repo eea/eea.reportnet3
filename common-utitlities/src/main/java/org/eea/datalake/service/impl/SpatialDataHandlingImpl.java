@@ -28,7 +28,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public boolean geoJsonHeadersIsNotEmpty(boolean isGeoJsonHeaders) {
+  public boolean geoJsonHeadersAreNotEmpty(boolean isGeoJsonHeaders) {
     return !getHeaders(isGeoJsonHeaders).isEmpty();
   }
 
@@ -42,8 +42,17 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public StringBuilder convertToJson() {
+  public StringBuilder getGeoJsonHeaders() {
     List<String> geoJsonHeaders = getHeaders(true);
+
+    return new StringBuilder(geoJsonHeaders.stream()
+        .map(header -> "concat('{\"type\":\"Feature\",\"geometry\":',replace(st_asgeojson(" + header + "),',\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:0\"}}}','},\"properties\": {\"srid\": \"4326\"}}')) as " + header)
+        .collect(Collectors.joining(",")));
+  }
+
+  @Override
+  public StringBuilder getGeoJsonHeader(String fieldName) {
+    List<String> geoJsonHeaders = getHeaderByFieldName(fieldName);
 
     return new StringBuilder(geoJsonHeaders.stream()
         .map(header -> "concat('{\"type\":\"Feature\",\"geometry\":',replace(st_asgeojson(" + header + "),',\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:0\"}}}','},\"properties\": {\"srid\": \"4326\"}}')) as " + header)
@@ -58,6 +67,24 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   private List<String> getHeaders(boolean isGeoJsonHeaders) {
+    List<DataType> geoJsonEnums = getGeoJsonEnums();
+
+    return headerTypes.stream()
+        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .map(FieldSchemaVO::getName)
+        .collect(Collectors.toList());
+  }
+
+  private List<String> getHeaderByFieldName(String fieldName) {
+    List<DataType> geoJsonEnums = getGeoJsonEnums();
+
+    return headerTypes.stream()
+        .filter(header -> geoJsonEnums.contains(header.getType()) && header.getName().equalsIgnoreCase(fieldName))
+        .map(FieldSchemaVO::getName)
+        .collect(Collectors.toList());
+  }
+
+  private static List<DataType> getGeoJsonEnums() {
     List<DataType> geoJsonEnums = new ArrayList<>();
     geoJsonEnums.add(DataType.GEOMETRYCOLLECTION);
     geoJsonEnums.add(DataType.MULTIPOINT);
@@ -66,10 +93,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     geoJsonEnums.add(DataType.POLYGON);
     geoJsonEnums.add(DataType.LINESTRING);
     geoJsonEnums.add(DataType.MULTILINESTRING);
-
-    return headerTypes.stream()
-        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
-        .map(FieldSchemaVO::getName)
-        .collect(Collectors.toList());
+    return geoJsonEnums;
   }
 }

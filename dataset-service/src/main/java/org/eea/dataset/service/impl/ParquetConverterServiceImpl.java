@@ -35,7 +35,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
@@ -248,7 +247,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         String createTableQuery;
         SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
-        if(spatialDataHandling.geoJsonHeadersIsNotEmpty(true)) {
+        if(spatialDataHandling.geoJsonHeadersAreNotEmpty(true)) {
             String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s %s FROM " + dremioPathForCsvFile;
             createTableQuery = String.format(initQuery, spatialDataHandling.getSimpleHeaders(), spatialDataHandling.getHeadersConvertedToBinary());
         } else {
