@@ -66,7 +66,6 @@ export const DataViewer = ({
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
-  icebergTableIsCreated = false,
   isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
@@ -125,7 +124,7 @@ export const DataViewer = ({
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [isPasting, setIsPasting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [isTableEditable, setIsTableEditable] = useState(icebergTableIsCreated);
+  const [isTableEditable, setIsTableEditable] = useState(false);
   const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
   const [prevFilterValue, setPrevFilterValue] = useState('');
   const [valueFilter, setValueFilter] = useState();
@@ -321,7 +320,9 @@ export const DataViewer = ({
   );
 
   useEffect(() => {
-    onIsTableDataLoading(isLoading);
+    if (onIsTableDataLoading) {
+      onIsTableDataLoading(isLoading);
+    }
   }, [isLoading]);
 
   useEffect(() => {

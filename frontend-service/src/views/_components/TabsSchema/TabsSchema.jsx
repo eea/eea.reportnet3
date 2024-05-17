@@ -84,7 +84,6 @@ export const TabsSchema = ({
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
-                  icebergTableIsCreated={table.icebergTableIsCreated}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
