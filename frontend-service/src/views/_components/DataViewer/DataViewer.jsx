@@ -77,7 +77,9 @@ export const DataViewer = ({
   isReportingWebform,
   onChangeButtonsVisibility,
   onChangeTableEditable,
+  onDisableManualEditing,
   onHideSelectGroupedValidation,
+  onIsTableDataLoading,
   onLoadTableData,
   onTableConversion,
   reporting,
@@ -92,8 +94,7 @@ export const DataViewer = ({
   tableId,
   tableName,
   tableReadOnly,
-  tableSchemaColumns,
-  viewType
+  tableSchemaColumns
 }) => {
   const { datasetId, dataflowId } = useParams();
 
@@ -320,8 +321,8 @@ export const DataViewer = ({
   );
 
   useEffect(() => {
-    setIsTableEditable(icebergTableIsCreated);
-  }, [icebergTableIsCreated, viewType]);
+    onIsTableDataLoading(isLoading);
+  }, [isLoading]);
 
   useEffect(() => {
     if (onChangeButtonsVisibility) {
@@ -377,6 +378,9 @@ export const DataViewer = ({
       setHasWebformWritePermissions(false);
     }
   }, [isReportingWebform]);
+  useEffect(() => {
+    onGetIsIcebergCreated();
+  }, []);
 
   const filterDataResponse = data => {
     const dataFiltered = DataViewerUtils.parseData(data);
@@ -387,6 +391,15 @@ export const DataViewer = ({
       setFetchedData([]);
     }
     setFetchedData(dataFiltered);
+  };
+
+  const onGetIsIcebergCreated = async () => {
+    const icebergCreated = await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: tableId
+    });
+
+    setIsTableEditable(icebergCreated.data);
   };
 
   const onFetchData = async (
@@ -421,12 +434,7 @@ export const DataViewer = ({
           value: valueFilter
         });
 
-        const icebergCreated = await DatasetService.getIsIcebergTableCreated({
-          datasetId,
-          tableSchemaId: tableId
-        });
-
-        setIsTableEditable(icebergCreated);
+        onGetIsIcebergCreated();
       } else {
         data = await DatasetService.getTableData({
           datasetId,
@@ -825,6 +833,11 @@ export const DataViewer = ({
 
   const onDisableEditButton = checked => {
     onTableConversion(checked);
+
+    if (onDisableManualEditing) {
+      onDisableManualEditing(checked);
+    }
+
     setIsEditRecordsManuallyButtonDisabled(checked);
   };
 

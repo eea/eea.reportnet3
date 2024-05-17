@@ -89,6 +89,8 @@ export const FieldsDesigner = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isPkChecked, setIsPkChecked] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
+  const [isTableLoading, setIsTableLoading] = useState(false);
+  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [dataAreManuallyEditable, setDataAreManuallyEditable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
@@ -111,6 +113,19 @@ export const FieldsDesigner = ({
       setFixedNumber(table.fixedNumber || false);
     }
   }, [table]);
+
+  useEffect(() => {
+    onGetIsIcebergCreated();
+  }, []);
+
+  const onGetIsIcebergCreated = async () => {
+    const icebergCreated = await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: table.tableSchemaId
+    });
+
+    setIsTableEditable(icebergCreated.data);
+  };
 
   useEffect(() => {
     if (!isLoading && !isNil(refElement)) {
@@ -338,10 +353,18 @@ export const FieldsDesigner = ({
     });
   };
 
+  const onDisableManualEditing = checked => {
+    setIsTableConversionInProgress(checked);
+  };
+
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName, upDownOrder = false, order) =>
     reorderField(draggedFieldIdx, droppedFieldName, upDownOrder, order);
 
   const onFieldDragAndDropStart = draggedFieldIdx => setInitialFieldIndexDragged(draggedFieldIdx);
+
+  const onIsTableDataLoading = isLoading => {
+    setIsTableLoading(isLoading);
+  };
 
   const onKeyChange = event => {
     if (event.key === 'Escape') {
@@ -522,7 +545,9 @@ export const FieldsDesigner = ({
           levelErrorTypes={table.levelErrorTypes}
           onChangeButtonsVisibility={onChangeButtonsVisibility}
           onChangeTableEditable={onChangeTableEditable}
+          onDisableManualEditing={onDisableManualEditing}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+          onIsTableDataLoading={onIsTableDataLoading}
           onLoadTableData={onLoadTableData}
           onTableConversion={onTableConversion}
           reporting={false}
@@ -1045,7 +1070,7 @@ export const FieldsDesigner = ({
               {resourcesContext.messages['notEmpty']}
             </label>
           </div>
-          {bigData && viewType['tabularData'] && !isDataflowOpen && (
+          {bigData && !isDataflowOpen && (
             <div>
               <span
                 className={styles.switchTextInput}
@@ -1057,7 +1082,9 @@ export const FieldsDesigner = ({
                 ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
                 checked={!isDataflowOpen && dataAreManuallyEditable}
                 className={styles.fieldDesignerItem}
-                disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
+                disabled={
+                  isTableConversionInProgress||isTableLoading || isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset
+                }
                 id={`${table.tableSchemaId}_check_manual_edit`}
                 inputId={`${table.tableSchemaId}_check_manual_edit`}
                 label="Default"
