@@ -72,11 +72,11 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
                 s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
                 totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
-                dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+                dataQuery.append("select %s %s %s from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
                 recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
             } else {
                 totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-                dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
+                dataQuery.append("select %s %s %s from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
                 recordsCountQuery.append("select count(record_id) from " + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " t ");
             }
             result.setTotalRecords(totalRecords);

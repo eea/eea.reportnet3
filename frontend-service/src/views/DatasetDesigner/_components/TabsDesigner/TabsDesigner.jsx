@@ -50,6 +50,7 @@ export const TabsDesigner = ({
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
+  onTableConversion,
   onUpdateSchema,
   onUpdateTable,
   selectedRuleId,
@@ -487,12 +488,13 @@ export const TabsDesigner = ({
                       key={tab.index}
                       manageDialogs={manageDialogs}
                       manageUniqueConstraint={manageUniqueConstraint}
+                      onChangeButtonsVisibility={onChangeButtonsVisibility}
                       onChangeFields={onChangeFields}
                       onChangeReference={onChangeReference}
                       onChangeTableProperties={onChangeTableProperties}
-                      onChangeButtonsVisibility={onChangeButtonsVisibility}
                       onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                       onLoadTableData={onLoadTableData}
+                      onTableConversion={onTableConversion}
                       selectedRuleId={selectedRuleId}
                       selectedRuleLevelError={selectedRuleLevelError}
                       selectedRuleMessage={selectedRuleMessage}

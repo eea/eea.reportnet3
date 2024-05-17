@@ -108,7 +108,8 @@ export const useSetColumns = (
   validationsTemplate,
   isReporting,
   dataAreManuallyEditable,
-  isTableEditable
+  isTableEditable,
+  isEditRecordsManuallyButtonDisabled
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
@@ -132,20 +133,21 @@ export const useSetColumns = (
         {!isNil(value) && value !== '' && (
           <Button
             className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
+            disabled={isEditRecordsManuallyButtonDisabled}
             icon="export"
             iconPos="right"
             label={value}
             onClick={() => onFileDownload(value, fieldId, recordId, fieldName)}
           />
         )}
-        {dataAreManuallyEditable &&
-          isTableEditable &&
+        {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
           (!colSchema.readOnly || !isReporting) && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
+              disabled={isEditRecordsManuallyButtonDisabled}
               icon="import"
               onClick={() => {
                 setIsAttachFileVisible(true);
@@ -161,8 +163,7 @@ export const useSetColumns = (
               }}
             />
           )}
-        {dataAreManuallyEditable &&
-          isTableEditable &&
+        {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
@@ -171,6 +172,7 @@ export const useSetColumns = (
           value !== '' && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
+              disabled={isEditRecordsManuallyButtonDisabled}
               icon="trash"
               onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId, value, fieldName, recordId)}
             />
@@ -427,8 +429,8 @@ export const useSetColumns = (
           }`}
           editor={
             ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
-            (dataAreManuallyEditable &&
-              isTableEditable &&
+            ((!bigData ||
+              (bigData && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled && isTableEditable)) &&
               hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
@@ -511,7 +513,7 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      dataAreManuallyEditable && isTableEditable && hasWritePermissions
+      (!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) && hasWritePermissions
         ? columnsArr.unshift(editCol, validationCol)
         : columnsArr.unshift(validationCol);
     }
@@ -535,7 +537,8 @@ export const useSetColumns = (
     initialCellValue,
     records.selectedRecord.recordId,
     dataAreManuallyEditable,
-    isTableEditable
+    isTableEditable,
+    isEditRecordsManuallyButtonDisabled
   ]);
 
   return {

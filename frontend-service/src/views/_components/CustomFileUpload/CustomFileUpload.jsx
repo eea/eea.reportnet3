@@ -22,6 +22,9 @@ import { Messages } from 'primereact/messages';
 import { ProgressBar } from 'primereact/progressbar';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
+import { DatasetService } from 'services/DatasetService';
+
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
@@ -35,6 +38,8 @@ export const CustomFileUpload = ({
   cancelLabel = 'Reset',
   chooseLabel = 'Choose',
   className = null,
+  dataflowId,
+  datasetId,
   dialogClassName = null,
   dialogHeader = null,
   dialogOnHide = null,
@@ -69,11 +74,15 @@ export const CustomFileUpload = ({
   replaceCheckLabel = 'Replace data',
   replaceCheckLabelMessage = '',
   replaceCheckDisabled = false,
+  s3Check = false,
+  s3CheckLabel = 'S3',
   style = null,
+  tableSchemaId = null,
   uploadLabel = 'Upload',
   url = null,
   withCredentials = false
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [state, dispatch] = useReducer(customFileUploadReducer, {
@@ -82,11 +91,13 @@ export const CustomFileUpload = ({
     isUploading: false,
     isValid: true,
     msgs: [],
-    replace: false
+    replace: false,
+    uploadWithS3: false
   });
 
   const [isValidating, setIsValidating] = useState(false);
   const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
+  const [presignedUrl, setPresignedUrl] = useState();
 
   const _files = useRef([]);
   const content = useRef(null);
@@ -98,13 +109,20 @@ export const CustomFileUpload = ({
   }, [state]);
 
   useEffect(() => {
+    if (presignedUrl) {
+      uploadToS3();
+      importS3ToDlh();
+    }
+  }, [presignedUrl]);
+
+  useEffect(() => {
     if (state.isUploadClicked) upload();
   }, [state.isUploadClicked]);
 
   useEffect(() => {
     if (state.progress === 100 && bigData && !isImportLeadReportersDialog) {
       const timer = setTimeout(() => {
-        onUpload();
+        onUpload({ files: state.files });
       }, 5000);
       return () => clearTimeout(timer);
     }
@@ -276,7 +294,7 @@ export const CustomFileUpload = ({
     return true;
   };
 
-  const upload = () => {
+  const upload = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
@@ -337,6 +355,38 @@ export const CustomFileUpload = ({
     xhr.send(formData);
 
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+  };
+
+  const uploadToS3 = async () => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    try {
+      await fetch(presignedUrl, {
+        method: 'PUT',
+        body: state.files[0]
+      });
+
+      onUpload({ files: state.files });
+
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    } catch (error) {
+      console.error('CustomFileUpload - uploadToS3.', error);
+      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    }
+  };
+
+  const importS3ToDlh = async () => {
+    try {
+      await DatasetService.importFileWithS3({
+        dataflowId,
+        datasetId,
+        delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+        tableSchemaId
+      });
+    } catch (error) {
+      console.error('CustomFileUpload - importS3ToDlh.', error);
+      notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
+    }
   };
 
   const clear = () => {
@@ -442,6 +492,12 @@ export const CustomFileUpload = ({
     );
   };
 
+  const onGetPresignedUrl = async () => {
+    const fileName = state?.files[0].name;
+    const data = await DatasetService.getPresignedUrl({ datasetId, dataflowId, fileName });
+    setPresignedUrl(data?.presignedUrl);
+  };
+
   const renderFiles = () => {
     return (
       <div className="p-fileupload-files">
@@ -490,7 +546,7 @@ export const CustomFileUpload = ({
 
   const renderReplaceCheck = () => {
     return (
-      <div className={styles.checkboxWrapper}>
+      <div className={styles.replaceCheckboxWrapper}>
         <Checkbox
           checked={state.replace}
           disabled={replaceCheckDisabled}
@@ -516,6 +572,24 @@ export const CustomFileUpload = ({
             tooltipOptions={{ position: 'top' }}
           />
         )}
+      </div>
+    );
+  };
+  const renderS3Check = () => {
+    return (
+      <div className={styles.s3CheckboxWrapper}>
+        <Checkbox
+          checked={state.uploadWithS3}
+          id="s3Checkbox"
+          inputId="s3Checkbox"
+          onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}
+          role="checkbox"
+        />
+        <label htmlFor="s3Checkbox">
+          <span onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}>
+            {s3CheckLabel}
+          </span>
+        </label>
       </div>
     );
   };
@@ -545,6 +619,7 @@ export const CustomFileUpload = ({
             {filesList}
           </div>
           {replaceCheck && renderReplaceCheck()}
+          {bigData && s3Check && renderS3Check()}
         </div>
         <p className={`${styles.invalidExtensionMsg} ${state.isValid ? styles.isValid : undefined}`}>
           {invalidExtensionMessage}
@@ -578,7 +653,11 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                upload();
+                if (bigData && state.uploadWithS3) {
+                  onGetPresignedUrl();
+                } else {
+                  upload();
+                }
               }
             }}
           />

@@ -66,6 +66,7 @@ export const DataViewer = ({
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
+  icebergTableIsCreated = false,
   isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
@@ -75,10 +76,10 @@ export const DataViewer = ({
   isReferenceDataset,
   isReportingWebform,
   onChangeButtonsVisibility,
-  onEnableManualEdit,
+  onChangeTableEditable,
   onHideSelectGroupedValidation,
   onLoadTableData,
-  isTableEditable,
+  onTableConversion,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -91,7 +92,8 @@ export const DataViewer = ({
   tableId,
   tableName,
   tableReadOnly,
-  tableSchemaColumns
+  tableSchemaColumns,
+  viewType
 }) => {
   const { datasetId, dataflowId } = useParams();
 
@@ -112,6 +114,7 @@ export const DataViewer = ({
   const [initialCellValue, setInitialCellValue] = useState();
   const [isAttachFileVisible, setIsAttachFileVisible] = useState(false);
   const [isColumnInfoVisible, setIsColumnInfoVisible] = useState(false);
+  const [isConfirmDeleteButtonDisabled, setIsConfirmDeleteButtonDisabled] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeleteAttachmentVisible, setIsDeleteAttachmentVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -121,6 +124,7 @@ export const DataViewer = ({
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [isPasting, setIsPasting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTableEditable, setIsTableEditable] = useState(icebergTableIsCreated);
   const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
   const [prevFilterValue, setPrevFilterValue] = useState('');
   const [valueFilter, setValueFilter] = useState();
@@ -224,7 +228,7 @@ export const DataViewer = ({
 
   const actionTemplate = () => (
     <ActionsColumn
-      disabledButtons={isDataflowOpen || isDesignDatasetEditorRead}
+      disabledButtons={isEditRecordsManuallyButtonDisabled || isDataflowOpen || isDesignDatasetEditorRead}
       hideDeletion={tableFixedNumber}
       hideEdition={RecordUtils.allAttachments(colsSchema)}
       onDeleteClick={() => setConfirmDeleteVisible(true)}
@@ -311,11 +315,21 @@ export const DataViewer = ({
     validationsTemplate,
     reporting,
     dataAreManuallyEditable,
-    isTableEditable
+    isTableEditable,
+    isEditRecordsManuallyButtonDisabled
   );
 
   useEffect(() => {
-    onChangeButtonsVisibility(isTableEditable);
+    setIsTableEditable(icebergTableIsCreated);
+  }, [icebergTableIsCreated, viewType]);
+
+  useEffect(() => {
+    if (onChangeButtonsVisibility) {
+      onChangeButtonsVisibility(isTableEditable);
+    }
+    if (onChangeTableEditable) {
+      onChangeTableEditable(isTableEditable);
+    }
   }, [isTableEditable]);
 
   useEffect(() => {
@@ -406,6 +420,13 @@ export const DataViewer = ({
           qcCodes: tableId === selectedTableSchemaId ? groupedRules : undefined,
           value: valueFilter
         });
+
+        const icebergCreated = await DatasetService.getIsIcebergTableCreated({
+          datasetId,
+          tableSchemaId: tableId
+        });
+
+        setIsTableEditable(icebergCreated);
       } else {
         data = await DatasetService.getTableData({
           datasetId,
@@ -675,6 +696,7 @@ export const DataViewer = ({
 
   const onConfirmDeleteRow = async () => {
     try {
+      setIsConfirmDeleteButtonDisabled(true);
       await DatasetService.deleteRecord({
         datasetId,
         recordId: records.selectedRecord.recordId,
@@ -687,7 +709,9 @@ export const DataViewer = ({
           : Math.floor(records.firstPageRecord / records.recordsPerPage) * records.recordsPerPage;
       dispatchRecords({ type: 'SET_FIRST_PAGE_RECORD', payload: page });
       dispatchRecords({ type: 'IS_RECORD_DELETED', payload: true });
+      setIsConfirmDeleteButtonDisabled(false);
     } catch (error) {
+      setIsConfirmDeleteButtonDisabled(false);
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
@@ -759,7 +783,7 @@ export const DataViewer = ({
             tableId
           );
         } catch (error) {
-          if (error.response.status === 423) {
+          if (error.response?.status === 423) {
             notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
           } else {
             console.error('DataViewer - onEditorSubmitValue.', error);
@@ -795,7 +819,12 @@ export const DataViewer = ({
     }
   };
 
+  const onEnableManualEdit = checked => {
+    setIsTableEditable(checked);
+  };
+
   const onDisableEditButton = checked => {
+    onTableConversion(checked);
     setIsEditRecordsManuallyButtonDisabled(checked);
   };
 
@@ -932,7 +961,7 @@ export const DataViewer = ({
         await DatasetService.updateRecord({ datasetId, record: parseMultiselect(record), tableSchemaId: tableId });
         onRefresh();
       } catch (error) {
-        if (error.response.status === 423) {
+        if (error.response?.status === 423) {
           notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
         } else {
           console.error('DataViewer - onSaveRecord - update.', error);
@@ -1285,6 +1314,7 @@ export const DataViewer = ({
                 }
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isEditRecordsManuallyButtonDisabled={isEditRecordsManuallyButtonDisabled}
                 isTableEditable={isTableEditable}
                 onAddClick={() => {
                   setIsNewRecord(true);
@@ -1515,7 +1545,9 @@ export const DataViewer = ({
       {confirmDeleteVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isConfirmDeleteButtonDisabled}
           header={resourcesContext.messages['deleteRow']}
+          iconConfirm={isConfirmDeleteButtonDisabled ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteRow}

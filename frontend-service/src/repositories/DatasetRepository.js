@@ -228,6 +228,12 @@ export const DatasetRepository = {
 
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
+  getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsIcebergTableCreated, { datasetId, tableSchemaId }) }),
+
+  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getPresignedUrl, { datasetId, dataflowId, fileName }) }),
+
   getReferencedFieldValues: async (
     datasetId,
     fieldSchemaId,
@@ -363,6 +369,11 @@ export const DatasetRepository = {
         tableSchemaId,
         value
       })
+    }),
+
+  importFileWithS3: async ({ dataflowId, datasetId, delimiter, tableSchemaId }) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.importFileWithS3, { dataflowId, datasetId, delimiter, tableSchemaId })
     }),
 
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) =>

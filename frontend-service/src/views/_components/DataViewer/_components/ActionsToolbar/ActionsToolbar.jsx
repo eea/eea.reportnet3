@@ -306,7 +306,8 @@ export const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
-            isTableEditable ||
+            isEditRecordsManuallyButtonDisabled ||
+            (isTableEditable && hasWritePermissions) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             actionsContext.importDatasetProcessing ||
@@ -338,8 +339,8 @@ export const ActionsToolbar = ({
       <div>
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
-          checked={isTableEditable && dataAreManuallyEditable}
-          disabled={!dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
+          checked={hasWritePermissions && isTableEditable && dataAreManuallyEditable}
+          disabled={isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
@@ -348,12 +349,15 @@ export const ActionsToolbar = ({
             convertTable(e.checked);
           }}
           role="checkbox"
+          tableConversionInProgress={isEditRecordsManuallyButtonDisabled}
         />
         <label
           id="check_edit_records_manually_label"
           style={{
             color:
-              dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled ? 'var(--main-font-color)' : '#9A9A9A',
+              !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
+                ? 'var(--main-font-color)'
+                : '#9A9A9A',
             cursor: 'auto',
             fontSize: '11pt',
             marginLeft: '6px',
@@ -462,7 +466,7 @@ export const ActionsToolbar = ({
       hasWritePermissions={hasWritePermissions}
       isDataflowOpen={isDataflowOpen}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-      isTableEditable={isTableEditable}
+      isTableEditable={isTableEditable || isEditRecordsManuallyButtonDisabled}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
       tableName={tableName}
@@ -497,6 +501,7 @@ export const ActionsToolbar = ({
         />
         <DeleteDialog
           disabled={
+            isEditRecordsManuallyButtonDisabled ||
             isTableEditable ||
             !hasWritePermissions ||
             isUndefined(records.totalRecords) ||
@@ -544,7 +549,7 @@ export const ActionsToolbar = ({
         />
         {renderFilterableButton()}
         {renderFilterSearch()}
-        {renderManualEditButton()}
+        {bigData && hasWritePermissions && !isDataflowOpen && renderManualEditButton()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
         <span className={styles.input}>

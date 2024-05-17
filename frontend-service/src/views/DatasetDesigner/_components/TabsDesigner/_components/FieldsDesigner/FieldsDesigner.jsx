@@ -59,6 +59,7 @@ export const FieldsDesigner = ({
   onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
+  onTableConversion,
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -83,9 +84,7 @@ export const FieldsDesigner = ({
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isTableEditable, setIsTableEditable] = useState(
-    table?.icebergTableIsCreated ? table.icebergTableIsCreated : false
-  );
+  const [isTableEditable, setIsTableEditable] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPkChecked, setIsPkChecked] = useState(false);
@@ -172,10 +171,6 @@ export const FieldsDesigner = ({
     } else {
       setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
     }
-  };
-
-  const onEnableManualEdit = checked => {
-    setIsTableEditable(checked);
   };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
@@ -290,6 +285,10 @@ export const FieldsDesigner = ({
       toPrefill: checked === false ? toPrefill : true,
       dataAreManuallyEditable
     });
+  };
+
+  const onChangeTableEditable = checked => {
+    setIsTableEditable(checked);
   };
 
   const onChangeToPrefill = checked => {
@@ -513,18 +512,19 @@ export const FieldsDesigner = ({
           dataAreManuallyEditable={table.dataAreManuallyEditable}
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
+          icebergTableIsCreated={table.icebergTableIsCreated}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
-          isTableEditable={isTableEditable}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onChangeButtonsVisibility={onChangeButtonsVisibility}
-          onEnableManualEdit={onEnableManualEdit}
+          onChangeTableEditable={onChangeTableEditable}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
+          onTableConversion={onTableConversion}
           reporting={false}
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
@@ -1045,27 +1045,29 @@ export const FieldsDesigner = ({
               {resourcesContext.messages['notEmpty']}
             </label>
           </div>
-          <div>
-            <span
-              className={styles.switchTextInput}
-              id={`${table.tableSchemaId}_check_manual_edit_label`}
-              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
-              {resourcesContext.messages['manualEdit']}
-            </span>
-            <Checkbox
-              ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
-              checked={dataAreManuallyEditable}
-              className={styles.fieldDesignerItem}
-              disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
-              id={`${table.tableSchemaId}_check_manual_edit`}
-              inputId={`${table.tableSchemaId}_check_manual_edit`}
-              label="Default"
-              onChange={e => onChangeManualEdit(e.checked)}
-            />
-            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
-              {resourcesContext.messages['manualEdit']}
-            </label>
-          </div>
+          {bigData && viewType['tabularData'] && !isDataflowOpen && (
+            <div>
+              <span
+                className={styles.switchTextInput}
+                id={`${table.tableSchemaId}_check_manual_edit_label`}
+                style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+                {resourcesContext.messages['manualEdit']}
+              </span>
+              <Checkbox
+                ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
+                checked={!isDataflowOpen && dataAreManuallyEditable}
+                className={styles.fieldDesignerItem}
+                disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
+                id={`${table.tableSchemaId}_check_manual_edit`}
+                inputId={`${table.tableSchemaId}_check_manual_edit`}
+                label="Default"
+                onChange={e => onChangeManualEdit(e.checked)}
+              />
+              <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
+                {resourcesContext.messages['manualEdit']}
+              </label>
+            </div>
+          )}
         </div>
       </div>
       <div className={styles.contentTable}>
@@ -1103,6 +1105,8 @@ export const FieldsDesigner = ({
             accept=".csv"
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
+            dataflowId={dataflowId}
+            datasetId={datasetId}
             dialogHeader={`${resourcesContext.messages['importTableSchemaDialogHeader']} ${table.tableSchemaName}`}
             dialogOnHide={() => manageDialogs('isImportTableSchemaDialogVisible', false)}
             dialogVisible={designerState.isImportTableSchemaDialogVisible}
@@ -1116,6 +1120,7 @@ export const FieldsDesigner = ({
             replaceCheck={true}
             replaceCheckDisabled={hasPKReferenced}
             replaceCheckLabelMessage={resourcesContext.messages['replaceDataPKInUse']}
+            s3Check={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
               datasetSchemaId: designerState.datasetSchemaId,
               datasetId: datasetId,

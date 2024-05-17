@@ -1,14 +1,18 @@
 package org.eea.dataset.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.eea.dataset.mapper.DremioRecordMapper;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.SpatialDataHandling;
+import org.eea.dataset.service.impl.SpatialDataHandlingImpl;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -17,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -189,7 +194,21 @@ public class DataLakeDataRetrieverUtils {
     public static List<RecordVO> getRecordVOS(String datasetSchema , TableSchemaVO tableSchemaVO, StringBuilder dataQuery) {
         DremioRecordMapper recordMapper = new DremioRecordMapper();
         recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchema).setTableSchemaId(tableSchemaVO.getIdTableSchema());
-        List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
+        List<String> headers = new ArrayList<>();
+        headers.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
+        headers.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
+        headers.addAll(tableSchemaVO.getRecordSchema().getFieldSchema().stream().map(FieldSchemaVO::getName).collect(Collectors.toList()));
+
+        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(headers);
+
+        List<RecordVO> recordVOS;
+        if (spatialDataHandling.geoJsonHeadersIsNotEmpty(true)) {
+            String newString =  String.format(dataQuery.toString(), spatialDataHandling.getSimpleHeaders(), "," ,spatialDataHandling.convertToJson());
+            recordVOS = dremioJdbcTemplate.query(newString, recordMapper);
+        } else {
+            String newString =  String.format(dataQuery.toString(), spatialDataHandling.getSimpleHeaders(), StringUtils.EMPTY, StringUtils.EMPTY);
+            recordVOS = dremioJdbcTemplate.query(newString, recordMapper);
+        }
         return recordVOS;
     }
 }

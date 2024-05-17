@@ -147,6 +147,8 @@ export const ImportTableDataDialog = ({
           accept=".csv"
           bigData={bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
+          dataflowId={dataflowId}
+          datasetId={datasetId}
           dialogHeader={`${resourcesContext.messages['uploadTable']}${tableName}`}
           dialogOnHide={() => setImportTableDialogVisible(false)}
           dialogVisible={importTableDialogVisible}
@@ -158,6 +160,8 @@ export const ImportTableDataDialog = ({
           onUpload={onUpload}
           onValidateFile={onValidateFile}
           replaceCheck={true}
+          s3Check={true}
+          tableSchemaId={tableId}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTableUpd, {
             datasetId: datasetId,
             dataflowId: dataflowId,

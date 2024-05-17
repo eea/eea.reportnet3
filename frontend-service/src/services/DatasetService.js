@@ -263,6 +263,10 @@ export const DatasetService = {
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
 
+  getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {
+    return await DatasetRepository.getIsIcebergTableCreated({ datasetId, tableSchemaId });
+  },
+
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
 
@@ -276,6 +280,11 @@ export const DatasetService = {
         ? 0
         : datasetTableDataDTO.data.dataProviderId
     });
+  },
+
+  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) => {
+    const presignedUrl = await DatasetRepository.getPresignedUrl({ datasetId, dataflowId, fileName });
+    return presignedUrl.data;
   },
 
   getReferencedFieldValues: async (
@@ -672,6 +681,14 @@ export const DatasetService = {
   },
 
   downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
+
+  importFileWithS3: async ({ dataflowId, datasetId, delimiter, tableSchemaId }) =>
+    await DatasetRepository.importFileWithS3({
+      dataflowId,
+      datasetId,
+      delimiter,
+      tableSchemaId
+    }),
 
   updateField: async (
     datasetId,
