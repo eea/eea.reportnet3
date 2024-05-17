@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.SpatialDataHandling;
+import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioRecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -23,7 +25,6 @@ import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -61,8 +62,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -976,7 +975,15 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
+    SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
+    String columnsFormat = "%s %s %s ";
+    totalRecords = totalRecords.replace("*", columnsFormat);
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
+    if (spatialDataHandling.geoJsonHeadersAreNotEmpty(true)) {
+      totalRecords =  String.format(totalRecords, spatialDataHandling.getSimpleHeaders(), "," ,spatialDataHandling.getGeoJsonHeaders());
+    } else {
+      totalRecords = String.format(totalRecords, spatialDataHandling.getSimpleHeaders(), org.apache.commons.lang.StringUtils.EMPTY, org.apache.commons.lang.StringUtils.EMPTY);
+    }
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
     bw.write("{\"records\":[");
     for (int i = 0; i < recordVOS.size(); i++) {

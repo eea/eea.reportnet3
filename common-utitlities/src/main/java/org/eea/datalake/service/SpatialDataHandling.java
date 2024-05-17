@@ -1,11 +1,13 @@
 package org.eea.datalake.service;
 
 public interface SpatialDataHandling {
-  boolean geoJsonHeadersIsNotEmpty(boolean isGeoJsonHeaders);
+  boolean geoJsonHeadersAreNotEmpty(boolean isGeoJsonHeaders);
 
   StringBuilder getHeadersConvertedToBinary();
 
   StringBuilder getSimpleHeaders();
 
-  StringBuilder convertToJson();
+  StringBuilder getGeoJsonHeaders();
+
+  StringBuilder getGeoJsonHeader(String fieldName);
 }
