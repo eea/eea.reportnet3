@@ -11,12 +11,9 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.service.BigDataDatasetService;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.ParquetConverterService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
@@ -117,6 +114,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    DatasetTableService datasetTableService;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
@@ -718,7 +718,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId) throws Exception {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
             throw new Exception("Can not delete table data because iceberg table is created");
         }
         String tableSchemaName = tableSchemaVO.getNameTableSchema();
@@ -758,7 +759,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
         for(TableSchemaIdNameVO entry: tableSchemas){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
                 throw new Exception("Can not delete table data because iceberg table is created");
             }
         }
@@ -924,7 +926,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception {
+    public void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
         providerId = providerId != null ? providerId : 0L;
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
@@ -938,23 +940,23 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 
+        DatasetTable datasetTableEntry = new DatasetTable(null, datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
+
         if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
                 !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema())) {
             //parquet table does not exist and no iceberg table should be created
-            tableSchemaVO.setIcebergTableIsCreated(true);
-            datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO, false);
+            datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             return;
         }
 
         String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
 
-        tableSchemaVO.setIcebergTableIsCreated(true);
-        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO, false);
+        datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
     }
 
     @Override
-    public void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception {
+    public void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
         providerId = providerId != null ? providerId : 0L;
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), UUID.randomUUID().toString(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
@@ -972,11 +974,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 
+        DatasetTable datasetTableEntry = new DatasetTable(null, datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
+
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
                 !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())) {
             //iceberg table does not exist and no parquet table should be created
-            tableSchemaVO.setIcebergTableIsCreated(false);
-            datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO, false);
+            datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             return;
         }
 
@@ -992,8 +995,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 
-        tableSchemaVO.setIcebergTableIsCreated(false);
-        datasetSchemaService.updateTableSchema(datasetId, tableSchemaVO, false);
+        datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
     }
 
     @Override

@@ -40,9 +40,6 @@ public class TableSchemaVO {
   /** The dataAreManuallyEditable. */
   private Boolean dataAreManuallyEditable;
 
-  /** The icebergTableIsCreated. */
-  private Boolean icebergTableIsCreated;
-
   /**
    * Hash code.
    *
@@ -50,7 +47,7 @@ public class TableSchemaVO {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(idTableSchema, description, nameTableSchema, recordSchema, notEmpty, dataAreManuallyEditable, icebergTableIsCreated);
+    return Objects.hash(idTableSchema, description, nameTableSchema, recordSchema, notEmpty, dataAreManuallyEditable);
   }
 
   /**
@@ -73,7 +70,6 @@ public class TableSchemaVO {
         && Objects.equals(nameTableSchema, other.nameTableSchema)
         && Objects.equals(recordSchema, other.recordSchema)
         && Objects.equals(notEmpty, other.notEmpty)
-        && Objects.equals(dataAreManuallyEditable, other.dataAreManuallyEditable)
-        && Objects.equals(icebergTableIsCreated, other.icebergTableIsCreated);
+        && Objects.equals(dataAreManuallyEditable, other.dataAreManuallyEditable);
   }
 }
