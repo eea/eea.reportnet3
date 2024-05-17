@@ -10,6 +10,7 @@ export const DatasetConfig = {
   createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record',
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
+  getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
   getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:

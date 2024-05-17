@@ -66,6 +66,7 @@ export const DataViewer = ({
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
+  icebergTableIsCreated = false,
   isDataflowOpen = false,
   isDesignDatasetEditorRead,
   isExportable,
@@ -75,11 +76,10 @@ export const DataViewer = ({
   isReferenceDataset,
   isReportingWebform,
   onChangeButtonsVisibility,
-  onEnableManualEdit,
+  onChangeTableEditable,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTableConversion,
-  isTableEditable,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -92,7 +92,8 @@ export const DataViewer = ({
   tableId,
   tableName,
   tableReadOnly,
-  tableSchemaColumns
+  tableSchemaColumns,
+  viewType
 }) => {
   const { datasetId, dataflowId } = useParams();
 
@@ -123,6 +124,7 @@ export const DataViewer = ({
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [isPasting, setIsPasting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTableEditable, setIsTableEditable] = useState(icebergTableIsCreated);
   const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
   const [prevFilterValue, setPrevFilterValue] = useState('');
   const [valueFilter, setValueFilter] = useState();
@@ -318,7 +320,16 @@ export const DataViewer = ({
   );
 
   useEffect(() => {
-    onChangeButtonsVisibility(isTableEditable);
+    setIsTableEditable(icebergTableIsCreated);
+  }, [icebergTableIsCreated, viewType]);
+
+  useEffect(() => {
+    if (onChangeButtonsVisibility) {
+      onChangeButtonsVisibility(isTableEditable);
+    }
+    if (onChangeTableEditable) {
+      onChangeTableEditable(isTableEditable);
+    }
   }, [isTableEditable]);
 
   useEffect(() => {
@@ -409,6 +420,13 @@ export const DataViewer = ({
           qcCodes: tableId === selectedTableSchemaId ? groupedRules : undefined,
           value: valueFilter
         });
+
+        const icebergCreated = await DatasetService.getIsIcebergTableCreated({
+          datasetId,
+          tableSchemaId: tableId
+        });
+
+        setIsTableEditable(icebergCreated);
       } else {
         data = await DatasetService.getTableData({
           datasetId,
@@ -799,6 +817,10 @@ export const DataViewer = ({
     if (!isEditing) {
       setIsEditing(true);
     }
+  };
+
+  const onEnableManualEdit = checked => {
+    setIsTableEditable(checked);
   };
 
   const onDisableEditButton = checked => {

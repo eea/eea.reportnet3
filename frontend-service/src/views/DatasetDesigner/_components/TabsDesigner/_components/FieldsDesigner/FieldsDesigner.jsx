@@ -84,9 +84,7 @@ export const FieldsDesigner = ({
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isTableEditable, setIsTableEditable] = useState(
-    table?.icebergTableIsCreated ? table.icebergTableIsCreated : false
-  );
+  const [isTableEditable, setIsTableEditable] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPkChecked, setIsPkChecked] = useState(false);
@@ -97,10 +95,6 @@ export const FieldsDesigner = ({
   const [refElement, setRefElement] = useState();
   const [tableDescriptionValue, setTableDescriptionValue] = useState('');
   const [toPrefill, setToPrefill] = useState(false);
-
-  useEffect(() => {
-    setIsTableEditable(table?.icebergTableIsCreated);
-  }, [table?.icebergTableIsCreated]);
 
   useEffect(() => {
     if (!isUndefined(table) && !isNil(table.records) && !isNull(table.records[0].fields)) {
@@ -177,10 +171,6 @@ export const FieldsDesigner = ({
     } else {
       setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
     }
-  };
-
-  const onEnableManualEdit = checked => {
-    setIsTableEditable(checked);
   };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
@@ -295,6 +285,10 @@ export const FieldsDesigner = ({
       toPrefill: checked === false ? toPrefill : true,
       dataAreManuallyEditable
     });
+  };
+
+  const onChangeTableEditable = checked => {
+    setIsTableEditable(checked);
   };
 
   const onChangeToPrefill = checked => {
@@ -518,16 +512,16 @@ export const FieldsDesigner = ({
           dataAreManuallyEditable={table.dataAreManuallyEditable}
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
+          icebergTableIsCreated={table.icebergTableIsCreated}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
-          isTableEditable={isTableEditable}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onChangeButtonsVisibility={onChangeButtonsVisibility}
-          onEnableManualEdit={onEnableManualEdit}
+          onChangeTableEditable={onChangeTableEditable}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onLoadTableData={onLoadTableData}
           onTableConversion={onTableConversion}
@@ -1051,7 +1045,7 @@ export const FieldsDesigner = ({
               {resourcesContext.messages['notEmpty']}
             </label>
           </div>
-          {bigData && (
+          {bigData && viewType['tabularData'] && !isDataflowOpen && (
             <div>
               <span
                 className={styles.switchTextInput}
@@ -1061,7 +1055,7 @@ export const FieldsDesigner = ({
               </span>
               <Checkbox
                 ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
-                checked={dataAreManuallyEditable}
+                checked={!isDataflowOpen && dataAreManuallyEditable}
                 className={styles.fieldDesignerItem}
                 disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
                 id={`${table.tableSchemaId}_check_manual_edit`}
