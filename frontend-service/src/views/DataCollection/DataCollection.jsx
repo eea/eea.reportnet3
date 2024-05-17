@@ -280,8 +280,6 @@ export const DataCollection = () => {
     setLoading(false);
   };
 
-  const onChangeButtonsVisibility = disabled => {};
-
   const onRenderTabsSchema = (
     <TabsSchema
       bigData={metadata?.dataflow.bigData}
@@ -292,7 +290,6 @@ export const DataCollection = () => {
       isExportable={false}
       isFilterable={false}
       levelErrorTypes={levelErrorTypes}
-      onChangeButtonsVisibility={onChangeButtonsVisibility}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}
       tables={tableSchema}

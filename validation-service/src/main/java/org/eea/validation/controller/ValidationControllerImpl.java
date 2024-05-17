@@ -15,6 +15,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
@@ -126,6 +127,9 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private DatasetSchemaController datasetSchemaController;
 
+  @Autowired
+  private DataSetControllerZuul dataSetControllerZuul;
+
   /**
    * Executes the validation job
    *
@@ -226,7 +230,8 @@ public class ValidationControllerImpl implements ValidationController {
         String datasetSchemaId = dataset.getDatasetSchema();
         for(TableSchemaIdNameVO table: tables){
           TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
-          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
             throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
           }
         }
