@@ -1261,7 +1261,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
               disabled={
                 isTableConversionInProgress ||
-                isIcebergTableCreated ||
+                (isIcebergTableCreated && hasWritePermissions) ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||

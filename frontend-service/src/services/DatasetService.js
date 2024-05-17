@@ -263,6 +263,10 @@ export const DatasetService = {
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
 
+  getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {
+    return await DatasetRepository.getIsIcebergTableCreated({ datasetId, tableSchemaId });
+  },
+
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
 

@@ -307,7 +307,7 @@ export const ActionsToolbar = ({
           }`}
           disabled={
             isEditRecordsManuallyButtonDisabled ||
-            isTableEditable ||
+            (isTableEditable && hasWritePermissions) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             actionsContext.importDatasetProcessing ||
@@ -339,10 +339,8 @@ export const ActionsToolbar = ({
       <div>
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
-          checked={isTableEditable && dataAreManuallyEditable}
-          disabled={
-            !hasWritePermissions || isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled
-          }
+          checked={hasWritePermissions && isTableEditable && dataAreManuallyEditable}
+          disabled={isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
@@ -357,7 +355,7 @@ export const ActionsToolbar = ({
           id="check_edit_records_manually_label"
           style={{
             color:
-              hasWritePermissions && !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
+              !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
                 ? 'var(--main-font-color)'
                 : '#9A9A9A',
             cursor: 'auto',
@@ -551,7 +549,7 @@ export const ActionsToolbar = ({
         />
         {renderFilterableButton()}
         {renderFilterSearch()}
-        {bigData && renderManualEditButton()}
+        {bigData && hasWritePermissions && !isDataflowOpen && renderManualEditButton()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
         <span className={styles.input}>
