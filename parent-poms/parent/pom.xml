@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.3.1-ICEBERG-FRONTEND-FIXES</api-gateway.version>
-      <communication.version>v3.3.1-ICEBERG-FRONTEND-FIXES</communication.version>
-      <collaboration.version>v3.3.1-ICEBERG-FRONTEND-FIXES</collaboration.version>
-      <dataflow.version>v3.3.1-ICEBERG-FRONTEND-FIXES</dataflow.version>
-      <dataset.version>v3.3.1-ICEBERG-FRONTEND-FIXES</dataset.version>
-      <document.version>v3.3.1-ICEBERG-FRONTEND-FIXES</document.version>
-      <frontend.version>v3.3.1-ICEBERG-FRONTEND-FIXES</frontend.version>
-      <indexsearch.version>v3.3.1-ICEBERG-FRONTEND-FIXES</indexsearch.version>
-      <inspire.version>v3.3.1-ICEBERG-FRONTEND-FIXES</inspire.version>
-      <recordstore.version>v3.3.1-ICEBERG-FRONTEND-FIXES</recordstore.version>
-      <ums.version>v3.3.1-ICEBERG-FRONTEND-FIXES</ums.version>
-      <validation.version>v3.3.1-ICEBERG-FRONTEND-FIXES</validation.version>
-      <common-interfaces.version>v3.3.1-ICEBERG-FRONTEND-FIXES</common-interfaces.version>
-      <common-utitlities.version>v3.3.1-ICEBERG-FRONTEND-FIXES</common-utitlities.version>
-      <rod.version>v3.3.1-ICEBERG-FRONTEND-FIXES</rod.version>
-      <orchestrator.version>v3.3.1-ICEBERG-FRONTEND-FIXES</orchestrator.version>
+      <api-gateway.version>v3.3_DLH_ATTACHMENTS_IMPORT</api-gateway.version>
+      <communication.version>v3.3_DLH_ATTACHMENTS_IMPORT</communication.version>
+      <collaboration.version>v3.3_DLH_ATTACHMENTS_IMPORT</collaboration.version>
+      <dataflow.version>v3.3_DLH_ATTACHMENTS_IMPORT</dataflow.version>
+      <dataset.version>v3.3_DLH_ATTACHMENTS_IMPORT</dataset.version>
+      <document.version>v3.3_DLH_ATTACHMENTS_IMPORT</document.version>
+      <frontend.version>v3.3_DLH_ATTACHMENTS_IMPORT</frontend.version>
+      <indexsearch.version>v3.3_DLH_ATTACHMENTS_IMPORT</indexsearch.version>
+      <inspire.version>v3.3_DLH_ATTACHMENTS_IMPORT</inspire.version>
+      <recordstore.version>v3.3_DLH_ATTACHMENTS_IMPORT</recordstore.version>
+      <ums.version>v3.3_DLH_ATTACHMENTS_IMPORT</ums.version>
+      <validation.version>v3.3_DLH_ATTACHMENTS_IMPORT</validation.version>
+      <common-interfaces.version>v3.3_DLH_ATTACHMENTS_IMPORT</common-interfaces.version>
+      <common-utitlities.version>v3.3_DLH_ATTACHMENTS_IMPORT</common-utitlities.version>
+      <rod.version>v3.3_DLH_ATTACHMENTS_IMPORT</rod.version>
+      <orchestrator.version>v3.3_DLH_ATTACHMENTS_IMPORT</orchestrator.version>
   </properties>
 </project>
