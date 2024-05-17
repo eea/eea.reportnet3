@@ -426,7 +426,7 @@ export const DataViewer = ({
           tableSchemaId: tableId
         });
 
-        setIsTableEditable(icebergCreated);
+        setIsTableEditable(icebergCreated.data);
       } else {
         data = await DatasetService.getTableData({
           datasetId,
