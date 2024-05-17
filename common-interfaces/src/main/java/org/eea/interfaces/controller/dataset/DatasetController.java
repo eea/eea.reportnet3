@@ -887,4 +887,15 @@ public interface DatasetController {
                                     @RequestParam(value = "providerId", required = false) Long providerId,
                                     @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
 
+  /**
+   * Check if iceberg table is created
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the tableSchemaId
+   * @return if the iceberg table is created
+   *
+   */
+  @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
+  Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId, @PathVariable("tableSchemaId") String tableSchemaId);
+
 }

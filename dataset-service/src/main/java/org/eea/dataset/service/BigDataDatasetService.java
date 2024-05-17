@@ -120,9 +120,10 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
+     * @param datasetSchemaId the datasetSchemaId
      *
      */
-    void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception;
+    void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -131,9 +132,10 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
+     * @param datasetSchemaId the datasetSchemaId
      *
      */
-    void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO) throws Exception;
+    void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception;
 
     /**
      * Insert records manually

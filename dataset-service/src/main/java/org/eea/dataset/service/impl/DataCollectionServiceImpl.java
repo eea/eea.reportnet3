@@ -254,9 +254,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private S3Helper s3Helper;
 
-  /** The big data dataset service */
+  /** The dataset table service */
   @Autowired
-  private BigDataDatasetService bigDataDatasetService;
+  private DatasetTableService datasetTableService;
 
 
   /**
@@ -411,7 +411,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       String datasetSchemaId = dataset.getDatasetSchema();
       for(TableSchemaIdNameVO table: tables){
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
           releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS, true, false);
           throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
         }

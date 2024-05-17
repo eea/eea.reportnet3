@@ -8,6 +8,7 @@ import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.DatasetTableService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -102,6 +103,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
   @Autowired
   private DatasetSchemaService datasetSchemaService;
+
+  @Autowired
+  private DatasetTableService datasetTableService;
 
   /**
    * The default release process priority
@@ -820,7 +824,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       String datasetSchemaId = dataset.getDatasetSchema();
       for(TableSchemaIdNameVO table: tables){
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
           throw new Exception("Can not release for jobId " + jobId + " because there is an iceberg table");
         }
       }
