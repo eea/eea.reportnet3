@@ -301,7 +301,6 @@ export const DataflowService = {
           hasPKReferenced: !isEmpty(
             records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
           ),
-          icebergTableIsCreated: datasetTableDTO.icebergTableIsCreated,
           records: records,
           recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null,
           tableSchemaDescription: datasetTableDTO.description,

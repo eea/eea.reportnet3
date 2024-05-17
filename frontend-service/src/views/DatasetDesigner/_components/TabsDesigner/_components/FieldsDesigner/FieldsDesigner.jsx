@@ -535,7 +535,6 @@ export const FieldsDesigner = ({
           dataAreManuallyEditable={table.dataAreManuallyEditable}
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
-          icebergTableIsCreated={table.icebergTableIsCreated}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={true}

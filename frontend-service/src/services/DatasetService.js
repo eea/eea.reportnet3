@@ -493,9 +493,6 @@ export const DatasetService = {
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
-        icebergTableIsCreated: isNull(datasetTableDTO.icebergTableIsCreated)
-          ? false
-          : datasetTableDTO.icebergTableIsCreated,
         tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
