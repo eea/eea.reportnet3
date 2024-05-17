@@ -320,7 +320,9 @@ export const DataViewer = ({
   );
 
   useEffect(() => {
-    onIsTableDataLoading(isLoading);
+    if (onIsTableDataLoading) {
+      onIsTableDataLoading(isLoading);
+    }
   }, [isLoading]);
 
   useEffect(() => {
