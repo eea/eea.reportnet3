@@ -199,11 +199,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
-                if(preSignedURL.endsWith(".csv")) {
+                if(preSignedURL.contains(".csv")) {
                     s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
                     fileName = s3File.getName();
                 }
-                else if(preSignedURL.endsWith(".zip")){
+                else if(preSignedURL.contains(".zip")){
                     s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
                     fileName = s3File.getName();
                 }
@@ -335,7 +335,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         String originalFileName = importFileInDremioInfo.getFileName();
-        String mimeType = datasetService.getMimetype(originalFileName);
+        String mimeType;
+        if(fileFromApi != null){
+            mimeType = datasetService.getMimetype(originalFileName);
+        }
+        else{
+            mimeType = datasetService.getMimetype(fileFromApi.getOriginalFilename());
+        }
 
         IntegrationVO integrationVO = null;
         if (importFileInDremioInfo.getIntegrationId() != null) {
