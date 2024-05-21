@@ -75,7 +75,7 @@ public class EuDatasetDataRetrieverDL implements DataLakeDataRetriever {
             }
 
             StringBuilder dataQuery = new StringBuilder();
-            dataQuery.append("select %s %s %s from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
+            dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");
             dataQuery.append(filteredQuery);
             List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
             result.setIdTableSchema(tableSchemaVO.getIdTableSchema());

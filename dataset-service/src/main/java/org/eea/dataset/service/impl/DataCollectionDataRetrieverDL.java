@@ -77,7 +77,7 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
             }
 
             StringBuilder dataQuery = new StringBuilder();
-            dataQuery.append("select %s %s %s from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ");
+            dataQuery.append("select * from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ");
             dataQuery.append(filteredQuery);
             List<RecordVO> recordVOS = DataLakeDataRetrieverUtils.getRecordVOS(dataset.getDatasetSchema(), tableSchemaVO, dataQuery);
             result.setIdTableSchema(tableSchemaVO.getIdTableSchema());

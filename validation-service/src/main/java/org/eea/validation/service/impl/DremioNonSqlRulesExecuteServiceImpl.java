@@ -13,17 +13,17 @@ import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
-import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioValidationException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
-import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
+import org.eea.validation.util.GeoJsonValidationUtils;
+import org.eea.validation.util.GeometryValidationUtils;
 import org.eea.validation.util.ValidationHelper;
+import org.locationtech.jts.io.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +58,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private S3Helper s3Helper;
     private DremioHelperService dremioHelperService;
     private ValidationHelper validationHelper;
+    private static SpatialDataHandling spatialDataHandling;
 
     private static final String DREMIO_NON_SQL_VALIDATION_UTILS = "org.eea.validation.util.datalake.DremioNonSQLValidationUtils";
     private static final String VALIDATION_DROOLS_UTILS = "org.eea.validation.util.ValidationDroolsUtils";
@@ -77,7 +78,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     @Autowired
     public DremioNonSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
                                                DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
-                                               DremioHelperService dremioHelperService, ValidationHelper validationHelper) {
+                                               DremioHelperService dremioHelperService, ValidationHelper validationHelper, SpatialDataHandling spatialDataHandling) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -86,6 +87,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         this.dremioRulesService = dremioRulesService;
         this.s3Helper = s3Helper;
         this.validationHelper = validationHelper;
+        this.spatialDataHandling = spatialDataHandling;
     }
 
     @Override
@@ -124,12 +126,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
-            TableSchemaVO tableSchemaVO = datasetSchemaControllerZuul.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
-            SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
-            StringBuilder header = spatialDataHandling.getGeoJsonHeader(fieldName);
-
-            query.append("select record_id,").append(header.length() > 0 ? header : fieldName ).append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+            query.append("select record_id,").append(fieldName != null ? fieldName : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
             Method method = null;
@@ -368,13 +366,27 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      */
     private static boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
         boolean isValid = false;
-        if (method.getName().contains("Geo") || method.getName().contains("EPSGSR")) {
-            if (method.getName().equals(VALIDATE_GEOMETRY_DREMIO)) {
-                String converted = rs.getString(fieldName);
-                isValid = (boolean) method.invoke(object, converted, DataType.fromValue(fieldName.toUpperCase()));  //GeoJsonValidationUtils
-            } else if (method.getName().equals(CHECK_EPSGSRID_VALIDATION)) {
-                String converted = rs.getString(fieldName);
-                isValid = (boolean) method.invoke(object, converted);  //GeometryValidationUtils
+        if (object instanceof GeoJsonValidationUtils || object instanceof GeometryValidationUtils) {
+            if (object instanceof GeoJsonValidationUtils) {
+                try {
+                    String modifiedJson = spatialDataHandling.decodeSpatialData((byte[]) rs.getObject(fieldName));
+                    if (method.getName().equals(VALIDATE_GEOMETRY_DREMIO)) {
+                        //GeoJsonValidationUtils.validateGeometryDremio
+                        isValid = (boolean) method.invoke(object, modifiedJson, spatialDataHandling.getGeometryType((byte[]) rs.getObject(fieldName)));
+                    }
+                } catch (IOException | ParseException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                try {
+                    String modifiedJson = spatialDataHandling.decodeSpatialData((byte[]) rs.getObject(fieldName));
+                    if (method.getName().equals(CHECK_EPSGSRID_VALIDATION)){
+                        //GeometryValidationUtils.checkEPSGSRIDValidation
+                        isValid = (boolean) method.invoke(object, modifiedJson);
+                    }
+                } catch (IOException | ParseException e) {
+                    throw new RuntimeException(e);
+                }
             }
         } else {
             int parameterLength = method.getParameters().length;

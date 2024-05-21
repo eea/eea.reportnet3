@@ -8,7 +8,6 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.SpatialDataHandling;
-import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioRecordMapper;
 import org.eea.dataset.mapper.RecordNoValidationMapper;
@@ -153,6 +152,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Lazy
   @Autowired
   private FileCommonUtils fileCommon;
+
+  @Autowired
+  SpatialDataHandling spatialDataHandling;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -971,20 +973,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw, Long datasetId)
       throws SQLException, IOException, EEAException {
 
-    DremioRecordMapper recordMapper = new DremioRecordMapper();
+    DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling);
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
-    SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
-    String columnsFormat = "%s %s %s ";
-    totalRecords = totalRecords.replace("*", columnsFormat);
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
-    if (spatialDataHandling.geoJsonHeadersAreNotEmpty(true)) {
-      totalRecords =  String.format(totalRecords, spatialDataHandling.getSimpleHeaders(), "," ,spatialDataHandling.getGeoJsonHeaders());
-    } else {
-      totalRecords = String.format(totalRecords, spatialDataHandling.getSimpleHeaders(), org.apache.commons.lang.StringUtils.EMPTY, org.apache.commons.lang.StringUtils.EMPTY);
-    }
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
+    spatialDataHandling.decodeSpatialData(recordVOS);
     bw.write("{\"records\":[");
     for (int i = 0; i < recordVOS.size(); i++) {
       bw.write("{\"fields\":[");
