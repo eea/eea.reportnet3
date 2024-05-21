@@ -406,6 +406,12 @@ export const DataflowService = {
     return dataflow;
   },
 
+  getIcebergTables: async ({ dataflowId, providerId }) => {
+    const icebergTables = await DataflowRepository.getIcebergTables({ dataflowId, providerId });
+
+    return icebergTables;
+  },
+
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData) =>

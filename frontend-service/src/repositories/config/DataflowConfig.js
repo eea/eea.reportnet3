@@ -24,6 +24,7 @@ export const DataflowConfig = {
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
   getDetails: '/dataflow/v1/{:dataflowId}/getmetabase',
+  getIcebergTables: '/dataset/getIcebergTables?dataflowId={:dataflowId}&providerId={:providerId}',
   getPublicData:
     '/dataflow/getPublicDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
