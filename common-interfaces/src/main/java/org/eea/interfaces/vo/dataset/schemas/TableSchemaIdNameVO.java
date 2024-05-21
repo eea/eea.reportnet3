@@ -13,7 +13,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@AllArgsConstructor
 public class TableSchemaIdNameVO {
 
   /** The id table schema. */
