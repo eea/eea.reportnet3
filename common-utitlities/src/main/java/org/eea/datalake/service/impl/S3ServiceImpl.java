@@ -33,6 +33,11 @@ public class S3ServiceImpl implements S3Service {
 
     private final String S3_ICEBERG_BUCKET_PATH;
 
+    private final String S3_DEFAULT_BUCKET_NAME;
+
+    private final String S3_ICEBERG_BUCKET_NAME;
+
+
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
 
     public S3ServiceImpl(DataSetControllerZuul dataSetControllerZuul, @Qualifier("s3PrivateConfiguration") S3Configuration s3PrivateConfiguration) {
@@ -41,6 +46,8 @@ public class S3ServiceImpl implements S3Service {
         this.S3_DEFAULT_BUCKET_PATH = s3PrivateConfiguration.getS3DefaultBucketPath();
         this.S3_ICEBERG_BUCKET = s3PrivateConfiguration.getIcebergBucket();
         this.S3_ICEBERG_BUCKET_PATH = s3PrivateConfiguration.getS3IcebergBucketPath();
+        this.S3_DEFAULT_BUCKET_NAME = s3PrivateConfiguration.getS3DefaultBucketName();
+        this.S3_ICEBERG_BUCKET_NAME = s3PrivateConfiguration.getS3IcebergBucketName();
     }
 
     @Override
@@ -349,6 +356,11 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    public String getS3DefaultBucket() {
+        return S3_DEFAULT_BUCKET;
+    }
+
+    @Override
     public String getS3DefaultBucketPath() {
         return S3_DEFAULT_BUCKET_PATH;
     }
@@ -361,6 +373,16 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String getS3IcebergBucketPath(){
         return S3_ICEBERG_BUCKET_PATH;
+    }
+
+    @Override
+    public String getS3DefaultBucketName(){
+        return S3_DEFAULT_BUCKET_NAME;
+    }
+
+    @Override
+    public String getS3IcebergBucketName(){
+        return S3_ICEBERG_BUCKET_NAME;
     }
 
 

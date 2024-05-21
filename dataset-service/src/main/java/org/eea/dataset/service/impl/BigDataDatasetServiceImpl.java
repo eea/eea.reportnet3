@@ -192,22 +192,33 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if(StringUtils.isBlank(preSignedURL)){
                     throw new EEAException("Empty file and file path");
                 }
-                String[] filePathInS3Split = preSignedURL.split("/");
+                String fileExtension = null;
+
+                if(preSignedURL.contains(".csv")) {
+                    fileExtension = CSV_TYPE;
+                }
+                else if(preSignedURL.contains(".zip")){
+                    fileExtension = ZIP_TYPE;
+                }
+                //todo handle other extensions
+
+                LOG.info("For jobId {} downloading file from s3 from bucket {}", jobId, s3ServicePublic.getS3DefaultBucketName());
+
+                String substringStart = s3ServicePublic.getS3DefaultBucketName() + "/";
+                int startIndex = preSignedURL.indexOf(substringStart) + substringStart.length();
+                int endIndex = preSignedURL.indexOf(fileExtension, startIndex) + fileExtension.length();
+                String filePathInS3 = preSignedURL.substring(startIndex, endIndex);
+                LOG.info("For jobId {} downloading file from s3 in path {}", jobId, filePathInS3);
+
+                String[] filePathInS3Split = filePathInS3.split("/");
                 String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
                 String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
                 File folder = new File(importPath + "/" + datasetId);
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
-                if(preSignedURL.contains(".csv")) {
-                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
-                    fileName = s3File.getName();
-                }
-                else if(preSignedURL.contains(".zip")){
-                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
-                    fileName = s3File.getName();
-                }
-                //todo handle other extensions
+                s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+                fileName = s3File.getName();
             }
 
             //Retrieve providerId and providerCode
@@ -335,13 +346,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         String originalFileName = importFileInDremioInfo.getFileName();
-        String mimeType;
-        if(fileFromApi != null){
-            mimeType = datasetService.getMimetype(originalFileName);
-        }
-        else{
-            mimeType = datasetService.getMimetype(fileFromApi.getOriginalFilename());
-        }
+        String mimeType = datasetService.getMimetype(originalFileName);
 
         IntegrationVO integrationVO = null;
         if (importFileInDremioInfo.getIntegrationId() != null) {
