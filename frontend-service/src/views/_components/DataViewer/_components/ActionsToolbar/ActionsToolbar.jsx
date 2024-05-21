@@ -349,7 +349,7 @@ export const ActionsToolbar = ({
             convertTable(e.checked);
           }}
           role="checkbox"
-          tableConversionInProgress={isLoading || isEditRecordsManuallyButtonDisabled}
+          tableConversionInProgress={isEditRecordsManuallyButtonDisabled}
         />
         <label
           id="check_edit_records_manually_label"
