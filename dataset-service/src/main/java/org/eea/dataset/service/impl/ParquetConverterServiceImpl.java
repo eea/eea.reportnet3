@@ -16,7 +16,6 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.impl.S3ServiceImpl;
-import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -110,6 +109,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    SpatialDataHandling spatialDataHandling;
 
     @Override
     public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
@@ -246,8 +248,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
         String createTableQuery;
-        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
-        if(spatialDataHandling.geoJsonHeadersAreNotEmpty(true)) {
+        if(spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO,true)) {
             String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s %s FROM " + dremioPathForCsvFile;
             createTableQuery = String.format(initQuery, spatialDataHandling.getSimpleHeaders(), spatialDataHandling.getHeadersConvertedToBinary());
         } else {
@@ -719,6 +720,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         List<String> fieldNames = new ArrayList<>();
         fieldNames.add(PARQUET_RECORD_ID_COLUMN_HEADER);
         fieldNames.add(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
+        fieldNames.add("srid");
 
         if (null != tableSchemaId) {
             for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {

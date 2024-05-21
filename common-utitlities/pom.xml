@@ -194,14 +194,9 @@
 			<version>3.9</version>
 		</dependency>
 		<dependency>
-			<groupId>mil.nga.sf</groupId>
-			<artifactId>sf-geojson</artifactId>
-			<version>3.3.2</version>
-		</dependency>
-		<dependency>
-			<groupId>mil.nga.sf</groupId>
-			<artifactId>sf-wkb</artifactId>
-			<version>2.2.2</version>
+			<groupId>org.locationtech.jts.io</groupId>
+			<artifactId>jts-io-common</artifactId>
+			<version>1.19.0</version>
 		</dependency>
 	</dependencies>
 	<build>

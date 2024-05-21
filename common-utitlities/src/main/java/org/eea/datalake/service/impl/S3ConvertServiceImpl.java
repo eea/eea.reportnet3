@@ -1,9 +1,6 @@
 package org.eea.datalake.service.impl;
 
 import com.opencsv.CSVWriter;
-import mil.nga.sf.geojson.Feature;
-import mil.nga.sf.geojson.FeatureConverter;
-import mil.nga.sf.wkb.GeometryReader;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.parquet.Preconditions;
@@ -14,10 +11,11 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.ParquetStream;
+import org.locationtech.jts.io.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -32,7 +30,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -45,9 +42,13 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ConvertServiceImpl.class);
 
-    /** The big data dataset service */
-    @Autowired
-    private S3Helper s3Helper;
+    private final S3Helper s3Helper;
+    private final SpatialDataHandling spatialDataHandling;
+
+    public S3ConvertServiceImpl(SpatialDataHandling spatialDataHandling, S3Helper s3Helper) {
+        this.s3Helper = s3Helper;
+        this.spatialDataHandling = spatialDataHandling;
+    }
 
     /**  The path export DL */
     @Value("${exportDLPath}")
@@ -139,26 +140,16 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         Object fieldValue = record.get(j);
                         if (fieldValue instanceof ByteBuffer) {
                             ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
-                            var geometry = GeometryReader.readGeometry(byteBuffer.array());
-                            //var geometryType = geometry.getGeometryType();
-
-                            Feature feature = FeatureConverter.toFeature(geometry);
-                            String featureContent = FeatureConverter.toStringValue(feature);
-
-                            String regex = "(\"properties\"\\s*:\\s*\\{)";
-                            Pattern pattern = Pattern.compile(regex);
-                            Matcher matcher = pattern.matcher(featureContent);
-
-
-                            String modifiedJson = matcher.find() ? matcher.replaceFirst("$1\"srid\":\"4326\",") : "";
+                            String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
                             columns[j] = modifiedJson;
-
                         } else {
                             columns[j] = (fieldValue != null) ? fieldValue.toString() : "";
                         }
                     }
                     csvWriter.writeNext(columns, false);
                 }
+            } catch (ParseException e) {
+              throw new RuntimeException(e);
             }
         }
     }
