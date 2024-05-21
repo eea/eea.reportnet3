@@ -202,10 +202,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
                 //todo handle other extensions
 
-                LOG.info("For jobId {} downloading file from s3 from bucket {}", jobId, s3ServicePublic.getS3DefaultBucketName());
+                LOG.info("For jobId {} downloading file from s3 from bucket {} with presigned Url {}", jobId, s3ServicePublic.getS3DefaultBucketName(), preSignedURL);
 
-                String substringStart = s3ServicePublic.getS3DefaultBucketName() + "/";
-                int startIndex = preSignedURL.indexOf(substringStart) + substringStart.length();
+                int startIndex = preSignedURL.indexOf("df-");
                 int endIndex = preSignedURL.indexOf(fileExtension, startIndex) + fileExtension.length();
                 String filePathInS3 = preSignedURL.substring(startIndex, endIndex);
                 LOG.info("For jobId {} downloading file from s3 in path {}", jobId, filePathInS3);
