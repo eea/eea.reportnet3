@@ -1082,7 +1082,12 @@ export const FieldsDesigner = ({
                 checked={!isDataflowOpen && dataAreManuallyEditable}
                 className={styles.fieldDesignerItem}
                 disabled={
-                  isTableConversionInProgress||isTableLoading || isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset
+                  isTableConversionInProgress ||
+                  isTableLoading ||
+                  isTableEditable ||
+                  isDataflowOpen ||
+                  isDesignDatasetEditorRead ||
+                  isReferenceDataset
                 }
                 id={`${table.tableSchemaId}_check_manual_edit`}
                 inputId={`${table.tableSchemaId}_check_manual_edit`}
