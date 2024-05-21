@@ -29,4 +29,14 @@ public class DatasetTable {
 
     @Column(name = "IS_ICEBERG_TABLE_CREATED")
     private Boolean isIcebergTableCreated;
+
+    @Transient
+    private String tableName;
+
+    public DatasetTable(Long datasetId, String datasetSchemaId, String tableSchemaId, Boolean isIcebergTableCreated) {
+        this.datasetId = datasetId;
+        this.datasetSchemaId = datasetSchemaId;
+        this.tableSchemaId = tableSchemaId;
+        this.isIcebergTableCreated = isIcebergTableCreated;
+    }
 }

@@ -21,4 +21,5 @@ public class DatasetTableVO implements Serializable {
     private String datasetSchemaId;
     private String tableSchemaId;
     private Boolean isIcebergTableCreated;
+    private String tableName;
 }

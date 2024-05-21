@@ -940,7 +940,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 
-        DatasetTable datasetTableEntry = new DatasetTable(null, datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
+        DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
 
         if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
                 !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema())) {
@@ -974,7 +974,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 
-        DatasetTable datasetTableEntry = new DatasetTable(null, datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
+        DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
 
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
                 !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())) {
