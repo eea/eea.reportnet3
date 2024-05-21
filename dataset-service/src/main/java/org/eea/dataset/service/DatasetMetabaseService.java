@@ -299,4 +299,13 @@ public interface DatasetMetabaseService {
    */
   Long getLastDatasetForRelease(Long datasetId);
 
+  /**
+   * Gets the reportings by provider id and dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the providerId
+   * @return the reportings by provider id and dataflow id
+   */
+  List<DataSetMetabaseVO> getDatasetsByDataflowIdAndProviderId(Long dataflowId, Long providerId);
+
 }

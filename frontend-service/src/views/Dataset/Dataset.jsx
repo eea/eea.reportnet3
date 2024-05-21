@@ -850,13 +850,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
-          if (tableSchema.icebergTableIsCreated) {
-            setIsIcebergTableCreated(true);
-          }
           return {
             dataAreManuallyEditable: tableSchema.dataAreManuallyEditable,
             description: tableSchema.description || tableSchema.tableSchemaDescription,
-            icebergTableIsCreated: tableSchema.icebergTableIsCreated,
             id: tableSchema.tableSchemaId,
             name: tableSchema.tableSchemaName,
             notEmpty: tableSchema.notEmpty,

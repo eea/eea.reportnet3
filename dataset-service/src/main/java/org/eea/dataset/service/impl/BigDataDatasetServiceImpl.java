@@ -192,22 +192,32 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if(StringUtils.isBlank(preSignedURL)){
                     throw new EEAException("Empty file and file path");
                 }
-                String[] filePathInS3Split = preSignedURL.split("/");
+                String fileExtension = null;
+
+                if(preSignedURL.contains(".csv")) {
+                    fileExtension = CSV_TYPE;
+                }
+                else if(preSignedURL.contains(".zip")){
+                    fileExtension = ZIP_TYPE;
+                }
+                //todo handle other extensions
+
+                LOG.info("For jobId {} downloading file from s3 from bucket {} with presigned Url {}", jobId, s3ServicePublic.getS3DefaultBucketName(), preSignedURL);
+
+                int startIndex = preSignedURL.indexOf("df-");
+                int endIndex = preSignedURL.indexOf(fileExtension, startIndex) + fileExtension.length();
+                String filePathInS3 = preSignedURL.substring(startIndex, endIndex);
+                LOG.info("For jobId {} downloading file from s3 in path {}", jobId, filePathInS3);
+
+                String[] filePathInS3Split = filePathInS3.split("/");
                 String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
                 String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
                 File folder = new File(importPath + "/" + datasetId);
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
-                if(preSignedURL.endsWith(".csv")) {
-                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
-                    fileName = s3File.getName();
-                }
-                else if(preSignedURL.endsWith(".zip")){
-                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
-                    fileName = s3File.getName();
-                }
-                //todo handle other extensions
+                s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+                fileName = s3File.getName();
             }
 
             //Retrieve providerId and providerCode
@@ -940,7 +950,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 
-        DatasetTable datasetTableEntry = new DatasetTable(null, datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
+        DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
 
         if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
                 !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema())) {
@@ -974,7 +984,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
 
-        DatasetTable datasetTableEntry = new DatasetTable(null, datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
+        DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
 
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
                 !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())) {

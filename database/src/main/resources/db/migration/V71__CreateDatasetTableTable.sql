@@ -16,6 +16,19 @@ CREATE SEQUENCE IF NOT EXISTS public.dataset_table_id_seq
 	CACHE 1
 	NO CYCLE;
 
---INDEXES--
+--Create Indexes--
 CREATE INDEX IF NOT EXISTS dataset_table_dataset_id ON dataset_table (dataset_id);
 CREATE INDEX IF NOT EXISTS dataset_table_schema_id ON dataset_table (table_schema_id);
+
+--Grant permissions--
+GRANT DELETE, REFERENCES, INSERT, TRUNCATE, TRIGGER, SELECT, UPDATE ON TABLE public.dataset_table TO dataflow;
+GRANT DELETE, REFERENCES, INSERT, TRUNCATE, TRIGGER, SELECT, UPDATE ON TABLE public.dataset_table TO dataset;
+GRANT DELETE, REFERENCES, INSERT, TRUNCATE, TRIGGER, SELECT, UPDATE ON TABLE public.dataset_table TO recordstore;
+GRANT DELETE, REFERENCES, INSERT, TRUNCATE, TRIGGER, SELECT, UPDATE ON TABLE public.dataset_table TO testuser;
+GRANT DELETE, REFERENCES, INSERT, TRUNCATE, TRIGGER, SELECT, UPDATE ON TABLE public.dataset_table TO validation;
+
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.dataset_table_id_seq TO dataflow;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.dataset_table_id_seq TO dataset;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.dataset_table_id_seq TO recordstore;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.dataset_table_id_seq TO testuser;
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE public.dataset_table_id_seq TO validation;

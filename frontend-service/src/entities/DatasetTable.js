@@ -3,7 +3,6 @@ export class DatasetTable {
     dataAreManuallyEditable,
     hasErrors,
     hasPKReferenced,
-    icebergTableIsCreated,
     records,
     recordSchemaId,
     recordsWithErrorsPercentage,
@@ -21,7 +20,6 @@ export class DatasetTable {
     this.dataAreManuallyEditable = dataAreManuallyEditable;
     this.hasErrors = hasErrors;
     this.hasPKReferenced = hasPKReferenced;
-    this.icebergTableIsCreated = icebergTableIsCreated;
     this.records = records;
     this.recordSchemaId = recordSchemaId;
     this.recordsWithErrorsPercentage = recordsWithErrorsPercentage;

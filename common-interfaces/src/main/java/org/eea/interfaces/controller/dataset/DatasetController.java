@@ -898,4 +898,18 @@ public interface DatasetController {
   @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
   Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId, @PathVariable("tableSchemaId") String tableSchemaId);
 
+  /**
+   * Get iceberg tables in dataflow
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param datasetId the dataset id
+   * @return list of tables info
+   *
+   */
+  @GetMapping("/getIcebergTables")
+  List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
+                                             @RequestParam(value = "providerId", required = false) Long providerId,
+                                             @RequestParam(value = "datasetId", required = false) Long datasetId);
+
 }

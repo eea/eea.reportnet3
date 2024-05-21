@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.datalake.service.DremioHelperService;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
@@ -2861,6 +2860,30 @@ public class DatasetControllerImpl implements DatasetController {
     }
     catch (Exception e){
       LOG.error("Could not find if the icebergTableCreated option was enabled for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      throw e;
+    }
+  }
+
+  /**
+   * Get iceberg tables in dataflow
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param datasetId the dataset id
+   * @return list of tables info
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getIcebergTables")
+  public List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
+                                             @RequestParam(value = "providerId", required = false) Long providerId,
+                                             @RequestParam(value = "datasetId", required = false) Long datasetId){
+    try{
+      return datasetTableService.getIcebergTablesForDataflow(dataflowId, providerId, datasetId);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve iceberg tables for dataflowId {}, providerId {} and datasetId {}", dataflowId, providerId, datasetId);
       throw e;
     }
   }

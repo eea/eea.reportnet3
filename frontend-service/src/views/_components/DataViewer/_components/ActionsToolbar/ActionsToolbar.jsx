@@ -340,7 +340,7 @@ export const ActionsToolbar = ({
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
           checked={hasWritePermissions && isTableEditable && dataAreManuallyEditable}
-          disabled={isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
+          disabled={isLoading || isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
@@ -355,7 +355,7 @@ export const ActionsToolbar = ({
           id="check_edit_records_manually_label"
           style={{
             color:
-              !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
+              !isLoading && !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
                 ? 'var(--main-font-color)'
                 : '#9A9A9A',
             cursor: 'auto',
