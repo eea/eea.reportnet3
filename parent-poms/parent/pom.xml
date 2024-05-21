@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.3.1-ICEBERG-FRONTEND-FIXES</api-gateway.version>
-      <communication.version>v3.3.1-ICEBERG-FRONTEND-FIXES</communication.version>
-      <collaboration.version>v3.3.1-ICEBERG-FRONTEND-FIXES</collaboration.version>
-      <dataflow.version>v3.3.1-ICEBERG-FRONTEND-FIXES</dataflow.version>
-      <dataset.version>v3.3.1-ICEBERG-FRONTEND-FIXES</dataset.version>
-      <document.version>v3.3.1-ICEBERG-FRONTEND-FIXES</document.version>
-      <frontend.version>v3.3.1-ICEBERG-FRONTEND-FIXES</frontend.version>
-      <indexsearch.version>v3.3.1-ICEBERG-FRONTEND-FIXES</indexsearch.version>
-      <inspire.version>v3.3.1-ICEBERG-FRONTEND-FIXES</inspire.version>
-      <recordstore.version>v3.3.1-ICEBERG-FRONTEND-FIXES</recordstore.version>
-      <ums.version>v3.3.1-ICEBERG-FRONTEND-FIXES</ums.version>
-      <validation.version>v3.3.1-ICEBERG-FRONTEND-FIXES</validation.version>
-      <common-interfaces.version>v3.3.1-ICEBERG-FRONTEND-FIXES</common-interfaces.version>
-      <common-utitlities.version>v3.3.1-ICEBERG-FRONTEND-FIXES</common-utitlities.version>
-      <rod.version>v3.3.1-ICEBERG-FRONTEND-FIXES</rod.version>
-      <orchestrator.version>v3.3.1-ICEBERG-FRONTEND-FIXES</orchestrator.version>
+      <api-gateway.version>v3.3.1-ARCHITECTURE_DLH</api-gateway.version>
+      <communication.version>v3.3.1-ARCHITECTURE_DLH</communication.version>
+      <collaboration.version>v3.3.1-ARCHITECTURE_DLH</collaboration.version>
+      <dataflow.version>v3.3.1-ARCHITECTURE_DLH</dataflow.version>
+      <dataset.version>v3.3.1-ARCHITECTURE_DLH</dataset.version>
+      <document.version>v3.3.1-ARCHITECTURE_DLH</document.version>
+      <frontend.version>v3.3.1-ARCHITECTURE_DLH</frontend.version>
+      <indexsearch.version>v3.3.1-ARCHITECTURE_DLH</indexsearch.version>
+      <inspire.version>v3.3.1-ARCHITECTURE_DLH</inspire.version>
+      <recordstore.version>v3.3.1-ARCHITECTURE_DLH</recordstore.version>
+      <ums.version>v3.3.1-ARCHITECTURE_DLH</ums.version>
+      <validation.version>v3.3.1-ARCHITECTURE_DLH</validation.version>
+      <common-interfaces.version>v3.3.1-ARCHITECTURE_DLH</common-interfaces.version>
+      <common-utitlities.version>v3.3.1-ARCHITECTURE_DLH</common-utitlities.version>
+      <rod.version>v3.3.1-ARCHITECTURE_DLH</rod.version>
+      <orchestrator.version>v3.3.1-ARCHITECTURE_DLH</orchestrator.version>
   </properties>
 </project>
