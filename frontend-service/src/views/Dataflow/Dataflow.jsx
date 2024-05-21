@@ -772,7 +772,9 @@ export const Dataflow = () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
 
-      const icebergTables = await DataflowService.getIcebergTables({ dataflowId, providerId: dataProviderId });
+      const icebergTables = dataProviderId
+        ? await DataflowService.getIcebergTablesWithProviderId({ dataflowId, providerId: dataProviderId })
+        : await DataflowService.getIcebergTables({ dataflowId });
 
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
