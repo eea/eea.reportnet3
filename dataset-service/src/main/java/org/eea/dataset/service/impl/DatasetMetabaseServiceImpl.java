@@ -1172,4 +1172,17 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return nextIdValidation;
   }
 
+  /**
+   * Gets the reportings by provider id and dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the providerId
+   * @return the reportings by provider id and dataflow id
+   */
+  @Override
+  public List<DataSetMetabaseVO> getDatasetsByDataflowIdAndProviderId(Long dataflowId, Long providerId){
+    return dataSetMetabaseMapper
+            .entityListToClass(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, providerId));
+  }
+
 }
