@@ -112,7 +112,7 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (presignedUrl) {
       uploadToS3();
-      importS3ToDlh();
+      // importS3ToDlh();
     }
   }, [presignedUrl]);
 
@@ -369,6 +369,7 @@ export const CustomFileUpload = ({
       onUpload({ files: state.files });
 
       dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+      importS3ToDlh();
     } catch (error) {
       console.error('CustomFileUpload - uploadToS3.', error);
       notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
