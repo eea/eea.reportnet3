@@ -60,8 +60,10 @@ export const DatasetConfig = {
     '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}&dataflowId={:dataflowId}',
   importTableSchema:
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
-  importFileWithS3:
+  importTableFileWithS3:
     '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}&dataflowId={:dataflowId}&jobId={:jobId}',
+  importZipFileWithS3:
+    '/dataset/v2/importFileData/{:datasetId}&delimiter={:delimiter}&dataflowId={:dataflowId}&jobId={:jobId}',
   getPresignedUrl: '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&fileName={:fileName}',
   getShowValidationErrors:
     '/validation/listGroupValidations/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',

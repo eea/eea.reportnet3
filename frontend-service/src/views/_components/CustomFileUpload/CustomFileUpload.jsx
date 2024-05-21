@@ -112,7 +112,6 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (presignedUrl) {
       uploadToS3();
-      // importS3ToDlh();
     }
   }, [presignedUrl]);
 
@@ -379,13 +378,20 @@ export const CustomFileUpload = ({
 
   const importS3ToDlh = async () => {
     try {
-      await DatasetService.importFileWithS3({
-        dataflowId,
-        datasetId,
-        delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
-        jobId,
-        tableSchemaId
-      });
+      tableSchemaId
+        ? await DatasetService.importTableFileWithS3({
+            dataflowId,
+            datasetId,
+            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+            jobId,
+            tableSchemaId
+          })
+        : await DatasetService.importZipFileWithS3({
+            dataflowId,
+            datasetId,
+            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+            jobId
+          });
     } catch (error) {
       console.error('CustomFileUpload - importS3ToDlh.', error);
       notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
