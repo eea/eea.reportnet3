@@ -16,7 +16,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER;
@@ -133,5 +138,37 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     WKBReader reader = new WKBReader();
     Geometry geometry = reader.read(byteArray);
     return DataType.fromValue(geometry.getGeometryType().toUpperCase());
+  }
+
+  private Optional<String> getHeader(boolean isGeoJsonHeaders, String headerInput) {
+    List<DataType> geoJsonEnums = getGeoJsonEnums();
+
+    return headerTypes.stream()
+        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .map(FieldSchemaVO::getName)
+        .filter(name -> name.equalsIgnoreCase(headerInput)).findAny();
+  }
+
+  @Override
+  public String fixQueryForSpatialData(String inputQuery, boolean isGeoJsonHeaders) {
+    String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*[^\\s]+";
+    Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+    Matcher matcher = pattern.matcher(inputQuery);
+    Map<String, String> replacements = new LinkedHashMap<>();
+
+    while (matcher.find()) {
+      String columnName = matcher.group(1);
+      Optional<String> header = getHeader(isGeoJsonHeaders, columnName);
+      if (header.isPresent() && !replacements.containsKey(columnName)) {
+        replacements.put(columnName, "st_asgeojson(" + columnName + ")");
+      }
+    }
+
+    String finalQuery = inputQuery;
+    for (Map.Entry<String, String> entry : replacements.entrySet()) {
+      finalQuery = finalQuery.replaceAll("\\b" + Pattern.quote(entry.getKey()) + "\\b", entry.getValue());
+    }
+
+    return !finalQuery.isEmpty() ? finalQuery : inputQuery;
   }
 }

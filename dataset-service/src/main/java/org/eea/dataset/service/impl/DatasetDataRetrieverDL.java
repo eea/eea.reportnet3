@@ -4,6 +4,7 @@ import cdjd.org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioValidationMapper;
 import org.eea.dataset.service.DataLakeDataRetriever;
@@ -43,16 +44,18 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
     private S3Helper s3Helper;
     private JdbcTemplate dremioJdbcTemplate;
     private DremioHelperService dremioHelperService;
+    private final SpatialDataHandling spatialDataHandling;
 
     @Autowired
     private DatasetTableService datasetTableService;
 
     @Autowired
-    public DatasetDataRetrieverDL(S3Service s3Service, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DremioHelperService dremioHelperService) {
+    public DatasetDataRetrieverDL(S3Service s3Service, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DremioHelperService dremioHelperService, SpatialDataHandling  spatialDataHandling) {
         this.s3Service = s3Service;
         this.s3Helper = s3Helper;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.dremioHelperService = dremioHelperService;
+        this.spatialDataHandling = spatialDataHandling;
     }
 
     @Override
@@ -120,6 +123,10 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         int idx = recordsCountQueryString.indexOf("order by");
         if (idx!=-1) {
             recordsCountQueryString = recordsCountQueryString.substring(0, idx-1);
+        }
+        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+            recordsCountQueryString = spatialDataHandling.fixQueryForSpatialData(recordsCountQueryString, true);
+            filteredQuery = new StringBuilder(spatialDataHandling.fixQueryForSpatialData(filteredQuery.toString(), true));
         }
         Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQueryString, Long.class);
         result.setTotalFilteredRecords(totalFilteredRecords);

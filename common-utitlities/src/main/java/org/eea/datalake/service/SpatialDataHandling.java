@@ -23,4 +23,6 @@ public interface SpatialDataHandling {
   List<DataType> getGeoJsonEnums();
 
   DataType getGeometryType(byte[] byteArray) throws ParseException;
+
+  String fixQueryForSpatialData(String inputQuery, boolean isGeoJsonHeaders);
 }
