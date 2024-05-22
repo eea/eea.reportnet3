@@ -21,4 +21,7 @@ public class JobPresignedUrlInfo implements Serializable {
 
     /** The presigned url */
     private String presignedUrl;
+
+    /** The file path in s3 */
+    private String filePathInS3;
 }

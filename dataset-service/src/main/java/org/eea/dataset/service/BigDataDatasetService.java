@@ -5,11 +5,9 @@ import org.eea.interfaces.vo.dataset.AttachmentDLVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -42,7 +40,7 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      */
-    String generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName);
+    JobPresignedUrlInfo generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName);
 
     String generateExportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName);
 
