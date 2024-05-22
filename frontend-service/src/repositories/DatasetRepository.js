@@ -231,8 +231,28 @@ export const DatasetRepository = {
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) =>
     await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsIcebergTableCreated, { datasetId, tableSchemaId }) }),
 
-  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) =>
-    await HTTPRequester.get({ url: getUrl(DatasetConfig.getPresignedUrl, { datasetId, dataflowId, fileName }) }),
+  getPresignedUrl: async ({
+    datasetId,
+    dataflowId,
+    providerId,
+    tableSchemaId,
+    replace,
+    integrationId,
+    delimiter,
+    fileName
+  }) =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getPresignedUrl, {
+        datasetId,
+        dataflowId,
+        providerId,
+        tableSchemaId,
+        replace,
+        integrationId,
+        delimiter,
+        fileName
+      })
+    }),
 
   getReferencedFieldValues: async (
     datasetId,

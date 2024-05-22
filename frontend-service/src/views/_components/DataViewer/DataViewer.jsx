@@ -379,9 +379,6 @@ export const DataViewer = ({
       setHasWebformWritePermissions(false);
     }
   }, [isReportingWebform]);
-  useEffect(() => {
-    onGetIsIcebergCreated();
-  }, []);
 
   const filterDataResponse = data => {
     const dataFiltered = DataViewerUtils.parseData(data);

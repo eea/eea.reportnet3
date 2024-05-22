@@ -1069,7 +1069,7 @@ export const FieldsDesigner = ({
               {resourcesContext.messages['notEmpty']}
             </label>
           </div>
-          {bigData && !isDataflowOpen && (
+          {bigData && (
             <div>
               <span
                 className={styles.switchTextInput}
@@ -1086,8 +1086,7 @@ export const FieldsDesigner = ({
                   isTableLoading ||
                   isTableEditable ||
                   isDataflowOpen ||
-                  isDesignDatasetEditorRead ||
-                  isReferenceDataset
+                  isDesignDatasetEditorRead
                 }
                 id={`${table.tableSchemaId}_check_manual_edit`}
                 inputId={`${table.tableSchemaId}_check_manual_edit`}

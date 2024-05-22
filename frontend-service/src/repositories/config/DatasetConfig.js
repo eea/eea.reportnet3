@@ -64,7 +64,8 @@ export const DatasetConfig = {
     '/dataset/v2/importFileData/{:datasetId}?tableSchemaId={:tableSchemaId}&delimiter={:delimiter}&dataflowId={:dataflowId}&jobId={:jobId}',
   importZipFileWithS3:
     '/dataset/v2/importFileData/{:datasetId}&delimiter={:delimiter}&dataflowId={:dataflowId}&jobId={:jobId}',
-  getPresignedUrl: '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&fileName={:fileName}',
+  getPresignedUrl:
+    '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}',
   getShowValidationErrors:
     '/validation/listGroupValidations/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getShowValidationErrorsDL:

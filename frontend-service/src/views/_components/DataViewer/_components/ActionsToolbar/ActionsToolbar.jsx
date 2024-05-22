@@ -340,7 +340,20 @@ export const ActionsToolbar = ({
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
           checked={hasWritePermissions && isTableEditable && dataAreManuallyEditable}
-          disabled={isLoading || isDataflowOpen || !dataAreManuallyEditable || isEditRecordsManuallyButtonDisabled}
+          disabled={
+            !hasWritePermissions ||
+            isLoading ||
+            isDataflowOpen ||
+            !dataAreManuallyEditable ||
+            isEditRecordsManuallyButtonDisabled ||
+            actionsContext.importDatasetProcessing ||
+            actionsContext.exportDatasetProcessing ||
+            actionsContext.deleteDatasetProcessing ||
+            actionsContext.importTableProcessing ||
+            actionsContext.exportTableProcessing ||
+            actionsContext.deleteTableProcessing ||
+            actionsContext.validateDatasetProcessing
+          }
           id="check_edit_records_manually"
           inputId="check_edit_records_manually_checkbox"
           onChange={e => {
@@ -355,7 +368,20 @@ export const ActionsToolbar = ({
           id="check_edit_records_manually_label"
           style={{
             color:
-              !isLoading && !isDataflowOpen && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled
+              !isLoading &&
+              !isDataflowOpen &&
+              hasWritePermissions &&
+              dataAreManuallyEditable &&
+              !isEditRecordsManuallyButtonDisabled &&
+              !(
+                actionsContext.importDatasetProcessing ||
+                actionsContext.exportDatasetProcessing ||
+                actionsContext.deleteDatasetProcessing ||
+                actionsContext.importTableProcessing ||
+                actionsContext.exportTableProcessing ||
+                actionsContext.deleteTableProcessing ||
+                actionsContext.validateDatasetProcessing
+              )
                 ? 'var(--main-font-color)'
                 : '#9A9A9A',
             cursor: 'auto',
@@ -549,7 +575,7 @@ export const ActionsToolbar = ({
         />
         {renderFilterableButton()}
         {renderFilterSearch()}
-        {bigData && hasWritePermissions && !isDataflowOpen && renderManualEditButton()}
+        {bigData && renderManualEditButton()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
         <span className={styles.input}>

@@ -1429,11 +1429,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             isTooltip: true,
             validExtensions: importSelectedIntegrationExtension
           })}`}
+          integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"
           onError={onImportDatasetError}
           onUpload={onUpload}
+          providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
           s3Check={true}
           url={`${window.env.REACT_APP_BACKEND}${
