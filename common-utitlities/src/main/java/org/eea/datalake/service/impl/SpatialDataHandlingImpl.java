@@ -1,25 +1,38 @@
 package org.eea.datalake.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.eea.datalake.service.SpatialDataHandling;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.utils.LiteralConstants;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ParseException;
+import org.locationtech.jts.io.WKBReader;
+import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.eea.utils.LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER;
+import static org.eea.utils.LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER;
 
+
+@Component
 public class SpatialDataHandlingImpl implements SpatialDataHandling {
-  private final List<FieldSchemaVO> headerTypes;
+  private List<FieldSchemaVO> headerTypes = new ArrayList<>();
 
-  public SpatialDataHandlingImpl(TableSchemaVO tableSchemaVO) {
+  private void init(TableSchemaVO tableSchemaVO) {
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
     FieldSchemaVO recordId = new FieldSchemaVO();
-    recordId.setName(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
+    recordId.setName(PARQUET_RECORD_ID_COLUMN_HEADER);
     FieldSchemaVO providerCode = new FieldSchemaVO();
-    providerCode.setName(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
+    providerCode.setName(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
     fieldSchemas.add(recordId);
     fieldSchemas.add(providerCode);
     fieldSchemas.addAll(tableSchemaVO.getRecordSchema().getFieldSchema());
@@ -28,7 +41,8 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public boolean geoJsonHeadersIsNotEmpty(boolean isGeoJsonHeaders) {
+  public boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO, boolean isGeoJsonHeaders) {
+    init(tableSchemaVO);
     return !getHeaders(isGeoJsonHeaders).isEmpty();
   }
 
@@ -37,17 +51,8 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     List<String> geoJsonHeaders = getHeaders(true);
 
     return new StringBuilder(geoJsonHeaders.stream()
-        .map(header -> ", ST_AsBinary(ST_GeomFromGeoJson(" + header + ")) as " + header)
+        .map(header -> ", St_asEwkb(ST_Transform(ST_GeomFromGeoJson(" + header + "), CAST(REPLACE(REGEXP_EXTRACT(" + header + ", '\"[0-9]{4}\"', 0 ), '\"', '') AS integer))) as " + header)
         .collect(Collectors.joining()));
-  }
-
-  @Override
-  public StringBuilder convertToJson() {
-    List<String> geoJsonHeaders = getHeaders(true);
-
-    return new StringBuilder(geoJsonHeaders.stream()
-        .map(header -> "concat('{\"type\":\"Feature\",\"geometry\":',replace(st_asgeojson(" + header + "),',\"crs\":{\"type\":\"name\",\"properties\":{\"name\":\"EPSG:0\"}}}','},\"properties\": {\"srid\": \"4326\"}}')) as " + header)
-        .collect(Collectors.joining(",")));
   }
 
   @Override
@@ -57,7 +62,61 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return new StringBuilder(String.join(",", geoJsonHeaders));
   }
 
+  @Override
+  public void decodeSpatialData(List<RecordVO> recordVOS) {
+    recordVOS.stream()
+        .flatMap(recordVO -> recordVO.getFields().stream())
+        .filter(fieldVO -> fieldVO.getByteArrayValue() != null)
+        .forEach(fieldVO -> {
+          try {
+            fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
+          } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+          }
+        });
+  }
+
+  @Override
+  public String decodeSpatialData(byte[] byteArray) throws RuntimeException, IOException, ParseException {
+    WKBReader reader = new WKBReader();
+    Geometry geometry = reader.read(byteArray);
+
+    GeoJsonWriter geoJsonWriter = new GeoJsonWriter();
+    String input = geoJsonWriter.write(geometry);
+
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode root = mapper.readTree(input);
+
+    String type = root.path("type").asText();
+    JsonNode coordinates = root.path("coordinates");
+    String srid = root.path("crs").path("properties").path("name").asText().replace("EPSG:", "");
+
+    ObjectNode geometryNode = mapper.createObjectNode();
+    geometryNode.put("type", type);
+    geometryNode.set("coordinates", coordinates);
+
+    ObjectNode propertiesNode = mapper.createObjectNode();
+    propertiesNode.put("srid", srid);
+
+    ObjectNode featureNode = mapper.createObjectNode();
+    featureNode.put("type", "Feature");
+    featureNode.set("geometry", geometryNode);
+    featureNode.set("properties", propertiesNode);
+
+    return mapper.writeValueAsString(featureNode);
+  }
+
   private List<String> getHeaders(boolean isGeoJsonHeaders) {
+    List<DataType> geoJsonEnums = getGeoJsonEnums();
+
+    return headerTypes.stream()
+        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .map(FieldSchemaVO::getName)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<DataType> getGeoJsonEnums() {
     List<DataType> geoJsonEnums = new ArrayList<>();
     geoJsonEnums.add(DataType.GEOMETRYCOLLECTION);
     geoJsonEnums.add(DataType.MULTIPOINT);
@@ -66,10 +125,13 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     geoJsonEnums.add(DataType.POLYGON);
     geoJsonEnums.add(DataType.LINESTRING);
     geoJsonEnums.add(DataType.MULTILINESTRING);
+    return geoJsonEnums;
+  }
 
-    return headerTypes.stream()
-        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
-        .map(FieldSchemaVO::getName)
-        .collect(Collectors.toList());
+  @Override
+  public DataType getGeometryType(byte[] byteArray) throws ParseException {
+    WKBReader reader = new WKBReader();
+    Geometry geometry = reader.read(byteArray);
+    return DataType.fromValue(geometry.getGeometryType().toUpperCase());
   }
 }

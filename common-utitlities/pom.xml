@@ -193,6 +193,11 @@
 			<artifactId>poi-ooxml</artifactId>
 			<version>3.9</version>
 		</dependency>
+		<dependency>
+			<groupId>org.locationtech.jts.io</groupId>
+			<artifactId>jts-io-common</artifactId>
+			<version>1.19.0</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

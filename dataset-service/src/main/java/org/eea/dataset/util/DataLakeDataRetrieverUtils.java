@@ -1,22 +1,15 @@
 package org.eea.dataset.util;
 
-import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
-import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.DremioRecordMapper;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.FieldSchema;
-import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.datalake.service.SpatialDataHandling;
-import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
-import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -39,10 +31,12 @@ public class DataLakeDataRetrieverUtils {
     private static SchemasRepository schemasRepository;
     private static JdbcTemplate dremioJdbcTemplate;
     private static final Logger LOG = LoggerFactory.getLogger(DataLakeDataRetrieverUtils.class);
+    private static SpatialDataHandling spatialDataHandling;
 
-    public DataLakeDataRetrieverUtils(SchemasRepository schemasRepository, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate) {
+    public DataLakeDataRetrieverUtils(SchemasRepository schemasRepository, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, SpatialDataHandling spatialDataHandling) {
         this.schemasRepository = schemasRepository;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
+        this.spatialDataHandling = spatialDataHandling;
     }
 
     public static Pageable calculatePageable(Pageable pageable, Long totalRecords) {
@@ -196,19 +190,10 @@ public class DataLakeDataRetrieverUtils {
     }
 
     public static List<RecordVO> getRecordVOS(String datasetSchema , TableSchemaVO tableSchemaVO, StringBuilder dataQuery) {
-        DremioRecordMapper recordMapper = new DremioRecordMapper();
+        DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling);
         recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchema).setTableSchemaId(tableSchemaVO.getIdTableSchema());
-
-        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
-
-        List<RecordVO> recordVOS;
-        if (spatialDataHandling.geoJsonHeadersIsNotEmpty(true)) {
-            String newString =  String.format(dataQuery.toString(), spatialDataHandling.getSimpleHeaders(), "," ,spatialDataHandling.convertToJson());
-            recordVOS = dremioJdbcTemplate.query(newString, recordMapper);
-        } else {
-            String newString =  String.format(dataQuery.toString(), spatialDataHandling.getSimpleHeaders(), StringUtils.EMPTY, StringUtils.EMPTY);
-            recordVOS = dremioJdbcTemplate.query(newString, recordMapper);
-        }
+        List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
+        spatialDataHandling.decodeSpatialData(recordVOS);
         return recordVOS;
     }
 }

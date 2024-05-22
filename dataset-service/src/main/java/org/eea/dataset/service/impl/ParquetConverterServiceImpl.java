@@ -16,7 +16,6 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.impl.S3ServiceImpl;
-import org.eea.datalake.service.impl.SpatialDataHandlingImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -35,7 +34,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
@@ -111,6 +109,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    SpatialDataHandling spatialDataHandling;
 
     @Override
     public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
@@ -247,8 +248,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
         String createTableQuery;
-        SpatialDataHandling spatialDataHandling = new SpatialDataHandlingImpl(tableSchemaVO);
-        if(spatialDataHandling.geoJsonHeadersIsNotEmpty(true)) {
+        if(spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO,true)) {
             String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s %s FROM " + dremioPathForCsvFile;
             createTableQuery = String.format(initQuery, spatialDataHandling.getSimpleHeaders(), spatialDataHandling.getHeadersConvertedToBinary());
         } else {
