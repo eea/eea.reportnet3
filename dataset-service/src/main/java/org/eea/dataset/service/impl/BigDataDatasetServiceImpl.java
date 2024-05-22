@@ -201,9 +201,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     fileExtension = ZIP_TYPE;
                 }
                 //todo handle other extensions
-
-                LOG.info("For jobId {} downloading file from s3 from bucket {} with presigned Url {}", jobId, s3ServicePublic.getS3DefaultBucketName(), preSignedURL);
-
+                
                 int startIndex = preSignedURL.indexOf("df-");
                 int endIndex = preSignedURL.indexOf(fileExtension, startIndex) + fileExtension.length();
                 String filePathInS3 = preSignedURL.substring(startIndex, endIndex);
