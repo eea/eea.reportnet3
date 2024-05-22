@@ -39,6 +39,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -142,7 +143,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
                               String fmeJobId, DataFlowVO dataflowVO) throws Exception {
-        String preSignedURL = null;
+        String filePathInS3 = null;
         String fileName = (file != null) ? file.getOriginalFilename() : null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
@@ -174,7 +175,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 else if(job.getJobStatus().equals(JobStatusEnum.QUEUED)){
                     jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
                 }
-                preSignedURL = job.getParameters().get("preSignedURL").toString();
+                filePathInS3 = job.getParameters().get("filePathInS3").toString();
             }else{
                 //check if there is already an import job with status IN_PROGRESS for the specific datasetId
                 List<Long> datasetIds = new ArrayList<>();
@@ -189,22 +190,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             if(file == null){
-                if(StringUtils.isBlank(preSignedURL)){
+                if(StringUtils.isBlank(filePathInS3)){
                     throw new EEAException("Empty file and file path");
                 }
                 String fileExtension = null;
 
-                if(preSignedURL.contains(".csv")) {
+                if(filePathInS3.endsWith(".csv")) {
                     fileExtension = CSV_TYPE;
                 }
-                else if(preSignedURL.contains(".zip")){
+                else if(filePathInS3.endsWith(".zip")){
                     fileExtension = ZIP_TYPE;
                 }
                 //todo handle other extensions
-                
-                int startIndex = preSignedURL.indexOf("df-");
-                int endIndex = preSignedURL.indexOf(fileExtension, startIndex) + fileExtension.length();
-                String filePathInS3 = preSignedURL.substring(startIndex, endIndex);
+
                 LOG.info("For jobId {} downloading file from s3 in path {}", jobId, filePathInS3);
 
                 String[] filePathInS3Split = filePathInS3.split("/");
@@ -713,8 +711,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public String generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
-        return s3HelperPublic.generatePUTPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName, false));
+    public JobPresignedUrlInfo generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
+        JobPresignedUrlInfo info = new JobPresignedUrlInfo();
+        String filePathInS3 = getFilePath(datasetId, dataflowId, providerId, fileName, false);
+        info.setFilePathInS3(filePathInS3);
+        info.setPresignedUrl(s3HelperPublic.generatePUTPreSignedUrl(filePathInS3));
+        return info;
     }
 
     @Override
