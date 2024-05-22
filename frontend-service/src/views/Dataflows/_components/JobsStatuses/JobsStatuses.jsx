@@ -95,7 +95,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         providerId: filterBy.providerId,
         datasetId: filterBy.datasetId,
         datasetName: filterBy.datasetName,
-        creatorUsername: isProvider ? userContext.preferredUsername : filterBy.creatorUsername,
+        creatorUsername: !isAdmin ? (isProvider ? userContext.preferredUsername : filterBy.creatorUsername) : undefined,
         jobStatus: filterBy.jobStatus?.join()
       });
 
@@ -176,29 +176,33 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       label: resourcesContext.messages['jobType'],
       multiSelectOptions: [
         {
-          type: resourcesContext.messages[config.jobType.IMPORT.label].toUpperCase(),
-          value: config.jobType.IMPORT.key
+          type: resourcesContext.messages[config.jobType.COPY_TO_EU_DATASET.label].toUpperCase(),
+          value: config.jobType.COPY_TO_EU_DATASET.key
         },
         {
-          type: resourcesContext.messages[config.jobType.VALIDATION.label].toUpperCase(),
-          value: config.jobType.VALIDATION.key
-        },
-        {
-          type: resourcesContext.messages[config.jobType.RELEASE.label].toUpperCase(),
-          value: config.jobType.RELEASE.key
+          type: resourcesContext.messages[config.jobType.DELETE.label].toUpperCase(),
+          value: config.jobType.DELETE.key
         },
         {
           type: resourcesContext.messages[config.jobType.EXPORT.label].toUpperCase(),
           value: config.jobType.EXPORT.key
         },
         {
-          type: resourcesContext.messages[config.jobType.COPY_TO_EU_DATASET.label].toUpperCase(),
-          value: config.jobType.COPY_TO_EU_DATASET.key
-        },
-        {
           type: resourcesContext.messages[config.jobType.FILE_EXPORT.label].toUpperCase(),
           value: config.jobType.FILE_EXPORT.key
-        }
+        },
+        {
+          type: resourcesContext.messages[config.jobType.IMPORT.label].toUpperCase(),
+          value: config.jobType.IMPORT.key
+        },
+        {
+          type: resourcesContext.messages[config.jobType.RELEASE.label].toUpperCase(),
+          value: config.jobType.RELEASE.key
+        },
+        {
+          type: resourcesContext.messages[config.jobType.VALIDATION.label].toUpperCase(),
+          value: config.jobType.VALIDATION.key
+        },
       ],
       template: 'jobType',
       type: 'MULTI_SELECT'
@@ -208,28 +212,28 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       label: resourcesContext.messages['jobStatus'],
       multiSelectOptions: [
         {
-          type: resourcesContext.messages[config.jobRunningStatus.FAILED.label].toUpperCase(),
-          value: config.jobRunningStatus.FAILED.key
-        },
-        {
           type: resourcesContext.messages[config.jobRunningStatus.QUEUED.label].toUpperCase(),
           value: config.jobRunningStatus.QUEUED.key
         },
         {
-          type: resourcesContext.messages[config.jobRunningStatus.REFUSED.label].toUpperCase(),
-          value: config.jobRunningStatus.REFUSED.key
+          type: resourcesContext.messages[config.jobRunningStatus.IN_PROGRESS.label].toUpperCase(),
+          value: config.jobRunningStatus.IN_PROGRESS.key
         },
         {
           type: resourcesContext.messages[config.jobRunningStatus.FINISHED.label].toUpperCase(),
           value: config.jobRunningStatus.FINISHED.key
         },
         {
-          type: resourcesContext.messages[config.jobRunningStatus.CANCELED.label].toUpperCase(),
-          value: config.jobRunningStatus.CANCELED.key
+          type: resourcesContext.messages[config.jobRunningStatus.FAILED.label].toUpperCase(),
+          value: config.jobRunningStatus.FAILED.key
         },
         {
-          type: resourcesContext.messages[config.jobRunningStatus.IN_PROGRESS.label].toUpperCase(),
-          value: config.jobRunningStatus.IN_PROGRESS.key
+          type: resourcesContext.messages[config.jobRunningStatus.REFUSED.label].toUpperCase(),
+          value: config.jobRunningStatus.REFUSED.key
+        },
+        {
+          type: resourcesContext.messages[config.jobRunningStatus.CANCELED.label].toUpperCase(),
+          value: config.jobRunningStatus.CANCELED.key
         },
         {
           type: resourcesContext.messages[config.jobRunningStatus.CANCELED_BY_ADMIN.label].toUpperCase(),

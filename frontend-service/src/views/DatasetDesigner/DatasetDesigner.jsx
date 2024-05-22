@@ -1710,20 +1710,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 className={`p-button-rounded p-button-secondary ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={
-                  isDataflowOpen ||
-                  isDesignDatasetEditorRead ||
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                disabled={isDataflowOpen || isDesignDatasetEditorRead || actionsContext.isInProgress}
+                icon={
+                  actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
                 }
-                icon={actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'}
                 label={
-                  actionsContext.importDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.importDatasetProcessing
                     ? resourcesContext.messages['importInProgress']
                     : resourcesContext.messages['importDataset']
                 }
@@ -1740,21 +1732,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 className={`p-button-rounded p-button-secondary-transparent ${
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
-                disabled={
-                  isDataflowOpen ||
-                  isDesignDatasetEditorRead ||
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                disabled={isDataflowOpen || isDesignDatasetEditorRead || actionsContext.isInProgress}
+                icon={
+                  actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'
                 }
-                icon={actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
                 id="buttonExportDataset"
                 label={
-                  actionsContext.exportDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.exportDatasetProcessing
                     ? resourcesContext.messages['exportInProgress']
                     : resourcesContext.messages['exportDataset']
                 }
@@ -1768,18 +1752,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 ref={exportMenuRef}
               />
               <DatasetDeleteDataDialog
-                disabled={
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                disabled={actionsContext.isInProgress}
+                icon={
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'
                 }
-                icon={actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
                 label={
-                  actionsContext.deleteDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
                     ? resourcesContext.messages['deleteInProgress']
                     : resourcesContext.messages['deleteDatasetData']
                 }
@@ -1790,19 +1768,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             </div>
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
-                disabled={
-                  isDesignDatasetEditorRead ||
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                disabled={isDesignDatasetEditorRead || actionsContext.isInProgress}
+                icon={
+                  actionsContext.isInProgress && actionsContext.validateDatasetProcessing
+                    ? 'spinnerAnimate'
+                    : 'validate'
                 }
-                icon={actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'}
                 label={
-                  actionsContext.validateDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.validateDatasetProcessing
                     ? resourcesContext.messages['validationInProgress']
                     : resourcesContext.messages['validate']
                 }

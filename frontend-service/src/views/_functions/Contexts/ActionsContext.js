@@ -1,14 +1,15 @@
 import { createContext } from 'react';
 
 export const ActionsContext = createContext({
-  importDatasetProcessing: false,
-  importTableProcessing: false,
-  exportDatasetProcessing: false,
-  exportTableProcessing: false,
-  deleteDatasetProcessing: false,
-  deleteTableProcessing: false,
-  validateDatasetProcessing: false,
   changeExportDatasetState: isLoading => {},
   changeExportTableState: isTableLoading => {},
-  testProcess: (datasetId, action) => {}
+  deleteDatasetProcessing: false,
+  deleteTableProcessing: false,
+  exportDatasetProcessing: false,
+  exportTableProcessing: false,
+  importDatasetProcessing: false,
+  importTableProcessing: false,
+  isInProgress: false,
+  testProcess: (datasetId, action) => {},
+  validateDatasetProcessing: false,
 });

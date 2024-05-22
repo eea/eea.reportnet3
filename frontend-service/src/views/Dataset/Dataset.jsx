@@ -1222,19 +1222,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                   className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
-                  disabled={
-                    !hasWritePermissions ||
-                    actionsContext.importDatasetProcessing ||
-                    actionsContext.exportDatasetProcessing ||
-                    actionsContext.deleteDatasetProcessing ||
-                    actionsContext.importTableProcessing ||
-                    actionsContext.exportTableProcessing ||
-                    actionsContext.deleteTableProcessing ||
-                    actionsContext.validateDatasetProcessing
+                  disabled={!hasWritePermissions || actionsContext.isInProgress}
+                  icon={
+                    actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
                   }
-                  icon={actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'}
                   label={
-                    actionsContext.importDatasetProcessing
+                    actionsContext.isInProgress && actionsContext.importDatasetProcessing
                       ? resourcesContext.messages['importInProgress']
                       : resourcesContext.messages['importDataset']
                   }
@@ -1251,19 +1244,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             )}
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
-              disabled={
-                actionsContext.importDatasetProcessing ||
-                actionsContext.exportDatasetProcessing ||
-                actionsContext.deleteDatasetProcessing ||
-                actionsContext.importTableProcessing ||
-                actionsContext.exportTableProcessing ||
-                actionsContext.deleteTableProcessing ||
-                actionsContext.validateDatasetProcessing
-              }
-              icon={actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
+              disabled={actionsContext.isInProgress}
+              icon={actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
               id="buttonExportDataset"
               label={
-                actionsContext.exportDatasetProcessing
+                actionsContext.isInProgress && actionsContext.exportDatasetProcessing
                   ? resourcesContext.messages['exportInProgress']
                   : resourcesContext.messages['exportDataset']
               }
@@ -1277,19 +1262,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               ref={exportMenuRef}
             />
             <DatasetDeleteDataDialog
-              disabled={
-                !hasWritePermissions ||
-                actionsContext.importDatasetProcessing ||
-                actionsContext.exportDatasetProcessing ||
-                actionsContext.deleteDatasetProcessing ||
-                actionsContext.importTableProcessing ||
-                actionsContext.exportTableProcessing ||
-                actionsContext.deleteTableProcessing ||
-                actionsContext.validateDatasetProcessing
-              }
-              icon={actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
+              disabled={!hasWritePermissions || actionsContext.isInProgress}
+              icon={actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
               label={
-                actionsContext.deleteDatasetProcessing
+                actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
                   ? resourcesContext.messages['deleteInProgress']
                   : resourcesContext.messages['deleteDatasetData']
               }
@@ -1298,19 +1274,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           </div>
           <div className="p-toolbar-group-right">
             <DatasetValidateDialog
-              disabled={
-                !hasWritePermissions ||
-                actionsContext.importDatasetProcessing ||
-                actionsContext.exportDatasetProcessing ||
-                actionsContext.deleteDatasetProcessing ||
-                actionsContext.importTableProcessing ||
-                actionsContext.exportTableProcessing ||
-                actionsContext.deleteTableProcessing ||
-                actionsContext.validateDatasetProcessing
+              disabled={!hasWritePermissions || actionsContext.isInProgress}
+              icon={
+                actionsContext.isInProgress && actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'
               }
-              icon={actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'}
               label={
-                actionsContext.validateDatasetProcessing
+                actionsContext.isInProgress && actionsContext.validateDatasetProcessing
                   ? resourcesContext.messages['validationInProgress']
                   : resourcesContext.messages['validate']
               }

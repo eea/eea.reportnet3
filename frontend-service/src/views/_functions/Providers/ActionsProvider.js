@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import { ActionsContext } from '../Contexts/ActionsContext';
 
 import { JobsStatusesService } from 'services/JobsStatusesService';
+import { isEmpty } from 'lodash';
 
 export const ActionsProvider = ({ children }) => {
   const [deleteDatasetProcessing, setDeleteDatasetProcessing] = useState(false);
@@ -25,11 +26,13 @@ export const ActionsProvider = ({ children }) => {
   const testProcess = (datasetId, action) => {
     clearInterval(timer.current);
 
+    setDeleteDatasetProcessing(false);
+    setDeleteTableProcessing(false);
     setImportDatasetProcessing(false);
     setImportTableProcessing(false);
     setValidateDatasetProcessing(false);
     setJobTypeInProgress('');
-    setIsInProgress(false);
+    setIsInProgress(action ? true : false);
 
     let pageRefresh = false;
 
@@ -60,63 +63,30 @@ export const ActionsProvider = ({ children }) => {
     }
 
     timer.current = setInterval(async () => {
-
-      const datasetJobs = await JobsStatusesService.getJobsStatuses({
+      const jobsInProgress = await JobsStatusesService.getJobsStatuses({
         datasetId: datasetId,
-        numberRows: 1000
+        jobStatus: ['QUEUED', 'IN_PROGRESS'].join()
       });
 
-      let lastJob = datasetJobs.jobsList[datasetJobs.jobsList.length - 1]
-      let lastJobStatus = lastJob.jobStatus;
-      
-      if( lastJobStatus === 'FINISHED' || lastJobStatus === 'REFUSED' || lastJobStatus === 'FAILED' || lastJobStatus === 'CANCELED'){
+      if (isEmpty(jobsInProgress.jobsList)) {
         setIsInProgress(false);
         clearInterval(timer.current);
-        setJobTypeInProgress(lastJob.jobType)
-      }else setIsInProgress(true)
-
-      if (!pageRefresh && !action && jobTypeRef.current === 'IMPORT') {
-        pageRefresh = true;
-        setImportDatasetProcessing(true);
-      } else if (!pageRefresh && !action && jobTypeRef.current === 'VALIDATION') {
-        pageRefresh = true;
-        setValidateDatasetProcessing(true);
+      } else {
+        setIsInProgress(true);
+        const jobInProgress = jobsInProgress.jobsList.find(job => job.jobStatus === 'IN_PROGRESS');
+        setJobTypeInProgress(jobInProgress.jobType);
       }
 
-      if (!inProgressRef.current) {
-        switch (action) {
-          case 'DATASET_IMPORT':
-            setImportDatasetProcessing(false);
-            clearInterval(timer.current);
-            break;
-          case 'TABLE_IMPORT':
-            setImportTableProcessing(false);
-            clearInterval(timer.current);
-            break;
-          case 'DATASET_EXPORT':
-            setExportDatasetProcessing(false);
-            clearInterval(timer.current);
-            break;
-          case 'TABLE_EXPORT':
-            setExportTableProcessing(false);
-            clearInterval(timer.current);
-            break;
-          case 'DATASET_DELETE':
-            setDeleteDatasetProcessing(false);
-            clearInterval(timer.current);
-            break;
-          case 'TABLE_DELETE':
-            setDeleteTableProcessing(false);
-            clearInterval(timer.current);
-            break;
-          default:
-            if (jobTypeRef.current === 'IMPORT') {
-              setImportDatasetProcessing(false);
-              clearInterval(timer.current);
-            } else {
-              setValidateDatasetProcessing(false);
-              clearInterval(timer.current);
-            }
+      if (!pageRefresh && !action) {
+        if (jobTypeRef.current === 'IMPORT') {
+          pageRefresh = true;
+          setImportDatasetProcessing(true);
+        } else if (jobTypeRef.current === 'VALIDATION') {
+          pageRefresh = true;
+          setValidateDatasetProcessing(true);
+        } else if (jobTypeRef.current === 'DELETE') {
+          pageRefresh = true;
+          setDeleteDatasetProcessing(true);
         }
       }
     }, 1000);
@@ -133,16 +103,17 @@ export const ActionsProvider = ({ children }) => {
   return (
     <ActionsContext.Provider
       value={{
-        importDatasetProcessing: importDatasetProcessing,
-        importTableProcessing: importTableProcessing,
-        exportDatasetProcessing: exportDatasetProcessing,
-        exportTableProcessing: exportTableProcessing,
-        deleteDatasetProcessing: deleteDatasetProcessing,
-        deleteTableProcessing: deleteTableProcessing,
-        validateDatasetProcessing: validateDatasetProcessing,
-        changeExportDatasetState: changeExportDatasetState,
-        changeExportTableState: changeExportTableState,
-        testProcess: testProcess
+        changeExportDatasetState,
+        changeExportTableState,
+        deleteDatasetProcessing,
+        deleteTableProcessing,
+        exportDatasetProcessing,
+        exportTableProcessing,
+        importDatasetProcessing,
+        importTableProcessing,
+        isInProgress,
+        testProcess,
+        validateDatasetProcessing
       }}>
       {children}
     </ActionsContext.Provider>

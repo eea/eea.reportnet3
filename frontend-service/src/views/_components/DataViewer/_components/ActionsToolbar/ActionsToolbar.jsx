@@ -213,21 +213,11 @@ export const ActionsToolbar = ({
           className={`p-button-rounded p-button-secondary-transparent datasetSchema-export-table-help-step ${
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={
-            isDataflowOpen ||
-            isDesignDatasetEditorRead ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
-          }
-          icon={actionsContext.exportTableProcessing ? 'spinnerAnimate' : 'export'}
+          disabled={isDataflowOpen || isDesignDatasetEditorRead || actionsContext.isInProgress}
+          icon={actionsContext.isInProgress && actionsContext.exportTableProcessing ? 'spinnerAnimate' : 'export'}
           id="buttonExportTable"
           label={
-            actionsContext.exportTableProcessing
+            actionsContext.isInProgress && actionsContext.exportTableProcessing
               ? resourcesContext.messages['exportInProgress']
               : resourcesContext.messages['exportTable']
           }
@@ -373,18 +363,12 @@ export const ActionsToolbar = ({
             isUndefined(records.totalRecords) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
+            actionsContext.isInProgress
           }
           hasWritePermissions={hasWritePermissions}
-          icon={actionsContext.deleteTableProcessing ? 'spinnerAnimate' : 'trash'}
+          icon={actionsContext.isInProgress && actionsContext.deleteTableProcessing ? 'spinnerAnimate' : 'trash'}
           label={
-            actionsContext.deleteTableProcessing
+            actionsContext.isInProgress && actionsContext.deleteTableProcessing
               ? resourcesContext.messages['deleteInProgress']
               : resourcesContext.messages['deleteTable']
           }

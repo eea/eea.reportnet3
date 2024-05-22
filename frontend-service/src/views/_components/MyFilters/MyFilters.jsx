@@ -443,7 +443,6 @@ export const MyFilters = ({
         options?.forEach((opt)=>{
           let tempfilt = { filterBy: { ...filterBy, 'field': [opt.value] } }
           let tempdata = onApplyFilters(tempfilt);
-          console.log(tempfilt)
           if(tempdata?.length>0) finoptions.push(opt)
         })
       }else{

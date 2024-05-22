@@ -113,21 +113,10 @@ export const ImportTableDataDialog = ({
           className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${
             !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={
-            !hasWritePermissions ||
-            isDataflowOpen ||
-            isDesignDatasetEditorRead ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
-          }
-          icon={actionsContext.importTableProcessing ? 'spinnerAnimate' : 'import'}
+          disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead || actionsContext.isInProgress}
+          icon={actionsContext.isInProgress && actionsContext.importTableProcessing ? 'spinnerAnimate' : 'import'}
           label={
-            actionsContext.importTableProcessing
+            actionsContext.isInProgress && actionsContext.importTableProcessing
               ? resourcesContext.messages['importInProgress']
               : resourcesContext.messages['importTable']
           }
