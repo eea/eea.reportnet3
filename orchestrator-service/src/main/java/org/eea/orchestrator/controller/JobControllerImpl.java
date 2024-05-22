@@ -271,7 +271,7 @@ public class JobControllerImpl implements JobController {
                               @ApiParam(type = "String", value = "Fme Job Id",
                                       example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
                               @ApiParam(type = "String", value = "File path URL",
-                                  example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv") @RequestParam(value = "preSignedURL", required = false) String preSignedURL)  {
+                                  example = "df-0000000/dp-0000000/ds-0000000/current/provider_import/file.csv") @RequestParam(value = "filePathInS3", required = false) String filePathInS3)  {
 
         ThreadPropertiesManager.setVariable("user",
                 SecurityContextHolder.getContext().getAuthentication().getName());
@@ -286,7 +286,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("integrationId", integrationId);
         parameters.put("delimiter", delimiter);
         parameters.put("fmeCallback", false);
-        parameters.put("preSignedURL", preSignedURL);
+        parameters.put("filePathInS3", filePathInS3);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;

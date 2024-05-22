@@ -2753,7 +2753,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "File name", example = "fileName") @RequestParam(value = "fileName", required = false) String fileName){
     JobPresignedUrlInfo info;
     try{
-      String preSignedUrl = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
+      info = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
       LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {}", dataflowId, datasetId, providerId);
 
       //check eligibility of job and add new import job
@@ -2764,13 +2764,13 @@ public class DatasetControllerImpl implements DatasetController {
         //if this endpoint is called we want to iniatialize an import job with status QUEUED instead of IN_PROGRESS
         jobStatus = JobStatusEnum.QUEUED;
       }
-      Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null, preSignedUrl);
+      Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null, info.getFilePathInS3());
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, null);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
       }
-      info = new JobPresignedUrlInfo(jobId, preSignedUrl);
+      info.setJobId(jobId);
     }
     catch (Exception e){
       LOG.error("Could not generate import presigned url for datasetId {}, dataflowId {} and providerId {}", datasetId, dataflowId, providerId);
