@@ -720,7 +720,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         List<String> fieldNames = new ArrayList<>();
         fieldNames.add(PARQUET_RECORD_ID_COLUMN_HEADER);
         fieldNames.add(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
-        fieldNames.add("srid");
 
         if (null != tableSchemaId) {
             for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
