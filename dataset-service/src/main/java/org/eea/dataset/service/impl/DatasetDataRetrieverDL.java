@@ -61,15 +61,20 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
-        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
+        S3PathResolver s3PathResolver;
         if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true);
             s3PathResolver.setIsIcebergTable(true);
+        }
+        else{
+            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolver.setIsIcebergTable(false);
         }
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
         if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
             StringBuilder dataQuery = new StringBuilder();
             StringBuilder recordsCountQuery = new StringBuilder();
-            if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+            if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && s3PathResolver.getIsIcebergTable() == false) {
                 s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
                 totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
                 dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");

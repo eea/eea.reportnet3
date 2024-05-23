@@ -19,6 +19,7 @@ import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
@@ -57,7 +58,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -65,9 +65,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -118,6 +120,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DatasetTableService datasetTableService;
+
+    @Autowired
+    DataFlowControllerZuul dataFlowControllerZuul;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
@@ -938,7 +943,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
         providerId = providerId != null ? providerId : 0L;
-        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+        String parquetTableQueryPathConstant = (datasetType == DatasetTypeEnum.REFERENCE ) ? S3_DATAFLOW_REFERENCE_QUERY_PATH : S3_TABLE_AS_FOLDER_QUERY_PATH;
+        String parquetTableS3PathConstant = (datasetType == DatasetTypeEnum.REFERENCE ) ? S3_DATAFLOW_REFERENCE_FOLDER_PATH : S3_TABLE_NAME_FOLDER_PATH;
+
+        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), parquetTableS3PathConstant);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
@@ -952,14 +961,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
 
-        if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
+        if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, parquetTableS3PathConstant) ||
                 !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema())) {
             //parquet table does not exist and no iceberg table should be created
             datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             return;
         }
 
-        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3TablePathResolver.setPath(parquetTableQueryPathConstant);
+        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
         dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
 
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
@@ -968,6 +978,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
         providerId = providerId != null ? providerId : 0L;
+        DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), UUID.randomUUID().toString(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
@@ -996,6 +1008,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         dremioHelperService.createTableFromAnotherTable(icebergTablePath, parquetInnerFolderQueryPath);
         //refresh the metadata
         dremioHelperService.refreshTableMetadataAndPromote(null, parquetTablePath, s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+
+        if(datasetType == DatasetTypeEnum.REFERENCE){
+            s3TablePathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+            createReferenceFolder(s3TablePathResolver);
+        }
 
         //remove iceberg table
         dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
@@ -1183,5 +1200,48 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
         String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
         s3HelperPrivate.deleteFile(attachmentPathInS3);
+    }
+
+    @Override
+    public void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception {
+        String tableSchemaName = s3TablePathResolver.getTableName();
+        List<S3Object> tableNameFilenames = s3HelperPrivate.getFilenamesFromTableNames(s3TablePathResolver);
+        AtomicInteger fileCounter = new AtomicInteger();
+
+        //demote reference table folder
+        S3PathResolver s3ReferenceTablePathResolver = new S3PathResolver(s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName, tableSchemaName, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+        if (s3HelperPrivate.checkFolderExist(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH)) {
+            dremioHelperService.demoteFolderOrFile(s3ReferenceTablePathResolver, tableSchemaName);
+            //remove folders that contain the previous parquet files because data will be replaced
+            s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+        }
+
+        tableNameFilenames.stream().forEach(file -> {
+            String key = file.key();
+            String filename = new File(key).getName();
+            S3PathResolver s3ReferenceParquetPathResolver = new S3PathResolver(s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName, filename, S3_DATAFLOW_REFERENCE_PATH);
+            s3ReferenceParquetPathResolver.setParquetFolder(key.split("/")[5]);
+            try {
+                String referenceParquetPath = s3ServicePrivate.getS3Path(s3ReferenceParquetPathResolver);
+                //copy file to reference folder
+                s3HelperPrivate.copyFileToAnotherDestination(key, referenceParquetPath);
+
+                //path in dremio for the reference folder that represents the table of the dataset
+                String dremioPathForReferenceParquetFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ReferenceParquetPathResolver, S3_DATAFLOW_REFERENCE_QUERY_PATH);
+
+                //refresh the metadata
+                dremioHelperService.refreshTableMetadataAndPromote(null, dremioPathForReferenceParquetFolder, s3ReferenceTablePathResolver, tableSchemaName);
+                fileCounter.incrementAndGet();
+            }
+            catch (Exception e) {
+                LOG.error("Error copying items to reference folder for dataflowId {} providerId {} datasetId {} and table {}", s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName, e);
+            }
+        });
+
+        if(fileCounter.get() != tableNameFilenames.size()){
+            String exceptionMsg = String.format("Error copying items to reference folder for dataflowId %s providerId %s datasetId %s and table %s ", s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName);
+            throw new Exception(exceptionMsg);
+        }
+        LOG.info("For dataflowId {} providerId {} datasetId {} and table {} the REFERENCE dataset files have been successfully copied to the reference folder", s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName);
     }
 }
