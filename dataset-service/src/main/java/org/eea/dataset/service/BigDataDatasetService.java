@@ -1,5 +1,6 @@
 package org.eea.dataset.service;
 
+import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.AttachmentDLVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
@@ -186,4 +187,6 @@ public interface BigDataDatasetService {
      *
      */
     void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception;
+
+    void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 }

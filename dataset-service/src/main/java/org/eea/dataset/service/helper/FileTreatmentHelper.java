@@ -633,7 +633,7 @@ public class FileTreatmentHelper implements DisposableBean {
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
-            throw new Exception("Can not delete table data because iceberg table is created");
+            throw new Exception("Can not export table data because iceberg table is created");
         }
 
         NotificationVO notificationVO = NotificationVO
@@ -655,7 +655,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
                 DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
                 String includeCountryCode = getCode(dataset.getDataflowId(), datasetType);
-                S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableName);
+                S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableName, false);
                 boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
                 LOG.info("For datasetId {} s3PathResolver : {}", dataset.getId(), s3PathResolver);
                 LOG.info("s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) : {}", folderExist);
