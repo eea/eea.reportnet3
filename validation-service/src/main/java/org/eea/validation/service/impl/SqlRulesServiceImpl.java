@@ -76,9 +76,6 @@ public class SqlRulesServiceImpl implements SqlRulesService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(SqlRulesServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant KEYWORDS: {@value}. */
   private static final String KEYWORDS = "DELETE,INSERT,DROP,UPDATE,TRUNCATE";
 
@@ -559,7 +556,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+      LOG.error("Unable to release notification: {}, {}", eventType, notificationVO);
     }
   }
 
@@ -598,7 +595,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
               checkQueryTestExecution(query.replace(";", ""), dataSetMetabaseVO, rule);
             }
           } catch (Exception e) {
-            LOG_ERROR.error(String.format("SQL is not correct: %s.  %s", rule.getSqlSentence(),
+            LOG.error(String.format("SQL is not correct: %s.  %s", rule.getSqlSentence(),
                 e.getCause().getCause().getMessage()));
             isSQLCorrect = e.getCause().getCause().getMessage();
           }
@@ -1154,7 +1151,7 @@ public class SqlRulesServiceImpl implements SqlRulesService {
                   .findDatasetSchemaIdById(Long.parseLong(datasetIdFromotherSchemas)),
               Long.parseLong(datasetIdFromotherSchemas));
         } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
-          LOG_ERROR.error("Error validating SQL rule, processing the sentence {}. Message {}",
+          LOG.error("Error validating SQL rule, processing the sentence {}. Message {}",
               query, e.getMessage(), e);
           throw e;
         }

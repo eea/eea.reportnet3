@@ -44,9 +44,6 @@ public class ExcelWriterStrategy implements WriterStrategy {
   /** The Constant ERROR: {@value}. */
   private static final String ERROR = "ERROR:";
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ExcelWriterStrategy.class);
 
@@ -156,7 +153,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
       LOG.info("Finishing writing Excel({}) file", mimeType);
 
     } catch (IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in writeFile for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw e;
@@ -205,7 +202,7 @@ public class ExcelWriterStrategy implements WriterStrategy {
       LOG.info("Finishing writing Excel({}) file", mimeType);
 
     } catch (IOException e) {
-      LOG_ERROR.error(e.getMessage());
+      LOG.error(e.getMessage());
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in writeFileList for datasetId {} and countryCode {}. Message: {}", datasetId, includeCountryCode, e.getMessage());
       throw e;

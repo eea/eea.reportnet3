@@ -20,11 +20,6 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
    */
   private static final Logger LOG = LoggerFactory.getLogger(DefaultKafkaReceiver.class);
 
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
 
   /**
    * Listen message.
@@ -39,9 +34,9 @@ public class DefaultKafkaReceiver extends KafkaReceiver {
       try {
         handler.processMessage(message.getPayload());
       } catch (EEAException e) {
-        LOG_ERROR.error("Error processing event {}", message.getPayload(), e);
+        LOG.error("Error processing event {}", message.getPayload(), e);
       } catch (Exception e) {
-        LOG_ERROR.error("Unexpected error! Undetermined processing message {}", message, e);
+        LOG.error("Unexpected error! Undetermined processing message {}", message, e);
       }
     }
 

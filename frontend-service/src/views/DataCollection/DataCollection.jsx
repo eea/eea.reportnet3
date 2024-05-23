@@ -223,7 +223,6 @@ export const DataCollection = () => {
             description: tableSchema['tableSchemaDescription'],
             fixedNumber: tableSchema['tableSchemaFixedNumber'],
             hasInfoTooltip: true,
-            icebergTableIsCreated: tableSchema['icebergTableIsCreated'],
             id: tableSchema['tableSchemaId'],
             name: tableSchema['tableSchemaName'],
             notEmpty: tableSchema['tableSchemaNotEmpty'],

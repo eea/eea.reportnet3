@@ -35,10 +35,6 @@ import java.util.List;
 
 @Component
 public class CSVSegmentedReaderStrategy {
-    /**
-     * The Constant LOG_ERROR.
-     */
-    private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
     /**
      * The Constant LOG.
@@ -119,7 +115,7 @@ public class CSVSegmentedReaderStrategy {
 
 
         } catch (final IOException e) {
-            LOG_ERROR.error(e.getMessage());
+            LOG.error(e.getMessage());
             throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
         }
         LOG.info("Reading Csv File Completed in dataset {}", datasetId);
@@ -298,7 +294,7 @@ public class CSVSegmentedReaderStrategy {
         }
 
         if (!atLeastOneFieldSchema) {
-            LOG_ERROR.error(
+            LOG.error(
                     "Error parsing CSV file. No headers matching FieldSchemas: datasetId={}, tableSchemaId={}, expectedHeaders={}, actualHeaders={}",
                     datasetId, idTableSchema, getFieldNames(idTableSchema, dataSetSchema), values);
             throw new EEAException(EEAErrorMessage.ERROR_FILE_NO_HEADERS_MATCHING);

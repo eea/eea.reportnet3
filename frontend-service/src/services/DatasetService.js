@@ -282,8 +282,26 @@ export const DatasetService = {
     });
   },
 
-  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) => {
-    const presignedUrl = await DatasetRepository.getPresignedUrl({ datasetId, dataflowId, fileName });
+  getPresignedUrl: async ({
+    datasetId,
+    dataflowId,
+    providerId,
+    tableSchemaId,
+    replace,
+    integrationId,
+    delimiter,
+    fileName
+  }) => {
+    const presignedUrl = await DatasetRepository.getPresignedUrl({
+      datasetId,
+      dataflowId,
+      providerId,
+      tableSchemaId,
+      replace,
+      integrationId,
+      delimiter,
+      fileName
+    });
     return presignedUrl.data;
   },
 
@@ -493,9 +511,6 @@ export const DatasetService = {
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
-        icebergTableIsCreated: isNull(datasetTableDTO.icebergTableIsCreated)
-          ? false
-          : datasetTableDTO.icebergTableIsCreated,
         tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
@@ -682,12 +697,21 @@ export const DatasetService = {
 
   downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
 
-  importFileWithS3: async ({ dataflowId, datasetId, delimiter, tableSchemaId }) =>
-    await DatasetRepository.importFileWithS3({
+  importTableFileWithS3: async ({ dataflowId, datasetId, delimiter, jobId, tableSchemaId }) =>
+    await DatasetRepository.importTableFileWithS3({
       dataflowId,
       datasetId,
       delimiter,
+      jobId,
       tableSchemaId
+    }),
+
+  importZipFileWithS3: async ({ dataflowId, datasetId, delimiter, jobId }) =>
+    await DatasetRepository.importZipFileWithS3({
+      dataflowId,
+      datasetId,
+      delimiter,
+      jobId
     }),
 
   updateField: async (

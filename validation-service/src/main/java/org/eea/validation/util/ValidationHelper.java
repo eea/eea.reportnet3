@@ -99,9 +99,6 @@ public class ValidationHelper implements DisposableBean {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ValidationHelper.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The processes map. */
   private Map<String, ValidationProcessVO> processesMap;
 
@@ -526,7 +523,7 @@ public class ValidationHelper implements DisposableBean {
                   .findDatasetSchemaIdById(Long.parseLong(datasetIdFromotherSchemas)),
               Long.parseLong(datasetIdFromotherSchemas));
         } catch (StringIndexOutOfBoundsException | NumberFormatException e) {
-          LOG_ERROR.error("Error validating SQL rule, processing the sentence {}. Message {}",
+          LOG.error("Error validating SQL rule, processing the sentence {}. Message {}",
               query, e.getMessage(), e);
           throw e;
         }
@@ -713,7 +710,7 @@ public class ValidationHelper implements DisposableBean {
           SecurityContextHolder.getContext().getAuthentication().getName());
 
     } catch (Exception e) {
-      LOG_ERROR.error("There's an error putting the lock to validation process in dataset {}",
+      LOG.error("There's an error putting the lock to validation process in dataset {}",
           datasetId);
       deleteLockToReleaseProcess(datasetId);
     }
@@ -976,7 +973,7 @@ public class ValidationHelper implements DisposableBean {
       try {
         json = objectMapper.writeValueAsString(eeaEventVO);
       } catch (JsonProcessingException e) {
-        LOG_ERROR.error("error processing json for processId {}", processId);
+        LOG.error("error processing json for processId {}", processId);
       }
       Task task = new Task(null, processId, ProcessStatusEnum.IN_QUEUE, TaskType.VALIDATION_TASK, new Date(), null, null,
           json, 0, null);
@@ -1143,7 +1140,7 @@ public class ValidationHelper implements DisposableBean {
         validationTask.validator.performValidation(validationTask.eeaEventVO,
             validationTask.datasetId, validationTask.kieBase, validationTask.taskId);
       } catch (Exception e) {
-        LOG_ERROR.error("Error processing validations for dataset {} due to exception {}",
+        LOG.error("Error processing validations for dataset {} due to exception {}",
             validationTask.datasetId, e.getMessage(), e);
         status = ProcessStatusEnum.IN_QUEUE;
       } finally {
@@ -1157,7 +1154,7 @@ public class ValidationHelper implements DisposableBean {
           LOG.info("Validation task {} finished, it has taken taken {} seconds",
               validationTask.eeaEventVO, totalTime);
         } catch (Exception e) {
-          LOG_ERROR.error("Error updating validations for dataset {} due to exception {}",
+          LOG.error("Error updating validations for dataset {} due to exception {}",
               validationTask.datasetId, e.getMessage(), e);
         } finally {
           try {
@@ -1165,7 +1162,7 @@ public class ValidationHelper implements DisposableBean {
             LOG.info("Checking status of process {} for dataset {}. taskId {}", validationTask.processId, validationTask.datasetId, validationTask.taskId);
             checkFinishedValidations(validationTask.datasetId, validationTask.processId, validationTask.taskId);
           } catch (EEAException | InterruptedException eeaEx) {
-            LOG_ERROR.error("Error finishing validations for dataset {} due to exception {}",
+            LOG.error("Error finishing validations for dataset {} due to exception {}",
                 validationTask.datasetId, eeaEx.getMessage(), eeaEx);
           }
 
@@ -1303,7 +1300,7 @@ public class ValidationHelper implements DisposableBean {
             LOG.info("Process {} for dataset {} ending", processId, datasetId);
             Thread.sleep(5000);
           } catch (InterruptedException eeaEx) {
-            LOG_ERROR.error("interrupting the sleep because of {}", eeaEx);
+            LOG.error("interrupting the sleep because of {}", eeaEx);
           }
           checkFinishedValidations(datasetId, processId, taskId);
         }

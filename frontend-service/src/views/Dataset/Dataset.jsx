@@ -850,13 +850,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
-          if (tableSchema.icebergTableIsCreated) {
-            setIsIcebergTableCreated(true);
-          }
           return {
             dataAreManuallyEditable: tableSchema.dataAreManuallyEditable,
             description: tableSchema.description || tableSchema.tableSchemaDescription,
-            icebergTableIsCreated: tableSchema.icebergTableIsCreated,
             id: tableSchema.tableSchemaId,
             name: tableSchema.tableSchemaName,
             notEmpty: tableSchema.notEmpty,
@@ -1433,11 +1429,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             isTooltip: true,
             validExtensions: importSelectedIntegrationExtension
           })}`}
+          integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"
           onError={onImportDatasetError}
           onUpload={onUpload}
+          providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
           s3Check={true}
           url={`${window.env.REACT_APP_BACKEND}${

@@ -33,6 +33,7 @@ public class FieldVO implements Serializable {
    */
   private String value;
 
+  private byte[] byteArrayValue;
   /**
    * The id.
    */

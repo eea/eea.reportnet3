@@ -37,11 +37,6 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(ReferenceDatasetServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
-
   /** The reference dataset repository. */
   @Autowired
   private ReferenceDatasetRepository referenceDatasetRepository;

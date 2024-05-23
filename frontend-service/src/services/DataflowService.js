@@ -301,7 +301,6 @@ export const DataflowService = {
           hasPKReferenced: !isEmpty(
             records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
           ),
-          icebergTableIsCreated: datasetTableDTO.icebergTableIsCreated,
           records: records,
           recordSchemaId: !isNull(datasetTableDTO.recordSchema) ? datasetTableDTO.recordSchema.idRecordSchema : null,
           tableSchemaDescription: datasetTableDTO.description,
@@ -405,6 +404,18 @@ export const DataflowService = {
     dataflow.designDatasets.sort(DatasetUtils.sortDatasetTypeByName);
     dataflow.referenceDatasets.sort(DatasetUtils.sortDatasetTypeByName);
     return dataflow;
+  },
+
+  getIcebergTables: async ({ dataflowId }) => {
+    const icebergTables = await DataflowRepository.getIcebergTables({ dataflowId });
+
+    return icebergTables;
+  },
+
+  getIcebergTablesWithProviderId: async ({ dataflowId, providerId }) => {
+    const icebergTables = await DataflowRepository.getIcebergTablesWithProviderId({ dataflowId, providerId });
+
+    return icebergTables;
   },
 
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),

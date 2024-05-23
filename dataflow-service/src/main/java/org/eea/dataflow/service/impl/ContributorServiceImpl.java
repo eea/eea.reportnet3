@@ -56,10 +56,7 @@ public class ContributorServiceImpl implements ContributorService {
    * The Constant LOG.
    */
   private static final Logger LOG = LoggerFactory.getLogger(ContributorServiceImpl.class);
-  /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+
 
   /** The user management controller zull. */
   @Autowired
@@ -859,12 +856,12 @@ public class ContributorServiceImpl implements ContributorService {
       try {
         createContributor(dataflowId, contributorVO, dataProviderId, persistDataflowPermission);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error creating contributor with the account: {} in the dataflow {} ",
+        LOG.error("Error creating contributor with the account: {} in the dataflow {} ",
             contributorVO.getAccount(), dataflowId);
         throw new EEAException(e);
       }
     } else {
-      LOG_ERROR.error(
+      LOG.error(
           "Error creating contributor with the account: {} in the dataflow {}  because the role not avaliable {}",
           contributorVO.getAccount(), dataflowId, contributorVO.getRole());
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, new StringBuilder("Role ")
@@ -928,7 +925,7 @@ public class ContributorServiceImpl implements ContributorService {
             resourceAccess.getRole().toString(), dataProviderId);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error deleting contributor with the account: {} in the dataflow {} with role {} ",
           contributorVO.getAccount(), dataflowId, resourceAccess.getRole());
       throw new EEAException(e);
@@ -1092,7 +1089,7 @@ public class ContributorServiceImpl implements ContributorService {
           updateContributor(dataflowId, contributor, dataProviderId);
         }
       } catch (Exception e) {
-        LOG_ERROR.error(
+        LOG.error(
             "Error creating contributor with the account: {} in the dataflow {} with role {}.",
             contributor.getAccount(), dataflowId, contributor.getRole());
 

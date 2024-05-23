@@ -132,11 +132,6 @@ public class FileTreatmentHelper implements DisposableBean {
     private static final Logger LOG = LoggerFactory.getLogger(FileTreatmentHelper.class);
 
     /**
-     * The Constant LOG_ERROR.
-     */
-    private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-    /**
      * The Constant USER: {@value}.
      */
     private static final String USER = "root";
@@ -570,7 +565,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 dataSetMetabaseRepository.save(dataset);
             }
         } catch (EEAException e) {
-            LOG_ERROR.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
+            LOG.error("File not created in dataflow {}. Message: {}", dataset.getDataflowId(),
                     e.getMessage(), e);
         }
         LOG.info("Reference file created in dataflowId {} for datasetId {}", dataset.getDataflowId(), dataset.getId());
@@ -612,7 +607,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 throw e;
             }
         } catch (IOException | EEAException e) {
-            LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId,
+            LOG.error("Error exporting table data from dataset Id {} with schema {}.", datasetId,
                     tableSchemaId);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null,
                     notificationVO);
@@ -679,7 +674,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
 
         } catch (Exception e) {
-            LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
+            LOG.error("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_FAILED_EVENT, null, notificationVO);
         }
     }
@@ -782,7 +777,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
             }*/
         } catch (Exception e) {
-            LOG_ERROR.info("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
+            LOG.error("Error exporting table data from dataset Id {} with schema {}.", datasetId, tableSchemaId);
         }
     }
 
@@ -818,7 +813,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 s3ConvertService.convertParquetToXML(parquetFile, xlsxFile);
             }*/
         } catch (Exception e) {
-            LOG_ERROR.info("Error exporting table data from dataset Id {} with tableName {}.", datasetId, tableName, e);
+            LOG.error("Error exporting table data from dataset Id {} with tableName {}.", datasetId, tableName, e);
         }
     }
 
@@ -867,7 +862,7 @@ public class FileTreatmentHelper implements DisposableBean {
             datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
                     .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
         } catch (EEAException e) {
-            LOG_ERROR.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
+            LOG.error("Error finding datasetSchema by Id. DatasetSchemaId {}. Message {}",
                     datasetSchemaId, e.getMessage(), e);
         }
         List<TableSchema> tableSchemaList = new ArrayList<>();
@@ -1008,7 +1003,7 @@ public class FileTreatmentHelper implements DisposableBean {
             generateFile(datasetId, extension, contents, includeZip, datasetType);
             LOG.info("Exported dataset data for datasetId {}", datasetId);
         } catch (EEAException | IOException | NullPointerException e) {
-            LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
+            LOG.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
                     datasetId, mimeType, e.getMessage(), e);
             // Send notification
             NotificationVO notificationVO = NotificationVO.builder()
@@ -1019,7 +1014,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
                         notificationVO);
             } catch (EEAException ex) {
-                LOG_ERROR.error("Error sending export dataset fail notification for datasetId {}. Message {}",
+                LOG.error("Error sending export dataset fail notification for datasetId {}. Message {}",
                         datasetId, e.getMessage(), ex);
             }
         }
@@ -1072,11 +1067,11 @@ public class FileTreatmentHelper implements DisposableBean {
                     }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
                 } catch (Exception e) {
-                    LOG_ERROR.error("Error creating zip file for datasetId {}, file type {}", datasetId, mimeType, e);
+                    LOG.error("Error creating zip file for datasetId {}, file type {}", datasetId, mimeType, e);
                 }
             }
         } catch (Exception e) {
-            LOG_ERROR.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
+            LOG.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
                 datasetId, mimeType, e.getMessage(), e);
             NotificationVO notificationVO = NotificationVO.builder()
                 .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -1240,7 +1235,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
             releaseLockReleasingProcess(datasetId);
         } catch (Exception e) {
-            LOG_ERROR.error("Error deleting files: datasetId={}", datasetId, e);
+            LOG.error("Error deleting files: datasetId={}", datasetId, e);
         }
     }
 
@@ -1358,7 +1353,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 }
 
             } catch (EEAException | FeignException | IOException e) {
-                LOG_ERROR.error(
+                LOG.error(
                         "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
                         multipartFile.getName(), e.getMessage(), e);
                 releaseLockAndDeleteImportFileDirectory(datasetId);
@@ -1402,7 +1397,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 if ((entryName.split("/").length > 1)
                         || !CSV.getValue().equalsIgnoreCase(mimeType) || entry.isDirectory()
                         || !filePath.startsWith(saveLocationPath + File.separator)) {
-                    LOG_ERROR.error("Ignored file from ZIP: {}", entryName);
+                    LOG.error("Ignored file from ZIP: {}", entryName);
                     entry = zip.getNextEntry();
                     continue;
                 }
@@ -1467,7 +1462,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
 
                     } catch (Exception e) {
-                        LOG_ERROR.error("RN3-Import: Unexpected error in queueImportProcess for datasetId {} and tableSchemaId {}. {}", datasetId, tableSchemaId, e.getMessage(), e);
+                        LOG.error("RN3-Import: Unexpected error in queueImportProcess for datasetId {} and tableSchemaId {}. {}", datasetId, tableSchemaId, e.getMessage(), e);
                         if (e instanceof InterruptedException) {
                             Thread.currentThread().interrupt();
                         }
@@ -1572,7 +1567,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         LOG.info("Finish RN3-Import file: fileName={}, tableSchemaId={}", fileName,
                                 tableSchemaId);
                     } else {
-                        LOG_ERROR.error(
+                        LOG.error(
                                 "RN3-Import file failed: fileName={}. There's no table with that fileName", fileName);
                         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                                 DatasetRunningStatusEnum.ERROR_IN_IMPORT);
@@ -1584,7 +1579,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         }
                     }
                 } catch (IOException | EEAException e) {
-                    LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
+                    LOG.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
                             tableSchemaId, e);
                     error = e.getMessage();
                 } catch (Exception e) {
@@ -1636,7 +1631,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         LOG.info("Finish RN3-Import file segmentation into import Tasks: fileName={}, tableSchemaId={}", fileName,
                                 tableSchemaId);
                     } else {
-                        LOG_ERROR.error(
+                        LOG.error(
                                 "RN3-Import file failed: fileName={}. There's no table with that fileName", fileName);
                         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                                 DatasetRunningStatusEnum.ERROR_IN_IMPORT);
@@ -1654,7 +1649,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         }
                     }
                 } catch (IOException | EEAException e) {
-                    LOG_ERROR.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
+                    LOG.error("RN3-Import file failed: fileName={}, tableSchemaId={}", fileName,
                             tableSchemaId, e);
                     error = e.getMessage();
                 }
@@ -1771,7 +1766,7 @@ public class FileTreatmentHelper implements DisposableBean {
                             value, notificationWarning);
                 }
             } catch (EEAException e) {
-                LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
+                LOG.error("RN3-Import file error for datasetId {}", datasetId, e);
 
             }
         }
@@ -1857,7 +1852,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         value, notificationWarning);
             }
         } catch (EEAException e) {
-            LOG_ERROR.error("RN3-Import file error for datasetId {}", datasetId, e);
+            LOG.error("RN3-Import file error for datasetId {}", datasetId, e);
             if(task.isPresent()){
                 this.updateTask(task.get().getId(), ProcessStatusEnum.CANCELED, new Date());
             }
@@ -2123,7 +2118,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         json, 0);
                 taskRepository.saveAndFlush(task);
             } catch (JsonProcessingException e) {
-                LOG_ERROR.error("error processing json");
+                LOG.error("error processing json");
             }
 
         }
@@ -2163,7 +2158,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         json, 0);
                 taskRepository.saveAndFlush(task);
             } catch (JsonProcessingException e) {
-                LOG_ERROR.error("error processing json");
+                LOG.error("error processing json");
             }
         }
     }
@@ -2536,7 +2531,7 @@ public class FileTreatmentHelper implements DisposableBean {
             final PartitionDataSetMetabase partition = partitionDataSetMetabaseRepository
                     .findFirstByIdDataSet_idAndUsername(datasetId, user).orElse(null);
             if (partition == null) {
-                LOG_ERROR.error(EEAErrorMessage.PARTITION_ID_NOTFOUND);
+                LOG.error(EEAErrorMessage.PARTITION_ID_NOTFOUND);
                 throw new EEAException(EEAErrorMessage.PARTITION_ID_NOTFOUND);
             }
             return partition;
@@ -2594,7 +2589,7 @@ public class FileTreatmentHelper implements DisposableBean {
                             dataSetMetabaseRepository.save(datasetToFile);
                         }
                     } catch (EEAException e) {
-                        LOG_ERROR.error(
+                        LOG.error(
                                 "File not created in dataflow {} with dataprovider {} with datasetId {} message {}",
                                 dataflowId, datasetToFile.getDataProviderId(), datasetToFile.getId(), e.getMessage(),
                                 e);

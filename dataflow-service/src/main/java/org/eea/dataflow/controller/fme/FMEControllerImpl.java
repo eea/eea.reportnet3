@@ -80,8 +80,6 @@ public class FMEControllerImpl implements FMEController {
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
 
   /**
@@ -160,7 +158,7 @@ public class FMEControllerImpl implements FMEController {
     } catch(Exception e){
       Long datasetId = (fmeOperationInfoVO != null) ? fmeOperationInfoVO.getDatasetId() : null;
       Long rn3JobId = (fmeOperationInfoVO != null) ? fmeOperationInfoVO.getRn3JobId() : null;
-      LOG_ERROR.error("Unexpected error! Could not notify a FME Operation finished for datasetId {} and rn3JobId {} Message: {}", datasetId, rn3JobId, e.getMessage());
+      LOG.error("Unexpected error! Could not notify a FME Operation finished for datasetId {} and rn3JobId {} Message: {}", datasetId, rn3JobId, e.getMessage());
       throw e;
     }
 
@@ -221,7 +219,7 @@ public class FMEControllerImpl implements FMEController {
       try {
         streamingUtil.copy(is, out);
       } catch (Exception e){
-        LOG_ERROR.error("Error copying file {} for datasetId {} and providerId {} Message: {}", fileName, datasetId, providerId, e.getMessage());
+        LOG.error("Error copying file {} for datasetId {} and providerId {} Message: {}", fileName, datasetId, providerId, e.getMessage());
         throw e;
       } finally {
         is.close();

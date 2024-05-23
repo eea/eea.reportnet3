@@ -78,9 +78,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class FMECommunicationServiceImpl implements FMECommunicationService {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(FMECommunicationServiceImpl.class);
 
@@ -197,7 +194,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       }
 
     } catch (HttpStatusCodeException exception) {
-      LOG_ERROR.error("For jobId {} Status code: {} message: {}", jobId,  exception.getStatusCode().value(),
+      LOG.error("For jobId {} Status code: {} message: {}", jobId,  exception.getStatusCode().value(),
           exception.getMessage(), exception);
       Map<String, PublishedParameter> mapParameters = fmeAsyncJob.getPublishedParameters().stream()
           .collect(Collectors.toMap(PublishedParameter::getName, Function.identity()));
@@ -220,7 +217,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.CALL_FME_PROCESS_FAILED_EVENT, null,
             notificationVO);
       } catch (EEAException e1) {
-        LOG_ERROR.error("Failed sending kafka notification for jobId {} due to an error calling FME: {}", jobId,
+        LOG.error("Failed sending kafka notification for jobId {} due to an error calling FME: {}", jobId,
             e1.getMessage(), e1);
       }
     }
@@ -268,7 +265,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
             "attachment; filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
       }
     } catch (UnsupportedEncodingException e) {
-      LOG_ERROR.error("Error encoding file: {}", file.getName());
+      LOG.error("Error encoding file: {}", file.getName());
     }
 
     headerInfo.put(CONTENT_TYPE, "application/octet-stream");
@@ -325,7 +322,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         }
       }
     } catch (EEAException | ResourceAccessException e) {
-      LOG_ERROR.error("Error getting the file to send it to FME. File {}, datasetId {}",
+      LOG.error("Error getting the file to send it to FME. File {}, datasetId {}",
           file.getName(), dataset.getId(), e);
     }
     return result;
@@ -412,9 +409,9 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           .path(auxURL).buildAndExpand(uriParams).toString(), HttpMethod.GET, request,
           byte[].class);
     } catch (HttpClientErrorException e) {
-      LOG_ERROR.info("Error downloading file: {}  from FME for datasetId {}", fileName, idDataset, e);
+      LOG.error("Error downloading file: {}  from FME for datasetId {}", fileName, idDataset, e);
     } catch (Exception e) {
-      LOG_ERROR.info("Unexpected error! Error downloading file: {} from FME. Message: {}", fileName, e.getMessage());
+      LOG.error("Unexpected error! Error downloading file: {} from FME. Message: {}", fileName, e.getMessage());
       throw e;
     }
     InputStream stream = null;
@@ -536,7 +533,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       // Authorization
       FMEJob fmeJob = fmeJobRepository.findById(rn3JobId).orElse(null);
       if (!(null != fmeJob && userName.equals(fmeJob.getUserName()))) {
-        LOG_ERROR.error("User not allowed: userName={}, fmeJobId={}", userName, rn3JobId);
+        LOG.error("User not allowed: userName={}, fmeJobId={}", userName, rn3JobId);
         throw new EEAForbiddenException(EEAErrorMessage.FORBIDDEN);
       }
 
@@ -544,7 +541,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           fmeJob);
       return fmeJob;
     }
-    LOG_ERROR.error("Invalid apiKey: {}", apiKey);
+    LOG.error("Invalid apiKey: {}", apiKey);
     throw new EEAUnauthorizedException(EEAErrorMessage.UNAUTHORIZED);
   }
 
@@ -596,10 +593,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
       }
     } catch (EEAException e) {
-      LOG_ERROR.error("Error realeasing event: FMEJob={}", fmeJob, e);
+      LOG.error("Error realeasing event: FMEJob={}", fmeJob, e);
     }
     catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error releasing event: FMEJob={} Message: {}", fmeJob, e.getMessage());
+      LOG.error("Unexpected error! Error releasing event: FMEJob={} Message: {}", fmeJob, e.getMessage());
       throw e;
     }
   }

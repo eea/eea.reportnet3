@@ -47,9 +47,6 @@ public class NotificationControllerImpl implements NotificationController {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(NotificationControllerImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /**
    * Creates the user notification.
    *
@@ -70,7 +67,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (Exception e) {
       String eventType = (userNotificationVO != null) ? userNotificationVO.getEventType() : null;
       Long dataflowId = (userNotificationVO != null && userNotificationVO.getContent() != null) ? userNotificationVO.getContent().getDataflowId() : null;
-      LOG_ERROR.error("Unexpected error! Error creating user notification of type {} for dataflowId {} Message: {}", eventType, dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error creating user notification of type {} for dataflowId {} Message: {}", eventType, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -97,7 +94,7 @@ public class NotificationControllerImpl implements NotificationController {
           EEAErrorMessage.CREATING_NOTIFICATION);
     } catch (Exception e) {
       Long dataflowId = (content != null) ? content.getDataflowId() : null;
-      LOG_ERROR.error("Unexpected error! Error creating private user notification of type {} for dataflowId {} Message: {}", eventType, dataflowId, e.getMessage());
+      LOG.error("Unexpected error! Error creating private user notification of type {} for dataflowId {} Message: {}", eventType, dataflowId, e.getMessage());
       throw e;
     }
   }
@@ -122,7 +119,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (Exception e) {
       String notificationId = (systemNotificationVO != null) ? systemNotificationVO.getId() : null;
       String message = (systemNotificationVO != null) ? systemNotificationVO.getMessage() : null;
-      LOG_ERROR.error("Unexpected error! Error creating system notification with id {} and message {}. Error Message: {}", notificationId, message, e.getMessage());
+      LOG.error("Unexpected error! Error creating system notification with id {} and message {}. Error Message: {}", notificationId, message, e.getMessage());
       throw e;
     }
   }
@@ -146,7 +143,7 @@ public class NotificationControllerImpl implements NotificationController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.DELETING_SYSTEM_NOTIFICATION);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error deleting system notification with id {} Message: {}", systemNotificationId, e.getMessage());
+      LOG.error("Unexpected error! Error deleting system notification with id {} Message: {}", systemNotificationId, e.getMessage());
       throw e;
     }
   }
@@ -171,7 +168,7 @@ public class NotificationControllerImpl implements NotificationController {
     } catch (Exception e) {
       String notificationId = (systemNotificationVO != null) ? systemNotificationVO.getId() : null;
       String message = (systemNotificationVO != null) ? systemNotificationVO.getMessage() : null;
-      LOG_ERROR.error("Unexpected error! Error updating system notification with id {} and message {}. Error Message: {}", notificationId, message, e.getMessage());
+      LOG.error("Unexpected error! Error updating system notification with id {} and message {}. Error Message: {}", notificationId, message, e.getMessage());
       throw e;
     }
   }
@@ -196,7 +193,7 @@ public class NotificationControllerImpl implements NotificationController {
       return notificationService.findUserNotificationsByUserPaginated(pageNum, pageSize);
     } catch (Exception e) {
       String user = SecurityContextHolder.getContext().getAuthentication().getName();
-      LOG_ERROR.error("Unexpected error! Error retrieving notifications for user {}. Message: {}", user, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving notifications for user {}. Message: {}", user, e.getMessage());
       throw e;
     }
   }
@@ -214,7 +211,7 @@ public class NotificationControllerImpl implements NotificationController {
     try{
       return notificationService.findSystemNotifications();
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving system notifications. Message: {}", e.getMessage());
+      LOG.error("Unexpected error! Error retrieving system notifications. Message: {}", e.getMessage());
       throw e;
     }
   }

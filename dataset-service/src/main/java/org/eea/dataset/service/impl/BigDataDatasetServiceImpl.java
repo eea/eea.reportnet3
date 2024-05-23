@@ -26,7 +26,10 @@ import org.eea.interfaces.controller.recordstore.ProcessController.ProcessContro
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.*;
+import org.eea.interfaces.vo.dataset.AttachmentDLVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.FieldVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -36,6 +39,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -53,6 +57,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -138,7 +143,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
                               String fmeJobId, DataFlowVO dataflowVO) throws Exception {
-        String preSignedURL = null;
+        String filePathInS3 = null;
         String fileName = (file != null) ? file.getOriginalFilename() : null;
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
@@ -170,7 +175,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 else if(job.getJobStatus().equals(JobStatusEnum.QUEUED)){
                     jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
                 }
-                preSignedURL = job.getParameters().get("preSignedURL").toString();
+                filePathInS3 = job.getParameters().get("filePathInS3").toString();
             }else{
                 //check if there is already an import job with status IN_PROGRESS for the specific datasetId
                 List<Long> datasetIds = new ArrayList<>();
@@ -185,25 +190,30 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             if(file == null){
-                if(StringUtils.isBlank(preSignedURL)){
+                if(StringUtils.isBlank(filePathInS3)){
                     throw new EEAException("Empty file and file path");
                 }
-                String[] filePathInS3Split = preSignedURL.split("/");
+                String fileExtension = null;
+
+                if(filePathInS3.endsWith(".csv")) {
+                    fileExtension = CSV_TYPE;
+                }
+                else if(filePathInS3.endsWith(".zip")){
+                    fileExtension = ZIP_TYPE;
+                }
+                //todo handle other extensions
+
+                LOG.info("For jobId {} downloading file from s3 in path {}", jobId, filePathInS3);
+
+                String[] filePathInS3Split = filePathInS3.split("/");
                 String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
                 String filePathStructure = "/" + datasetId + "/" + fileNameInS3;
                 File folder = new File(importPath + "/" + datasetId);
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
-                if(preSignedURL.endsWith(".csv")) {
-                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".csv", ""), importPath, LiteralConstants.CSV_TYPE);
-                    fileName = s3File.getName();
-                }
-                else if(preSignedURL.endsWith(".zip")){
-                    s3File = s3HelperPublic.getFileFromS3(preSignedURL, filePathStructure.replace(".zip", ""), importPath, LiteralConstants.ZIP_TYPE);
-                    fileName = s3File.getName();
-                }
-                //todo handle other extensions
+                s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+                fileName = s3File.getName();
             }
 
             //Retrieve providerId and providerCode
@@ -681,7 +691,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     value, notificationWarning);
         }
 
-        if(importFileInDremioInfo.getSendEmptyFileWarning()){
+        if(Boolean.TRUE.equals(importFileInDremioInfo.getSendEmptyFileWarning())){
             NotificationVO notificationWarning = NotificationVO.builder()
                     .user(SecurityContextHolder.getContext().getAuthentication().getName())
                     .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
@@ -701,8 +711,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public String generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
-        return s3HelperPublic.generatePUTPreSignedUrl(getFilePath(datasetId, dataflowId, providerId, fileName, false));
+    public JobPresignedUrlInfo generateImportPreSignedUrl(Long datasetId, Long dataflowId, Long providerId, String fileName) {
+        JobPresignedUrlInfo info = new JobPresignedUrlInfo();
+        String filePathInS3 = getFilePath(datasetId, dataflowId, providerId, fileName, false);
+        info.setFilePathInS3(filePathInS3);
+        info.setPresignedUrl(s3HelperPublic.generatePUTPreSignedUrl(filePathInS3));
+        return info;
     }
 
     @Override

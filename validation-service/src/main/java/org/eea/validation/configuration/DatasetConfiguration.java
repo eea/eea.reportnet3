@@ -48,9 +48,6 @@ public class DatasetConfiguration implements WebMvcConfigurer {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetConfiguration.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /**
    * The dll.
    */
@@ -170,7 +167,7 @@ public class DatasetConfiguration implements WebMvcConfigurer {
     return new TimeoutCallableProcessingInterceptor() {
       @Override
       public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) throws Exception {
-        LOG_ERROR.error("Stream download failed by timeout");
+        LOG.error("Stream download failed by timeout");
         return super.handleTimeout(request, task);
       }
     };

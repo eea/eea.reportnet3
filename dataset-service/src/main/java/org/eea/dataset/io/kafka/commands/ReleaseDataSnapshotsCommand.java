@@ -117,10 +117,6 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
    */
   private static final Logger LOG = LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR =
-      LoggerFactory.getLogger(ReleaseDataSnapshotsCommand.class);
-
   /**
    * The default release process priority
    */
@@ -287,7 +283,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
         }
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
+      LOG.error("Unexpected error! Error executing event {}. Message: {}", eeaEventVO, e.getMessage());
       throw new EEAException(e.getMessage());
     }
   }
@@ -335,7 +331,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
     } catch (Exception e) {
       Long dataflowId = (dataflowVO != null) ? dataflowVO.getId() : null;
       Long datasetId = (dataflowVO != null) ? dataset.getId() : null;
-      LOG_ERROR.error("Unexpected error! Error sending release mail for dataflowId {} and datasetId {}. Message: {}", dataflowId, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error sending release mail for dataflowId {} and datasetId {}. Message: {}", dataflowId, datasetId, e.getMessage());
     }
   }
 }

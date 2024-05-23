@@ -1,9 +1,7 @@
 package org.eea.dataset.service.impl;
 
-import lombok.SneakyThrows;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,9 +25,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.BigDataDatasetService;
 import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.PaMService;
@@ -90,8 +86,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.*;
@@ -136,9 +130,6 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetServiceImpl.class);
-
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
   /** The Constant USER: {@value}. */
   private static final String USER = "root";
@@ -342,13 +333,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Value("${importPath}")
   private String importPath;
 
-  /** The dataschema service. */
-  @Autowired
-  private DatasetSchemaService dataschemaService;
-
-  @Autowired
-  private BigDataDatasetService bigDataDatasetService;
-
   /**
    * The default process priority
    */
@@ -514,7 +498,7 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       saveStatistics(datasetId, bigData);
     } catch (EEAException e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error saving statistics after deleting all the dataset values. Error message: {}",
           e.getMessage(), e);
     }
@@ -692,7 +676,7 @@ public class DatasetServiceImpl implements DatasetService {
       statisticsRepository.saveAll(statsList);
       LOG.info("Statistics saved to datasetId {}.", datasetId);
     } else {
-      LOG_ERROR.error("No dataset found to save statistics. DatasetId:{}", datasetId);
+      LOG.error("No dataset found to save statistics. DatasetId:{}", datasetId);
     }
   }
 
@@ -1112,7 +1096,7 @@ public class DatasetServiceImpl implements DatasetService {
       table.setDatasetId(dataset.get());
       saveTable(datasetId, table);
     } else {
-      LOG_ERROR.error("Saving table propagation failed because the dataset {} is not found",
+      LOG.error("Saving table propagation failed because the dataset {} is not found",
           datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -1336,7 +1320,7 @@ public class DatasetServiceImpl implements DatasetService {
             searchValue, conditionalSchemaId, conditionalValue, fvPk.getType(), resultsNumber);
       } catch (DataIntegrityViolationException e) {
 
-        LOG_ERROR.error(
+        LOG.error(
             "Error with dataset id {}  field  with id {} because data has not correct format {}",
             datasetIdOrigin, idPk, fvPk.getType());
         // we find table and field to send in notification
@@ -1788,7 +1772,7 @@ public class DatasetServiceImpl implements DatasetService {
         try {
           storeRecords(targetDataset.getId(), targetRecords, connectionDataVO,null);
         } catch (IOException | SQLException e) {
-          LOG_ERROR.error(
+          LOG.error(
               "Error saving the list of records into the dataset {} when executing a prefill data",
               targetDataset.getId());
         }
@@ -2990,7 +2974,7 @@ public class DatasetServiceImpl implements DatasetService {
     File file =
         new File(new File(pathPublicFile, "dataset-" + datasetId), FilenameUtils.getName(fileName));
     if (!file.exists()) {
-      LOG_ERROR.error(
+      LOG.error(
           "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName);
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
@@ -3015,7 +2999,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     LOG.info("File {} ", file);
     if (!file.exists()) {
-      LOG_ERROR.error(
+      LOG.error(
           "Trying to download a file generated during the export dataset data process for datasetId {} but the file {} is not found", datasetId, fileName);
       throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
     }
@@ -3200,7 +3184,7 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
     } catch (Exception e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error executing the processes after creating a new empty dataset. Error message: {}",
           e.getMessage(), e);
     }
@@ -3683,7 +3667,7 @@ public class DatasetServiceImpl implements DatasetService {
         truncateDataset.setDataflowId(dataSetMetabase.getDataflowId());
       }
     } catch (Exception e) {
-      LOG_ERROR.error("Error in getDatasetDataToBeDeleted. Error message: {}", e.getMessage(), e);
+      LOG.error("Error in getDatasetDataToBeDeleted. Error message: {}", e.getMessage(), e);
     }
 
     return truncateDataset;
@@ -3703,7 +3687,7 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       deleted = recordRepository.truncateDataset(datasetId);
     } catch (Exception e) {
-      LOG_ERROR.error(
+      LOG.error(
           "Error in getDatasetDataToBeDeleted. Error message: {}",
           e.getMessage(), e);
     }

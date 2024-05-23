@@ -37,9 +37,6 @@ import java.util.Map;
 @Component
 public class DeleteHelper {
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DeleteHelper.class);
 
@@ -146,7 +143,7 @@ public class DeleteHelper {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+      LOG.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
     }
   }
 
@@ -200,7 +197,7 @@ public class DeleteHelper {
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
+        LOG.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
       }
     }
   }

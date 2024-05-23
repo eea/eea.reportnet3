@@ -41,12 +41,6 @@ public class KafkaSenderUtils {
   private static final Logger LOG = LoggerFactory.getLogger(KafkaSenderUtils.class);
 
   /**
-   * The Constant LOG_ERROR.
-   */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-
-  /**
    * Release Dataset kafka event.
    *
    * @param eventType the event type
@@ -72,7 +66,7 @@ public class KafkaSenderUtils {
       kafkaSender.sendMessage(event);
     } catch (Exception e) {
       String eventTopic = (eventType != null) ? eventType.getTopic() : null;
-      LOG_ERROR.error("Unexpected error! Error releasing kafka event {}. Message: {}", eventTopic, e.getMessage());
+      LOG.error("Unexpected error! Error releasing kafka event {}. Message: {}", eventTopic, e.getMessage());
       throw e;
     }
   }
@@ -86,7 +80,7 @@ public class KafkaSenderUtils {
     try {
       kafkaSender.sendMessage(event);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error releasing kafka event {}. Message: {}", event, e.getMessage());
+      LOG.error("Unexpected error! Error releasing kafka event {}. Message: {}", event, e.getMessage());
       throw e;
     }
   }
@@ -116,7 +110,7 @@ public class KafkaSenderUtils {
     } catch (Exception e) {
       String eventTopic = (eventType != null) ? eventType.getTopic() : null;
       Long datasetId = (notificationVO != null) ? notificationVO.getDatasetId() : null;
-      LOG_ERROR.error("Unexpected error! Error releasing notificable kafka event {} for datasetId {} Message: {}", eventTopic, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error releasing notificable kafka event {} for datasetId {} Message: {}", eventTopic, datasetId, e.getMessage());
       throw e;
     }
   }
@@ -195,7 +189,7 @@ public class KafkaSenderUtils {
       LOG.info("Save user notification, eventType: {}, notification content: {}", eventType, content);
 
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error saving user notification for event Message: {}", eventType, e.getMessage());
+      LOG.error("Unexpected error! Error saving user notification for event Message: {}", eventType, e.getMessage());
       throw e;
     }
   }

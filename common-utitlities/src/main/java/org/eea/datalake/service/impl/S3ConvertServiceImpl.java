@@ -3,8 +3,6 @@ package org.eea.datalake.service.impl;
 import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -13,20 +11,23 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.ParquetStream;
-import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.utils.LiteralConstants;
-import org.json.JSONWriter;
+import org.locationtech.jts.io.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -41,9 +42,13 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3ConvertServiceImpl.class);
 
-    /** The big data dataset service */
-    @Autowired
-    private S3Helper s3Helper;
+    private final S3Helper s3Helper;
+    private final SpatialDataHandling spatialDataHandling;
+
+    public S3ConvertServiceImpl(SpatialDataHandling spatialDataHandling, S3Helper s3Helper) {
+        this.s3Helper = s3Helper;
+        this.spatialDataHandling = spatialDataHandling;
+    }
 
     /**  The path export DL */
     @Value("${exportDLPath}")
@@ -114,30 +119,37 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
-        CSVWriter csvWriter) throws IOException {
+                                          CSVWriter csvWriter) throws IOException {
         int size = 0;
         int counter = 0;
         for (int i = 0; i < exportFilenames.size(); i++) {
-            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE,
-                datasetId);
-            InputStream inputStream = new FileInputStream(parquetFile);
-            ParquetStream parquetStream = new ParquetStream(inputStream);
-            ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
-            GenericRecord record;
+            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+            try (InputStream inputStream = new FileInputStream(parquetFile);
+                ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
+                GenericRecord record;
 
-            while ((record = r.read()) != null) {
-                if (i == 0 && counter == 0) {
-                    size = record.getSchema().getFields().size();
-                    List<String> headers =
-                        record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                    csvWriter.writeNext(headers.toArray(String[]::new), false);
-                    counter++;
+                while ((record = r.read()) != null) {
+                    if (i == 0 && counter == 0) {
+                        size = record.getSchema().getFields().size();
+                      csvWriter.writeNext(record.getSchema().getFields().stream()
+                          .map(Schema.Field::name).toArray(String[]::new), false);
+                        counter++;
+                    }
+                    String[] columns = new String[size];
+                    for (int j = 0; j < size; j++) {
+                        Object fieldValue = record.get(j);
+                        if (fieldValue instanceof ByteBuffer) {
+                            ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                            String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
+                            columns[j] = modifiedJson;
+                        } else {
+                            columns[j] = (fieldValue != null) ? fieldValue.toString() : "";
+                        }
+                    }
+                    csvWriter.writeNext(columns, false);
                 }
-                String[] columns = new String[size];
-                for (int j = 0; j < size; j++) {
-                    columns[j] = (record.get(j) != null) ? record.get(j).toString() : "";
-                }
-                csvWriter.writeNext(columns, false);
+            } catch (ParseException e) {
+              throw new RuntimeException(e);
             }
         }
     }

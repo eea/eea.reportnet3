@@ -49,6 +49,7 @@ export const CustomFileUpload = ({
   fileLimit = 1,
   id = null,
   infoTooltip = '',
+  integrationId,
   invalidExtensionMessage = '',
   invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
@@ -70,6 +71,7 @@ export const CustomFileUpload = ({
   onValidateFile = null,
   operation = 'POST',
   previewWidth = 50,
+  providerId,
   replaceCheck = false,
   replaceCheckLabel = 'Replace data',
   replaceCheckLabelMessage = '',
@@ -77,7 +79,7 @@ export const CustomFileUpload = ({
   s3Check = false,
   s3CheckLabel = 'S3',
   style = null,
-  tableSchemaId = null,
+  tableSchemaId,
   uploadLabel = 'Upload',
   url = null,
   withCredentials = false
@@ -97,6 +99,7 @@ export const CustomFileUpload = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
+  const [jobId, setJobId] = useState();
   const [presignedUrl, setPresignedUrl] = useState();
 
   const _files = useRef([]);
@@ -111,7 +114,6 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (presignedUrl) {
       uploadToS3();
-      importS3ToDlh();
     }
   }, [presignedUrl]);
 
@@ -368,6 +370,7 @@ export const CustomFileUpload = ({
       onUpload({ files: state.files });
 
       dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+      importS3ToDlh();
     } catch (error) {
       console.error('CustomFileUpload - uploadToS3.', error);
       notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
@@ -377,12 +380,20 @@ export const CustomFileUpload = ({
 
   const importS3ToDlh = async () => {
     try {
-      await DatasetService.importFileWithS3({
-        dataflowId,
-        datasetId,
-        delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
-        tableSchemaId
-      });
+      tableSchemaId
+        ? await DatasetService.importTableFileWithS3({
+            dataflowId,
+            datasetId,
+            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+            jobId,
+            tableSchemaId
+          })
+        : await DatasetService.importZipFileWithS3({
+            dataflowId,
+            datasetId,
+            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+            jobId
+          });
     } catch (error) {
       console.error('CustomFileUpload - importS3ToDlh.', error);
       notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
@@ -494,7 +505,17 @@ export const CustomFileUpload = ({
 
   const onGetPresignedUrl = async () => {
     const fileName = state?.files[0].name;
-    const data = await DatasetService.getPresignedUrl({ datasetId, dataflowId, fileName });
+    const data = await DatasetService.getPresignedUrl({
+      datasetId,
+      dataflowId,
+      providerId,
+      tableSchemaId,
+      replace: state.replace,
+      integrationId,
+      delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+      fileName
+    });
+    setJobId(data?.jobId);
     setPresignedUrl(data?.presignedUrl);
   };
 

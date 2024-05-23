@@ -1,11 +1,5 @@
 package org.eea.validation.util;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.transaction.Transactional;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
@@ -17,14 +11,31 @@ import org.eea.validation.persistence.repository.RulesRepository;
 import org.eea.validation.persistence.repository.SchemasRepository;
 import org.eea.validation.persistence.schemas.rule.Rule;
 import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.util.datalake.DremioNonSQLValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The Class GeometryValidationUtils.
  */
 @Component
 public class GeometryValidationUtils {
+
+  private static GeometryValidationUtils instance;
+
+  public static synchronized GeometryValidationUtils getInstance() {
+    if (instance == null) {
+      instance = new GeometryValidationUtils();
+    }
+    return instance;
+  }
 
 
   /** The rules repository. */
@@ -100,15 +111,19 @@ public class GeometryValidationUtils {
    * @return true, if successful
    */
   public static boolean checkEPSGSRID(FieldValue fieldValue) {
+    return checkEPSGSRIDValidation(fieldValue.getValue());
+  }
+
+  public static boolean checkEPSGSRIDValidation(String fieldValue) {
     boolean rtn = false;
-    if (fieldValue.getValue().isEmpty()) {
+    if (fieldValue.isEmpty()) {
       rtn = true;
     }
-    if (!rtn && existRSID(fieldValue.getValue())) {
+    if (!rtn && existRSID(fieldValue)) {
       // Obtain the SRID code removing all other characters from geojson
       // The cases are the SRID supported in reportnet
-      Pattern p = Pattern.compile("\"srid\"+:\"+[0-9]+\"");
-      Matcher m = p.matcher(fieldValue.getValue());
+      Pattern p = Pattern.compile("\"srid\"\\s*:\\s*\"+[0-9]+\"");
+      Matcher m = p.matcher(fieldValue);
       List<String> srids = new ArrayList<>();
       while (m.find()) {
         srids.add(m.group().replaceAll("\\D+", ""));

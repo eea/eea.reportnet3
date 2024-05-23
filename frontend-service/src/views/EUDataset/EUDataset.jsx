@@ -254,7 +254,6 @@ export const EUDataset = () => {
             ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
           }.hasErrors,
           hasInfoTooltip: true,
-          icebergTableIsCreated: tableSchema['icebergTableIsCreated'],
           id: tableSchema['tableSchemaId'],
           name: tableSchema['tableSchemaName'],
           notEmpty: tableSchema['tableSchemaNotEmpty'],

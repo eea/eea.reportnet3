@@ -86,7 +86,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_FOLDER_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class ValidationService.
@@ -192,9 +192,6 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant FC_DESCRIPTION. */
   private static final String FC_DESCRIPTION = "Checks if the field is missing or empty";
 
@@ -206,7 +203,7 @@ public class RulesServiceImpl implements RulesService {
 
   /** The Constant TO_DESCRIPTION: {@value}. */
   private static final String TO_DESCRIPTION =
-      "Checks if contains all the records based on set criteria.";
+          "Checks if contains all the records based on set criteria.";
 
   /** The Constant FIELD_TYPE. */
   private static final String FIELD_TYPE = "Field type ";
@@ -262,7 +259,7 @@ public class RulesServiceImpl implements RulesService {
 
   /** The Constant DOWNLOAD_QC_EXCEPTION: {@value}. */
   private static final String DOWNLOAD_QC_EXCEPTION =
-      "Download exported QC's didn't found a file with the followings parameters:, datasetID: %s + filename: %s";
+          "Download exported QC's didn't found a file with the followings parameters:, datasetID: %s + filename: %s";
 
   private static final String REGULATION_TEMPLATE_FILE = "/templateRules.drl";
 
@@ -301,24 +298,24 @@ public class RulesServiceImpl implements RulesService {
         RulesSchema rulesdisabled = rulesRepository.getAllDisabledRules(new ObjectId(datasetSchemaId));
         RulesSchema rulesUnchecked = rulesRepository.getAllUncheckedRules(new ObjectId(datasetSchemaId));
         NotificationVO notificationVO = NotificationVO.builder()
-            .user(SecurityContextHolder.getContext().getAuthentication().getName())
-            .datasetId(datasetId).dataflowId(dataflowId)
-            .invalidRules(rulesUnchecked.getRules().size())
-            .disabledRules(rulesdisabled.getRules().size())
-            .build();
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId).dataflowId(dataflowId)
+                .invalidRules(rulesUnchecked.getRules().size())
+                .disabledRules(rulesdisabled.getRules().size())
+                .build();
         LOG.info("SQL rules contains errors");
         releaseNotification(EventType.DISABLE_NAMES_TYPES_RULES_ERROR_EVENT, notificationVO);
       } else {
 
         NotificationVO notificationVO = NotificationVO.builder()
-            .user(SecurityContextHolder.getContext().getAuthentication().getName())
-            .datasetId(datasetId)
-            .build();
+                .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                .datasetId(datasetId)
+                .build();
         LOG.info("All rules validated. Validation contains 0 errors");
         releaseNotification(EventType.VALIDATE_ALL_RULES_COMPLETED_EVENT, notificationVO);
       }
     } catch(Exception e){
-      LOG_ERROR.error("Unexpected error! Error validating all sql rules for datasetId: {}, checkNoSQL: {}, user: {}. Message: {}", datasetId, checkNoSQL, user, e.getMessage());
+      LOG.error("Unexpected error! Error validating all sql rules for datasetId: {}, checkNoSQL: {}, user: {}. Message: {}", datasetId, checkNoSQL, user, e.getMessage());
       throw e;
     }
   }
@@ -333,23 +330,23 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public RulesSchemaVO getRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
-        rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
+            rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), false);
     RulesSchemaVO rulesVO = null;
     Long designDatasetRelated =
-        dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(datasetSchemaId);
+            dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(datasetSchemaId);
     if (null == rulesSchema) {
       rulesSchema = null;
     } else {
       List<Audit> audits = auditRepository.getAuditsByDatasetId(designDatasetRelated);
       for (Rule rule : rulesSchema.getRules()) {
         if (null != rule.getAutomaticType()
-            && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
+                && AutomaticRuleTypeEnum.FIELD_SQL_TYPE.equals(rule.getAutomaticType())) {
           rule.setSqlSentence(null);
         }
 
         Optional<Audit> aud = audits.stream()
-            .filter(audit -> audit.getHistoric().get(0).getRuleId().equals(rule.getRuleId()))
-            .findFirst();
+                .filter(audit -> audit.getHistoric().get(0).getRuleId().equals(rule.getRuleId()))
+                .findFirst();
         if (aud.isPresent()) {
           rule.setHasHistoric(true);
         }
@@ -369,10 +366,10 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public RulesSchemaVO getActiveRulesSchemaByDatasetId(String datasetSchemaId) {
     RulesSchema rulesSchema =
-        rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), true);
+            rulesRepository.getRulesWithActiveCriteria(new ObjectId(datasetSchemaId), true);
 
     RulesSchemaVO rulesVO =
-        rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
+            rulesSchema == null ? null : rulesSchemaMapper.entityToClass(rulesSchema);
     setIntegrityIntoVO(rulesSchema, rulesVO);
     return rulesVO;
   }
@@ -426,13 +423,13 @@ public class RulesServiceImpl implements RulesService {
     Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
 
     if (null != rule && EntityTypeEnum.TABLE.equals(rule.getType())
-        && rule.getIntegrityConstraintId() != null) {
+            && rule.getIntegrityConstraintId() != null) {
       Optional<IntegritySchema> integritySchema =
-          integritySchemaRepository.findById(rule.getIntegrityConstraintId());
+              integritySchemaRepository.findById(rule.getIntegrityConstraintId());
       if (integritySchema.isPresent()) {
         dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
-            integritySchema.get().getOriginDatasetSchemaId().toString(),
-            integritySchema.get().getReferencedDatasetSchemaId().toString());
+                integritySchema.get().getOriginDatasetSchemaId().toString(),
+                integritySchema.get().getReferencedDatasetSchemaId().toString());
       }
       integritySchemaRepository.deleteById(rule.getIntegrityConstraintId());
     }
@@ -448,7 +445,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void deleteRuleByReferenceId(String datasetSchemaId, String referenceId) {
     rulesRepository.deleteRuleByReferenceId(new ObjectId(datasetSchemaId),
-        new ObjectId(referenceId));
+            new ObjectId(referenceId));
   }
 
 
@@ -461,7 +458,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void deleteAutomaticRuleByReferenceId(String datasetSchemaId, String referenceId) {
     rulesRepository.deleteAutomaticRuleByReferenceId(new ObjectId(datasetSchemaId),
-        new ObjectId(referenceId));
+            new ObjectId(referenceId));
   }
 
   /**
@@ -472,9 +469,9 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void deleteRuleByReferenceFieldSchemaPKId(String datasetSchemaId,
-      String referenceFieldSchemaPKId) {
+                                                   String referenceFieldSchemaPKId) {
     rulesRepository.deleteRuleByReferenceFieldSchemaPKId(new ObjectId(datasetSchemaId),
-        new ObjectId(referenceFieldSchemaPKId));
+            new ObjectId(referenceFieldSchemaPKId));
   }
 
   /**
@@ -534,12 +531,12 @@ public class RulesServiceImpl implements RulesService {
     }
     String datasetSchemaId = dataset.getDatasetSchema();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
-        && StringUtils.isBlank(ruleVO.getSqlSentence()) && !ruleVO.isAutomatic()) {
+            && StringUtils.isBlank(ruleVO.getSqlSentence()) && !ruleVO.isAutomatic()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
     if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
-        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
-        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
+            || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
     }
 
@@ -588,7 +585,7 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private void rulesWhenConditionNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
-      Rule rule, boolean bigData) throws EEAException {
+                                      Rule rule, boolean bigData) throws EEAException {
     // we create the whencondition Integrity for the rule
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
       ObjectId integrityConstraintId = new ObjectId();
@@ -601,20 +598,20 @@ public class RulesServiceImpl implements RulesService {
       rule.setEnabled(ruleVO.isEnabled());
       rule.setIntegrityConstraintId(integrityConstraintId);
       rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
-          + integrityConstraintId.toString() + "','" + rule.getRuleId().toString() + "')");
+              + integrityConstraintId.toString() + "','" + rule.getRuleId().toString() + "')");
       Long datasetReferencedId = dataSetMetabaseControllerZuul
-          .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
+              .getDesignDatasetIdByDatasetSchemaId(integrityVO.getReferencedDatasetSchemaId());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetId, datasetReferencedId,
-          integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
+              integrityVO.getOriginDatasetSchemaId(), integrityVO.getReferencedDatasetSchemaId());
       // send notification
       NotificationVO notificationVO = NotificationVO.builder()
-          .user(SecurityContextHolder.getContext().getAuthentication().getName())
-          .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build();
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build();
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
-          notificationVO);
+              notificationVO);
 
     } else if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.isAutomatic()
-        && (StringUtils.isBlank(ruleVO.getSqlSentence()))) {
+            && (StringUtils.isBlank(ruleVO.getSqlSentence()))) {
       rule.setAutomatic(true);
       rule.setVerified(true);
       rule.setEnabled(true);
@@ -624,10 +621,10 @@ public class RulesServiceImpl implements RulesService {
         rule.setSqlSentence(rule.getSqlSentence().replace("!=", "<>"));
       }
       rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id, '")
-          .append(rule.getRuleId().toString())
-          .append(
-              "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
-          .append(")").toString());
+              .append(rule.getRuleId().toString())
+              .append(
+                      "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
+              .append(")").toString());
       if (!bigData) {
         recordStoreController.createUpdateQueryView(datasetId, false);
       }
@@ -664,7 +661,7 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void createAutomaticRules(String datasetSchemaId, String referenceId, DataType typeData,
-      EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
+                                   EntityTypeEnum typeEntityEnum, Long datasetId, boolean required) throws EEAException {
     Document document;
     List<Rule> ruleList = new ArrayList<>();
     // we use that if to sort between a rule required and rule for any other type(Boolean,
@@ -673,38 +670,38 @@ public class RulesServiceImpl implements RulesService {
 
     if (required && typeData.equals(DataType.POINT)) {
       ruleList.add(
-          AutomaticRules.createRequiredRulePoint(referenceId, typeEntityEnum, "Field cardinality",
-              "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
+              AutomaticRules.createRequiredRulePoint(referenceId, typeEntityEnum, "Field cardinality",
+                      "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
     } else if (required) {
       ruleList
-          .add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
-              "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
+              .add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
+                      "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
     } else {
       switch (typeData) {
         case NUMBER_INTEGER:
           ruleList.add(AutomaticRules.createNumberIntegerAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + "NUMBER - INTEGER", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + "NUMBER - INTEGER"));
+                  FIELD_TYPE + "NUMBER - INTEGER", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + "NUMBER - INTEGER"));
           break;
         case NUMBER_DECIMAL:
           ruleList.add(AutomaticRules.createNumberDecimalAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + "NUMBER - DECIMAL", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + "NUMBER - DECIMAL"));
+                  FIELD_TYPE + "NUMBER - DECIMAL", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + "NUMBER - DECIMAL"));
           break;
         case DATE:
           ruleList.add(AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + typeData));
+                  FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + typeData));
           break;
         case DATETIME:
           ruleList.add(AutomaticRules.createDateTimeAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + typeData));
+                  FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + typeData));
           break;
         case BOOLEAN:
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + typeData));
+                  FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + typeData));
           break;
         case EXTERNAL_LINK:
         case LINK:
@@ -712,22 +709,22 @@ public class RulesServiceImpl implements RulesService {
           // at TABLE level
           // that is for avoid do many calls to database and collapse it
           DataSetSchema datasetSchema =
-              schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
+                  schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId));
           String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, referenceId);
           FieldSchema fieldSchemaPK = getPKFieldSchemaFromSchema(datasetSchema, referenceId);
 
           ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
-              FIELD_TYPE + typeData, "TC" + shortcode, AutomaticRuleTypeEnum.FIELD_LINK,
-              TC_DESCRIPTION + typeData, tableSchemaId, false));
+                  FIELD_TYPE + typeData, "TC" + shortcode, AutomaticRuleTypeEnum.FIELD_LINK,
+                  TC_DESCRIPTION + typeData, tableSchemaId, false));
 
           if (null != fieldSchemaPK && Boolean.TRUE.equals(fieldSchemaPK.getPkMustBeUsed())) {
 
             Long shortcodeAux =
-                rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
+                    rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
 
             ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
-                "Table Completeness", "TO" + shortcodeAux, AutomaticRuleTypeEnum.TABLE_COMPLETNESS,
-                TO_DESCRIPTION, tableSchemaId, true));
+                    "Table Completeness", "TO" + shortcodeAux, AutomaticRuleTypeEnum.TABLE_COMPLETNESS,
+                    TO_DESCRIPTION, tableSchemaId, true));
           }
 
           break;
@@ -737,8 +734,8 @@ public class RulesServiceImpl implements RulesService {
           document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           List<String> singleCodeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, singleCodeListItems, "FT" + shortcode,
-              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
+                  FIELD_TYPE + typeData, singleCodeListItems, "FT" + shortcode,
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
           break;
         case MULTISELECT_CODELIST:
           // we find values available to create this validation for a codelist, same value with
@@ -746,23 +743,23 @@ public class RulesServiceImpl implements RulesService {
           document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
           List<String> codeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createMultiSelectCodelistAutomaticRule(referenceId,
-              typeEntityEnum, FIELD_TYPE + typeData, codeListItems, "FT" + shortcode,
-              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                  typeEntityEnum, FIELD_TYPE + typeData, codeListItems, "FT" + shortcode,
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
           break;
         case URL:
           ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + typeData));
+                  FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + typeData));
           break;
         case EMAIL:
           ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + typeData));
+                  FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + typeData));
           break;
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
-              FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-              FT_DESCRIPTION + typeData));
+                  FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
+                  FT_DESCRIPTION + typeData));
           break;
         case MULTIPOLYGON:
         case POINT:
@@ -772,27 +769,46 @@ public class RulesServiceImpl implements RulesService {
         case POLYGON:
         case GEOMETRYCOLLECTION:
           ruleList.add(AutomaticRules.createGeometryAutomaticRule(typeData, referenceId,
-              typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
-              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                  typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
           // add additional rule for the EPSG SRID check
           shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
           ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckEPSGSRID(typeData,
-              referenceId, typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
-              AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                  referenceId, typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
           // add SQL check for Geometries.
           if (rulesRepository.findGeometrySQLRulesByreferenceId(new ObjectId(datasetSchemaId),
-              new ObjectId(referenceId)) == null) {
+                  new ObjectId(referenceId)) == null) {
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
             document = schemasRepository.findFieldSchema(datasetSchemaId, referenceId);
+
+            /*Check if is big dataflow*/
+            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+            boolean isBigDataflow = dataflow.getBigData() != null && dataflow.getBigData();
+
+            /*find table path*/
+            Document tableSchemaDoc = schemasRepository.findTableSchema(datasetSchemaId,getTableSchemaIdFromIdFieldSchema(schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId)), referenceId));
+            String tableName = tableSchemaDoc.get("nameTableSchema").toString();
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+            S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
+            dataTableResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
+            String key = s3Helper.getS3Service().getS3Path(dataTableResolver);
+
             // Validate Geometry
             ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckGeometries(datasetId,
-                document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+                    document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
+                    "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, isBigDataflow, key));
             // ST_Transform
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
-            ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckSTtransform(datasetId,
-                document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+
+            /*if big data and geometry  do not check if transforms*/
+
+            if (!isBigDataflow) {
+              ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckSTtransform(datasetId,
+                      document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
+                      "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+            }
           }
           break;
         default:
@@ -802,7 +818,7 @@ public class RulesServiceImpl implements RulesService {
     }
     if (!ruleList.isEmpty()) {
       ruleList.stream()
-          .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
+              .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
     }
   }
 
@@ -871,7 +887,7 @@ public class RulesServiceImpl implements RulesService {
   public void deleteRuleRequired(String datasetSchemaId, String referenceId, DataType typeData) {
     if (typeData.equals(DataType.POINT)) {
       rulesRepository.deleteRulePointRequired(new ObjectId(datasetSchemaId),
-          new ObjectId(referenceId));
+              new ObjectId(referenceId));
     } else {
       rulesRepository.deleteRuleRequired(new ObjectId(datasetSchemaId), new ObjectId(referenceId));
     }
@@ -887,7 +903,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public boolean existsRuleRequired(String datasetSchemaId, String referenceId) {
     return rulesRepository.existsRuleRequired(new ObjectId(datasetSchemaId),
-        new ObjectId(referenceId));
+            new ObjectId(referenceId));
   }
 
   /**
@@ -905,23 +921,23 @@ public class RulesServiceImpl implements RulesService {
     }
     String datasetSchemaId = dataset.getDatasetSchema();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() == null
-        && StringUtils.isBlank(ruleVO.getSqlSentence())) {
+            && StringUtils.isBlank(ruleVO.getSqlSentence())) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_TABLE);
     }
     if ((EntityTypeEnum.RECORD.equals(ruleVO.getType())
-        || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
-        && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
+            || EntityTypeEnum.FIELD.equals(ruleVO.getType()))
+            && StringUtils.isBlank(ruleVO.getSqlSentence()) && null == ruleVO.getWhenCondition()) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE_FIELD_RECORD);
     }
     var ruleOriginal =
-        rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleVO.getRuleId()));
+            rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleVO.getRuleId()));
     if (null == ruleOriginal) {
       throw new EEAException(EEAErrorMessage.RULE_NOT_FOUND);
     }
     var originalIntegrityVO = new IntegrityVO();
     if (ruleOriginal.getIntegrityConstraintId() != null) {
       originalIntegrityVO =
-          getIntegrityConstraint(ruleOriginal.getIntegrityConstraintId().toString());
+              getIntegrityConstraint(ruleOriginal.getIntegrityConstraintId().toString());
     }
     Rule rule = ruleMapper.classToEntity(ruleVO);
     rule.setAutomatic(false);
@@ -963,7 +979,7 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private void ruleWhenCondtionUpdateNull(long datasetId, RuleVO ruleVO, String datasetSchemaId,
-      Rule rule, DataFlowVO dataFlowVO) throws EEAException {
+                                          Rule rule, DataFlowVO dataFlowVO) throws EEAException {
     TypeStatusEnum dataflowStatus = dataFlowVO.getStatus();
     if (EntityTypeEnum.TABLE.equals(ruleVO.getType()) && ruleVO.getIntegrityVO() != null) {
 
@@ -975,24 +991,24 @@ public class RulesServiceImpl implements RulesService {
       rule.setVerified(true);
       rule.setEnabled(ruleVO.isEnabled());
       rule.setWhenCondition("checkIntegrityConstraint(this.datasetId,'"
-          + integritySchema.getId().toString() + "','" + rule.getRuleId().toString() + "')");
+              + integritySchema.getId().toString() + "','" + rule.getRuleId().toString() + "')");
       dataSetMetabaseControllerZuul.updateDatasetForeignRelationship(datasetId, datasetId,
-          integritySchema.getOriginDatasetSchemaId().toString(),
-          integritySchema.getReferencedDatasetSchemaId().toString());
+              integritySchema.getOriginDatasetSchemaId().toString(),
+              integritySchema.getReferencedDatasetSchemaId().toString());
       rule.setIntegrityConstraintId(integritySchema.getId());
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATED_QC_RULE_EVENT, null,
-          NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
+              NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                      .datasetSchemaId(datasetSchemaId).shortCode(rule.getShortCode()).build());
     } else if (null != ruleVO.getSqlSentence() && !ruleVO.getSqlSentence().isEmpty()) {
       if (rule.getSqlSentence().contains("!=")) {
         rule.setSqlSentence(rule.getSqlSentence().replaceAll("!=", "<>"));
       }
       rule.setWhenCondition(new StringBuilder().append("isSQLSentenceWithCode(this.datasetId.id,'")
-          .append(rule.getRuleId().toString())
-          .append(
-              "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
-          .append(")").toString());
+              .append(rule.getRuleId().toString())
+              .append(
+                      "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
+              .append(")").toString());
       if (!TypeStatusEnum.DRAFT.equals(dataflowStatus)) {
         if (dataFlowVO.getBigData()==null || (dataFlowVO.getBigData()!=null && !dataFlowVO.getBigData())) {
           recordStoreController.createUpdateQueryView(datasetId, false);
@@ -1027,9 +1043,9 @@ public class RulesServiceImpl implements RulesService {
         Rule rule = rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
         if (null != rule) {
           Rule originalRule =
-              rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
+                  rulesRepository.findRule(new ObjectId(datasetSchemaId), new ObjectId(ruleId));
           if (null == originalRule) {
-            LOG_ERROR.error("RuleId not valid: {}", ruleId);
+            LOG.error("RuleId not valid: {}", ruleId);
             throw new EEAException(EEAErrorMessage.RULEID_INCORRECT);
           }
           // Update only allowed properties
@@ -1041,17 +1057,17 @@ public class RulesServiceImpl implements RulesService {
             addHistoricRuleInfo(rule, originalRule, datasetId, null);
           }
         } else {
-          LOG_ERROR.error("Rule not found for datasetSchemaId {} and ruleId {}", datasetSchemaId,
-              ruleId);
+          LOG.error("Rule not found for datasetSchemaId {} and ruleId {}", datasetSchemaId,
+                  ruleId);
           throw new EEAException(
-              String.format(EEAErrorMessage.RULE_NOT_FOUND, datasetSchemaId, ruleId));
+                  String.format(EEAErrorMessage.RULE_NOT_FOUND, datasetSchemaId, ruleId));
         }
       } else {
-        LOG_ERROR.error("RuleId not valid: {}", ruleId);
+        LOG.error("RuleId not valid: {}", ruleId);
         throw new EEAException(EEAErrorMessage.RULEID_INCORRECT);
       }
     } else {
-      LOG_ERROR.error("DatasetSchemaId not found for datasetId {}", datasetId);
+      LOG.error("DatasetSchemaId not found for datasetId {}", datasetId);
       throw new EEAException(EEAErrorMessage.DATASET_INCORRECT_ID);
     }
   }
@@ -1093,12 +1109,12 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void createUniqueConstraint(String datasetSchemaId, String tableSchemaId,
-      String uniqueId) {
+                                     String uniqueId) {
     Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
     StringBuilder description = new StringBuilder();
     StringBuilder message = new StringBuilder();
     Optional<UniqueConstraintSchema> uniqueResult =
-        uniqueRepository.findById(new ObjectId(uniqueId));
+            uniqueRepository.findById(new ObjectId(uniqueId));
     if (uniqueResult.isPresent()) {
       int i = 0;
       StringBuilder fieldNames = new StringBuilder();
@@ -1112,10 +1128,10 @@ public class RulesServiceImpl implements RulesService {
 
       for (ObjectId fieldSchemaId : uniqueResult.get().getFieldSchemaIds()) {
         if (uniqueResult.get().getFieldSchemaIds().size() - 1 == i
-            && uniqueResult.get().getFieldSchemaIds().size() > 1) {
+                && uniqueResult.get().getFieldSchemaIds().size() > 1) {
           fieldNames.append(" and ");
         } else if (i < uniqueResult.get().getFieldSchemaIds().size() - 1
-            && uniqueResult.get().getFieldSchemaIds().size() > 1 && i != 0) {
+                && uniqueResult.get().getFieldSchemaIds().size() > 1 && i != 0) {
           fieldNames.append(", ");
         }
         fieldNames.append(fieldSchemaIdName.get(fieldSchemaId));
@@ -1130,9 +1146,9 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     Rule rule =
-        AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId, EntityTypeEnum.TABLE,
-            "Table type uniqueConstraint", "TU" + shortcode, AutomaticRuleTypeEnum.TABLE_UNIQUENESS,
-            description.toString(), message.toString(), uniqueId);
+            AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId, EntityTypeEnum.TABLE,
+                    "Table type uniqueConstraint", "TU" + shortcode, AutomaticRuleTypeEnum.TABLE_UNIQUENESS,
+                    description.toString(), message.toString(), uniqueId);
     rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
@@ -1145,7 +1161,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void deleteUniqueConstraint(String datasetSchemaId, String uniqueId) {
     rulesRepository.deleteByUniqueConstraintId(new ObjectId(datasetSchemaId),
-        new ObjectId(uniqueId));
+            new ObjectId(uniqueId));
   }
 
   /**
@@ -1158,16 +1174,16 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public void deleteRuleHighLevelLike(String datasetSchemaId, String fieldSchemaId) {
     boolean deleted =
-        rulesRepository.deleteRuleHighLevelLike(new ObjectId(datasetSchemaId), fieldSchemaId);
+            rulesRepository.deleteRuleHighLevelLike(new ObjectId(datasetSchemaId), fieldSchemaId);
 
     if (deleted) {
       LOG.info(
-          "Rules associated with fieldSchemaId {} in datasetSchemaId {} , were deleted in high level(record,table,dataset)",
-          fieldSchemaId, datasetSchemaId);
+              "Rules associated with fieldSchemaId {} in datasetSchemaId {} , were deleted in high level(record,table,dataset)",
+              fieldSchemaId, datasetSchemaId);
     } else {
       LOG.info(
-          "No rules associated with fieldSchemaId {} in datasetSchemaId {} in high level(record,table,dataset)",
-          fieldSchemaId, datasetSchemaId);
+              "No rules associated with fieldSchemaId {} in datasetSchemaId {} in high level(record,table,dataset)",
+              fieldSchemaId, datasetSchemaId);
     }
   }
 
@@ -1180,7 +1196,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public IntegrityVO getIntegrityConstraint(String integrityId) {
     IntegritySchema integritySchema =
-        integritySchemaRepository.findById(new ObjectId(integrityId)).orElse(null);
+            integritySchemaRepository.findById(new ObjectId(integrityId)).orElse(null);
     return integritySchema == null ? null : integrityMapper.entityToClass(integritySchema);
   }
 
@@ -1195,17 +1211,17 @@ public class RulesServiceImpl implements RulesService {
       Map<String, IntegrityVO> integrityMap = new HashMap<>();
       if (ruleSchema.getRules() != null) {
         for (Rule rule : ruleSchema.getRules().stream()
-            .filter(rule -> rule.getIntegrityConstraintId() != null).collect(Collectors.toList())) {
+                .filter(rule -> rule.getIntegrityConstraintId() != null).collect(Collectors.toList())) {
           IntegritySchema integrityschema = integritySchemaRepository
-              .findById(rule.getIntegrityConstraintId()).orElse(new IntegritySchema());
+                  .findById(rule.getIntegrityConstraintId()).orElse(new IntegritySchema());
           integrityMap.put(rule.getRuleId().toString(),
-              integrityMapper.entityToClass(integrityschema));
+                  integrityMapper.entityToClass(integrityschema));
         }
       }
       // Set integrity into VO
       if (!integrityMap.isEmpty() && ruleSchemaVO.getRules() != null) {
         ruleSchemaVO.getRules().stream()
-            .forEach(rule -> rule.setIntegrityVO(integrityMap.get(rule.getRuleId())));
+                .forEach(rule -> rule.setIntegrityVO(integrityMap.get(rule.getRuleId())));
       }
     }
   }
@@ -1222,25 +1238,25 @@ public class RulesServiceImpl implements RulesService {
   public void deleteDatasetRuleAndIntegrityByFieldSchemaId(String fieldSchemaId, Long datasetId) {
     // we find the values salved in database by origin or referenced in integritySchema
     List<IntegritySchema> integritySchema =
-        integritySchemaRepository.findByOriginOrReferenceFields(new ObjectId(fieldSchemaId));
+            integritySchemaRepository.findByOriginOrReferenceFields(new ObjectId(fieldSchemaId));
     // we delete the integrity object and delete the rules associated to the originDataset
     if (null != integritySchema && !integritySchema.isEmpty()) {
       integritySchema.stream().forEach(integritySchemaData -> {
         // we delete the rule associate with that field
         rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
-            integritySchemaData.getRuleId());
+                integritySchemaData.getRuleId());
 
         // we delete the integrity rule in mongodb in integrity collection
         integritySchemaRepository.deleteById(integritySchemaData.getId());
         LOG.info(
-            "Rule integrity associated to the fieldschemaId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
-            fieldSchemaId, integritySchemaData.getId(),
-            integritySchemaData.getOriginDatasetSchemaId());
+                "Rule integrity associated to the fieldschemaId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+                fieldSchemaId, integritySchemaData.getId(),
+                integritySchemaData.getOriginDatasetSchemaId());
 
         // we delete the pk relation in the database
         dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
-            integritySchemaData.getOriginDatasetSchemaId().toString(),
-            integritySchemaData.getReferencedDatasetSchemaId().toString());
+                integritySchemaData.getOriginDatasetSchemaId().toString(),
+                integritySchemaData.getReferencedDatasetSchemaId().toString());
       });
 
     }
@@ -1255,27 +1271,27 @@ public class RulesServiceImpl implements RulesService {
   @Override
   @Async
   public void deleteDatasetRuleAndIntegrityByDatasetSchemaId(String datasetSchemaId,
-      Long datasetId) {
+                                                             Long datasetId) {
     // we find the values salved in database by origin or referenced in integritySchema
     List<IntegritySchema> integritySchema = integritySchemaRepository
-        .findByOriginOrReferenceDatasetSchemaId(new ObjectId(datasetSchemaId));
+            .findByOriginOrReferenceDatasetSchemaId(new ObjectId(datasetSchemaId));
 
     if (null != integritySchema && !integritySchema.isEmpty()) {
       integritySchema.stream().forEach(integritySchemaData -> {
         // we delete the rule associate with that field
         rulesRepository.deleteRuleById(integritySchemaData.getOriginDatasetSchemaId(),
-            integritySchemaData.getRuleId());
+                integritySchemaData.getRuleId());
         // we delete the integrity rule in mongodb in integrity collection
         integritySchemaRepository.deleteById(integritySchemaData.getId());
         LOG.info(
-            "Rule integrity associated to the datasetId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
-            datasetSchemaId, integritySchemaData.getId(),
-            integritySchemaData.getOriginDatasetSchemaId());
+                "Rule integrity associated to the datasetId {} and the integrity data with id {} , in the datasetOrigin id {} was deleted!",
+                datasetSchemaId, integritySchemaData.getId(),
+                integritySchemaData.getOriginDatasetSchemaId());
 
         // we delete the pk relation in the database
         dataSetMetabaseControllerZuul.deleteForeignRelationship(datasetId, null,
-            integritySchemaData.getOriginDatasetSchemaId().toString(),
-            integritySchemaData.getReferencedDatasetSchemaId().toString());
+                integritySchemaData.getOriginDatasetSchemaId().toString(),
+                integritySchemaData.getReferencedDatasetSchemaId().toString());
       });
 
     }
@@ -1301,7 +1317,7 @@ public class RulesServiceImpl implements RulesService {
     for (String originDatasetSchemaId : listDatasetSchemaIdToCopy) {
       String newDatasetSchemaId = dictionaryOriginTargetObjectId.get(originDatasetSchemaId);
       RulesSchema originRules =
-          rulesRepository.getRulesWithActiveCriteria(new ObjectId(originDatasetSchemaId), false);
+              rulesRepository.getRulesWithActiveCriteria(new ObjectId(originDatasetSchemaId), false);
 
       // Delete the the rules created in the steps before on the new schema, we are going to copy
       // them directly
@@ -1314,7 +1330,7 @@ public class RulesServiceImpl implements RulesService {
         // automatically in the process when we update the fieldSchema in previous calls of the copy
         // process
         copyData(dictionaryOriginTargetObjectId, originDatasetSchemaId,
-            dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule);
+                dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule);
       }
     }
     return dictionaryOriginTargetObjectId;
@@ -1345,8 +1361,8 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
-      String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
-      String newDatasetSchemaId, Rule rule) throws EEAException {
+                                       String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
+                                       String newDatasetSchemaId, Rule rule) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
     fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
@@ -1358,8 +1374,8 @@ public class RulesServiceImpl implements RulesService {
     }
 
     LOG.info(
-        "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
-        rule.getRuleName(), rule.getReferenceId());
+            "A new rule is going to be created in the copy schema process {}, with this Reference id {}",
+            rule.getRuleName(), rule.getReferenceId());
     if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     } else {
@@ -1380,35 +1396,35 @@ public class RulesServiceImpl implements RulesService {
    * @return the map
    */
   private Map<String, String> fillRuleCopied(Rule rule,
-      Map<String, String> dictionaryOriginTargetObjectId,
-      Map<Long, Long> dictionaryOriginTargetDatasetsId) {
+                                             Map<String, String> dictionaryOriginTargetObjectId,
+                                             Map<Long, Long> dictionaryOriginTargetDatasetsId) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
     rule.setRuleId(new ObjectId(newRuleId));
     if (dictionaryOriginTargetObjectId.containsKey(rule.getReferenceId().toString())) {
       rule.setReferenceId(
-          new ObjectId(dictionaryOriginTargetObjectId.get(rule.getReferenceId().toString())));
+              new ObjectId(dictionaryOriginTargetObjectId.get(rule.getReferenceId().toString())));
     }
     if (rule.getReferenceFieldSchemaPKId() != null && dictionaryOriginTargetObjectId
-        .containsKey(rule.getReferenceFieldSchemaPKId().toString())) {
+            .containsKey(rule.getReferenceFieldSchemaPKId().toString())) {
       rule.setReferenceFieldSchemaPKId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
+              dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
     }
     if (rule.getUniqueConstraintId() != null) {
       String newUniqueConstraintId = new ObjectId().toString();
       dictionaryOriginTargetObjectId.put(rule.getUniqueConstraintId().toString(),
-          newUniqueConstraintId);
+              newUniqueConstraintId);
       rule.setUniqueConstraintId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
+              dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
     }
 
     if (rule.getIntegrityConstraintId() != null) {
       String newIntegrityConstraintId = new ObjectId().toString();
       dictionaryOriginTargetObjectId.put(rule.getIntegrityConstraintId().toString(),
-          newIntegrityConstraintId);
+              newIntegrityConstraintId);
       rule.setIntegrityConstraintId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(rule.getIntegrityConstraintId().toString())));
+              dictionaryOriginTargetObjectId.get(rule.getIntegrityConstraintId().toString())));
 
     }
 
@@ -1427,19 +1443,19 @@ public class RulesServiceImpl implements RulesService {
           // Change the datasetId in "isSQLSentence(xxx,...."
           String newWhenCondition = rule.getWhenCondition();
           newWhenCondition = newWhenCondition.replace("(" + oldDatasetId.toString(),
-              "(" + newDatasetId.toString());
+                  "(" + newDatasetId.toString());
 
           // Change the dataset_X in the sentence itself if necessary, like
           // select * from table_one t1 inner join dataset_256.table_two....
           newWhenCondition = newWhenCondition.replace(DATASET + oldDatasetId.toString(),
-              DATASET + newDatasetId.toString());
+                  DATASET + newDatasetId.toString());
           rule.setWhenCondition(newWhenCondition);
 
           // Do the same in the property SqlSentence
           if (StringUtils.isNotBlank(rule.getSqlSentence())) {
             String newSqlSentence = rule.getSqlSentence();
             newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
-                DATASET + newDatasetId.toString());
+                    DATASET + newDatasetId.toString());
             rule.setSqlSentence(newSqlSentence);
           }
 
@@ -1457,35 +1473,35 @@ public class RulesServiceImpl implements RulesService {
    * @param rule the rule
    */
   private void copyIntegrity(String originDatasetSchemaId,
-      Map<String, String> dictionaryOriginTargetObjectId, Rule rule) {
+                             Map<String, String> dictionaryOriginTargetObjectId, Rule rule) {
 
     List<IntegritySchema> integritySchemas = integritySchemaRepository
-        .findByOriginOrReferenceDatasetSchemaId(new ObjectId(originDatasetSchemaId));
+            .findByOriginOrReferenceDatasetSchemaId(new ObjectId(originDatasetSchemaId));
     for (IntegritySchema integrity : integritySchemas) {
       integrity.setId(rule.getIntegrityConstraintId());
       integrity.setOriginDatasetSchemaId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(integrity.getOriginDatasetSchemaId().toString())));
+              dictionaryOriginTargetObjectId.get(integrity.getOriginDatasetSchemaId().toString())));
       integrity.setReferencedDatasetSchemaId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(integrity.getReferencedDatasetSchemaId().toString())));
+              dictionaryOriginTargetObjectId.get(integrity.getReferencedDatasetSchemaId().toString())));
       integrity.setRuleId(rule.getRuleId());
       for (int i = 0; i < integrity.getOriginFields().size(); i++) {
         integrity.getOriginFields().set(i, new ObjectId(
-            dictionaryOriginTargetObjectId.get(integrity.getOriginFields().get(i).toString())));
+                dictionaryOriginTargetObjectId.get(integrity.getOriginFields().get(i).toString())));
       }
       for (int i = 0; i < integrity.getReferencedFields().size(); i++) {
         integrity.getReferencedFields().set(i, new ObjectId(
-            dictionaryOriginTargetObjectId.get(integrity.getReferencedFields().get(i).toString())));
+                dictionaryOriginTargetObjectId.get(integrity.getReferencedFields().get(i).toString())));
       }
 
       integritySchemaRepository.save(integrity);
 
       Long datasetReferencedId = dataSetMetabaseControllerZuul
-          .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
+              .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
       Long datasetOriginId = dataSetMetabaseControllerZuul
-          .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
+              .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetOriginId,
-          datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
-          integrity.getReferencedDatasetSchemaId().toString());
+              datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
+              integrity.getReferencedDatasetSchemaId().toString());
     }
   }
 
@@ -1526,7 +1542,7 @@ public class RulesServiceImpl implements RulesService {
 
     for (DesignDatasetVO schema : designs) {
       RulesSchema scheamaAux =
-          rulesRepository.getAllDisabledRules(new ObjectId(schema.getDatasetSchema()));
+              rulesRepository.getAllDisabledRules(new ObjectId(schema.getDatasetSchema()));
       if (null != scheamaAux.getRules()) {
         disabledRules += scheamaAux.getRules().size();
       }
@@ -1547,7 +1563,7 @@ public class RulesServiceImpl implements RulesService {
 
     for (DesignDatasetVO schema : designs) {
       RulesSchema scheamaAux =
-          rulesRepository.getAllUncheckedRules(new ObjectId(schema.getDatasetSchema()));
+              rulesRepository.getAllUncheckedRules(new ObjectId(schema.getDatasetSchema()));
       if (null != scheamaAux.getRules()) {
         uncheckedRules += scheamaAux.getRules().size();
       }
@@ -1566,7 +1582,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   public List<IntegrityVO> getIntegritySchemas(String datasetSchemaId) {
     List<IntegritySchema> integrities =
-        integritySchemaRepository.findByOriginDatasetSchemaId(new ObjectId(datasetSchemaId));
+            integritySchemaRepository.findByOriginDatasetSchemaId(new ObjectId(datasetSchemaId));
     return integrityMapper.entityListToClass(integrities);
   }
 
@@ -1584,12 +1600,12 @@ public class RulesServiceImpl implements RulesService {
       integritySchemaRepository.save(integrity);
 
       Long datasetReferencedId = dataSetMetabaseControllerZuul
-          .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
+              .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
       Long datasetOriginId = dataSetMetabaseControllerZuul
-          .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
+              .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetOriginId,
-          datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
-          integrity.getReferencedDatasetSchemaId().toString());
+              datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
+              integrity.getReferencedDatasetSchemaId().toString());
     }
   }
 
@@ -1605,8 +1621,8 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public Map<String, String> importRulesSchema(List<byte[]> qcRulesBytes,
-      Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integritiesVo)
-      throws EEAException {
+                                               Map<String, String> dictionaryOriginTargetObjectId, List<IntegrityVO> integritiesVo)
+          throws EEAException {
 
     List<RulesSchema> schemaRules = new ArrayList<>();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -1617,8 +1633,8 @@ public class RulesServiceImpl implements RulesService {
         try {
           schemaRules.add(objectMapper.readValue(content, RulesSchema.class));
         } catch (IOException e) {
-          LOG_ERROR.error("Error converting from bytes[] to RulesSchema class. Message {}",
-              e.getMessage(), e);
+          LOG.error("Error converting from bytes[] to RulesSchema class. Message {}",
+                  e.getMessage(), e);
         }
       }
     }
@@ -1629,7 +1645,7 @@ public class RulesServiceImpl implements RulesService {
     // them as new rules.
     for (RulesSchema ruleSchema : schemaRules) {
       String newDatasetSchemaId =
-          dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
+              dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
 
       // Delete the the rules created in the steps before on the new schema, we are going to copy
       // them directly
@@ -1660,31 +1676,31 @@ public class RulesServiceImpl implements RulesService {
     // Sets the validation file name and it's root directory
     String folderName = "dataset-" + datasetId + "-QCS";
     String composedFileName = folderName + "-"
-        + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss"));
+            + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss"));
     String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
     File fileFolder = new File(pathPublicFile, folderName);
 
     String creatingFileError =
-        String.format("Failed generating CSV file with name %s using datasetID %s",
-            fileNameWithExtension, datasetId);
+            String.format("Failed generating CSV file with name %s using datasetID %s",
+                    fileNameWithExtension, datasetId);
 
     fileFolder.mkdirs();
 
     // Creates notification VO and passes the datasetID, the filename and the datasetType
     NotificationVO notificationVO = NotificationVO.builder()
-        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
-        .fileName(fileNameWithExtension).datasetType(datasetType).error(creatingFileError).build();
+            .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+            .fileName(fileNameWithExtension).datasetType(datasetType).error(creatingFileError).build();
 
     // We create the CSV
     StringWriter stringWriter = new StringWriter();
 
     try (CSVWriter csvWriter =
-        new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+                 new CSVWriter(stringWriter, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
       // Creates an array list containing all the column names from the CSV defined as constants
       List<String> headers = new ArrayList<>(Arrays.asList(TABLE, FIELD, CODE, QCNAME, QCDESC,
-          MESSAGE, EXPRESSION, TYPE_OF_QC, LEVEL_ERROR, CREATION_MODE, STATUS, VALID));
+              MESSAGE, EXPRESSION, TYPE_OF_QC, LEVEL_ERROR, CREATION_MODE, STATUS, VALID));
 
       // Writes the column names into the CSV Writer and sets the array String to headers size so it
       // only writes at most the number of columns as variables per row
@@ -1696,10 +1712,10 @@ public class RulesServiceImpl implements RulesService {
     }
     catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
-          notificationVO);
-      LOG_ERROR
-          .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
-              datasetId, e.getMessage(), e));
+              notificationVO);
+      LOG
+              .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
+                      datasetId, e.getMessage(), e));
       return;
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportQCCSV csvWriter.writeNext or fillQCExportData for datasetId {}. Message: {}", datasetId, e.getMessage());
@@ -1717,13 +1733,13 @@ public class RulesServiceImpl implements RulesService {
     try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
       out.write(file);
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_COMPLETED_EVENT, null,
-          notificationVO);
+              notificationVO);
     } catch (FileNotFoundException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
-          notificationVO);
-      LOG_ERROR
-          .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
-              datasetId, e.getMessage(), e));
+              notificationVO);
+      LOG
+              .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
+                      datasetId, e.getMessage(), e));
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportQCCSV when releasing notification (EXPORT_QC_COMPLETED_EVENT) for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;
@@ -1742,16 +1758,16 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public File downloadQCCSV(Long datasetId, String fileName)
-      throws IOException, ResponseStatusException {
+          throws IOException, ResponseStatusException {
 
     String folderName = "dataset-" + datasetId + "-QCS";
     // we compound the route and create the file
     File file = new File(new File(pathPublicFile, folderName), fileName);
     if (!file.exists()) {
 
-      LOG_ERROR.error(String.format(DOWNLOAD_QC_EXCEPTION, datasetId, fileName));
+      LOG.error(String.format(DOWNLOAD_QC_EXCEPTION, datasetId, fileName));
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-          String.format(DOWNLOAD_QC_EXCEPTION, datasetId, fileName));
+              String.format(DOWNLOAD_QC_EXCEPTION, datasetId, fileName));
     }
 
     return file;
@@ -1768,7 +1784,7 @@ public class RulesServiceImpl implements RulesService {
   @Override
   @Transactional
   public List<RuleHistoricInfoVO> getRuleHistoricInfo(Long datasetId, String ruleId)
-      throws EEAException {
+          throws EEAException {
     List<RuleHistoricInfoVO> historic = new ArrayList<>();
     String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(datasetId);
     if (datasetSchemaId == null) {
@@ -1819,7 +1835,7 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private Map<String, String> importData(Map<String, String> dictionaryOriginTargetObjectId,
-      String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities) throws EEAException {
+                                         String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
     fillRuleImport(rule, dictionaryOriginTargetObjectId);
@@ -1830,8 +1846,8 @@ public class RulesServiceImpl implements RulesService {
       importIntegrity(integrities, dictionaryOriginTargetObjectId, rule);
     }
     LOG.info(
-        "A new rule is going to be created in the import schema process {}, with this Reference id {}",
-        rule.getRuleName(), rule.getReferenceId());
+            "A new rule is going to be created in the import schema process {}, with this Reference id {}",
+            rule.getRuleName(), rule.getReferenceId());
     if (!rulesRepository.createNewRule(new ObjectId(newDatasetSchemaId), rule)) {
       throw new EEAException(EEAErrorMessage.ERROR_CREATING_RULE);
     } else {
@@ -1850,31 +1866,31 @@ public class RulesServiceImpl implements RulesService {
    * @return the map
    */
   private Map<String, String> fillRuleImport(Rule rule,
-      Map<String, String> dictionaryOriginTargetObjectId) {
+                                             Map<String, String> dictionaryOriginTargetObjectId) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
     rule.setRuleId(new ObjectId(newRuleId));
     if (dictionaryOriginTargetObjectId.containsKey(rule.getReferenceId().toString())) {
       rule.setReferenceId(
-          new ObjectId(dictionaryOriginTargetObjectId.get(rule.getReferenceId().toString())));
+              new ObjectId(dictionaryOriginTargetObjectId.get(rule.getReferenceId().toString())));
     }
     if (rule.getReferenceFieldSchemaPKId() != null && dictionaryOriginTargetObjectId
-        .containsKey(rule.getReferenceFieldSchemaPKId().toString())) {
+            .containsKey(rule.getReferenceFieldSchemaPKId().toString())) {
       rule.setReferenceFieldSchemaPKId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
+              dictionaryOriginTargetObjectId.get(rule.getReferenceFieldSchemaPKId().toString())));
     }
     if (rule.getUniqueConstraintId() != null) {
       rule.setUniqueConstraintId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
+              dictionaryOriginTargetObjectId.get(rule.getUniqueConstraintId().toString())));
     }
 
     if (rule.getIntegrityConstraintId() != null) {
       String newIntegrityConstraintId = new ObjectId().toString();
       dictionaryOriginTargetObjectId.put(rule.getIntegrityConstraintId().toString(),
-          newIntegrityConstraintId);
+              newIntegrityConstraintId);
       rule.setIntegrityConstraintId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(rule.getIntegrityConstraintId().toString())));
+              dictionaryOriginTargetObjectId.get(rule.getIntegrityConstraintId().toString())));
 
     }
 
@@ -1889,12 +1905,12 @@ public class RulesServiceImpl implements RulesService {
 
     // Special case for SQL Sentences
     if (StringUtils.isNotBlank(rule.getWhenCondition())
-        && rule.getWhenCondition().contains("isSQLSentence")
-        && StringUtils.isNotBlank(rule.getSqlSentence())) {
+            && rule.getWhenCondition().contains("isSQLSentence")
+            && StringUtils.isNotBlank(rule.getSqlSentence())) {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
         String newSqlSentence = rule.getSqlSentence();
         newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
-        rule.setSqlSentence(newSqlSentence);
+        rule.setSqlSentence(newSqlSentence);//
       });
     }
 
@@ -1910,33 +1926,33 @@ public class RulesServiceImpl implements RulesService {
    * @param rule the rule
    */
   private void importIntegrity(List<IntegritySchema> integritySchemas,
-      Map<String, String> dictionaryOriginTargetObjectId, Rule rule) {
+                               Map<String, String> dictionaryOriginTargetObjectId, Rule rule) {
 
     for (IntegritySchema integrity : integritySchemas) {
       integrity.setId(rule.getIntegrityConstraintId());
       integrity.setOriginDatasetSchemaId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(integrity.getOriginDatasetSchemaId().toString())));
+              dictionaryOriginTargetObjectId.get(integrity.getOriginDatasetSchemaId().toString())));
       integrity.setReferencedDatasetSchemaId(new ObjectId(
-          dictionaryOriginTargetObjectId.get(integrity.getReferencedDatasetSchemaId().toString())));
+              dictionaryOriginTargetObjectId.get(integrity.getReferencedDatasetSchemaId().toString())));
       integrity.setRuleId(rule.getRuleId());
       for (int i = 0; i < integrity.getOriginFields().size(); i++) {
         integrity.getOriginFields().set(i, new ObjectId(
-            dictionaryOriginTargetObjectId.get(integrity.getOriginFields().get(i).toString())));
+                dictionaryOriginTargetObjectId.get(integrity.getOriginFields().get(i).toString())));
       }
       for (int i = 0; i < integrity.getReferencedFields().size(); i++) {
         integrity.getReferencedFields().set(i, new ObjectId(
-            dictionaryOriginTargetObjectId.get(integrity.getReferencedFields().get(i).toString())));
+                dictionaryOriginTargetObjectId.get(integrity.getReferencedFields().get(i).toString())));
       }
 
       integritySchemaRepository.save(integrity);
 
       Long datasetReferencedId = dataSetMetabaseControllerZuul
-          .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
+              .getDesignDatasetIdByDatasetSchemaId(integrity.getReferencedDatasetSchemaId().toString());
       Long datasetOriginId = dataSetMetabaseControllerZuul
-          .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
+              .getDesignDatasetIdByDatasetSchemaId(integrity.getOriginDatasetSchemaId().toString());
       dataSetMetabaseControllerZuul.createDatasetForeignRelationship(datasetOriginId,
-          datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
-          integrity.getReferencedDatasetSchemaId().toString());
+              datasetReferencedId, integrity.getOriginDatasetSchemaId().toString(),
+              integrity.getReferencedDatasetSchemaId().toString());
     }
   }
 
@@ -1968,32 +1984,32 @@ public class RulesServiceImpl implements RulesService {
 
       if (rule.getType() == EntityTypeEnum.TABLE || rule.getType() == EntityTypeEnum.RECORD) {
         fieldsToWrite[0] =
-            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
-                : "Table not found"; // Table Name
+                tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                        : "Table not found"; // Table Name
       } else {
         fieldsToWrite[0] =
-            tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
-                : ""; // Table Name if it has a Field reference ID
+                tableNames.containsKey(rule.getReferenceId()) ? tableNames.get(rule.getReferenceId())
+                        : ""; // Table Name if it has a Field reference ID
       }
 
       fieldsToWrite[1] =
-          fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
-              : ""; // Field Name
+              fieldNames.containsKey(rule.getReferenceId()) ? fieldNames.get(rule.getReferenceId())
+                      : ""; // Field Name
       fieldsToWrite[2] =
-          rule.getShortCode().startsWith("=") ? " " + rule.getShortCode() : rule.getShortCode();
+              rule.getShortCode().startsWith("=") ? " " + rule.getShortCode() : rule.getShortCode();
       fieldsToWrite[3] =
-          rule.getRuleName().startsWith("=") ? " " + rule.getRuleName() : rule.getRuleName();
+              rule.getRuleName().startsWith("=") ? " " + rule.getRuleName() : rule.getRuleName();
       fieldsToWrite[4] = rule.getDescription().startsWith("=") ? " " + rule.getDescription()
-          : rule.getDescription();
+              : rule.getDescription();
       fieldsToWrite[5] =
-          rule.getThenCondition().get(0).startsWith("=") ? " " + rule.getThenCondition().get(0)
-              : rule.getThenCondition().get(0); // Message
+              rule.getThenCondition().get(0).startsWith("=") ? " " + rule.getThenCondition().get(0)
+                      : rule.getThenCondition().get(0); // Message
       if (rule.getSqlSentence() != null) {
         fieldsToWrite[6] = rule.getSqlSentence().startsWith("=") ? " " + rule.getSqlSentence()
-            : rule.getSqlSentence();
+                : rule.getSqlSentence();
       } else if (rule.getExpressionText() != null) {
         fieldsToWrite[6] = rule.getExpressionText().startsWith("=") ? " " + rule.getExpressionText()
-            : rule.getExpressionText();
+                : rule.getExpressionText();
       }
       fieldsToWrite[7] = rule.getType().toString(); // Type of QC
       fieldsToWrite[8] = rule.getThenCondition().get(1); // Level Error
@@ -2016,7 +2032,7 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private void addHistoricRuleInfo(Rule rule, Rule ruleOriginal, Long datasetId,
-      IntegrityVO originalIntegrityVO) throws EEAException {
+                                   IntegrityVO originalIntegrityVO) throws EEAException {
     UserRepresentationVO user = userManagementControllerZuul.getUserByUserId();
     Audit audit = auditRepository.getAuditByRuleId(rule.getRuleId());
     boolean metadata = false;
@@ -2051,10 +2067,10 @@ public class RulesServiceImpl implements RulesService {
    * @return true, if successful
    */
   private boolean checkExpressionHasChange(Rule ruleActual, Rule ruleOriginal,
-      IntegrityVO originalIntegrityVO) {
+                                           IntegrityVO originalIntegrityVO) {
     return checkSQLSentenceHasChange(ruleActual, ruleOriginal)
-        || checkExpressionTextHasChange(ruleActual, ruleOriginal)
-        || checkDatasetComparisonHasChange(ruleActual, originalIntegrityVO);
+            || checkExpressionTextHasChange(ruleActual, ruleOriginal)
+            || checkDatasetComparisonHasChange(ruleActual, originalIntegrityVO);
   }
 
   /**
@@ -2065,20 +2081,20 @@ public class RulesServiceImpl implements RulesService {
    * @return true, if successful
    */
   private boolean checkDatasetComparisonHasChange(Rule ruleActual,
-      IntegrityVO originalIntegrityVO) {
+                                                  IntegrityVO originalIntegrityVO) {
     IntegrityVO actualIntegrityVO = null;
     if (ruleActual.getIntegrityConstraintId() != null) {
       actualIntegrityVO = getIntegrityConstraint(ruleActual.getIntegrityConstraintId().toString());
     }
     return (actualIntegrityVO != null && originalIntegrityVO != null
-        && ruleActual.getSqlSentence() == null && ruleActual.getExpressionText().equals("")
-        && (!(actualIntegrityVO.getOriginFields().equals(originalIntegrityVO.getOriginFields()))
+            && ruleActual.getSqlSentence() == null && ruleActual.getExpressionText().equals("")
+            && (!(actualIntegrityVO.getOriginFields().equals(originalIntegrityVO.getOriginFields()))
             || !(actualIntegrityVO.getReferencedFields()
-                .equals(originalIntegrityVO.getReferencedFields()))
+            .equals(originalIntegrityVO.getReferencedFields()))
             || (actualIntegrityVO.getOriginFields().size() > originalIntegrityVO.getOriginFields()
-                .size()
-                || actualIntegrityVO.getReferencedFields().size() > originalIntegrityVO
-                    .getReferencedFields().size())));
+            .size()
+            || actualIntegrityVO.getReferencedFields().size() > originalIntegrityVO
+            .getReferencedFields().size())));
   }
 
   /**
@@ -2094,7 +2110,7 @@ public class RulesServiceImpl implements RulesService {
       change = false;
     } else {
       if ((ruleActual.getSqlSentence() != null && ruleOriginal.getSqlSentence() == null)
-          || !(ruleActual.getSqlSentence().equals(ruleOriginal.getSqlSentence()))) {
+              || !(ruleActual.getSqlSentence().equals(ruleOriginal.getSqlSentence()))) {
         change = true;
       }
     }
@@ -2114,7 +2130,7 @@ public class RulesServiceImpl implements RulesService {
       change = false;
     } else {
       if ((ruleActual.getExpressionText() != null && ruleOriginal.getExpressionText() == null)
-          || !(ruleActual.getExpressionText().equals(ruleOriginal.getExpressionText()))) {
+              || !(ruleActual.getExpressionText().equals(ruleOriginal.getExpressionText()))) {
         change = true;
       }
     }
@@ -2130,10 +2146,10 @@ public class RulesServiceImpl implements RulesService {
    */
   private boolean checkMetadataHasChange(Rule ruleActual, Rule ruleOriginal) {
     return !(ruleActual.getRuleName().equals(ruleOriginal.getRuleName()))
-        || !(ruleActual.getDescription().equals(ruleOriginal.getDescription()))
-        || !(ruleActual.getShortCode().equals(ruleOriginal.getShortCode()))
-        || !(ruleActual.getThenCondition().get(0).equals(ruleOriginal.getThenCondition().get(0)))
-        || !(ruleActual.getThenCondition().get(1).equals(ruleOriginal.getThenCondition().get(1)));
+            || !(ruleActual.getDescription().equals(ruleOriginal.getDescription()))
+            || !(ruleActual.getShortCode().equals(ruleOriginal.getShortCode()))
+            || !(ruleActual.getThenCondition().get(0).equals(ruleOriginal.getThenCondition().get(0)))
+            || !(ruleActual.getThenCondition().get(1).equals(ruleOriginal.getThenCondition().get(1)));
   }
 
   /**
@@ -2156,7 +2172,7 @@ public class RulesServiceImpl implements RulesService {
    * @param fieldNames the field names
    */
   private void retrieveTableAndFieldNames(List<TableSchema> tables, Map<String, String> tableNames,
-      Map<String, String> fieldNames) {
+                                          Map<String, String> fieldNames) {
     for (TableSchema table : tables) {
       tableNames.put(table.getIdTableSchema().toString(), table.getNameTableSchema());
 
@@ -2214,7 +2230,7 @@ public class RulesServiceImpl implements RulesService {
       rulesRepository.updateRule(new ObjectId(datasetSchemaId), rule);
     } catch (Exception e) {
       ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error updating rule state for datasetId {} and ruleId {}. Message: {}", datasetId, ruleId, e.getMessage());
+      LOG.error("Unexpected error! Error updating rule state for datasetId {} and ruleId {}. Message: {}", datasetId, ruleId, e.getMessage());
       throw e;
     }
   }
@@ -2260,7 +2276,7 @@ public class RulesServiceImpl implements RulesService {
       return isCorrect;
     } catch (Exception e) {
       ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error validating rule state for datasetSchemaId {} and ruleId {}. Message: {}", datasetSchemaId, ruleId, e.getMessage());
+      LOG.error("Unexpected error! Error validating rule state for datasetSchemaId {} and ruleId {}. Message: {}", datasetSchemaId, ruleId, e.getMessage());
       throw e;
     }
   }
@@ -2342,7 +2358,7 @@ public class RulesServiceImpl implements RulesService {
       return isCorrect;
     } catch (Exception e) {
       ObjectId ruleId = (rule != null) ? rule.getRuleId() : null;
-      LOG_ERROR.error("Unexpected error! Error validating rule with kiebase for ruleId {}. Message: {}", ruleId, e.getMessage());
+      LOG.error("Unexpected error! Error validating rule with kiebase for ruleId {}. Message: {}", ruleId, e.getMessage());
       throw e;
     }
   }
@@ -2392,11 +2408,11 @@ public class RulesServiceImpl implements RulesService {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
     } catch (EEAException e) {
-      LOG_ERROR.error("Unable to release notification: {}, {}", eventType, notificationVO);
+      LOG.error("Unable to release notification: {}, {}", eventType, notificationVO);
     } catch (Exception e) {
       String eventTopic = (eventType != null) ? eventType.getTopic() : null;
       Long datasetId = (notificationVO != null) ? notificationVO.getDatasetId() : null;
-      LOG_ERROR.error("Unexpected error! Error releasing notification for event topic {} and datasetId {}. Message: {}", eventTopic, datasetId, e.getMessage());
+      LOG.error("Unexpected error! Error releasing notification for event topic {} and datasetId {}. Message: {}", eventTopic, datasetId, e.getMessage());
       throw e;
     }
   }

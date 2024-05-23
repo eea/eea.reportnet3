@@ -907,8 +907,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
 
-        setIsIcebergTableCreated(dataset.tables.find(table => table.icebergTableIsCreated === true));
-
         setIsLoading(false);
         designerDispatch({
           type: 'GET_DATASET_DATA',
@@ -2050,6 +2048,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               isTooltip: true,
               validExtensions: designerState.selectedImportExtension
             })}`}
+            integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
             name="file"

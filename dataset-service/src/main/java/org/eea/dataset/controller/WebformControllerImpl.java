@@ -40,9 +40,6 @@ public class WebformControllerImpl implements WebformController {
   @Autowired
   private WebformService webformService;
 
-  /** The Constant LOG_ERROR. */
-  private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(WebformControllerImpl.class);
 
@@ -80,15 +77,15 @@ public class WebformControllerImpl implements WebformController {
       LOG.info("Successfully inserted webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
     } catch (EEAException e) {
       if(webformConfig != null){
-        LOG_ERROR.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+        LOG.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
       }
       else{
-        LOG_ERROR.error("Error when inserting webform config because object is null. Message: {}", e.getMessage());
+        LOG.error("Error when inserting webform config because object is null. Message: {}", e.getMessage());
       }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     } catch (Exception e) {
       String name = (webformConfig != null) ? webformConfig.getName() : null;
-      LOG_ERROR.error("Unexpected error! Error inserting webform config with name {} Message: {}", name, e.getMessage());
+      LOG.error("Unexpected error! Error inserting webform config with name {} Message: {}", name, e.getMessage());
       throw e;
     }
   }
@@ -112,15 +109,15 @@ public class WebformControllerImpl implements WebformController {
       LOG.info("Successfully updated webform config {} with type {}", webformConfig.getName(), webformConfig.getType());
     } catch (EEAException e) {
       if(webformConfig != null){
-        LOG_ERROR.error("Error when updating webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+        LOG.error("Error when updating webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
       }
       else{
-        LOG_ERROR.error("Error when updating webform config because object is null. Message: {}", e.getMessage());
+        LOG.error("Error when updating webform config because object is null. Message: {}", e.getMessage());
       }
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.NAME_DUPLICATED);
     } catch (Exception e) {
       String name = (webformConfig != null) ? webformConfig.getName() : null;
-      LOG_ERROR.error("Unexpected error! Error updating webform config with name {} Message: {}", name, e.getMessage());
+      LOG.error("Unexpected error! Error updating webform config with name {} Message: {}", name, e.getMessage());
       throw e;
     }
   }
@@ -142,11 +139,11 @@ public class WebformControllerImpl implements WebformController {
     try {
       json = webformService.findWebformConfigContentById(id);
     } catch (JsonProcessingException e) {
-      LOG_ERROR.error("Error getting the json webconfig from the id {}", id, e);
+      LOG.error("Error getting the json webconfig from the id {}", id, e);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND,
           EEAErrorMessage.OBTAINING_WEBFORM_CONFIG);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error retrieving webform config with id {} Message: {}", id, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving webform config with id {} Message: {}", id, e.getMessage());
       throw e;
     }
     return json;
@@ -168,11 +165,11 @@ public class WebformControllerImpl implements WebformController {
       LOG.info("Deleting webform config with id",id);
       webformService.deleteWebformConfig(id);
     } catch (EEAException e) {
-      LOG_ERROR.error("Error when deleting webform config with id",id);
+      LOG.error("Error when deleting webform config with id",id);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
           EEAErrorMessage.ERROR_WEBFORM_IN_USE);
     } catch (Exception e) {
-      LOG_ERROR.error("Unexpected error! Error removing webform config with id {} Message: {}", id, e.getMessage());
+      LOG.error("Unexpected error! Error removing webform config with id {} Message: {}", id, e.getMessage());
       throw e;
     }
   }
