@@ -637,16 +637,6 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "boolean", value = "delete cascade", example = "true") @RequestParam(
                   value = "deleteCascadePK", required = false) boolean deleteCascadePK,
           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-            && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
-            datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
-      LOG.error(
-              "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
-              recordId, datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-                      datasetService.findRecordSchemaIdById(datasetId, recordId)));
-    }
     try {
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -674,6 +664,16 @@ public class DatasetControllerImpl implements DatasetController {
         }
       }
       else {
+        if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+                && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
+                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
+          LOG.error(
+                  "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
+                  recordId, datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+                          datasetService.findRecordSchemaIdById(datasetId, recordId)));
+        }
         if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
                 datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
           LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
