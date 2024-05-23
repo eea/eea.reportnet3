@@ -391,14 +391,27 @@ export const DatasetRepository = {
       })
     }),
 
-  importTableFileWithS3: async ({ dataflowId, datasetId, delimiter, jobId, tableSchemaId }) =>
+  importTableFileWithS3: async ({
+    datasetId,
+    dataflowId,
+    providerId,
+    tableSchemaId,
+    replace,
+    integrationId,
+    delimiter,
+    jobId
+  }) =>
     await HTTPRequester.post({
-      url: getUrl(DatasetConfig.importTableFileWithS3, { dataflowId, datasetId, delimiter, jobId, tableSchemaId })
-    }),
-
-  importZipFileWithS3: async ({ dataflowId, datasetId, delimiter, jobId }) =>
-    await HTTPRequester.post({
-      url: getUrl(DatasetConfig.importZipFileWithS3, { dataflowId, datasetId, delimiter, jobId })
+      url: getUrl(DatasetConfig.importTableFileWithS3, {
+        datasetId,
+        dataflowId,
+        providerId,
+        tableSchemaId,
+        replace,
+        integrationId,
+        delimiter,
+        jobId
+      })
     }),
 
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) =>
