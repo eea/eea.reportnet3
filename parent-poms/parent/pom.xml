@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.1.6-UPLOAD-S3-FIXES</api-gateway.version>
-      <communication.version>v3.1.6-UPLOAD-S3-FIXES</communication.version>
-      <collaboration.version>v3.1.6-UPLOAD-S3-FIXES</collaboration.version>
-      <dataflow.version>v3.1.6-UPLOAD-S3-FIXES</dataflow.version>
-      <dataset.version>v3.1.6-UPLOAD-S3-FIXES</dataset.version>
-      <document.version>v3.1.6-UPLOAD-S3-FIXES</document.version>
-      <frontend.version>v3.1.6-UPLOAD-S3-FIXES</frontend.version>
-      <indexsearch.version>v3.1.6-UPLOAD-S3-FIXES</indexsearch.version>
-      <inspire.version>v3.1.6-UPLOAD-S3-FIXES</inspire.version>
-      <recordstore.version>v3.1.6-UPLOAD-S3-FIXES</recordstore.version>
-      <ums.version>v3.1.6-UPLOAD-S3-FIXES</ums.version>
-      <validation.version>v3.1.6-UPLOAD-S3-FIXES</validation.version>
-      <common-interfaces.version>v3.1.6-UPLOAD-S3-FIXES</common-interfaces.version>
-      <common-utitlities.version>v3.1.6-UPLOAD-S3-FIXES</common-utitlities.version>
-      <rod.version>v3.1.6-UPLOAD-S3-FIXES</rod.version>
-      <orchestrator.version>v3.1.6-UPLOAD-S3-FIXES</orchestrator.version>
+      <api-gateway.version>v3.3.1-ARCHITECTURE_DLH</api-gateway.version>
+      <communication.version>v3.3.1-ARCHITECTURE_DLH</communication.version>
+      <collaboration.version>v3.3.1-ARCHITECTURE_DLH</collaboration.version>
+      <dataflow.version>v3.3.1-ARCHITECTURE_DLH</dataflow.version>
+      <dataset.version>v3.3.1-ARCHITECTURE_DLH</dataset.version>
+      <document.version>v3.3.1-ARCHITECTURE_DLH</document.version>
+      <frontend.version>v3.3.1-ARCHITECTURE_DLH</frontend.version>
+      <indexsearch.version>v3.3.1-ARCHITECTURE_DLH</indexsearch.version>
+      <inspire.version>v3.3.1-ARCHITECTURE_DLH</inspire.version>
+      <recordstore.version>v3.3.1-ARCHITECTURE_DLH</recordstore.version>
+      <ums.version>v3.3.1-ARCHITECTURE_DLH</ums.version>
+      <validation.version>v3.3.1-ARCHITECTURE_DLH</validation.version>
+      <common-interfaces.version>v3.3.1-ARCHITECTURE_DLH</common-interfaces.version>
+      <common-utitlities.version>v3.3.1-ARCHITECTURE_DLH</common-utitlities.version>
+      <rod.version>v3.3.1-ARCHITECTURE_DLH</rod.version>
+      <orchestrator.version>v3.3.1-ARCHITECTURE_DLH</orchestrator.version>
   </properties>
 </project>
