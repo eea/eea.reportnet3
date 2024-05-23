@@ -380,20 +380,16 @@ export const CustomFileUpload = ({
 
   const importS3ToDlh = async () => {
     try {
-      tableSchemaId
-        ? await DatasetService.importTableFileWithS3({
-            dataflowId,
-            datasetId,
-            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
-            jobId,
-            tableSchemaId
-          })
-        : await DatasetService.importZipFileWithS3({
-            dataflowId,
-            datasetId,
-            delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
-            jobId
-          });
+      await DatasetService.importTableFileWithS3({
+        datasetId,
+        dataflowId,
+        providerId,
+        tableSchemaId,
+        replace: state.replace,
+        integrationId,
+        delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+        jobId
+      });
     } catch (error) {
       console.error('CustomFileUpload - importS3ToDlh.', error);
       notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
