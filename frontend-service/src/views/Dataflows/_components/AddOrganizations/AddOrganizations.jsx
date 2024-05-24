@@ -52,7 +52,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [sort, setSort] = useState({ field: 'label', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
-
+  const [organizationCode, setOrganizationCode] = useState('');
   const { setData } = useApplyFilters('addOrganizations');
 
   const { firstRow, numberRows, pageNum } = pagination;
@@ -60,7 +60,6 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-  let organizationCode = organizationName?.replaceAll(' ', '').substring(0, 20).toUpperCase();
 
   useEffect(() => {
     getOrganizations();
@@ -69,6 +68,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   useInputTextFocus(isAddOrganizationDialogVisible, inputRef);
 
   const isValidOrganizationName = () => RegularExpressions['nonSymbols'].test(organizationName);
+  const isValidOrganizationCode = () => RegularExpressions['nonSymbols'].test(organizationCode);
 
   const getOrganizations = async () => {
     setLoadingStatus('pending');
@@ -237,6 +237,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const renderAddOrganizationForm = () => {
     const hasError = !isEmpty(organizationName) && (isRepeatedOrganization() || !isValidOrganizationName());
+    const hasCodeError = !isEmpty(organizationCode) && (!isValidOrganizationCode());
 
     return (
       <div className={styles.addDialog}>
@@ -259,11 +260,13 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
             {resourcesContext.messages['code']}
           </label>
           <InputText
-            disabled={true}
+            disabled={false}
             id="codeInput"
+            className={hasCodeError ? styles.error : ''}
             placeholder={resourcesContext.messages['organizationCodeDots']}
             style={{ margin: '0.3rem 0' }}
             value={organizationCode}
+            onChange={(event)=>setOrganizationCode(event.target.value?.replaceAll(' ', '').substring(0, 20).toUpperCase())}
           />
         </div>
         <div className={styles.inputWrapper}>
@@ -465,7 +468,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         <ConfirmDialog
           confirmTooltip={getTooltipMessage()}
           dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
-          disabledConfirm={hasEmptyData() || isLoadingButton || isRepeatedOrganization() || !isValidOrganizationName()}
+          disabledConfirm={hasEmptyData() || isLoadingButton || isRepeatedOrganization() || !isValidOrganizationName() || !isValidOrganizationCode()}
           header={resourcesContext.messages['addOrganization']}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}
