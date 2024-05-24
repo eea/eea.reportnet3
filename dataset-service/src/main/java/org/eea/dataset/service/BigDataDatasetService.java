@@ -159,7 +159,7 @@ public interface BigDataDatasetService {
      * @param updateCascadePK the updateCascadePK
      *
      */
-    void updateRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records, boolean updateCascadePK) throws Exception;
+    void updateRecords(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVOe, List<RecordVO> records, boolean updateCascadePK) throws Exception;
 
     /**
      * Update field manually

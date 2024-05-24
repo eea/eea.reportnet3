@@ -37,10 +37,11 @@ import static org.eea.utils.LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER;
 
 @Component
 public class SpatialDataHandlingImpl implements SpatialDataHandling {
-  private List<FieldSchemaVO> headerTypes = new ArrayList<>();
-  private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
 
-  private void init(TableSchemaVO tableSchemaVO) {
+  private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
+  private static final String FROM_XEX = "FROM_HEX";
+
+  private List<FieldSchemaVO> init(TableSchemaVO tableSchemaVO) {
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
     FieldSchemaVO recordId = new FieldSchemaVO();
     recordId.setName(PARQUET_RECORD_ID_COLUMN_HEADER);
@@ -50,28 +51,26 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     fieldSchemas.add(providerCode);
     fieldSchemas.addAll(tableSchemaVO.getRecordSchema().getFieldSchema());
 
-    this.headerTypes = fieldSchemas;
+    return fieldSchemas;
   }
 
   @Override
   public boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO, boolean isGeoJsonHeaders) {
-    init(tableSchemaVO);
-    return !getHeaders(isGeoJsonHeaders).isEmpty();
+    return !getHeaders(isGeoJsonHeaders, tableSchemaVO).isEmpty();
   }
 
   @Override
-  public StringBuilder getHeadersConvertedToBinary() {
-    List<String> geoJsonHeaders = getHeaders(true);
+  public StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO) {
+    List<String> geoJsonHeaders = getHeaders(true, tableSchemaVO);
 
     return new StringBuilder(geoJsonHeaders.stream()
-        .map(header -> ", FROM_HEX(" + header + ") as " + header)
+        .map(header -> ", " + FROM_XEX + "(" + header + ") as " + header)
         .collect(Collectors.joining()));
   }
 
   @Override
-  public StringBuilder getSimpleHeaders() {
-    List<String> geoJsonHeaders = getHeaders(false);
-
+  public StringBuilder getSimpleHeaders(TableSchemaVO tableSchemaVO) {
+    List<String> geoJsonHeaders = getHeaders(false, tableSchemaVO);
     return new StringBuilder(String.join(",", geoJsonHeaders));
   }
 
@@ -84,7 +83,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
           try {
             fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
           } catch (IOException | ParseException e) {
-            LOG.error("Invalid GeoJson!!", e);
+            LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
             throw new RuntimeException(e);
           }
         });
@@ -113,7 +112,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         sb.append(String.format("%02X", b));
       }
     } catch (ParseException e) {
-      LOG.error("Invalid GeoJson!!", e);
+      LOG.error("Invalid GeoJson!! Tried to convert this String : {} , to binary but failed", value, e);
       throw new RuntimeException(e);
     }
     return sb.toString();
@@ -135,16 +134,16 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         return feature.toString();
       }
     } catch (ParseException e) {
-      LOG.error("Invalid GeoJson!!", e);
+      LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
       throw new RuntimeException(e);
     }
     return "";
   }
 
-  private List<String> getHeaders(boolean isGeoJsonHeaders) {
+  private List<String> getHeaders(boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
-    return headerTypes.stream()
+    return init(tableSchemaVO).stream()
         .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
         .map(FieldSchemaVO::getName)
         .collect(Collectors.toList());
@@ -170,17 +169,17 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return DataType.fromValue(geometry.getGeometryType().toUpperCase());
   }
 
-  private Optional<String> getHeader(boolean isGeoJsonHeaders, String headerInput) {
+  private Optional<String> getHeader(boolean isGeoJsonHeaders, String headerInput, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
-    return headerTypes.stream()
+    return init(tableSchemaVO).stream()
         .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
         .map(FieldSchemaVO::getName)
         .filter(name -> name.equalsIgnoreCase(headerInput)).findAny();
   }
 
   @Override
-  public String fixQueryForSearchData(String inputQuery, boolean isGeoJsonHeaders) {
+  public String fixQueryForSearchSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*\\S+";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
@@ -188,7 +187,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
     while (matcher.find()) {
       String columnName = matcher.group(1);
-      Optional<String> header = getHeader(isGeoJsonHeaders, columnName);
+      Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent() && !replacements.containsKey(columnName)) {
         replacements.put(columnName, "st_asgeojson(" + columnName + ")");
       }
@@ -203,7 +202,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public StringBuilder fixQueryForUpdateData(String inputQuery, boolean isGeoJsonHeaders) {
+  public StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
@@ -214,12 +213,12 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       String columnName = matcher.group(1);
       String value = matcher.group(3);
 
-      Optional<String> header = getHeader(isGeoJsonHeaders, columnName);
-      if (header.isPresent() && header.get().equalsIgnoreCase(DataType.POINT.getValue())) {
+      Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
+      if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
         String escValue = escapeJsonString(value);
         LOG.info("Value before converted to binary: {} ", escValue);
         String binaryStr = convertToBinary(escValue);
-        String hexBinaryStr = "FROM_HEX('" + binaryStr + "')";
+        String hexBinaryStr = FROM_XEX + "('" + binaryStr + "')";
         int valueStart = matcher.start(3);
         int valueEnd = matcher.end(3);
         resultQuery.replace(valueStart, valueEnd, hexBinaryStr);
