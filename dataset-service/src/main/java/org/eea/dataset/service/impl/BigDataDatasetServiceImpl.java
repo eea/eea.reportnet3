@@ -1132,7 +1132,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String fieldValue = (field.getValue() != null) ? field.getValue() : "";
         updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
         updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(recordId).append("'");
-        updateQueryBuilder = new StringBuilder(spatialDataHandling.fixQueryForUpdateData(updateQueryBuilder.toString(), true));
+        updateQueryBuilder = spatialDataHandling.fixQueryForUpdateData(updateQueryBuilder.toString(), true);
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
 

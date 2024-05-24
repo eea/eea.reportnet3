@@ -28,5 +28,5 @@ public interface SpatialDataHandling {
 
   String fixQueryForSearchData(String inputQuery, boolean isGeoJsonHeaders);
 
-  String fixQueryForUpdateData(String inputQuery, boolean isGeoJsonHeaders);
+  StringBuilder fixQueryForUpdateData(String inputQuery, boolean isGeoJsonHeaders);
 }

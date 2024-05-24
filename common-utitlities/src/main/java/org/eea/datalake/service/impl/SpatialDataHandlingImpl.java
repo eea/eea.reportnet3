@@ -7,12 +7,15 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.lock.service.impl.LockServiceImpl;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
@@ -35,6 +38,7 @@ import static org.eea.utils.LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER;
 @Component
 public class SpatialDataHandlingImpl implements SpatialDataHandling {
   private List<FieldSchemaVO> headerTypes = new ArrayList<>();
+  private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
 
   private void init(TableSchemaVO tableSchemaVO) {
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
@@ -80,6 +84,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
           try {
             fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
           } catch (IOException | ParseException e) {
+            LOG.error("Invalid GeoJson!!", e);
             throw new RuntimeException(e);
           }
         });
@@ -87,56 +92,51 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   @Override
   public String convertToBinary(String value) {
-    GeoJsonReader reader = new GeoJsonReader();
-    Geometry geometry;
+    StringBuilder sb = new StringBuilder();
     try {
+      GeoJsonReader reader = new GeoJsonReader();
+      Geometry geometry;
       geometry = reader.read(value);
+      Feature feature = FeatureConverter.toFeature(value);
+      String srid = feature.getProperties().get("srid").toString();
+      if (!srid.isBlank()) {
+        geometry.setSRID(Integer.parseInt(srid));
+      }
+
+      int order = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
+          ? ByteOrderValues.BIG_ENDIAN
+          : ByteOrderValues.LITTLE_ENDIAN;
+
+      WKBWriter wkbWriter = new WKBWriter(2, order, true);
+      byte[] bytes = wkbWriter.write(geometry);
+      for (byte b : bytes) {
+        sb.append(String.format("%02X", b));
+      }
     } catch (ParseException e) {
+      LOG.error("Invalid GeoJson!!", e);
       throw new RuntimeException(e);
     }
-
-    Feature feature = FeatureConverter.toFeature(value);
-    String t = feature.getProperties().get("srid").toString();
-    if (!t.isBlank()) {
-      geometry.setSRID(Integer.parseInt(t));
-    }
-
-    byte[] bytes;
-
-    int order = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
-        ? ByteOrderValues.BIG_ENDIAN
-        : ByteOrderValues.LITTLE_ENDIAN;
-
-    WKBWriter wkbWriter = new WKBWriter(2, order, true);
-    bytes = wkbWriter.write(geometry);
-
-    StringBuilder sb = new StringBuilder();
-    for (byte b : bytes) {
-      sb.append(String.format("%02X", b));
-    }
-
     return sb.toString();
   }
 
   @Override
   public String decodeSpatialData(byte[] byteArray) throws RuntimeException, IOException, ParseException {
-    WKBReader r = new WKBReader();
-
-    org.locationtech.jts.geom.Geometry t;
     try {
-      t = r.read(byteArray);
+      WKBReader r = new WKBReader();
+      org.locationtech.jts.geom.Geometry t = r.read(byteArray);
+      if (t != null) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("srid", Integer.toString(t.getSRID()));
+
+        org.wololo.jts2geojson.GeoJSONWriter writ = new GeoJSONWriter();
+        org.wololo.geojson.Geometry geometry = writ.write(t);
+
+        org.wololo.geojson.Feature feature = new org.wololo.geojson.Feature(geometry, properties);
+        return feature.toString();
+      }
     } catch (ParseException e) {
+      LOG.error("Invalid GeoJson!!", e);
       throw new RuntimeException(e);
-    }
-    if (t != null) {
-      Map<String, Object> properties = new HashMap<>();
-      properties.put("srid", Integer.toString(t.getSRID()));
-
-      org.wololo.jts2geojson.GeoJSONWriter writ = new GeoJSONWriter();
-      org.wololo.geojson.Geometry geometry = writ.write(t);
-
-      org.wololo.geojson.Feature feature = new org.wololo.geojson.Feature(geometry, properties);
-      return feature.toString();
     }
     return "";
   }
@@ -181,7 +181,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   @Override
   public String fixQueryForSearchData(String inputQuery, boolean isGeoJsonHeaders) {
-    String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*[^\\s]+";
+    String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*\\S+";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
     Map<String, String> replacements = new LinkedHashMap<>();
@@ -203,7 +203,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public String fixQueryForUpdateData(String inputQuery, boolean isGeoJsonHeaders) {
+  public StringBuilder fixQueryForUpdateData(String inputQuery, boolean isGeoJsonHeaders) {
     String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
@@ -217,6 +217,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       Optional<String> header = getHeader(isGeoJsonHeaders, columnName);
       if (header.isPresent() && header.get().equalsIgnoreCase(DataType.POINT.getValue())) {
         String escValue = escapeJsonString(value);
+        LOG.info("Value before converted to binary: {} ", escValue);
         String binaryStr = convertToBinary(escValue);
         String hexBinaryStr = "FROM_HEX('" + binaryStr + "')";
         int valueStart = matcher.start(3);
@@ -225,7 +226,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       }
     }
 
-    return !resultQuery.toString().isBlank() ? resultQuery.toString() : inputQuery;
+    return resultQuery;
   }
 
   public static String escapeJsonString(String str) {
