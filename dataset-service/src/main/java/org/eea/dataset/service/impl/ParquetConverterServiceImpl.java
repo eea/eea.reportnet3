@@ -401,6 +401,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                         row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
                     } else {
                         if(csvRecord.isMapped(expectedHeader)){
+                            if (spatialDataHandling.getGeoJsonEnums().contains(fieldType)) {
+                                String binaryString = spatialDataHandling.convertToBinary(csvRecord.get(expectedHeader));
+                                row.add(binaryString);
+                                continue;
+                            }
                             row.add(csvRecord.get(expectedHeader));
                         }
                         else{

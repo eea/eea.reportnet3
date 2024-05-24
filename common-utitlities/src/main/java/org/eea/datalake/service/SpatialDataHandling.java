@@ -14,6 +14,8 @@ public interface SpatialDataHandling {
 
   StringBuilder getHeadersConvertedToBinary();
 
+  String convertToBinary(String value);
+
   StringBuilder getSimpleHeaders();
 
   void decodeSpatialData(List<RecordVO> recordVOS);
@@ -23,4 +25,8 @@ public interface SpatialDataHandling {
   List<DataType> getGeoJsonEnums();
 
   DataType getGeometryType(byte[] byteArray) throws ParseException;
+
+  String fixQueryForSearchData(String inputQuery, boolean isGeoJsonHeaders);
+
+  String fixQueryForUpdateData(String inputQuery, boolean isGeoJsonHeaders);
 }

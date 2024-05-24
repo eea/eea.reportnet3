@@ -1,22 +1,31 @@
 package org.eea.datalake.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import mil.nga.sf.geojson.Feature;
+import mil.nga.sf.geojson.FeatureConverter;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
-import org.locationtech.jts.io.geojson.GeoJsonWriter;
+import org.locationtech.jts.io.WKBWriter;
+import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.springframework.stereotype.Component;
+import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.io.IOException;
+import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER;
@@ -51,7 +60,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     List<String> geoJsonHeaders = getHeaders(true);
 
     return new StringBuilder(geoJsonHeaders.stream()
-        .map(header -> ", St_asEwkb(ST_Transform(ST_GeomFromGeoJson(" + header + "), CAST(REPLACE(REGEXP_EXTRACT(" + header + ", '\"[0-9]{4}\"', 0 ), '\"', '') AS integer))) as " + header)
+        .map(header -> ", FROM_HEX(" + header + ") as " + header)
         .collect(Collectors.joining()));
   }
 
@@ -77,33 +86,59 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
+  public String convertToBinary(String value) {
+    GeoJsonReader reader = new GeoJsonReader();
+    Geometry geometry;
+    try {
+      geometry = reader.read(value);
+    } catch (ParseException e) {
+      throw new RuntimeException(e);
+    }
+
+    Feature feature = FeatureConverter.toFeature(value);
+    String t = feature.getProperties().get("srid").toString();
+    if (!t.isBlank()) {
+      geometry.setSRID(Integer.parseInt(t));
+    }
+
+    byte[] bytes;
+
+    int order = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
+        ? ByteOrderValues.BIG_ENDIAN
+        : ByteOrderValues.LITTLE_ENDIAN;
+
+    WKBWriter wkbWriter = new WKBWriter(2, order, true);
+    bytes = wkbWriter.write(geometry);
+
+    StringBuilder sb = new StringBuilder();
+    for (byte b : bytes) {
+      sb.append(String.format("%02X", b));
+    }
+
+    return sb.toString();
+  }
+
+  @Override
   public String decodeSpatialData(byte[] byteArray) throws RuntimeException, IOException, ParseException {
-    WKBReader reader = new WKBReader();
-    Geometry geometry = reader.read(byteArray);
+    WKBReader r = new WKBReader();
 
-    GeoJsonWriter geoJsonWriter = new GeoJsonWriter();
-    String input = geoJsonWriter.write(geometry);
+    org.locationtech.jts.geom.Geometry t;
+    try {
+      t = r.read(byteArray);
+    } catch (ParseException e) {
+      throw new RuntimeException(e);
+    }
+    if (t != null) {
+      Map<String, Object> properties = new HashMap<>();
+      properties.put("srid", Integer.toString(t.getSRID()));
 
-    ObjectMapper mapper = new ObjectMapper();
-    JsonNode root = mapper.readTree(input);
+      org.wololo.jts2geojson.GeoJSONWriter writ = new GeoJSONWriter();
+      org.wololo.geojson.Geometry geometry = writ.write(t);
 
-    String type = root.path("type").asText();
-    JsonNode coordinates = root.path("coordinates");
-    String srid = root.path("crs").path("properties").path("name").asText().replace("EPSG:", "");
-
-    ObjectNode geometryNode = mapper.createObjectNode();
-    geometryNode.put("type", type);
-    geometryNode.set("coordinates", coordinates);
-
-    ObjectNode propertiesNode = mapper.createObjectNode();
-    propertiesNode.put("srid", srid);
-
-    ObjectNode featureNode = mapper.createObjectNode();
-    featureNode.put("type", "Feature");
-    featureNode.set("geometry", geometryNode);
-    featureNode.set("properties", propertiesNode);
-
-    return mapper.writeValueAsString(featureNode);
+      org.wololo.geojson.Feature feature = new org.wololo.geojson.Feature(geometry, properties);
+      return feature.toString();
+    }
+    return "";
   }
 
   private List<String> getHeaders(boolean isGeoJsonHeaders) {
@@ -133,5 +168,70 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     WKBReader reader = new WKBReader();
     Geometry geometry = reader.read(byteArray);
     return DataType.fromValue(geometry.getGeometryType().toUpperCase());
+  }
+
+  private Optional<String> getHeader(boolean isGeoJsonHeaders, String headerInput) {
+    List<DataType> geoJsonEnums = getGeoJsonEnums();
+
+    return headerTypes.stream()
+        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .map(FieldSchemaVO::getName)
+        .filter(name -> name.equalsIgnoreCase(headerInput)).findAny();
+  }
+
+  @Override
+  public String fixQueryForSearchData(String inputQuery, boolean isGeoJsonHeaders) {
+    String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*[^\\s]+";
+    Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+    Matcher matcher = pattern.matcher(inputQuery);
+    Map<String, String> replacements = new LinkedHashMap<>();
+
+    while (matcher.find()) {
+      String columnName = matcher.group(1);
+      Optional<String> header = getHeader(isGeoJsonHeaders, columnName);
+      if (header.isPresent() && !replacements.containsKey(columnName)) {
+        replacements.put(columnName, "st_asgeojson(" + columnName + ")");
+      }
+    }
+
+    String finalQuery = inputQuery;
+    for (Map.Entry<String, String> entry : replacements.entrySet()) {
+      finalQuery = finalQuery.replaceAll("\\b" + Pattern.quote(entry.getKey()) + "\\b", entry.getValue());
+    }
+
+    return !finalQuery.isEmpty() ? finalQuery : inputQuery;
+  }
+
+  @Override
+  public String fixQueryForUpdateData(String inputQuery, boolean isGeoJsonHeaders) {
+    String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
+    Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+    Matcher matcher = pattern.matcher(inputQuery);
+
+    StringBuilder resultQuery = new StringBuilder(inputQuery);
+
+    while (matcher.find()) {
+      String columnName = matcher.group(1);
+      String value = matcher.group(3);
+
+      Optional<String> header = getHeader(isGeoJsonHeaders, columnName);
+      if (header.isPresent() && header.get().equalsIgnoreCase(DataType.POINT.getValue())) {
+        String escValue = escapeJsonString(value);
+        String binaryStr = convertToBinary(escValue);
+        String hexBinaryStr = "FROM_HEX('" + binaryStr + "')";
+        int valueStart = matcher.start(3);
+        int valueEnd = matcher.end(3);
+        resultQuery.replace(valueStart, valueEnd, hexBinaryStr);
+      }
+    }
+
+    return !resultQuery.toString().isBlank() ? resultQuery.toString() : inputQuery;
+  }
+
+  public static String escapeJsonString(String str) {
+    if (str.startsWith("'") && str.endsWith("'")) {
+      return str.substring(1, str.length() - 1);
+    }
+    return str;
   }
 }
