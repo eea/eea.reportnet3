@@ -81,6 +81,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
   const [isIcebergTableCreated, setIsIcebergTableCreated] = useState(false);
+  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
@@ -758,6 +759,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   }, [snapshotState.isRestoring]);
 
+  const onTableConversion = conversionInProgress => {
+    setIsTableConversionInProgress(conversionInProgress);
+  };
+
   useEffect(() => {
     const validationFinished = notificationContext.toShow.find(
       notification => notification.key === 'VALIDATION_FINISHED_EVENT'
@@ -901,8 +906,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           datasetId,
           dataset.tables.map(tableSchema => tableSchema.tableSchemaName)
         );
-
-        setIsIcebergTableCreated(dataset.tables.find(table => table.icebergTableIsCreated === true));
 
         setIsLoading(false);
         designerDispatch({
@@ -1708,6 +1711,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
@@ -1739,6 +1743,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
@@ -1768,6 +1773,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
@@ -1791,6 +1797,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
                 disabled={
+                  isTableConversionInProgress ||
                   isIcebergTableCreated ||
                   isDesignDatasetEditorRead ||
                   actionsContext.importDatasetProcessing ||
@@ -1913,6 +1920,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
+            onTableConversion={onTableConversion}
             onUpdateSchema={onUpdateSchema}
             onUpdateTable={onUpdateTable}
             selectedRuleId={dataViewerOptions.selectedRuleId}
@@ -2040,6 +2048,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               isTooltip: true,
               validExtensions: designerState.selectedImportExtension
             })}`}
+            integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
             name="file"

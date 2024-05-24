@@ -104,6 +104,8 @@ public interface JobController {
      * @param integrationId the id of the integration
      * @param delimiter the delimiter
      * @param jobStatus the status of the job
+     * @param fmeJobId the fme job id
+     * @param filePathInS3 the file path in s3
      * @return the job id
      */
     @PostMapping(value = "/addImport/{datasetId}")
@@ -117,7 +119,7 @@ public interface JobController {
                        @RequestParam(value = "delimiter", required = false) String delimiter,
                       @RequestParam(value = "jobStatus", required = false) JobStatusEnum jobStatus,
                       @RequestParam(value = "fmeJobId", required = false) String fmeJobId,
-                      @RequestParam(value = "preSignedURL", required = false) String preSignedURL);
+                      @RequestParam(value = "filePathInS3", required = false) String filePathInS3);
 
 
     /**

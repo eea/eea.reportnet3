@@ -130,6 +130,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [selectedView, setSelectedView] = useState('');
+  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [isTestDataset, setIsTestDataset] = useState(false);
 
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
@@ -849,13 +850,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setTableSchema(
         datasetSchema.tables.map(tableSchema => {
           tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
-          if (tableSchema.icebergTableIsCreated) {
-            setIsIcebergTableCreated(true);
-          }
           return {
             dataAreManuallyEditable: tableSchema.dataAreManuallyEditable,
             description: tableSchema.description || tableSchema.tableSchemaDescription,
-            icebergTableIsCreated: tableSchema.icebergTableIsCreated,
             id: tableSchema.tableSchemaId,
             name: tableSchema.tableSchemaName,
             notEmpty: tableSchema.notEmpty,
@@ -978,6 +975,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       }
       setIsDownloadingQCRules(false);
     }
+  };
+
+  const onTableConversion = conversionInProgress => {
+    setIsTableConversionInProgress(conversionInProgress);
   };
 
   const datasetInsideTitle = () => {
@@ -1168,6 +1169,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+        onTableConversion={onTableConversion}
         reporting={true}
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
@@ -1223,6 +1225,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
                   disabled={
+                    isTableConversionInProgress ||
                     isIcebergTableCreated ||
                     !hasWritePermissions ||
                     actionsContext.importDatasetProcessing ||
@@ -1253,7 +1256,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
               disabled={
-                isIcebergTableCreated ||
+                isTableConversionInProgress ||
+                (isIcebergTableCreated && hasWritePermissions) ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||
@@ -1280,6 +1284,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
             <DatasetDeleteDataDialog
               disabled={
+                isTableConversionInProgress ||
                 isIcebergTableCreated ||
                 !hasWritePermissions ||
                 actionsContext.importDatasetProcessing ||
@@ -1302,6 +1307,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           <div className="p-toolbar-group-right">
             <DatasetValidateDialog
               disabled={
+                isTableConversionInProgress ||
                 isIcebergTableCreated ||
                 !hasWritePermissions ||
                 actionsContext.importDatasetProcessing ||
@@ -1423,11 +1429,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             isTooltip: true,
             validExtensions: importSelectedIntegrationExtension
           })}`}
+          integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           name="file"
           onError={onImportDatasetError}
           onUpload={onUpload}
+          providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
           s3Check={true}
           url={`${window.env.REACT_APP_BACKEND}${

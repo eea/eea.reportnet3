@@ -3,18 +3,12 @@ package org.eea.dataset.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
-import lombok.Data;
 import lombok.SneakyThrows;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bson.types.ObjectId;
-import org.eea.datalake.service.DremioHelperService;
-import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
-import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
-import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -72,8 +66,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
-
-import static org.eea.utils.LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH;
 
 /**
  * The Class DatasetControllerImpl.
@@ -137,7 +129,7 @@ public class DatasetControllerImpl implements DatasetController {
   private BigDataDatasetService bigDataDatasetService;
 
   @Autowired
-  private DremioHelperService dremioHelperService;
+  private DatasetTableService datasetTableService;
 
   /**
    * Gets the data tables values.
@@ -359,11 +351,14 @@ public class DatasetControllerImpl implements DatasetController {
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
-          LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+        if(StringUtils.isNotBlank(tableSchemaId)){
+          String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+          TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+            LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+          }
         }
         bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO);
       } catch (Exception e) {
@@ -595,7 +590,8 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.updateRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records, updateCascadePK);
         }
         else{
@@ -641,16 +637,6 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "boolean", value = "delete cascade", example = "true") @RequestParam(
                   value = "deleteCascadePK", required = false) boolean deleteCascadePK,
           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
-    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-            && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
-            datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
-      LOG.error(
-              "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
-              recordId, datasetId);
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-                      datasetService.findRecordSchemaIdById(datasetId, recordId)));
-    }
     try {
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -661,7 +647,8 @@ public class DatasetControllerImpl implements DatasetController {
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
 
           if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
                   tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
@@ -677,6 +664,16 @@ public class DatasetControllerImpl implements DatasetController {
         }
       }
       else {
+        if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+                && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
+                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
+          LOG.error(
+                  "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
+                  recordId, datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+                          datasetService.findRecordSchemaIdById(datasetId, recordId)));
+        }
         if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
                 datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
           LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
@@ -744,7 +741,8 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.insertRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records);
         }
         else{
@@ -1271,7 +1269,8 @@ public class DatasetControllerImpl implements DatasetController {
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO, updateCascadePK);
         }
         else{
@@ -2754,7 +2753,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "File name", example = "fileName") @RequestParam(value = "fileName", required = false) String fileName){
     JobPresignedUrlInfo info;
     try{
-      String preSignedUrl = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
+      info = bigDataDatasetService.generateImportPreSignedUrl(datasetId, dataflowId, providerId, fileName);
       LOG.info("Created presigned url for dataflowId {}, datasetId {} and providerId {}", dataflowId, datasetId, providerId);
 
       //check eligibility of job and add new import job
@@ -2765,13 +2764,13 @@ public class DatasetControllerImpl implements DatasetController {
         //if this endpoint is called we want to iniatialize an import job with status QUEUED instead of IN_PROGRESS
         jobStatus = JobStatusEnum.QUEUED;
       }
-      Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null, preSignedUrl);
+      Long jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, null, replace, integrationId, delimiter, jobStatus, null, info.getFilePathInS3());
       if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
         LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
         datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, null);
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
       }
-      info = new JobPresignedUrlInfo(jobId, preSignedUrl);
+      info.setJobId(jobId);
     }
     catch (Exception e){
       LOG.error("Could not generate import presigned url for datasetId {}, dataflowId {} and providerId {}", datasetId, dataflowId, providerId);
@@ -2781,7 +2780,7 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/convertParquetToIcebergTable/{datasetId}")
   public void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
@@ -2792,8 +2791,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.info("Converting parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-      if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && !BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
-        bigDataDatasetService.convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO);
+      if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+              && !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+        bigDataDatasetService.convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId);
         LOG.info("Converted parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       }
       else{
@@ -2817,7 +2817,7 @@ public class DatasetControllerImpl implements DatasetController {
    *
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/convertIcebergToParquetTable/{datasetId}")
   public void convertIcebergToParquetTable(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
@@ -2827,8 +2827,9 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.info("Converting iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-      if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())) {
-        bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO);
+      if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+              && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+        bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId);
         LOG.info("Converted iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       }
       else{
@@ -2838,6 +2839,51 @@ public class DatasetControllerImpl implements DatasetController {
     catch (Exception e){
       LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
               providerId, datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Check if iceberg table is created
+   *
+   * @param datasetId the dataset id
+   * @param tableSchemaId the tableSchemaId
+   * @return if the iceberg table is created
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/isIcebergTableCreated/{datasetId}/{tableSchemaId}")
+  public Boolean isIcebergTableCreated(@PathVariable("datasetId") Long datasetId,
+                             @PathVariable("tableSchemaId") String tableSchemaId){
+    try{
+      return datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId);
+    }
+    catch (Exception e){
+      LOG.error("Could not find if the icebergTableCreated option was enabled for datasetId {}, tableSchemaId {}", datasetId, tableSchemaId);
+      throw e;
+    }
+  }
+
+  /**
+   * Get iceberg tables in dataflow
+   *
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param datasetId the dataset id
+   * @return list of tables info
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getIcebergTables")
+  public List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
+                                             @RequestParam(value = "providerId", required = false) Long providerId,
+                                             @RequestParam(value = "datasetId", required = false) Long datasetId){
+    try{
+      return datasetTableService.getIcebergTablesForDataflow(dataflowId, providerId, datasetId);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve iceberg tables for dataflowId {}, providerId {} and datasetId {}", dataflowId, providerId, datasetId);
       throw e;
     }
   }

@@ -263,6 +263,10 @@ export const DatasetService = {
   exportTableSchema: async (datasetId, datasetSchemaId, tableSchemaId, fileType) =>
     await DatasetRepository.exportTableSchema(datasetId, datasetSchemaId, tableSchemaId, fileType),
 
+  getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {
+    return await DatasetRepository.getIsIcebergTableCreated({ datasetId, tableSchemaId });
+  },
+
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
 
@@ -278,8 +282,26 @@ export const DatasetService = {
     });
   },
 
-  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) => {
-    const presignedUrl = await DatasetRepository.getPresignedUrl({ datasetId, dataflowId, fileName });
+  getPresignedUrl: async ({
+    datasetId,
+    dataflowId,
+    providerId,
+    tableSchemaId,
+    replace,
+    integrationId,
+    delimiter,
+    fileName
+  }) => {
+    const presignedUrl = await DatasetRepository.getPresignedUrl({
+      datasetId,
+      dataflowId,
+      providerId,
+      tableSchemaId,
+      replace,
+      integrationId,
+      delimiter,
+      fileName
+    });
     return presignedUrl.data;
   },
 
@@ -489,9 +511,6 @@ export const DatasetService = {
         hasPKReferenced: !isEmpty(
           records.filter(record => record.fields.filter(field => field.pkReferenced === true)[0])
         ),
-        icebergTableIsCreated: isNull(datasetTableDTO.icebergTableIsCreated)
-          ? false
-          : datasetTableDTO.icebergTableIsCreated,
         tableSchemaToPrefill: isNull(datasetTableDTO.toPrefill) ? false : datasetTableDTO.toPrefill,
         tableSchemaId: datasetTableDTO.idTableSchema,
         tableSchemaDescription: datasetTableDTO.description,
@@ -677,6 +696,27 @@ export const DatasetService = {
   },
 
   downloadTableDefinitions: async datasetSchemaId => await DatasetRepository.downloadTableDefinitions(datasetSchemaId),
+
+  importTableFileWithS3: async ({
+    datasetId,
+    dataflowId,
+    providerId,
+    tableSchemaId,
+    replace,
+    integrationId,
+    delimiter,
+    jobId
+  }) =>
+    await DatasetRepository.importTableFileWithS3({
+      datasetId,
+      dataflowId,
+      providerId,
+      tableSchemaId,
+      replace,
+      integrationId,
+      delimiter,
+      jobId
+    }),
 
   updateField: async (
     datasetId,

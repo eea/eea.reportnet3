@@ -494,6 +494,11 @@ public class DatasetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordFixedNumberException() throws Exception {
     try {
+      Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
+      DataFlowVO mockDataflow = new DataFlowVO();
+      mockDataflow.setBigData(false);
+      Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
+
       Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),

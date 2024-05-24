@@ -1294,7 +1294,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       Pageable pageable, ExportFilterVO filters) throws SQLException {
 
     String stringQuery = buildQueryWithExportFilters(datasetId, tableId, pageable, filters);
-    LOG.info("Dataset id {} tableId {}", datasetId, tableId);
 
     int parameterPosition = 1;
     ErrorTypeEnum[] levelErrorsArray = filters.getLevelError();
@@ -1321,7 +1320,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (StringUtils.isNotBlank(filters.getFieldValue())) {
         stmt.setString(parameterPosition, "%" + filters.getFieldValue() + "%");
       }
-      LOG.info("executing query in findByTableValueOrdered: {}", stmt);
       ResultSet rs = stmt.executeQuery();
       ObjectMapper mapper = new ObjectMapper();
       while (rs.next()) {

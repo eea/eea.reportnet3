@@ -59,6 +59,7 @@ export const FieldsDesigner = ({
   onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
+  onTableConversion,
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -83,13 +84,13 @@ export const FieldsDesigner = ({
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isTableEditable, setIsTableEditable] = useState(
-    table?.icebergTableIsCreated ? table.icebergTableIsCreated : false
-  );
+  const [isTableEditable, setIsTableEditable] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPkChecked, setIsPkChecked] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
+  const [isTableLoading, setIsTableLoading] = useState(false);
+  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [dataAreManuallyEditable, setDataAreManuallyEditable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
@@ -112,6 +113,19 @@ export const FieldsDesigner = ({
       setFixedNumber(table.fixedNumber || false);
     }
   }, [table]);
+
+  useEffect(() => {
+    onGetIsIcebergCreated();
+  }, []);
+
+  const onGetIsIcebergCreated = async () => {
+    const icebergCreated = await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: table.tableSchemaId
+    });
+
+    setIsTableEditable(icebergCreated.data);
+  };
 
   useEffect(() => {
     if (!isLoading && !isNil(refElement)) {
@@ -172,10 +186,6 @@ export const FieldsDesigner = ({
     } else {
       setMarkedForDeletion(markedForDeletion.filter(markedField => markedField.fieldId !== fieldId));
     }
-  };
-
-  const onEnableManualEdit = checked => {
-    setIsTableEditable(checked);
   };
 
   const onCodelistAndLinkShow = (fieldId, selectedField) => {
@@ -292,6 +302,10 @@ export const FieldsDesigner = ({
     });
   };
 
+  const onChangeTableEditable = checked => {
+    setIsTableEditable(checked);
+  };
+
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
     updateTableDesign({
@@ -339,10 +353,18 @@ export const FieldsDesigner = ({
     });
   };
 
+  const onDisableManualEditing = checked => {
+    setIsTableConversionInProgress(checked);
+  };
+
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName, upDownOrder = false, order) =>
     reorderField(draggedFieldIdx, droppedFieldName, upDownOrder, order);
 
   const onFieldDragAndDropStart = draggedFieldIdx => setInitialFieldIndexDragged(draggedFieldIdx);
+
+  const onIsTableDataLoading = isLoading => {
+    setIsTableLoading(isLoading);
+  };
 
   const onKeyChange = event => {
     if (event.key === 'Escape') {
@@ -518,13 +540,15 @@ export const FieldsDesigner = ({
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
-          isTableEditable={isTableEditable}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
           onChangeButtonsVisibility={onChangeButtonsVisibility}
-          onEnableManualEdit={onEnableManualEdit}
+          onChangeTableEditable={onChangeTableEditable}
+          onDisableManualEditing={onDisableManualEditing}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+          onIsTableDataLoading={onIsTableDataLoading}
           onLoadTableData={onLoadTableData}
+          onTableConversion={onTableConversion}
           reporting={false}
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
@@ -1045,27 +1069,35 @@ export const FieldsDesigner = ({
               {resourcesContext.messages['notEmpty']}
             </label>
           </div>
-          <div>
-            <span
-              className={styles.switchTextInput}
-              id={`${table.tableSchemaId}_check_manual_edit_label`}
-              style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
-              {resourcesContext.messages['manualEdit']}
-            </span>
-            <Checkbox
-              ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
-              checked={dataAreManuallyEditable}
-              className={styles.fieldDesignerItem}
-              disabled={isTableEditable || isDataflowOpen || isDesignDatasetEditorRead || isReferenceDataset}
-              id={`${table.tableSchemaId}_check_manual_edit`}
-              inputId={`${table.tableSchemaId}_check_manual_edit`}
-              label="Default"
-              onChange={e => onChangeManualEdit(e.checked)}
-            />
-            <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
-              {resourcesContext.messages['manualEdit']}
-            </label>
-          </div>
+          {bigData && (
+            <div>
+              <span
+                className={styles.switchTextInput}
+                id={`${table.tableSchemaId}_check_manual_edit_label`}
+                style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen ? 0.5 : 1 }}>
+                {resourcesContext.messages['manualEdit']}
+              </span>
+              <Checkbox
+                ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
+                checked={!isDataflowOpen && dataAreManuallyEditable}
+                className={styles.fieldDesignerItem}
+                disabled={
+                  isTableConversionInProgress ||
+                  isTableLoading ||
+                  isTableEditable ||
+                  isDataflowOpen ||
+                  isDesignDatasetEditorRead
+                }
+                id={`${table.tableSchemaId}_check_manual_edit`}
+                inputId={`${table.tableSchemaId}_check_manual_edit`}
+                label="Default"
+                onChange={e => onChangeManualEdit(e.checked)}
+              />
+              <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
+                {resourcesContext.messages['manualEdit']}
+              </label>
+            </div>
+          )}
         </div>
       </div>
       <div className={styles.contentTable}>

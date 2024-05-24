@@ -33,6 +33,11 @@ public class S3ServiceImpl implements S3Service {
 
     private final String S3_ICEBERG_BUCKET_PATH;
 
+    private final String S3_DEFAULT_BUCKET_NAME;
+
+    private final String S3_ICEBERG_BUCKET_NAME;
+
+
     private static final Logger LOG = LoggerFactory.getLogger(S3ServiceImpl.class);
 
     public S3ServiceImpl(DataSetControllerZuul dataSetControllerZuul, @Qualifier("s3PrivateConfiguration") S3Configuration s3PrivateConfiguration) {
@@ -41,6 +46,8 @@ public class S3ServiceImpl implements S3Service {
         this.S3_DEFAULT_BUCKET_PATH = s3PrivateConfiguration.getS3DefaultBucketPath();
         this.S3_ICEBERG_BUCKET = s3PrivateConfiguration.getIcebergBucket();
         this.S3_ICEBERG_BUCKET_PATH = s3PrivateConfiguration.getS3IcebergBucketPath();
+        this.S3_DEFAULT_BUCKET_NAME = s3PrivateConfiguration.getS3DefaultBucketName();
+        this.S3_ICEBERG_BUCKET_NAME = s3PrivateConfiguration.getS3IcebergBucketName();
     }
 
     @Override
@@ -313,32 +320,32 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    public S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName) {
+    public S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName, Boolean isIceberg) {
         S3PathResolver s3PathResolver;
-        switch (dataset.getDatasetTypeEnum()) {
-            case REFERENCE:
-                s3PathResolver = new S3PathResolver(dataset.getDataflowId(),
+
+        if(!isIceberg && dataset.getDatasetTypeEnum() == DatasetTypeEnum.REFERENCE){
+            s3PathResolver = new S3PathResolver(dataset.getDataflowId(),
                     dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
                     dataset.getId(), tableName);
-                s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
-                break;
-            case COLLECTION:
-                s3PathResolver =
-                    new S3PathResolver(dataset.getDataflowId(), dataset.getId(), tableName,
-                        S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
-                break;
-            case EUDATASET:
-                s3PathResolver =
-                    new S3PathResolver(dataset.getDataflowId(), dataset.getId(), tableName,
-                        S3_EU_SNAPSHOT_ROOT_PATH);
-                break;
-            default:
-                s3PathResolver = new S3PathResolver(dataset.getDataflowId(),
-                    dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
-                    dataset.getId(), tableName);
-                s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
-                break;
+            s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_FOLDER_PATH);
         }
+        else if(!isIceberg && dataset.getDatasetTypeEnum() == DatasetTypeEnum.COLLECTION){
+            s3PathResolver =
+                    new S3PathResolver(dataset.getDataflowId(), dataset.getId(), tableName,
+                            S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+        }
+        else if(!isIceberg && dataset.getDatasetTypeEnum() == DatasetTypeEnum.EUDATASET){
+            s3PathResolver =
+                    new S3PathResolver(dataset.getDataflowId(), dataset.getId(), tableName,
+                            S3_EU_SNAPSHOT_ROOT_PATH);
+        }
+        else {
+            s3PathResolver = new S3PathResolver(dataset.getDataflowId(),
+                    dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0,
+                    dataset.getId(), tableName);
+            s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
+        }
+
         return s3PathResolver;
     }
 
@@ -346,6 +353,11 @@ public class S3ServiceImpl implements S3Service {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         String date = dateFormat.format(new Date());
         return String.format(S3_SNAPSHOT_PATTERN, snapshotId, date);
+    }
+
+    @Override
+    public String getS3DefaultBucket() {
+        return S3_DEFAULT_BUCKET;
     }
 
     @Override
@@ -361,6 +373,16 @@ public class S3ServiceImpl implements S3Service {
     @Override
     public String getS3IcebergBucketPath(){
         return S3_ICEBERG_BUCKET_PATH;
+    }
+
+    @Override
+    public String getS3DefaultBucketName(){
+        return S3_DEFAULT_BUCKET_NAME;
+    }
+
+    @Override
+    public String getS3IcebergBucketName(){
+        return S3_ICEBERG_BUCKET_NAME;
     }
 
 

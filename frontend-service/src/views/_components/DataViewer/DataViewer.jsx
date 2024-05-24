@@ -75,10 +75,12 @@ export const DataViewer = ({
   isReferenceDataset,
   isReportingWebform,
   onChangeButtonsVisibility,
-  onEnableManualEdit,
+  onChangeTableEditable,
+  onDisableManualEditing,
   onHideSelectGroupedValidation,
+  onIsTableDataLoading,
   onLoadTableData,
-  isTableEditable,
+  onTableConversion,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -122,6 +124,7 @@ export const DataViewer = ({
   const [isNewRecord, setIsNewRecord] = useState(false);
   const [isPasting, setIsPasting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isTableEditable, setIsTableEditable] = useState(false);
   const [levelErrorValidations, setLevelErrorValidations] = useState(levelErrorAllTypes);
   const [prevFilterValue, setPrevFilterValue] = useState('');
   const [valueFilter, setValueFilter] = useState();
@@ -225,7 +228,7 @@ export const DataViewer = ({
 
   const actionTemplate = () => (
     <ActionsColumn
-      disabledButtons={isDataflowOpen || isDesignDatasetEditorRead}
+      disabledButtons={isEditRecordsManuallyButtonDisabled || isDataflowOpen || isDesignDatasetEditorRead}
       hideDeletion={tableFixedNumber}
       hideEdition={RecordUtils.allAttachments(colsSchema)}
       onDeleteClick={() => setConfirmDeleteVisible(true)}
@@ -312,11 +315,23 @@ export const DataViewer = ({
     validationsTemplate,
     reporting,
     dataAreManuallyEditable,
-    isTableEditable
+    isTableEditable,
+    isEditRecordsManuallyButtonDisabled
   );
 
   useEffect(() => {
-    onChangeButtonsVisibility(isTableEditable);
+    if (onIsTableDataLoading) {
+      onIsTableDataLoading(isLoading);
+    }
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (onChangeButtonsVisibility) {
+      onChangeButtonsVisibility(isTableEditable);
+    }
+    if (onChangeTableEditable) {
+      onChangeTableEditable(isTableEditable);
+    }
   }, [isTableEditable]);
 
   useEffect(() => {
@@ -376,6 +391,15 @@ export const DataViewer = ({
     setFetchedData(dataFiltered);
   };
 
+  const onGetIsIcebergCreated = async () => {
+    const icebergCreated = await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: tableId
+    });
+
+    setIsTableEditable(icebergCreated.data);
+  };
+
   const onFetchData = async (
     sField,
     sOrder,
@@ -407,6 +431,8 @@ export const DataViewer = ({
           qcCodes: tableId === selectedTableSchemaId ? groupedRules : undefined,
           value: valueFilter
         });
+
+        onGetIsIcebergCreated();
       } else {
         data = await DatasetService.getTableData({
           datasetId,
@@ -799,7 +825,17 @@ export const DataViewer = ({
     }
   };
 
+  const onEnableManualEdit = checked => {
+    setIsTableEditable(checked);
+  };
+
   const onDisableEditButton = checked => {
+    onTableConversion(checked);
+
+    if (onDisableManualEditing) {
+      onDisableManualEditing(checked);
+    }
+
     setIsEditRecordsManuallyButtonDisabled(checked);
   };
 
@@ -1289,6 +1325,7 @@ export const DataViewer = ({
                 }
                 isDataflowOpen={isDataflowOpen}
                 isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+                isEditRecordsManuallyButtonDisabled={isEditRecordsManuallyButtonDisabled}
                 isTableEditable={isTableEditable}
                 onAddClick={() => {
                   setIsNewRecord(true);

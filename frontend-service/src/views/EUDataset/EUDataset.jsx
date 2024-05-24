@@ -254,7 +254,6 @@ export const EUDataset = () => {
             ...datasetStatistics.tables.filter(table => table['tableSchemaId'] === tableSchema['tableSchemaId'])[0]
           }.hasErrors,
           hasInfoTooltip: true,
-          icebergTableIsCreated: tableSchema['icebergTableIsCreated'],
           id: tableSchema['tableSchemaId'],
           name: tableSchema['tableSchemaName'],
           notEmpty: tableSchema['tableSchemaNotEmpty'],
@@ -328,8 +327,6 @@ export const EUDataset = () => {
     false
   );
 
-  const onChangeButtonsVisibility = disabled => {};
-
   const renderTabsSchema = () => (
     <TabsSchema
       bigData={euDatasetState.bigData}
@@ -341,7 +338,6 @@ export const EUDataset = () => {
       isFilterable={false}
       isGroupedValidationSelected={isGroupedValidationSelected}
       levelErrorTypes={levelErrorTypes}
-      onChangeButtonsVisibility={onChangeButtonsVisibility}
       onLoadTableData={onLoadTableData}
       onTabChange={table => onTabChange(table)}
       showWriteButtons={false}

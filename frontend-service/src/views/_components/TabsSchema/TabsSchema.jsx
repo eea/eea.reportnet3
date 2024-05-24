@@ -33,6 +33,7 @@ export const TabsSchema = ({
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
+  onTableConversion,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -83,7 +84,6 @@ export const TabsSchema = ({
                   datasetSchemaId={datasetSchemaId}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
-                  icebergTableIsCreated={table.icebergTableIsCreated}
                   isExportable={isExportable}
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
@@ -95,6 +95,7 @@ export const TabsSchema = ({
                   onChangeButtonsVisibility={onChangeButtonsVisibility}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
+                  onTableConversion={onTableConversion}
                   reporting={reporting}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}

@@ -52,7 +52,7 @@ public class EuDatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
-        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
+        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
         boolean folderExist = s3Helper.checkTableNameDCFolderExist(s3PathResolver);
         if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver,s3PathResolver.getTableName())) {
             s3PathResolver.setPath(S3_TABLE_NAME_EU_QUERY_PATH);

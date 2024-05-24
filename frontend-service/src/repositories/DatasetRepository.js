@@ -228,8 +228,31 @@ export const DatasetRepository = {
 
   getMetadata: async datasetId => await HTTPRequester.get({ url: getUrl(DatasetConfig.getMetadata, { datasetId }) }),
 
-  getPresignedUrl: async ({ datasetId, dataflowId, fileName }) =>
-    await HTTPRequester.get({ url: getUrl(DatasetConfig.getPresignedUrl, { datasetId, dataflowId, fileName }) }),
+  getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsIcebergTableCreated, { datasetId, tableSchemaId }) }),
+
+  getPresignedUrl: async ({
+    datasetId,
+    dataflowId,
+    providerId,
+    tableSchemaId,
+    replace,
+    integrationId,
+    delimiter,
+    fileName
+  }) =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getPresignedUrl, {
+        datasetId,
+        dataflowId,
+        providerId,
+        tableSchemaId,
+        replace,
+        integrationId,
+        delimiter,
+        fileName
+      })
+    }),
 
   getReferencedFieldValues: async (
     datasetId,
@@ -365,6 +388,29 @@ export const DatasetRepository = {
         pageSize,
         tableSchemaId,
         value
+      })
+    }),
+
+  importTableFileWithS3: async ({
+    datasetId,
+    dataflowId,
+    providerId,
+    tableSchemaId,
+    replace,
+    integrationId,
+    delimiter,
+    jobId
+  }) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.importTableFileWithS3, {
+        datasetId,
+        dataflowId,
+        providerId,
+        tableSchemaId,
+        replace,
+        integrationId,
+        delimiter,
+        jobId
       })
     }),
 

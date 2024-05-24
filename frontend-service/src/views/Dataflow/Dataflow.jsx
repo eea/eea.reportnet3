@@ -84,6 +84,7 @@ export const Dataflow = () => {
     designDatasetSchemas: [],
     formHasRepresentatives: false,
     hasCustodianPermissions: false,
+    hasIcebergTables: false,
     hasReporters: false,
     hasRepresentativesWithoutDatasets: false,
     hasWritePermissions: false,
@@ -771,6 +772,10 @@ export const Dataflow = () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
 
+      const icebergTables = dataProviderId
+        ? await DataflowService.getIcebergTablesWithProviderId({ dataflowId, providerId: dataProviderId })
+        : await DataflowService.getIcebergTables({ dataflowId });
+
       dataflowDispatch({ type: 'SET_IS_FETCHING_DATA', payload: { isFetchingData: false } });
       dataflowDispatch({
         type: 'INITIAL_LOAD',
@@ -780,6 +785,7 @@ export const Dataflow = () => {
           data: dataflow,
           dataflowType: dataflow.type,
           description: dataflow.description,
+          hasIcebergTables: !isEmpty(icebergTables.data),
           isAutomaticReportingDeletion: dataflow.isAutomaticReportingDeletion,
           isReleasable: dataflow.isReleasable,
           name: dataflow.name,

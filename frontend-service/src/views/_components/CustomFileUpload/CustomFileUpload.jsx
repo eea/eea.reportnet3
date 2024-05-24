@@ -24,6 +24,7 @@ import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 
 import { DatasetService } from 'services/DatasetService';
 
+import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
@@ -48,6 +49,7 @@ export const CustomFileUpload = ({
   fileLimit = 1,
   id = null,
   infoTooltip = '',
+  integrationId,
   invalidExtensionMessage = '',
   invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
@@ -69,6 +71,7 @@ export const CustomFileUpload = ({
   onValidateFile = null,
   operation = 'POST',
   previewWidth = 50,
+  providerId,
   replaceCheck = false,
   replaceCheckLabel = 'Replace data',
   replaceCheckLabelMessage = '',
@@ -76,10 +79,12 @@ export const CustomFileUpload = ({
   s3Check = false,
   s3CheckLabel = 'S3',
   style = null,
+  tableSchemaId,
   uploadLabel = 'Upload',
   url = null,
   withCredentials = false
 }) => {
+  const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [state, dispatch] = useReducer(customFileUploadReducer, {
@@ -94,6 +99,7 @@ export const CustomFileUpload = ({
 
   const [isValidating, setIsValidating] = useState(false);
   const [isCreateDatasetSchemaConfirmDialogVisible, setIsCreateDatasetSchemaConfirmDialogVisible] = useState(false);
+  const [jobId, setJobId] = useState();
   const [presignedUrl, setPresignedUrl] = useState();
 
   const _files = useRef([]);
@@ -107,7 +113,7 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (presignedUrl) {
-      upload();
+      uploadToS3();
     }
   }, [presignedUrl]);
 
@@ -291,12 +297,7 @@ export const CustomFileUpload = ({
   };
 
   const upload = async () => {
-    presignedUrl
-      ? await fetch(presignedUrl, {
-          method: 'PUT',
-          body: state.files[0]
-        })
-      : dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
@@ -336,16 +337,16 @@ export const CustomFileUpload = ({
       }
     };
 
-    let nUrl = bigData && state.uploadWithS3 ? presignedUrl : url;
+    let nUrl = url;
 
     if (replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
       nUrl += 'replace=' + state.replace;
     }
 
-    xhr.open(bigData && state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
+    xhr.open(operation, nUrl, true);
     const tokens = LocalUserStorageUtils.getTokens();
-    if (!state.uploadWithS3) xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
+    xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
     if (onBeforeSend) {
       onBeforeSend({ xhr: xhr, formData: formData });
@@ -356,6 +357,43 @@ export const CustomFileUpload = ({
     xhr.send(formData);
 
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+  };
+
+  const uploadToS3 = async () => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    try {
+      await fetch(presignedUrl, {
+        method: 'PUT',
+        body: state.files[0]
+      });
+
+      onUpload({ files: state.files });
+
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+      importS3ToDlh();
+    } catch (error) {
+      console.error('CustomFileUpload - uploadToS3.', error);
+      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    }
+  };
+
+  const importS3ToDlh = async () => {
+    try {
+      await DatasetService.importTableFileWithS3({
+        datasetId,
+        dataflowId,
+        providerId,
+        tableSchemaId,
+        replace: state.replace,
+        integrationId,
+        delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+        jobId
+      });
+    } catch (error) {
+      console.error('CustomFileUpload - importS3ToDlh.', error);
+      notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
+    }
   };
 
   const clear = () => {
@@ -463,7 +501,17 @@ export const CustomFileUpload = ({
 
   const onGetPresignedUrl = async () => {
     const fileName = state?.files[0].name;
-    const data = await DatasetService.getPresignedUrl({ datasetId, dataflowId, fileName });
+    const data = await DatasetService.getPresignedUrl({
+      datasetId,
+      dataflowId,
+      providerId,
+      tableSchemaId,
+      replace: state.replace,
+      integrationId,
+      delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+      fileName
+    });
+    setJobId(data?.jobId);
     setPresignedUrl(data?.presignedUrl);
   };
 

@@ -50,6 +50,7 @@ export const TabsDesigner = ({
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
+  onTableConversion,
   onUpdateSchema,
   onUpdateTable,
   selectedRuleId,
@@ -493,6 +494,7 @@ export const TabsDesigner = ({
                       onChangeTableProperties={onChangeTableProperties}
                       onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                       onLoadTableData={onLoadTableData}
+                      onTableConversion={onTableConversion}
                       selectedRuleId={selectedRuleId}
                       selectedRuleLevelError={selectedRuleLevelError}
                       selectedRuleMessage={selectedRuleMessage}

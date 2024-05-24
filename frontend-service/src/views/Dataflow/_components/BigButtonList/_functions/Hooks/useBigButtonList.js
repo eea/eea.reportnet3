@@ -540,8 +540,11 @@ const useBigButtonList = ({
         buttonIcon: isReleasing ? 'spinner' : 'released',
         buttonIconClass: isReleasing ? 'spinner' : 'released',
         caption: resourcesContext.messages['releaseDataCollection'],
-        enabled: dataflowState.isReleasable && !isReleasing,
-        handleRedirect: dataflowState.isReleasable && !isReleasing ? () => onOpenReleaseConfirmDialog() : () => {},
+        enabled: !dataflowState.hasIcebergTables && dataflowState.isReleasable && !isReleasing,
+        handleRedirect:
+          !dataflowState.hasIcebergTables && dataflowState.isReleasable && !isReleasing
+            ? () => onOpenReleaseConfirmDialog()
+            : () => {},
         helpClassName: 'dataflow-big-buttons-release-help-step',
         infoStatus: isReleased,
         infoStatusIcon: true,

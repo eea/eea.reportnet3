@@ -7,6 +7,7 @@ import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioValidationMapper;
 import org.eea.dataset.service.DataLakeDataRetriever;
+import org.eea.dataset.service.DatasetTableService;
 import org.eea.dataset.util.DataLakeDataRetrieverUtils;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.*;
@@ -44,6 +45,9 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
     private DremioHelperService dremioHelperService;
 
     @Autowired
+    private DatasetTableService datasetTableService;
+
+    @Autowired
     public DatasetDataRetrieverDL(S3Service s3Service, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DremioHelperService dremioHelperService) {
         this.s3Service = s3Service;
         this.s3Helper = s3Helper;
@@ -57,15 +61,20 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
         TableVO result = new TableVO();
-        S3PathResolver s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema());
-        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(tableSchemaVO.getIcebergTableIsCreated())){
+        S3PathResolver s3PathResolver;
+        if(BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), true);
             s3PathResolver.setIsIcebergTable(true);
+        }
+        else{
+            s3PathResolver = s3Service.getS3PathResolverByDatasetType(dataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolver.setIsIcebergTable(false);
         }
         boolean folderExist = s3Helper.checkFolderExist(s3PathResolver);
         if (folderExist && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
             StringBuilder dataQuery = new StringBuilder();
             StringBuilder recordsCountQuery = new StringBuilder();
-            if (REFERENCE.equals(dataset.getDatasetTypeEnum())) {
+            if (REFERENCE.equals(dataset.getDatasetTypeEnum()) && s3PathResolver.getIsIcebergTable() == false) {
                 s3PathResolver.setPath(S3_DATAFLOW_REFERENCE_QUERY_PATH);
                 totalRecords = dremioJdbcTemplate.queryForObject(s3Helper.getRecordsCountQuery(s3PathResolver), Long.class);
                 dataQuery.append("select * from " + s3Service.getTableAsFolderQueryPath(s3PathResolver) + " t ");

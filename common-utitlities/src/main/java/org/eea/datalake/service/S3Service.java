@@ -39,11 +39,18 @@ public interface S3Service {
      * @param dataset
      * @return
      */
-    S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName);
+    S3PathResolver getS3PathResolverByDatasetType(DataSetMetabaseVO dataset, String tableName, Boolean isIceberg);
+
+    String getS3DefaultBucket();
 
     String getS3DefaultBucketPath();
 
     String getS3IcebergBucket();
 
     String getS3IcebergBucketPath();
+
+    String getS3DefaultBucketName();
+
+    String getS3IcebergBucketName();
+
 }

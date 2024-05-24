@@ -416,7 +416,6 @@ export const DatasetSchema = ({
       const tables = design.tables.map(tableDTO => {
         const tableProperties = {
           dataAreManuallyEditable: !isNil(tableDTO.dataAreManuallyEditable) ? tableDTO.dataAreManuallyEditable : false,
-          icebergTableIsCreated: !isNil(tableDTO.icebergTableIsCreated) ? tableDTO.icebergTableIsCreated : false,
           description:
             !isNil(tableDTO.tableSchemaDescription) && tableDTO.tableSchemaDescription !== ''
               ? tableDTO.tableSchemaDescription
