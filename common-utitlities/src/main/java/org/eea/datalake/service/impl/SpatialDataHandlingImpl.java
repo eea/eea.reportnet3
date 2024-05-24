@@ -84,7 +84,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
             fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
           } catch (IOException | ParseException e) {
             LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
-            throw new RuntimeException(e);
           }
         });
   }
@@ -113,7 +112,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       }
     } catch (ParseException e) {
       LOG.error("Invalid GeoJson!! Tried to convert this String : {} , to binary but failed", value, e);
-      throw new RuntimeException(e);
     }
     return sb.toString();
   }
@@ -135,7 +133,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       }
     } catch (ParseException e) {
       LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
-      throw new RuntimeException(e);
     }
     return "";
   }
@@ -224,7 +221,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         resultQuery.replace(valueStart, valueEnd, hexBinaryStr);
       }
     }
-
     return resultQuery;
   }
 
