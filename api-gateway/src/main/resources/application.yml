@@ -6,3 +6,9 @@ spring:
 
 zuul:
   sensitiveHeaders: Cookie,Set-Cookie,FeignInvocationUser,FeignInvocationUserId
+
+#restricting logs
+logging:
+  level:
+    cdjd.com.dremio.telemetry.api.metrics: ERROR
+    cdjd.com.dremio.sabot.rpc.user: ERROR

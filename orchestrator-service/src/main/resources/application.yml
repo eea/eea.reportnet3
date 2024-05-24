@@ -5,3 +5,9 @@ spring:
     name: orchestrator
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration, org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+
+#restricting logs
+logging:
+  level:
+    cdjd.com.dremio.telemetry.api.metrics: ERROR
+    cdjd.com.dremio.sabot.rpc.user: ERROR
