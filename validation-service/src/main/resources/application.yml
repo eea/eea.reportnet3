@@ -3,3 +3,9 @@ server:
 spring:
   application:
     name: validation
+
+#restricting logs
+logging:
+  level:
+    cdjd.com.dremio.telemetry.api.metrics: ERROR
+    cdjd.com.dremio.sabot.rpc.user: ERROR
