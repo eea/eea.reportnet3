@@ -3,3 +3,11 @@ server:
 spring:
   application:
     name: ums
+
+#restricting logs
+logging:
+  level:
+    cdjd.com.dremio.telemetry.api.metrics: ERROR
+    cdjd.com.dremio.sabot.rpc.user: ERROR
+    org.springframework.cloud.netflix.zuul.filters.route.support: ERROR
+    org.apache.kafka.clients.consumer.internals: ERROR
