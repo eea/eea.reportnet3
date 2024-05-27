@@ -402,7 +402,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                     } else {
                         if(csvRecord.isMapped(expectedHeader)){
                             if (spatialDataHandling.getGeoJsonEnums().contains(fieldType)) {
-                                String binaryString = spatialDataHandling.convertToBinary(csvRecord.get(expectedHeader));
+                                String binaryString = spatialDataHandling.convertToHEX(csvRecord.get(expectedHeader));
                                 row.add(binaryString);
                                 continue;
                             }

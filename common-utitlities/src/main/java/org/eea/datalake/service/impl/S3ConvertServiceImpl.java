@@ -149,7 +149,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     csvWriter.writeNext(columns, false);
                 }
             } catch (ParseException e) {
-              throw new RuntimeException(e);
+                LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
             }
         }
     }

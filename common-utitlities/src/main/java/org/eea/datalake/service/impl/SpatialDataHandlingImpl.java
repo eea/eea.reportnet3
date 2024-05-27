@@ -3,13 +3,13 @@ package org.eea.datalake.service.impl;
 import mil.nga.sf.geojson.Feature;
 import mil.nga.sf.geojson.FeatureConverter;
 import org.eea.datalake.service.SpatialDataHandling;
+import org.eea.datalake.service.SpatialDataHelper;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.lock.service.impl.LockServiceImpl;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.ByteOrderValues;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
 import org.locationtech.jts.io.WKBWriter;
@@ -20,19 +20,16 @@ import org.springframework.stereotype.Component;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.io.IOException;
-import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.eea.utils.LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER;
-import static org.eea.utils.LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER;
 
 
 @Component
@@ -40,18 +37,10 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
   private static final String FROM_XEX = "FROM_HEX";
+  private final SpatialDataHelper spatialDataHelper;
 
-  private List<FieldSchemaVO> init(TableSchemaVO tableSchemaVO) {
-    List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
-    FieldSchemaVO recordId = new FieldSchemaVO();
-    recordId.setName(PARQUET_RECORD_ID_COLUMN_HEADER);
-    FieldSchemaVO providerCode = new FieldSchemaVO();
-    providerCode.setName(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
-    fieldSchemas.add(recordId);
-    fieldSchemas.add(providerCode);
-    fieldSchemas.addAll(tableSchemaVO.getRecordSchema().getFieldSchema());
-
-    return fieldSchemas;
+  public SpatialDataHandlingImpl(SpatialDataHelper spatialDataHelper) {
+    this.spatialDataHelper = spatialDataHelper;
   }
 
   @Override
@@ -89,31 +78,24 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public String convertToBinary(String value) {
-    StringBuilder sb = new StringBuilder();
+  public String convertToHEX(String value) {
+    String hexString = "";
     try {
       GeoJsonReader reader = new GeoJsonReader();
-      Geometry geometry;
-      geometry = reader.read(value);
+      Geometry geometry = reader.read(value);
       Feature feature = FeatureConverter.toFeature(value);
       String srid = feature.getProperties().get("srid").toString();
       if (!srid.isBlank()) {
         geometry.setSRID(Integer.parseInt(srid));
       }
 
-      int order = ByteOrder.nativeOrder().equals(ByteOrder.BIG_ENDIAN)
-          ? ByteOrderValues.BIG_ENDIAN
-          : ByteOrderValues.LITTLE_ENDIAN;
-
-      WKBWriter wkbWriter = new WKBWriter(2, order, true);
+      WKBWriter wkbWriter = new WKBWriter(2, true);
       byte[] bytes = wkbWriter.write(geometry);
-      for (byte b : bytes) {
-        sb.append(String.format("%02X", b));
-      }
+      hexString = spatialDataHelper.bytesToHex(bytes);
     } catch (ParseException e) {
       LOG.error("Invalid GeoJson!! Tried to convert this String : {} , to binary but failed", value, e);
     }
-    return sb.toString();
+    return hexString;
   }
 
   @Override
@@ -140,7 +122,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   private List<String> getHeaders(boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
-    return init(tableSchemaVO).stream()
+    return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
         .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
         .map(FieldSchemaVO::getName)
         .collect(Collectors.toList());
@@ -148,15 +130,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   @Override
   public List<DataType> getGeoJsonEnums() {
-    List<DataType> geoJsonEnums = new ArrayList<>();
-    geoJsonEnums.add(DataType.GEOMETRYCOLLECTION);
-    geoJsonEnums.add(DataType.MULTIPOINT);
-    geoJsonEnums.add(DataType.MULTIPOLYGON);
-    geoJsonEnums.add(DataType.POINT);
-    geoJsonEnums.add(DataType.POLYGON);
-    geoJsonEnums.add(DataType.LINESTRING);
-    geoJsonEnums.add(DataType.MULTILINESTRING);
-    return geoJsonEnums;
+    return spatialDataHelper.getGeoJsonEnums();
   }
 
   @Override
@@ -169,7 +143,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   private Optional<String> getHeader(boolean isGeoJsonHeaders, String headerInput, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
-    return init(tableSchemaVO).stream()
+    return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
         .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
         .map(FieldSchemaVO::getName)
         .filter(name -> name.equalsIgnoreCase(headerInput)).findAny();
@@ -199,6 +173,48 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
+  public String fixQueryExcludeSpatialDataFromSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
+    String columnRegex = "\\b([a-zA-Z0-9_]+)\\b";
+    Pattern columnPattern = Pattern.compile(columnRegex);
+    Matcher columnMatcher = columnPattern.matcher(inputQuery);
+
+    Set<String> columnsToExclude = new HashSet<>();
+
+    while (columnMatcher.find()) {
+      String columnName = columnMatcher.group(1);
+      Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
+      if (header.isPresent()) {
+        columnsToExclude.add(columnName);
+      }
+    }
+
+    if (columnsToExclude.isEmpty()) {
+      return inputQuery;
+    }
+
+    String exclusionRegex = "\\b(" + String.join("|", columnsToExclude) + ")\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*\\S+\\s*(AND|OR)?";
+    Pattern exclusionPattern = Pattern.compile(exclusionRegex, Pattern.CASE_INSENSITIVE);
+    Matcher exclusionMatcher = exclusionPattern.matcher(inputQuery);
+
+    StringBuilder sb = new StringBuilder();
+    while (exclusionMatcher.find()) {
+      exclusionMatcher.appendReplacement(sb, "");
+    }
+    exclusionMatcher.appendTail(sb);
+
+    StringBuilder finalQuery = new StringBuilder(sb.toString().replaceAll("\\s*(AND|OR)\\s*$", "").replaceAll("\\s*(AND|OR)\\s*(\\))", " $2"));
+
+    int openParens = spatialDataHelper.countOccurrences(finalQuery.toString(), '(');
+    int closeParens = spatialDataHelper.countOccurrences(finalQuery.toString(), ')');
+    while (openParens > closeParens) {
+      finalQuery.append(")");
+      closeParens++;
+    }
+
+    return (finalQuery.length() == 0) ? inputQuery : finalQuery.toString();
+  }
+
+  @Override
   public StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
@@ -212,9 +228,9 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
       Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
-        String escValue = escapeJsonString(value);
+        String escValue = spatialDataHelper.escapeJsonString(value);
         LOG.info("Value before converted to binary: {} ", escValue);
-        String binaryStr = convertToBinary(escValue);
+        String binaryStr = convertToHEX(escValue);
         String hexBinaryStr = FROM_XEX + "('" + binaryStr + "')";
         int valueStart = matcher.start(3);
         int valueEnd = matcher.end(3);
@@ -222,12 +238,5 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       }
     }
     return resultQuery;
-  }
-
-  public static String escapeJsonString(String str) {
-    if (str.startsWith("'") && str.endsWith("'")) {
-      return str.substring(1, str.length() - 1);
-    }
-    return str;
   }
 }

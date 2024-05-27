@@ -3,7 +3,6 @@ package org.eea.datalake.service;
 
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
-import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.locationtech.jts.io.ParseException;
 
@@ -15,7 +14,7 @@ public interface SpatialDataHandling {
 
   StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO);
 
-  String convertToBinary(String value);
+  String convertToHEX(String value);
 
   StringBuilder getSimpleHeaders(TableSchemaVO tableSchemaVO);
 
@@ -28,6 +27,8 @@ public interface SpatialDataHandling {
   DataType getGeometryType(byte[] byteArray) throws ParseException;
 
   String fixQueryForSearchSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
+
+  String fixQueryExcludeSpatialDataFromSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
 
   StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
 }

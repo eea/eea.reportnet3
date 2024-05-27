@@ -127,8 +127,8 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             recordsCountQueryString = recordsCountQueryString.substring(0, idx-1);
         }
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
-            recordsCountQueryString = spatialDataHandling.fixQueryForSearchSpatialData(recordsCountQueryString, true, tableSchemaVO);
-            filteredQuery = new StringBuilder(spatialDataHandling.fixQueryForSearchSpatialData(filteredQuery.toString(), true, tableSchemaVO));
+            recordsCountQueryString = spatialDataHandling.fixQueryExcludeSpatialDataFromSearch(recordsCountQueryString, true, tableSchemaVO);
+            filteredQuery = new StringBuilder(spatialDataHandling.fixQueryExcludeSpatialDataFromSearch(filteredQuery.toString(), true, tableSchemaVO));
         }
         Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQueryString, Long.class);
         result.setTotalFilteredRecords(totalFilteredRecords);
