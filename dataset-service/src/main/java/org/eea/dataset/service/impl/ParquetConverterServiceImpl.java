@@ -402,8 +402,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                     } else {
                         if(csvRecord.isMapped(expectedHeader)){
                             if (spatialDataHandling.getGeoJsonEnums().contains(fieldType)) {
-                                String binaryString = spatialDataHandling.convertToHEX(csvRecord.get(expectedHeader));
-                                row.add(binaryString);
+                                String HEXString = spatialDataHandling.convertToHEX(csvRecord.get(expectedHeader));
+                                row.add(HEXString);
                                 continue;
                             }
                             row.add(csvRecord.get(expectedHeader));

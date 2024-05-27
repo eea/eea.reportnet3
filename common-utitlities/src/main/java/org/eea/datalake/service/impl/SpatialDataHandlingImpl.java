@@ -49,35 +49,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO) {
-    List<String> geoJsonHeaders = getHeaders(true, tableSchemaVO);
-
-    return new StringBuilder(geoJsonHeaders.stream()
-        .map(header -> ", " + FROM_XEX + "(" + header + ") as " + header)
-        .collect(Collectors.joining()));
-  }
-
-  @Override
-  public StringBuilder getSimpleHeaders(TableSchemaVO tableSchemaVO) {
-    List<String> geoJsonHeaders = getHeaders(false, tableSchemaVO);
-    return new StringBuilder(String.join(",", geoJsonHeaders));
-  }
-
-  @Override
-  public void decodeSpatialData(List<RecordVO> recordVOS) {
-    recordVOS.stream()
-        .flatMap(recordVO -> recordVO.getFields().stream())
-        .filter(fieldVO -> fieldVO.getByteArrayValue() != null)
-        .forEach(fieldVO -> {
-          try {
-            fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
-          } catch (IOException | ParseException e) {
-            LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
-          }
-        });
-  }
-
-  @Override
   public String convertToHEX(String value) {
     String hexString = "";
     try {
@@ -99,6 +70,20 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
+  public void decodeSpatialData(List<RecordVO> recordVOS) {
+    recordVOS.stream()
+        .flatMap(recordVO -> recordVO.getFields().stream())
+        .filter(fieldVO -> fieldVO.getByteArrayValue() != null)
+        .forEach(fieldVO -> {
+          try {
+            fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
+          } catch (IOException | ParseException e) {
+            LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
+          }
+        });
+  }
+
+  @Override
   public String decodeSpatialData(byte[] byteArray) throws RuntimeException, IOException, ParseException {
     try {
       WKBReader r = new WKBReader();
@@ -117,6 +102,21 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
     }
     return "";
+  }
+
+  @Override
+  public StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO) {
+    List<String> geoJsonHeaders = getHeaders(true, tableSchemaVO);
+
+    return new StringBuilder(geoJsonHeaders.stream()
+        .map(header -> ", " + FROM_XEX + "(" + header + ") as " + header)
+        .collect(Collectors.joining()));
+  }
+
+  @Override
+  public StringBuilder getSimpleHeaders(TableSchemaVO tableSchemaVO) {
+    List<String> geoJsonHeaders = getHeaders(false, tableSchemaVO);
+    return new StringBuilder(String.join(",", geoJsonHeaders));
   }
 
   private List<String> getHeaders(boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
@@ -150,7 +150,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public String fixQueryForSearchSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
+  public String fixQueryIncludeSpatialDataForSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*\\S+";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
@@ -229,7 +229,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
         String escValue = spatialDataHelper.escapeJsonString(value);
-        LOG.info("Value before converted to binary: {} ", escValue);
         String binaryStr = convertToHEX(escValue);
         String hexBinaryStr = FROM_XEX + "('" + binaryStr + "')";
         int valueStart = matcher.start(3);

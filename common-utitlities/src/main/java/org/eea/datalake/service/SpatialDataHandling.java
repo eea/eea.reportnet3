@@ -26,7 +26,7 @@ public interface SpatialDataHandling {
 
   DataType getGeometryType(byte[] byteArray) throws ParseException;
 
-  String fixQueryForSearchSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
+  String fixQueryIncludeSpatialDataForSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
 
   String fixQueryExcludeSpatialDataFromSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
 
