@@ -704,7 +704,7 @@ export class Dropdown extends Component {
         let optionLabel = this.getOptionLabel(option);
         return (
           <DropdownItem
-            disabled={option.disabled}
+            disabled={option?.disabled}
             key={this.getOptionKey(option)}
             label={optionLabel}
             onClick={this.onOptionClick}
