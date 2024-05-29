@@ -193,6 +193,7 @@ export const ManageLeadReporters = ({
           await getDataProviderGroup();
           break;
         case config.dataflowType.CITIZEN_SCIENCE.value:
+          formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
           await getGroupOrganizations();
           break;
         default:
@@ -522,7 +523,10 @@ export const ManageLeadReporters = ({
   };
 
   const renderRepresentativesDropdown = () => {
-    if (TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value)) {
+    if (
+      TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ||
+      TextUtils.areEquals(dataflowType, config.dataflowType.CITIZEN_SCIENCE.value)
+    ) {
       return (
         <Dropdown
           ariaLabel="dataProviders"
