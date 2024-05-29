@@ -141,16 +141,14 @@ export const ManageDataflowForm = forwardRef(
 
             onEdit(name, description, metadata.obligation.id);
           } else {
-            const creationResponse = 
-            isCitizenScienceDataflow
+            const creationResponse = isCitizenScienceDataflow
               ? await CitizenScienceDataflowService.create(
                   name,
                   description,
                   metadata.obligation.id,
                   selectedGroup.dataProviderGroupId
                 )
-              : 
-              DataflowService.create(name, description, metadata.obligation.id);
+              : await DataflowService.create(name, description, metadata.obligation.id);
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
