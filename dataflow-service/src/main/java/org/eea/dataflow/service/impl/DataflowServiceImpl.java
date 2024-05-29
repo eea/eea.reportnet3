@@ -1251,7 +1251,7 @@ public class DataflowServiceImpl implements DataflowService {
     if (result != null) {
       dataflowVO = dataflowMapper.entityToClass(result);
 
-      if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
+      if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType()) || TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflowVO.getType())) {
         dataflowVO.setDataProviderGroupName(
             dataProviderGroupRepository.findById(dataflowVO.getDataProviderGroupId())
                 .orElse(new DataProviderGroup()).getName());
