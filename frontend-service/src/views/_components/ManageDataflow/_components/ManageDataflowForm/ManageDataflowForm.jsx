@@ -1,4 +1,4 @@
-import { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import styles from './ManageDataflowForm.module.scss';
 
@@ -14,6 +14,7 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { DataflowService } from 'services/DataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
+import { RepresentativeService } from 'services/RepresentativeService';
 import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -21,6 +22,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { Dropdown } from 'views/_components/Dropdown';
 
 export const ManageDataflowForm = forwardRef(
   (
@@ -60,7 +62,9 @@ export const ManageDataflowForm = forwardRef(
       name: { message: '', hasErrors: false },
       obligation: { message: '', hasErrors: false }
     });
+    const [groupOfCompanies, setGroupOfCompanies] = useState([]);
     const [name, setName] = useState(metadata.name);
+    const [selectedGroup, setSelectedGroup] = useState();
 
     const form = useRef(null);
     const inputRef = useRef(null);
@@ -70,6 +74,23 @@ export const ManageDataflowForm = forwardRef(
     }));
 
     useInputTextFocus(refresh, inputRef);
+
+    const getDropdownsOptions = async () => {
+      try {
+        const responseGroupOfCompanies = await RepresentativeService.getGroupOrganizations();
+        setGroupOfCompanies(responseGroupOfCompanies.data);
+      } catch (error) {
+        console.error('ManageDataflowForm - getDropdownsOptions.', error);
+      }
+    };
+
+    useEffect(() => {
+      getDropdownsOptions();
+    }, []);
+
+    const handleErrors = ({ field, hasErrors, message }) => {
+      setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
+    };
 
     const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
@@ -120,7 +141,14 @@ export const ManageDataflowForm = forwardRef(
 
             onEdit(name, description, metadata.obligation.id);
           } else {
-            const creationResponse = await service.create(name, description, metadata.obligation.id);
+            const creationResponse = isCitizenScienceDataflow
+              ? await CitizenScienceDataflowService.create(
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  selectedGroup.dataProviderGroupId
+                )
+              : await DataflowService.create(name, description, metadata.obligation.id);
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
@@ -153,6 +181,11 @@ export const ManageDataflowForm = forwardRef(
           onSubmit(false);
         }
       }
+    };
+
+    const onSelectGroup = group => {
+      setSelectedGroup(group);
+      getData({ ...metadata, providerGroup: group });
     };
 
     return (
@@ -224,6 +257,25 @@ export const ManageDataflowForm = forwardRef(
               {errors.description.message !== '' && <ErrorMessage message={errors.description.message} />}
             </div>
           </div>
+
+          {isCitizenScienceDataflow && (
+            <div className={styles.dropdownsWrapper}>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="groupOfCompanies"
+                className={styles.groupOfCompaniesWrapper}
+                disabled={isEditing && !isDesign}
+                name="groupOfCompanies"
+                onChange={event => onSelectGroup(event.target.value)}
+                onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
+                optionLabel="label"
+                options={groupOfCompanies}
+                placeholder={resourcesContext.messages['selectGroupOfCompanies']}
+                tooltip={isDesign ? resourcesContext.messages['groupOfCompaniesDisabledTooltip'] : ''}
+                value={selectedGroup}
+              />
+            </div>
+          )}
 
           <div className={`${styles.search}`}>
             <Button

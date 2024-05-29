@@ -56,6 +56,7 @@ export const ManageDataflow = ({
     name: isEditing ? state.name : '',
     obligation,
     pinDataflow: false,
+    providerGroup: null,
     isReleasable: state.isReleasable
   };
 
@@ -112,8 +113,8 @@ export const ManageDataflow = ({
     }
   };
 
-  const onLoadData = ({ name, description }) =>
-    reportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
+  const onLoadData = ({ name, description, providerGroup }) =>
+    reportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description, providerGroup } });
 
   const onLoadObligation = ({ id, title }) =>
     reportingDataflowDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
@@ -211,6 +212,7 @@ export const ManageDataflow = ({
         </div>
         <Button
           className={`p-button-primary ${
+            !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&
             !isEmpty(reportingDataflowState.name) &&
             !isEmpty(reportingDataflowState.description) &&
             !isNil(reportingDataflowState.obligation?.id) &&
@@ -219,6 +221,7 @@ export const ManageDataflow = ({
               : ''
           }`}
           disabled={
+            (isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) ||
             isEmpty(reportingDataflowState.name) ||
             isEmpty(reportingDataflowState.description) ||
             isNil(reportingDataflowState.obligation?.id) ||

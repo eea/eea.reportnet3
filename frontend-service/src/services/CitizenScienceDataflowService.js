@@ -24,8 +24,8 @@ export const CitizenScienceDataflowService = {
     return { ...dataflowsDTO.data, dataflows: DataflowUtils.parseDataflowListDTO(dataflows) };
   },
 
-  create: async (name, description, obligationId) =>
-    await CitizenScienceDataflowRepository.create(name, description, obligationId),
+  create: async (name, description, obligationId, dataProviderGroupId) =>
+    await CitizenScienceDataflowRepository.create(name, description, obligationId, dataProviderGroupId),
 
   update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
     await CitizenScienceDataflowRepository.update(
