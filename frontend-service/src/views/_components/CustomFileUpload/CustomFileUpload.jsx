@@ -391,8 +391,10 @@ export const CustomFileUpload = ({
         jobId
       });
     } catch (error) {
-      console.error('CustomFileUpload - importS3ToDlh.', error);
-      notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
+      if (error.response.status !== 504) {
+        console.error('CustomFileUpload - importS3ToDlh.', error);
+        notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
+      }
     }
   };
 
