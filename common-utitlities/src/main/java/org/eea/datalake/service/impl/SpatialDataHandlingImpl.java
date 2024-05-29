@@ -50,7 +50,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   @Override
   public String convertToHEX(String value) {
-    String hexString = "";
     try {
       GeoJsonReader reader = new GeoJsonReader();
       Geometry geometry = reader.read(value);
@@ -62,11 +61,11 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
       WKBWriter wkbWriter = new WKBWriter(2, true);
       byte[] bytes = wkbWriter.write(geometry);
-      hexString = spatialDataHelper.bytesToHex(bytes);
+      return spatialDataHelper.bytesToHex(bytes);
     } catch (ParseException e) {
       LOG.error("Invalid GeoJson!! Tried to convert this String : {} , to binary but failed", value, e);
+      return "";
     }
-    return hexString;
   }
 
   @Override
@@ -86,16 +85,16 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   @Override
   public String decodeSpatialData(byte[] byteArray) throws RuntimeException, IOException, ParseException {
     try {
-      WKBReader r = new WKBReader();
-      org.locationtech.jts.geom.Geometry t = r.read(byteArray);
-      if (t != null) {
+      WKBReader reader = new WKBReader();
+      Geometry geometry = reader.read(byteArray);
+      if (geometry != null) {
         Map<String, Object> properties = new HashMap<>();
-        properties.put("srid", Integer.toString(t.getSRID()));
+        properties.put("srid", Integer.toString(geometry.getSRID()));
 
-        org.wololo.jts2geojson.GeoJSONWriter writ = new GeoJSONWriter();
-        org.wololo.geojson.Geometry geometry = writ.write(t);
+        GeoJSONWriter writer = new GeoJSONWriter();
+        org.wololo.geojson.Geometry geoJsonGeometry = writer.write(geometry);
 
-        org.wololo.geojson.Feature feature = new org.wololo.geojson.Feature(geometry, properties);
+        org.wololo.geojson.Feature feature = new org.wololo.geojson.Feature(geoJsonGeometry, properties);
         return feature.toString();
       }
     } catch (ParseException e) {
@@ -107,10 +106,12 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   @Override
   public StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO) {
     List<String> geoJsonHeaders = getHeaders(true, tableSchemaVO);
+    StringBuilder result = new StringBuilder();
 
-    return new StringBuilder(geoJsonHeaders.stream()
-        .map(header -> ", " + FROM_XEX + "(" + header + ") as " + header)
-        .collect(Collectors.joining()));
+    for (String header : geoJsonHeaders) {
+      result.append(", ").append(FROM_XEX).append("(").append(header).append(") as ").append(header);
+    }
+    return result;
   }
 
   @Override
