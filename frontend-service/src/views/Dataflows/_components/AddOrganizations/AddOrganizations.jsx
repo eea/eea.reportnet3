@@ -300,6 +300,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const onResetAll = () => {
     setIsRefreshing(true);
     setOrganizationName(null);
+    setOrganizationCode('')
     setGroup(null);
 
     getOrganizations();
@@ -325,6 +326,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       notificationContext.add({ type: 'CREATE_ORGANIZATION_ERROR' }, true);
     } finally {
       setIsLoadingButton(false);
+      onResetAll();
     }
   };
 
