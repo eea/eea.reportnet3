@@ -227,7 +227,7 @@ export const Coordinates = ({
               e.preventDefault();
               onFocus();
             }}
-            onKeyDown={e => onKeyDown(e, e.target.value)}
+            onKeyDown={e => onKeyDown(e, [e.target.value, longitude].join(', '))}
             tooltip={hasErrors.latOutOfBounds ? renderTooltipButtonMessage() : ''}
             tooltipOptions={{ position: 'top' }}
             type="text"
@@ -259,7 +259,7 @@ export const Coordinates = ({
               e.preventDefault();
               onFocus();
             }}
-            onKeyDown={e => onKeyDown(e, e.target.value)}
+            onKeyDown={e => onKeyDown(e, [latitude, e.target.value].join(', '))}
             tooltip={hasErrors.longOutOfBounds ? renderTooltipButtonMessage() : ''}
             tooltipOptions={{ position: 'top' }}
             type="text"

@@ -570,7 +570,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             idSnapshot, idDataset, processId, SecurityContextHolder.getContext().getAuthentication().getName());
     kafkaSenderUtils.releaseKafkaEvent(EventType.RELEASE_ONEBYONE_COMPLETED_EVENT, value);
 
-    LOG.info("FME_Historic_Releases: Successfully released snapshot with id {} for datasetId {} processId {} and dateRelease {}", idSnapshot, idDataset, processId, dateRelease);
+    LOG.info("Successfully released snapshot with id {} for datasetId {} processId {} and dateRelease {}", idSnapshot, idDataset, processId, dateRelease);
   }
 
   /**
@@ -1125,9 +1125,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
                 .equals(datasetType)) {
           releases = getSnapshotsReleasedByIdEUDataset(datasetId);
         }
-    }
-    for(ReleaseVO releaseVO: releases){
-      LOG.info("FME_Historic_Releases: Retrieved release snapshot with id {} and dateReleased {} for datasetType {} and datasetId {}", releaseVO.getId(), releaseVO.getDateReleased(), datasetType.getValue(), datasetId);
     }
     return releases;
   }

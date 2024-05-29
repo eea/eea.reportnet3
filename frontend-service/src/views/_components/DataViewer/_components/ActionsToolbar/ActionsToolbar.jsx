@@ -339,7 +339,7 @@ export const ActionsToolbar = ({
       <div>
         <Checkbox
           ariaLabelledBy="check_edit_records_manually_label"
-          checked={hasWritePermissions && isTableEditable && dataAreManuallyEditable}
+          checked={isTableEditable && dataAreManuallyEditable}
           disabled={
             !hasWritePermissions ||
             isLoading ||

@@ -323,6 +323,17 @@ export const FieldEditor = ({
         false
       )
     );
+    onEditorValueChange(
+      cells,
+      changePoint(
+        RecordUtils.getCellValue(cells, cells.field) !== ''
+          ? JSON.parse(RecordUtils.getCellValue(cells, cells.field))
+          : JSON.parse(fieldEmptyPointValue),
+        coordinates,
+        currentCRS.value,
+        false
+      )
+    );
   };
 
   const saveCalendarDate = (inputDateValue, withDatetime) => {

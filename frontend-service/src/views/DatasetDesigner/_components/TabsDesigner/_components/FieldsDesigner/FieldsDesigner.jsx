@@ -1079,7 +1079,7 @@ export const FieldsDesigner = ({
               </span>
               <Checkbox
                 ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
-                checked={!isDataflowOpen && dataAreManuallyEditable}
+                checked={dataAreManuallyEditable}
                 className={styles.fieldDesignerItem}
                 disabled={
                   isTableConversionInProgress ||

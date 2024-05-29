@@ -9,6 +9,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
@@ -117,6 +118,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    SpatialDataHandling  spatialDataHandling;
 
     @Autowired
     DatasetTableService datasetTableService;
@@ -1087,23 +1091,29 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     @Override
-    public void updateRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records, boolean updateCascadePK) throws Exception {
+    public void updateRecords(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<RecordVO> records, boolean updateCascadePK) throws Exception {
         providerId = providerId != null ? providerId : 0L;
-        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
         for (RecordVO record: records){
             //create update query for the record
-            StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE " + icebergTablePath + " SET ");
+            StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
             for(int i=0; i< record.getFields().size(); i++){
                 FieldVO field = record.getFields().get(i);
+                if (spatialDataHandling.getGeoJsonEnums().contains(field.getType()) && !field.getType().equals(DataType.POINT)) {
+                    continue;
+                }
                 String fieldValue = (field.getValue() != null) ? field.getValue() : "";
-                updateQueryBuilder.append(field.getName() + " = '" + fieldValue + "'");
+                updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
                 updateQueryBuilder.append((i != record.getFields().size() -1) ? ", " : " ");
             }
-            updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + record.getId() + "'");
+            updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(record.getId()).append("'");
+            if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+                updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
+            }
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
         }
@@ -1116,18 +1126,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, String tableSchemaName, boolean updateCascadePK) throws Exception{
+    public void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception{
         providerId = providerId != null ? providerId : 0L;
-        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
         //create update query for the record
-        StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE " + icebergTablePath + " SET ");
+        StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
         String fieldValue = (field.getValue() != null) ? field.getValue() : "";
-        updateQueryBuilder.append(field.getName() + " = '" + fieldValue + "'");
-        updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'");
+        updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
+        updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(recordId).append("'");
+        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+            updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
+        }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
 

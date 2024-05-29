@@ -12,9 +12,11 @@ import java.util.List;
 public interface SpatialDataHandling {
   boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO, boolean isGeoJsonHeaders);
 
-  StringBuilder getHeadersConvertedToBinary();
+  StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO);
 
-  StringBuilder getSimpleHeaders();
+  String convertToHEX(String value);
+
+  StringBuilder getSimpleHeaders(TableSchemaVO tableSchemaVO);
 
   void decodeSpatialData(List<RecordVO> recordVOS);
 
@@ -23,4 +25,10 @@ public interface SpatialDataHandling {
   List<DataType> getGeoJsonEnums();
 
   DataType getGeometryType(byte[] byteArray) throws ParseException;
+
+  String fixQueryIncludeSpatialDataForSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
+
+  String fixQueryExcludeSpatialDataFromSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
+
+  StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
 }

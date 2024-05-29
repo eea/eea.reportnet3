@@ -375,7 +375,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                         isValid = (boolean) method.invoke(object, modifiedJson, spatialDataHandling.getGeometryType((byte[]) rs.getObject(fieldName)));
                     }
                 } catch (IOException | ParseException e) {
-                    throw new RuntimeException(e);
+                    LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
                 }
             } else {
                 try {
@@ -385,7 +385,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                         isValid = (boolean) method.invoke(object, modifiedJson);
                     }
                 } catch (IOException | ParseException e) {
-                    throw new RuntimeException(e);
+                    LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
                 }
             }
         } else {

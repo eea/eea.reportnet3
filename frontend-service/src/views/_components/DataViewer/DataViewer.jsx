@@ -683,6 +683,7 @@ export const DataViewer = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
+      setIsConfirmDeleteButtonDisabled(true);
       await DatasetService.deleteAttachment({
         dataflowId,
         datasetId,
@@ -695,7 +696,9 @@ export const DataViewer = ({
       });
       RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
       setIsDeleteAttachmentVisible(false);
+      setIsConfirmDeleteButtonDisabled(false);
     } catch (error) {
+      setIsConfirmDeleteButtonDisabled(false);
       console.error('DataViewer - onConfirmDeleteAttachment.', error);
     }
   };
@@ -1543,7 +1546,9 @@ export const DataViewer = ({
       {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isConfirmDeleteButtonDisabled}
           header={`${resourcesContext.messages['deleteAttachmentHeader']}`}
+          iconConfirm={isConfirmDeleteButtonDisabled ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}
