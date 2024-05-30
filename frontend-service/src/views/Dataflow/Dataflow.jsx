@@ -76,6 +76,7 @@ export const Dataflow = () => {
     currentUrl: '',
     data: {},
     dataflowType: '',
+    dataProviderGroup: {},
     dataProviderId: [],
     dataProviderSelected: {},
     deleteInput: '',
@@ -90,6 +91,7 @@ export const Dataflow = () => {
     isApiKeyDialogVisible: false,
     isAutomaticReportingDeletion: false,
     isBusinessDataflowDialogVisible: false,
+    isCitizenScienceDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
@@ -538,6 +540,7 @@ export const Dataflow = () => {
       payload: {
         name: newName,
         description: newDescription,
+        isCitizenScienceDataflowDialogVisible: false,
         isReportingDataflowDialogVisible: false,
         isExportDialogVisible: false
       }
@@ -785,6 +788,10 @@ export const Dataflow = () => {
           anySchemaAvailableInPublic: dataflow.anySchemaAvailableInPublic,
           data: dataflow,
           dataflowType: dataflow.type,
+          dataProviderGroup: {
+            dataProviderGroupId: dataflow.dataProviderGroupId,
+            label: dataflow.dataProviderGroupName
+          },
           description: dataflow.description,
           isAutomaticReportingDeletion: dataflow.isAutomaticReportingDeletion,
           isReleasable: dataflow.isReleasable,
@@ -1646,10 +1653,26 @@ export const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
-            isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
             isCustodian={isLeadDesigner}
             isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
+            manageDialogs={manageDialogs}
+            obligation={obligation}
+            onEditDataflow={onEditDataflow}
+            resetObligations={resetObligations}
+            setCheckedObligation={setCheckedObligation}
+            state={dataflowState}
+          />
+        )}
+
+        {dataflowState.isCitizenScienceDataflowDialogVisible && (
+          <ManageDataflow
+            dataflowId={dataflowId}
+            dataProviderGroup={dataflowState.dataProviderGroup}
+            isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
+            isCustodian={isLeadDesigner}
+            isEditing={true}
+            isVisible={dataflowState.isCitizenScienceDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}

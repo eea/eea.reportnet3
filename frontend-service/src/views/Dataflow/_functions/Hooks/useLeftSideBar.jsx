@@ -36,7 +36,13 @@ export const useLeftSideBar = (
         icon: 'edit',
         isVisible: buttonsVisibility.editBtn,
         label: 'edit',
-        onClick: () => manageDialogs('isReportingDataflowDialogVisible', true),
+        onClick: () =>
+          manageDialogs(
+            dataflowState.dataflowType === 'CITIZEN_SCIENCE'
+              ? 'isCitizenScienceDataflowDialogVisible'
+              : 'isReportingDataflowDialogVisible',
+            true
+          ),
         title: 'edit'
       };
 
