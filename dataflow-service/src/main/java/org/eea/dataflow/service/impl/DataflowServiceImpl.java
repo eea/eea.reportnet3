@@ -1216,12 +1216,18 @@ public class DataflowServiceImpl implements DataflowService {
     if (result != null) {
       dataflowVO = dataflowMapper.entityToClass(result);
 
-      if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType()) || TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflowVO.getType())) {
+      if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
         dataflowVO.setDataProviderGroupName(
             dataProviderGroupRepository.findById(dataflowVO.getDataProviderGroupId())
                 .orElse(new DataProviderGroup()).getName());
         dataflowVO.setFmeUserName(fmeUserRepository.findById(dataflowVO.getFmeUserId())
             .orElse(new FMEUser()).getUsername());
+      }
+
+      if (TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflowVO.getType())) {
+        dataflowVO.setDataProviderGroupName(
+            dataProviderGroupRepository.findById(dataflowVO.getDataProviderGroupId())
+                .orElse(new DataProviderGroup()).getName());
       }
 
       // filter design datasets (schemas) showed to the user depending on permissions

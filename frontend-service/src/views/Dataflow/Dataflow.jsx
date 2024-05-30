@@ -1646,6 +1646,7 @@ export const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
             isCustodian={isLeadDesigner}
             isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}

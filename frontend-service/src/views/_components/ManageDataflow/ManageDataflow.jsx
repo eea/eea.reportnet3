@@ -60,9 +60,7 @@ export const ManageDataflow = ({
     isReleasable: state.isReleasable
   };
 
-  const dialogName = isCitizenScienceDataflow
-    ? 'isCitizenScienceDataflowDialogVisible'
-    : 'isReportingDataflowDialogVisible';
+  const dialogName = 'isReportingDataflowDialogVisible';
 
   const setIsDeleting = isDeleting => reportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
 
@@ -260,11 +258,7 @@ export const ManageDataflow = ({
             onSearch={() => manageDialogs('isReportingObligationsDialogVisible', true)}
             onSubmit={onSubmit}
             ref={formRef}
-            refresh={
-              isCitizenScienceDataflow
-                ? state.isCitizenScienceDataflowDialogVisible
-                : state.isReportingDataflowDialogVisible
-            }
+            refresh={state.isReportingDataflowDialogVisible}
           />
         </Dialog>
       )}
