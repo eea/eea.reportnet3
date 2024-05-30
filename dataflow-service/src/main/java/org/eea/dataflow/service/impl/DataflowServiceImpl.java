@@ -341,57 +341,22 @@ public class DataflowServiceImpl implements DataflowService {
       if (CollectionUtils.isNotEmpty(idsResources) || userAdmin
           || dataflowType == TypeDataflowEnum.REFERENCE) {
         List<Dataflow> dataflows = new ArrayList<>();
-        switch (dataflowType) {
-          case REPORTING:
-          case CITIZEN_SCIENCE:
-          case BUSINESS:
-            dataflows = userAdmin
-                ? dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, null, pinnedDataflows)
-                : dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, idsResources, pinnedDataflows);
-            paginatedDataflowVO.setFilteredRecords(userAdmin
-                ? dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, null, pinnedDataflows)
-                : dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                    orderHeader, asc, dataflowType, idsResources, pinnedDataflows));
+        List<Long> dataflowIdsInput = userAdmin ? null : idsResources;
+        List<Long> dataflowIdsInput2 = userAdmin ? null : idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources;
 
-            paginatedDataflowVO.setTotalRecords(userAdmin
-                ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
-                    asc, dataflowType, null, pinnedDataflows)
-                : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
-                    asc, dataflowType,
-                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources,
-                    pinnedDataflows));
-            break;
-          case REFERENCE:
-            if (CollectionUtils.isNotEmpty(idsResources) || userAdmin) {
-              dataflows = userAdmin
-                  ? dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, null, pinnedDataflows)
-                  : dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, idsResources, pinnedDataflows);
-              paginatedDataflowVO.setFilteredRecords(userAdmin
-                  ? dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, null, pinnedDataflows)
-                  : dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.FALSE, filters,
-                      orderHeader, asc, dataflowType, idsResources, pinnedDataflows));
-
-            } else {
-              paginatedDataflowVO.setFilteredRecords(Long.valueOf(0));
-            }
-            paginatedDataflowVO.setTotalRecords(userAdmin
-                ? dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
-                    asc, dataflowType, null, pinnedDataflows)
-                : dataflowRepository.countPaginated(arrayToJson, null, Boolean.FALSE, null, null,
-                    asc, dataflowType,
-                    idsResourcesWithoutRole != null ? idsResourcesWithoutRole : idsResources,
-                    pinnedDataflows));
-
-            break;
-
+        if (CollectionUtils.isNotEmpty(idsResources) || userAdmin) {
+          dataflows = dataflowRepository.findPaginated(arrayToJson, pageable, false, filters,
+                  orderHeader, asc, dataflowType, dataflowIdsInput, pinnedDataflows);
+          paginatedDataflowVO.setFilteredRecords(
+                  dataflowRepository.countPaginated(arrayToJson, pageable, false, filters,
+                          orderHeader, asc, dataflowType, dataflowIdsInput, pinnedDataflows));
+        } else {
+          paginatedDataflowVO.setFilteredRecords(0L);
         }
 
+        paginatedDataflowVO.setTotalRecords(
+                dataflowRepository.countPaginated(arrayToJson, null, false, null, null,
+                        asc, dataflowType, dataflowIdsInput2, pinnedDataflows));
 
         dataflows.forEach(dataflow -> {
           DataFlowVO dataflowVO = dataflowNoContentMapper.entityToClass(dataflow);
