@@ -27,13 +27,14 @@ export const CitizenScienceDataflowService = {
   create: async (name, description, obligationId, dataProviderGroupId) =>
     await CitizenScienceDataflowRepository.create(name, description, obligationId, dataProviderGroupId),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, dataProviderGroupId) =>
     await CitizenScienceDataflowRepository.update(
       dataflowId,
       name,
       description,
       obligationId,
       isReleasable,
-      showPublicInfo
+      showPublicInfo,
+      dataProviderGroupId
     )
 };

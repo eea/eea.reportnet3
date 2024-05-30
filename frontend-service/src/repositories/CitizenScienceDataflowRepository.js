@@ -24,7 +24,7 @@ export const CitizenScienceDataflowRepository = {
       data: { ...filterBy }
     }),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo) =>
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, dataProviderGroupId) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -34,7 +34,8 @@ export const CitizenScienceDataflowRepository = {
         obligation: { obligationId },
         releasable: isReleasable,
         showPublicInfo,
-        type: 'CITIZEN_SCIENCE'
+        type: 'CITIZEN_SCIENCE',
+        dataProviderGroupId
       }
     })
 };

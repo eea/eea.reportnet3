@@ -127,17 +127,25 @@ export const ManageDataflowForm = forwardRef(
         onSubmit(true);
 
         try {
-          const service = isCitizenScienceDataflow ? CitizenScienceDataflowService : DataflowService;
-
           if (isEditing) {
-            await service.update(
-              dataflowId,
-              name,
-              description,
-              metadata.obligation.id,
-              metadata.isReleasable,
-              metadata.showPublicInfo
-            );
+            isCitizenScienceDataflow
+              ? await CitizenScienceDataflowService.update(
+                  dataflowId,
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  metadata.isReleasable,
+                  metadata.showPublicInfo,
+                  selectedGroup.dataProviderGroupId
+                )
+              : await DataflowService.update(
+                  dataflowId,
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  metadata.isReleasable,
+                  metadata.showPublicInfo
+                );
 
             onEdit(name, description, metadata.obligation.id);
           } else {
