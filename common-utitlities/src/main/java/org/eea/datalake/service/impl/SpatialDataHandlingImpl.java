@@ -141,13 +141,21 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return DataType.fromValue(geometry.getGeometryType().toUpperCase());
   }
 
-  private Optional<String> getHeader(boolean isGeoJsonHeaders, String headerInput, TableSchemaVO tableSchemaVO) {
+  private Optional<String> getHeaderName(boolean isGeoJsonHeaders, String headerInput, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
     return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
         .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
         .map(FieldSchemaVO::getName)
         .filter(name -> name.equalsIgnoreCase(headerInput)).findAny();
+  }
+
+  private Optional<String> getHeaderType(boolean isGeoJsonHeaders, String headerInput, TableSchemaVO tableSchemaVO) {
+    List<DataType> geoJsonEnums = getGeoJsonEnums();
+
+    return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
+        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .filter(name -> name.getName().equalsIgnoreCase(headerInput)).findAny().map(fieldSchemaVO -> fieldSchemaVO.getType().getValue());
   }
 
   @Override
@@ -159,7 +167,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
     while (matcher.find()) {
       String columnName = matcher.group(1);
-      Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
+      Optional<String> header = getHeaderName(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent() && !replacements.containsKey(columnName)) {
         replacements.put(columnName, "st_asgeojson(" + columnName + ")");
       }
@@ -183,7 +191,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
     while (columnMatcher.find()) {
       String columnName = columnMatcher.group(1);
-      Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
+      Optional<String> header = getHeaderName(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent()) {
         columnsToExclude.add(columnName);
       }
@@ -227,7 +235,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       String columnName = matcher.group(1);
       String value = matcher.group(3);
 
-      Optional<String> header = getHeader(isGeoJsonHeaders, columnName, tableSchemaVO);
+      Optional<String> header = getHeaderType(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
         String escValue = spatialDataHelper.escapeJsonString(value);
         String binaryStr = convertToHEX(escValue);
