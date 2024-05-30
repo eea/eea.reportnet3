@@ -28,6 +28,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageDataflow = ({
   dataflowId,
+  dataProviderGroup,
   isCitizenScienceDataflow,
   isCustodian,
   isEditing = false,
@@ -60,7 +61,9 @@ export const ManageDataflow = ({
     isReleasable: state.isReleasable
   };
 
-  const dialogName = 'isReportingDataflowDialogVisible';
+  const dialogName = isCitizenScienceDataflow
+    ? 'isCitizenScienceDataflowDialogVisible'
+    : 'isReportingDataflowDialogVisible';
 
   const setIsDeleting = isDeleting => reportingDataflowDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting } });
 
@@ -219,7 +222,7 @@ export const ManageDataflow = ({
               : ''
           }`}
           disabled={
-            (isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) ||
+            (isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup) && isEmpty(dataProviderGroup)) ||
             isEmpty(reportingDataflowState.name) ||
             isEmpty(reportingDataflowState.description) ||
             isNil(reportingDataflowState.obligation?.id) ||
@@ -245,6 +248,7 @@ export const ManageDataflow = ({
           visible={isVisible}>
           <ManageDataflowForm
             dataflowId={dataflowId}
+            dataProviderGroup={dataProviderGroup}
             dialogName={dialogName}
             getData={onLoadData}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
@@ -258,7 +262,11 @@ export const ManageDataflow = ({
             onSearch={() => manageDialogs('isReportingObligationsDialogVisible', true)}
             onSubmit={onSubmit}
             ref={formRef}
-            refresh={state.isReportingDataflowDialogVisible}
+            refresh={
+              isCitizenScienceDataflow
+                ? state.isCitizenScienceDataflowDialogVisible
+                : state.isReportingDataflowDialogVisible
+            }
           />
         </Dialog>
       )}

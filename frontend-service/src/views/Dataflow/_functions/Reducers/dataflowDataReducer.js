@@ -45,6 +45,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return {
         ...state,
         description: payload.description,
+        isCitizenScienceDataflowDialogVisible: payload.isCitizenScienceDataflowDialogVisible,
         isReportingDataflowDialogVisible: payload.isReportingDataflowDialogVisible,
         isExportDialogVisible: payload.isExportDialogVisible,
         name: payload.name

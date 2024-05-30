@@ -28,6 +28,7 @@ export const ManageDataflowForm = forwardRef(
   (
     {
       dataflowId,
+      dataProviderGroup,
       dialogName,
       getData,
       isCitizenScienceDataflow,
@@ -280,7 +281,7 @@ export const ManageDataflowForm = forwardRef(
                 options={groupOfCompanies}
                 placeholder={resourcesContext.messages['selectGroupOfCompanies']}
                 tooltip={isDesign ? resourcesContext.messages['groupOfCompaniesDisabledTooltip'] : ''}
-                value={selectedGroup}
+                value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>
           )}
