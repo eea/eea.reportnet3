@@ -1342,19 +1342,19 @@ public class DataFlowServiceImplTest {
    */
   @Test
   public void getDataflowsCountTest() throws EEAException {
-
-    IDataflowCount idc1 = new IDataflowCount() {
-
-      @Override
-      public TypeDataflowEnum getType() {
-        return TypeDataflowEnum.REFERENCE;
-      }
-
-      @Override
-      public Long getAmount() {
-        return 15L;
-      }
-    };
+      /* Commented out section for ticket Feature-265682 */
+//    IDataflowCount idc1 = new IDataflowCount() {
+//
+//      @Override
+//      public TypeDataflowEnum getType() {
+//        return TypeDataflowEnum.REFERENCE;
+//      }
+//
+//      @Override
+//      public Long getAmount() {
+//        return 15L;
+//      }
+//    };
 
     ResourceAccessVO resource = new ResourceAccessVO();
     resource.setId(1L);
@@ -1367,7 +1367,8 @@ public class DataFlowServiceImplTest {
     authorities.add(new SimpleGrantedAuthority("ROLE_CUSTODIAN"));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(dataflowRepository.countReferenceDataflowsDraft()).thenReturn(idc1);
+    /* Commented out section for ticket Feature-265682 */
+//    Mockito.when(dataflowRepository.countReferenceDataflowsDraft()).thenReturn(idc1);
 
     assertNotNull(dataflowServiceImpl.getDataflowsCount());
   }
