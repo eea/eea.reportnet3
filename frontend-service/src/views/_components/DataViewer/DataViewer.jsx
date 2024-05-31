@@ -327,7 +327,7 @@ export const DataViewer = ({
 
   useEffect(() => {
     if (onChangeButtonsVisibility) {
-      onChangeButtonsVisibility(isTableEditable);
+      onChangeButtonsVisibility();
     }
     if (onChangeTableEditable) {
       onChangeTableEditable(isTableEditable);
@@ -1287,6 +1287,7 @@ export const DataViewer = ({
         isTableEditable={isTableEditable}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
         levelErrorValidations={levelErrorValidations}
+        onChangeButtonsVisibility={onChangeButtonsVisibility}
         onConfirmDeleteTable={onConfirmDeleteTable}
         onDisableEditButton={onDisableEditButton}
         onEnableManualEdit={onEnableManualEdit}

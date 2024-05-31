@@ -80,7 +80,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { resetFilterState } = useApplyFilters('uniqueConstraints');
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
-  const [isIcebergTableCreated, setIsIcebergTableCreated] = useState(false);
+  const [hasIcebergTables, setHasIcebergTables] = useState(false);
   const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
@@ -234,6 +234,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     leftSideBarContext.removeModels();
+    onGetIcebergTables();
     onLoadSchema();
     callSetMetaData();
     if (isEmpty(webformOptions)) {
@@ -324,6 +325,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       setIsDownloadingQCRules(false);
     }
   }, [notificationContext.hidden]);
+
+  const onGetIcebergTables = async () => {
+    const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId });
+    setHasIcebergTables(!isEmpty(icebergTables?.data));
+  };
 
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
 
@@ -692,8 +698,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
-  const onChangeButtonsVisibility = disabled => {
-    setIsIcebergTableCreated(disabled);
+  const onChangeButtonsVisibility = () => {
+    onGetIcebergTables();
   };
 
   const onHideDelete = () => {
@@ -1711,10 +1717,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  isTableConversionInProgress ||
-                  isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
+                  hasIcebergTables ||
+                  isTableConversionInProgress ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1743,10 +1749,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  isTableConversionInProgress ||
-                  isIcebergTableCreated ||
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
+                  hasIcebergTables ||
+                  isTableConversionInProgress ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1773,8 +1779,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
+                  hasIcebergTables ||
                   isTableConversionInProgress ||
-                  isIcebergTableCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1797,9 +1803,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
                 disabled={
-                  isTableConversionInProgress ||
-                  isIcebergTableCreated ||
                   isDesignDatasetEditorRead ||
+                  hasIcebergTables ||
+                  isTableConversionInProgress ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||

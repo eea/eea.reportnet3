@@ -120,8 +120,8 @@ export const DataflowRepository = {
 
   get: async dataflowId => await HTTPRequester.get({ url: getUrl(DataflowConfig.get, { dataflowId }) }),
 
-  getIcebergTables: async ({ dataflowId, providerId }) =>
-    await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId }) }),
+  getIcebergTables: async ({ dataflowId, providerId, datasetId }) =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId }) }),
 
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),
