@@ -1585,37 +1585,40 @@ public class DataflowServiceImpl implements DataflowService {
 
     for (IDataflowCount dataflow : dataflowCountList) {
       DataflowCountVO newDataflowCountVO = new DataflowCountVO();
-      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin) {
-        continue;
-      }
+
+      /* Commented out section for ticket Feature-265682 */
+//      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin) {
+//        continue;
+//      }
       newDataflowCountVO.setType(dataflow.getType());
       newDataflowCountVO.setAmount(dataflow.getAmount());
       dataflowCountVOList.add(newDataflowCountVO);
     }
 
-    if (!isAdmin) {
-      IDataflowCount draftReferenceDataflow = dataflowRepository.countReferenceDataflowsDraft();
-      IDataflowCount designReferenceDataflow = null;
-
-      if (CollectionUtils.isNotEmpty(idsResources))
-        designReferenceDataflow =
-            dataflowRepository.countReferenceDataflowsDesignByUser(idsResources);
-
-      long totalReferenceAmount = 0L;
-
-      if (designReferenceDataflow != null) {
-        totalReferenceAmount += designReferenceDataflow.getAmount();
-      }
-
-      if (draftReferenceDataflow != null) {
-        totalReferenceAmount += draftReferenceDataflow.getAmount();
-      }
-
-      DataflowCountVO totalReferenceCountVO = new DataflowCountVO();
-      totalReferenceCountVO.setType(TypeDataflowEnum.REFERENCE);
-      totalReferenceCountVO.setAmount(totalReferenceAmount);
-      dataflowCountVOList.add(totalReferenceCountVO);
-    }
+    /* Commented out section for ticket Feature-265682 */
+//    if (!isAdmin) {
+//      IDataflowCount draftReferenceDataflow = dataflowRepository.countReferenceDataflowsDraft();
+//      IDataflowCount designReferenceDataflow = null;
+//
+//      if (CollectionUtils.isNotEmpty(idsResources))
+//        designReferenceDataflow =
+//            dataflowRepository.countReferenceDataflowsDesignByUser(idsResources);
+//
+//      long totalReferenceAmount = 0L;
+//
+//      if (designReferenceDataflow != null) {
+//        totalReferenceAmount += designReferenceDataflow.getAmount();
+//      }
+//
+//      if (draftReferenceDataflow != null) {
+//        totalReferenceAmount += draftReferenceDataflow.getAmount();
+//      }
+//
+//      DataflowCountVO totalReferenceCountVO = new DataflowCountVO();
+//      totalReferenceCountVO.setType(TypeDataflowEnum.REFERENCE);
+//      totalReferenceCountVO.setAmount(totalReferenceAmount);
+//      dataflowCountVOList.add(totalReferenceCountVO);
+//    }
 
     return dataflowCountVOList;
   }
