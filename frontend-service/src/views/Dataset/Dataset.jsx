@@ -109,6 +109,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   });
   const [dataflowType, setDataflowType] = useState('');
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
+  const [hasIcebergTables, setHasIcebergTables] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
@@ -124,7 +125,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [isDownloadingValidations, setIsDownloadingValidations] = useState(false);
   const [isImportDatasetDialogVisible, setIsImportDatasetDialogVisible] = useState(false);
   const [isImportOtherSystemsDialogVisible, setIsImportOtherSystemsDialogVisible] = useState(false);
-  const [isIcebergTableCreated, setIsIcebergTableCreated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isReferenceDataset, setIsReferenceDataset] = useState(false);
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
@@ -288,6 +288,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }, [datasetId]);
 
   useEffect(() => {
+    onGetIcebergTables();
     onLoadDataflow();
   }, []);
 
@@ -310,6 +311,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeUrl();
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
+
+  const onGetIcebergTables = async () => {
+    const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId });
+    setHasIcebergTables(!isEmpty(icebergTables?.data));
+  };
 
   const changeProgressStepBar = stepInfo => {
     const inmDatasetProgressBarSteps = [...datasetProgressBarSteps.steps];
@@ -473,8 +479,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   };
 
-  const onChangeButtonsVisibility = disabled => {
-    setIsIcebergTableCreated(disabled);
+  const onChangeButtonsVisibility = () => {
+    onGetIcebergTables();
   };
 
   const onConfirmDelete = async () => {
@@ -1225,9 +1231,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
                   disabled={
-                    isTableConversionInProgress ||
-                    isIcebergTableCreated ||
+                    hasIcebergTables ||
                     !hasWritePermissions ||
+                    isTableConversionInProgress ||
                     actionsContext.importDatasetProcessing ||
                     actionsContext.exportDatasetProcessing ||
                     actionsContext.deleteDatasetProcessing ||
@@ -1256,8 +1262,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
               disabled={
+                (hasWritePermissions && hasIcebergTables) ||
                 isTableConversionInProgress ||
-                (isIcebergTableCreated && hasWritePermissions) ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||
@@ -1284,9 +1290,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
             <DatasetDeleteDataDialog
               disabled={
-                isTableConversionInProgress ||
-                isIcebergTableCreated ||
+                hasIcebergTables ||
                 !hasWritePermissions ||
+                isTableConversionInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||
@@ -1307,9 +1313,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           <div className="p-toolbar-group-right">
             <DatasetValidateDialog
               disabled={
-                isTableConversionInProgress ||
-                isIcebergTableCreated ||
+                hasIcebergTables ||
                 !hasWritePermissions ||
+                isTableConversionInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||

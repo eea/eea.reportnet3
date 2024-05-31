@@ -56,6 +56,7 @@ export const ActionsToolbar = ({
   levelErrorTypesWithCorrects,
   levelErrorValidations,
   onHideSelectGroupedValidation,
+  onChangeButtonsVisibility,
   onConfirmDeleteTable,
   onDisableEditButton,
   onEnableManualEdit,
@@ -184,6 +185,7 @@ export const ActionsToolbar = ({
           });
         }
       }
+      onChangeButtonsVisibility();
       onEnableManualEdit(checked);
       onDisableEditButton(false);
     } catch (error) {
