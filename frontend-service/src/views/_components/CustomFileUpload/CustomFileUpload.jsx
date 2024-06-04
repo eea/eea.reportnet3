@@ -29,6 +29,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
 
+import { HTTPRequester } from 'repositories/_utils/HTTPRequester';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const CustomFileUpload = ({
@@ -77,7 +78,9 @@ export const CustomFileUpload = ({
   replaceCheckLabelMessage = '',
   replaceCheckDisabled = false,
   s3Check = false,
+  s3TestCheck = false,
   s3CheckLabel = 'S3',
+  s3CheckTestLabel = 'Test',
   style = null,
   tableSchemaId,
   uploadLabel = 'Upload',
@@ -94,6 +97,7 @@ export const CustomFileUpload = ({
     isValid: true,
     msgs: [],
     replace: false,
+    testUploadWithS3: false,
     uploadWithS3: false
   });
 
@@ -113,7 +117,11 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (presignedUrl) {
-      uploadToS3();
+      if (state.testUploadWithS3) {
+        uploadToS3Test();
+      } else {
+        uploadToS3();
+      }
     }
   }, [presignedUrl]);
 
@@ -378,6 +386,31 @@ export const CustomFileUpload = ({
     }
   };
 
+  const uploadToS3Test = async () => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    let formData = new FormData();
+
+    for (let file of state.files) {
+      formData.append(name, file, file.name);
+    }
+    try {
+      await HTTPRequester.putWithFiles({
+        url: presignedUrl,
+        data: formData,
+        headers: { 'Content-Type': undefined }
+      });
+
+      onUpload({ files: state.files });
+
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+      importS3ToDlh();
+    } catch (error) {
+      console.error('CustomFileUpload - uploadToS3.', error);
+      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    }
+  };
+
   const importS3ToDlh = async () => {
     try {
       await DatasetService.importTableFileWithS3({
@@ -613,6 +646,28 @@ export const CustomFileUpload = ({
     );
   };
 
+  const renderS3TestCheck = () => {
+    return (
+      <div className={styles.s3CheckboxWrapper}>
+        <Checkbox
+          checked={state.testUploadWithS3}
+          id="testS3Checkbox"
+          inputId="testS3Checkbox"
+          onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { testUploadWithS3: !state.testUploadWithS3 } })}
+          role="checkbox"
+        />
+        <label htmlFor="testS3Checkbox">
+          <span
+            onClick={() =>
+              dispatch({ type: 'UPLOAD_PROPERTY', payload: { testUploadWithS3: !state.testUploadWithS3 } })
+            }>
+            {s3CheckTestLabel}
+          </span>
+        </label>
+      </div>
+    );
+  };
+
   const renderAdvanced = () => {
     const cClassName = classNames('p-fileupload p-component', className);
     let filesList, progressBar;
@@ -639,6 +694,7 @@ export const CustomFileUpload = ({
           </div>
           {replaceCheck && renderReplaceCheck()}
           {bigData && s3Check && renderS3Check()}
+          {bigData && s3TestCheck && renderS3TestCheck()}
         </div>
         <p className={`${styles.invalidExtensionMsg} ${state.isValid ? styles.isValid : undefined}`}>
           {invalidExtensionMessage}
@@ -672,7 +728,7 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                if (bigData && state.uploadWithS3) {
+                if (bigData && (state.uploadWithS3 || state.testUploadWithS3)) {
                   onGetPresignedUrl();
                 } else {
                   upload();
