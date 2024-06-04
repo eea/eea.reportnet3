@@ -1444,6 +1444,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
           s3Check={true}
+          s3TestCheck={true}
           url={`${window.env.REACT_APP_BACKEND}${
             isNil(selectedCustomImportIntegration.id)
               ? getUrl(DatasetConfig.importFileDatasetUpd, {

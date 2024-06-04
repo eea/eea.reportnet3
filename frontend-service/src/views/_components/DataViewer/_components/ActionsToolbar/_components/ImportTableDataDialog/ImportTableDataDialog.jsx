@@ -161,6 +161,7 @@ export const ImportTableDataDialog = ({
           onValidateFile={onValidateFile}
           replaceCheck={true}
           s3Check={true}
+          s3TestCheck={true}
           tableSchemaId={tableId}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTableUpd, {
             datasetId: datasetId,
