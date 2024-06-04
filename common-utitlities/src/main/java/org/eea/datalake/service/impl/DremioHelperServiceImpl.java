@@ -316,7 +316,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         for(int i=0; i < numberOfRetriesForPromoting; i++) {
             executeSqlStatement(refreshTableAndPromoteQuery);
             if(checkFolderPromoted(s3PathResolver, tableName)) {
-                LOG.info("For job {} and datasetId {} promoted table {} in retry #{}", jobId, tablePath, i+1);
+                LOG.info("For job {} and datasetId {} promoted table {} in retry #{}", jobId, s3PathResolver.getDatasetId(), tablePath, i+1);
                 folderWasPromoted = true;
                 break;
             }

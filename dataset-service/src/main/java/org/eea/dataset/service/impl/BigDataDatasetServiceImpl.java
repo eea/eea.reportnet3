@@ -769,6 +769,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
         }
+
+        //if dataset is reference, remove the data from reference folder
+        DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+        if(datasetType == DatasetTypeEnum.REFERENCE){
+            //demote reference table folder
+            S3PathResolver s3ReferenceTablePathResolver = new S3PathResolver(s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName, tableSchemaName, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+            if (s3HelperPrivate.checkFolderExist(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH)) {
+                dremioHelperService.demoteFolderOrFile(s3ReferenceTablePathResolver, tableSchemaName);
+                //remove folders that contain the previous parquet files because data will be replaced
+                s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+            }
+        }
     }
 
     @Override
