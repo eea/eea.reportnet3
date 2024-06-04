@@ -1,5 +1,7 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
+import axios from 'axios';
+
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 
 import isEmpty from 'lodash/isEmpty';
@@ -394,11 +396,7 @@ export const CustomFileUpload = ({
       formData.append(name, file, file.name);
     }
     try {
-      await HTTPRequester.putWithFiles({
-        url: presignedUrl,
-        data: formData,
-        headers: { 'Content-Type': undefined }
-      });
+      await axios.put(presignedUrl, state.files[0]);
 
       onUpload({ files: state.files });
 
