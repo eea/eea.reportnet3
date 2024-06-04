@@ -390,14 +390,20 @@ export const CustomFileUpload = ({
 
   const uploadToS3Test = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
-    const options = {
-      headers: {
-        'Content-Type': state.files[0].type
-      }
-    };
 
     try {
-      await axios.put(presignedUrl, state.files[0], options);
+      await axios({
+        method: 'put',
+        url: presignedUrl,
+        data: state.files[0],
+        headers: {
+          'Content-Type': state.files[0].type
+        },
+        transformRequest: (data, headers) => {
+          delete headers.common['Authorization'];
+          return data;
+        }
+      });
 
       onUpload({ files: state.files });
 
