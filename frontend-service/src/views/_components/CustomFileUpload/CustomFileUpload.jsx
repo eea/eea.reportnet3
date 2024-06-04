@@ -390,13 +390,14 @@ export const CustomFileUpload = ({
 
   const uploadToS3Test = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
-    let formData = new FormData();
+    const options = {
+      headers: {
+        'Content-Type': state.files[0].type
+      }
+    };
 
-    for (let file of state.files) {
-      formData.append(name, file, file.name);
-    }
     try {
-      await axios.put(presignedUrl, state.files[0]);
+      await axios.put(presignedUrl, state.files[0], options);
 
       onUpload({ files: state.files });
 
