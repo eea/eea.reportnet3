@@ -398,7 +398,9 @@ export const CustomFileUpload = ({
   };
 
   const uploadFile = () => {
+    console.log('uploadFile');
     return new Promise((resolve, reject) => {
+      console.log('return');
       let xhr = new XMLHttpRequest();
       let formData = new FormData();
 
@@ -415,6 +417,7 @@ export const CustomFileUpload = ({
       });
 
       xhr.onreadystatechange = () => {
+        console.log('onreadystatechange');
         if (xhr.readyState === 4) {
           dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
           console.log('xhr.status: ' + xhr.status);
@@ -436,6 +439,7 @@ export const CustomFileUpload = ({
       xhr.open('PUT', nUrl, true);
 
       xhr.onload = () => {
+        console.log('onload');
         if (xhr.status >= 200 && xhr.status < 300) {
           resolve(xhr.response);
         } else {
