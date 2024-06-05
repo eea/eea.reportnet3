@@ -136,7 +136,7 @@ export const CustomFileUpload = ({
       if (attachment) {
         const timer = setTimeout(() => {
           onUpload({ files: state.files });
-        }, 15000);
+        }, 30000);
         return () => clearTimeout(timer);
       } else {
         console.log('useEffect state.progress: ' + state.progress);
