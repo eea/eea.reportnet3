@@ -1613,7 +1613,6 @@ export const Dataflow = () => {
             infoTooltip={infoExtensionsTooltip}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
-            isImportLeadReportersDialog={true}
             name="file"
             onUpload={onUploadLeadReporters}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importFile, {

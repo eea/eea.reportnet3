@@ -1437,7 +1437,6 @@ export const DataViewer = ({
       {isAttachFileVisible && (
         <CustomFileUpload
           accept={getAttachExtensions || '*'}
-          attachment={true}
           bigData={bigData}
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
