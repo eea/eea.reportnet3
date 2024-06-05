@@ -954,6 +954,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
         s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
         file.delete();
+        LOG.info("Updated dl attachment for datasetId {}, table {} and field {}", datasetId, tableSchemaName, fieldName);
     }
 
     @Override
