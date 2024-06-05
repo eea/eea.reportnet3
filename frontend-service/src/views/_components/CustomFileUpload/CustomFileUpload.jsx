@@ -372,14 +372,47 @@ export const CustomFileUpload = ({
   const uploadToS3 = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     try {
-      await fetch(presignedUrl, {
-        method: 'PUT',
-        body: state.files[0]
+      let xhr = new XMLHttpRequest();
+      let formData = new FormData();
+
+      for (let file of state.files) {
+        formData.append(name, file, file.name);
+      }
+
+      xhr.upload.addEventListener('progress', event => {
+        if (event.lengthComputable) {
+          dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
+        }
       });
 
-      onUpload({ files: state.files });
+      xhr.onreadystatechange = () => {
+        if (xhr.readyState === 4) {
+          dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
+
+          if (xhr.status >= 200 && xhr.status < 300) {
+            if (onUpload && !(bigData && !isImportLeadReportersDialog)) {
+              onUpload({ xhr: xhr, files: _files.current });
+            }
+          } else {
+            if (onError) {
+              onError({ xhr: xhr, files: _files.current });
+            }
+          }
+
+          clear();
+        }
+      };
+
+      let nUrl = presignedUrl;
+
+      xhr.open('PUT', nUrl, true);
+      // const tokens = LocalUserStorageUtils.getTokens();
+      // xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
+
+      xhr.send(formData);
 
       dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+
       importS3ToDlh();
     } catch (error) {
       console.error('CustomFileUpload - uploadToS3.', error);
