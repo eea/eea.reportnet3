@@ -372,6 +372,26 @@ export const CustomFileUpload = ({
   const uploadToS3 = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     try {
+      await fetch(presignedUrl, {
+        method: 'PUT',
+        body: state.files[0]
+      });
+
+      onUpload({ files: state.files });
+
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+
+      importS3ToDlh();
+    } catch (error) {
+      console.error('CustomFileUpload - uploadToS3.', error);
+      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    }
+  };
+
+  const uploadToS3Test = async () => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    try {
       let xhr = new XMLHttpRequest();
       let formData = new FormData();
 
@@ -413,34 +433,6 @@ export const CustomFileUpload = ({
 
       dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
 
-      importS3ToDlh();
-    } catch (error) {
-      console.error('CustomFileUpload - uploadToS3.', error);
-      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
-    }
-  };
-
-  const uploadToS3Test = async () => {
-    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
-
-    try {
-      await axios({
-        method: 'put',
-        url: presignedUrl,
-        data: state.files[0],
-        headers: {
-          'Content-Type': state.files[0].type
-        },
-        transformRequest: (data, headers) => {
-          delete headers.common['Authorization'];
-          return data;
-        }
-      });
-
-      onUpload({ files: state.files });
-
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
       importS3ToDlh();
     } catch (error) {
       console.error('CustomFileUpload - uploadToS3.', error);
