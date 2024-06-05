@@ -35,7 +35,6 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const CustomFileUpload = ({
   accept = undefined,
-  attachment = false,
   auto = false,
   bigData = false,
   cancelLabel = 'Reset',
@@ -59,16 +58,13 @@ export const CustomFileUpload = ({
   invalidNumberOfFilesMessageSummary = 'You can only upload {0} {1}.',
   isDialog = false,
   isImportDatasetDesignerSchema = false,
-  isImportLeadReportersDialog = false,
+  leaveDialogVisible = false,
   maxFileSize = null,
   mode = 'advanced',
   multiple = false,
   name = null,
-  onBeforeSend = null,
-  onBeforeUpload = null,
   onClear = null,
   onError = null,
-  onProgress = null,
   onSelect = null,
   onUpload = null,
   onValidateFile = null,
@@ -86,8 +82,7 @@ export const CustomFileUpload = ({
   style = null,
   tableSchemaId,
   uploadLabel = 'Upload',
-  url = null,
-  withCredentials = false
+  url = null
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -132,19 +127,8 @@ export const CustomFileUpload = ({
   }, [state.isUploadClicked]);
 
   useEffect(() => {
-    if (state.progress === 100 && bigData && !isImportLeadReportersDialog) {
-      if (attachment) {
-        const timer = setTimeout(() => {
-          onUpload({ files: state.files });
-        }, 15000);
-        return () => clearTimeout(timer);
-      } else {
-        console.log('useEffect state.progress: ' + state.progress);
-        const timer = setTimeout(() => {
-          onUpload({ files: state.files });
-        }, 5000);
-        return () => clearTimeout(timer);
-      }
+    if (state.progress === 100 && leaveDialogVisible) {
+      onUpload(leaveDialogVisible);
     }
   }, [state.progress]);
 
@@ -319,30 +303,28 @@ export const CustomFileUpload = ({
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
-    if (onBeforeUpload) {
-      onBeforeUpload({ xhr: xhr, formData: formData }, state.files);
-    }
-
     for (let file of state.files) {
       formData.append(name, file, file.name);
     }
 
     xhr.upload.addEventListener('progress', event => {
+      console.log('event.loaded: ' + event.loaded);
+      console.log('event.total: ' + event.total);
       if (event.lengthComputable) {
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
-      }
-
-      if (onProgress) {
-        onProgress({ originalEvent: event, progress: state.progress });
       }
     });
 
     xhr.onreadystatechange = () => {
+      console.log('onreadystatechange');
       if (xhr.readyState === 4) {
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
-
+        console.log('xhr.status: ' + xhr.status);
         if (xhr.status >= 200 && xhr.status < 300) {
-          if (onUpload && !(bigData && !isImportLeadReportersDialog)) {
+          console.log('xhr.status inside if: ' + xhr.status);
+          if (leaveDialogVisible) {
+            onUpload(false);
+          } else {
             onUpload({ xhr: xhr, files: _files.current });
           }
         } else {
@@ -350,7 +332,6 @@ export const CustomFileUpload = ({
             onError({ xhr: xhr, files: _files.current });
           }
         }
-
         clear();
       }
     };
@@ -365,12 +346,6 @@ export const CustomFileUpload = ({
     xhr.open(operation, nUrl, true);
     const tokens = LocalUserStorageUtils.getTokens();
     xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
-
-    if (onBeforeSend) {
-      onBeforeSend({ xhr: xhr, formData: formData });
-    }
-
-    xhr.withCredentials = withCredentials;
 
     xhr.send(formData);
 
@@ -397,82 +372,115 @@ export const CustomFileUpload = ({
     }
   };
 
-  const uploadFile = () => {
-    console.log('uploadFile');
-    return new Promise((resolve, reject) => {
-      console.log('return');
-      let xhr = new XMLHttpRequest();
-      let formData = new FormData();
+  // const uploadFile = () => {
+  //   console.log('uploadFile');
+  //   return new Promise((resolve, reject) => {
+  //     console.log('return');
+  //     let xhr = new XMLHttpRequest();
+  //     let formData = new FormData();
 
-      for (let file of state.files) {
-        formData.append(name, file, file.name);
-      }
+  //     for (let file of state.files) {
+  //       formData.append(name, file, file.name);
+  //     }
 
-      xhr.upload.addEventListener('progress', event => {
-        console.log('event.loaded: ' + event.loaded);
-        console.log('event.total: ' + event.total);
-        if (event.lengthComputable) {
-          dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
-        }
-      });
+  //     xhr.upload.addEventListener('progress', event => {
+  //       console.log('event.loaded: ' + event.loaded);
+  //       console.log('event.total: ' + event.total);
+  //       if (event.lengthComputable) {
+  //         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
+  //       }
+  //     });
 
-      xhr.onreadystatechange = () => {
-        console.log('onreadystatechange');
-        if (xhr.readyState === 4) {
-          dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
-          console.log('xhr.status: ' + xhr.status);
-          if (xhr.status >= 200 && xhr.status < 300) {
-            console.log('xhr.status inside if: ' + xhr.status);
-            onUpload({ xhr: xhr, files: _files.current });
-          } else {
-            if (onError) {
-              onError({ xhr: xhr, files: _files.current });
-            }
-          }
+  //     xhr.onreadystatechange = () => {
+  //       console.log('onreadystatechange');
+  //       if (xhr.readyState === 4) {
+  //         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
+  //         console.log('xhr.status: ' + xhr.status);
+  //         if (xhr.status >= 200 && xhr.status < 300) {
+  //           console.log('xhr.status inside if: ' + xhr.status);
+  //           onUpload({ xhr: xhr, files: _files.current });
+  //         } else {
+  //           if (onError) {
+  //             onError({ xhr: xhr, files: _files.current });
+  //           }
+  //         }
 
-          clear();
-        }
-      };
+  //         clear();
+  //       }
+  //     };
 
-      let nUrl = presignedUrl;
+  //     let nUrl = presignedUrl;
 
-      xhr.open('PUT', nUrl, true);
+  //     xhr.open('PUT', nUrl, true);
 
-      xhr.onload = () => {
-        console.log('onload');
-        if (xhr.status >= 200 && xhr.status < 300) {
-          resolve(xhr.response);
-        } else {
-          reject({
-            status: xhr.status,
-            statusText: xhr.statusText
-          });
-        }
-      };
-      xhr.onerror = () => {
-        reject({
-          status: xhr.status,
-          statusText: xhr.statusText
-        });
-      };
+  //     xhr.onload = () => {
+  //       console.log('onload');
+  //       if (xhr.status >= 200 && xhr.status < 300) {
+  //         resolve(xhr.response);
+  //       } else {
+  //         reject({
+  //           status: xhr.status,
+  //           statusText: xhr.statusText
+  //         });
+  //       }
+  //     };
+  //     xhr.onerror = () => {
+  //       reject({
+  //         status: xhr.status,
+  //         statusText: xhr.statusText
+  //       });
+  //     };
 
-      xhr.send(formData);
-    });
-  };
+  //     xhr.send(formData);
+  //   });
+  // };
 
   const uploadToS3Test = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
-    try {
-      await uploadFile();
+    let xhr = new XMLHttpRequest();
+    let formData = new FormData();
 
-      importS3ToDlh();
-
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
-    } catch (error) {
-      console.error('CustomFileUpload - uploadToS3.', error);
-      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    for (let file of state.files) {
+      formData.append(name, file, file.name);
     }
+
+    xhr.upload.addEventListener('progress', event => {
+      console.log('event.loaded: ' + event.loaded);
+      console.log('event.total: ' + event.total);
+      if (event.lengthComputable) {
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
+      }
+    });
+
+    xhr.onreadystatechange = () => {
+      console.log('onreadystatechange');
+      if (xhr.readyState === 4) {
+        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
+        console.log('xhr.status: ' + xhr.status);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          console.log('xhr.status inside if: ' + xhr.status);
+          importS3ToDlh();
+          onUpload({ xhr: xhr, files: _files.current });
+        } else {
+          if (onError) {
+            onError({ xhr: xhr, files: _files.current });
+          }
+        }
+        clear();
+      }
+    };
+
+    let nUrl = presignedUrl ? presignedUrl : url;
+
+    xhr.open('PUT', nUrl, true);
+
+    if (!presignedUrl) {
+      const tokens = LocalUserStorageUtils.getTokens();
+      xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
+    }
+    xhr.send(formData);
+
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
   };
 
   const importS3ToDlh = async () => {

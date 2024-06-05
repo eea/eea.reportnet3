@@ -854,9 +854,12 @@ export const FieldsDesigner = ({
     }
   };
 
-  const onUpload = async () => {
-    notificationContext.add({ type: 'IMPORT_TABLE_SCHEMA_INIT' });
-    manageDialogs('isImportTableSchemaDialogVisible', false);
+  const onUpload = async leaveDialogVisible => {
+    if (!leaveDialogVisible) {
+      manageDialogs('isImportTableSchemaDialogVisible', false);
+    } else {
+      notificationContext.add({ type: 'IMPORT_TABLE_SCHEMA_INIT' });
+    }
   };
 
   const createTableName = (tableName, fileType) => `${tableName}.${fileType}`;
@@ -1143,6 +1146,7 @@ export const FieldsDesigner = ({
             infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
+            leaveDialogVisible={true}
             mode="advanced"
             name="file"
             onError={onImportTableSchemaError}
