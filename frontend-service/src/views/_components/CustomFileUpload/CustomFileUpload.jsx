@@ -156,6 +156,8 @@ export const CustomFileUpload = ({
     }
   }, [draggedFiles]);
 
+  console.log('state.progress: ' + state.progress);
+
   const checkValidExtension = file => {
     const acceptedExtensions = accept.toLowerCase().split(/,\s*/);
 
@@ -311,6 +313,7 @@ export const CustomFileUpload = ({
       console.log('event.loaded: ' + event.loaded);
       console.log('event.total: ' + event.total);
       if (event.lengthComputable) {
+        console.log('event.lengthComputable: ' + event.lengthComputable);
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
       }
     });
@@ -448,6 +451,7 @@ export const CustomFileUpload = ({
       console.log('event.loaded: ' + event.loaded);
       console.log('event.total: ' + event.total);
       if (event.lengthComputable) {
+        console.log('event.lengthComputable: ' + event.lengthComputable);
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
       }
     });
