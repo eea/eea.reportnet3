@@ -31,11 +31,11 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
 
-import { HTTPRequester } from 'repositories/_utils/HTTPRequester';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const CustomFileUpload = ({
   accept = undefined,
+  attachment = false,
   auto = false,
   bigData = false,
   cancelLabel = 'Reset',
@@ -133,10 +133,18 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (state.progress === 100 && bigData && !isImportLeadReportersDialog) {
-      const timer = setTimeout(() => {
-        onUpload({ files: state.files });
-      }, 5000);
-      return () => clearTimeout(timer);
+      if (attachment) {
+        const timer = setTimeout(() => {
+          onUpload({ files: state.files });
+        }, 15000);
+        return () => clearTimeout(timer);
+      } else {
+        console.log('useEffect state.progress: ' + state.progress);
+        const timer = setTimeout(() => {
+          onUpload({ files: state.files });
+        }, 5000);
+        return () => clearTimeout(timer);
+      }
     }
   }, [state.progress]);
 
@@ -390,7 +398,7 @@ export const CustomFileUpload = ({
   };
 
   const uploadFile = () => {
-    return new Promise(() => {
+    return new Promise((resolve, reject) => {
       let xhr = new XMLHttpRequest();
       let formData = new FormData();
 
@@ -399,6 +407,8 @@ export const CustomFileUpload = ({
       }
 
       xhr.upload.addEventListener('progress', event => {
+        console.log('event.loaded: ' + event.loaded);
+        console.log('event.total: ' + event.total);
         if (event.lengthComputable) {
           dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
         }
@@ -407,11 +417,10 @@ export const CustomFileUpload = ({
       xhr.onreadystatechange = () => {
         if (xhr.readyState === 4) {
           dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
-
+          console.log('xhr.status: ' + xhr.status);
           if (xhr.status >= 200 && xhr.status < 300) {
-            if (onUpload && !(bigData && !isImportLeadReportersDialog)) {
-              onUpload({ xhr: xhr, files: _files.current });
-            }
+            console.log('xhr.status inside if: ' + xhr.status);
+            onUpload({ xhr: xhr, files: _files.current });
           } else {
             if (onError) {
               onError({ xhr: xhr, files: _files.current });
@@ -425,6 +434,23 @@ export const CustomFileUpload = ({
       let nUrl = presignedUrl;
 
       xhr.open('PUT', nUrl, true);
+
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(xhr.response);
+        } else {
+          reject({
+            status: xhr.status,
+            statusText: xhr.statusText
+          });
+        }
+      };
+      xhr.onerror = () => {
+        reject({
+          status: xhr.status,
+          statusText: xhr.statusText
+        });
+      };
 
       xhr.send(formData);
     });
