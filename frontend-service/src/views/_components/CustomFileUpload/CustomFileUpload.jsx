@@ -389,9 +389,8 @@ export const CustomFileUpload = ({
     }
   };
 
-  const uploadToS3Test = async () => {
-    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
-    try {
+  const uploadFile = () => {
+    return new Promise(() => {
       let xhr = new XMLHttpRequest();
       let formData = new FormData();
 
@@ -426,14 +425,19 @@ export const CustomFileUpload = ({
       let nUrl = presignedUrl;
 
       xhr.open('PUT', nUrl, true);
-      // const tokens = LocalUserStorageUtils.getTokens();
-      // xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
       xhr.send(formData);
+    });
+  };
 
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+  const uploadToS3Test = async () => {
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
+    try {
+      await uploadFile();
 
       importS3ToDlh();
+
+      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
     } catch (error) {
       console.error('CustomFileUpload - uploadToS3.', error);
       notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
