@@ -38,9 +38,12 @@ import { ThemeProvider } from 'views/_functions/Providers/ThemeProvider';
 import { UserProvider } from 'views/_functions/Providers/UserProvider';
 import { ValidationProvider } from 'views/_functions/Providers/ValidationProvider';
 import { LegalNotice } from 'views/LegalNotice';
+import { QueryClient, QueryClientProvider } from 'react-query';
+const queryClient = new QueryClient();
 
 const App = () => {
   return (
+    <QueryClientProvider client={queryClient}>
     <div className={styles.app}>
       <RecoilRoot>
         <ResourcesProvider>
@@ -169,6 +172,7 @@ const App = () => {
         </ResourcesProvider>
       </RecoilRoot>
     </div>
+    </QueryClientProvider>
   );
 };
 
