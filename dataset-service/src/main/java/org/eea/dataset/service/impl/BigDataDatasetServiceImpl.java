@@ -1110,6 +1110,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
                 updateQueryBuilder.append((i != record.getFields().size() -1) ? ", " : " ");
             }
+            if (updateQueryBuilder.length() >= 2 && updateQueryBuilder.substring(updateQueryBuilder.length() - 2).equals(", ")) {
+                updateQueryBuilder.delete(updateQueryBuilder.length() - 2, updateQueryBuilder.length());
+            }
             updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(record.getId()).append("'");
             if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
                 updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
