@@ -2,15 +2,22 @@ package org.eea.orchestrator.service.impl;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
-import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetTableVO;
+import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
@@ -18,8 +25,6 @@ import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -121,6 +126,15 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
 
+    @Autowired
+    private DataFlowControllerZuul dataFlowControllerZuul;
+
+    @Autowired
+    private RulesController.RulesControllerZuul rulesControllerZuul;
+
+    @Autowired
+    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
     /**
      * The job utils.
      */
@@ -188,6 +202,12 @@ public class JobServiceImpl implements JobService {
         JobTypeEnum jobType = job.getJobType();
         Integer numberOfCurrentJobs = 0;
         if (jobType == JobTypeEnum.VALIDATION && job.isRelease() || jobType == JobTypeEnum.RELEASE) {
+            if(jobType == JobTypeEnum.VALIDATION && !canValidationBeExecutedDueToReferenceIcebergTables(job)){
+                job.setJobStatus(JobStatusEnum.FAILED);
+                job.setJobInfo(JobInfoEnum.ERROR_VALIDATION_REFERENCE_ICEBERG_TABLES_EXIST.getValue(null));
+                save(job);
+                return false;
+            }
             numberOfCurrentJobs = jobRepository.countByJobStatusAndJobTypeAndRelease(JobStatusEnum.IN_PROGRESS, JobTypeEnum.VALIDATION, true);
             Integer numberOfCurrentValidationJobsWithReleaseFalse = jobRepository.countByJobStatusAndJobTypeAndRelease(JobStatusEnum.IN_PROGRESS, JobTypeEnum.VALIDATION, false);
             Integer numberOfCurrentReleaseJobs = jobRepository.countByJobStatusAndJobTypeAndRelease(JobStatusEnum.IN_PROGRESS, JobTypeEnum.RELEASE, true);
@@ -202,6 +222,12 @@ public class JobServiceImpl implements JobService {
         if (job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs < maximumNumberOfInProgressImportJobs) {
             return true;
         } else if (jobType == JobTypeEnum.VALIDATION && !job.isRelease() && numberOfCurrentJobs < maximumNumberOfInProgressValidationJobs) {
+            if(!canValidationBeExecutedDueToReferenceIcebergTables(job)){
+                job.setJobStatus(JobStatusEnum.FAILED);
+                job.setJobInfo(JobInfoEnum.ERROR_VALIDATION_REFERENCE_ICEBERG_TABLES_EXIST.getValue(null));
+                save(job);
+                return false;
+            }
             return true;
         } else if (jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDatasetJobs) {
             return true;
@@ -600,5 +626,28 @@ public class JobServiceImpl implements JobService {
         LOG.info("Found provider id {} for job {}", providerId, jobId);
 
         return providerId;
+    }
+
+    @Override
+    public Boolean canValidationBeExecutedDueToReferenceIcebergTables(JobVO job){
+        DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(job.getDataflowId(), job.getProviderId());
+        if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+            //find all reference Datasets that are related via rules
+            List<DataSetMetabaseVO> relatedReferenceDatasets = new ArrayList<>();
+            //do this for all datasetIds
+            String datasetSchemaId = dataSetMetabaseControllerZuul.findDatasetSchemaIdById(job.getDatasetId());
+            List<RuleVO> rules = rulesControllerZuul.findSqlSentencesByDatasetSchemaId(datasetSchemaId);
+            for (RuleVO rule: rules){
+                rule.getSqlSentence()
+            }
+
+            for(DataSetMetabaseVO relatedReferenceDataset: relatedReferenceDatasets){
+                List<DatasetTableVO> referenceDatasetsWithIcebergTables = dataSetControllerZuul.getIcebergTables(relatedReferenceDataset.getDataflowId(), null, relatedReferenceDataset.getId());
+                if(referenceDatasetsWithIcebergTables != null && referenceDatasetsWithIcebergTables.size() != 0){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

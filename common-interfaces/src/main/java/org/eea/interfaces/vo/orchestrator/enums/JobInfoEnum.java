@@ -25,7 +25,9 @@ public enum JobInfoEnum {
 
     ERROR_CSV_MULTIPLE_QUOTES("Multiple quotes were found in the imported file"),
 
-    ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d");
+    ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d"),
+
+    ERROR_VALIDATION_REFERENCE_ICEBERG_TABLES_EXIST("Can not execute validation because there are related reference datasets with manually edittable tables");
 
     /** The value. */
     private final String value;

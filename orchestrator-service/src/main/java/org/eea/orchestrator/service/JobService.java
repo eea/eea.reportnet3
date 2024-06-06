@@ -88,4 +88,6 @@ public interface JobService {
     void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber);
 
     Long findProviderIdById(Long jobId);
+
+    Boolean canValidationBeExecutedDueToReferenceIcebergTables(JobVO job);
 }
