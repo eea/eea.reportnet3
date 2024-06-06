@@ -378,11 +378,6 @@ export const CustomFileUpload = ({
   const uploadToS3Test = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
-    // let formData = new FormData();
-
-    // for (let file of state.files) {
-    //   formData.append(name, file, file.name);
-    // }
 
     xhr.upload.addEventListener('progress', event => {
       console.log('event.loaded: ' + event.loaded);
@@ -396,7 +391,7 @@ export const CustomFileUpload = ({
     xhr.onreadystatechange = () => {
       console.log('onreadystatechange');
       if (xhr.readyState === 4) {
-        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
+        if (!state.testUploadWithS3) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
         console.log('xhr.status: ' + xhr.status);
         if (xhr.status >= 200 && xhr.status < 300) {
           console.log('xhr.status inside if: ' + xhr.status);
