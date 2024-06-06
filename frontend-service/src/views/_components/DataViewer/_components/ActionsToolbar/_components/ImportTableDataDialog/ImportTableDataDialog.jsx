@@ -61,33 +61,29 @@ export const ImportTableDataDialog = ({
     }
   };
 
-  const onUpload = async leaveDialogVisible => {
-    if (!leaveDialogVisible) {
-      setImportTableDialogVisible(false);
-    } else {
-      const action = 'TABLE_IMPORT';
-      actionsContext.testProcess(datasetId, action);
-
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-      notificationContext.add(
-        {
-          type: 'DATASET_DATA_LOADING_INIT',
-          content: {
-            dataflowName,
-            datasetName,
-            customContent: {
-              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-              title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
-              datasetLoading: resourcesContext.messages['datasetLoading']
-            }
+  const onUpload = async () => {
+    const action = 'TABLE_IMPORT';
+    actionsContext.testProcess(datasetId, action);
+    setImportTableDialogVisible(false);
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+    notificationContext.add(
+      {
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          dataflowName,
+          datasetName,
+          customContent: {
+            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+            title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
+            datasetLoading: resourcesContext.messages['datasetLoading']
           }
-        },
-        true
-      );
-    }
+        }
+      },
+      true
+    );
   };
 
   const onValidateFile = async file => {
@@ -159,7 +155,6 @@ export const ImportTableDataDialog = ({
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
-          leaveDialogVisible={true}
           name="file"
           onError={onImportTableError}
           onUpload={onUpload}
@@ -168,6 +163,7 @@ export const ImportTableDataDialog = ({
           s3Check={true}
           s3TestCheck={true}
           tableSchemaId={tableId}
+          timeoutBeforeClose={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTableUpd, {
             datasetId: datasetId,
             dataflowId: dataflowId,

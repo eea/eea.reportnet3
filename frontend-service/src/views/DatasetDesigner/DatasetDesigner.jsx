@@ -1021,46 +1021,42 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
-  const onUpload = async leaveDialogVisible => {
-    if (!leaveDialogVisible) {
-      manageDialogs('isImportDatasetDialogVisible', false);
-    } else {
-      const action = 'DATASET_IMPORT';
-      actionsContext.testProcess(datasetId, action);
+  const onUpload = async () => {
+    const action = 'DATASET_IMPORT';
+    actionsContext.testProcess(datasetId, action);
+    manageDialogs('isImportDatasetDialogVisible', false);
+    setSelectedCustomImportIntegration({ id: null, name: null });
+    try {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-      setSelectedCustomImportIntegration({ id: null, name: null });
-      try {
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-
-        notificationContext.add(
-          {
-            type: 'DATASET_DATA_LOADING_INIT',
-            content: {
-              customContent: {
-                datasetLoading: resourcesContext.messages['datasetLoading'],
-                datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-                title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-              },
-              dataflowName,
-              datasetName
-            }
-          },
-          true
-        );
-        designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
-      } catch (error) {
-        console.error('DatasetDesigner - onUpload.', error);
-        notificationContext.add(
-          {
-            type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
-            content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
-          },
-          true
-        );
-      }
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            customContent: {
+              datasetLoading: resourcesContext.messages['datasetLoading'],
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+            },
+            dataflowName,
+            datasetName
+          }
+        },
+        true
+      );
+      designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
+    } catch (error) {
+      console.error('DatasetDesigner - onUpload.', error);
+      notificationContext.add(
+        {
+          type: 'EXTERNAL_IMPORT_DESIGN_FAILED_EVENT',
+          content: { dataflowName: designerState.dataflowName, datasetName: designerState.datasetSchemaName }
+        },
+        true
+      );
     }
   };
 
@@ -2061,13 +2057,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
             invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
             isDialog={true}
-            leaveDialogVisible={true}
             name="file"
             onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
             s3Check={true}
             s3TestCheck={true}
+            timeoutBeforeClose={true}
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(selectedCustomImportIntegration.id)
                 ? getUrl(DatasetConfig.importFileDatasetUpd, {
