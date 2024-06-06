@@ -204,17 +204,14 @@ export const BigButtonListReference = ({
     }
   };
 
-  const onUpload = async leaveDialogVisible => {
-    if (!leaveDialogVisible) {
-      onImportSchema(false);
-      setImportingLoading(true);
-      setIsImportingDataflow(true);
-    } else {
-      notificationContext.add({
-        type: 'IMPORT_DATASET_SCHEMA_INIT',
-        content: { dataflowName: dataflowState.name }
-      });
-    }
+  const onUpload = async () => {
+    onImportSchema(false);
+    setImportingLoading(true);
+    setIsImportingDataflow(true);
+    notificationContext.add({
+      type: 'IMPORT_DATASET_SCHEMA_INIT',
+      content: { dataflowName: dataflowState.name }
+    });
   };
 
   const onCreateReferenceDatasets = async () => {
@@ -444,7 +441,6 @@ export const BigButtonListReference = ({
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .zip`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
-          leaveDialogVisible={true}
           name="file"
           onError={onImportSchemaError}
           onUpload={onUpload}
