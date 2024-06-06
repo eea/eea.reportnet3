@@ -139,13 +139,12 @@ export const WebformField = ({
       const conditionalField = record.elements.find(
         el => el.fieldSchemaId === element.referencedField.masterConditionalFieldId
       );
-
       queryClient
         .fetchQuery(
-          ['referencedFieldValues', datasetSchemaId, conditionalField, element],
+          ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
           async () => {
             
-
+            
             const referencedFieldValues = await DatasetService.getReferencedFieldValues(
               datasetId,
               element.fieldSchemaId,
@@ -155,10 +154,9 @@ export const WebformField = ({
                   ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
                   : conditionalField.value
                 : encodeURIComponent(element.value),
-              datasetSchemaId,
+                localDatasetSchemaId,
               400
             );
-
             return referencedFieldValues
               .map(referencedField => ({
                 itemType:

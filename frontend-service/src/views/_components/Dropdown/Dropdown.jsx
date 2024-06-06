@@ -158,7 +158,7 @@ export class Dropdown extends Component {
     if (!this.overlayClick && !this.editableInputClick && !clearClick) {
       this.focusInput.focus();
 
-      if (this.panel.element.offsetParent) {
+      if (this.panel.offsetParent) {
         this.hide();
       } else {
         this.show();
@@ -210,7 +210,7 @@ export class Dropdown extends Component {
 
   onDownKey(event) {
     if (this.props.options) {
-      if (!this.panel.element.offsetParent && event.altKey) {
+      if (!this.panel.offsetParent && event.altKey) {
         this.show();
       } else {
         let selectedItemIndex = this.findOptionIndex(this.props.value);
@@ -240,7 +240,7 @@ export class Dropdown extends Component {
         break;
       //space
       case 32:
-        if (!this.panel.element.offsetParent) {
+        if (!this.panel.offsetParent) {
           this.show();
           event.preventDefault();
         }
@@ -489,12 +489,12 @@ export class Dropdown extends Component {
   }
 
   show() {
-    this.panel.element.style.zIndex = String(DomHandler.generateZIndex());
-    this.panel.element.style.display = 'block';
+    this.panel.style.zIndex = String(DomHandler.generateZIndex());
+    this.panel.style.display = 'block';
 
     setTimeout(() => {
-      DomHandler.addClass(this.panel.element, 'p-input-overlay-visible');
-      DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+      DomHandler.addClass(this.panel, 'p-input-overlay-visible');
+      DomHandler.removeClass(this.panel, 'p-input-overlay-hidden');
     }, 1);
 
     this.alignPanel();
@@ -502,16 +502,16 @@ export class Dropdown extends Component {
   }
 
   hide() {
-    if (this.panel && this.panel.element) {
-      DomHandler.addClass(this.panel.element, 'p-input-overlay-hidden');
-      DomHandler.removeClass(this.panel.element, 'p-input-overlay-visible');
+    if (this.panel && this.panel) {
+      DomHandler.addClass(this.panel, 'p-input-overlay-hidden');
+      DomHandler.removeClass(this.panel, 'p-input-overlay-visible');
       this.unbindDocumentClickListener();
       this.clearClickState();
 
       this.hideTimeout = setTimeout(() => {
         if (this.panel) {
-          this.panel.element.style.display = 'none';
-          DomHandler.removeClass(this.panel.element, 'p-input-overlay-hidden');
+          this.panel.style.display = 'none';
+          DomHandler.removeClass(this.panel, 'p-input-overlay-hidden');
         }
       }, 150);
     }
@@ -519,10 +519,10 @@ export class Dropdown extends Component {
 
   alignPanel() {
     if (this.props.appendTo) {
-      this.panel.element.style.minWidth = DomHandler.getWidth(this.container) + 'px';
-      DomHandler.absolutePosition(this.panel.element, this.container);
+      this.panel.style.minWidth = DomHandler.getWidth(this.container) + 'px';
+      DomHandler.absolutePosition(this.panel, this.container);
     } else {
-      DomHandler.relativePosition(this.panel.element, this.container);
+      DomHandler.relativePosition(this.panel, this.container);
     }
   }
 
@@ -791,9 +791,9 @@ export class Dropdown extends Component {
     if (this.props.filter) {
       this.alignPanel();
     }
-
-    if (this.panel.element.offsetParent) {
-      let highlightItem = DomHandler.findSingle(this.panel.element, 'li.p-highlight');
+    console.log(this.panel)
+    if (this.panel.offsetParent) {
+      let highlightItem = DomHandler.findSingle(this.panel.current, 'li.p-highlight');
       if (highlightItem) {
         DomHandler.scrollInView(this.panel.itemsWrapper, highlightItem);
       }
