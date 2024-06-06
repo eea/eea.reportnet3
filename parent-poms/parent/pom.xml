@@ -25,7 +25,7 @@
     <recordstore.version>v3.2.19</recordstore.version>
     <ums.version>v3.2.19</ums.version>
     <validation.version>v3.2.19</validation.version>
-    <common-interfaces.version>v3.2.19E</common-interfaces.version>
+    <common-interfaces.version>v3.2.19</common-interfaces.version>
     <common-utitlities.version>v3.2.19</common-utitlities.version>
     <rod.version>v3.2.19</rod.version>
     <orchestrator.version>v3.2.19</orchestrator.version>
