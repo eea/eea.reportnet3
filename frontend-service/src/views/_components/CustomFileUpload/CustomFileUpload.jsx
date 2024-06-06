@@ -375,77 +375,14 @@ export const CustomFileUpload = ({
     }
   };
 
-  // const uploadFile = () => {
-  //   console.log('uploadFile');
-  //   return new Promise((resolve, reject) => {
-  //     console.log('return');
-  //     let xhr = new XMLHttpRequest();
-  //     let formData = new FormData();
-
-  //     for (let file of state.files) {
-  //       formData.append(name, file, file.name);
-  //     }
-
-  //     xhr.upload.addEventListener('progress', event => {
-  //       console.log('event.loaded: ' + event.loaded);
-  //       console.log('event.total: ' + event.total);
-  //       if (event.lengthComputable) {
-  //         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
-  //       }
-  //     });
-
-  //     xhr.onreadystatechange = () => {
-  //       console.log('onreadystatechange');
-  //       if (xhr.readyState === 4) {
-  //         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
-  //         console.log('xhr.status: ' + xhr.status);
-  //         if (xhr.status >= 200 && xhr.status < 300) {
-  //           console.log('xhr.status inside if: ' + xhr.status);
-  //           onUpload({ xhr: xhr, files: _files.current });
-  //         } else {
-  //           if (onError) {
-  //             onError({ xhr: xhr, files: _files.current });
-  //           }
-  //         }
-
-  //         clear();
-  //       }
-  //     };
-
-  //     let nUrl = presignedUrl;
-
-  //     xhr.open('PUT', nUrl, true);
-
-  //     xhr.onload = () => {
-  //       console.log('onload');
-  //       if (xhr.status >= 200 && xhr.status < 300) {
-  //         resolve(xhr.response);
-  //       } else {
-  //         reject({
-  //           status: xhr.status,
-  //           statusText: xhr.statusText
-  //         });
-  //       }
-  //     };
-  //     xhr.onerror = () => {
-  //       reject({
-  //         status: xhr.status,
-  //         statusText: xhr.statusText
-  //       });
-  //     };
-
-  //     xhr.send(formData);
-  //   });
-  // };
-
   const uploadToS3Test = async () => {
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
     let xhr = new XMLHttpRequest();
-    let formData = new FormData();
+    // let formData = new FormData();
 
-    for (let file of state.files) {
-      formData.append(name, file, file.name);
-    }
+    // for (let file of state.files) {
+    //   formData.append(name, file, file.name);
+    // }
 
     xhr.upload.addEventListener('progress', event => {
       console.log('event.loaded: ' + event.loaded);
@@ -482,7 +419,7 @@ export const CustomFileUpload = ({
       const tokens = LocalUserStorageUtils.getTokens();
       xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
     }
-    xhr.send(formData);
+    xhr.send(state.files[0]);
 
     dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
   };
