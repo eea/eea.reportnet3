@@ -146,7 +146,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                    String tableSchemaName) throws Exception {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
     //create a new csv file that contains records ids and data provider code as extra information
-    List<File> csvFilesWithAddedColumns = null;
+    List<File> csvFilesWithAddedColumns;
 
     if (convertParquetWithCustomWay) {
       csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
@@ -375,6 +375,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       List<String> expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName(), tableSchemaId);
       Map<String, DataType> fieldNameAndTypeMap = getFieldNameAndTypeMap(tableSchemaId, dataSetSchema);
 
+      int batchSize = 1000;
+      int currentBatchSize = 0;
+
       for (CSVRecord csvRecord : csvParser) {
         if (csvRecord.values().length == 0) {
           LOG.error("Empty first line in CSV file {}. {}", csvFile.getPath(), importFileInDremioInfo);
@@ -416,6 +419,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           }
         }
         csvPrinter.printRecord(row);
+        currentBatchSize++;
+        if (currentBatchSize >= batchSize) {
+          csvPrinter.flush();
+          currentBatchSize = 0;
+        }
       }
 
       csvPrinter.flush();
@@ -566,7 +574,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private String getImportPathForCsv(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName) throws Exception {
     S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, fileName, tableSchemaName, S3_IMPORT_FILE_PATH);
-    String pathToS3ForImport = null;
+    String pathToS3ForImport;
     pathToS3ForImport = s3Service.getS3Path(s3PathResolver);
     if (StringUtils.isBlank(pathToS3ForImport)) {
       LOG.error("Could not resolve path to s3 for import {}", importFileInDremioInfo);
@@ -577,7 +585,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private String getImportQueryPathForFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName, String pathConstant) throws Exception {
     S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, fileName, tableSchemaName, pathConstant);
-    String pathToS3ForImport = null;
+    String pathToS3ForImport;
     if (pathConstant.equals(LiteralConstants.S3_TABLE_NAME_QUERY_PATH) || pathConstant.equals(LiteralConstants.S3_IMPORT_CSV_FILE_QUERY_PATH)) {
       pathToS3ForImport = s3Service.getS3Path(s3PathResolver);
     } else {
