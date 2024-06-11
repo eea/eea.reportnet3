@@ -163,6 +163,7 @@ export const ImportTableDataDialog = ({
           s3Check={true}
           s3TestCheck={true}
           tableSchemaId={tableId}
+          timeoutBeforeClose={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTableUpd, {
             datasetId: datasetId,
             dataflowId: dataflowId,

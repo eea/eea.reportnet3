@@ -1,7 +1,5 @@
 import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
-import axios from 'axios';
-
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 
 import isEmpty from 'lodash/isEmpty';
@@ -31,7 +29,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
 
-import { HTTPRequester } from 'repositories/_utils/HTTPRequester';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const CustomFileUpload = ({
@@ -57,18 +54,15 @@ export const CustomFileUpload = ({
   invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
   invalidNumberOfFilesMessageSummary = 'You can only upload {0} {1}.',
+  isAttachmentUpload = false,
   isDialog = false,
   isImportDatasetDesignerSchema = false,
-  isImportLeadReportersDialog = false,
   maxFileSize = null,
   mode = 'advanced',
   multiple = false,
   name = null,
-  onBeforeSend = null,
-  onBeforeUpload = null,
   onClear = null,
   onError = null,
-  onProgress = null,
   onSelect = null,
   onUpload = null,
   onValidateFile = null,
@@ -80,14 +74,12 @@ export const CustomFileUpload = ({
   replaceCheckLabelMessage = '',
   replaceCheckDisabled = false,
   s3Check = false,
-  s3TestCheck = false,
   s3CheckLabel = 'S3',
-  s3CheckTestLabel = 'Test',
   style = null,
   tableSchemaId,
+  timeoutBeforeClose = false,
   uploadLabel = 'Upload',
-  url = null,
-  withCredentials = false
+  url = null
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -99,7 +91,6 @@ export const CustomFileUpload = ({
     isValid: true,
     msgs: [],
     replace: false,
-    testUploadWithS3: false,
     uploadWithS3: false
   });
 
@@ -119,26 +110,26 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (presignedUrl) {
-      if (state.testUploadWithS3) {
-        uploadToS3Test();
-      } else {
-        uploadToS3();
-      }
+      upload();
     }
   }, [presignedUrl]);
 
   useEffect(() => {
-    if (state.isUploadClicked) upload();
-  }, [state.isUploadClicked]);
-
-  useEffect(() => {
-    if (state.progress === 100 && bigData && !isImportLeadReportersDialog) {
-      const timer = setTimeout(() => {
+    if (state.progress === 100 && timeoutBeforeClose) {
+      if (bigData) {
+        const timer = setTimeout(() => {
+          onUpload({ files: state.files });
+        }, 5000);
+        return () => clearTimeout(timer);
+      } else {
         onUpload({ files: state.files });
-      }, 5000);
-      return () => clearTimeout(timer);
+      }
     }
   }, [state.progress]);
+
+  useEffect(() => {
+    if (state.isUploadClicked) upload();
+  }, [state.isUploadClicked]);
 
   useEffect(() => {
     if (!isNil(draggedFiles)) {
@@ -311,10 +302,6 @@ export const CustomFileUpload = ({
     let xhr = new XMLHttpRequest();
     let formData = new FormData();
 
-    if (onBeforeUpload) {
-      onBeforeUpload({ xhr: xhr, formData: formData }, state.files);
-    }
-
     for (let file of state.files) {
       formData.append(name, file, file.name);
     }
@@ -323,18 +310,15 @@ export const CustomFileUpload = ({
       if (event.lengthComputable) {
         dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
       }
-
-      if (onProgress) {
-        onProgress({ originalEvent: event, progress: state.progress });
-      }
     });
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
-
+        if (!state.uploadWithS3) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
         if (xhr.status >= 200 && xhr.status < 300) {
-          if (onUpload && !(bigData && !isImportLeadReportersDialog)) {
+          if (state.uploadWithS3) {
+            importS3ToDlh();
+          } else if (!timeoutBeforeClose) {
             onUpload({ xhr: xhr, files: _files.current });
           }
         } else {
@@ -342,107 +326,24 @@ export const CustomFileUpload = ({
             onError({ xhr: xhr, files: _files.current });
           }
         }
-
         clear();
       }
     };
 
-    let nUrl = url;
+    let nUrl = presignedUrl ? presignedUrl : url;
 
-    if (replaceCheck) {
-      nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
-      nUrl += 'replace=' + state.replace;
-    }
+    xhr.open(state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
 
-    xhr.open(operation, nUrl, true);
-    const tokens = LocalUserStorageUtils.getTokens();
-    xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
-
-    if (onBeforeSend) {
-      onBeforeSend({ xhr: xhr, formData: formData });
-    }
-
-    xhr.withCredentials = withCredentials;
-
-    xhr.send(formData);
-
-    dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
-  };
-
-  const uploadToS3 = async () => {
-    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
-    try {
-      await fetch(presignedUrl, {
-        method: 'PUT',
-        body: state.files[0]
-      });
-
-      onUpload({ files: state.files });
-
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
-
-      importS3ToDlh();
-    } catch (error) {
-      console.error('CustomFileUpload - uploadToS3.', error);
-      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
-    }
-  };
-
-  const uploadFile = () => {
-    return new Promise(() => {
-      let xhr = new XMLHttpRequest();
-      let formData = new FormData();
-
-      for (let file of state.files) {
-        formData.append(name, file, file.name);
-      }
-
-      xhr.upload.addEventListener('progress', event => {
-        if (event.lengthComputable) {
-          dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: Math.round((event.loaded * 100) / event.total) } });
-        }
-      });
-
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === 4) {
-          dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
-
-          if (xhr.status >= 200 && xhr.status < 300) {
-            if (onUpload && !(bigData && !isImportLeadReportersDialog)) {
-              onUpload({ xhr: xhr, files: _files.current });
-            }
-          } else {
-            if (onError) {
-              onError({ xhr: xhr, files: _files.current });
-            }
-          }
-
-          clear();
-        }
-      };
-
-      let nUrl = presignedUrl;
-
-      xhr.open('PUT', nUrl, true);
+    if (!state.uploadWithS3) {
+      const tokens = LocalUserStorageUtils.getTokens();
+      xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
       xhr.send(formData);
-    });
-  };
-
-  const uploadToS3Test = async () => {
-    dispatch({ type: 'UPLOAD_PROPERTY', payload: { msgs: [], isUploading: true } });
-    try {
-      await uploadFile();
-
-      importS3ToDlh();
-
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
-    } catch (error) {
-      console.error('CustomFileUpload - uploadToS3.', error);
-      notificationContext.add({ type: 'UPLOAD_TO_S3_ERROR' }, true);
-      dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
+    } else {
+      xhr.send(state.files[0]);
     }
+
+    dispatch({ type: 'UPLOAD_PROPERTY', payload: { isUploadClicked: false } });
   };
 
   const importS3ToDlh = async () => {
@@ -680,33 +581,11 @@ export const CustomFileUpload = ({
     );
   };
 
-  const renderS3TestCheck = () => {
-    return (
-      <div className={styles.s3CheckboxWrapper}>
-        <Checkbox
-          checked={state.testUploadWithS3}
-          id="testS3Checkbox"
-          inputId="testS3Checkbox"
-          onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { testUploadWithS3: !state.testUploadWithS3 } })}
-          role="checkbox"
-        />
-        <label htmlFor="testS3Checkbox">
-          <span
-            onClick={() =>
-              dispatch({ type: 'UPLOAD_PROPERTY', payload: { testUploadWithS3: !state.testUploadWithS3 } })
-            }>
-            {s3CheckTestLabel}
-          </span>
-        </label>
-      </div>
-    );
-  };
-
   const renderAdvanced = () => {
     const cClassName = classNames('p-fileupload p-component', className);
     let filesList, progressBar;
 
-    if (hasFiles()) {
+    if (hasFiles() || state.uploadWithS3) {
       filesList = renderFiles();
       progressBar = <ProgressBar showValue={false} value={state.progress} />;
     }
@@ -728,7 +607,6 @@ export const CustomFileUpload = ({
           </div>
           {replaceCheck && renderReplaceCheck()}
           {bigData && s3Check && renderS3Check()}
-          {bigData && s3TestCheck && renderS3TestCheck()}
         </div>
         <p className={`${styles.invalidExtensionMsg} ${state.isValid ? styles.isValid : undefined}`}>
           {invalidExtensionMessage}
@@ -762,7 +640,7 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                if (bigData && (state.uploadWithS3 || state.testUploadWithS3)) {
+                if (bigData && state.uploadWithS3) {
                   onGetPresignedUrl();
                 } else {
                   upload();

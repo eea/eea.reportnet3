@@ -954,6 +954,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
         s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
         file.delete();
+        LOG.info("Updated dl attachment for datasetId {}, table {} and field {}", datasetId, tableSchemaName, fieldName);
     }
 
     @Override
@@ -1121,6 +1122,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 String fieldValue = (field.getValue() != null) ? field.getValue() : "";
                 updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
                 updateQueryBuilder.append((i != record.getFields().size() -1) ? ", " : " ");
+            }
+            if (updateQueryBuilder.length() >= 2 && updateQueryBuilder.substring(updateQueryBuilder.length() - 2).equals(", ")) {
+                updateQueryBuilder.delete(updateQueryBuilder.length() - 2, updateQueryBuilder.length());
             }
             updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(record.getId()).append("'");
             if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {

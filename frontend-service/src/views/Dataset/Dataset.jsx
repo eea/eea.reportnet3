@@ -488,7 +488,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     actionsContext.testProcess(datasetId, action);
     try {
       notificationContext.add({ type: 'DELETE_DATASET_DATA_INIT' });
-      await DatasetService.deleteData(datasetId);
+      await DatasetService.deleteData(datasetId, isReferenceDataset);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -1445,6 +1445,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           replaceCheck={true}
           s3Check={true}
           s3TestCheck={true}
+          timeoutBeforeClose={true}
           url={`${window.env.REACT_APP_BACKEND}${
             isNil(selectedCustomImportIntegration.id)
               ? getUrl(DatasetConfig.importFileDatasetUpd, {

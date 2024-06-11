@@ -851,37 +851,37 @@ export const BigButtonList = ({
       )}
 
       {isQCsNotValidWarningVisible && emptyTable && (
-          <ConfirmDialog
-              header={resourcesContext.messages['notValidQCWarningTitleAndEmptyTable']}
-              labelCancel={resourcesContext.messages['no']}
-              labelConfirm={resourcesContext.messages['yes']}
-              onConfirm={onCreateDataCollectionsWithNotValids}
-              onHide={() => {
-                notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
-                setIsQCsNotValidWarningVisible(false);
-                setEmptyTable(false);
-              }}
-              visible={isQCsNotValidWarningVisible}>
-            {TextUtils.parseText(resourcesContext.messages['notValidQCWarningAndEmptyTableBody'], {
-              disabled: invalidAndDisabledRulesAmount.disabledRules,
-              invalid: invalidAndDisabledRulesAmount.invalidRules
-            })}
-          </ConfirmDialog>
+        <ConfirmDialog
+          header={resourcesContext.messages['notValidQCWarningTitleAndEmptyTable']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onCreateDataCollectionsWithNotValids}
+          onHide={() => {
+            notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
+            setIsQCsNotValidWarningVisible(false);
+            setEmptyTable(false);
+          }}
+          visible={isQCsNotValidWarningVisible}>
+          {TextUtils.parseText(resourcesContext.messages['notValidQCWarningAndEmptyTableBody'], {
+            disabled: invalidAndDisabledRulesAmount.disabledRules,
+            invalid: invalidAndDisabledRulesAmount.invalidRules
+          })}
+        </ConfirmDialog>
       )}
 
       {!isQCsNotValidWarningVisible && emptyTable && (
-          <ConfirmDialog
-              header={resourcesContext.messages['emptyTableTitle']}
-              labelCancel={resourcesContext.messages['no']}
-              labelConfirm={resourcesContext.messages['yes']}
-              onConfirm={onCreateDataCollectionsWithEmptyTables}
-              onHide={() => {
-                notificationContext.removeHiddenByKey('EMPTY_TABLE_EVENT');
-                setEmptyTable(false);
-              }}
-              visible={emptyTable}>
-            {resourcesContext.messages['emptyTableMessage']}
-          </ConfirmDialog>
+        <ConfirmDialog
+          header={resourcesContext.messages['emptyTableTitle']}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onCreateDataCollectionsWithEmptyTables}
+          onHide={() => {
+            notificationContext.removeHiddenByKey('EMPTY_TABLE_EVENT');
+            setEmptyTable(false);
+          }}
+          visible={emptyTable}>
+          {resourcesContext.messages['emptyTableMessage']}
+        </ConfirmDialog>
       )}
 
       {isImportSchemaVisible && (

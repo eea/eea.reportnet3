@@ -2063,6 +2063,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             replaceCheck={true}
             s3Check={true}
             s3TestCheck={true}
+            timeoutBeforeClose={true}
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(selectedCustomImportIntegration.id)
                 ? getUrl(DatasetConfig.importFileDatasetUpd, {
