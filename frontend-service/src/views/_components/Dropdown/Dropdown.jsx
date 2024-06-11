@@ -791,7 +791,6 @@ export class Dropdown extends Component {
     if (this.props.filter) {
       this.alignPanel();
     }
-    console.log(this.panel)
     if (this.panel.offsetParent) {
       let highlightItem = DomHandler.findSingle(this.panel.current, 'li.p-highlight');
       if (highlightItem) {

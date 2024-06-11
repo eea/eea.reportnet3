@@ -1,10 +1,10 @@
-import React, { forwardRef, memo } from 'react';
+import React, { forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import './DropdownPanel.scss';
 
-const DropdownPanel = memo(
+const DropdownPanel =
   forwardRef(
     ({ appendTo, children, filter, itemsWrapperRef, onClick, panelClassName, panelStyle, scrollHeight }, ref) => {
       const className = classNames('p-dropdown-panel p-hidden p-input-overlay', panelClassName);
@@ -25,7 +25,6 @@ const DropdownPanel = memo(
       }
     }
   )
-);
 
 DropdownPanel.propTypes = {
   appendTo: PropTypes.object,

@@ -670,7 +670,7 @@ const DropdownWebform = props => {
   const renderFilter = () => {
     if (filter) {
       return (
-        <div className="p-dropdown-filter-containerRef">
+        <div className="p-dropdown-filter-container">
           <input
             aria-label={ariaLabel}
             aria-labelledby={ariaLabelledBy}
