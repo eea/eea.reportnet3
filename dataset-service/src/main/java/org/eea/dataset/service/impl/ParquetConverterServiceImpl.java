@@ -18,6 +18,7 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.configuration.util.CsvHeaderMapping;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -149,9 +150,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     List<File> csvFilesWithAddedColumns;
 
     if (convertParquetWithCustomWay) {
-      csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
+      csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile);
     } else {
-      csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
+      TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
+      if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, 5000);
+      } else {
+        csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
+      }
     }
 
     if (csvFilesWithAddedColumns == null) {
@@ -220,13 +226,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         String importPathForParquet = getImportS3PathForParquet(importFileInDremioInfo, parquetFileName, tableSchemaName);
         s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
       } else {
-        String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
-        if (StringUtils.isBlank(tableSchemaId)) {
-          tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
-        }
         LOG.info("For import job {} " +
             "the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-        String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile, tableSchemaId);
+        String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile, csvFile.getName(), dataSetSchema);
         String processId = dremioHelperService.executeSqlStatement(createTableQuery);
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
       }
@@ -241,11 +243,18 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
   }
 
-  private String getTableQuery(ImportFileInDremioInfo importFileInDremioInfo, String parquetInnerFolderPath, String dremioPathForCsvFile, String tableSchemaId) {
+  private TableSchemaVO getTableSchemaVO(String csvFileName, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws EEAException {
+    String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
+    if (StringUtils.isBlank(tableSchemaId)) {
+      tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFileName, false);
+    }
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
     String datasetSchemaId = dataset.getDatasetSchema();
-    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+    return datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+  }
 
+  private String getTableQuery(ImportFileInDremioInfo importFileInDremioInfo, String parquetInnerFolderPath, String dremioPathForCsvFile, String csvFileName, DataSetSchema dataSetSchema) throws EEAException {
+    TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFileName, dataSetSchema, importFileInDremioInfo);
     String createTableQuery;
     if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
       String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s %s FROM " + dremioPathForCsvFile;
@@ -341,16 +350,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   private List<File> modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
-    LOG.info(MEASUREMENTS + " modifyCsvFile started");
-    char delimiterChar = defaultDelimiter;
-    if (!StringUtils.isBlank(importFileInDremioInfo.getDelimiter())) {
-      delimiterChar = importFileInDremioInfo.getDelimiter().charAt(0);
-    }
-    String randomStrForNewFolderSuffix = UUID.randomUUID().toString();
+    LOG.info(MEASUREMENTS + " with job {} modifyCsvFile started", importFileInDremioInfo);
+    char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
+        importFileInDremioInfo.getDelimiter().charAt(0) : defaultDelimiter;
+
+    File csvFileWithAddedColumns = createNewFilePath(csvFile);
     List<File> modifiedCsvFiles = new ArrayList<>();
-    String modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MODIFIED_CSV_SUFFIX, randomStrForNewFolderSuffix);
-    File csvFileWithAddedColumns = new File(modifiedFilePath);
-    int recordCounter = 0;
+    long recordCounter = 0;
 
     try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
          CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
@@ -363,70 +369,21 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
          BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
          CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build())) {
 
-      List<String> csvHeaders = new ArrayList<>();
-      csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
-      csvHeaders.addAll(csvParser.getHeaderMap().keySet());
-      csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
-
-      String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
-      if (StringUtils.isBlank(tableSchemaId)) {
-        tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
-      }
-      List<String> expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName(), tableSchemaId);
-      Map<String, DataType> fieldNameAndTypeMap = getFieldNameAndTypeMap(tableSchemaId, dataSetSchema);
-
-      int batchSize = 1000;
-      int currentBatchSize = 0;
+      CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
 
       for (CSVRecord csvRecord : csvParser) {
-        if (csvRecord.values().length == 0) {
-          LOG.error("Empty first line in CSV file {}. {}", csvFile.getPath(), importFileInDremioInfo);
-          throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
-        }
+        checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", csvFile, importFileInDremioInfo);
         recordCounter++;
         if (recordCounter == 1) {
-          csvPrinter.printRecord(expectedHeaders);
+          csvPrinter.printRecord(typeMapping.getExpectedHeaders());
         }
 
-        List<String> row = new ArrayList<>();
-        String recordIdValue = UUID.randomUUID().toString();
-
-        for (String expectedHeader : expectedHeaders) {
-          DataType fieldType = fieldNameAndTypeMap.get(expectedHeader);
-          if (fieldType == DataType.ATTACHMENT) {
-            row.add("");
-            continue;
-          }
-          if (expectedHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
-            row.add(recordIdValue);
-          } else if (expectedHeader.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
-            row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
-          } else {
-            if (csvRecord.isMapped(expectedHeader)) {
-              if (spatialDataHandling.getGeoJsonEnums().contains(fieldType)) {
-                row.add(spatialDataHandling.convertToHEX(csvRecord.get(expectedHeader)));
-                continue;
-              }
-              row.add(csvRecord.get(expectedHeader));
-            } else {
-              String headerWithBom = "\uFEFF" + expectedHeader;
-              if (csvRecord.isMapped(headerWithBom)) {
-                row.add(csvRecord.get(headerWithBom));
-              } else {
-                row.add("");
-              }
-            }
-          }
-        }
+        List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo);
         csvPrinter.printRecord(row);
-        currentBatchSize++;
-        if (currentBatchSize >= batchSize) {
-          csvPrinter.flush();
-          currentBatchSize = 0;
-        }
       }
 
       csvPrinter.flush();
+      modifiedCsvFiles.add(csvFileWithAddedColumns);
     } catch (IOException | UncheckedIOException e) {
       handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
     }
@@ -435,9 +392,97 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
       return null;
     }
-    modifiedCsvFiles.add(csvFileWithAddedColumns);
-    LOG.info(MEASUREMENTS + " modifyCsvFile finished");
+    LOG.info(MEASUREMENTS + " with job {} modifyCsvFile finished", importFileInDremioInfo);
     return modifiedCsvFiles;
+  }
+
+  private List<File> modifyAndSplitCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, Integer batchSize) throws Exception {
+    LOG.info(MEASUREMENTS + " with job {} modifyAndSplitCsvFile started", importFileInDremioInfo);
+    char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
+        importFileInDremioInfo.getDelimiter().charAt(0) : defaultDelimiter;
+
+    List<File> modifiedCsvFiles = new ArrayList<>();
+    long recordCounter = 0;
+    boolean fileIsEmpty = true;
+
+    BufferedWriter writer = null;
+    CSVPrinter csvPrinter = null;
+    File csvFileWithAddedColumns = null;
+
+    try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
+         CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+             .setHeader()
+             .setSkipHeaderRecord(false)
+             .setDelimiter(delimiterChar)
+             .setIgnoreHeaderCase(true)
+             .setIgnoreEmptyLines(false)
+             .setTrim(true).build())) {
+
+      CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
+
+      for (CSVRecord csvRecord : csvParser) {
+        fileIsEmpty = false;
+        checkForEmptyValues(csvRecord, "Empty first line in csv file {}. {}", csvFile, importFileInDremioInfo);
+
+        if (recordCounter == 0) {
+          csvFileWithAddedColumns = createNewFilePath(csvFile);
+          writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
+          csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
+          csvPrinter.printRecord(typeMapping.getExpectedHeaders());
+        }
+
+        List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo);
+        csvPrinter.printRecord(row);
+        recordCounter++;
+
+        if (recordCounter == batchSize) {
+          closeResources(writer, csvPrinter);
+          modifiedCsvFiles.add(csvFileWithAddedColumns);
+          recordCounter = 0;
+        }
+      }
+
+      if (fileIsEmpty) {
+        LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
+        return null;
+      }
+    } catch (IOException | UncheckedIOException e) {
+      handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
+    } finally {
+      if (recordCounter != 0) {
+        closeResources(writer, csvPrinter);
+        modifiedCsvFiles.add(csvFileWithAddedColumns);
+      }
+    }
+
+    LOG.info(MEASUREMENTS + " with job {} modifyCsvFile finished", importFileInDremioInfo);
+    return modifiedCsvFiles;
+  }
+
+  private void checkForEmptyValues(CSVRecord csvRecord, String s, File csvFile, ImportFileInDremioInfo importFileInDremioInfo) throws InvalidFileException {
+    if (csvRecord.values().length == 0) {
+      LOG.error(s, csvFile.getPath(), importFileInDremioInfo);
+      throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
+    }
+  }
+
+  private CsvHeaderMapping getHeaderTypeMapping(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, CSVParser csvParser) throws EEAException {
+    List<String> csvHeaders = getCsvHeaders(csvParser);
+    String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
+    if (StringUtils.isBlank(tableSchemaId)) {
+      tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+    }
+    List<String> expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName(), tableSchemaId);
+    Map<String, DataType> fieldNameAndTypeMap = getFieldNameAndTypeMap(tableSchemaId, dataSetSchema);
+    return new CsvHeaderMapping(expectedHeaders, fieldNameAndTypeMap);
+  }
+
+  private List<String> getCsvHeaders(CSVParser csvParser) {
+    List<String> csvHeaders = new ArrayList<>();
+    csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
+    csvHeaders.addAll(csvParser.getHeaderMap().keySet());
+    csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
+    return csvHeaders;
   }
 
   private void handleCsvProcessingError(Exception e, File csvFile, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
@@ -455,117 +500,46 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     throw new Exception("Could not read CSV file " + csvFile.getPath(), e);
   }
 
-
-  private List<File> modifyAndSplitCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
-    char delimiterChar = defaultDelimiter;
-    if (!StringUtils.isBlank(importFileInDremioInfo.getDelimiter())) {
-      delimiterChar = importFileInDremioInfo.getDelimiter().charAt(0);
+  private void closeResources(BufferedWriter writer, CSVPrinter csvPrinter) throws IOException {
+    if (csvPrinter != null) {
+      csvPrinter.flush();
+      csvPrinter.close();
     }
-
-    List<File> modifiedCsvFiles = new ArrayList<>();
-    String modifiedFilePath;
-    File csvFileWithAddedColumns = null;
-    BufferedWriter writer = null;
-    CSVPrinter csvPrinter = null;
-
-    List<String> csvHeaders = new ArrayList<>();
-    List<String> expectedHeaders;
-    //Reading csv file
-    try (
-        Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
-        CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
-            .setHeader()
-            .setSkipHeaderRecord(false)
-            .setDelimiter(delimiterChar)
-            .setIgnoreHeaderCase(true)
-            .setIgnoreEmptyLines(false)
-            .setTrim(true).build())) {
-      csvHeaders.add(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER);
-      csvHeaders.addAll(csvParser.getHeaderMap().keySet());
-      csvHeaders.add(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER);
-
-      String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
-      if (StringUtils.isBlank(tableSchemaId)) {
-        tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
-      }
-      expectedHeaders = checkIfCSVHeadersAreCorrect(csvHeaders, dataSetSchema, importFileInDremioInfo, csvFile.getName(), tableSchemaId);
-      Map<String, DataType> fieldNameAndTypeMap = getFieldNameAndTypeMap(tableSchemaId, dataSetSchema);
-
-      int recordCounter = 0;
-      boolean emptyFile = true;
-
-      for (CSVRecord csvRecord : csvParser) {
-        emptyFile = false;
-        if (csvRecord.values().length == 0) {
-          LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
-          throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
-        }
-
-        if (recordCounter == 0) {
-          //create new file
-          String randomStrForNewFolderSuffix = UUID.randomUUID().toString();
-          modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MODIFIED_CSV_SUFFIX, randomStrForNewFolderSuffix);
-          csvFileWithAddedColumns = new File(modifiedFilePath);
-          writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
-          csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
-
-          //add headers
-          csvPrinter.printRecord(expectedHeaders);
-        }
-        List<String> row = new ArrayList<>();
-        String recordIdValue = UUID.randomUUID().toString();
-        for (String expectedHeader : expectedHeaders) {
-          DataType fieldType = fieldNameAndTypeMap.get(expectedHeader);
-          if (fieldType == DataType.ATTACHMENT) {
-            //do not add any value to attachment fields
-            row.add("");
-            continue;
-          }
-          if (expectedHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
-            row.add(recordIdValue);
-          } else if (expectedHeader.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
-            row.add((importFileInDremioInfo.getDataProviderCode() != null) ? importFileInDremioInfo.getDataProviderCode() : "");
-          } else {
-            if (csvRecord.isMapped(expectedHeader)) {
-              row.add(csvRecord.get(expectedHeader));
-            } else {
-              //check if header contains bom
-              String headerWithBom = "\uFEFF" + expectedHeader;
-              if (csvRecord.isMapped(headerWithBom)) {
-                row.add(csvRecord.get(headerWithBom));
-              } else {
-                row.add("");
-              }
-            }
-
-          }
-        }
-        csvPrinter.printRecord(row);
-        recordCounter++;
-        if (recordCounter == maxCsvLinesPerFile) {
-          csvPrinter.flush();
-          writer.close();
-          recordCounter = 0;
-          //add file to list
-          modifiedCsvFiles.add(csvFileWithAddedColumns);
-        }
-      }
-      if (recordCounter != 0) {
-        csvPrinter.flush();
-        writer.close();
-        //add file to list
-        modifiedCsvFiles.add(csvFileWithAddedColumns);
-      }
-      if (emptyFile) {
-        LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
-        return null;
-      }
-    } catch (IOException | UncheckedIOException e) {
-      handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
+    if (writer != null) {
+      writer.close();
     }
-
-    return modifiedCsvFiles;
   }
+
+  private File createNewFilePath(File csvFile) {
+    String randomStrForNewFolderSuffix = UUID.randomUUID().toString();
+    String modifiedFilePath = csvFile.getPath().replace(".csv", "") + String.format(MODIFIED_CSV_SUFFIX, randomStrForNewFolderSuffix);
+    return new File(modifiedFilePath);
+  }
+
+  private List<String> generateRow(CSVRecord csvRecord, List<String> expectedHeaders, Map<String, DataType> fieldNameAndTypeMap, ImportFileInDremioInfo importFileInDremioInfo) {
+    List<String> row = new ArrayList<>();
+    String recordIdValue = UUID.randomUUID().toString();
+
+    for (String expectedHeader : expectedHeaders) {
+      DataType fieldType = fieldNameAndTypeMap.get(expectedHeader);
+      if (fieldType == DataType.ATTACHMENT) {
+        row.add("");
+      } else if (expectedHeader.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER)) {
+        row.add(recordIdValue);
+      } else if (expectedHeader.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER)) {
+        row.add(importFileInDremioInfo.getDataProviderCode() != null ? importFileInDremioInfo.getDataProviderCode() : "");
+      } else if (csvRecord.isMapped(expectedHeader)) {
+        row.add(spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
+            spatialDataHandling.convertToHEX(csvRecord.get(expectedHeader)) : csvRecord.get(expectedHeader));
+      } else {
+        String headerWithBom = "\uFEFF" + expectedHeader;
+        row.add(csvRecord.isMapped(headerWithBom) ? csvRecord.get(headerWithBom) : "");
+      }
+    }
+
+    return row;
+  }
+
 
   private S3PathResolver constructS3PathResolver(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName, String path) {
     long providerId = importFileInDremioInfo.getProviderId() != null ? importFileInDremioInfo.getProviderId() : 0L;
@@ -604,9 +578,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     char delimiterChar = LiteralConstants.COMMA.charAt(0);
 
     // Check that the parquet file exists, if so delete it
-    if (Files.exists(Paths.get(parquetFilePath))) {
+    java.nio.file.Path path = Paths.get(parquetFilePath);
+    if (Files.exists(path)) {
       try {
-        Files.delete(Paths.get(parquetFilePath));
+        Files.delete(path);
       } catch (IOException e) {
         LOG.error("Could not delete folder for file {}. {}", parquetFilePath, importFileInDremioInfo);
         throw new Exception("Could not delete folder for file " + parquetFilePath);
@@ -627,10 +602,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       csvHeaders = new ArrayList<>(csvParser.getHeaderMap().keySet());
 
       for (CSVRecord csvRecord : csvParser) {
-        if (csvRecord.values().length == 0) {
-          LOG.error("Empty first line in csv file {}. {}", csvFile.getPath(), importFileInDremioInfo);
-          throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE);
-        }
+        checkForEmptyValues(csvRecord, "Empty first line in csv file {}. {}", csvFile, importFileInDremioInfo);
         List<String> row = new ArrayList<>();
         for (String csvHeader : csvHeaders) {
           row.add(csvRecord.get(csvHeader));
