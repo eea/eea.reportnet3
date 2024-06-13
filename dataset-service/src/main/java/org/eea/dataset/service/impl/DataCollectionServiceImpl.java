@@ -255,6 +255,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
   @Autowired
   private DatasetTableService datasetTableService;
 
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
+
 
   /**
    * Gets the dataflow status.
@@ -401,17 +404,20 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
-    //check if there are tables converted to Iceberg and convert them back to Parquet
-    List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
-    for(DataSetMetabaseVO dataset: datasets){
-      List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
-      String datasetSchemaId = dataset.getDatasetSchema();
-      for(TableSchemaIdNameVO table: tables){
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
-          releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS, true, false);
-          throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
+    DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
+    if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+      //check if there are tables converted to Iceberg and convert them back to Parquet
+      List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
+      for (DataSetMetabaseVO dataset : datasets) {
+        List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
+        String datasetSchemaId = dataset.getDatasetSchema();
+        for (TableSchemaIdNameVO table : tables) {
+          TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
+          if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+            releaseLockAndNotification(dataflowId, EEAErrorMessage.DATA_COLLECTION_FAILED_ICEBERG_EXISTS, true, false);
+            throw new Exception("Can not create data collection for dataflowId " + dataflowId + " because there is an iceberg table");
+          }
         }
       }
     }
@@ -506,7 +512,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
 
           DataFlowVO dataFlowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
-          if (dataFlowVO!=null && dataFlowVO.getBigData()!=null && dataFlowVO.getBigData()) {
+          if (dataFlowVO!=null && BooleanUtils.isTrue(dataFlowVO.getBigData())) {
             rulesSql.stream().forEach(ruleVO -> {
               checkIfTablesEmpty(emptyDatasetTables, dataset, ruleVO);
             });
@@ -799,6 +805,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             testDatasetIds.add(testDatasetId);
             datasetIdsAndSchemaIds.put(testDatasetId, design.getDatasetSchema());
 
+            DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
+            if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+              //create prefilled tables for test dataset if needed
+              bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), testDatasetId, 0L);
+            }
+
+
             prepareFKAndIntegrityForEUandDC(dataCollectionId, newDCsRegistry,
                 lIntegrityDataCollections, design, integritieVOs);
             prepareFKAndIntegrityForEUandDC(euDatasetId, newEUsRegistry, lIntegrityDataCollections,
@@ -811,7 +824,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           createReportingDatasetInMetabase(dataflowId, time, representatives, map, datasetIdsEmails,
               datasetIdsAndSchemaIds, statement, newReportingDatasetsRegistry,
               lIntegrityDataCollections, design, integritieVOs);
-
 
         }
       }
@@ -900,7 +912,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     } catch (SQLException e) {
       LOG.error("Error persisting changes. Rolling back...", e);
       releaseLockAndRollback(connection, dataflowId, isCreation);
-    } catch (EEAException e) {
+    } catch (Exception e) {
       LOG.error("Error creating permissions. Rolling back...", e);
       releaseLockAndRollback(connection, dataflowId, isCreation);
     } finally {
@@ -977,7 +989,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       Map<Long, List<String>> datasetIdsEmails, Map<Long, String> datasetIdsAndSchemaIds,
       Statement statement, List<FKDataCollection> newReportingDatasetsRegistry,
       List<IntegrityDataCollection> lIntegrityDataCollections, DesignDatasetVO design,
-      List<IntegrityVO> integritieVOs) throws SQLException {
+      List<IntegrityVO> integritieVOs) throws Exception {
     for (RepresentativeVO representative : representatives) {
       // Here we save the reporting datasets.
       Long datasetId = persistRD(statement, design, representative, time, dataflowId,
@@ -1008,6 +1020,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               .setIdDatasetSchemaReferenced(integritieVO.getReferencedDatasetSchemaId());
           lIntegrityDataCollections.add(integrityDataCollection);
         }
+      }
+
+      DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+        //create prefilled tables for reporting dataset if needed
+        bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), datasetId, representative.getDataProviderId());
       }
     }
   }

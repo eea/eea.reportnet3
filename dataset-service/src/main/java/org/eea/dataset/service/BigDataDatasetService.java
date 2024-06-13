@@ -168,7 +168,7 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param datasetId the dataset id
      * @param recordId the recordId
-     * @param tableSchemaName the tableSchemaName
+     * @param tableSchemaVO the tableSchemaVO
      * @param field the new field
      * @param updateCascadePK the updateCascadePK
      *
@@ -189,4 +189,6 @@ public interface BigDataDatasetService {
     void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception;
 
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
+
+    void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId) throws Exception;
 }

@@ -7,6 +7,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
@@ -34,6 +35,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
@@ -125,7 +127,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
             }
             convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName);
-            if(importFileInDremioInfo.getSendEmptyFileWarning()){
+            if(BooleanUtils.isTrue(importFileInDremioInfo.getSendEmptyFileWarning())){
                 numberOfEmptyFiles++;
             }
         }
@@ -143,6 +145,17 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     private void convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo,
                                               String tableSchemaName) throws Exception {
+        String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
+        if (StringUtils.isBlank(tableSchemaId)) {
+            tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+        }
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, dataSetSchema.getIdDataSetSchema().toString());
+        if (!fileCommonUtils.isDesignDataset(importFileInDremioInfo.getDatasetId())){
+            if (tableSchemaVO == null || tableSchemaVO.getReadOnly()) {
+                LOG.info("For job {} can not convert csv to parquet because table {} is read only", importFileInDremioInfo, tableSchemaName);
+                return;
+            }
+        }
         LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
         //create a new csv file that contains records ids and data provider code as extra information
         List<File> csvFilesWithAddedColumns = null;
@@ -211,11 +224,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 needToDemoteTable = false;
             }
 
-            String tableSchemaId = importFileInDremioInfo.getTableSchemaId();
-            if (StringUtils.isBlank(tableSchemaId)) {
-                tableSchemaId = fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
-            }
-
             //create parquet file
             if (convertParquetWithCustomWay) {
                 LOG.info("For import job {} the conversion of the csv to parquet will use the custom implementation", importFileInDremioInfo);
@@ -227,7 +235,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
             } else {
                 LOG.info("For import job {} the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-                String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile, tableSchemaId);
+                String createTableQuery = getTableQuery(parquetInnerFolderPath, dremioPathForCsvFile, tableSchemaVO);
                 String processId = dremioHelperService.executeSqlStatement(createTableQuery);
                 dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
             }
@@ -242,10 +250,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
 
-    private String getTableQuery(ImportFileInDremioInfo importFileInDremioInfo, String parquetInnerFolderPath, String dremioPathForCsvFile, String tableSchemaId) {
-        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
-        String datasetSchemaId = dataset.getDatasetSchema();
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+    private String getTableQuery(String parquetInnerFolderPath, String dremioPathForCsvFile, TableSchemaVO tableSchemaVO) {
 
         String createTableQuery;
         if(spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO,true)) {
@@ -327,7 +332,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     @Override
     public void removeCsvFilesThatWillBeReplaced(S3PathResolver s3PathResolver, String tableSchemaName, String s3PathForCsvFolder){
-        List<ObjectIdentifier> csvFilesInS3 = s3Helper.listObjectsInBucket(s3PathForCsvFolder);
+        List<ObjectIdentifier> csvFilesInS3 = s3Helper.listObjectsInBucket(s3PathForCsvFolder + "/");
         for(ObjectIdentifier csvFileInS3 : csvFilesInS3){
             String[] csvFileNameSplit = csvFileInS3.key().split("/");
             String csvFileName = csvFileNameSplit[csvFileNameSplit.length - 1];

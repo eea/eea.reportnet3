@@ -71,6 +71,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -1272,5 +1273,57 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             throw new Exception(exceptionMsg);
         }
         LOG.info("For dataflowId {} providerId {} datasetId {} and table {} the REFERENCE dataset files have been successfully copied to the reference folder", s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName);
+    }
+
+    @Override
+    public void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId) throws Exception {
+        DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
+
+        List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
+        for (TableSchemaIdNameVO table : tables) {
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), designDatasetSchemaId);
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getToPrefill())) {
+                //copy table folder from design to dataset with id datasetIdForCreation and promote folder
+                String tableSchemaName = tableSchemaVO.getNameTableSchema();
+
+                S3PathResolver s3DesignTablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), 0L, designDatasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                //query path for the design table
+                String dremioDesignTableQueryPath = s3ServicePrivate.getTableAsFolderQueryPath(s3DesignTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                S3PathResolver s3NewTablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                //query path for the new table
+                String dremioNewTableQueryPath = s3ServicePrivate.getTableAsFolderQueryPath(s3NewTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                String providerCode = "''";
+                if(providerId != 0L) {
+                    DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
+                    providerCode = "'" + dataProviderVO.getCode() + "'";
+                }
+
+                List<FieldSchemaVO> fieldSchemas = tableSchemaVO.getRecordSchema().getFieldSchema();
+                String tableHeaders = constructRecordIdCreationForQuery();
+                tableHeaders += ", " + providerCode + " AS " + PARQUET_PROVIDER_CODE_COLUMN_HEADER + ", ";
+                tableHeaders += fieldSchemas.stream()
+                        .map(FieldSchemaVO::getName)
+                        .collect(Collectors.joining(","));
+
+                String queryToCreatePrefilledTable = "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
+                String processId = dremioHelperService.executeSqlStatement(queryToCreatePrefilledTable);
+                dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId);
+
+                //refresh the metadata
+                dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
+            }
+        }
+    }
+
+    private String constructRecordIdCreationForQuery(){
+        return "CONCAT(\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 4294967295 AS BIGINT)), 8, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 281474976710655 AS BIGINT)), 12, '0'))\n" +
+                "    ) AS " + PARQUET_RECORD_ID_COLUMN_HEADER + " ";
     }
 }
