@@ -126,6 +126,10 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
     {
       label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
       group: 6
+    },
+    {
+      label: resourcesContext.messages[config.providerGroup.HDV_MANUFACTURERS.label],
+      group: 7
     }
   ];
 
@@ -165,6 +169,10 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         {
           label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
           value: 6
+        },
+        {
+          label: resourcesContext.messages[config.providerGroup.HDV_MANUFACTURERS.label],
+          value: 7
         }
       ],
       template: 'groupId',
