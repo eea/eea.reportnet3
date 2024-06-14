@@ -13,6 +13,20 @@
   }
 }
 
+.calendarConfirm {
+  min-width: 20rem !important;
+  min-height: 20rem !important;
+
+  .dataCollectionDialogMessagesWrapper {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.calendar {
+  display: flex !important;
+}
+
 .dialog :global .p-dialog-content {
   padding-bottom: 0 !important;
 }

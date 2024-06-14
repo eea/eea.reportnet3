@@ -29,6 +29,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManageDataflow = ({
   dataflowId,
   dataProviderGroup,
+  isAdmin,
   isCitizenScienceDataflow,
   isCustodian,
   isEditing = false,
@@ -157,7 +158,7 @@ export const ManageDataflow = ({
 
   const renderDataflowDialog = () => {
     const renderDeleteDataflowButton = () => {
-      if (isEditing && isCustodian && state.status === config.dataflowStatus.DESIGN) {
+      if (isEditing && (isCustodian || isAdmin)) {
         return (
           <Button
             className="p-button-danger p-button-animated-blink"
@@ -251,10 +252,12 @@ export const ManageDataflow = ({
             dataProviderGroup={dataProviderGroup}
             dialogName={dialogName}
             getData={onLoadData}
+            isAdmin={isAdmin}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
             isEditing={isEditing}
             metadata={reportingDataflowState}
             obligation={reportingDataflowState.obligation}
+            onChangeDate={() => manageDialogs('isDeliveryDateDialogVisible', true)}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onHide={onHideDataflowDialog}

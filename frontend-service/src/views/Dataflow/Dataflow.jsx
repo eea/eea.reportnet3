@@ -1,5 +1,7 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -59,6 +61,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { Calendar } from 'views/_components/Calendar';
 
 export const Dataflow = () => {
   const navigate = useNavigate();
@@ -75,6 +78,7 @@ export const Dataflow = () => {
     anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
+    dataCollectionDueDate: null,
     dataflowType: '',
     dataProviderGroup: {},
     dataProviderId: [],
@@ -139,6 +143,7 @@ export const Dataflow = () => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+  const hasExpirationDate = new Date(dataflowState.obligations?.expirationDate) > new Date();
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
 
@@ -147,6 +152,7 @@ export const Dataflow = () => {
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetShareRightsFiltersState } = useFilters('shareRights');
   const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
+  const { resetFilterState: resetDeliveryDateFilterState } = useApplyFilters('changeDeliveryDate');
 
   const {
     obligation,
@@ -405,6 +411,13 @@ export const Dataflow = () => {
     dataflowDispatch({
       type: 'SET_HAS_REPORTERS',
       payload: { hasReporters }
+    });
+  };
+
+  const setDataCollectionDueDate = dueDate => {
+    dataflowDispatch({
+      type: 'SET_DUE_DATE',
+      payload: { dueDate }
     });
   };
 
@@ -1035,6 +1048,12 @@ export const Dataflow = () => {
     setObligationToPrevious();
   };
 
+  const onHideDeliveryDateDialog = () => {
+    manageDialogs('isDeliveryDateDialogVisible', false);
+    resetDeliveryDateFilterState();
+    setDataCollectionDueDate(null);
+  };
+
   const renderObligationFooter = () => (
     <Fragment>
       <Button
@@ -1653,6 +1672,7 @@ export const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            isAdmin={isAdmin}
             isCustodian={isLeadDesigner}
             isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
@@ -1669,6 +1689,7 @@ export const Dataflow = () => {
           <ManageDataflow
             dataflowId={dataflowId}
             dataProviderGroup={dataflowState.dataProviderGroup}
+            isAdmin={isAdmin}
             isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
             isCustodian={isLeadDesigner}
             isEditing={true}
@@ -1716,6 +1737,42 @@ export const Dataflow = () => {
             visible={dataflowState.isReportingObligationsDialogVisible}>
             <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
           </Dialog>
+        )}
+
+        {dataflowState.isDeliveryDateDialogVisible && (
+          <ConfirmDialog
+            className={styles.calendarConfirm}
+            disabledConfirm={isNil(dataflowState.dataCollectionDueDate)}
+            header={resourcesContext.messages['changeDeliveryDate']}
+            labelCancel={resourcesContext.messages['close']}
+            labelConfirm={resourcesContext.messages['save']}
+            onConfirm={''}
+            onHide={onHideDeliveryDateDialog}
+            visible={dataflowState.isDeliveryDateDialogVisible}>
+            {hasExpirationDate ? (
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: TextUtils.parseText(resourcesContext.messages['dataCollectionExpirationDate'], {
+                    expirationData: dayjs(dataflowState.obligations.expirationDate).format(
+                      userContext.userProps.dateFormat
+                    )
+                  })
+                }}></p>
+            ) : (
+              <p className={styles.dataCollectionDialogMessagesWrapper}>
+                <span>{`${resourcesContext.messages['chooseExpirationDate']}`}</span>
+                <span>{`${resourcesContext.messages['chooseExpirationDateSecondLine']}`}</span>
+              </p>
+            )}
+            <Calendar
+              className={styles.calendar}
+              inline={true}
+              monthNavigator={true}
+              onChange={event => setDataCollectionDueDate(event.target.value)}
+              value={dataflowState.dataCollectionDueDate}
+              yearNavigator={true}
+            />
+          </ConfirmDialog>
         )}
 
         {dataflowState.isApiKeyDialogVisible && (

@@ -93,6 +93,7 @@
     "category": "Category",
     "categoryDescription": "Description",
     "categoryShortCode": "Short code",
+    "changeDeliveryDate": "Change delivery date",
     "changeStatus": "Change status",
     "checkAllFilter": "Select all",
     "checkboxIsPublic": "Mark as public",

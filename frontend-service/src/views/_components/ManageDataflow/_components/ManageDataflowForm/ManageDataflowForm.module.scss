@@ -1,6 +1,7 @@
 .errorAndCounterWrapper {
   height: 40px;
 }
+
 .search {
   --searchButtonWidth: 170px;
   cursor: pointer !important;
@@ -30,6 +31,14 @@
       opacity: 1;
     }
   }
+}
+
+.deliveryDate {
+  --searchButtonWidth: 170px;
+  cursor: pointer !important;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem !important;
 }
 
 .fieldset {

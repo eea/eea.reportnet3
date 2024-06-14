@@ -31,9 +31,11 @@ export const ManageDataflowForm = forwardRef(
       dataProviderGroup,
       dialogName,
       getData,
+      isAdmin,
       isCitizenScienceDataflow,
       isEditing,
       metadata,
+      onChangeDate,
       onCreate,
       onEdit,
       onResetData,
@@ -235,7 +237,7 @@ export const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <InputTextarea
               className={styles.inputTextArea}
-              disabled={isEditing && (!isLeadDesigner || !isDesign)}
+              disabled={isEditing && !isLeadDesigner && !isAdmin}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -286,9 +288,20 @@ export const ManageDataflowForm = forwardRef(
             </div>
           )}
 
+          {isEditing && (
+            <div className={`${styles.deliveryDate}`}>
+              <Button
+                disabled={isEditing && !isLeadDesigner && !isAdmin}
+                icon="calendar"
+                label={resourcesContext.messages['deliveryDate']}
+                onClick={onChangeDate}
+              />
+            </div>
+          )}
+
           <div className={`${styles.search}`}>
             <Button
-              disabled={isEditing && (!isLeadDesigner || !isDesign)}
+              disabled={isEditing && !isLeadDesigner && !isAdmin}
               icon="search"
               label={resourcesContext.messages['searchObligations']}
               onClick={onSearch}

@@ -9,6 +9,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
         dataProviderSelected: payload
       };
 
+    case 'SET_DUE_DATE':
+      return {
+        ...state,
+        dataCollectionDueDate: payload.dueDate
+      };
+
     case 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS':
       return { ...state, hasRepresentativesWithoutDatasets: payload.hasRepresentativesWithoutDatasets };
 
