@@ -53,8 +53,8 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO, boolean isGeoJsonHeaders) {
-    return !getHeaders(isGeoJsonHeaders, tableSchemaVO).isEmpty();
+  public boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO) {
+    return !getHeaders(true, tableSchemaVO).isEmpty();
   }
 
   @Override
@@ -125,11 +125,11 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return new StringBuilder(String.join(",", geoJsonHeaders));
   }
 
-  private List<String> getHeaders(boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
+  private List<String> getHeaders(boolean includeGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
     return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
-        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .filter(header -> includeGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
         .map(FieldSchemaVO::getName)
         .collect(Collectors.toList());
   }

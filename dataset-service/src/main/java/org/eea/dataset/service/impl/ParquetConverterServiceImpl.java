@@ -153,7 +153,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile);
     } else {
       TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
-      if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+      if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
         csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, 5000);
       } else {
         csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo);
@@ -256,7 +256,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private String getTableQuery(ImportFileInDremioInfo importFileInDremioInfo, String parquetInnerFolderPath, String dremioPathForCsvFile, String csvFileName, DataSetSchema dataSetSchema) throws EEAException {
     TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFileName, dataSetSchema, importFileInDremioInfo);
     String createTableQuery;
-    if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+    if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
       String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s %s FROM " + dremioPathForCsvFile;
       createTableQuery = String.format(initQuery, spatialDataHandling.getSimpleHeaders(tableSchemaVO), spatialDataHandling.getHeadersConvertedToBinary(tableSchemaVO));
     } else {
