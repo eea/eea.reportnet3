@@ -352,7 +352,7 @@ public class JobServiceImpl implements JobService {
     @Transactional
     @Override
     public void deleteFinishedJobsBasedOnDuration() {
-        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue())));
+        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue(), JobStatusEnum.CANCELED_BY_ADMIN.getValue())));
     }
 
     @Transactional
