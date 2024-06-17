@@ -1445,6 +1445,7 @@ export const DataViewer = ({
           dialogVisible={isAttachFileVisible}
           infoTooltip={infoAttachTooltip}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+          isAttachmentUpload={true}
           isDialog={true}
           maxFileSize={
             !isNil(records.selectedMaxSize) && records.selectedMaxSize.toString() !== '0'

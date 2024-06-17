@@ -126,7 +126,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         if (idx!=-1) {
             recordsCountQueryString = recordsCountQueryString.substring(0, idx-1);
         }
-        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
             recordsCountQueryString = spatialDataHandling.fixQueryExcludeSpatialDataFromSearch(recordsCountQueryString, true, tableSchemaVO);
             filteredQuery = new StringBuilder(spatialDataHandling.fixQueryExcludeSpatialDataFromSearch(filteredQuery.toString(), true, tableSchemaVO));
         }

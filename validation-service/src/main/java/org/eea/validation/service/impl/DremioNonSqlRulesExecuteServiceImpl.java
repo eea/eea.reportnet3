@@ -50,15 +50,15 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
-    private JdbcTemplate dremioJdbcTemplate;
-    private S3Service s3Service;
-    private RulesService rulesService;
-    private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-    private DremioRulesService dremioRulesService;
-    private S3Helper s3Helper;
-    private DremioHelperService dremioHelperService;
-    private ValidationHelper validationHelper;
-    private static SpatialDataHandling spatialDataHandling;
+    private final JdbcTemplate dremioJdbcTemplate;
+    private final S3Service s3Service;
+    private final RulesService rulesService;
+    private final DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+    private final DremioRulesService dremioRulesService;
+    private final S3Helper s3Helper;
+    private final DremioHelperService dremioHelperService;
+    private final ValidationHelper validationHelper;
+    private final SpatialDataHandling spatialDataHandling;
 
     private static final String DREMIO_NON_SQL_VALIDATION_UTILS = "org.eea.validation.util.datalake.DremioNonSQLValidationUtils";
     private static final String VALIDATION_DROOLS_UTILS = "org.eea.validation.util.ValidationDroolsUtils";
@@ -364,7 +364,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private static boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
+    private boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
         boolean isValid = false;
         if (object instanceof GeoJsonValidationUtils || object instanceof GeometryValidationUtils) {
             if (object instanceof GeoJsonValidationUtils) {

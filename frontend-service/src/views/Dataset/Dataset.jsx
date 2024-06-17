@@ -1026,36 +1026,32 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const onUpload = async leaveDialogVisible => {
-    if (!leaveDialogVisible) {
-      setIsImportDatasetDialogVisible(false);
-    } else {
-      const action = 'DATASET_IMPORT';
-      actionsContext.testProcess(datasetId, action);
+  const onUpload = async () => {
+    const action = 'DATASET_IMPORT';
+    actionsContext.testProcess(datasetId, action);
+    setIsImportDatasetDialogVisible(false);
+    setSelectedCustomImportIntegration({ id: null, name: null });
+    const {
+      dataflow: { name: dataflowName },
+      dataset: { name: datasetName }
+    } = metadata;
 
-      setSelectedCustomImportIntegration({ id: null, name: null });
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = metadata;
-
-      notificationContext.add(
-        {
-          type: 'DATASET_DATA_LOADING_INIT',
-          content: {
-            customContent: {
-              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-              datasetLoading: resourcesContext.messages['datasetLoading']
-            },
-            dataflowName,
-            datasetName
-          }
-        },
-        true
-      );
-      changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
-    }
+    notificationContext.add(
+      {
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          customContent: {
+            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+            datasetLoading: resourcesContext.messages['datasetLoading']
+          },
+          dataflowName,
+          datasetName
+        }
+      },
+      true
+    );
+    changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
   const renderImportOtherSystemsFooter = (
@@ -1442,7 +1438,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
-          leaveDialogVisible={true}
           name="file"
           onError={onImportDatasetError}
           onUpload={onUpload}
@@ -1450,6 +1445,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           replaceCheck={true}
           s3Check={true}
           s3TestCheck={true}
+          timeoutBeforeClose={true}
           url={`${window.env.REACT_APP_BACKEND}${
             isNil(selectedCustomImportIntegration.id)
               ? getUrl(DatasetConfig.importFileDatasetUpd, {

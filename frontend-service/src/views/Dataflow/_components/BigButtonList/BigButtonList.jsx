@@ -348,16 +348,13 @@ export const BigButtonList = ({
     setHistoricReleasesView(typeView);
   };
 
-  const onUpload = async (leaveDialogVisible) => {
-    if(!leaveDialogVisible){
-      setIsImportSchemaVisible(false);
-      setIsImportingDataflow(true);
-    } else {
-      notificationContext.add({
-        type: 'IMPORT_DATASET_SCHEMA_INIT',
-        content: { dataflowName }
-      });
-    }  
+  const onUpload = async () => {
+    setIsImportSchemaVisible(false);
+    setIsImportingDataflow(true);
+    notificationContext.add({
+      type: 'IMPORT_DATASET_SCHEMA_INIT',
+      content: { dataflowName }
+    });
   };
 
   const onLoadEUDatasetIntegration = async datasetSchemaId => {
@@ -899,7 +896,6 @@ export const BigButtonList = ({
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
           isImportDatasetDesignerSchema={true}
-          leaveDialogVisible={true}
           name="file"
           onError={onImportSchemaError}
           onUpload={onUpload}
