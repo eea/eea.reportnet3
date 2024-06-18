@@ -122,6 +122,7 @@ export const Dataflow = () => {
     isReleaseDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isRightPermissionsChanged: false,
+    isSameExpirationDate: false,
     isShowPublicInfoDialogVisible: false,
     isShowPublicInfoUpdating: false,
     isSnapshotDialogVisible: false,
@@ -256,6 +257,20 @@ export const Dataflow = () => {
       window.location.href = '/dataflows/error/loadDataflowData';
     }
   }, []);
+
+  useEffect(() => {
+    if (dataflowState.dataCollectionDueDate) {
+      dataflowDispatch({
+        type: 'CHECK_SELECTED_DATE',
+        payload: {
+          isSameExpirationDate:
+            new Date(
+              dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate).utc().format('ddd MMM DD YYYY')
+            ).getTime() === dataflowState.dataCollectionDueDate?.getTime()
+        }
+      });
+    }
+  }, [dataflowState.dataCollectionDueDate]);
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
@@ -1674,6 +1689,7 @@ export const Dataflow = () => {
             dataflowId={dataflowId}
             isAdmin={isAdmin}
             isCustodian={isLeadDesigner}
+            isDataflowOpen={isOpenStatus}
             isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
@@ -1692,6 +1708,7 @@ export const Dataflow = () => {
             isAdmin={isAdmin}
             isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
             isCustodian={isLeadDesigner}
+            isDataflowOpen={isOpenStatus}
             isEditing={true}
             isVisible={dataflowState.isCitizenScienceDataflowDialogVisible}
             manageDialogs={manageDialogs}
@@ -1742,7 +1759,8 @@ export const Dataflow = () => {
         {dataflowState.isDeliveryDateDialogVisible && (
           <ConfirmDialog
             className={styles.calendarConfirm}
-            disabledConfirm={isNil(dataflowState.dataCollectionDueDate)}
+            confirmTooltip={dataflowState.isSameExpirationDate && resourcesContext.messages['newDeliveryDate']}
+            disabledConfirm={isNil(dataflowState.dataCollectionDueDate) || dataflowState.isSameExpirationDate}
             header={resourcesContext.messages['changeDeliveryDate']}
             labelCancel={resourcesContext.messages['close']}
             labelConfirm={resourcesContext.messages['save']}
@@ -1769,7 +1787,13 @@ export const Dataflow = () => {
               inline={true}
               monthNavigator={true}
               onChange={event => setDataCollectionDueDate(event.target.value)}
-              value={dataflowState.dataCollectionDueDate}
+              value={
+                dataflowState.dataCollectionDueDate
+                  ? dataflowState.dataCollectionDueDate
+                  : new Date(
+                      dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate).utc().format('ddd MMM DD YYYY')
+                    )
+              }
               yearNavigator={true}
             />
           </ConfirmDialog>

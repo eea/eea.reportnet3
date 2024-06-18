@@ -3,6 +3,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
+    case 'CHECK_SELECTED_DATE':
+      return {
+        ...state,
+        isSameExpirationDate: payload.isSameExpirationDate
+      };
+
     case 'SET_DATA_PROVIDER_SELECTED':
       return {
         ...state,

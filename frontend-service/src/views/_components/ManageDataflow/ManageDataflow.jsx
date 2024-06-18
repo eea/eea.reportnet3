@@ -32,6 +32,7 @@ export const ManageDataflow = ({
   isAdmin,
   isCitizenScienceDataflow,
   isCustodian,
+  isDataflowOpen,
   isEditing = false,
   isVisible,
   manageDialogs,
@@ -254,6 +255,7 @@ export const ManageDataflow = ({
             getData={onLoadData}
             isAdmin={isAdmin}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
+            isDataflowOpen={isDataflowOpen}
             isEditing={isEditing}
             metadata={reportingDataflowState}
             obligation={reportingDataflowState.obligation}

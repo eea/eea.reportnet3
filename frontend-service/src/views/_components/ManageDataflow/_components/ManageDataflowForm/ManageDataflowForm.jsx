@@ -33,6 +33,7 @@ export const ManageDataflowForm = forwardRef(
       getData,
       isAdmin,
       isCitizenScienceDataflow,
+      isDataflowOpen,
       isEditing,
       metadata,
       onChangeDate,
@@ -288,7 +289,7 @@ export const ManageDataflowForm = forwardRef(
             </div>
           )}
 
-          {isEditing && (
+          {isEditing && isDataflowOpen && (
             <div className={`${styles.deliveryDate}`}>
               <Button
                 disabled={isEditing && !isLeadDesigner && !isAdmin}
