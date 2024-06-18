@@ -726,6 +726,9 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_IMPORT_EMPTY_FILES. */
   public static final String ERROR_IMPORT_EMPTY_FILES = "All import files were empty";
 
+  /** The Constant ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA. */
+  public static final String ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA = "Import failed because all tables have fixed number of records and the Replace Data option was not selected";
+
   /** The Constant DATAFLOW_ERROR. {@value}. */
   public static final String DATAFLOW_GET_ERROR = "Error getting the dataflows";
 

@@ -638,25 +638,36 @@ public class DatasetControllerImpl implements DatasetController {
                   value = "deleteCascadePK", required = false) boolean deleteCascadePK,
           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
     try {
+      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      Long providerId = datasetService.getDataProviderIdById(datasetId);
+      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+
+      if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
+              tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
+        LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
+                recordId, datasetId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+      }
+
+      if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+              && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
+              datasetService.findRecordSchemaIdById(datasetId, tableSchemaVO.getRecordSchema().getIdRecordSchema()), EntityTypeEnum.RECORD))) {
+        LOG.error(
+                "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
+                recordId, datasetId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+                        datasetService.findRecordSchemaIdById(datasetId, recordId)));
+      }
+
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
 
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        Long providerId = datasetService.getDataProviderIdById(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-
-          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-                  tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
-            LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
-                    recordId, datasetId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-          }
-
           bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, recordId, deleteCascadePK);
         }
         else{
@@ -664,22 +675,6 @@ public class DatasetControllerImpl implements DatasetController {
         }
       }
       else {
-        if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-                && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
-                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
-          LOG.error(
-                  "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
-                  recordId, datasetId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                  String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-                          datasetService.findRecordSchemaIdById(datasetId, recordId)));
-        }
-        if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
-          LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
-                  recordId, datasetId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-        }
         updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
       }
       LOG.info("Successfully deleted record with id {} for datasetId {}", recordId, datasetId);

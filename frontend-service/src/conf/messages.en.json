@@ -796,6 +796,8 @@
     "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
     "importEmptyFilesWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: empty files were provided.",
     "importEmptyFilesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all import files were empty.",
+    "importFixedNumWithoutReplaceDataErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have fixed number of records and replace data option was not selected.",
+    "importFixedNumWithoutReplaceDataWarningEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have fixed number of records and replace data option was not selected.",
     "importOperationManageIntegration": "Import",
     "importPreviousData": "Other custom imports",
     "importPreviousDataConfirm": "Do you want to import using <strong>\"{:importName}\"</strong> integration?",

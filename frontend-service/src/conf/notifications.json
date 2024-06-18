@@ -35,6 +35,13 @@
           }
         },
         {
+          "key": "IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
@@ -1341,6 +1348,20 @@
       "types": [
         {
           "key": "IMPORT_EMPTY_FILES_WARNING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
+      ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [
+        {
+          "key": "IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_WARNING_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]

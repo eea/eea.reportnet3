@@ -26,6 +26,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
+import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -35,6 +36,8 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
@@ -98,6 +101,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final DatasetSchemaService datasetSchemaService;
   private final SpatialDataHandling spatialDataHandling;
 
+  private final DatasetService datasetService;
+
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
                                      S3ServiceImpl s3Service,
@@ -106,7 +111,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      DatasetMetabaseService datasetMetabaseService,
                                      DatasetSchemaService datasetSchemaService,
                                      SpatialDataHandling spatialDataHandling,
-                                     @Lazy FileTreatmentHelper fileTreatmentHelper) {
+                                     @Lazy FileTreatmentHelper fileTreatmentHelper,
+                                     DatasetService datasetService) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -116,12 +122,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.datasetSchemaService = datasetSchemaService;
     this.spatialDataHandling = spatialDataHandling;
     this.fileTreatmentHelper = fileTreatmentHelper;
+    this.datasetService = datasetService;
   }
 
   @Override
   public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
     String tableSchemaName;
     int numberOfEmptyFiles = 0;
+    int numberOfFailedImportsForFixedNumberOfRecords = 0;
     for (File csvFile : csvFiles) {
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
         tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
@@ -129,18 +137,34 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
       }
       convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName);
-      if (importFileInDremioInfo.getSendEmptyFileWarning()) {
-        numberOfEmptyFiles++;
+      if (StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessage())) {
+        if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))) {
+          numberOfEmptyFiles++;
+        }
+        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+          numberOfFailedImportsForFixedNumberOfRecords++;
+        }
       }
+
     }
     if (numberOfEmptyFiles != 0) {
       if (numberOfEmptyFiles == csvFiles.size()) {
         //all files were empty and an error (instead of a warning) must be thrown
-        importFileInDremioInfo.setSendEmptyFileWarning(false);
+        importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
       } else {
-        importFileInDremioInfo.setSendEmptyFileWarning(true);
+        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
+      }
+    }
+    if (numberOfFailedImportsForFixedNumberOfRecords != 0) {
+      if (numberOfFailedImportsForFixedNumberOfRecords == csvFiles.size()) {
+        //all imports failed and an error (instead of a warning) must be thrown
+        importFileInDremioInfo.setWarningMessage(null);
+        importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA);
+        throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA);
+      } else {
+        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
       }
     }
   }
@@ -150,11 +174,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
     //create a new csv file that contains records ids and data provider code as extra information
     List<File> csvFilesWithAddedColumns;
-
+    TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
     if (convertParquetWithCustomWay) {
       csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile);
     } else {
-      TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
       if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
         csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, 5000);
       } else {
@@ -163,11 +186,27 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
 
     if (csvFilesWithAddedColumns == null) {
-      importFileInDremioInfo.setSendEmptyFileWarning(true);
+      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
       return;
     } else {
-      importFileInDremioInfo.setSendEmptyFileWarning(false);
+      importFileInDremioInfo.setWarningMessage(null);
     }
+
+    Integer numberOfRecordsToBeInserted = 10;
+    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
+    String recordSchemaId = datasetService.findRecordSchemaIdById(importFileInDremioInfo.getDatasetId(), tableSchemaVO.getRecordSchema().getIdRecordSchema());
+    Boolean isFixedNumberOfRecords = datasetService.getTableFixedNumberOfRecords(importFileInDremioInfo.getDatasetId(), recordSchemaId, EntityTypeEnum.RECORD);
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && Boolean.TRUE.equals(isFixedNumberOfRecords)) {
+      handleFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted);
+    }
+
+    /*
+    if (!isDesignDataset && tableSchema.getRecordSchema().getFieldSchema().stream()
+                    .allMatch(FieldSchema::getReadOnly)) {
+                throw new IOException("All fields for this table " + tableSchema.getNameTableSchema()
+                        + " are readOnly, you can't import new fields");
+            }
+     */
 
     S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
     S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
@@ -730,5 +769,15 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     } else {
       return -1;
     }
+  }
+
+  private void handleFixedNumberOfRecords(ImportFileInDremioInfo importFileInDremioInfo, Integer numberOfRecordsToBeInserted){
+    Integer numberOfExistingRecords = 10;
+    // TODO
+    if(importFileInDremioInfo.getReplaceData() == false){
+      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
+      return;
+    }
+
   }
 }

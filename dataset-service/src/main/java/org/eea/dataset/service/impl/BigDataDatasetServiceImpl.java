@@ -434,15 +434,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                     datasetService.failImportJobAndProcess(importFileInDremioInfo.getProcessId(), importFileInDremioInfo.getDatasetId(), tableSchemaId, fileName, eventType, JobInfoEnum.ERROR_WRONG_FILE_NAME);
                     importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
-                    importFileInDremioInfo.setSendWrongFileNameWarning(sendWrongFileNameWarning);
                     throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
                 }
             }
         }
         if(sendWrongFileNameWarning){
+            importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
             jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
         }
-        importFileInDremioInfo.setSendWrongFileNameWarning(sendWrongFileNameWarning);
         return correctFilesForImport;
 
     }
@@ -652,7 +651,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if (EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ALL_FILES_ARE_EMPTY, null);
                 eventType = EventType.IMPORT_EMPTY_FILES_ERROR_EVENT;
-            } else {
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA, null);
+                eventType = EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT;
+            }
+            else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_EVENT
                         : EventType.IMPORT_DESIGN_FAILED_EVENT;
@@ -691,22 +694,30 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
-        // If importing a zip a file doesn't match with the table and the process ignores it, we send
-        // a warning notification
-        if (importFileInDremioInfo.getSendWrongFileNameWarning() != null && importFileInDremioInfo.getSendWrongFileNameWarning()) {
-            NotificationVO notificationWarning = NotificationVO.builder()
-                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                    .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
-                    value, notificationWarning);
-        }
 
-        if(Boolean.TRUE.equals(importFileInDremioInfo.getSendEmptyFileWarning())){
-            NotificationVO notificationWarning = NotificationVO.builder()
-                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                    .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
-                    value, notificationWarning);
+        if(StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessage())) {
+            //send warning
+            if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))){
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_WARNING_EVENT,
+                        value, notificationWarning);
+            }
         }
 
         if (importFileInDremioInfo.getProviderId() != null) {
