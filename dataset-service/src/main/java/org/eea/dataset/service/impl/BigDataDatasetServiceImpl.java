@@ -654,6 +654,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.equals(importFileInDremioInfo.getErrorMessage())){
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA, null);
                 eventType = EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT;
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS, null);
+                eventType = EventType.IMPORT_WRONG_NUM_OF_RECORDS_ERROR_EVENT;
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -716,6 +719,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT,
                         value, notificationWarning);
             }
         }

@@ -30,6 +30,7 @@ import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
+import org.eea.dataset.service.model.FileWithRecordNum;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -46,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -101,7 +103,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final DatasetSchemaService datasetSchemaService;
   private final SpatialDataHandling spatialDataHandling;
 
-  private final DatasetService datasetService;
+  private JdbcTemplate dremioJdbcTemplate;
 
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
@@ -112,7 +114,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      DatasetSchemaService datasetSchemaService,
                                      SpatialDataHandling spatialDataHandling,
                                      @Lazy FileTreatmentHelper fileTreatmentHelper,
-                                     DatasetService datasetService) {
+                                     JdbcTemplate dremioJdbcTemplate) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -122,14 +124,15 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.datasetSchemaService = datasetSchemaService;
     this.spatialDataHandling = spatialDataHandling;
     this.fileTreatmentHelper = fileTreatmentHelper;
-    this.datasetService = datasetService;
+    this.dremioJdbcTemplate = dremioJdbcTemplate;
   }
 
   @Override
   public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
     String tableSchemaName;
     int numberOfEmptyFiles = 0;
-    int numberOfFailedImportsForFixedNumberOfRecords = 0;
+    int numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace = 0;
+    int numberOfFailedImportsForWrongNumberOfRecords = 0;
     for (File csvFile : csvFiles) {
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
         tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
@@ -142,7 +145,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           numberOfEmptyFiles++;
         }
         else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
-          numberOfFailedImportsForFixedNumberOfRecords++;
+          numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace++;
+        }
+        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+          numberOfFailedImportsForWrongNumberOfRecords++;
         }
       }
 
@@ -157,8 +163,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
       }
     }
-    if (numberOfFailedImportsForFixedNumberOfRecords != 0) {
-      if (numberOfFailedImportsForFixedNumberOfRecords == csvFiles.size()) {
+    if (numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace != 0) {
+      if (numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace == csvFiles.size()) {
         //all imports failed and an error (instead of a warning) must be thrown
         importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA);
@@ -167,13 +173,24 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
       }
     }
+
+    if (numberOfFailedImportsForWrongNumberOfRecords != 0) {
+      if (numberOfFailedImportsForWrongNumberOfRecords == csvFiles.size()) {
+        //all imports failed and an error (instead of a warning) must be thrown
+        importFileInDremioInfo.setWarningMessage(null);
+        importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS);
+        throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS);
+      } else {
+        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null));
+      }
+    }
   }
 
   private void convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo,
                                    String tableSchemaName) throws Exception {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
     //create a new csv file that contains records ids and data provider code as extra information
-    List<File> csvFilesWithAddedColumns;
+    List<FileWithRecordNum> csvFilesWithAddedColumns;
     TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
     if (convertParquetWithCustomWay) {
       csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile);
@@ -192,12 +209,21 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       importFileInDremioInfo.setWarningMessage(null);
     }
 
-    Integer numberOfRecordsToBeInserted = 10;
+
+    S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
+    S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+
+    //path in dremio for the folder in current that represents the table of the dataset
+    String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+    //path in s3 for the folder that contains the stored csv files
+    String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+
+    Long numberOfRecordsToBeInserted = csvFilesWithAddedColumns.stream().mapToLong(FileWithRecordNum::getNumberOfRecords).sum();
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
-    String recordSchemaId = datasetService.findRecordSchemaIdById(importFileInDremioInfo.getDatasetId(), tableSchemaVO.getRecordSchema().getIdRecordSchema());
-    Boolean isFixedNumberOfRecords = datasetService.getTableFixedNumberOfRecords(importFileInDremioInfo.getDatasetId(), recordSchemaId, EntityTypeEnum.RECORD);
-    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && Boolean.TRUE.equals(isFixedNumberOfRecords)) {
-      handleFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted);
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
+      if(!canImportForFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted, dremioPathForParquetFolder, s3TablePathResolver)){
+        return;
+      }
     }
 
     /*
@@ -208,13 +234,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             }
      */
 
-    S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
-    S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
-
-    //path in dremio for the folder in current that represents the table of the dataset
-    String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
-    //path in s3 for the folder that contains the stored csv files
-    String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
     if (importFileInDremioInfo.getReplaceData()) {
       //remove tables and folders that contain the previous csv files because data will be replaced
@@ -229,8 +248,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     boolean needToDemoteTable = true;
 
-    for (File csvFileWithAddedColumns : csvFilesWithAddedColumns) {
-
+    for (FileWithRecordNum entry : csvFilesWithAddedColumns) {
+      File csvFileWithAddedColumns = entry.getFile();
       String csvFileName = csvFileWithAddedColumns.getName().replace(CSV_EXTENSION, "");
 
       //path in s3 for the stored csv file
@@ -390,13 +409,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
   }
 
-  private List<File> modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
+  private List<FileWithRecordNum> modifyCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
     LOG.info(MEASUREMENTS + " with job {} modifyCsvFile started", importFileInDremioInfo);
     char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
         importFileInDremioInfo.getDelimiter().charAt(0) : defaultDelimiter;
 
     File csvFileWithAddedColumns = createNewFilePath(csvFile);
-    List<File> modifiedCsvFiles = new ArrayList<>();
+    List<FileWithRecordNum> modifiedCsvFiles = new ArrayList<>();
     long recordCounter = 0;
 
     try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
@@ -424,7 +443,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       }
 
       csvPrinter.flush();
-      modifiedCsvFiles.add(csvFileWithAddedColumns);
+      modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
     } catch (IOException | UncheckedIOException e) {
       handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
     }
@@ -437,12 +456,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     return modifiedCsvFiles;
   }
 
-  private List<File> modifyAndSplitCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, Integer batchSize) throws Exception {
+  private List<FileWithRecordNum> modifyAndSplitCsvFile(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, Integer batchSize) throws Exception {
     LOG.info(MEASUREMENTS + " with job {} modifyAndSplitCsvFile started", importFileInDremioInfo);
     char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
         importFileInDremioInfo.getDelimiter().charAt(0) : defaultDelimiter;
 
-    List<File> modifiedCsvFiles = new ArrayList<>();
+    List<FileWithRecordNum> modifiedCsvFiles = new ArrayList<>();
     long recordCounter = 0;
     boolean fileIsEmpty = true;
 
@@ -478,7 +497,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         if (recordCounter == batchSize) {
           closeResources(writer, csvPrinter);
-          modifiedCsvFiles.add(csvFileWithAddedColumns);
+          modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
           recordCounter = 0;
         }
       }
@@ -492,7 +511,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     } finally {
       if (recordCounter != 0) {
         closeResources(writer, csvPrinter);
-        modifiedCsvFiles.add(csvFileWithAddedColumns);
+        modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
+
       }
     }
 
@@ -771,13 +791,22 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
   }
 
-  private void handleFixedNumberOfRecords(ImportFileInDremioInfo importFileInDremioInfo, Integer numberOfRecordsToBeInserted){
-    Integer numberOfExistingRecords = 10;
-    // TODO
-    if(importFileInDremioInfo.getReplaceData() == false){
-      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
-      return;
+  private Boolean canImportForFixedNumberOfRecords(ImportFileInDremioInfo importFileInDremioInfo, Long numberOfRecordsToBeInserted, String tableQueryPath, S3PathResolver s3PathResolver){
+    Long numberOfExistingRecords = 0L;
+    if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
+      String recordsCountQuery = "SELECT COUNT (record_id) FROM " + tableQueryPath;
+      numberOfExistingRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery, Long.class);
     }
 
+    if(importFileInDremioInfo.getReplaceData() == false){
+      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
+      return false;
+    }
+    if(numberOfExistingRecords != numberOfRecordsToBeInserted){
+      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null));
+      LOG.info("For job {} for fixed number of records table, existing records are {} and records to be inserted are {}", importFileInDremioInfo, numberOfExistingRecords, numberOfRecordsToBeInserted);
+      return false;
+    }
+    return true;
   }
 }

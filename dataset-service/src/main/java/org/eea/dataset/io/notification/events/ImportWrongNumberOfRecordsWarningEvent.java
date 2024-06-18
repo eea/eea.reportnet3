@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class ImportFixedNumWithoutReplaceDataErrorEvent implements NotificableEventHandler {
+public class ImportWrongNumberOfRecordsWarningEvent implements NotificableEventHandler {
 
 
     /**
@@ -44,7 +44,7 @@ public class ImportFixedNumWithoutReplaceDataErrorEvent implements NotificableEv
      */
     @Override
     public EventType getEventType() {
-        return EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT;
+        return EventType.IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT;
     }
 
     /**
@@ -87,4 +87,3 @@ public class ImportFixedNumWithoutReplaceDataErrorEvent implements NotificableEv
         return notification;
     }
 }
-

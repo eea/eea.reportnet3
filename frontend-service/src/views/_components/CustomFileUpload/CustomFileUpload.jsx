@@ -331,6 +331,10 @@ export const CustomFileUpload = ({
     };
 
     let nUrl = presignedUrl ? presignedUrl : url;
+    if (!state.uploadWithS3 && replaceCheck) {
+      nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
+      nUrl += 'replace=' + state.replace;
+    }
 
     xhr.open(state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
 
