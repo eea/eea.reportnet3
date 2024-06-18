@@ -1,4 +1,5 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useCallback } from 'react';
+import { useQueryClient } from 'react-query';
 
 import isNil from 'lodash/isNil';
 
@@ -13,10 +14,10 @@ import { CharacterCounter } from 'views/_components/CharacterCounter';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DownloadFile } from 'views/_components/DownloadFile';
-import { Dropdown } from 'views/_components/Dropdown';
 import { InputText } from 'views/_components/InputText';
 import { InputTextarea } from 'views/_components/InputTextarea';
-import { MultiSelect } from 'views/_components/MultiSelect';
+import DropdownWebform from 'views/_components/Dropdown/DropdownWebform';
+import MultiSelectWebform from 'views/_components/MultiSelect/MultiSelectWebform';
 
 import { DatasetService } from 'services/DatasetService';
 
@@ -51,6 +52,7 @@ export const WebformField = ({
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const queryClient = useQueryClient();
 
   const inputRef = useRef(null);
 
@@ -115,73 +117,81 @@ export const WebformField = ({
     }
   };
 
-  const onFilter = async (filter, field) => {
-    if (isNil(field) || isNil(field.referencedField)) {
-      return;
-    }
+  const onFilter = useCallback(
+    async (filter, element) => {
+      if (isNil(element) || isNil(element.referencedField)) {
+        return;
+      }
 
-    const conditionalField = record.elements.find(
-      element => element.fieldSchemaId === field.referencedField.masterConditionalFieldId
-    );
+      let localDatasetSchemaId = datasetSchemaId;
 
-    if (datasetSchemaId === '' || isNil(datasetSchemaId)) {
-      const metadata = await DatasetService.getMetadata(datasetId);
-      datasetSchemaId = metadata.datasetSchemaId;
-    }
+      if (localDatasetSchemaId === '' || isNil(localDatasetSchemaId)) {
+        try {
+          const metadata = await DatasetService.getMetadata(datasetId);
+          localDatasetSchemaId = metadata.datasetSchemaId;
+        } catch (error) {
+          console.error('Failed to fetch dataset schema ID:', error);
+          // Handle error (e.g., setting an error state or showing a notification)
+          return; // Exit if unable to fetch the metadata
+        }
+      }
 
-    try {
-      webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: true });
-      const referencedFieldValues = await DatasetService.getReferencedFieldValues(
-        datasetId,
-        field.fieldSchemaId,
-        filter,
-        !isNil(conditionalField)
-          ? conditionalField.type === 'MULTISELECT_CODELIST'
-            ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
-            : conditionalField.value
-          : encodeURIComponent(field.value),
-        datasetSchemaId,
-        400
+      const conditionalField = record.elements.find(
+        el => el.fieldSchemaId === element.referencedField.masterConditionalFieldId
       );
-
-      const linkItems = referencedFieldValues
-        .map(referencedField => {
-          return {
-            itemType: `${
-              !isNil(referencedField.label) &&
-              referencedField.label !== '' &&
-              referencedField.label !== referencedField.value
-                ? `${referencedField.label}`
-                : referencedField.value
-            }`,
-            value: referencedField.value
-          };
+      queryClient
+        .fetchQuery(
+          ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
+          async () => {
+            
+            
+            const referencedFieldValues = await DatasetService.getReferencedFieldValues(
+              datasetId,
+              element.fieldSchemaId,
+              filter,
+              !isNil(conditionalField)
+                ? conditionalField.type === 'MULTISELECT_CODELIST'
+                  ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
+                  : conditionalField.value
+                : encodeURIComponent(element.value),
+                localDatasetSchemaId,
+              400
+            );
+            return referencedFieldValues
+              .map(referencedField => ({
+                itemType:
+                  !isNil(referencedField.label) &&
+                  referencedField.label !== '' &&
+                  referencedField.label !== referencedField.value
+                    ? `${referencedField.label}`
+                    : referencedField.value,
+                value: referencedField.value
+              }))
+              .sort((a, b) => a.value.localeCompare(b.value));
+          },
+          {
+            staleTime: 5 * 60 * 1000 // Example stale time
+          }
+        )
+        .then(linkItems => {
+          webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
         })
-        .sort((a, b) => a.value - b.value);
-
-      if (!field.pkHasMultipleValues) {
-        linkItems.unshift({
-          itemType: resourcesContext.messages['noneCodelist'],
-          value: ''
+        .catch(error => {
+          console.error('WebformField - onFilter.', error);
+          notificationContext.add({ type: 'GET_REFERENCED_LINK_VALUES_ERROR' }, true);
         });
-      }
-
-      if (referencedFieldValues.length > 400) {
-        linkItems[linkItems.length - 1] = {
-          disabled: true,
-          itemType: resourcesContext.messages['moreElements'],
-          value: ''
-        };
-      }
-
-      webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
-    } catch (error) {
-      console.error('WebformField - onFilter.', error);
-      notificationContext.add({ type: 'GET_REFERENCED_LINK_VALUES_ERROR' }, true);
-    } finally {
-      webformFieldDispatch({ type: 'SET_IS_LOADING_DATA', payload: false });
-    }
-  };
+    },
+    [
+      datasetId,
+      element,
+      record,
+      queryClient,
+      datasetSchemaId,
+      resourcesContext,
+      webformFieldDispatch,
+      notificationContext
+    ]
+  );
 
   const onFocusField = value => {
     webformFieldDispatch({ type: 'SET_INITIAL_FIELD_VALUE', payload: value });
@@ -356,7 +366,7 @@ export const WebformField = ({
       case 'LINK':
         if (field.pkHasMultipleValues) {
           return (
-            <MultiSelect
+            <MultiSelectWebform
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
@@ -380,7 +390,7 @@ export const WebformField = ({
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
           return (
-            <Dropdown
+            <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
               disabled={isLoadingData}
@@ -407,7 +417,7 @@ export const WebformField = ({
         }
       case 'MULTISELECT_CODELIST':
         return (
-          <MultiSelect
+          <MultiSelectWebform
             appendTo={document.body}
             id={field.fieldId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
@@ -431,7 +441,7 @@ export const WebformField = ({
         );
       case 'CODELIST':
         return (
-          <Dropdown
+          <DropdownWebform
             appendTo={document.body}
             id={field.fieldId}
             onChange={event => {

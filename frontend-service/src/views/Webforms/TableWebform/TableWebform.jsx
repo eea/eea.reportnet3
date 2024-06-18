@@ -73,12 +73,12 @@ export const TableWebform = ({ bigData, dataflowId, dataProviderId, datasetId, i
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(tableWebformState.isVisible))[0];
     const visibleContent = tableWebformState.data.filter(table => table.name === visibleTitle)[0];
-
     return (
       <WebformTable
         bigData={bigData}
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}
+        datasetSchemaId={datasetSchema.datasetSchemaId}
         datasetId={datasetId}
         isReporting={isReporting}
         onTabChange={tableWebformState.isVisible}

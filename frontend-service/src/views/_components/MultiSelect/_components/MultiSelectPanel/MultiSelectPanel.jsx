@@ -1,9 +1,9 @@
-import { Component } from 'react';
+import { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 
-export class MultiSelectPanel extends Component {
+export class MultiSelectPanel extends PureComponent {
   static defaultProps = {
     appendTo: null,
     header: null,
