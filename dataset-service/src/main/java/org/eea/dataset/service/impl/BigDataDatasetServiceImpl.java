@@ -910,7 +910,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String updateFileNameColumn = "UPDATE " + icebergTablePath + " SET " + fieldName + "=''"
                 + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
-        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId, 2000L);
+
         //remove attachment file from s3
         removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaName, fieldName, FilenameUtils.getExtension(fileName), recordId);
     }
@@ -946,7 +947,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String updateFileNameColumn = "UPDATE " + icebergTablePath + " SET " + fieldName + "='" + multipartFile.getOriginalFilename()
                 + "' WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
-        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId, 2000L);
+
         File folder = new File(importPath + "/" + datasetId);
         if (!folder.exists()) {
             folder.mkdir();
@@ -1085,7 +1087,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             createIcebergTable.append(" )");
 
             String createIcebergTableProcessId = dremioHelperService.executeSqlStatement(createIcebergTable.toString());
-            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(createIcebergTable.toString(), createIcebergTableProcessId);
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(createIcebergTable.toString(), createIcebergTableProcessId, null);
         }
 
         for (RecordVO record: records){
@@ -1104,7 +1106,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             insertQueryValuesBuilder.append(" )");
             String finalInsertQuery = insertQueryBuilder.toString() + insertQueryValuesBuilder.toString();
             String processId = dremioHelperService.executeSqlStatement(finalInsertQuery);
-            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId);
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId, 2000L);
         }
     }
 
@@ -1138,7 +1140,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
             }
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
-            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
         }
         //todo handle updateCascadePK
     }
@@ -1160,7 +1162,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
         }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
-        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
+
         //todo handle updateCascadePK
     }
 
@@ -1195,7 +1198,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             StringBuilder deleteQueryBuilder = new StringBuilder().append("DELETE FROM" + icebergTablePath + " ");
             deleteQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'");
             String processId = dremioHelperService.executeSqlStatement(deleteQueryBuilder.toString());
-            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(deleteQueryBuilder.toString(), processId);
+            dremioHelperService.checkIfDremioProcessFinishedSuccessfully(deleteQueryBuilder.toString(), processId, 2000L);
+
         }
         else{
             //we must remove the table
