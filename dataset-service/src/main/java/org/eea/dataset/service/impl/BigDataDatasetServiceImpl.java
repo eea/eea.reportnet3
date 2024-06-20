@@ -890,10 +890,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
 
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
-
         //remove attachment file from s3
         removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaName, fieldName, FilenameUtils.getExtension(fileName), recordId);
     }
@@ -930,10 +926,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 + "' WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
-
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
 
         File folder = new File(importPath + "/" + datasetId);
         if (!folder.exists()) {
@@ -1094,11 +1086,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String processId = dremioHelperService.executeSqlStatement(finalInsertQuery);
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId);
         }
-
-        //refresh metadata
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
     }
 
 
@@ -1133,11 +1120,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
         }
-
-        //refresh metadata
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
         //todo handle updateCascadePK
     }
 
@@ -1159,11 +1141,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
-
-        //refresh metadata
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
 
         //todo handle updateCascadePK
     }
@@ -1200,12 +1177,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             deleteQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'");
             String processId = dremioHelperService.executeSqlStatement(deleteQueryBuilder.toString());
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(deleteQueryBuilder.toString(), processId);
-
-            //refresh metadata
-            String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-            String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-            dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
-
 
         }
         else{
