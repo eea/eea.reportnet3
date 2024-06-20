@@ -2882,4 +2882,22 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
   }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PostMapping("/restorePrefilledTables/{datasetId}")
+  public void restorePrefilledTables(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception {
+    try{
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
+      Long designDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId, null);
+      Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+
+      bigDataDatasetService.createPrefilledTables(designDatasetId, datasetSchemaId, datasetId, providerId, tableSchemaId);
+    }
+    catch (Exception e){
+      LOG.error("Could not restore prefilled tables for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+      throw e;
+    }
+  }
 }

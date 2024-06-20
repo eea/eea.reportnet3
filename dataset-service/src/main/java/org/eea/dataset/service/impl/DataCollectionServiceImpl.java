@@ -808,7 +808,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
             if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
               //create prefilled tables for test dataset if needed
-              bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), testDatasetId, 0L);
+              bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), testDatasetId, 0L, null);
             }
 
 
@@ -1025,7 +1025,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
       if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
         //create prefilled tables for reporting dataset if needed
-        bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), datasetId, representative.getDataProviderId());
+        bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), datasetId, representative.getDataProviderId(), null);
       }
     }
   }

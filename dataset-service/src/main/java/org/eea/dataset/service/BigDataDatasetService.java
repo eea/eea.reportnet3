@@ -190,5 +190,5 @@ public interface BigDataDatasetService {
 
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 
-    void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId) throws Exception;
+    void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception;
 }

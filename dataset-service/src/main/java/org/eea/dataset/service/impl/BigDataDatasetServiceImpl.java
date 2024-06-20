@@ -911,11 +911,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
-
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
-
         //remove attachment file from s3
         removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaName, fieldName, FilenameUtils.getExtension(fileName), recordId);
     }
@@ -952,11 +947,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 + "' WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + "='" + recordId + "'";
         String processId = dremioHelperService.executeSqlStatement(updateFileNameColumn);
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateFileNameColumn, processId);
-
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
-
         File folder = new File(importPath + "/" + datasetId);
         if (!folder.exists()) {
             folder.mkdir();
@@ -1116,11 +1106,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String processId = dremioHelperService.executeSqlStatement(finalInsertQuery);
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId);
         }
-
-        //refresh metadata
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
     }
 
 
@@ -1155,11 +1140,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
         }
-
-        //refresh metadata
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
         //todo handle updateCascadePK
     }
 
@@ -1181,12 +1161,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId);
-
-        //refresh metadata
-        String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-        String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
-
         //todo handle updateCascadePK
     }
 
@@ -1222,13 +1196,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             deleteQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'");
             String processId = dremioHelperService.executeSqlStatement(deleteQueryBuilder.toString());
             dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(deleteQueryBuilder.toString(), processId);
-
-            //refresh metadata
-            String refreshMetadata = "ALTER TABLE " + icebergTablePath + " REFRESH METADATA";
-            String refreshMetadataProcessId = dremioHelperService.executeSqlStatement(refreshMetadata);
-            dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(refreshMetadata, refreshMetadataProcessId);
-
-
         }
         else{
             //we must remove the table
@@ -1297,11 +1264,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId) throws Exception {
+    public void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception {
         DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
 
         List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
         for (TableSchemaIdNameVO table : tables) {
+            //check if we need to create prefilled data for a specific table only
+            if(StringUtils.isNotBlank(tableSchemaId) && !table.getIdTableSchema().equals(tableSchemaId)){
+                continue;
+            }
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), designDatasetSchemaId);
             if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getToPrefill())) {
                 //copy table folder from design to dataset with id datasetIdForCreation and promote folder
@@ -1328,6 +1299,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .map(FieldSchemaVO::getName)
                         .collect(Collectors.joining(","));
 
+                //remove previous data if they exist
+                S3PathResolver s3TablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                    //remove old parquet table because it will be recreated
+                    dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                    s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+                }
+
+
                 String queryToCreatePrefilledTable = "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
                 String processId = dremioHelperService.executeSqlStatement(queryToCreatePrefilledTable);
                 dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId);
@@ -1335,6 +1315,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 //refresh the metadata
                 dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
             }
+            LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
         }
     }
 

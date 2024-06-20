@@ -912,4 +912,15 @@ public interface DatasetController {
                                              @RequestParam(value = "providerId", required = false) Long providerId,
                                              @RequestParam(value = "datasetId", required = false) Long datasetId);
 
+  /**
+   * Restore prefilled tables
+   *
+   * @param datasetId the dataset id to be restored
+   * @param tableSchemaId the table schema id
+   * @return
+   *
+   */
+  @PostMapping("/restorePrefilledTables/{datasetId}")
+  void restorePrefilledTables(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
+
 }
