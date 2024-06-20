@@ -26,7 +26,7 @@ public interface DremioHelperService {
 
     String executeSqlStatementPost(String sqlStatement);
 
-    void ckeckIfDremioProcessFinishedSuccessfully(String query, String processId) throws Exception;
+    void checkIfDremioProcessFinishedSuccessfully(String query, String processId) throws Exception;
 
     void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception;
 

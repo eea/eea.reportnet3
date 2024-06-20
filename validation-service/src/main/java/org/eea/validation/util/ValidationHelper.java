@@ -1323,7 +1323,7 @@ public class ValidationHelper implements DisposableBean {
           String validateTable = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
           String query = "ALTER TABLE " + validateTable + " REFRESH METADATA AUTO PROMOTION";
           String id = dremioHelperService.executeSqlStatement(query);
-          dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(query, id);
+          dremioHelperService.checkIfDremioProcessFinishedSuccessfully(query, id);
         } catch (Exception e) {
           throw new EEAException(e.getCause().getCause().getMessage());
         }

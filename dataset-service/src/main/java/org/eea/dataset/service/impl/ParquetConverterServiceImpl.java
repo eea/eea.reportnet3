@@ -290,7 +290,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             "the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
         String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile, csvFile.getName(), dataSetSchema);
         String processId = dremioHelperService.executeSqlStatement(createTableQuery);
-        dremioHelperService.ckeckIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(createTableQuery, processId);
       }
     }
     //refresh the metadata

@@ -286,7 +286,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public void ckeckIfDremioProcessFinishedSuccessfully(String query, String processId) throws Exception {
+    public void checkIfDremioProcessFinishedSuccessfully(String query, String processId) throws Exception {
         Boolean processIsFinished = false;
         for(int i=0; i < numberOfRetriesForJobPolling; i++) {
             DremioJobStatusResponse response = this.pollForJobStatus(processId);
@@ -339,6 +339,6 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception {
         String createNewTableQuery = "CREATE TABLE " + newTablePathInDremio + " AS SELECT * FROM " + oldTablePathInDremio;
         String processId = executeSqlStatement(createNewTableQuery);
-        ckeckIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId);
+        checkIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId);
     }
 }
