@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -59,6 +59,7 @@ export const WebformTable = ({
     isLoading: true,
     webformData: {}
   });
+  const [isConverted, setIsConverted] = useState(false);
 
   const { isDataUpdated, webformData } = webformTableState;
 
@@ -334,6 +335,55 @@ export const WebformTable = ({
     return <Spinner style={{ top: 0, margin: '1rem' }} />;
   }
 
+  const convertHelper = ()=>{
+    if(webformData?.length>0){
+      webformData?.forEach((table)=>convertTable(table.tableSchemaId))
+    }else{
+      convertTable(webformData.tableSchemaId)
+    }
+  }
+
+  const convertTable = async tableId => {
+    try {
+      if (!isConverted) {
+        if (dataProviderId) {
+          await DatasetService.convertParquetToIceberg({
+            datasetId,
+            dataflowId,
+            providerId: dataProviderId,
+            tableSchemaId: tableId
+          });
+        } else {
+          await DatasetService.convertParquetToIceberg({
+            datasetId,
+            dataflowId,
+            tableSchemaId: tableId
+          });
+        }
+      } else {
+        if (dataProviderId) {
+          await DatasetService.convertIcebergToParquet({
+            datasetId,
+            dataflowId,
+            providerId: dataProviderId,
+            tableSchemaId: tableId
+          });
+        } else {
+          await DatasetService.convertIcebergToParquet({
+            datasetId,
+            dataflowId,
+            tableSchemaId: tableId
+          });
+        }
+      }
+      setIsConverted(!isConverted)
+    } catch (error) {
+      console.error('ActionsToolbar - convertTable.', error);
+      notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
+    }
+  };
+  
+
   return (
     <div className={styles.contentWrap}>
       <h3 className={styles.title}>
@@ -343,6 +393,12 @@ export const WebformTable = ({
             : webformData.name}
           {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
         </div>
+        <Button
+            icon={isConverted ? 'unlock' : 'lock'}
+            label={isConverted ? 'Close Webform' : 'Open Webform'}
+            className={styles.openWebformButton}
+            onClick={() => convertHelper()}
+          />
         {webformData.multipleRecords && (
           <Button
             icon="plus"
@@ -351,15 +407,21 @@ export const WebformTable = ({
           />
         )}
       </h3>
-      {isNil(webformData.tableSchemaId) && (
-        <span
-          className={styles.nonExistTable}
-          dangerouslySetInnerHTML={{
-            __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], { tableName: webformData.name })
-          }}
-        />
-      )}
-      {!isNil(webformData.elementsRecords) && renderWebform(webformData.multipleRecords)}
+      <div className={styles.overlay}>
+        <div style={isConverted ? {opacity:1}:{ opacity: 0.5, pointerEvents:'none' }}>
+          {isNil(webformData.tableSchemaId) && (
+            <span
+              className={styles.nonExistTable}
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], {
+                  tableName: webformData.name
+                })
+              }}
+            />
+          )}
+          {!isNil(webformData.elementsRecords) && renderWebform(webformData.multipleRecords)}
+        </div>
+      </div>
     </div>
   );
 };

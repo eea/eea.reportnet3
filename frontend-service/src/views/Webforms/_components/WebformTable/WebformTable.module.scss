@@ -4,6 +4,25 @@
   margin-top: 1rem;
   width: 100%;
 
+  .overlay {
+    position: relative;
+  }
+
+  .openWebformButton {
+    left: 0;
+  }
+
+  .overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    pointer-events: none; /* Allows clicks to pass through the overlay */
+  }
+
   .title {
     align-items: center;
     border-radius: 3px;
