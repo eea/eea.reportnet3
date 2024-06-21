@@ -59,9 +59,22 @@ export const WebformTable = ({
     isLoading: true,
     webformData: {}
   });
-  const [isConverted, setIsConverted] = useState(false);
+  const [isIcebergCreated, setIsIcebergCreated] = useState(false);
+  const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
 
   const { isDataUpdated, webformData } = webformTableState;
+
+  const checkIsIcebergCreated = async(tableId)=>{
+    setIsLoadingIceberg(true);
+    let check =  await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: tableId
+    });
+
+    setIsIcebergCreated(check);
+    setIsLoadingIceberg(false);
+  }
+  
 
   useEffect(() => {
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
@@ -79,6 +92,9 @@ export const WebformTable = ({
         onLoadTableData();
       }
     }
+
+    checkIsIcebergCreated(webformData.tableSchemaId)
+
   }, [isRefresh, onTabChange, selectedTable.pamsId, webform]);
 
   useEffect(() => {
@@ -345,7 +361,7 @@ export const WebformTable = ({
 
   const convertTable = async tableId => {
     try {
-      if (!isConverted) {
+      if (!isIcebergCreated) {
         if (dataProviderId) {
           await DatasetService.convertParquetToIceberg({
             datasetId,
@@ -376,13 +392,13 @@ export const WebformTable = ({
           });
         }
       }
-      setIsConverted(!isConverted)
     } catch (error) {
       console.error('ActionsToolbar - convertTable.', error);
       notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
     }
   };
-  
+
+
 
   return (
     <div className={styles.contentWrap}>
@@ -393,11 +409,13 @@ export const WebformTable = ({
             : webformData.name}
           {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
         </div>
+
         <Button
-            icon={isConverted ? 'unlock' : 'lock'}
-            label={isConverted ? 'Close Webform' : 'Open Webform'}
+            icon={isIcebergCreated ? 'unlock' : 'lock'}
+            label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
             className={styles.openWebformButton}
             onClick={() => convertHelper()}
+            isLoading={isLoadingIceberg}
           />
         {webformData.multipleRecords && (
           <Button
@@ -408,7 +426,7 @@ export const WebformTable = ({
         )}
       </h3>
       <div className={styles.overlay}>
-        <div style={isConverted ? {opacity:1}:{ opacity: 0.5, pointerEvents:'none' }}>
+        <div style={isIcebergCreated ? {opacity:1}:{ opacity: 0.5, pointerEvents:'none' }}>
           {isNil(webformData.tableSchemaId) && (
             <span
               className={styles.nonExistTable}
