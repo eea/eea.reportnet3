@@ -162,7 +162,7 @@ export const ManageDataflow = ({
 
   const renderDataflowDialog = () => {
     const renderDeleteDataflowButton = () => {
-      if (isEditing && (isCustodian || isAdmin)) {
+      if (isEditing && !isDataflowOpen && (isCustodian || isAdmin)) {
         return (
           <Button
             className="p-button-danger p-button-animated-blink"
