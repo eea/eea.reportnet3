@@ -3,10 +3,22 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
+    case 'CHECK_SELECTED_DATE':
+      return {
+        ...state,
+        isSameExpirationDate: payload.isSameExpirationDate
+      };
+
     case 'SET_DATA_PROVIDER_SELECTED':
       return {
         ...state,
         dataProviderSelected: payload
+      };
+
+    case 'SET_DUE_DATE':
+      return {
+        ...state,
+        dataCollectionDueDate: payload.dueDate
       };
 
     case 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS':

@@ -1,6 +1,7 @@
 .errorAndCounterWrapper {
   height: 40px;
 }
+
 .search {
   --searchButtonWidth: 170px;
   cursor: pointer !important;
@@ -32,6 +33,14 @@
   }
 }
 
+.deliveryDate {
+  --searchButtonWidth: 170px;
+  cursor: pointer !important;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem !important;
+}
+
 .fieldset {
   padding: 0;
 }
@@ -54,4 +63,16 @@
 .dropdownsWrapper {
   display: flex;
   margin: 1rem 0;
+}
+
+.deliveryDateText {
+  background-color: var(--form-field-bg);
+  border-radius: 0 !important;
+  border: none;
+  color: var(--main-font-color);
+  cursor: default !important;
+  outline: none;
+  padding: 10px;
+  text-overflow: ellipsis;
+  width: calc(100% - var(--searchButtonWidth));
 }

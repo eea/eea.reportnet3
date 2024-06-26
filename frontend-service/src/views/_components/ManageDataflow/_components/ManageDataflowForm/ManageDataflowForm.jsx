@@ -2,6 +2,9 @@ import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useStat
 
 import styles from './ManageDataflowForm.module.scss';
 
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
 import { config } from 'conf';
 
 import { Button } from 'views/_components/Button';
@@ -29,11 +32,15 @@ export const ManageDataflowForm = forwardRef(
     {
       dataflowId,
       dataProviderGroup,
+      deliveryDate,
       dialogName,
       getData,
+      isAdmin,
       isCitizenScienceDataflow,
+      isDataflowOpen,
       isEditing,
       metadata,
+      onChangeDate,
       onCreate,
       onEdit,
       onResetData,
@@ -69,6 +76,8 @@ export const ManageDataflowForm = forwardRef(
 
     const form = useRef(null);
     const inputRef = useRef(null);
+
+    dayjs.extend(utc);
 
     useImperativeHandle(ref, () => ({
       handleSubmit: onConfirm
@@ -137,7 +146,10 @@ export const ManageDataflowForm = forwardRef(
                   metadata.obligation.id,
                   metadata.isReleasable,
                   metadata.showPublicInfo,
-                  selectedGroup.dataProviderGroupId
+                  selectedGroup.dataProviderGroupId,
+                  isDataflowOpen && deliveryDate
+                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                    : undefined
                 )
               : await DataflowService.update(
                   dataflowId,
@@ -145,7 +157,10 @@ export const ManageDataflowForm = forwardRef(
                   description,
                   metadata.obligation.id,
                   metadata.isReleasable,
-                  metadata.showPublicInfo
+                  metadata.showPublicInfo,
+                  isDataflowOpen && deliveryDate
+                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                    : undefined
                 );
 
             onEdit(name, description, metadata.obligation.id);
@@ -235,7 +250,7 @@ export const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <InputTextarea
               className={styles.inputTextArea}
-              disabled={isEditing && (!isLeadDesigner || !isDesign)}
+              disabled={isEditing && !isLeadDesigner && !isAdmin}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -286,9 +301,23 @@ export const ManageDataflowForm = forwardRef(
             </div>
           )}
 
+          {isEditing && isDataflowOpen && (
+            <div className={`${styles.deliveryDate}`}>
+              <Button
+                disabled={isEditing && !isLeadDesigner && !isAdmin}
+                icon="calendar"
+                label={resourcesContext.messages['deliveryDate']}
+                onClick={onChangeDate}
+              />
+              <span className={styles.deliveryDateText} id={'deliveryDate'}>
+                {deliveryDate}
+              </span>
+            </div>
+          )}
+
           <div className={`${styles.search}`}>
             <Button
-              disabled={isEditing && (!isLeadDesigner || !isDesign)}
+              disabled={isEditing && !isLeadDesigner && !isAdmin}
               icon="search"
               label={resourcesContext.messages['searchObligations']}
               onClick={onSearch}
