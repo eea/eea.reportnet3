@@ -32,7 +32,7 @@ export const CitizenScienceDataflowRepository = {
     isReleasable,
     showPublicInfo,
     dataProviderGroupId,
-    dueDate
+    deadlineDate
   ) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
@@ -45,7 +45,7 @@ export const CitizenScienceDataflowRepository = {
         showPublicInfo,
         type: 'CITIZEN_SCIENCE',
         dataProviderGroupId,
-        dueDate
+        deadlineDate
       }
     })
 };
