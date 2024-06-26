@@ -868,9 +868,9 @@ public interface DatasetController {
    */
   @PostMapping("/convertParquetToIcebergTable/{datasetId}")
   void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
-                                                 @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                                 @RequestParam(value = "dataflowId") Long dataflowId,
                                                  @RequestParam(value = "providerId", required = false) Long providerId,
-                                                 @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
+                                                 @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
 
   /**
    * Convert Iceberg To Parquet Table
@@ -886,6 +886,36 @@ public interface DatasetController {
                                     @RequestParam(value = "dataflowId") Long dataflowId,
                                     @RequestParam(value = "providerId", required = false) Long providerId,
                                     @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
+
+  /**
+   * Convert Parquet To Iceberg Table
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaIds the tableSchemaIds
+   *
+   */
+  @PostMapping("/convertParquetToIcebergTables/{datasetId}")
+  void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId") Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId,
+                                    @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception;
+
+  /**
+   * Convert Iceberg To Parquet Table
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaIds the tableSchemaIds
+   *
+   */
+  @PostMapping("/convertIcebergToParquetTables/{datasetId}")
+  void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
+                                    @RequestParam(value = "dataflowId") Long dataflowId,
+                                    @RequestParam(value = "providerId", required = false) Long providerId,
+                                    @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception;
 
   /**
    * Check if iceberg table is created

@@ -2802,15 +2802,6 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
-  /**
-   * Convert Iceberg To Parquet Table
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param tableSchemaId the tableSchemaId
-   *
-   */
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/convertIcebergToParquetTable/{datasetId}")
@@ -2834,6 +2825,45 @@ public class DatasetControllerImpl implements DatasetController {
     catch (Exception e){
       LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
               providerId, datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PostMapping("/convertParquetToIcebergTables/{datasetId}")
+  public void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
+                                           @RequestParam(value = "dataflowId") Long dataflowId,
+                                           @RequestParam(value = "providerId", required = false) Long providerId,
+                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
+
+    try{
+      for(String tableSchemaId: tableSchemaIds){
+        convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaId);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not convert parquet tables to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaIds {}. Error message: {}", dataflowId,
+              providerId, datasetId, tableSchemaIds);
+      throw e;
+    }
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PostMapping("/convertIcebergToParquetTables/{datasetId}")
+  public void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
+                                           @RequestParam(value = "dataflowId") Long dataflowId,
+                                           @RequestParam(value = "providerId", required = false) Long providerId,
+                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
+    try{
+      for(String tableSchemaId: tableSchemaIds){
+        convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaId);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not convert iceberg tables to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaIds {}. Error message: {}", dataflowId,
+              providerId, datasetId, tableSchemaIds);
       throw e;
     }
   }
