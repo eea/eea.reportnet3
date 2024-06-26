@@ -1053,6 +1053,13 @@ public class DataflowServiceImpl implements DataflowService {
         .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
   }
 
+  @Override
+  public boolean isCustodian() {
+    String roleAdmin = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
+  }
+
   /**
    * Sets the reportings.
    *
