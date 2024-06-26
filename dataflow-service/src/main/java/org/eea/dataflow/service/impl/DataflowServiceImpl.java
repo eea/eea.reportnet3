@@ -1055,9 +1055,9 @@ public class DataflowServiceImpl implements DataflowService {
 
   @Override
   public boolean isCustodian() {
-    String roleAdmin = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
+    String roleCustodian = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
     return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-        .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
+        .anyMatch(role -> roleCustodian.equals(role.getAuthority()));
   }
 
   /**
