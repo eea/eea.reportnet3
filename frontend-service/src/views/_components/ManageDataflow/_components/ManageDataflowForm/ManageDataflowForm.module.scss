@@ -64,3 +64,15 @@
   display: flex;
   margin: 1rem 0;
 }
+
+.deliveryDateText {
+  background-color: var(--form-field-bg);
+  border-radius: 0 !important;
+  border: none;
+  color: var(--main-font-color);
+  cursor: default !important;
+  outline: none;
+  padding: 10px;
+  text-overflow: ellipsis;
+  width: calc(100% - var(--searchButtonWidth));
+}

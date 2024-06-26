@@ -1063,9 +1063,18 @@ export const Dataflow = () => {
     setObligationToPrevious();
   };
 
+  const onConfirmDeliveryDateDialog = () => {
+    manageDialogs('isDeliveryDateDialogVisible', false);
+    resetDeliveryDateFilterState();
+  };
+
   const onHideDeliveryDateDialog = () => {
     manageDialogs('isDeliveryDateDialogVisible', false);
     resetDeliveryDateFilterState();
+    setDataCollectionDueDate(null);
+  };
+
+  const resetDeliveryDate = () => {
     setDataCollectionDueDate(null);
   };
 
@@ -1687,6 +1696,13 @@ export const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            deliveryDate={
+              dataflowState.dataCollectionDueDate
+                ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
+                : dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate)
+                    .utc()
+                    .format(userContext.userProps.dateFormat)
+            }
             isAdmin={isAdmin}
             isCustodian={isLeadDesigner}
             isDataflowOpen={isOpenStatus}
@@ -1695,6 +1711,7 @@ export const Dataflow = () => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            resetDeliveryDate={resetDeliveryDate}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}
             state={dataflowState}
@@ -1705,6 +1722,9 @@ export const Dataflow = () => {
           <ManageDataflow
             dataflowId={dataflowId}
             dataProviderGroup={dataflowState.dataProviderGroup}
+            deliveryDate={dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate)
+              .utc()
+              .format(userContext.userProps.dateFormat)}
             isAdmin={isAdmin}
             isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
             isCustodian={isLeadDesigner}
@@ -1764,7 +1784,7 @@ export const Dataflow = () => {
             header={resourcesContext.messages['changeDeliveryDate']}
             labelCancel={resourcesContext.messages['close']}
             labelConfirm={resourcesContext.messages['save']}
-            onConfirm={''}
+            onConfirm={onConfirmDeliveryDateDialog}
             onHide={onHideDeliveryDateDialog}
             visible={dataflowState.isDeliveryDateDialogVisible}>
             {hasExpirationDate ? (

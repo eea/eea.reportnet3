@@ -29,6 +29,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManageDataflow = ({
   dataflowId,
   dataProviderGroup,
+  deliveryDate,
   isAdmin,
   isCitizenScienceDataflow,
   isCustodian,
@@ -39,6 +40,7 @@ export const ManageDataflow = ({
   obligation,
   onCreateDataflow,
   onEditDataflow,
+  resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
   state
@@ -78,8 +80,8 @@ export const ManageDataflow = ({
 
   useEffect(() => {
     if (isEditing) {
-      onLoadObligation({ id: state.obligations.obligationId, title: state.obligations.title });
-      setCheckedObligation({ id: state.obligations.obligationId, title: state.obligations.title });
+      onLoadObligation({ id: obligation.id, title: obligation.title });
+      setCheckedObligation({ id: obligation.id, title: obligation.title });
     }
   }, [state]);
 
@@ -95,6 +97,7 @@ export const ManageDataflow = ({
 
   const onHideDataflowDialog = () => {
     onResetData();
+    resetDeliveryDate();
     resetObligations();
     manageDialogs(dialogName, false);
   };
@@ -251,6 +254,7 @@ export const ManageDataflow = ({
           <ManageDataflowForm
             dataflowId={dataflowId}
             dataProviderGroup={dataProviderGroup}
+            deliveryDate={deliveryDate}
             dialogName={dialogName}
             getData={onLoadData}
             isAdmin={isAdmin}
@@ -258,7 +262,6 @@ export const ManageDataflow = ({
             isDataflowOpen={isDataflowOpen}
             isEditing={isEditing}
             metadata={reportingDataflowState}
-            obligation={reportingDataflowState.obligation}
             onChangeDate={() => manageDialogs('isDeliveryDateDialogVisible', true)}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
