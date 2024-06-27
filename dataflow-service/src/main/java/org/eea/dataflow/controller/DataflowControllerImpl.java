@@ -516,26 +516,28 @@ public class DataflowControllerImpl implements DataFlowController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     boolean isAdmin = dataflowService.isAdmin();
+    boolean isCustodian = dataflowService.isCustodian();
+    boolean isAdminOrCustodian = isAdmin || isCustodian;
 
-    if (!isAdmin && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+    if (!isAdminOrCustodian && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
         && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
             || dataFlowVO.getDeadlineDate().equals(dateToday))) {
       message = EEAErrorMessage.DATE_AFTER_INCORRECT;
       status = HttpStatus.BAD_REQUEST;
     }
 
-    if (!isAdmin && status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+    if (!isAdminOrCustodian && status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
         || StringUtils.isBlank(dataFlowVO.getDescription()))) {
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     } else {
-      if (isAdmin && status == HttpStatus.OK && StringUtils.isBlank(dataFlowVO.getName())) {
+      if (isAdminOrCustodian && status == HttpStatus.OK && StringUtils.isBlank(dataFlowVO.getName())) {
         message = EEAErrorMessage.DATAFLOW_NAME_EMPTY;
         status = HttpStatus.BAD_REQUEST;
       }
     }
 
-    if (status == HttpStatus.OK && !isAdmin) {
+    if (status == HttpStatus.OK && !isAdminOrCustodian) {
       try {
         DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
         if (!TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
@@ -555,7 +557,7 @@ public class DataflowControllerImpl implements DataFlowController {
       }
     }
 
-    if (!isAdmin && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+    if (!isAdminOrCustodian && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
         && status == HttpStatus.OK && (null == dataFlowVO.getObligation()
             || null == dataFlowVO.getObligation().getObligationId())) {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
@@ -566,7 +568,7 @@ public class DataflowControllerImpl implements DataFlowController {
     if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && status == HttpStatus.OK) {
       try {
         DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
-        if ((!isAdmin && !TypeStatusEnum.DESIGN.equals(dataflow.getStatus()))) {
+        if ((!isAdminOrCustodian && !TypeStatusEnum.DESIGN.equals(dataflow.getStatus()))) {
           message = EEAErrorMessage.DATAFLOW_UPDATE_ERROR;
           status = HttpStatus.BAD_REQUEST;
         }
