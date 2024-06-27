@@ -52,6 +52,7 @@ public abstract class ReleaseMapper implements IMapper<Snapshot, ReleaseVO> {
   @AfterMapping
   public void afterMapping(Snapshot snapshot, @MappingTarget ReleaseVO releaseVO) {
     if (snapshot.getReportingDataset().getDataProviderId() != null) {
+      releaseVO.setDataProviderId(snapshot.getReportingDataset().getDataProviderId());
       releaseVO.setDataProviderCode(representativeControllerZuul
           .findDataProviderById(snapshot.getReportingDataset().getDataProviderId()).getCode());
     }
