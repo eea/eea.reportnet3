@@ -17,4 +17,6 @@ public interface ParquetConverterService {
 
     FileTreatmentHelper getFileTreatmentHelper();
 
+    File exportParquetToCsvFile(String existingTableQueryPath, String exportTableQueryPath, String exportTableS3Path, String exportedFileName, String exportedFilePath, S3PathResolver s3ExportPathResolver) throws Exception;
+
 }

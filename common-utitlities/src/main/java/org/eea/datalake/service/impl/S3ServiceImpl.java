@@ -205,6 +205,7 @@ public class S3ServiceImpl implements S3Service {
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
 
         switch (path) {
+            case S3_EXPORT_PREFILLED_TABLE_FILE_PATH:
             case S3_IMPORT_FILE_PATH:
             case S3_TABLE_NAME_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
@@ -219,6 +220,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
                 return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder,
                     s3PathResolver.getTableName());
+            case S3_EXPORT_PREFILLED_TABLE_AS_FOLDER_QUERY_PATH:
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
                 if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
                     return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,

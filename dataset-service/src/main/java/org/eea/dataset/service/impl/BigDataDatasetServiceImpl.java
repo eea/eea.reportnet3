@@ -1314,7 +1314,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 String queryToCreatePrefilledTable = "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
                 String processId = dremioHelperService.executeSqlStatement(queryToCreatePrefilledTable);
-                dremioHelperService.checkIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId);
+                dremioHelperService.checkIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId, null);
 
                 //refresh the metadata
                 dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
