@@ -43,6 +43,9 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     @Value("${dremio.password}")
     private String dremioPassword;
 
+    @Value("${s3.default.public.bucket.path}")
+    private String S3_DEFAULT_BUCKET_PATH;
+
     @Value("${dremio.jobPolling.numberOfRetries}")
     private Integer numberOfRetriesForJobPolling;
 

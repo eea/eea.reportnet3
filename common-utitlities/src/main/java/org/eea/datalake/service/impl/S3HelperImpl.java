@@ -7,6 +7,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -40,6 +41,9 @@ public class S3HelperImpl implements S3Helper {
     private S3Client s3Client;
 
     private S3Presigner s3Presigner;
+
+    @Value("${s3.default.public.bucket.name}")
+    private String S3_BUCKET_NAME;
 
     @Autowired
     public S3HelperImpl(S3Service s3Service, S3Client s3Client, S3Presigner s3Presigner) {
@@ -227,7 +231,7 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public void uploadFileToBucket(String filePathInS3, String filePathInReportnet) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(LiteralConstants.S3_BUCKET_NAME)
+                .bucket(S3_BUCKET_NAME)
                 .key(filePathInS3)
                 .build();
 
@@ -240,7 +244,7 @@ public class S3HelperImpl implements S3Helper {
     public List<ObjectIdentifier> listObjectsInBucket(String prefix){
         List<ObjectIdentifier> objectKeys = new ArrayList<>();
         ListObjectsRequest listObjectsRequest = ListObjectsRequest.builder()
-                .bucket(LiteralConstants.S3_BUCKET_NAME)
+                .bucket(S3_BUCKET_NAME)
                 .prefix(prefix)
                 .build();
         ListObjectsResponse listObjectsResponse;

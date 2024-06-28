@@ -158,7 +158,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
 
         //path in dremio for the folder in current that represents the table of the dataset
-        String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
         //path in s3 for the folder that contains the stored csv files
         String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
@@ -178,7 +178,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             String s3PathForModifiedCsv = getImportPathForCsv(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName);
 
             //path in dremio for the stored csv file
-            String dremioPathForCsvFile = getImportQueryPathForFolder(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName, LiteralConstants.S3_IMPORT_CSV_FILE_QUERY_PATH);
+            String dremioPathForCsvFile = getImportQueryPathForFolder(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName, S3_IMPORT_CSV_FILE_QUERY_PATH);
             //path in dremio for the folder that contains the created parquet file
             String parquetInnerFolderPath = dremioPathForParquetFolder + ".\"" + csvFileName + "\"";
 
@@ -253,7 +253,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                 s3Helper.copyFileToAnotherDestination(key, referenceParquetPath);
 
                 //path in dremio for the reference folder that represents the table of the dataset
-                String dremioPathForReferenceParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_DATAFLOW_REFERENCE_QUERY_PATH);
+                String dremioPathForReferenceParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_DATAFLOW_REFERENCE_QUERY_PATH);
 
                 //refresh the metadata
                 refreshTableMetadataAndPromote(importFileInDremioInfo, dremioPathForReferenceParquetFolder, s3ReferenceTablePathResolver, tableSchemaName);
@@ -559,7 +559,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     private String getImportQueryPathForFolder(ImportFileInDremioInfo importFileInDremioInfo, String fileName, String tableSchemaName, String pathConstant) throws Exception {
         S3PathResolver s3PathResolver = constructS3PathResolver(importFileInDremioInfo, fileName, tableSchemaName, pathConstant);
         String pathToS3ForImport = null;
-        if(pathConstant.equals(LiteralConstants.S3_TABLE_NAME_QUERY_PATH) || pathConstant.equals(LiteralConstants.S3_IMPORT_CSV_FILE_QUERY_PATH)){
+        if(pathConstant.equals(S3_TABLE_NAME_QUERY_PATH) || pathConstant.equals(S3_IMPORT_CSV_FILE_QUERY_PATH)){
             pathToS3ForImport = s3Service.getS3Path(s3PathResolver);
         }
         else{
