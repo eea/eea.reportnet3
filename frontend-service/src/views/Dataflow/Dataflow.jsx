@@ -264,9 +264,8 @@ export const Dataflow = () => {
         type: 'CHECK_SELECTED_DATE',
         payload: {
           isSameExpirationDate:
-            new Date(
-              dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate).utc().format('ddd MMM DD YYYY')
-            ).getTime() === dataflowState.dataCollectionDueDate?.getTime()
+            new Date(dayjs(dataflowState?.data?.expirationDate).format('ddd MMM DD YYYY')).getTime() ===
+            dataflowState.dataCollectionDueDate?.getTime()
         }
       });
     }
@@ -1699,9 +1698,7 @@ export const Dataflow = () => {
             deliveryDate={
               dataflowState.dataCollectionDueDate
                 ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
-                : dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate)
-                    .utc()
-                    .format(userContext.userProps.dateFormat)
+                : dayjs(dataflowState?.data?.expirationDate).format(userContext.userProps.dateFormat)
             }
             isAdmin={isAdmin}
             isCustodian={isLeadDesigner}
@@ -1721,10 +1718,11 @@ export const Dataflow = () => {
         {dataflowState.isCitizenScienceDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
-            dataProviderGroup={dataflowState.dataProviderGroup}
-            deliveryDate={dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate)
-              .utc()
-              .format(userContext.userProps.dateFormat)}
+            deliveryDate={
+              dataflowState.dataCollectionDueDate
+                ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
+                : dayjs(dataflowState?.data?.expirationDate).format(userContext.userProps.dateFormat)
+            }
             isAdmin={isAdmin}
             isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
             isCustodian={isLeadDesigner}
@@ -1810,9 +1808,7 @@ export const Dataflow = () => {
               value={
                 dataflowState.dataCollectionDueDate
                   ? dataflowState.dataCollectionDueDate
-                  : new Date(
-                      dayjs(dataflowState?.data?.dataCollections[0]?.expirationDate).utc().format('ddd MMM DD YYYY')
-                    )
+                  : new Date(dayjs(dataflowState?.data?.expirationDate).format('ddd MMM DD YYYY'))
               }
               yearNavigator={true}
             />
