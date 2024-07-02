@@ -1,6 +1,5 @@
 package org.eea.orchestrator.persistence.repository;
 
-import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.orchestrator.persistence.domain.Job;
