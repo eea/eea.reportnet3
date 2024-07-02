@@ -2,14 +2,14 @@
   border-radius: 3px;
   height: 100%;
   margin-top: 1rem;
-  width: 100%;
+  width: 90vw;
 
   .overlay {
     position: relative;
   }
 
   .openWebformButton {
-    left: 0;
+    left:0;
   }
 
   .overlay::before {
@@ -33,7 +33,27 @@
     justify-content: space-between;
     margin: 0.5rem 0;
     padding: 1rem;
+
   }
+  
+  .wrapper {
+    transition: top 0.3s ease; /* Only transition the top property */
+    width: 100%; /* Ensure it starts with full width */
+  }
+  
+  .stickyWrapper {
+    position: fixed;
+    top: 64px;
+    z-index: 100;
+    background-color: rgba(255, 255, 255, 1);
+    width:90vw;
+  }
+  
+  .initialWrapper {
+    position: static;
+    top: initial; /* This ensures there's no conflict */
+  }
+  
 
   .nonExistTable {
     color: var(--errors);

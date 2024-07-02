@@ -59,22 +59,36 @@ export const WebformTable = ({
     isLoading: true,
     webformData: {}
   });
-  const [isIcebergCreated, setIsIcebergCreated] = useState(false);
+  const [isIcebergCreated, setIsIcebergCreated] = useState(true);
   const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
 
   const { isDataUpdated, webformData } = webformTableState;
 
-  const checkIsIcebergCreated = async(tableId)=>{
-    setIsLoadingIceberg(true);
-    let check =  await DatasetService.getIsIcebergTableCreated({
-      datasetId,
-      tableSchemaId: tableId
-    });
+  const [isSticky, setIsSticky] = useState(false);
 
-    setIsIcebergCreated(check);
-    setIsLoadingIceberg(false);
-  }
-  
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      const scrollThreshold = document.documentElement.scrollHeight * 0.22;
+      setIsSticky(scrollPosition > scrollThreshold);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  // const checkIsIcebergCreated = async(tableId)=>{
+  //   setIsLoadingIceberg(true);
+  //   let check =  await DatasetService.getIsIcebergTableCreated({
+  //     datasetId,
+  //     tableSchemaId: tableId
+  //   });
+
+  //   setIsIcebergCreated(check);
+  //   setIsLoadingIceberg(false);
+  // }
 
   useEffect(() => {
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
@@ -93,8 +107,7 @@ export const WebformTable = ({
       }
     }
 
-    checkIsIcebergCreated(webformData.tableSchemaId)
-
+    // checkIsIcebergCreated(webformData.tableSchemaId)
   }, [isRefresh, onTabChange, selectedTable.pamsId, webform]);
 
   useEffect(() => {
@@ -351,13 +364,13 @@ export const WebformTable = ({
     return <Spinner style={{ top: 0, margin: '1rem' }} />;
   }
 
-  const convertHelper = ()=>{
-    if(webformData?.length>0){
-      webformData?.forEach((table)=>convertTable(table.tableSchemaId))
-    }else{
-      convertTable(webformData.tableSchemaId)
+  const convertHelper = () => {
+    if (webformData?.length > 0) {
+      webformData?.forEach(table => convertTable(table.tableSchemaId));
+    } else {
+      convertTable(webformData.tableSchemaId);
     }
-  }
+  };
 
   const convertTable = async tableId => {
     try {
@@ -398,35 +411,35 @@ export const WebformTable = ({
     }
   };
 
-
-
   return (
     <div className={styles.contentWrap}>
-      <h3 className={styles.title}>
-        <div>
-          {webformData.title
-            ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
-            : webformData.name}
-          {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
-        </div>
-
-        <Button
+      <div className={`${styles.wrapper} ${isSticky ? styles.stickyWrapper : styles.initialWrapper}`}>
+        <h3 className={styles.title}>
+          <div>
+            {webformData.title
+              ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
+              : webformData.name}
+            {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
+          </div>
+          <Button
+            helpClassName={isIcebergCreated && 'p-button-reverse'}
             icon={isIcebergCreated ? 'unlock' : 'lock'}
             label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
             className={styles.openWebformButton}
             onClick={() => convertHelper()}
             isLoading={isLoadingIceberg}
           />
-        {webformData.multipleRecords && (
-          <Button
-            icon="plus"
-            label={resourcesContext.messages['addRecord']}
-            onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
-          />
-        )}
-      </h3>
+          {webformData.multipleRecords && (
+            <Button
+              icon="plus"
+              label={resourcesContext.messages['addRecord']}
+              onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
+            />
+          )}
+        </h3>
+      </div>
       <div className={styles.overlay}>
-        <div style={isIcebergCreated ? {opacity:1}:{ opacity: 0.5, pointerEvents:'none' }}>
+        <div style={isIcebergCreated ? { opacity: 1 } : { opacity: 0.5, pointerEvents: 'none' }}>
           {isNil(webformData.tableSchemaId) && (
             <span
               className={styles.nonExistTable}
