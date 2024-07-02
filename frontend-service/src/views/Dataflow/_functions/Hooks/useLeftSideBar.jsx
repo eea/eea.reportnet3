@@ -34,7 +34,7 @@ export const useLeftSideBar = (
       const editBtn = {
         className: 'dataflow-edit-help-step',
         icon: 'edit',
-        isVisible: dataProviderId ? false : true,
+        isVisible: dataProviderId || !buttonsVisibility.editBtn ? false : true,
         label: 'edit',
         onClick: () =>
           manageDialogs(
