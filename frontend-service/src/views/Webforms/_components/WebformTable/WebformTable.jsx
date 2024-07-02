@@ -67,12 +67,32 @@ export const WebformTable = ({
   const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
+    const alertMessage = ev => {
+      ev.preventDefault();
+      // if table not saved
+      return (ev.returnValue = 'Are you sure you want to close?');
+    };
+    window.addEventListener('beforeunload', alertMessage);
+
+    return () => {
+      window.removeEventListener('beforeunload', alertMessage);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
-      const scrollThreshold = document.documentElement.scrollHeight * 0.22;
-      setIsSticky(scrollPosition > scrollThreshold);
-    };
 
+      if (webformData.multipleRecords) {
+        const scrollThreshold = document.documentElement.scrollHeight * 0.18;
+        const maxScrollThreshold = document.documentElement.scrollHeight * 0.62;
+        setIsSticky(scrollPosition > scrollThreshold && scrollPosition < maxScrollThreshold);
+      } else {
+        const scrollThreshold = document.documentElement.scrollHeight * 0.12;
+        const maxScrollThreshold = document.documentElement.scrollHeight * 0.86;
+        setIsSticky(scrollPosition > scrollThreshold && scrollPosition < maxScrollThreshold);
+      }
+    };
     window.addEventListener('scroll', handleScroll);
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -413,31 +433,56 @@ export const WebformTable = ({
 
   return (
     <div className={styles.contentWrap}>
-      <div className={`${styles.wrapper} ${isSticky ? styles.stickyWrapper : styles.initialWrapper}`}>
-        <h3 className={styles.title}>
-          <div>
-            {webformData.title
-              ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
-              : webformData.name}
-            {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
-          </div>
-          <Button
-            helpClassName={isIcebergCreated && 'p-button-reverse'}
-            icon={isIcebergCreated ? 'unlock' : 'lock'}
-            label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
-            className={styles.openWebformButton}
-            onClick={() => convertHelper()}
-            isLoading={isLoadingIceberg}
-          />
-          {webformData.multipleRecords && (
+      {webform?.multipleRecords ? (
+        <>
+          <h3 className={styles.title}>
             <Button
               icon="plus"
               label={resourcesContext.messages['addRecord']}
+              className={styles.addRecordButton}
               onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
             />
-          )}
-        </h3>
-      </div>
+          </h3>
+
+          <div className={`${styles.wrapper} ${isSticky ? styles.stickyWrapper : styles.initialWrapper}`}>
+            <h3 className={styles.title}>
+              <div>
+                {webformData.title
+                  ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
+                  : webformData.name}
+                {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
+              </div>
+              <Button
+                helpClassName={isIcebergCreated && 'p-button-reverse'}
+                icon={isIcebergCreated ? 'unlock' : 'lock'}
+                label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
+                className={styles.openWebformButton}
+                onClick={() => convertHelper()}
+                isLoading={isLoadingIceberg}
+              />
+            </h3>
+          </div>
+        </>
+      ) : (
+        <div className={`${styles.wrapper} ${isSticky ? styles.stickyWrapper : styles.initialWrapper}`}>
+          <h3 className={styles.title}>
+            <div>
+              {webformData.title
+                ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
+                : webformData.name}
+              {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
+            </div>
+            <Button
+              helpClassName={isIcebergCreated && 'p-button-reverse'}
+              icon={isIcebergCreated ? 'unlock' : 'lock'}
+              label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
+              className={styles.openWebformButton}
+              onClick={() => convertHelper()}
+              isLoading={isLoadingIceberg}
+            />
+          </h3>
+        </div>
+      )}
       <div className={styles.overlay}>
         <div style={isIcebergCreated ? { opacity: 1 } : { opacity: 0.5, pointerEvents: 'none' }}>
           {isNil(webformData.tableSchemaId) && (

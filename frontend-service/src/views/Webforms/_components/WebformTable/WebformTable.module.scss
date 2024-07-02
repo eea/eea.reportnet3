@@ -9,7 +9,6 @@
   }
 
   .openWebformButton {
-    left:0;
   }
 
   .overlay::before {
@@ -33,7 +32,10 @@
     justify-content: space-between;
     margin: 0.5rem 0;
     padding: 1rem;
+  }
 
+  .addRecordButton{
+    margin-left: auto;
   }
   
   .wrapper {
@@ -48,13 +50,16 @@
     background-color: rgba(255, 255, 255, 1);
     width:90vw;
   }
+
+  .openWebformButton{
+    margin-left:auto;
+  }
   
   .initialWrapper {
     position: static;
     top: initial; /* This ensures there's no conflict */
   }
   
-
   .nonExistTable {
     color: var(--errors);
   }
