@@ -206,30 +206,26 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
     Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
-    File existingCsvFile = null;
     if(!DatasetTypeEnum.DESIGN.equals(datasetType) &&  readOnlyFieldsExist){
       if(importFileInDremioInfo.getReplaceData()){
-        //export csv and get it from s3
-        LOG.info("For job {} read only fields exist", importFileInDremioInfo);
-        String exportedFileName = "prefilled_" + tableSchemaName;
-        S3PathResolver s3ExportTablePathResolver = constructS3PathResolver(importFileInDremioInfo, exportedFileName, DEFAULT_TXT_NAME, S3_EXPORT_PREFILLED_TABLE_FILE_PATH);
-        //path in dremio for the new exported table
-        String dremioPathForExportTable = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, exportedFileName, LiteralConstants.S3_EXPORT_PREFILLED_TABLE_AS_FOLDER_QUERY_PATH);
-        //path in dremio for the new exported table
-        String s3PathForExportTable = getImportQueryPathForFolder(importFileInDremioInfo, DEFAULT_TXT_NAME, exportedFileName, LiteralConstants.S3_EXPORT_PREFILLED_TABLE_FILE_PATH);
+        //convert old table to iceberg
+        //parse csv and for each record of the input csv
+        //do an update query with read only fields in where statement
+        //if columns are geometry execute the to_hex command
+        //after all updates convert iceberg to parquet using a function to convert hex data to binary
+        //promote if needed
 
-        String exportedFilePath = importPath + "/" + importFileInDremioInfo.getDatasetId() + "/";
-        existingCsvFile = exportParquetToCsvFile(dremioPathForParquetFolder, dremioPathForExportTable, s3PathForExportTable, exportedFileName, exportedFilePath, s3ExportTablePathResolver);
+
       }
     }
 
     if (convertParquetWithCustomWay) {
-      csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, existingCsvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
+      csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
     } else {
       if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, existingCsvFile, dataSetSchema, importFileInDremioInfo, 5000, datasetType);
+        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, 5000, datasetType);
       } else {
-        csvFilesWithAddedColumns = modifyCsvFile(csvFile, existingCsvFile, dataSetSchema, importFileInDremioInfo, datasetType);
+        csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, datasetType);
       }
     }
 
@@ -431,7 +427,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
   }
 
-  private List<FileWithRecordNum> modifyCsvFile(File csvFile, File existingCsvFile, DataSetSchema dataSetSchema,
+  private List<FileWithRecordNum> modifyCsvFile(File csvFile, DataSetSchema dataSetSchema,
                                                 ImportFileInDremioInfo importFileInDremioInfo, DatasetTypeEnum datasetType) throws Exception {
     LOG.info(MEASUREMENTS + " with job {} modifyCsvFile started", importFileInDremioInfo);
     char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
@@ -479,7 +475,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     return modifiedCsvFiles;
   }
 
-  private List<FileWithRecordNum> modifyAndSplitCsvFile(File csvFile, File existingCsvFile, DataSetSchema dataSetSchema,
+  private List<FileWithRecordNum> modifyAndSplitCsvFile(File csvFile, DataSetSchema dataSetSchema,
                                                         ImportFileInDremioInfo importFileInDremioInfo, Integer batchSize, DatasetTypeEnum datasetType) throws Exception {
     LOG.info(MEASUREMENTS + " with job {} modifyAndSplitCsvFile started", importFileInDremioInfo);
     char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
