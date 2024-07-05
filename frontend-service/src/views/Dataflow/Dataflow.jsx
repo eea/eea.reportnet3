@@ -1718,6 +1718,7 @@ export const Dataflow = () => {
         {dataflowState.isCitizenScienceDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            dataProviderGroup={dataflowState.dataProviderGroup}
             deliveryDate={
               dataflowState.dataCollectionDueDate
                 ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
