@@ -99,8 +99,7 @@ export const ReferenceDataflow = () => {
   const getLeftSidebarButtonsVisibility = () => ({
     apiKeyBtn: dataflowState.isCustodian,
     datasetsInfoBtn: dataflowState.isAdmin || dataflowState.isCustodian,
-    editBtn:
-      (dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian) || dataflowState.isAdmin,
+    editBtn: dataflowState.isCustodian || dataflowState.isAdmin,
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:

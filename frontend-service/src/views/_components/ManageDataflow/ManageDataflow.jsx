@@ -97,7 +97,7 @@ export const ManageDataflow = ({
 
   const onHideDataflowDialog = () => {
     onResetData();
-    resetDeliveryDate();
+    resetDeliveryDate && resetDeliveryDate();
     resetObligations();
     manageDialogs(dialogName, false);
   };
