@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.3.1-264535</api-gateway.version>
-      <communication.version>v3.3.1-264535</communication.version>
-      <collaboration.version>v3.3.1-264535</collaboration.version>
-      <dataflow.version>v3.3.1-264535</dataflow.version>
-      <dataset.version>v3.3.1-264535</dataset.version>
-      <document.version>v3.3.1-264535</document.version>
-      <frontend.version>v3.3.1-264535</frontend.version>
-      <indexsearch.version>v3.3.1-264535</indexsearch.version>
-      <inspire.version>v3.3.1-264535</inspire.version>
-      <recordstore.version>v3.3.1-264535</recordstore.version>
-      <ums.version>v3.3.1-264535</ums.version>
-      <validation.version>v3.3.1-264535</validation.version>
-      <common-interfaces.version>v3.3.1-264535</common-interfaces.version>
-      <common-utitlities.version>v3.3.1-264535</common-utitlities.version>
-      <rod.version>v3.3.1-264535</rod.version>
-      <orchestrator.version>v3.3.1-264535</orchestrator.version>
+      <api-gateway.version>v3.3.1-ARCHITECTURE_DLH</api-gateway.version>
+      <communication.version>v3.3.1-ARCHITECTURE_DLH</communication.version>
+      <collaboration.version>v3.3.1-ARCHITECTURE_DLH</collaboration.version>
+      <dataflow.version>v3.3.1-ARCHITECTURE_DLH</dataflow.version>
+      <dataset.version>v3.3.1-ARCHITECTURE_DLH</dataset.version>
+      <document.version>v3.3.1-ARCHITECTURE_DLH</document.version>
+      <frontend.version>v3.3.1-ARCHITECTURE_DLH</frontend.version>
+      <indexsearch.version>v3.3.1-ARCHITECTURE_DLH</indexsearch.version>
+      <inspire.version>v3.3.1-ARCHITECTURE_DLH</inspire.version>
+      <recordstore.version>v3.3.1-ARCHITECTURE_DLH</recordstore.version>
+      <ums.version>v3.3.1-ARCHITECTURE_DLH</ums.version>
+      <validation.version>v3.3.1-ARCHITECTURE_DLH</validation.version>
+      <common-interfaces.version>v3.3.1-ARCHITECTURE_DLH</common-interfaces.version>
+      <common-utitlities.version>v3.3.1-ARCHITECTURE_DLH</common-utitlities.version>
+      <rod.version>v3.3.1-ARCHITECTURE_DLH</rod.version>
+      <orchestrator.version>v3.3.1-ARCHITECTURE_DLH</orchestrator.version>
   </properties>
 </project>
