@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface SpatialDataHandling {
-  boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO, boolean isGeoJsonHeaders);
+  boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO);
 
   StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO);
 

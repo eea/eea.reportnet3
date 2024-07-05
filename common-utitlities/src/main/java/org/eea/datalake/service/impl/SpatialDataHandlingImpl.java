@@ -37,31 +37,37 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   private static final Logger LOG = LoggerFactory.getLogger(LockServiceImpl.class);
   private static final String FROM_XEX = "FROM_HEX";
+
   private final SpatialDataHelper spatialDataHelper;
+  private final WKBReader wkbReader;
+  private final WKBWriter wkbWriter;
+  private final GeoJsonReader geoJsonReader;
+  private final GeoJSONWriter geoJSONWriter;
 
   public SpatialDataHandlingImpl(SpatialDataHelper spatialDataHelper) {
     this.spatialDataHelper = spatialDataHelper;
+    this.wkbReader = new WKBReader();
+    this.wkbWriter = new WKBWriter(2, true);
+    this.geoJsonReader = new GeoJsonReader();
+    this.geoJSONWriter = new GeoJSONWriter();
   }
 
   @Override
-  public boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO, boolean isGeoJsonHeaders) {
-    return !getHeaders(isGeoJsonHeaders, tableSchemaVO).isEmpty();
+  public boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO) {
+    return !getHeaders(true, tableSchemaVO).isEmpty();
   }
 
   @Override
   public String convertToHEX(String value) {
     try {
-      GeoJsonReader reader = new GeoJsonReader();
-      Geometry geometry = reader.read(value);
+      Geometry geometry = geoJsonReader.read(value);
       Feature feature = FeatureConverter.toFeature(value);
       String srid = feature.getProperties().get("srid").toString();
       if (!srid.isBlank()) {
         geometry.setSRID(Integer.parseInt(srid));
       }
 
-      WKBWriter wkbWriter = new WKBWriter(2, true);
-      byte[] bytes = wkbWriter.write(geometry);
-      return spatialDataHelper.bytesToHex(bytes);
+      return spatialDataHelper.bytesToHex(wkbWriter.write(geometry));
     } catch (ParseException e) {
       LOG.error("Invalid GeoJson!! Tried to convert this String : {} , to binary but failed", value, e);
       return "";
@@ -91,10 +97,9 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         Map<String, Object> properties = new HashMap<>();
         properties.put("srid", Integer.toString(geometry.getSRID()));
 
-        GeoJSONWriter writer = new GeoJSONWriter();
-        org.wololo.geojson.Geometry geoJsonGeometry = writer.write(geometry);
-
+        org.wololo.geojson.Geometry geoJsonGeometry = geoJSONWriter.write(geometry);
         org.wololo.geojson.Feature feature = new org.wololo.geojson.Feature(geoJsonGeometry, properties);
+
         return feature.toString();
       }
     } catch (ParseException e) {
@@ -120,11 +125,11 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return new StringBuilder(String.join(",", geoJsonHeaders));
   }
 
-  private List<String> getHeaders(boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
+  private List<String> getHeaders(boolean includeGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
     return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
-        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
+        .filter(header -> includeGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
         .map(FieldSchemaVO::getName)
         .collect(Collectors.toList());
   }
@@ -136,8 +141,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   @Override
   public DataType getGeometryType(byte[] byteArray) throws ParseException {
-    WKBReader reader = new WKBReader();
-    Geometry geometry = reader.read(byteArray);
+    Geometry geometry = wkbReader.read(byteArray);
     return DataType.fromValue(geometry.getGeometryType().toUpperCase());
   }
 

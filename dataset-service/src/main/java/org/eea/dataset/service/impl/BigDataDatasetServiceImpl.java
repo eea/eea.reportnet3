@@ -1114,7 +1114,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 updateQueryBuilder.delete(updateQueryBuilder.length() - 2, updateQueryBuilder.length());
             }
             updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(record.getId()).append("'");
-            if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+            if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
                 updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
             }
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
@@ -1136,7 +1136,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String fieldValue = (field.getValue() != null) ? field.getValue() : "";
         updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
         updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(recordId).append("'");
-        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO, true)) {
+        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
             updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
         }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
