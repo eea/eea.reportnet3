@@ -33,6 +33,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
@@ -43,6 +44,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -106,6 +108,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final DatasetMetabaseService datasetMetabaseService;
   private final DatasetSchemaService datasetSchemaService;
   private final SpatialDataHandling spatialDataHandling;
+
+  @Lazy
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
 
   private JdbcTemplate dremioJdbcTemplate;
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
@@ -206,18 +212,23 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
 
     Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
-    if(!DatasetTypeEnum.DESIGN.equals(datasetType) &&  readOnlyFieldsExist){
-      if(importFileInDremioInfo.getReplaceData()){
-        //convert old table to iceberg
-        //parse csv and for each record of the input csv
-        //do an update query with read only fields in where statement
-        //if columns are geometry execute the to_hex command
-        //after all updates convert iceberg to parquet using a function to convert hex data to binary
-        //promote if needed
-
-
+    if(!DatasetTypeEnum.DESIGN.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()){
+      //convert old table to iceberg
+      Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
+      bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
+      S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+      s3IcebergTablePathResolver.setIsIcebergTable(true);
+      try {
+        updatePrefilledDataBasedOnReadOnlyData(importFileInDremioInfo, csvFile, s3IcebergTablePathResolver, dataSetSchema, datasetType);
       }
+      finally {
+        //after all updates convert iceberg to parquet
+        // todo using a function to convert hex data to binary
+        bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
+      }
+      return;
     }
+
 
     if (convertParquetWithCustomWay) {
       csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
@@ -860,6 +871,84 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         s3Helper.deleteFileFromS3(exportTableS3Path);
       }
     }
+  }
 
+  private void updatePrefilledDataBasedOnReadOnlyData(ImportFileInDremioInfo importFileInDremioInfo, File inputFile,
+                                                      S3PathResolver s3IcebergTablePathResolver, DataSetSchema dataSetSchema, DatasetTypeEnum datasetType) throws Exception {
+
+    String icebergTablePath = s3Service.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+    //parse csv and for each record of the input csv
+    //do an update query with read only fields in where statement
+    //if columns are geometry execute the to_hex command
+    char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
+            importFileInDremioInfo.getDelimiter().charAt(0) : defaultDelimiter;
+
+    long recordCounter = 0;
+
+    try (Reader reader = Files.newBufferedReader(Paths.get(inputFile.getPath()));
+         CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+                 .setHeader()
+                 .setSkipHeaderRecord(false)
+                 .setDelimiter(delimiterChar)
+                 .setIgnoreHeaderCase(true)
+                 .setIgnoreEmptyLines(false)
+                 .setTrim(true).build())) {
+
+      CsvHeaderMapping typeMapping = getHeaderTypeMapping(inputFile, dataSetSchema, importFileInDremioInfo, csvParser);
+      for (CSVRecord csvRecord : csvParser) {
+        checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", inputFile, importFileInDremioInfo);
+        if(recordCounter == 1){
+          continue;
+        }
+        StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
+        StringBuilder whereStatementBuilder = new StringBuilder().append(" WHERE ");
+
+        for (FieldSchema field : typeMapping.getExpectedHeaders()) {
+          String expectedHeaderName = field.getHeaderName();
+          DataType fieldType = typeMapping.getFieldNameAndTypeMap().get(expectedHeaderName);
+          if(BooleanUtils.isTrue(field.getReadOnly())){
+            //construct where statement
+            String value = csvRecord.get(expectedHeaderName);
+            whereStatementBuilder.append(" " + expectedHeaderName + " = '" + value + "' AND");
+          }
+          else if (expectedHeaderName.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER) || expectedHeaderName.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER) ||
+                    fieldType == DataType.ATTACHMENT){
+            //we will not update these values
+              continue;
+          } else if (csvRecord.isMapped(expectedHeaderName)) {
+            String value = spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
+                    spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName)) : csvRecord.get(expectedHeaderName);
+            updateQueryBuilder.append(" " + expectedHeaderName + " = '" + value + "' ,");
+
+
+          } else {
+            String headerWithBom = "\uFEFF" + expectedHeaderName;
+            String value = csvRecord.isMapped(headerWithBom) ? csvRecord.get(headerWithBom) : "";
+            updateQueryBuilder.append(" " + expectedHeaderName + " = '" + value + "' ,");
+          }
+        }
+
+        //remove last character if it is comma
+        if(updateQueryBuilder.toString().endsWith(" ,")){
+          updateQueryBuilder.deleteCharAt(updateQueryBuilder.length() - 1);
+        }
+        if(whereStatementBuilder.toString().endsWith("AND")) {
+          // Find the last occurrence of "AND" and remove it
+          int lastIndex = whereStatementBuilder.lastIndexOf("AND");
+          whereStatementBuilder.delete(lastIndex, lastIndex + 3); // 3 is the length of "AND"
+        }
+
+        updateQueryBuilder.append(whereStatementBuilder);
+        String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
+        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
+
+      }
+    } catch (IOException | UncheckedIOException e) {
+      handleCsvProcessingError(e, inputFile, importFileInDremioInfo);
+    }
+
+    if (recordCounter == 0) {
+      LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, inputFile.getName());
+    }
   }
 }
