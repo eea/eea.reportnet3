@@ -21,8 +21,7 @@ public class ImportFileInDremioInfo {
     private Long integrationId;
     private String delimiter;
     private String errorMessage;
-    private Boolean sendWrongFileNameWarning;
-    private Boolean sendEmptyFileWarning;
+    private String warningMessage;
     private String dataProviderCode;
     private Boolean updateReferenceFolder;
 

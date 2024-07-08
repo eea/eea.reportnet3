@@ -294,6 +294,10 @@ public final class LiteralConstants {
 
   public static final String S3_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\"";
 
+  public static final String S3_EXPORT_PREFILLED_TABLE_AS_FOLDER_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"current\".\"exported\".\"%s\"";
+
+  public static final String S3_EXPORT_PREFILLED_TABLE_FILE_PATH = "%s/%s/%s/current/exported/%s/%s";
+
   /** The Constant S3_DATAFLOW_REFERENCE_PATH: {@value}. */
   public static final String S3_DATAFLOW_REFERENCE_PATH = "%s/reference/%s/%s/%s";
 

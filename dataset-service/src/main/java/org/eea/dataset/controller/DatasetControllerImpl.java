@@ -638,25 +638,36 @@ public class DatasetControllerImpl implements DatasetController {
                   value = "deleteCascadePK", required = false) boolean deleteCascadePK,
           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
     try {
+      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      Long providerId = datasetService.getDataProviderIdById(datasetId);
+      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+
+      if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
+              tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
+        LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
+                recordId, datasetId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+      }
+
+      if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+              && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
+              datasetService.findRecordSchemaIdById(datasetId, tableSchemaVO.getRecordSchema().getIdRecordSchema()), EntityTypeEnum.RECORD))) {
+        LOG.error(
+                "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
+                recordId, datasetId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+                        datasetService.findRecordSchemaIdById(datasetId, recordId)));
+      }
+
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
 
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        Long providerId = datasetService.getDataProviderIdById(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-
-          if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-                  tableSchemaVO.getRecordSchema().getIdRecordSchema(), EntityTypeEnum.RECORD)) {
-            LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
-                    recordId, datasetId);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-          }
-
           bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, recordId, deleteCascadePK);
         }
         else{
@@ -664,22 +675,6 @@ public class DatasetControllerImpl implements DatasetController {
         }
       }
       else {
-        if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-                && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
-                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
-          LOG.error(
-                  "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
-                  recordId, datasetId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                  String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-                          datasetService.findRecordSchemaIdById(datasetId, recordId)));
-        }
-        if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
-                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD)) {
-          LOG.error("Error deleting record with id {} in the datasetId {}. The table is read only",
-                  recordId, datasetId);
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
-        }
         updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
       }
       LOG.info("Successfully deleted record with id {} for datasetId {}", recordId, datasetId);
@@ -2807,15 +2802,6 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
-  /**
-   * Convert Iceberg To Parquet Table
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param tableSchemaId the tableSchemaId
-   *
-   */
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/convertIcebergToParquetTable/{datasetId}")
@@ -2839,6 +2825,45 @@ public class DatasetControllerImpl implements DatasetController {
     catch (Exception e){
       LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
               providerId, datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PostMapping("/convertParquetToIcebergTables/{datasetId}")
+  public void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
+                                           @RequestParam(value = "dataflowId") Long dataflowId,
+                                           @RequestParam(value = "providerId", required = false) Long providerId,
+                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
+
+    try{
+      for(String tableSchemaId: tableSchemaIds){
+        convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaId);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not convert parquet tables to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaIds {}. Error message: {}", dataflowId,
+              providerId, datasetId, tableSchemaIds);
+      throw e;
+    }
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PostMapping("/convertIcebergToParquetTables/{datasetId}")
+  public void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
+                                           @RequestParam(value = "dataflowId") Long dataflowId,
+                                           @RequestParam(value = "providerId", required = false) Long providerId,
+                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
+    try{
+      for(String tableSchemaId: tableSchemaIds){
+        convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaId);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not convert iceberg tables to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaIds {}. Error message: {}", dataflowId,
+              providerId, datasetId, tableSchemaIds);
       throw e;
     }
   }
@@ -2884,6 +2909,24 @@ public class DatasetControllerImpl implements DatasetController {
     }
     catch (Exception e){
       LOG.error("Could not retrieve iceberg tables for dataflowId {}, providerId {} and datasetId {}", dataflowId, providerId, datasetId);
+      throw e;
+    }
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
+  @PostMapping("/restorePrefilledTables/{datasetId}")
+  public void restorePrefilledTables(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception {
+    try{
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
+      Long designDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId, null);
+      Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+
+      bigDataDatasetService.createPrefilledTables(designDatasetId, datasetSchemaId, datasetId, providerId, tableSchemaId);
+    }
+    catch (Exception e){
+      LOG.error("Could not restore prefilled tables for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       throw e;
     }
   }

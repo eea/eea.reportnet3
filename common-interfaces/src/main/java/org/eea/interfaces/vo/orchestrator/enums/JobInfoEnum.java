@@ -25,7 +25,16 @@ public enum JobInfoEnum {
 
     ERROR_CSV_MULTIPLE_QUOTES("Multiple quotes were found in the imported file"),
 
-    ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d");
+    ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d"),
+
+    WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA("Some imports to fixed number of records tables failed because the Replace Data option was not selected"),
+
+    ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA("Import failed because all tables have fixed number of records and the Replace Data option was not selected"),
+
+    WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS("Some imports for fixed number of records tables failed because the number of records provided in the import file was not correct"),
+
+    ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS("Import failed for fixed number of records tables because the number of records provided in the import files were not correct");
+
 
     /** The value. */
     private final String value;

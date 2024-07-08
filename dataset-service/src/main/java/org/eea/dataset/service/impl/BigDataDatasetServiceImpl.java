@@ -71,6 +71,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -433,15 +434,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                     datasetService.failImportJobAndProcess(importFileInDremioInfo.getProcessId(), importFileInDremioInfo.getDatasetId(), tableSchemaId, fileName, eventType, JobInfoEnum.ERROR_WRONG_FILE_NAME);
                     importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
-                    importFileInDremioInfo.setSendWrongFileNameWarning(sendWrongFileNameWarning);
                     throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
                 }
             }
         }
         if(sendWrongFileNameWarning){
+            importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
             jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
         }
-        importFileInDremioInfo.setSendWrongFileNameWarning(sendWrongFileNameWarning);
         return correctFilesForImport;
 
     }
@@ -651,7 +651,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if (EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())) {
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ALL_FILES_ARE_EMPTY, null);
                 eventType = EventType.IMPORT_EMPTY_FILES_ERROR_EVENT;
-            } else {
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA, null);
+                eventType = EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT;
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS, null);
+                eventType = EventType.IMPORT_WRONG_NUM_OF_RECORDS_ERROR_EVENT;
+            }
+            else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                         ? EventType.IMPORT_REPORTING_FAILED_EVENT
                         : EventType.IMPORT_DESIGN_FAILED_EVENT;
@@ -690,22 +697,37 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
-        // If importing a zip a file doesn't match with the table and the process ignores it, we send
-        // a warning notification
-        if (importFileInDremioInfo.getSendWrongFileNameWarning() != null && importFileInDremioInfo.getSendWrongFileNameWarning()) {
-            NotificationVO notificationWarning = NotificationVO.builder()
-                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                    .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
-                    value, notificationWarning);
-        }
 
-        if(Boolean.TRUE.equals(importFileInDremioInfo.getSendEmptyFileWarning())){
-            NotificationVO notificationWarning = NotificationVO.builder()
-                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                    .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
-                    value, notificationWarning);
+        if(StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessage())) {
+            //send warning
+            if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))){
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT,
+                        value, notificationWarning);
+            }
         }
 
         if (importFileInDremioInfo.getProviderId() != null) {
@@ -1243,5 +1265,71 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             throw new Exception(exceptionMsg);
         }
         LOG.info("For dataflowId {} providerId {} datasetId {} and table {} the REFERENCE dataset files have been successfully copied to the reference folder", s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName);
+    }
+
+    @Override
+    public void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception {
+        DataSetMetabaseVO designDataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(designDatasetId);
+
+        List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(designDatasetId);
+        for (TableSchemaIdNameVO table : tables) {
+            //check if we need to create prefilled data for a specific table only
+            if(StringUtils.isNotBlank(tableSchemaId) && !table.getIdTableSchema().equals(tableSchemaId)){
+                continue;
+            }
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), designDatasetSchemaId);
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getToPrefill())) {
+                //copy table folder from design to dataset with id datasetIdForCreation and promote folder
+                String tableSchemaName = tableSchemaVO.getNameTableSchema();
+
+                S3PathResolver s3DesignTablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), 0L, designDatasetId, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                //query path for the design table
+                String dremioDesignTableQueryPath = s3ServicePrivate.getTableAsFolderQueryPath(s3DesignTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                S3PathResolver s3NewTablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                //query path for the new table
+                String dremioNewTableQueryPath = s3ServicePrivate.getTableAsFolderQueryPath(s3NewTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                String providerCode = "''";
+                if(providerId != 0L) {
+                    DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
+                    providerCode = "'" + dataProviderVO.getCode() + "'";
+                }
+
+                List<FieldSchemaVO> fieldSchemas = tableSchemaVO.getRecordSchema().getFieldSchema();
+                String tableHeaders = constructRecordIdCreationForQuery();
+                tableHeaders += ", " + providerCode + " AS " + PARQUET_PROVIDER_CODE_COLUMN_HEADER + ", ";
+                tableHeaders += fieldSchemas.stream()
+                        .map(FieldSchemaVO::getName)
+                        .collect(Collectors.joining(","));
+
+                //remove previous data if they exist
+                S3PathResolver s3TablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                    //remove old parquet table because it will be recreated
+                    dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                    s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+                }
+
+
+                String queryToCreatePrefilledTable = "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
+                String processId = dremioHelperService.executeSqlStatement(queryToCreatePrefilledTable);
+                dremioHelperService.checkIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId, null);
+
+                //refresh the metadata
+                dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
+            }
+            LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
+        }
+    }
+
+    private String constructRecordIdCreationForQuery(){
+        return "CONCAT(\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 4294967295 AS BIGINT)), 8, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
+                "        LOWER(LPAD(TO_HEX(CAST(RAND() * 281474976710655 AS BIGINT)), 12, '0'))\n" +
+                "    ) AS " + PARQUET_RECORD_ID_COLUMN_HEADER + " ";
     }
 }

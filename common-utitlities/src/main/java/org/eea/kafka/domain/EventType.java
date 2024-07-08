@@ -58,6 +58,22 @@ public enum EventType {
   IMPORT_EMPTY_FILES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_emptyFiles_error_event", true),
 
+  /** The import to fixed number of records table without replace data error event. */
+  IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_fixedNumWithoutReplaceData_error_event", true),
+
+  /** The import to fixed number of records table without replace data warning event. */
+  IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_fixedNumWithoutReplaceData_warning_event", true),
+
+  /** The import with wrong number of records error event. */
+  IMPORT_WRONG_NUM_OF_RECORDS_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_WrongNumberOfRecords_error_event", true),
+
+  /** The import with wrong number of records warning event. */
+  IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_WrongNumberOfRecords_warning_event", true),
+
   /** The import reporting failed no headers matching event. */
   IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_no_headers_failed_event", true),
