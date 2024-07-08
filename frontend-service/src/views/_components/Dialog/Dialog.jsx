@@ -7,9 +7,12 @@ import styles from './Dialog.module.scss';
 
 import { Dialog as PrimeDialog } from 'primereact/dialog';
 
+import { TabMenu } from 'views/Dataflows/_components/TabMenu';
+
 import { dialogsStore } from 'views/_components/Dialog/_functions/Stores/dialogsStore';
 
 export const Dialog = ({
+  activeIndex,
   blockScroll = true,
   children,
   className,
@@ -19,8 +22,11 @@ export const Dialog = ({
   focusOnShow = true,
   footer,
   header,
+  isJobsMonitoringDialog,
   onHide,
   style,
+  tabChange,
+  tabMenuItems,
   visible,
   zIndex = 5000
 }) => {
@@ -28,6 +34,7 @@ export const Dialog = ({
 
   const [openedDialogs, setOpenedDialogs] = useRecoilState(dialogsStore);
 
+  const [dialogClass, setDialogClass] = useState(styles.dialog_mask_wrapper);
   const [dialogId, setDialogId] = useState('');
   const [maskStyle, setMaskStyle] = useState({
     display: visible ? 'flex' : 'none',
@@ -36,7 +43,6 @@ export const Dialog = ({
     alignItems: 'center',
     zIndex: zIndex
   });
-  const [dialogClass, setDialogClass] = useState(styles.dialog_mask_wrapper);
 
   const dialogStyle = {
     top: 'auto',
@@ -100,6 +106,15 @@ export const Dialog = ({
         onHide={onHide}
         style={style ? { ...style, ...dialogStyle } : { ...dialogStyle, width: '50vw' }}
         visible={visible}>
+        {isJobsMonitoringDialog && (
+          <div className={styles.tabMenu}>
+            <TabMenu
+              activeIndex={activeIndex}
+              model={tabMenuItems}
+              onTabChange={event => tabChange(event.index, event.value)}
+            />
+          </div>
+        )}
         {children}
       </PrimeDialog>
       <label className="srOnly" id={id}>

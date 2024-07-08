@@ -53,6 +53,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
   const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
 
+  const [activeIndex, setActiveIndex] = useState(0);
   const [expandedRows, setExpandedRows] = useState(null);
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -76,6 +77,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
+    console.log('inside use effect');
     getJobsStatuses();
   }, [pagination, sort]);
 
@@ -147,6 +149,29 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     }
   };
 
+  const tabMenuItems = [
+    {
+      className: styles.flow_tab,
+      id: 'monitoring',
+      label: resourcesContext.messages['monitoring']
+    },
+    { className: styles.flow_tab, id: 'history', label: resourcesContext.messages['history'] }
+  ];
+
+  const onChangeTab = (index, value) => {
+    setActiveIndex(index);
+    if (index === 1) {
+      setIsFiltered(false);
+      setJobsStatusesList([]);
+    } else {
+      setIsLoading(true);
+      getJobsStatuses();
+    }
+
+    // onChangePagination({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
+    // setGoToPage(1);
+  };
+
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
 
   const filterOptions = [
@@ -202,7 +227,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {
           type: resourcesContext.messages[config.jobType.VALIDATION.label].toUpperCase(),
           value: config.jobType.VALIDATION.key
-        },
+        }
       ],
       template: 'jobType',
       type: 'MULTI_SELECT'
@@ -565,6 +590,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const renderFilters = () => (
     <Filters
+      activeIndex={activeIndex}
       className="lineItems"
       isLoading={loadingStatus === 'pending'}
       isProvider={isProvider}
@@ -585,7 +611,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       );
     }
 
-    if (isFiltered && isEmpty(jobsStatuses)) {
+    if ((isFiltered || activeIndex) && isEmpty(jobsStatuses)) {
       return (
         <div className={styles.dialogContent}>
           {renderFilters()}
@@ -673,12 +699,16 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   return (
     <Fragment>
       <Dialog
+        activeIndex={activeIndex}
         blockScroll={false}
         className="responsiveBigDialog"
         footer={dialogFooter}
         header={resourcesContext.messages['jobsMonitoring']}
+        isJobsMonitoringDialog={true}
         modal={true}
         onHide={onCloseDialog}
+        tabChange={onChangeTab}
+        tabMenuItems={tabMenuItems}
         visible={isDialogVisible}>
         {renderDialogContent()}
       </Dialog>

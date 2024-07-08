@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import { noWait, useRecoilCallback } from 'recoil';
 
 import isNil from 'lodash/isNil';
@@ -47,6 +47,7 @@ const components = {
 };
 
 export const Filters = ({
+  activeIndex,
   className,
   isLoading,
   isProvider,
@@ -64,6 +65,12 @@ export const Filters = ({
   const [viewDate, setViewData] = useState(undefined);
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
+
+  // useEffect(() => {
+  //   setViewData(new Date());
+  //   onResetFilters();
+  //   onReset({ sortByHeader: '', sortByOption: 'idle' });
+  // }, [activeIndex]);
 
   const clearDateInputs = () => {
     [...document.getElementsByClassName('date-filter-input')].forEach(input => (input.value = ''));
