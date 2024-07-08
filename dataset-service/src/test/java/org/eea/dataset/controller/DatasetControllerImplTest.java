@@ -35,6 +35,8 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
@@ -439,6 +441,10 @@ public class DatasetControllerImplTest {
     Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     doNothing().when(updateRecordHelper).executeDeleteProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
+    TableSchemaVO tableSchemaVO = new TableSchemaVO();
+    tableSchemaVO.setRecordSchema(new RecordSchemaVO());
+    when(datasetSchemaService.getTableSchemaVO(any(), any())).thenReturn(tableSchemaVO);
+
     datasetControllerImpl.deleteRecord(1L, recordId, false, null);
     Mockito.verify(updateRecordHelper, times(1)).executeDeleteProcess(Mockito.any(), Mockito.any(),
         Mockito.anyBoolean());
@@ -454,6 +460,10 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
     DataFlowVO mockDataflow = new DataFlowVO();
     mockDataflow.setBigData(false);
+    TableSchemaVO tableSchemaVO = new TableSchemaVO();
+    tableSchemaVO.setRecordSchema(new RecordSchemaVO());
+    when(datasetSchemaService.getTableSchemaVO(any(), any())).thenReturn(tableSchemaVO);
+
     Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
         .thenReturn(DatasetTypeEnum.DESIGN);
@@ -472,10 +482,9 @@ public class DatasetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordReadOnlyException() throws Exception {
     try {
-      Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
-      DataFlowVO mockDataflow = new DataFlowVO();
-      mockDataflow.setBigData(false);
-      Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
+      TableSchemaVO tableSchemaVO = new TableSchemaVO();
+      tableSchemaVO.setRecordSchema(new RecordSchemaVO());
+      when(datasetSchemaService.getTableSchemaVO(any(), any())).thenReturn(tableSchemaVO);
       Mockito.when(datasetService.checkIfDatasetLockedOrReadOnly(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
 
@@ -494,15 +503,14 @@ public class DatasetControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void testDeleteRecordFixedNumberException() throws Exception {
     try {
-      Mockito.when(datasetService.getDataFlowIdById(anyLong())).thenReturn(1L);
-      DataFlowVO mockDataflow = new DataFlowVO();
-      mockDataflow.setBigData(false);
-      Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
-
       Mockito.when(datasetMetabaseService.getDatasetType(Mockito.anyLong()))
           .thenReturn(DatasetTypeEnum.REPORTING);
       Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
           Mockito.any())).thenReturn(true);
+
+      TableSchemaVO tableSchemaVO = new TableSchemaVO();
+      tableSchemaVO.setRecordSchema(new RecordSchemaVO());
+      when(datasetSchemaService.getTableSchemaVO(any(), any())).thenReturn(tableSchemaVO);
 
       datasetControllerImpl.deleteRecord(1L, recordId, false, null);
     } catch (ResponseStatusException e) {
@@ -525,6 +533,10 @@ public class DatasetControllerImplTest {
     Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     doThrow(new EEAException()).when(updateRecordHelper).executeDeleteProcess(Mockito.any(),
         Mockito.any(), Mockito.anyBoolean());
+    TableSchemaVO tableSchemaVO = new TableSchemaVO();
+    tableSchemaVO.setRecordSchema(new RecordSchemaVO());
+    when(datasetSchemaService.getTableSchemaVO(any(), any())).thenReturn(tableSchemaVO);
+
     datasetControllerImpl.deleteRecord(1L, recordId, false, null);
   }
 
