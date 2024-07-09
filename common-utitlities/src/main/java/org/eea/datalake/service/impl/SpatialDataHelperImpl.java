@@ -1,11 +1,14 @@
 package org.eea.datalake.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eea.datalake.service.SpatialDataHelper;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +18,7 @@ import static org.eea.utils.LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER;
 @Component
 public class SpatialDataHelperImpl implements SpatialDataHelper {
   private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+  private static final String SRIDPath = "/properties/srid";
 
   @Override
   public int countOccurrences(String str, char ch) {
@@ -71,5 +75,10 @@ public class SpatialDataHelperImpl implements SpatialDataHelper {
     geoJsonEnums.add(DataType.LINESTRING);
     geoJsonEnums.add(DataType.MULTILINESTRING);
     return geoJsonEnums;
+  }
+
+  public String extractSRID(String geoJson) throws IOException {
+    JsonNode SRIDNode = new ObjectMapper().readTree(geoJson).at(SRIDPath);
+    return SRIDNode.isTextual() ? SRIDNode.asText() : "";
   }
 }
