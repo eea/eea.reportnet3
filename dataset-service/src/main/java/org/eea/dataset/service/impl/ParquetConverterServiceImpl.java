@@ -142,6 +142,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     int numberOfEmptyFiles = 0;
     int numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace = 0;
     int numberOfFailedImportsForWrongNumberOfRecords = 0;
+    int numberOfFailedImportsForOnlyReadOnlyFields = 0;
     for (File csvFile : csvFiles) {
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
         tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
@@ -159,12 +160,15 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
           numberOfFailedImportsForWrongNumberOfRecords++;
         }
+        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
+          numberOfFailedImportsForOnlyReadOnlyFields++;
+        }
       }
-
     }
+
+    //check if all imports failed and an error (instead of a warning) must be thrown
     if (numberOfEmptyFiles != 0) {
       if (numberOfEmptyFiles == csvFiles.size()) {
-        //all files were empty and an error (instead of a warning) must be thrown
         importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
@@ -193,6 +197,16 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null));
       }
     }
+
+    if (numberOfFailedImportsForOnlyReadOnlyFields != 0) {
+      if (numberOfFailedImportsForOnlyReadOnlyFields == csvFiles.size()) {
+        importFileInDremioInfo.setWarningMessage(null);
+        importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS);
+        throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS);
+      } else {
+        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
+      }
+    }
   }
 
   private void convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo,
@@ -210,6 +224,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
     //path in s3 for the folder that contains the stored csv files
     String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+    datasetType = DatasetTypeEnum.REPORTING;
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchemaVO.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchemaVO::getReadOnly)) {
+      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
+      return;
+    }
 
     Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
     if(!DatasetTypeEnum.DESIGN.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()){
@@ -254,15 +273,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         return;
       }
     }
-
-    /* // todo
-    if (!isDesignDataset && tableSchema.getRecordSchema().getFieldSchema().stream()
-                    .allMatch(FieldSchema::getReadOnly)) {
-                throw new IOException("All fields for this table " + tableSchema.getNameTableSchema()
-                        + " are readOnly, you can't import new fields");
-            }
-     */
-
 
     if (importFileInDremioInfo.getReplaceData()) {
       //remove tables and folders that contain the previous csv files because data will be replaced

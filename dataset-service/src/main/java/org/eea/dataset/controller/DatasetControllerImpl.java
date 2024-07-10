@@ -650,8 +650,7 @@ public class DatasetControllerImpl implements DatasetController {
       }
 
       if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-              && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
-              datasetService.findRecordSchemaIdById(datasetId, tableSchemaVO.getRecordSchema().getIdRecordSchema()), EntityTypeEnum.RECORD))) {
+              && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
         LOG.error(
                 "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
                 recordId, datasetId);
@@ -711,11 +710,11 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "table schema Id",
                   example = "5cf0e9b3b793310e9ceca190") @PathVariable("tableSchemaId") String tableSchemaId,
           @ApiParam(value = "list of records") @RequestBody List<RecordVO> records) {
-    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
-    if ((!DatasetTypeEnum.DESIGN.equals(datasetType)
-            && !DatasetTypeEnum.REFERENCE.equals(datasetType))
-            && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
-            records.get(0).getIdRecordSchema(), EntityTypeEnum.RECORD))) {
+
+    String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+    if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+            && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
       LOG.error("Error inserting record in the datasetId {} and tableSchemaId {}. The table has a fixed number of records",
               datasetId, tableSchemaId);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String
@@ -733,9 +732,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
 
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.insertRecords(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), records);
