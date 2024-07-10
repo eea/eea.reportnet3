@@ -1,5 +1,7 @@
 package org.eea.dataset.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -205,7 +207,7 @@ public class DataCollectionServiceImplTest {
   @Test
   public void getDataCollectionIdByDataflowIdTest() {
     dataCollectionService.getDataCollectionIdByDataflowId(Mockito.anyLong());
-    Mockito.verify(dataCollectionRepository, times(1)).findByDataflowId(Mockito.any());
+    Mockito.verify(dataCollectionRepository, times(1)).findByDataflowId(any());
   }
 
   /**
@@ -217,7 +219,7 @@ public class DataCollectionServiceImplTest {
   public void getDataflowStatusDesignTest() {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DESIGN);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(any())).thenReturn(dataflowVO);
     Assert.assertEquals(TypeStatusEnum.DESIGN, dataCollectionService.getDataflowStatus(1L));
   }
 
@@ -230,7 +232,7 @@ public class DataCollectionServiceImplTest {
   public void getDataflowStatusDraftTest() {
     DataFlowVO dataflowVO = new DataFlowVO();
     dataflowVO.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflowVO);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(any())).thenReturn(dataflowVO);
     Assert.assertEquals(TypeStatusEnum.DRAFT, dataCollectionService.getDataflowStatus(1L));
   }
 
@@ -241,7 +243,7 @@ public class DataCollectionServiceImplTest {
    */
   @Test
   public void getDataflowStatusNullTest() {
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(null);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(any())).thenReturn(null);
     Assert.assertNull(dataCollectionService.getDataflowStatus(1L));
   }
 
@@ -252,7 +254,7 @@ public class DataCollectionServiceImplTest {
    */
   @Test
   public void getDataflowStatusExceptionTest() {
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
+    Mockito.when(dataflowControllerZuul.getMetabaseById(any()))
         .thenThrow(new RuntimeException());
     Assert.assertNull(dataCollectionService.getDataflowStatus(1L));
   }
@@ -264,20 +266,20 @@ public class DataCollectionServiceImplTest {
    */
   @Test
   public void undoDataCollectionCreationTest() throws EEAException {
-    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
-    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.when(lockService.removeLockByCriteria(any())).thenReturn(true);
+    Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(any(),
+        any(), any());
     Mockito.doNothing().when(resourceManagementControllerZuul)
-        .deleteResourceByDatasetId(Mockito.any());
-    Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(Mockito.any());
-    Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        .deleteResourceByDatasetId(any());
+    Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(any());
+    Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(any(),
+        any(), any());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.undoDataCollectionCreation(
         new ArrayList<>(Arrays.asList(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L)), 1L, true);
-    Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(any(),
+        any(), any());
   }
 
   /**
@@ -287,17 +289,17 @@ public class DataCollectionServiceImplTest {
    */
   @Test
   public void undoDataCollectionCreationTestEEAExceptionPath() throws EEAException {
-    Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    Mockito.when(lockService.removeLockByCriteria(any())).thenReturn(true);
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
-        .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(Mockito.any());
-    Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        .releaseNotificableKafkaEvent(any(), any(), any());
+    Mockito.doNothing().when(dataCollectionRepository).deleteDatasetById(any());
+    Mockito.doNothing().when(dataflowControllerZuul).updateDataFlowStatus(any(),
+        any(), any());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.undoDataCollectionCreation(new ArrayList<>(), 1L, false);
-    Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(Mockito.any(),
-        Mockito.any(), Mockito.any());
+    Mockito.verify(dataflowControllerZuul, times(1)).updateDataFlowStatus(any(),
+        any(), any());
   }
 
   /**
@@ -325,29 +327,23 @@ public class DataCollectionServiceImplTest {
     List<DataProviderVO> dataProvidersVO = new ArrayList<>();
     dataProvidersVO.add(dataProvider);
     Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
-        .thenReturn(dataProvidersVO);
+            .thenReturn(dataProvidersVO);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
-        .thenReturn(designs);
+            .thenReturn(designs);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
-        .thenReturn(representatives);
+            .thenReturn(representatives);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
     Mockito.when(connection.createStatement()).thenReturn(statement);
     Mockito.doNothing().when(connection).setAutoCommit(Mockito.anyBoolean());
     Mockito.doNothing().when(statement).addBatch(Mockito.any());
     Mockito.when(statement.executeQuery(Mockito.any())).thenReturn(resultSet);
     Mockito.when(resultSet.next()).thenReturn(true);
-    Mockito.when(statement.executeBatch()).thenReturn(null);
-    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
-    Mockito.doThrow(NullPointerException.class).when(userManagementControllerZuul)
-        .addContributorsToResources(Mockito.any());
-    Mockito.doNothing().when(resourceManagementControllerZuul)
-        .deleteResourceByDatasetId(Mockito.any());
     Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
-        .thenReturn(new ArrayList<>());
+            .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
-        .thenReturn(new DataSetSchemaVO());
+            .thenReturn(new DataSetSchemaVO());
     dataCollectionService.updateDataCollection(1L, false);
     Mockito.verify(connection, times(1)).rollback();
   }
@@ -390,58 +386,62 @@ public class DataCollectionServiceImplTest {
     designsValue.add(designDataset);
     rulesSql.add(ruleVO);
     userRepresentationVOs.add(userRepresentationVO);
-    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(any()))
         .thenReturn(designs);
-    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(any()))
         .thenReturn(representatives);
-    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(any()))
         .thenReturn(dataProviders);
-    Mockito.when(rulesControllerZuul.validateSqlRuleDataCollection(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(true);
+    Mockito.when(rulesControllerZuul.validateSqlRuleDataCollection(any(), any(),
+        any())).thenReturn(true);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
     Mockito.when(connection.createStatement()).thenReturn(statement);
     Mockito.doNothing().when(connection).setAutoCommit(Mockito.anyBoolean());
-    Mockito.doNothing().when(statement).addBatch(Mockito.any());
-    Mockito.when(statement.executeQuery(Mockito.any())).thenReturn(resultSet);
+    Mockito.doNothing().when(statement).addBatch(any());
+    Mockito.when(statement.executeQuery(any())).thenReturn(resultSet);
     Mockito.when(resultSet.next()).thenReturn(true);
     Mockito.when(statement.executeBatch()).thenReturn(null);
-    Mockito.when(rulesControllerZuul.findSqlSentencesByDatasetSchemaId(Mockito.any()))
+    Mockito.when(rulesControllerZuul.findSqlSentencesByDatasetSchemaId(any()))
         .thenReturn(rulesSql);
-    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
+    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(any());
     Mockito.when(userManagementControllerZuul.getUsersByGroup(Mockito.anyString()))
         .thenReturn(userRepresentationVOs);
     Mockito.doNothing().when(userManagementControllerZuul)
-        .addContributorsToResources(Mockito.any());
-    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(designsValue);
-    Mockito.when(resourceManagementControllerZuul.getResourceDetail(Mockito.any(), Mockito.any()))
+        .addContributorsToResources(any());
+    Mockito.when(designDatasetRepository.findByDataflowId(any())).thenReturn(designsValue);
+    Mockito.when(resourceManagementControllerZuul.getResourceDetail(any(), any()))
         .thenReturn(new ResourceInfoVO());
     RulesSchemaVO rulesSchemaVO = new RulesSchemaVO();
     rulesSchemaVO.setRules(Arrays.asList(ruleVO));
-    Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(Mockito.any(), Mockito.any()))
+    Mockito.when(rulesControllerZuul.findRuleSchemaByDatasetId(any(), any()))
         .thenReturn(rulesSchemaVO);
-    Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(any(), any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
-    Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
+    Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(any()))
         .thenReturn(new ArrayList<>());
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    Mockito.when(datasetMetabaseService.getDatasetType(Mockito.any()))
+    Mockito.when(datasetMetabaseService.getDatasetType(any()))
         .thenReturn(DatasetTypeEnum.REPORTING).thenReturn(DatasetTypeEnum.COLLECTION)
         .thenReturn(DatasetTypeEnum.EUDATASET).thenReturn(DatasetTypeEnum.TEST);
     DataSetMetabase datasetmetabase = new DataSetMetabase();
     datasetmetabase.setId(1L);
-    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
-        Mockito.any())).thenReturn(Optional.of(datasetmetabase));
-    Mockito.when(euDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(any(),
+        any())).thenReturn(Optional.of(datasetmetabase));
+    Mockito.when(euDatasetRepository.findFirstByDatasetSchema(any()))
         .thenReturn(Optional.of(new EUDataset()));
-    Mockito.when(testDatasetRepository.findFirstByDatasetSchema(Mockito.any()))
+    Mockito.when(testDatasetRepository.findFirstByDatasetSchema(any()))
         .thenReturn(Optional.of(new TestDataset()));
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
+
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
-    Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(any(), any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
@@ -479,32 +479,32 @@ public class DataCollectionServiceImplTest {
     designsValue.add(designDataset);
     rulesSql.add(ruleVO);
     userRepresentationVOs.add(userRepresentationVO);
-    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(any()))
         .thenReturn(designs);
-    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(any()))
         .thenReturn(representatives);
-    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(any()))
         .thenReturn(dataProviders);
-    Mockito.when(rulesControllerZuul.validateSqlRuleDataCollection(Mockito.any(), Mockito.any(),
-        Mockito.any())).thenReturn(true);
+    Mockito.when(rulesControllerZuul.validateSqlRuleDataCollection(any(), any(),
+        any())).thenReturn(true);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
     Mockito.when(connection.createStatement()).thenReturn(statement);
     Mockito.doNothing().when(connection).setAutoCommit(Mockito.anyBoolean());
-    Mockito.doNothing().when(statement).addBatch(Mockito.any());
-    Mockito.when(statement.executeQuery(Mockito.any())).thenReturn(resultSet);
+    Mockito.doNothing().when(statement).addBatch(any());
+    Mockito.when(statement.executeQuery(any())).thenReturn(resultSet);
     Mockito.when(resultSet.next()).thenReturn(true);
     Mockito.when(statement.executeBatch()).thenReturn(null);
-    Mockito.when(rulesControllerZuul.findSqlSentencesByDatasetSchemaId(Mockito.any()))
+    Mockito.when(rulesControllerZuul.findSqlSentencesByDatasetSchemaId(any()))
         .thenReturn(rulesSql);
-    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
+    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(any());
     Mockito.when(userManagementControllerZuul.getUsersByGroup(Mockito.anyString()))
         .thenReturn(userRepresentationVOs);
     Mockito.doNothing().when(userManagementControllerZuul)
-        .addContributorsToResources(Mockito.any());
-    Mockito.when(designDatasetRepository.findByDataflowId(Mockito.any())).thenReturn(designsValue);
-    Mockito.when(resourceManagementControllerZuul.getResourceDetail(Mockito.any(), Mockito.any()))
+        .addContributorsToResources(any());
+    Mockito.when(designDatasetRepository.findByDataflowId(any())).thenReturn(designsValue);
+    Mockito.when(resourceManagementControllerZuul.getResourceDetail(any(), any()))
         .thenReturn(new ResourceInfoVO());
-    Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.doNothing().when(recordStoreControllerZuul).createSchemas(any(), any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
 
     DataSetSchemaVO schema = new DataSetSchemaVO();
@@ -532,10 +532,13 @@ public class DataCollectionServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
 
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), false, false, false,
         false, true);
-    Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(Mockito.any(), Mockito.any(),
+    Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(any(), any(),
         Mockito.anyBoolean(), Mockito.anyBoolean());
   }
 
@@ -551,17 +554,20 @@ public class DataCollectionServiceImplTest {
     design.setDataSetName("datasetName_");
     design.setDatasetSchema("datasetSchema_");
     designs.add(design);
-    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(any()))
         .thenReturn(designs);
-    Mockito.when(rulesControllerZuul.getAllDisabledRules(Mockito.any(), Mockito.any()))
+    Mockito.when(rulesControllerZuul.getAllDisabledRules(any(), any()))
         .thenReturn(1);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(1)).removeLockByCriteria(any());
   }
 
   @Test
@@ -569,17 +575,21 @@ public class DataCollectionServiceImplTest {
     List<DesignDatasetVO> designs = new ArrayList<>();
     DesignDatasetVO design = new DesignDatasetVO();
     designs.add(design);
-    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(any()))
         .thenReturn(designs);
     DataSetSchemaVO schema = new DataSetSchemaVO();
     schema.setReferenceDataset(false);
+
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
 
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
-    Mockito.verify(lockService, times(1)).removeLockByCriteria(Mockito.any());
+    Mockito.verify(lockService, times(1)).removeLockByCriteria(any());
   }
 
 
@@ -603,20 +613,23 @@ public class DataCollectionServiceImplTest {
     representative.setHasDatasets(false);
     designs.add(design);
     representatives.add(representative);
-    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(any()))
         .thenReturn(designs);
-    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(any()))
         .thenReturn(representatives);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
     Mockito.when(connection.createStatement()).thenReturn(statement);
     Mockito.doThrow(SQLException.class).when(connection).setAutoCommit(Mockito.anyBoolean());
     Mockito.doThrow(EEAException.class).when(kafkaSenderUtils)
-        .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
+        .releaseNotificableKafkaEvent(any(), any(), any());
     Mockito.doNothing().when(connection).rollback();
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
     Mockito.verify(connection, times(1)).rollback();
@@ -641,35 +654,38 @@ public class DataCollectionServiceImplTest {
     representative.setDataProviderId(1L);
     designs.add(design);
     representatives.add(representative);
-    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(any()))
         .thenReturn(designs);
     DataProviderVO dataProvider = new DataProviderVO();
     dataProvider.setId(1L);
     dataProvider.setLabel("label");
     List<DataProviderVO> dataProvidersVO = new ArrayList<>();
     dataProvidersVO.add(dataProvider);
-    Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
+    Mockito.when(representativeControllerZuul.findDataProvidersByIds(any()))
         .thenReturn(dataProvidersVO);
-    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
+    Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(any()))
         .thenReturn(representatives);
     Mockito.when(metabaseDataSource.getConnection()).thenReturn(connection);
     Mockito.when(connection.createStatement()).thenReturn(statement);
     Mockito.doNothing().when(connection).setAutoCommit(Mockito.anyBoolean());
-    Mockito.doNothing().when(statement).addBatch(Mockito.any());
-    Mockito.when(statement.executeQuery(Mockito.any())).thenReturn(resultSet);
+    Mockito.doNothing().when(statement).addBatch(any());
+    Mockito.when(statement.executeQuery(any())).thenReturn(resultSet);
     Mockito.when(resultSet.next()).thenReturn(true);
     Mockito.when(statement.executeBatch()).thenReturn(null);
-    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(Mockito.any());
+    Mockito.doNothing().when(resourceManagementControllerZuul).createResources(any());
     Mockito.doThrow(NullPointerException.class).when(userManagementControllerZuul)
-        .addContributorsToResources(Mockito.any());
+        .addContributorsToResources(any());
     Mockito.doNothing().when(resourceManagementControllerZuul)
-        .deleteResourceByDatasetId(Mockito.any());
-    Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(Mockito.any()))
+        .deleteResourceByDatasetId(any());
+    Mockito.when(datasetSchemaService.getReferencedFieldsBySchema(any()))
         .thenReturn(new ArrayList<>());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
     Mockito.verify(connection, times(1)).rollback();
@@ -689,7 +705,7 @@ public class DataCollectionServiceImplTest {
     referenced.setIdPk(new ObjectId("5ce524fad31fc52540abae73"));
     fkData.setFks(Arrays.asList(referenced));
     dataCollectionService.addForeignRelationsFromNewReportings(Arrays.asList(fkData));
-    Mockito.verify(foreignRelationsRepository, times(1)).saveAll(Mockito.any());
+    Mockito.verify(foreignRelationsRepository, times(1)).saveAll(any());
   }
 
 
@@ -701,13 +717,13 @@ public class DataCollectionServiceImplTest {
     DataFlowVO dataflow2 = new DataFlowVO();
     dataflow2.setStatus(TypeStatusEnum.DRAFT);
     dataflow2.setId(1L);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(dataflow);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(any())).thenReturn(dataflow);
     Assert.assertEquals(dataflow2, dataCollectionService.getDataflowMetabase(1L));
   }
 
   @Test
   public void getDataflowMetabaseExceptionTest() {
-    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.any()))
+    Mockito.when(dataflowControllerZuul.getMetabaseById(any()))
         .thenThrow(new RuntimeException());
     Assert.assertNull(dataCollectionService.getDataflowMetabase(1L));
   }

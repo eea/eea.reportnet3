@@ -1,7 +1,5 @@
 package org.eea.datalake.service.impl;
 
-import mil.nga.sf.geojson.Feature;
-import mil.nga.sf.geojson.FeatureConverter;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.SpatialDataHelper;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -17,6 +15,7 @@ import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
 
 import java.io.IOException;
@@ -61,15 +60,14 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   public String convertToHEX(String value) {
     try {
       Geometry geometry = geoJsonReader.read(value);
-      Feature feature = FeatureConverter.toFeature(value);
-      String srid = feature.getProperties().get("srid").toString();
+      String srid = spatialDataHelper.extractSRID(value);
       if (!srid.isBlank()) {
         geometry.setSRID(Integer.parseInt(srid));
       }
 
       return spatialDataHelper.bytesToHex(wkbWriter.write(geometry));
-    } catch (ParseException e) {
-      LOG.error("Invalid GeoJson!! Tried to convert this String : {} , to binary but failed", value, e);
+    } catch (ParseException | IOException e) {
+      LOG.error("Invalid GeoJson!! Tried to convert this geoJson : {} , to HEX but failed", value, e);
       return "";
     }
   }
@@ -83,7 +81,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
           try {
             fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
           } catch (IOException | ParseException e) {
-            LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
+            LOG.error("Invalid byteArray!! Tried to decode from binary but failed", e);
           }
         });
   }
@@ -98,12 +96,12 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         properties.put("srid", Integer.toString(geometry.getSRID()));
 
         org.wololo.geojson.Geometry geoJsonGeometry = geoJSONWriter.write(geometry);
-        org.wololo.geojson.Feature feature = new org.wololo.geojson.Feature(geoJsonGeometry, properties);
+        Feature feature = new Feature(geoJsonGeometry, properties);
 
         return feature.toString();
       }
     } catch (ParseException e) {
-      LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
+      LOG.error("Invalid byteArray!! Tried to decode from binary but failed", e);
     }
     return "";
   }

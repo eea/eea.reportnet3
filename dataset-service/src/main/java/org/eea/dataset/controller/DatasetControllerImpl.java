@@ -639,7 +639,7 @@ public class DatasetControllerImpl implements DatasetController {
           @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
     try {
       String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-      Long providerId = datasetService.getDataProviderIdById(datasetId);
+
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
       if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId,
@@ -664,7 +664,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
 
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
-
+        Long providerId = datasetService.getDataProviderIdById(datasetId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
           bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, recordId, deleteCascadePK);
