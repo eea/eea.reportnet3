@@ -74,6 +74,14 @@ public enum EventType {
   IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_WrongNumberOfRecords_warning_event", true),
 
+  /** The import with only read only fields error event. */
+  IMPORT_ONLY_READ_ONLY_FIELDS_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_onlyReadOnlyFields_error_event", true),
+
+  /** The import with only read only fields warning event. */
+  IMPORT_ONLY_READ_ONLY_FIELDS_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_onlyReadOnlyFields_warning_event", true),
+
   /** The import reporting failed no headers matching event. */
   IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_no_headers_failed_event", true),

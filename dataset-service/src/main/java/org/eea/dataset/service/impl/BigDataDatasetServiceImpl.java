@@ -414,7 +414,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 fileTreatmentHelper.validateFileType(fileMimeType);
 
                 if (FileTypeEnum.getEnum(fileMimeType.toLowerCase()) == FileTypeEnum.CSV) {
-                    //TODO check read only, prefilled, fixed number of records etc
                     correctFilesForImport.add(file);
                 }
                 else {
@@ -657,6 +656,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.equals(importFileInDremioInfo.getErrorMessage())){
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS, null);
                 eventType = EventType.IMPORT_WRONG_NUM_OF_RECORDS_ERROR_EVENT;
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS, null);
+                eventType = EventType.IMPORT_ONLY_READ_ONLY_FIELDS_ERROR_EVENT;
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -701,6 +703,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if(StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessage())) {
             //send warning
             if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
                 NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
@@ -708,6 +711,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         value, notificationWarning);
             }
             else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY, null);
                 NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
@@ -715,6 +719,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         value, notificationWarning);
             }
             else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA, null);
                 NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
@@ -722,10 +727,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         value, notificationWarning);
             }
             else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS, null);
                 NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS, null);
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_ONLY_READ_ONLY_FIELDS_WARNING_EVENT,
                         value, notificationWarning);
             }
         }
