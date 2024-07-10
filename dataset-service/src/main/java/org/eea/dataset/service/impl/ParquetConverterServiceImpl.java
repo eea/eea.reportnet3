@@ -108,10 +108,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final DatasetMetabaseService datasetMetabaseService;
   private final DatasetSchemaService datasetSchemaService;
   private final SpatialDataHandling spatialDataHandling;
-
-  @Lazy
-  @Autowired
-  private BigDataDatasetService bigDataDatasetService;
+  private final BigDataDatasetService bigDataDatasetService;
 
   private JdbcTemplate dremioJdbcTemplate;
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
@@ -123,7 +120,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      DatasetSchemaService datasetSchemaService,
                                      SpatialDataHandling spatialDataHandling,
                                      @Lazy FileTreatmentHelper fileTreatmentHelper,
-                                     JdbcTemplate dremioJdbcTemplate) {
+                                     JdbcTemplate dremioJdbcTemplate,
+                                     @Lazy BigDataDatasetService bigDataDatasetService) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -134,6 +132,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.spatialDataHandling = spatialDataHandling;
     this.fileTreatmentHelper = fileTreatmentHelper;
     this.dremioJdbcTemplate = dremioJdbcTemplate;
+    this.bigDataDatasetService = bigDataDatasetService;
   }
 
   @Override
