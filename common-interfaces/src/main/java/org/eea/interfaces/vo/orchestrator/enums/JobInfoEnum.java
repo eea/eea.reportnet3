@@ -33,7 +33,12 @@ public enum JobInfoEnum {
 
     WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS("Some imports for fixed number of records tables failed because the number of records provided in the import file was not correct"),
 
-    ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS("Import failed for fixed number of records tables because the number of records provided in the import files were not correct");
+    ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS("Import failed for fixed number of records tables because the number of records provided in the import files were not correct"),
+
+    WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS("Some imports failed because all the fields in the table were read only"),
+
+    ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS("Import failed because all the fields in the tables were read only");
+
 
 
     /** The value. */
