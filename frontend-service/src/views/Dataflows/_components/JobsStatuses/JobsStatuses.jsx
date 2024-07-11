@@ -77,29 +77,55 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
-    console.log('inside use effect');
-    getJobsStatuses();
-  }, [pagination, sort]);
+    console.log('empty list: ' + isEmpty(filterBy));
+    if (!(isEmpty(filterBy) && activeIndex === 1)) getJobsStatuses(activeIndex);
+  }, [filterBy, sort]);
 
-  const getJobsStatuses = async () => {
+  const getJobsStatuses = async index => {
     setLoadingStatus('pending');
-
+    let data;
     try {
-      const data = await JobsStatusesService.getJobsStatuses({
-        pageNum,
-        numberRows,
-        sortOrder: sort.order,
-        sortField: sort.field,
-        jobId: filterBy.jobId,
-        jobType: filterBy.jobType?.join(),
-        dataflowId: filterBy.dataflowId,
-        dataflowName: filterBy.dataflowName,
-        providerId: filterBy.providerId,
-        datasetId: filterBy.datasetId,
-        datasetName: filterBy.datasetName,
-        creatorUsername: !isAdmin ? (isProvider ? userContext.preferredUsername : filterBy.creatorUsername) : undefined,
-        jobStatus: filterBy.jobStatus?.join()
-      });
+      if (index === 0) {
+        data = await JobsStatusesService.getJobsStatuses({
+          pageNum,
+          numberRows,
+          sortOrder: sort.order,
+          sortField: sort.field,
+          jobId: filterBy.jobId,
+          jobType: filterBy.jobType?.join(),
+          dataflowId: filterBy.dataflowId,
+          dataflowName: filterBy.dataflowName,
+          providerId: filterBy.providerId,
+          datasetId: filterBy.datasetId,
+          datasetName: filterBy.datasetName,
+          creatorUsername: !isAdmin
+            ? isProvider
+              ? userContext.preferredUsername
+              : filterBy.creatorUsername
+            : undefined,
+          jobStatus: filterBy.jobStatus?.join()
+        });
+      } else if (!isEmpty(filterBy)) {
+        data = await JobsStatusesService.getJobsHistory({
+          pageNum,
+          numberRows,
+          sortOrder: sort.order,
+          sortField: sort.field,
+          jobId: filterBy.jobId,
+          jobType: filterBy.jobType?.join(),
+          dataflowId: filterBy.dataflowId,
+          dataflowName: filterBy.dataflowName,
+          providerId: filterBy.providerId,
+          datasetId: filterBy.datasetId,
+          datasetName: filterBy.datasetName,
+          creatorUsername: !isAdmin
+            ? isProvider
+              ? userContext.preferredUsername
+              : filterBy.creatorUsername
+            : undefined,
+          jobStatus: filterBy.jobStatus?.join()
+        });
+      }
 
       if (isProvider && !providersTotalRecords) {
         setProvidersTotalRecords(data.filteredRecords);
@@ -112,10 +138,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       }
 
       setTotalRecords(data.totalRecords);
-      setJobsStatusesList(data.jobsList);
+      setJobsStatusesList(index === 0 ? data.jobsList : data.jobHistoryVOList);
       setFilteredRecords(data.filteredRecords);
       setRemainingJobs(data.remainingJobs);
-      setData(data.jobsList);
+      setData(index === 0 ? data.jobsList : data.jobHistoryVOList);
       setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - getJobsStatuses.', error);
@@ -165,7 +191,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setJobsStatusesList([]);
     } else {
       setIsLoading(true);
-      getJobsStatuses();
+      getJobsStatuses(index);
     }
 
     // onChangePagination({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
@@ -542,7 +568,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onRefresh = () => {
     setIsRefreshing(true);
-    getJobsStatuses();
+    getJobsStatuses(activeIndex);
   };
 
   const dialogFooter = (
@@ -574,7 +600,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setLoadingStatus('failed');
     } finally {
       setJobStatus(null);
-      getJobsStatuses();
+      getJobsStatuses(activeIndex);
     }
   };
 

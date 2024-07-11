@@ -66,11 +66,11 @@ export const Filters = ({
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
-  // useEffect(() => {
-  //   setViewData(new Date());
-  //   onResetFilters();
-  //   onReset({ sortByHeader: '', sortByOption: 'idle' });
-  // }, [activeIndex]);
+  useEffect(() => {
+    setViewData(new Date());
+    onResetFilters();
+    onReset({ sortByHeader: '', sortByOption: 'idle' });
+  }, [activeIndex]);
 
   const clearDateInputs = () => {
     [...document.getElementsByClassName('date-filter-input')].forEach(input => (input.value = ''));
