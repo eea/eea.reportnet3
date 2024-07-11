@@ -236,11 +236,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
       s3IcebergTablePathResolver.setIsIcebergTable(true);
       try {
-        updatePrefilledDataBasedOnReadOnlyData(importFileInDremioInfo, csvFile, s3IcebergTablePathResolver, dataSetSchema, datasetType);
+        updatePrefilledDataBasedOnReadOnlyData(importFileInDremioInfo, csvFile, s3IcebergTablePathResolver, dataSetSchema, tableSchemaVO);
       }
       finally {
         //after all updates convert iceberg to parquet
-        // todo using a function to convert hex data to binary
         bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
       }
       return;
@@ -882,7 +881,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   private void updatePrefilledDataBasedOnReadOnlyData(ImportFileInDremioInfo importFileInDremioInfo, File inputFile,
-                                                      S3PathResolver s3IcebergTablePathResolver, DataSetSchema dataSetSchema, DatasetTypeEnum datasetType) throws Exception {
+                                                      S3PathResolver s3IcebergTablePathResolver, DataSetSchema dataSetSchema, TableSchemaVO tableSchemaVO) throws Exception {
 
     String icebergTablePath = s3Service.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
     //parse csv and for each record of the input csv
@@ -924,10 +923,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             //we will not update these values
               continue;
           } else if (csvRecord.isMapped(expectedHeaderName)) {
-            String value = spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
-                    spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName)) : csvRecord.get(expectedHeaderName);
+            String value = csvRecord.get(expectedHeaderName);
             updateQueryBuilder.append(" " + expectedHeaderName + " = '" + value + "' ,");
-
 
           } else {
             String headerWithBom = "\uFEFF" + expectedHeaderName;
@@ -947,6 +944,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         updateQueryBuilder.append(whereStatementBuilder);
+        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
+          updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
+        }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
 
