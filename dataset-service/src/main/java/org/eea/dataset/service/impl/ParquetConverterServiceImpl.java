@@ -223,7 +223,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
     //path in s3 for the folder that contains the stored csv files
     String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
-    datasetType = DatasetTypeEnum.REPORTING;
     if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchemaVO.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchemaVO::getReadOnly)) {
       importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
       return;
