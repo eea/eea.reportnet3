@@ -254,10 +254,12 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   @Override
   public String refactorQuery(String geoJsonValue) {
-    if (!geoJsonValue.isEmpty() && spatialDataHelper.coordinatesAreNotEmpty(geoJsonValue)) {
+    if (!geoJsonValue.isEmpty() ) {
       String escValue = spatialDataHelper.escapeJsonString(geoJsonValue);
-      String hexStr = convertToHEX(escValue);
-      return FROM_XEX + "('" + hexStr + "')";
+      if (spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
+        String hexStr = convertToHEX(escValue);
+        return FROM_XEX + "('" + hexStr + "')";
+      }
     }
     return "''";
   }
