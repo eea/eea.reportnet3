@@ -1096,7 +1096,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             for(int i=0; i< records.get(0).getFields().size(); i++){
                 FieldVO field = records.get(0).getFields().get(i);
-                createIcebergTable.append(", " + field.getName() + " VARCHAR ");
+                if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
+                    createIcebergTable.append(", ").append(field.getName()).append(" VARBINARY ");
+                } else {
+                    createIcebergTable.append(", ").append(field.getName()).append(" VARCHAR ");
+                }
             }
             createIcebergTable.append(" )");
 
@@ -1106,19 +1110,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         for (RecordVO record: records){
             //create update query for the record
-            StringBuilder insertQueryBuilder = new StringBuilder().append("INSERT INTO " + icebergTablePath + " (");
+            StringBuilder insertQueryBuilder = new StringBuilder().append("INSERT INTO ").append(icebergTablePath).append(" (");
             insertQueryBuilder.append(PARQUET_RECORD_ID_COLUMN_HEADER + ", " + PARQUET_PROVIDER_CODE_COLUMN_HEADER);
             String recordId = UUID.randomUUID().toString();
 
-            StringBuilder insertQueryValuesBuilder = new StringBuilder().append(") VALUES ('" +  recordId + "', " + dataProviderCode);
-            for(int i=0; i< record.getFields().size(); i++){
+            StringBuilder insertQueryValuesBuilder = new StringBuilder().append(") VALUES ('").append(recordId).append("', ").append(dataProviderCode);
+            for (int i=0; i< record.getFields().size(); i++) {
                 FieldVO field = record.getFields().get(i);
-                insertQueryBuilder.append(", " + field.getName() + " ");
-                String fieldValue = (field.getValue() != null) ? field.getValue() : "";
-                insertQueryValuesBuilder.append(", '" + fieldValue + "' ");
+                insertQueryBuilder.append(", ").append(field.getName()).append(" ");
+                if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
+                    String fieldValue = (field.getValue() != null) ? field.getValue() : "";
+                    String refactoredValue = spatialDataHandling.refactorQuery(fieldValue);
+                    insertQueryValuesBuilder.append(", ").append(refactoredValue).append(" ");
+                } else {
+                    String fieldValue = (field.getValue() != null) ? field.getValue() : "";
+                    insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
+                }
             }
             insertQueryValuesBuilder.append(" )");
-            String finalInsertQuery = insertQueryBuilder.toString() + insertQueryValuesBuilder.toString();
+            String finalInsertQuery = insertQueryBuilder + insertQueryValuesBuilder.toString();
             String processId = dremioHelperService.executeSqlStatement(finalInsertQuery);
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId, 2000L);
         }

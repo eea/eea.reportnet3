@@ -6,6 +6,8 @@ import org.eea.datalake.service.SpatialDataHelper;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -80,5 +82,13 @@ public class SpatialDataHelperImpl implements SpatialDataHelper {
   public String extractSRID(String geoJson) throws IOException {
     JsonNode SRIDNode = new ObjectMapper().readTree(geoJson).at(SRIDPath);
     return SRIDNode.isTextual() ? SRIDNode.asText() : "";
+  }
+
+  @Override
+  public boolean coordinatesAreNotEmpty(String value) {
+    JSONObject geoJson = new JSONObject(value);
+    JSONObject geometry = geoJson.getJSONObject("geometry");
+    JSONArray coordinates = geometry.getJSONArray("coordinates");
+    return !coordinates.isEmpty();
   }
 }
