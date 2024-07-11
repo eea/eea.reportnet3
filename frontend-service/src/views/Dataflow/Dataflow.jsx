@@ -1172,6 +1172,7 @@ export const Dataflow = () => {
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable,
         dataflowState.showPublicInfo,
+        undefined,
         dataflowState.isAutomaticReportingDeletion
       );
       onLoadReportingDataflow();
