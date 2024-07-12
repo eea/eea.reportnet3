@@ -20,8 +20,6 @@ import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
@@ -352,7 +350,7 @@ public class JobServiceImpl implements JobService {
     @Transactional
     @Override
     public void deleteFinishedJobsBasedOnDuration() {
-        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue())));
+        jobRepository.deleteJobsBasedOnStatusAndDuration(new HashSet<>(Arrays.asList(JobStatusEnum.FINISHED.getValue(), JobStatusEnum.REFUSED.getValue(), JobStatusEnum.FAILED.getValue(), JobStatusEnum.CANCELED.getValue(), JobStatusEnum.CANCELED_BY_ADMIN.getValue())));
     }
 
     @Transactional

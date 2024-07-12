@@ -353,8 +353,8 @@ export const Dataflow = () => {
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
       datasetsInfoBtn: isAdmin || isDataCustodian,
-      editBtn: !isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
-      editBusinessBtn: isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
+      editBtn: !isBusinessDataflow && (isLeadDesigner || isAdmin),
+      editBusinessBtn: isBusinessDataflow && (isLeadDesigner || isAdmin),
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
@@ -1172,6 +1172,7 @@ export const Dataflow = () => {
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable,
         dataflowState.showPublicInfo,
+        undefined,
         dataflowState.isAutomaticReportingDeletion
       );
       onLoadReportingDataflow();
@@ -1718,6 +1719,7 @@ export const Dataflow = () => {
         {dataflowState.isCitizenScienceDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            dataProviderGroup={dataflowState.dataProviderGroup}
             deliveryDate={
               dataflowState.dataCollectionDueDate
                 ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)

@@ -362,6 +362,7 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * Update materialized views of reference datasets in SQL.
+   * Returns the IDs of the datasets that need to update their materialized views.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
@@ -378,7 +379,10 @@ public class ValidationHelper implements DisposableBean {
         referenceDatasetControllerZuul.findReferenceDatasetByDataflowId(dataflowId);
     // remove the reference datasets that aren't open for modifying. We asume that these
     // materialized views are refreshed
-    referenceDatasets.removeIf(r -> !Boolean.TRUE.equals(r.getUpdatable()));
+//    referenceDatasets.removeIf(r -> !Boolean.TRUE.equals(r.getUpdatable()));
+    /* Task 270317: Commented out for a bug that caused materialized views to
+     not be updated on reference design datasets */
+    // TODO: check this function for correctness.
 
     for (Rule rule : rules) {
       String query = rule.getSqlSentence();
