@@ -735,6 +735,9 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS. */
   public static final String ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS = "Import failed because all the fields in the tables were read only";
 
+  /** The Constant ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS. */
+  public static final String ERROR_IMPORT_FAILED_READ_ONLY_TABLES = "Import failed because the tables are read only";
+
   /** The Constant DATAFLOW_ERROR. {@value}. */
   public static final String DATAFLOW_GET_ERROR = "Error getting the dataflows";
 

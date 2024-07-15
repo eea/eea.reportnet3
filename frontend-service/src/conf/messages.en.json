@@ -802,6 +802,8 @@
     "importWrongNumOfRecordsWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have fixed number of records and the files that were provided did not contain the same number of records.",
     "importOnlyReadOnlyFieldsErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have have only read only fields.",
     "importOnlyReadOnlyFieldsWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have only read only fields.",
+    "importReadOnlyTablesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables are read only.",
+    "importReadOnlyTablesWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables are read only.",
     "importOperationManageIntegration": "Import",
     "importPreviousData": "Other custom imports",
     "importPreviousDataConfirm": "Do you want to import using <strong>\"{:importName}\"</strong> integration?",

@@ -56,6 +56,13 @@
           }
         },
         {
+          "key": "IMPORT_READ_ONLY_TABLES_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "UPDATE_AUTOMATIC_REPORTING_DELETION_FAILED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
@@ -1404,6 +1411,20 @@
       "types": [
         {
           "key": "IMPORT_ONLY_READ_ONLY_FIELDS_WARNING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
+      ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [
+        {
+          "key": "IMPORT_READ_ONLY_TABLES_WARNING_EVENT",
           "navigateTo": {
             "section": "DATASET",
             "parameters": ["dataflowId", "datasetId"]
