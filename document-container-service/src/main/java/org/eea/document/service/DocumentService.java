@@ -45,19 +45,6 @@ public interface DocumentService {
   public void cloneAllDocumentsInDataflow(final Long originDataflowId, final Long destinationDataflowId)
           throws EEAException, IOException;
 
-
-  /**
-   * Clone the document to the destination dataflow.
-   *
-   * @param documentId The ID of the document to clone.
-   * @param destinationDataflowId The ID of the dataflow that the document will be assigned to.
-   *
-   * @throws EEAException
-   * @throws IOException
-   */
-  public void cloneDocument(final Long documentId, final Long destinationDataflowId)
-          throws EEAException, IOException;
-
   /**
    * Clone the document to the destination dataflow.
    *

@@ -225,9 +225,8 @@ public class DocumentServiceImpl implements DocumentService {
       // retrieve the file to the controller
       fileResponse = oakRepositoryUtils.getFileContents(session, PATH_DELIMITER + dataFlowId,
           Long.toString(documentId));
-      LOG.info("Fething the file...");
     } catch (IOException | RepositoryException e) {
-      LOG_ERROR.error("Error in getDocument due to", e);
+      LOG.error("Error in getDocument for documentId {} and dataflowId {} due to", documentId, dataFlowId, e);
       if (e.getClass().equals(PathNotFoundException.class)) {
         throw new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND, e);
       }
@@ -256,25 +255,6 @@ public class DocumentServiceImpl implements DocumentService {
       }
     }
   }
-
-
-  /**
-   * Clone the document to the destination dataflow.
-   *
-   * @param documentId The ID of the document to clone.
-   * @param destinationDataflowId The ID of the dataflow that the document will be assigned to.
-   *
-   * @throws EEAException
-   * @throws IOException
-   */
-  public void cloneDocument(final Long documentId, final Long destinationDataflowId)
-          throws EEAException, IOException {
-
-    // Get the original document information.
-    DocumentVO documentVO = dataflowController.getDocumentInfoById(documentId);
-    cloneDocument(documentVO, destinationDataflowId);
-  }
-
 
   /**
    * Clone the document to the destination dataflow.
@@ -320,7 +300,7 @@ public class DocumentServiceImpl implements DocumentService {
                       .fileName(fileName)
                       .error(e.getMessage())
                       .build());
-      LOG_ERROR.error("Error in uploadDocument {} due to exception: {}", fileName, e.getMessage(), e);
+      LOG_ERROR.error("Error in uploadDocument {} for dataflowId {} due to exception: {}", fileName, destinationDataflowId, e.getMessage());
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     }
   }

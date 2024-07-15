@@ -290,8 +290,14 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
       LOG.info("Prefilled data copied during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
 
-      // Copy all the documents from the origin dataflow to the destination.
-      documentControllerZuul.cloneAllDocuments(idDataflowOrigin, idDataflowDestination);
+      try {
+        // Copy all the documents from the origin dataflow to the destination.
+        documentControllerZuul.cloneAllDocuments(idDataflowOrigin, idDataflowDestination);
+        LOG.info("Documents cloned during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
+      }
+      catch(Exception e){
+        LOG.error("Could not clone help documents during the copyDesignDatasets process of dataflowId {} to dataflowId {} Error {}", idDataflowOrigin, idDataflowDestination, e.getMessage());
+      }
 
       // Release the notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
