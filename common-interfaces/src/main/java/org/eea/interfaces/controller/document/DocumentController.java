@@ -162,6 +162,14 @@ public interface DocumentController {
   List<DocumentVO> getAllDocumentsByDataflowLegacy(@RequestParam(name = "providerId",
       required = false) final Long providerId, @PathVariable("dataflowId") Long dataflowId);
 
+
+  @PostMapping(value = "/private/cloneAllDocuments")
+  public void cloneAllDocuments(
+          @RequestParam("originDataflowId") final Long originDataflowId,
+          @RequestParam("destinationDataflowId") final Long destinationDataflowId
+  ) throws Exception;
+
+
   /**
    * Upload schema snapshot document.
    *
