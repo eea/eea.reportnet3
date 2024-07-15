@@ -26,7 +26,7 @@ public class JobHistoryExtendedRepositoryImpl implements JobHistoryExtendedRepos
 
     /* This query counts the rows of job history that is already grouped by job_id at the nested query. Counts how many unique jobs exist inside job_history table */
     private static final String COUNT_UNIQUE_JOBS_FILTERED_PART_1 = "select count(*) from (select count(*) from job_history jh ";
-    private static final String COUNT_UNIQUE_JOBS_FILTERED_PART_2 = " group by jh.job_id)";
+    private static final String COUNT_UNIQUE_JOBS_FILTERED_PART_2 = " group by jh.job_id) as distinct_jobs_count";
 
     /** The entity manager. */
     @PersistenceContext(name = "orchestratorEntityManagerFactory")
