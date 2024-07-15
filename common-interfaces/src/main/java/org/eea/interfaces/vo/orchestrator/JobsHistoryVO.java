@@ -25,6 +25,6 @@ public class JobsHistoryVO {
     /** The filtered records. */
     private Long filteredRecords;
 
-    /** The remaining jobs. */
-    private Long remainingJobs;
+    /** The total jobs inside job history filtered. */
+    private Long filteredJobs;
 }

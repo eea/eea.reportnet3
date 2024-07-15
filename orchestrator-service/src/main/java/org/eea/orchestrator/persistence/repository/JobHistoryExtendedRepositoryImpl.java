@@ -24,6 +24,9 @@ public class JobHistoryExtendedRepositoryImpl implements JobHistoryExtendedRepos
 
     private static final String COUNT_JOB_HISTORY = "select count(*) from job_history";
 
+    /* This query counts the rows of job history that is already grouped by job_id at the nested query. Counts how many unique jobs exist inside job_history table */
+    private static final String COUNT_UNIQUE_JOBS_FILTERED = "select count(*) from (select count(*) from job_history jh group by jh.job_id)";
+
     /** The entity manager. */
     @PersistenceContext(name = "orchestratorEntityManagerFactory")
     private EntityManager entityManager;
@@ -56,6 +59,17 @@ public class JobHistoryExtendedRepositoryImpl implements JobHistoryExtendedRepos
     public Long countJobHistoryPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
         StringBuilder stringQuery = new StringBuilder();
         Query query = constructQuery(asc, sortedColumn, stringQuery, true, null, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
+
+        return Long.valueOf(query.getSingleResult().toString());
+    }
+
+    @Override
+    public Long countFilteredJobs(Long jobId, String jobType, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatus) {
+        StringBuilder stringQuery = new StringBuilder();
+        stringQuery.append(COUNT_JOB_HISTORY);
+        addFilters( stringQuery, jobId, jobType, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatus);
+        Query query = entityManager.createNativeQuery(COUNT_UNIQUE_JOBS_FILTERED);
+        LOG.info(query.toString());
 
         return Long.valueOf(query.getSingleResult().toString());
     }

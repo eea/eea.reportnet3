@@ -57,7 +57,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
         JobsHistoryVO jobsHistoryVO = new JobsHistoryVO();
         jobsHistoryVO.setTotalRecords(jobHistoryRepository.count());
         jobsHistoryVO.setFilteredRecords(jobHistoryRepository.countJobHistoryPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
-        jobsHistoryVO.setRemainingJobs(jobHistoryRepository.countJobHistoryPaginated(asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, remainingJobsStatusFilter));
+        jobsHistoryVO.setFilteredJobs(jobHistoryRepository.countFilteredJobs( jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses));
         jobsHistoryVO.setJobHistoryVOList(jobHistoryVOList);
 
         return jobsHistoryVO;
