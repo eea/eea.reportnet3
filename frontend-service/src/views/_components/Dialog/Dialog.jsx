@@ -22,7 +22,7 @@ export const Dialog = ({
   focusOnShow = true,
   footer,
   header,
-  isJobsMonitoringDialog,
+  isJobsStatusesDialog,
   onHide,
   style,
   tabChange,
@@ -106,7 +106,7 @@ export const Dialog = ({
         onHide={onHide}
         style={style ? { ...style, ...dialogStyle } : { ...dialogStyle, width: '50vw' }}
         visible={visible}>
-        {isJobsMonitoringDialog && (
+        {isJobsStatusesDialog && (
           <div className={styles.tabMenu}>
             <TabMenu
               activeIndex={activeIndex}

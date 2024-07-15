@@ -77,18 +77,17 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const { firstRow, numberRows, pageNum } = pagination;
 
   useEffect(() => {
-    console.log('empty list: ' + isEmpty(filterBy));
-    if (!(isEmpty(filterBy) && activeIndex === 1)) getJobsStatuses(activeIndex);
+    getJobsStatuses();
   }, [filterBy, sort]);
 
-  const getJobsStatuses = async index => {
+  const getJobsStatuses = async (index, page, rows) => {
     setLoadingStatus('pending');
     let data;
     try {
-      if (index === 0) {
+      if (index !== undefined ? index === 0 : activeIndex === 0) {
         data = await JobsStatusesService.getJobsStatuses({
-          pageNum,
-          numberRows,
+          pageNum: page !== undefined ? page : pageNum,
+          numberRows: rows !== undefined ? rows : numberRows,
           sortOrder: sort.order,
           sortField: sort.field,
           jobId: filterBy.jobId,
@@ -105,10 +104,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
             : undefined,
           jobStatus: filterBy.jobStatus?.join()
         });
+        setData(data.jobsList);
+        setJobsStatusesList(data.jobsList);
       } else if (!isEmpty(filterBy)) {
         data = await JobsStatusesService.getJobsHistory({
-          pageNum,
-          numberRows,
+          pageNum: page !== undefined ? page : pageNum,
+          numberRows: rows !== undefined ? rows : numberRows,
           sortOrder: sort.order,
           sortField: sort.field,
           jobId: filterBy.jobId,
@@ -125,23 +126,29 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
             : undefined,
           jobStatus: filterBy.jobStatus?.join()
         });
-      }
-
-      if (isProvider && !providersTotalRecords) {
-        setProvidersTotalRecords(data.filteredRecords);
-      }
-
-      if (isProvider && Object.keys(filterBy).length === 1) {
-        setIsFiltered(FiltersUtils.getIsFiltered({}));
+        setData(data.jobHistoryVOList);
+        setJobsStatusesList(data.jobHistoryVOList);
       } else {
-        setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
+        setIsFiltered(false);
+        setJobsStatusesList([]);
       }
 
-      setTotalRecords(data.totalRecords);
-      setJobsStatusesList(index === 0 ? data.jobsList : data.jobHistoryVOList);
-      setFilteredRecords(data.filteredRecords);
-      setRemainingJobs(data.remainingJobs);
-      setData(index === 0 ? data.jobsList : data.jobHistoryVOList);
+      if ((index !== undefined ? index === 0 : activeIndex === 0) || !isEmpty(filterBy)) {
+        if (isProvider && !providersTotalRecords) {
+          setProvidersTotalRecords(data.filteredRecords);
+        }
+
+        if (isProvider && Object.keys(filterBy).length === 1) {
+          setIsFiltered(FiltersUtils.getIsFiltered({}));
+        } else {
+          setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
+        }
+
+        setFilteredRecords(data.filteredRecords);
+        setRemainingJobs(data.remainingJobs);
+        setTotalRecords(data.totalRecords);
+      }
+
       setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - getJobsStatuses.', error);
@@ -184,18 +191,17 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     { className: styles.flow_tab, id: 'history', label: resourcesContext.messages['history'] }
   ];
 
-  const onChangeTab = (index, value) => {
+  const onChangeTab = index => {
     setActiveIndex(index);
     if (index === 1) {
       setIsFiltered(false);
       setJobsStatusesList([]);
     } else {
-      setIsLoading(true);
-      getJobsStatuses(index);
+      if (isEmpty(jobsStatuses) && isEmpty(filterBy)) {
+        setIsLoading(true);
+        getJobsStatuses(index);
+      }
     }
-
-    // onChangePagination({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
-    // setGoToPage(1);
   };
 
   const onSort = event => setSort({ field: event.sortField, order: event.sortOrder });
@@ -475,7 +481,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const getJobIdTemplate = job => <p>{job.id}</p>;
+  const getJobIdTemplate = job => <p>{activeIndex === 0 ? job.id : job.jobId}</p>;
 
   const getFmeJobIdTemplate = job => (
     <a
@@ -568,14 +574,14 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onRefresh = () => {
     setIsRefreshing(true);
-    getJobsStatuses(activeIndex);
+    getJobsStatuses();
   };
 
   const dialogFooter = (
     <div className={styles.footer}>
       <Button
         className="p-button-secondary"
-        disabled={loadingStatus === 'pending'}
+        disabled={loadingStatus === 'pending' || isEmpty(jobsStatuses)}
         icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['refresh']}
         onClick={onRefresh}
@@ -600,7 +606,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       setLoadingStatus('failed');
     } finally {
       setJobStatus(null);
-      getJobsStatuses(activeIndex);
+      getJobsStatuses();
     }
   };
 
@@ -618,10 +624,18 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <Filters
       activeIndex={activeIndex}
       className="lineItems"
+      emptyFilters={isEmpty(filterBy)}
+      isJobsStatuses={true}
       isLoading={loadingStatus === 'pending'}
       isProvider={isProvider}
       onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-      onReset={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onReset={() => {
+        setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 });
+        if (activeIndex === 1) {
+          setIsFiltered(false);
+          setJobsStatusesList([]);
+        }
+      }}
       options={filterOptions}
       providerUsername={userContext.preferredUsername}
       recoilId="jobsStatuses"
@@ -667,13 +681,14 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           hasDefaultCurrentPage={true}
           lazy={true}
           loading={loadingStatus === 'pending' && isNil(jobStatus)}
-          onPage={event =>
+          onPage={event => {
             setPagination({
               firstRow: event.first,
               numberRows: event.rows,
               pageNum: event.page
-            })
-          }
+            });
+            getJobsStatuses(activeIndex, event.page, event.rows);
+          }}
           onRowExpand={e => {
             const historyData = jobStatusHistory[e.data.id] ?? [];
 
@@ -730,7 +745,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className="responsiveBigDialog"
         footer={dialogFooter}
         header={resourcesContext.messages['jobsMonitoring']}
-        isJobsMonitoringDialog={true}
+        isJobsStatusesDialog={true}
         modal={true}
         onHide={onCloseDialog}
         tabChange={onChangeTab}

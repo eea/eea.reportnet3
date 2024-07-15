@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useRef } from 'react';
 import { noWait, useRecoilCallback } from 'recoil';
 
 import isNil from 'lodash/isNil';
@@ -49,6 +49,7 @@ const components = {
 export const Filters = ({
   activeIndex,
   className,
+  isJobsStatuses = false,
   isLoading,
   isProvider,
   isStrictModeVisible,
@@ -66,10 +67,17 @@ export const Filters = ({
 
   const hasCustomSort = !isNil(onFilter) || !isNil(onSort);
 
+  const hasFiltersBeenRendered = useRef(false);
+
   useEffect(() => {
-    setViewData(new Date());
-    onResetFilters();
-    onReset({ sortByHeader: '', sortByOption: 'idle' });
+    if (isJobsStatuses) {
+      if (hasFiltersBeenRendered.current) {
+        setViewData(new Date());
+        onResetFilters();
+        onReset({ sortByHeader: '', sortByOption: 'idle' });
+      }
+      hasFiltersBeenRendered.current = true;
+    }
   }, [activeIndex]);
 
   const clearDateInputs = () => {
