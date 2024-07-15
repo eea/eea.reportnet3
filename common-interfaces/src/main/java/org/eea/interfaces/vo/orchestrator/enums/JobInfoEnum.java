@@ -37,7 +37,11 @@ public enum JobInfoEnum {
 
     WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS("Some imports failed because all the fields in the table were read only"),
 
-    ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS("Import failed because all the fields in the tables were read only");
+    ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS("Import failed because all the fields in the tables were read only"),
+
+    WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES("Some imports failed because some tables are read only"),
+
+    ERROR_IMPORT_FAILED_READ_ONLY_TABLES("Import failed because the tables are read only");
 
 
 

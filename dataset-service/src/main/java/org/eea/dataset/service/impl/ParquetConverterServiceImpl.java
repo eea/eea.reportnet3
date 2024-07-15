@@ -142,6 +142,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     int numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace = 0;
     int numberOfFailedImportsForWrongNumberOfRecords = 0;
     int numberOfFailedImportsForOnlyReadOnlyFields = 0;
+    int numberOfFailedImportsForReadOnlyTables = 0;
     for (File csvFile : csvFiles) {
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
         tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
@@ -161,6 +162,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
           numberOfFailedImportsForOnlyReadOnlyFields++;
+        }
+        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
+          numberOfFailedImportsForReadOnlyTables++;
         }
       }
     }
@@ -206,6 +210,16 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
       }
     }
+
+    if (numberOfFailedImportsForReadOnlyTables != 0) {
+      if (numberOfFailedImportsForReadOnlyTables == csvFiles.size()) {
+        importFileInDremioInfo.setWarningMessage(null);
+        importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES);
+        throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES);
+      } else {
+        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
+      }
+    }
   }
 
   private void convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo,
@@ -225,6 +239,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
     if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchemaVO.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchemaVO::getReadOnly)) {
       importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
+      return;
+    }
+
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) {
+      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
       return;
     }
 

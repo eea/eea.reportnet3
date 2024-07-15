@@ -659,6 +659,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.equals(importFileInDremioInfo.getErrorMessage())){
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS, null);
                 eventType = EventType.IMPORT_ONLY_READ_ONLY_FIELDS_ERROR_EVENT;
+            } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLES, null);
+                eventType = EventType.IMPORT_READ_ONLY_TABLES_ERROR_EVENT;
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -740,6 +743,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_ONLY_READ_ONLY_FIELDS_WARNING_EVENT,
+                        value, notificationWarning);
+            }
+            else if(importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES, null);
+                NotificationVO notificationWarning = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_READ_ONLY_TABLES_WARNING_EVENT,
                         value, notificationWarning);
             }
         }
