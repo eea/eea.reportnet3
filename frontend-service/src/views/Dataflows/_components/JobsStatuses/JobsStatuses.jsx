@@ -53,6 +53,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
   const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
 
+  const [activeIndex, setActiveIndex] = useState(0);
   const [expandedRows, setExpandedRows] = useState(null);
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
@@ -77,43 +78,77 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   useEffect(() => {
     getJobsStatuses();
-  }, [pagination, sort]);
+  }, [filterBy, sort]);
 
-  const getJobsStatuses = async () => {
+  const getJobsStatuses = async (index, page, rows) => {
     setLoadingStatus('pending');
-
+    let data;
     try {
-      const data = await JobsStatusesService.getJobsStatuses({
-        pageNum,
-        numberRows,
-        sortOrder: sort.order,
-        sortField: sort.field,
-        jobId: filterBy.jobId,
-        jobType: filterBy.jobType?.join(),
-        dataflowId: filterBy.dataflowId,
-        dataflowName: filterBy.dataflowName,
-        providerId: filterBy.providerId,
-        datasetId: filterBy.datasetId,
-        datasetName: filterBy.datasetName,
-        creatorUsername: !isAdmin ? (isProvider ? userContext.preferredUsername : filterBy.creatorUsername) : undefined,
-        jobStatus: filterBy.jobStatus?.join()
-      });
-
-      if (isProvider && !providersTotalRecords) {
-        setProvidersTotalRecords(data.filteredRecords);
-      }
-
-      if (isProvider && Object.keys(filterBy).length === 1) {
-        setIsFiltered(FiltersUtils.getIsFiltered({}));
+      if (index !== undefined ? index === 0 : activeIndex === 0) {
+        data = await JobsStatusesService.getJobsStatuses({
+          pageNum: page !== undefined ? page : pageNum,
+          numberRows: rows !== undefined ? rows : numberRows,
+          sortOrder: sort.order,
+          sortField: sort.field,
+          jobId: filterBy.jobId,
+          jobType: filterBy.jobType?.join(),
+          dataflowId: filterBy.dataflowId,
+          dataflowName: filterBy.dataflowName,
+          providerId: filterBy.providerId,
+          datasetId: filterBy.datasetId,
+          datasetName: filterBy.datasetName,
+          creatorUsername: !isAdmin
+            ? isProvider
+              ? userContext.preferredUsername
+              : filterBy.creatorUsername
+            : undefined,
+          jobStatus: filterBy.jobStatus?.join()
+        });
+        setData(data.jobsList);
+        setJobsStatusesList(data.jobsList);
+      } else if (!isEmpty(filterBy)) {
+        data = await JobsStatusesService.getJobsHistory({
+          pageNum: page !== undefined ? page : pageNum,
+          numberRows: rows !== undefined ? rows : numberRows,
+          sortOrder: sort.order,
+          sortField: sort.field,
+          jobId: filterBy.jobId,
+          jobType: filterBy.jobType?.join(),
+          dataflowId: filterBy.dataflowId,
+          dataflowName: filterBy.dataflowName,
+          providerId: filterBy.providerId,
+          datasetId: filterBy.datasetId,
+          datasetName: filterBy.datasetName,
+          creatorUsername: !isAdmin
+            ? isProvider
+              ? userContext.preferredUsername
+              : filterBy.creatorUsername
+            : undefined,
+          jobStatus: filterBy.jobStatus?.join()
+        });
+        setData(data.jobHistoryVOList);
+        setJobsStatusesList(data.jobHistoryVOList);
       } else {
-        setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
+        setIsFiltered(false);
+        setJobsStatusesList([]);
       }
 
-      setTotalRecords(data.totalRecords);
-      setJobsStatusesList(data.jobsList);
-      setFilteredRecords(data.filteredRecords);
-      setRemainingJobs(data.remainingJobs);
-      setData(data.jobsList);
+      if ((index !== undefined ? index === 0 : activeIndex === 0) || !isEmpty(filterBy)) {
+        if (isProvider && !providersTotalRecords) {
+          setProvidersTotalRecords(data.filteredRecords);
+        }
+
+        if (isProvider && Object.keys(filterBy).length === 1) {
+          setIsFiltered(FiltersUtils.getIsFiltered({}));
+        } else {
+          setIsFiltered(FiltersUtils.getIsFiltered(filterBy));
+        }
+
+        setFilteredRecords(data.filteredRecords);
+        setRemainingJobs(data.remainingJobs);
+        setTotalRecords(data.totalRecords);
+      }
+
       setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - getJobsStatuses.', error);
@@ -144,6 +179,28 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
+    }
+  };
+
+  const tabMenuItems = [
+    {
+      className: styles.flow_tab,
+      id: 'monitoring',
+      label: resourcesContext.messages['monitoring']
+    },
+    { className: styles.flow_tab, id: 'history', label: resourcesContext.messages['history'] }
+  ];
+
+  const onChangeTab = index => {
+    setActiveIndex(index);
+    if (index === 1) {
+      setIsFiltered(false);
+      setJobsStatusesList([]);
+    } else {
+      if (isEmpty(jobsStatuses) && isEmpty(filterBy)) {
+        setIsLoading(true);
+        getJobsStatuses(index);
+      }
     }
   };
 
@@ -202,7 +259,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         {
           type: resourcesContext.messages[config.jobType.VALIDATION.label].toUpperCase(),
           value: config.jobType.VALIDATION.key
-        },
+        }
       ],
       template: 'jobType',
       type: 'MULTI_SELECT'
@@ -424,7 +481,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     </div>
   );
 
-  const getJobIdTemplate = job => <p>{job.id}</p>;
+  const getJobIdTemplate = job => <p>{activeIndex === 0 ? job.id : job.jobId}</p>;
 
   const getFmeJobIdTemplate = job => (
     <a
@@ -524,7 +581,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.footer}>
       <Button
         className="p-button-secondary"
-        disabled={loadingStatus === 'pending'}
+        disabled={loadingStatus === 'pending' || isEmpty(jobsStatuses)}
         icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['refresh']}
         onClick={onRefresh}
@@ -565,11 +622,20 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const renderFilters = () => (
     <Filters
+      activeIndex={activeIndex}
       className="lineItems"
+      emptyFilters={isEmpty(filterBy)}
+      isJobsStatuses={true}
       isLoading={loadingStatus === 'pending'}
       isProvider={isProvider}
       onFilter={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
-      onReset={() => setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 })}
+      onReset={() => {
+        setPagination({ firstRow: 0, numberRows: pagination.numberRows, pageNum: 0 });
+        if (activeIndex === 1) {
+          setIsFiltered(false);
+          setJobsStatusesList([]);
+        }
+      }}
       options={filterOptions}
       providerUsername={userContext.preferredUsername}
       recoilId="jobsStatuses"
@@ -585,7 +651,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       );
     }
 
-    if (isFiltered && isEmpty(jobsStatuses)) {
+    if ((isFiltered || activeIndex) && isEmpty(jobsStatuses)) {
       return (
         <div className={styles.dialogContent}>
           {renderFilters()}
@@ -615,13 +681,14 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           hasDefaultCurrentPage={true}
           lazy={true}
           loading={loadingStatus === 'pending' && isNil(jobStatus)}
-          onPage={event =>
+          onPage={event => {
             setPagination({
               firstRow: event.first,
               numberRows: event.rows,
               pageNum: event.page
-            })
-          }
+            });
+            getJobsStatuses(activeIndex, event.page, event.rows);
+          }}
           onRowExpand={e => {
             const historyData = jobStatusHistory[e.data.id] ?? [];
 
@@ -673,12 +740,16 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   return (
     <Fragment>
       <Dialog
+        activeIndex={activeIndex}
         blockScroll={false}
         className="responsiveBigDialog"
         footer={dialogFooter}
         header={resourcesContext.messages['jobsMonitoring']}
+        isJobsStatusesDialog={true}
         modal={true}
         onHide={onCloseDialog}
+        tabChange={onChangeTab}
+        tabMenuItems={tabMenuItems}
         visible={isDialogVisible}>
         {renderDialogContent()}
       </Dialog>

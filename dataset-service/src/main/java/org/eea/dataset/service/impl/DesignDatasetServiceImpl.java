@@ -25,6 +25,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
+import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -116,6 +117,10 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
   /** The contributor controller zuul. */
   @Autowired
   private ContributorControllerZuul contributorControllerZuul;
+
+  /** The dataflow controller zuul. */
+  @Autowired
+  private DocumentControllerZuul documentControllerZuul;
 
   /** The webform mapper. */
   @Autowired
@@ -284,6 +289,15 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       // Copy the data inside the design datasets, but only the tables that are prefilled
       datasetService.copyData(dictionaryOriginTargetDatasetsId, dictionaryOriginTargetObjectId);
       LOG.info("Prefilled data copied during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
+
+      try {
+        // Copy all the documents from the origin dataflow to the destination.
+        documentControllerZuul.cloneAllDocuments(idDataflowOrigin, idDataflowDestination);
+        LOG.info("Documents cloned during the copyDesignDatasets process of dataflowId {} to dataflowId {} ", idDataflowOrigin, idDataflowDestination);
+      }
+      catch(Exception e){
+        LOG.error("Could not clone help documents during the copyDesignDatasets process of dataflowId {} to dataflowId {} Error {}", idDataflowOrigin, idDataflowDestination, e.getMessage());
+      }
 
       // Release the notification
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_COMPLETED_EVENT,
