@@ -10,8 +10,6 @@ export const PaginatorRecordsCount = ({
   isFiltered,
   nameRecords = 'records'
 }) => {
-  console.log('filteredJobsLength: ' + filteredJobsLength);
-  console.log('remainingJobsLength: ' + remainingJobsLength);
   const resourcesContext = useContext(ResourcesContext);
 
   const getFilteredJobs = () => {
