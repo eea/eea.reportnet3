@@ -76,7 +76,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: 10, pageNum: 0 });
   const [providersTotalRecords, setProvidersTotalRecords] = useState(0);
   const [remainingJobs, setRemainingJobs] = useState(0);
-  const [sort, setSort] = useState({ field: 'dateAdded', order: -1 });
+  const [sort, setSort] = useState({ field: 'dateStatusChanged', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
 
   const { getDateTimeFormatByUserPreferences, getDateDifferenceInMinutes } = useDateTimeFormatByUserPreferences();
@@ -202,6 +202,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onChangeTab = index => {
     setActiveIndex(index);
+    setRemainingJobs(0);
+    setFilteredJobs(0);
     if (index === 1) {
       setIsFiltered(false);
       setJobsStatusesList([]);
