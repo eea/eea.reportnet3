@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.eea.utils.LiteralConstants.*;
@@ -392,16 +393,23 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             int parameterLength = method.getParameters().length;
             switch (parameterLength) {
                 case 1:
-                    isValid = (boolean) method.invoke(object, rs.getString(fieldName));  //DremioNonSQLValidationUtils methods
+                    isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName));  //DremioNonSQLValidationUtils methods
                     break;
                 case 2:
-                    isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1));  //ValidationDroolsUtils methods
+                    isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1));  //ValidationDroolsUtils methods
                     break;
                 case 3:
-                    isValid = (boolean) method.invoke(object, rs.getString(fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method
+                    isValid = (boolean) method.invoke(object, getConvertedString(rs, fieldName), parameters.get(1), Boolean.parseBoolean(parameters.get(2)));  //ValidationDroolsUtils codelistValidate method
                     break;
             }
         }
         return isValid;
+    }
+
+    private String getConvertedString(SqlRowSet rs, String fieldName) {
+        if (rs.getObject(fieldName) instanceof byte[]) {
+            return new String((byte[]) rs.getObject(fieldName), StandardCharsets.UTF_8);
+        }
+            return rs.getString(fieldName);
     }
 }

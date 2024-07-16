@@ -405,7 +405,6 @@ public class AutomaticRules {
    *
    * @param datasetId the dataset id
    * @param document the document
-   * @param typeData the type data
    * @param referenceId the reference id
    * @param typeEntityEnum the type entity enum
    * @param nameRule the name rule
@@ -415,7 +414,7 @@ public class AutomaticRules {
    * @return the rule
    */
   public static Rule createGeometryAutomaticRuleCheckGeometries(Long datasetId, Document document,
-      DataType typeData, String referenceId, EntityTypeEnum typeEntityEnum, String nameRule,
+      String referenceId, EntityTypeEnum typeEntityEnum, String nameRule,
       String shortCode, AutomaticRuleTypeEnum automaticType, String description, boolean isBigData, String tableName) {
     ObjectId ruleId = new ObjectId();
 
@@ -431,7 +430,7 @@ public class AutomaticRules {
     if (isBigData) {
       sql = "select record_id, ST_isValidReason(%s) as reason" +
           "  from %s" +
-          "  where ST_isValid(%s) = false";
+          "  where LENGTH(%s) > 0 and ST_isValid(%s) = false";
       sqlResult = String.format(sql, fieldName, tableName, fieldName);
     } else {
       sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","

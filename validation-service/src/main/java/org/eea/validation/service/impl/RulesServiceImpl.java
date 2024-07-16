@@ -797,7 +797,7 @@ public class RulesServiceImpl implements RulesService {
 
             // Validate Geometry
             ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckGeometries(datasetId,
-                    document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
+                    document, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
                     "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, isBigDataflow, key));
             // ST_Transform
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
@@ -1456,7 +1456,7 @@ public class RulesServiceImpl implements RulesService {
             String newSqlSentence = rule.getSqlSentence();
             newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
                     DATASET + newDatasetId.toString());
-            rule.setSqlSentence(newSqlSentence);
+            rule.setSqlSentence(newSqlSentence);//
           }
 
         });
@@ -1910,7 +1910,7 @@ public class RulesServiceImpl implements RulesService {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
         String newSqlSentence = rule.getSqlSentence();
         newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
-        rule.setSqlSentence(newSqlSentence);//
+        rule.setSqlSentence(newSqlSentence);
       });
     }
 
