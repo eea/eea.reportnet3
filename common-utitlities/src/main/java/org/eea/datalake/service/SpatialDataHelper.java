@@ -14,4 +14,5 @@ public interface SpatialDataHelper {
   List<FieldSchemaVO> getFieldSchemas(TableSchemaVO tableSchemaVO);
   List<DataType> getGeoJsonEnums();
   String extractSRID(String value) throws IOException;
+  boolean coordinatesAreNotEmpty(String value);
 }

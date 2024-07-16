@@ -76,7 +76,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   public void decodeSpatialData(List<RecordVO> recordVOS) {
     recordVOS.stream()
         .flatMap(recordVO -> recordVO.getFields().stream())
-        .filter(fieldVO -> fieldVO.getByteArrayValue() != null)
+        .filter(fieldVO -> fieldVO.getByteArrayValue() != null && fieldVO.getByteArrayValue().length > 0)
         .forEach(fieldVO -> {
           try {
             fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
@@ -240,13 +240,28 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       Optional<String> header = getHeaderType(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
         String escValue = spatialDataHelper.escapeJsonString(value);
-        String binaryStr = convertToHEX(escValue);
-        String hexBinaryStr = FROM_XEX + "('" + binaryStr + "')";
-        int valueStart = matcher.start(3);
-        int valueEnd = matcher.end(3);
-        resultQuery.replace(valueStart, valueEnd, hexBinaryStr);
+        if (spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
+          String hexStr = convertToHEX(escValue);
+          String binaryStr = FROM_XEX + "('" + hexStr + "')";
+          int valueStart = matcher.start(3);
+          int valueEnd = matcher.end(3);
+          resultQuery.replace(valueStart, valueEnd, binaryStr);
+        }
       }
     }
     return resultQuery;
   }
+
+  @Override
+  public String refactorQuery(String geoJsonValue) {
+    if (!geoJsonValue.isEmpty() ) {
+      String escValue = spatialDataHelper.escapeJsonString(geoJsonValue);
+      if (spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
+        String hexStr = convertToHEX(escValue);
+        return FROM_XEX + "('" + hexStr + "')";
+      }
+    }
+    return "''";
+  }
+
 }
