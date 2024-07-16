@@ -144,6 +144,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     int numberOfFailedImportsForOnlyReadOnlyFields = 0;
     int numberOfFailedImportsForReadOnlyTables = 0;
     for (File csvFile : csvFiles) {
+      //initialize warning message
+      importFileInDremioInfo.setWarningMessage(null);
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
         tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
       } else {
