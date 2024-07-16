@@ -27,6 +27,12 @@ export const DatasetService = {
   convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
     await DatasetRepository.convertParquetToIceberg({ datasetId, dataflowId, providerId, tableSchemaId }),
 
+  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) =>{
+    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId, tableSchemaIds })},
+
+  convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) =>
+    await DatasetRepository.convertIcebergsToParquets({ datasetId, dataflowId, providerId, tableSchemaIds }),
+
   createRecordDesign: async (datasetId, datasetTableRecordField) => {
     const datasetTableFieldDesign = new DatasetTableField({});
     datasetTableFieldDesign.codelistItems = datasetTableRecordField.codelistItems;
@@ -176,10 +182,10 @@ export const DatasetService = {
       allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO.data));
       tableStatisticValues.push([
         datasetTableDTO.totalRecords -
-          (datasetTableDTO.totalRecordsWithBlockers +
-            datasetTableDTO.totalRecordsWithErrors +
-            datasetTableDTO.totalRecordsWithWarnings +
-            datasetTableDTO.totalRecordsWithInfos),
+        (datasetTableDTO.totalRecordsWithBlockers +
+          datasetTableDTO.totalRecordsWithErrors +
+          datasetTableDTO.totalRecordsWithWarnings +
+          datasetTableDTO.totalRecordsWithInfos),
         datasetTableDTO.totalRecordsWithInfos,
         datasetTableDTO.totalRecordsWithWarnings,
         datasetTableDTO.totalRecordsWithErrors,
@@ -466,42 +472,42 @@ export const DatasetService = {
     const tables = datasetSchemaDTO.data.tableSchemas.map(datasetTableDTO => {
       const records = !isNull(datasetTableDTO.recordSchema)
         ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
-            const fields = !isNull(dataTableRecordDTO.fieldSchema)
-              ? dataTableRecordDTO.fieldSchema.map(
-                  dataTableFieldDTO =>
-                    new DatasetTableField({
-                      codelistItems: dataTableFieldDTO.codelistItems,
-                      description: dataTableFieldDTO.description,
-                      fieldId: dataTableFieldDTO.id,
-                      maxSize: dataTableFieldDTO.maxSize,
-                      pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
-                      pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
-                        ? dataTableFieldDTO.pkHasMultipleValues
-                        : false,
-                      ignoreCaseInLinks: !isNull(dataTableFieldDTO.ignoreCaseInLinks)
-                        ? dataTableFieldDTO.ignoreCaseInLinks
-                        : false,
-                      pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
-                      pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
-                      name: dataTableFieldDTO.name,
-                      readOnly: dataTableFieldDTO.readOnly,
-                      recordId: dataTableFieldDTO.idRecord,
-                      referencedField: dataTableFieldDTO.referencedField,
-                      required: dataTableFieldDTO.required,
-                      type: dataTableFieldDTO.type,
-                      validExtensions: !isNull(dataTableFieldDTO.validExtensions)
-                        ? dataTableFieldDTO.validExtensions
-                        : []
-                    })
-                )
-              : null;
+          const fields = !isNull(dataTableRecordDTO.fieldSchema)
+            ? dataTableRecordDTO.fieldSchema.map(
+              dataTableFieldDTO =>
+                new DatasetTableField({
+                  codelistItems: dataTableFieldDTO.codelistItems,
+                  description: dataTableFieldDTO.description,
+                  fieldId: dataTableFieldDTO.id,
+                  maxSize: dataTableFieldDTO.maxSize,
+                  pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
+                  pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
+                    ? dataTableFieldDTO.pkHasMultipleValues
+                    : false,
+                  ignoreCaseInLinks: !isNull(dataTableFieldDTO.ignoreCaseInLinks)
+                    ? dataTableFieldDTO.ignoreCaseInLinks
+                    : false,
+                  pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
+                  pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
+                  name: dataTableFieldDTO.name,
+                  readOnly: dataTableFieldDTO.readOnly,
+                  recordId: dataTableFieldDTO.idRecord,
+                  referencedField: dataTableFieldDTO.referencedField,
+                  required: dataTableFieldDTO.required,
+                  type: dataTableFieldDTO.type,
+                  validExtensions: !isNull(dataTableFieldDTO.validExtensions)
+                    ? dataTableFieldDTO.validExtensions
+                    : []
+                })
+            )
+            : null;
 
-            return new DatasetTableRecord({
-              datasetPartitionId: dataTableRecordDTO.id,
-              fields,
-              recordSchemaId: dataTableRecordDTO.idRecordSchema
-            });
-          })
+          return new DatasetTableRecord({
+            datasetPartitionId: dataTableRecordDTO.id,
+            fields,
+            recordSchemaId: dataTableRecordDTO.idRecordSchema
+          });
+        })
         : null;
 
       return new DatasetTable({
