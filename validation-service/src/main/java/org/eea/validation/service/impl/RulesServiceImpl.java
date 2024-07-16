@@ -1456,7 +1456,7 @@ public class RulesServiceImpl implements RulesService {
             String newSqlSentence = rule.getSqlSentence();
             newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
                     DATASET + newDatasetId.toString());
-            rule.setSqlSentence(newSqlSentence);//
+            rule.setSqlSentence(newSqlSentence);
           }
 
         });

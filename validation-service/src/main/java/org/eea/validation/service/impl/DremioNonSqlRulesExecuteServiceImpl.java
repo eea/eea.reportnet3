@@ -410,6 +410,6 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         if (rs.getObject(fieldName) instanceof byte[]) {
             return new String((byte[]) rs.getObject(fieldName), StandardCharsets.UTF_8);
         }
-            return rs.getString(fieldName);
+        return rs.getString(fieldName);
     }
 }

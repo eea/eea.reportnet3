@@ -70,7 +70,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     } catch (ParseException | IOException e) {
       LOG.error("Invalid GeoJson!! Tried to convert this geoJson : {} , to HEX but failed", value, e);
     }
-    return "";
+    return spatialDataHelper.bytesToHex(new byte[0]);
   }
 
   @Override

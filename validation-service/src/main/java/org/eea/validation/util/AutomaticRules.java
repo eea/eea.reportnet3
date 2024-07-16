@@ -430,7 +430,7 @@ public class AutomaticRules {
     if (isBigData) {
       sql = "select record_id, ST_isValidReason(%s) as reason" +
           "  from %s" +
-          "  where LENGTH(%s) > 0 and ST_isValid(%s) = false";
+          "  where OCTET_LENGTH(%s) > 0 and ST_isValid(%s) = false";
       sqlResult = String.format(sql, fieldName, tableName, fieldName ,fieldName);
     } else {
       sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","
