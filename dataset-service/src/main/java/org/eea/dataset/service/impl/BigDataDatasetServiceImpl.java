@@ -230,10 +230,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             List<Long> datasetIds = new ArrayList<>();
             datasetIds.add(datasetId);
             String providerCode = null;
-            if(providerId == null){
-                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-                providerId = dataSetMetabaseVO.getDataProviderId();
-            }
             if(providerId != null){
                 DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
                 providerCode = dataProviderVO.getCode();

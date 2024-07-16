@@ -348,6 +348,10 @@ public class DatasetControllerImpl implements DatasetController {
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
     }
+    if(providerId == null){
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      providerId = dataSetMetabaseVO.getDataProviderId();
+    }
     DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
