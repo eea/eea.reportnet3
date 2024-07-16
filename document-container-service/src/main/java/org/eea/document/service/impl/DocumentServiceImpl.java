@@ -106,12 +106,11 @@ public class DocumentServiceImpl implements DocumentService {
   @Override
   @Async
   public void uploadDocument(final InputStream inputStream, final String contentType,
-      final String fileName, DocumentVO documentVO, final Long size)
-      throws EEAException, IOException {
-
+                             final String fileName, DocumentVO documentVO, final Long size)
+          throws EEAException, IOException {
     try {
       if (fileName == null || contentType == null
-          || StringUtils.isBlank(FilenameUtils.getExtension(fileName))) {
+              || StringUtils.isBlank(FilenameUtils.getExtension(fileName))) {
         throw new EEAException(EEAErrorMessage.FILE_FORMAT);
       }
       // save to metabase
@@ -119,51 +118,50 @@ public class DocumentServiceImpl implements DocumentService {
       documentVO.setDate(new Date());
       documentVO.setName(fileName);
       Long idDocument = dataflowController.insertDocument(documentVO);
-      if (idDocument == null) {
+      if (idDocument != null) {
+        doUploadDocument(inputStream, idDocument.toString(), contentType, documentVO.getDataflowId());
+
+        // Release finish event
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_COMPLETED_EVENT,
+                null,
+                NotificationVO.builder()
+                        .user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
+                        .dataflowId(documentVO.getDataflowId()).fileName(fileName).build());
+        LOG.info("Successfully uploaded document {} with id {}", fileName, idDocument);
+      } else {
         throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
       }
-
-      doUploadDocument(inputStream, fileName, idDocument.toString(), contentType);
-
-      // Release finish event
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_COMPLETED_EVENT,
-          null,
-          NotificationVO.builder()
-              .user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
-              .dataflowId(documentVO.getDataflowId()).fileName(fileName).build());
-      LOG.info("Successfully uploaded document {} with id {}", fileName, idDocument);
-
     } catch (RepositoryException | EEAException e) {
       // Release fail event
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_FAILED_EVENT, null,
-          NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
-              .dataflowId((documentVO != null) ? documentVO.getDataflowId() : null)
-              .fileName(fileName).error(e.getMessage()).build());
+              NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
+                      .dataflowId((documentVO != null) ? documentVO.getDataflowId() : null)
+                      .fileName(fileName).error(e.getMessage()).build());
       LOG_ERROR.error("Error in uploadDocument {} due to exception: {}", fileName, e.getMessage(), e);
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
+    } finally {
+      if(inputStream != null) {
+        inputStream.close();
+      }
     }
   }
 
-
-  private void doUploadDocument(final InputStream inputStream,
-                                String fileName, String idDocument, String contentType)
-          throws EEAException, RepositoryException, IOException {
-
+  private void doUploadDocument(final InputStream inputStream, String idDocument, String contentType, Long dataflowId) throws EEAException, RepositoryException {
     Session session = null;
     DocumentNodeStore ns = null;
-
-    LOG.info("Inserting document {} with id {}", fileName, idDocument);
-
     try {
+      LOG.info("Inserting document with id {} for dataflowId {}", idDocument, dataflowId);
+
       // Initialize the session
       ns = oakRepositoryUtils.initializeNodeStore();
       Repository repository = oakRepositoryUtils.initializeRepository(ns);
       session = oakRepositoryUtils.initializeSession(repository);
 
-      oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + fileName, inputStream, idDocument, contentType);
+      // Add a file node with the document
+      oakRepositoryUtils.addFileNode(session, PATH_DELIMITER + dataflowId, inputStream, idDocument, contentType);
+      LOG.info("Finished inserting document with id {} for dataflowId {}", idDocument, dataflowId);
     }
     finally {
-      inputStream.close();
       oakRepositoryUtils.cleanUp(session, ns);
     }
   }
@@ -244,8 +242,7 @@ public class DocumentServiceImpl implements DocumentService {
    * @param originDataflowId The ID of the origin dataflow.
    * @param destinationDataflowId The ID of the destination dataflow.
    */
-  public void cloneAllDocumentsInDataflow(final Long originDataflowId, final Long destinationDataflowId)
-          throws EEAException, IOException {
+  public void cloneAllDocumentsInDataflow(final Long originDataflowId, final Long destinationDataflowId) throws Exception {
 
     // Copy the dataflow documents
     List<DocumentVO> documents = dataFlowDocumentControllerZuul.getAllDocumentsByDataflowId(originDataflowId);
@@ -263,12 +260,11 @@ public class DocumentServiceImpl implements DocumentService {
    * @param destinationDataflowId The ID of the dataflow that the document will be assigned to.
    *
    * @throws EEAException
-   * @throws IOException
    */
-  public void cloneDocument(final DocumentVO documentVO, final Long destinationDataflowId)
-          throws EEAException, IOException {
+  public void cloneDocument(final DocumentVO documentVO, final Long destinationDataflowId) throws Exception {
     String fileName = null;
     Long odlDataFlowId;
+    InputStream inputStream = null;
 
     try {
       if (documentVO == null) {
@@ -289,8 +285,8 @@ public class DocumentServiceImpl implements DocumentService {
       }
 
       // Insert the cloned document data.
-      InputStream inputStream = new ByteArrayInputStream(fileResponse.getBytes());
-      doUploadDocument(inputStream, documentVO.getName(), idDocument.toString(), fileResponse.getContentType());
+      inputStream = new ByteArrayInputStream(fileResponse.getBytes());
+      doUploadDocument(inputStream, idDocument.toString(), fileResponse.getContentType(), documentVO.getDataflowId());
     } catch (RepositoryException e)  {
       // Release fail event.
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.UPLOAD_DOCUMENT_FAILED_EVENT, null,
@@ -302,6 +298,11 @@ public class DocumentServiceImpl implements DocumentService {
                       .build());
       LOG_ERROR.error("Error in uploadDocument {} for dataflowId {} due to exception: {}", fileName, destinationDataflowId, e.getMessage());
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
+    }
+    finally {
+      if(inputStream != null) {
+        inputStream.close();
+      }
     }
   }
 
