@@ -25,8 +25,8 @@ public class JobHistoryExtendedRepositoryImpl implements JobHistoryExtendedRepos
     private static final String COUNT_JOB_HISTORY = "select count(*) from job_history";
 
     /* This query counts the rows of job history that is already grouped by job_id at the nested query. Counts how many unique jobs exist inside job_history table */
-    private static final String COUNT_UNIQUE_JOBS_FILTERED_PART_1 = "select count(*) from (select count(*) from job_history jh ";
-    private static final String COUNT_UNIQUE_JOBS_FILTERED_PART_2 = " group by jh.job_id) as distinct_jobs_count";
+    private static final String COUNT_UNIQUE_JOBS_FILTERED_PART_1 = "select count(*) from (select count(*) from job_history ";
+    private static final String COUNT_UNIQUE_JOBS_FILTERED_PART_2 = " group by job_history.job_id) as distinct_jobs_count";
 
     /** The entity manager. */
     @PersistenceContext(name = "orchestratorEntityManagerFactory")
@@ -68,9 +68,13 @@ public class JobHistoryExtendedRepositoryImpl implements JobHistoryExtendedRepos
     public Long countFilteredJobs(Long jobId, String jobType, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatus) {
         StringBuilder stringQuery = new StringBuilder();
         stringQuery.append(COUNT_UNIQUE_JOBS_FILTERED_PART_1);
-        addFilters( stringQuery, jobId, jobType, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatus);
+        addFilters(stringQuery, jobId, jobType, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatus);
         stringQuery.append(COUNT_UNIQUE_JOBS_FILTERED_PART_2);
-        Query query = entityManager.createNativeQuery(stringQuery.toString());
+
+        Query query = null;
+        query = entityManager.createNativeQuery(stringQuery.toString());
+
+        addParameters(query, jobId, jobType, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatus);
 
         return Long.valueOf(query.getSingleResult().toString());
     }

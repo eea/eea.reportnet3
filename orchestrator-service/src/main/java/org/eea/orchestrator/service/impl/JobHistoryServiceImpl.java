@@ -51,7 +51,6 @@ public class JobHistoryServiceImpl implements JobHistoryService {
                                        Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
 
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
-        String remainingJobsStatusFilter = "IN_PROGRESS,QUEUED";
         List<JobHistory> jobHistoryList = jobHistoryRepository.findJobHistoryPaginated(pageable, asc, sortedTableColumn, jobId, jobTypes, dataflowId, dataflowName, providerId, datasetId, datasetName, creatorUsername, jobStatuses);
         List<JobHistoryVO> jobHistoryVOList = jobHistoryMapper.entityListToClass(jobHistoryList);
         JobsHistoryVO jobsHistoryVO = new JobsHistoryVO();
