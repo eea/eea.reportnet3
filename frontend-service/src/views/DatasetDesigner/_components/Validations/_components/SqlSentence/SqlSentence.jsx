@@ -9,9 +9,9 @@ import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Dialog } from 'views/_components/Dialog';
-import { InputTextarea } from 'views/_components/InputTextarea';
 import { Spinner } from 'views/_components/Spinner';
 import { SqlHelp } from './_components/SqlHelp';
+import { SqlInputTextArea } from './_components/SqlHelp/_components/SqlInputTextArea';
 import { TrafficLight } from 'views/_components/TrafficLight';
 
 import { ValidationService } from 'services/ValidationService';
@@ -265,7 +265,7 @@ export const SqlSentence = ({ creationFormState, dataflowType, datasetId, level,
             />
             {renderSqlSentenceCost()}
           </h3>
-          <InputTextarea
+          <SqlInputTextArea
             className={`p-inputtextarea ${hasValidationError || isSqlErrorVisible ? styles.hasError : ''}`}
             id="sqlSentenceText"
             name=""
