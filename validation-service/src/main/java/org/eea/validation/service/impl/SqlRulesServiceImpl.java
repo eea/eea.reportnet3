@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -578,7 +581,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     boolean queryContainsKeyword = true;
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
-      if (query.toLowerCase().contains(word.toLowerCase())) {
+      String regex = "\\b" + word + "\\b";
+      Pattern pattern = Pattern.compile(regex);
+      Matcher matcher = pattern.matcher(query);
+      if (matcher.find()) {
         queryContainsKeyword = false;
         break;
       }
