@@ -185,7 +185,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 else if(job.getJobStatus().equals(JobStatusEnum.QUEUED)){
                     jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
                 }
-                filePathInS3 = job.getParameters().get("filePathInS3").toString();
+                if(job.getParameters().get("filePathInS3") != null) {
+                    filePathInS3 = job.getParameters().get("filePathInS3").toString();
+                }
             }else{
                 //check if there is already an import job with status IN_PROGRESS for the specific datasetId
                 List<Long> datasetIds = new ArrayList<>();
