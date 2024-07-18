@@ -205,17 +205,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if(StringUtils.isBlank(filePathInS3)){
                     throw new EEAException("Empty file and file path");
                 }
-                String fileExtension = null;
-
-                if(filePathInS3.endsWith(".csv")) {
-                    fileExtension = CSV_TYPE;
-                }
-                else if(filePathInS3.endsWith(".zip")){
-                    fileExtension = ZIP_TYPE;
-                }
-                //todo handle other extensions
-
-                LOG.info("For jobId {} downloading file from s3 in path {}", jobId, filePathInS3);
+                String fileExtension = getFileExtensionFromFilePath(filePathInS3);
+                LOG.info("For jobId {} downloading file from s3 in path {} with fileExtension {}", jobId, filePathInS3, fileExtension);
 
                 String[] filePathInS3Split = filePathInS3.split("/");
                 String fileNameInS3 = filePathInS3Split[filePathInS3Split.length - 1];
@@ -1364,5 +1355,28 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 "        LOWER(LPAD(TO_HEX(CAST(RAND() * 65535 AS BIGINT)), 4, '0')), '-',\n" +
                 "        LOWER(LPAD(TO_HEX(CAST(RAND() * 281474976710655 AS BIGINT)), 12, '0'))\n" +
                 "    ) AS " + PARQUET_RECORD_ID_COLUMN_HEADER + " ";
+    }
+
+    private String getFileExtensionFromFilePath(String filePathInS3){
+        String fileExtension = null;
+        if(filePathInS3.endsWith(CSV_TYPE)) {
+            fileExtension = CSV_TYPE;
+        }
+        else if(filePathInS3.endsWith(ZIP_TYPE)){
+            fileExtension = ZIP_TYPE;
+        }
+        else if(filePathInS3.endsWith(GKPG_TYPE)){
+            fileExtension = GKPG_TYPE;
+        }
+        else if(filePathInS3.endsWith(XLSX_TYPE)){
+            fileExtension = XLSX_TYPE;
+        }
+        else if(filePathInS3.endsWith(XML_TYPE)){
+            fileExtension = XML_TYPE;
+        }
+        else{
+            LOG.error("Found unhandled file extension for file in path {}", filePathInS3);
+        }
+        return fileExtension;
     }
 }
