@@ -1369,10 +1369,9 @@ public class RulesServiceImpl implements RulesService {
    * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
    * @param newDatasetSchemaId the new dataset schema id
    * @param rule the rule
-   * @return the map
    * @throws EEAException the EEA exception
    */
-  private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
+  private void copyData(Map<String, String> dictionaryOriginTargetObjectId,
                                        String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
                                        String newDatasetSchemaId, Rule rule,Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) throws EEAException {
 
@@ -1395,7 +1394,6 @@ public class RulesServiceImpl implements RulesService {
       rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
     }
 
-    return dictionaryOriginTargetObjectId;
   }
 
 
@@ -1405,9 +1403,8 @@ public class RulesServiceImpl implements RulesService {
    * @param rule the rule
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    * @param dictionaryOriginTargetDatasetsId the dictionary origin target datasets id
-   * @return the map
    */
-  private Map<String, String> fillRuleCopied(Rule rule,
+  private void fillRuleCopied(Rule rule,
                                              Map<String, String> dictionaryOriginTargetObjectId,
                                              Map<Long, Long> dictionaryOriginTargetDatasetsId, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) {
 
@@ -1482,7 +1479,6 @@ public class RulesServiceImpl implements RulesService {
         });
       }
     }
-    return dictionaryOriginTargetObjectId;
   }
 
   /**
@@ -1663,6 +1659,8 @@ public class RulesServiceImpl implements RulesService {
     // rules of them, and with the help of the dictionary,
     // replace the objectIds from the origin to the new ones of the target schemas, to finally save
     // them as new rules.
+
+    DataFlowVO dataFlowVO = null;
     for (RulesSchema ruleSchema : schemaRules) {
       String newDatasetSchemaId =
               dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
@@ -1675,7 +1673,9 @@ public class RulesServiceImpl implements RulesService {
 
       Long datasetId = dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(newDatasetSchemaId);
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
-      DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId());
+      if (dataFlowVO == null) {
+        dataFlowVO = dataflowControllerZuul.findById(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId());
+      }
 
       for (Rule rule : ruleSchema.getRules()) {
         List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
@@ -1855,10 +1855,9 @@ public class RulesServiceImpl implements RulesService {
    * @param newDatasetSchemaId the new dataset schema id
    * @param rule the rule
    * @param integrities the integrities
-   * @return the map
    * @throws EEAException the EEA exception
    */
-  private Map<String, String> importData(Map<String, String> dictionaryOriginTargetObjectId,
+  private void importData(Map<String, String> dictionaryOriginTargetObjectId,
                                          String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
@@ -1879,7 +1878,6 @@ public class RulesServiceImpl implements RulesService {
       rulesSequenceRepository.updateSequence(new ObjectId(newDatasetSchemaId));
     }
 
-    return dictionaryOriginTargetObjectId;
   }
 
   /**
@@ -1887,9 +1885,8 @@ public class RulesServiceImpl implements RulesService {
    *
    * @param rule the rule
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
-   * @return the map
    */
-  private Map<String, String> fillRuleImport(Rule rule,
+  private void fillRuleImport(Rule rule,
                                              Map<String, String> dictionaryOriginTargetObjectId, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) {
 
     String newRuleId = new ObjectId().toString();
@@ -1946,7 +1943,6 @@ public class RulesServiceImpl implements RulesService {
       });
     }
 
-    return dictionaryOriginTargetObjectId;
   }
 
 
