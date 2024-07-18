@@ -1,5 +1,6 @@
 package org.eea.validation.service.impl;
 
+import cdjd.org.apache.commons.lang3.BooleanUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -246,6 +247,10 @@ public class RulesServiceImpl implements RulesService {
 
   /** The Constant VALID: {@value}. */
   private static final String VALID = "Valid";
+
+  private static final String FROM = "from";
+
+  private static final String WHERE = "where";
 
   /** The path public file. */
   @Value("${validationExportPathFile}")
@@ -1314,6 +1319,7 @@ public class RulesServiceImpl implements RulesService {
     List<String> listDatasetSchemaIdToCopy = rules.getOriginDatasetSchemaIds();
     Map<String, String> dictionaryOriginTargetObjectId = rules.getDictionaryOriginTargetObjectId();
     Map<Long, Long> dictionaryOriginTargetDatasetsId = rules.getDictionaryOriginTargetDatasetsId();
+    DataFlowVO dataFlowVO = null;
     for (String originDatasetSchemaId : listDatasetSchemaIdToCopy) {
       String newDatasetSchemaId = dictionaryOriginTargetObjectId.get(originDatasetSchemaId);
       RulesSchema originRules =
@@ -1325,12 +1331,18 @@ public class RulesServiceImpl implements RulesService {
       rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
       rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
 
+      Long datasetId = dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(newDatasetSchemaId);
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      if (dataFlowVO == null) {
+        dataFlowVO = dataflowControllerZuul.findById(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId());
+      }
+
       for (Rule rule : originRules.getRules()) {
         // We copy only the rules that are not of type Link, because these one are created
         // automatically in the process when we update the fieldSchema in previous calls of the copy
         // process
         copyData(dictionaryOriginTargetObjectId, originDatasetSchemaId,
-                dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule);
+                dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule, datasetId, dataSetMetabaseVO, dataFlowVO);
       }
     }
     return dictionaryOriginTargetObjectId;
@@ -1362,10 +1374,10 @@ public class RulesServiceImpl implements RulesService {
    */
   private Map<String, String> copyData(Map<String, String> dictionaryOriginTargetObjectId,
                                        String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
-                                       String newDatasetSchemaId, Rule rule) throws EEAException {
+                                       String newDatasetSchemaId, Rule rule,Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
-    fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId);
+    fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId,datasetId ,dataSetMetabaseVO, dataFlowVO);
 
     // If the rule is a Dataset type, we need to do the same process with the
     // IntegritySchema
@@ -1397,7 +1409,7 @@ public class RulesServiceImpl implements RulesService {
    */
   private Map<String, String> fillRuleCopied(Rule rule,
                                              Map<String, String> dictionaryOriginTargetObjectId,
-                                             Map<Long, Long> dictionaryOriginTargetDatasetsId) {
+                                             Map<Long, Long> dictionaryOriginTargetDatasetsId, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
@@ -1453,12 +1465,20 @@ public class RulesServiceImpl implements RulesService {
 
           // Do the same in the property SqlSentence
           if (StringUtils.isNotBlank(rule.getSqlSentence())) {
-            String newSqlSentence = rule.getSqlSentence();
-            newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId.toString(),
-                    DATASET + newDatasetId.toString());
-            rule.setSqlSentence(newSqlSentence);
+            if (BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+              dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
+                try {
+                  fixSqlSentence(rule, newObjectId, dataSetMetabaseVO, datasetId);
+                } catch (Exception exception) {
+                  LOG.error("Error updating isSQLSentence information while copying dataset for rule {}", rule.getRuleId());
+                }
+              });
+            } else {
+              String newSqlSentence = rule.getSqlSentence();
+              newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId,DATASET + newDatasetId);
+              rule.setSqlSentence(newSqlSentence);
+            }
           }
-
         });
       }
     }
@@ -1653,9 +1673,13 @@ public class RulesServiceImpl implements RulesService {
       rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
       rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
 
+      Long datasetId = dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(newDatasetSchemaId);
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId());
+
       for (Rule rule : ruleSchema.getRules()) {
         List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
-        importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities);
+        importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities, datasetId, dataSetMetabaseVO, dataFlowVO);
       }
     }
     return dictionaryOriginTargetObjectId;
@@ -1835,10 +1859,10 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private Map<String, String> importData(Map<String, String> dictionaryOriginTargetObjectId,
-                                         String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities) throws EEAException {
+                                         String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
-    fillRuleImport(rule, dictionaryOriginTargetObjectId);
+    fillRuleImport(rule, dictionaryOriginTargetObjectId, datasetId, dataSetMetabaseVO, dataFlowVO);
 
     // If the rule is a Dataset type, we need to do the same process with the
     // IntegritySchema
@@ -1866,7 +1890,7 @@ public class RulesServiceImpl implements RulesService {
    * @return the map
    */
   private Map<String, String> fillRuleImport(Rule rule,
-                                             Map<String, String> dictionaryOriginTargetObjectId) {
+                                             Map<String, String> dictionaryOriginTargetObjectId, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
@@ -1908,9 +1932,17 @@ public class RulesServiceImpl implements RulesService {
             && rule.getWhenCondition().contains("isSQLSentence")
             && StringUtils.isNotBlank(rule.getSqlSentence())) {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
-        String newSqlSentence = rule.getSqlSentence();
-        newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
-        rule.setSqlSentence(newSqlSentence);
+        if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+          try {
+            fixSqlSentence(rule, newObjectId, dataSetMetabaseVO, datasetId);
+          } catch (Exception exception) {
+            LOG.error("Error updating isSQLSentence information while importing dataset for rule {}", rule.getRuleId());
+          }
+        } else {
+          String newSqlSentence = rule.getSqlSentence();
+          newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
+          rule.setSqlSentence(newSqlSentence);
+        }
       });
     }
 
@@ -2559,5 +2591,29 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     return datasetRepository.getTableId(tableSchemaId, datasetId);
+  }
+
+  private String getModifiedSql(Rule rule, String pathToDremioForTable) {
+    int fromIndex = rule.getSqlSentence().indexOf(FROM);
+    int whereIndex = rule.getSqlSentence().indexOf(WHERE);
+    String selectClause = rule.getSqlSentence().substring(0, fromIndex + "from ".length());
+    String whereClauseOnwards = rule.getSqlSentence().substring(whereIndex);
+    return selectClause + pathToDremioForTable + " " + whereClauseOnwards;
+  }
+
+  private void fixSqlSentence(Rule rule, String newObjectId, DataSetMetabaseVO dataSetMetabaseVO, Long datasetId) {
+    if (!newObjectId.startsWith(DATASET)) {
+      DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(newObjectId));
+      if (datasetSchema != null) {
+        String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, String.valueOf(rule.getReferenceId()));
+        if (!tableSchemaId.isBlank()) {
+          String tableSchemaName = datasetSchemaController.getTableSchemaName(newObjectId, tableSchemaId);
+          S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L, datasetId, tableSchemaName);
+          String pathToDremioForTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+          String modifiedSentence = getModifiedSql(rule, pathToDremioForTable);
+          rule.setSqlSentence(modifiedSentence);
+        }
+      }
+    }
   }
 }
