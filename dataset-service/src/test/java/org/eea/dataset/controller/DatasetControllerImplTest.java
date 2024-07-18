@@ -309,7 +309,7 @@ public class DatasetControllerImplTest {
   public void testImportBigFileData() throws Exception {
     DataFlowVO mockDataflow = new DataFlowVO();
     mockDataflow.setBigData(false);
-    Mockito.when(dataFlowControllerZuul.findById(anyLong(), anyLong())).thenReturn(mockDataflow);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
@@ -330,7 +330,7 @@ public class DatasetControllerImplTest {
   public void testImportBigFileDataEEAException() throws Exception {
     DataFlowVO mockDataflow = new DataFlowVO();
     mockDataflow.setBigData(false);
-    Mockito.when(dataFlowControllerZuul.findById(anyLong(), anyLong())).thenReturn(mockDataflow);
+      Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     MultipartFile multipartFile =
         new MockMultipartFile("multipartFile", "multipartFile".getBytes());
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
@@ -1535,7 +1535,7 @@ public class DatasetControllerImplTest {
 
     DataFlowVO mockDataflow = new DataFlowVO();
     mockDataflow.setBigData(false);
-    Mockito.when(dataFlowControllerZuul.findById(anyLong(), anyLong())).thenReturn(mockDataflow);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
 
     MultipartFile multipartFile =
             new MockMultipartFile("multipartFile", "multipartFile".getBytes());
@@ -1557,7 +1557,7 @@ public class DatasetControllerImplTest {
   public void importFileDataLegacyTest() throws EEAException {
     DataFlowVO mockDataflow = new DataFlowVO();
     mockDataflow.setBigData(false);
-    Mockito.when(dataFlowControllerZuul.findById(anyLong(), anyLong())).thenReturn(mockDataflow);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     Mockito.doNothing().when(fileTreatmentHelper).importFileData(Mockito.anyLong(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.nullable(Long.class));
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
@@ -1576,7 +1576,7 @@ public class DatasetControllerImplTest {
   public void importFileDataExceptionTest() throws EEAException {
     DataFlowVO mockDataflow = new DataFlowVO();
     mockDataflow.setBigData(false);
-    Mockito.when(dataFlowControllerZuul.findById(anyLong(), anyLong())).thenReturn(mockDataflow);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     Mockito.when(jobControllerZuul.checkEligibilityOfJob(anyString(), anyBoolean(), anyLong(), anyLong(), anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
     MultipartFile file = Mockito.mock(MultipartFile.class);
     Mockito.doThrow(EEAException.class).when(fileTreatmentHelper).importFileData(Mockito.anyLong(),
