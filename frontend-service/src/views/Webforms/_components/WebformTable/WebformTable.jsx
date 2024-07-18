@@ -114,6 +114,10 @@ export const WebformTable = ({
   }, [webform]);
 
   useEffect(() => {
+    checkIsIcebergCreated(webformData.tableSchemaId);
+  }, [webformData]);
+
+  useEffect(() => {
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
 
     if (!isNil(webform) && webform.tableSchemaId) {
@@ -125,12 +129,9 @@ export const WebformTable = ({
         onLoadTableData();
       }
     }
-
-    checkIsIcebergCreated(webformData.tableSchemaId);
   }, [isRefresh, onTabChange, selectedTable.pamsId, webform]);
 
   useEffect(() => {
-    checkIsIcebergCreated(webformData.tableSchemaId);
     if (isDataUpdated !== 0) {
       onLoadTableData();
     }
@@ -383,9 +384,11 @@ export const WebformTable = ({
   if (webformTableState.isLoading) {
     if (isLoadingIceberg) {
       return (
-        <div style={{ top: 0, margin: '1rem' }} >
+        <div style={{ top: 0, margin: '1rem' }}>
           <Spinner style={{ top: 0, margin: '1rem' }} />
-          <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>{'Webform tables are being converted.\nPlease wait'}</p>
+          <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
+            {'Webform tables are being converted.\nPlease wait'}
+          </p>
         </div>
       );
     } else {
@@ -444,7 +447,6 @@ export const WebformTable = ({
       console.error('ActionsToolbar - convertTable.', error);
       notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
     }
-    checkIsIcebergCreated(webformData.tableSchemaId);
     setIsLoadingIceberg(false);
     isLoading(false);
   };
