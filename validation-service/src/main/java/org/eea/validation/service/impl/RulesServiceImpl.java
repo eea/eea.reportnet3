@@ -1322,6 +1322,12 @@ public class RulesServiceImpl implements RulesService {
     DataFlowVO dataFlowVO = null;
     for (String originDatasetSchemaId : listDatasetSchemaIdToCopy) {
       String newDatasetSchemaId = dictionaryOriginTargetObjectId.get(originDatasetSchemaId);
+      Long datasetId = dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(newDatasetSchemaId);
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      if (dataFlowVO == null) {
+        dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+      }
+
       RulesSchema originRules =
               rulesRepository.getRulesWithActiveCriteria(new ObjectId(originDatasetSchemaId), false);
 
@@ -1330,12 +1336,6 @@ public class RulesServiceImpl implements RulesService {
       // from the original schema with properties like 'enabled'
       rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
       rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
-
-      Long datasetId = dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(newDatasetSchemaId);
-      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
-      if (dataFlowVO == null) {
-        dataFlowVO = dataflowControllerZuul.findById(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId());
-      }
 
       for (Rule rule : originRules.getRules()) {
         // We copy only the rules that are not of type Link, because these one are created
@@ -1663,7 +1663,14 @@ public class RulesServiceImpl implements RulesService {
     DataFlowVO dataFlowVO = null;
     for (RulesSchema ruleSchema : schemaRules) {
       String newDatasetSchemaId =
-              dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
+          dictionaryOriginTargetObjectId.get(ruleSchema.getIdDatasetSchema().toString());
+
+      Long datasetId = dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(newDatasetSchemaId);
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+      if (dataFlowVO == null) {
+        dataFlowVO = dataflowControllerZuul.getMetabaseById(dataSetMetabaseVO.getDataflowId());
+      }
+
 
       // Delete the the rules created in the steps before on the new schema, we are going to copy
       // them directly
@@ -1671,11 +1678,6 @@ public class RulesServiceImpl implements RulesService {
       rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
       rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
 
-      Long datasetId = dataSetMetabaseControllerZuul.getDesignDatasetIdByDatasetSchemaId(newDatasetSchemaId);
-      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
-      if (dataFlowVO == null) {
-        dataFlowVO = dataflowControllerZuul.findById(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId());
-      }
 
       for (Rule rule : ruleSchema.getRules()) {
         List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
@@ -2590,11 +2592,20 @@ public class RulesServiceImpl implements RulesService {
   }
 
   private String getModifiedSql(Rule rule, String pathToDremioForTable) {
-    int fromIndex = rule.getSqlSentence().indexOf(FROM);
-    int whereIndex = rule.getSqlSentence().indexOf(WHERE);
-    String selectClause = rule.getSqlSentence().substring(0, fromIndex + "from ".length());
-    String whereClauseOnwards = rule.getSqlSentence().substring(whereIndex);
-    return selectClause + pathToDremioForTable + " " + whereClauseOnwards;
+      if (rule.getSqlSentence().startsWith("select * from ( select rv.id as record_id ,fv.id as")) {
+        String fieldName = getFieldName(rule);
+        String newSql = "select record_id, ST_isValidReason(%s) as reason " +
+                        " from %s " +
+                        " where OCTET_LENGTH(%s) > 0 and ST_isValid(%s) = false";
+        return String.format(newSql, fieldName, pathToDremioForTable, fieldName ,fieldName);
+      } else if (rule.getSqlSentence().startsWith("select record_id, ST_isValidReason")) {
+        int fromIndex = rule.getSqlSentence().indexOf(FROM);
+        int whereIndex = rule.getSqlSentence().indexOf(WHERE);
+        String selectClause = rule.getSqlSentence().substring(0, fromIndex + "from ".length());
+        String whereClauseOnwards = rule.getSqlSentence().substring(whereIndex);
+        return selectClause + pathToDremioForTable + " " + whereClauseOnwards;
+      }
+      return "";
   }
 
   private void fixSqlSentence(Rule rule, String newObjectId, DataSetMetabaseVO dataSetMetabaseVO, Long datasetId) {
@@ -2606,10 +2617,20 @@ public class RulesServiceImpl implements RulesService {
           String tableSchemaName = datasetSchemaController.getTableSchemaName(newObjectId, tableSchemaId);
           S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L, datasetId, tableSchemaName);
           String pathToDremioForTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-          String modifiedSentence = getModifiedSql(rule, pathToDremioForTable);
-          rule.setSqlSentence(modifiedSentence);
+          if (rule.isAutomatic()) {
+            String modifiedSentence = getModifiedSql(rule, pathToDremioForTable);
+            if (!modifiedSentence.isBlank()) {
+              rule.setSqlSentence(modifiedSentence);
+            }
+          }
         }
       }
     }
+  }
+
+  private String getFieldName(Rule rule) {
+    int startInd = rule.getSqlSentence().indexOf("\"") +1;
+    int endInd = rule.getSqlSentence().indexOf("_id\"", startInd);
+    return rule.getSqlSentence().substring(startInd, endInd);
   }
 }
