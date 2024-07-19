@@ -88,6 +88,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
+import static org.eea.validation.util.AutomaticRules.SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE;
 
 /**
  * The Class ValidationService.
@@ -251,6 +252,12 @@ public class RulesServiceImpl implements RulesService {
   private static final String FROM = "from";
 
   private static final String WHERE = "where";
+
+  private final static String SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_1 = "select * from ( select rv.id as record_id ,fv.id as";
+
+  private final static String SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_2 = "select rv.id as record_id , fv.id as";
+
+  private final static String SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE = "select record_id, ST_isValidReason";
 
   /** The path public file. */
   @Value("${validationExportPathFile}")
@@ -1337,12 +1344,17 @@ public class RulesServiceImpl implements RulesService {
       rulesRepository.emptyRulesOfSchemaByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
       rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
 
-      for (Rule rule : originRules.getRules()) {
-        // We copy only the rules that are not of type Link, because these one are created
-        // automatically in the process when we update the fieldSchema in previous calls of the copy
-        // process
-        copyData(dictionaryOriginTargetObjectId, originDatasetSchemaId,
-                dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule, datasetId, dataSetMetabaseVO, dataFlowVO);
+      for (Iterator<Rule> iterator = originRules.getRules().iterator(); iterator.hasNext(); ) {
+        Rule rule = iterator.next();
+        if (shouldDeleteRule(rule)) {
+          iterator.remove();
+        } else {
+          // We copy only the rules that are not of type Link, because these one are created
+          // automatically in the process when we update the fieldSchema in previous calls of the copy
+          // process
+          copyData(dictionaryOriginTargetObjectId, originDatasetSchemaId,
+              dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule, datasetId, dataSetMetabaseVO, dataFlowVO);
+        }
       }
     }
     return dictionaryOriginTargetObjectId;
@@ -1679,12 +1691,22 @@ public class RulesServiceImpl implements RulesService {
       rulesSequenceRepository.deleteByDatasetSchemaId(new ObjectId(newDatasetSchemaId));
 
 
-      for (Rule rule : ruleSchema.getRules()) {
-        List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
-        importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities, datasetId, dataSetMetabaseVO, dataFlowVO);
+      for (Iterator<Rule> iterator = ruleSchema.getRules().iterator(); iterator.hasNext(); ) {
+        Rule rule = iterator.next();
+
+        if (shouldDeleteRule(rule)) {
+          iterator.remove();
+        } else {
+          List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
+          importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities, datasetId, dataSetMetabaseVO, dataFlowVO);
+        }
       }
     }
     return dictionaryOriginTargetObjectId;
+  }
+
+  private boolean shouldDeleteRule(Rule rule) {
+    return rule.isAutomatic() && StringUtils.isNotBlank(rule.getSqlSentence()) && rule.getSqlSentence().startsWith(SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_2);
   }
 
   /**
@@ -2593,13 +2615,10 @@ public class RulesServiceImpl implements RulesService {
 
   private String getModifiedSql(Rule rule, String pathToDremioForTable) {
     //old automatic rule
-    if (rule.getSqlSentence().startsWith("select * from ( select rv.id as record_id ,fv.id as")) {
+    if (rule.getSqlSentence().startsWith(SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_1)) {
       String fieldName = getFieldName(rule);
-      String newSql = "select record_id, ST_isValidReason(%s) as reason " +
-                      " from %s " +
-                      " where OCTET_LENGTH(%s) > 0 and ST_isValid(%s) = false";
-      return String.format(newSql, fieldName, pathToDremioForTable, fieldName ,fieldName);
-    } else if (rule.getSqlSentence().startsWith("select record_id, ST_isValidReason")) { //new automatic rule with wrong values
+      return String.format(SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE, fieldName, pathToDremioForTable, fieldName ,fieldName);
+    } else if (rule.getSqlSentence().startsWith(SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE)) { //new automatic rule with wrong values
       int fromIndex = rule.getSqlSentence().indexOf(FROM);
       int whereIndex = rule.getSqlSentence().indexOf(WHERE);
       String selectClause = rule.getSqlSentence().substring(0, fromIndex + "from ".length());

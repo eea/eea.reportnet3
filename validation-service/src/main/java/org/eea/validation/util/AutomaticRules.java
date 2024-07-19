@@ -17,6 +17,10 @@ import org.eea.validation.persistence.schemas.rule.Rule;
  */
 public class AutomaticRules {
 
+  public static final String SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE = "select record_id, ST_isValidReason(%s) as reason" +
+      "  from %s" +
+      "  where OCTET_LENGTH(%s) > 0 and ST_isValid(%s) = false";
+
   // we use that class to create a specifies rule for any of diferent automatic validation
 
   /**
@@ -428,9 +432,7 @@ public class AutomaticRules {
     String sql;
     String sqlResult;
     if (isBigData) {
-      sql = "select record_id, ST_isValidReason(%s) as reason" +
-          "  from %s" +
-          "  where OCTET_LENGTH(%s) > 0 and ST_isValid(%s) = false";
+      sql = SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE;
       sqlResult = String.format(sql, fieldName, tableName, fieldName ,fieldName);
     } else {
       sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","
