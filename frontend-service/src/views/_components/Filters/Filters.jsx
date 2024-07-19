@@ -91,13 +91,18 @@ export const Filters = ({
         const response = await Promise.all(
           filterByKeys.map(key => snapshot.getPromise(filterByStore(`${key}_${recoilId}`)))
         );
-        const filterBy = isProvider
-          ? Object.assign({}, ...response, { creatorUsername: [providerUsername] })
-          : Object.assign({}, ...response);
+
+        const responseFilters = Object.assign({}, ...response);
+        const responseFiltersLength = Object.keys(responseFilters).length;
+
+        const filterBy =
+          isProvider && !(isJobsStatuses && activeIndex === 1 && responseFiltersLength === 0)
+            ? Object.assign({}, ...response, { creatorUsername: [providerUsername] })
+            : Object.assign({}, ...response);
 
         set(filterByCustomFilterStore(recoilId), filterBy);
       },
-    [recoilId]
+    [recoilId, activeIndex]
   );
 
   const onApplyFilters = async () => {
