@@ -1474,6 +1474,9 @@ public class RulesServiceImpl implements RulesService {
 
           // Do the same in the property SqlSentence
           if (StringUtils.isNotBlank(rule.getSqlSentence())) {
+            String newSqlSentence = rule.getSqlSentence();
+            newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId,DATASET + newDatasetId);
+            rule.setSqlSentence(newSqlSentence);
             if (BooleanUtils.isTrue(dataFlowVO.getBigData())) {
               dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
                 try {
@@ -1482,10 +1485,6 @@ public class RulesServiceImpl implements RulesService {
                   LOG.error("Error updating isSQLSentence information while copying dataset for rule {}", rule.getRuleId());
                 }
               });
-            } else {
-              String newSqlSentence = rule.getSqlSentence();
-              newSqlSentence = newSqlSentence.replace(DATASET + oldDatasetId,DATASET + newDatasetId);
-              rule.setSqlSentence(newSqlSentence);
             }
           }
         });
@@ -1953,16 +1952,15 @@ public class RulesServiceImpl implements RulesService {
             && rule.getWhenCondition().contains("isSQLSentence")
             && StringUtils.isNotBlank(rule.getSqlSentence())) {
       dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
+        String newSqlSentence = rule.getSqlSentence();
+        newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
+        rule.setSqlSentence(newSqlSentence);
         if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
           try {
             fixSqlSentence(rule, newObjectId, dataSetMetabaseVO, datasetId);
           } catch (Exception exception) {
             LOG.error("Error updating isSQLSentence information while importing dataset for rule {}", rule.getRuleId());
           }
-        } else {
-          String newSqlSentence = rule.getSqlSentence();
-          newSqlSentence = newSqlSentence.replace(oldObjectId, newObjectId);
-          rule.setSqlSentence(newSqlSentence);
         }
       });
     }
@@ -2631,7 +2629,7 @@ public class RulesServiceImpl implements RulesService {
   private void fixSqlSentence(Rule rule, String newObjectId, DataSetMetabaseVO dataSetMetabaseVO, Long datasetId) {
     if (!newObjectId.startsWith(DATASET)) {
       DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(newObjectId));
-      if (datasetSchema != null) {
+      if (datasetSchema != null && rule.getReferenceId() != null) {
         String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, String.valueOf(rule.getReferenceId()));
         if (!tableSchemaId.isBlank()) {
           String tableSchemaName = datasetSchemaController.getTableSchemaName(newObjectId, tableSchemaId);
