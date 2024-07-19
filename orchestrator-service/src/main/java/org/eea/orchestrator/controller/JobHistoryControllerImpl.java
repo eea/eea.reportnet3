@@ -1,6 +1,7 @@
 package org.eea.orchestrator.controller;
 
 import io.swagger.annotations.Api;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.orchestrator.JobHistoryController;
 import org.eea.interfaces.vo.orchestrator.JobsHistoryVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
@@ -19,6 +20,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/jobHistory")
@@ -60,6 +62,13 @@ public class JobHistoryControllerImpl implements JobHistoryController {
             @RequestParam(value = "creatorUsername", required = false) String creatorUsername,
             @RequestParam(value = "jobStatus", required = false) String jobStatus
     ){
+        List<Object> filterParams = Arrays.asList(jobId,jobType,dataflowId,dataflowName,providerId,datasetId,datasetName,creatorUsername,jobStatus);
+        boolean atLeastOneFilterIsActive = filterParams.stream().anyMatch(Objects::nonNull);
+
+        if (!atLeastOneFilterIsActive) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.AT_LEAST_ONE_FILTER_SHOULD_BE_ACTIVE);
+        }
+
         try{
             Pageable pageable = PageRequest.of(pageNum, pageSize);
             if (!validColumns.contains(sortedColumn)) {
