@@ -364,6 +364,9 @@ public final class LiteralConstants {
   /** The Constant ZIP_TYPE: {@value}. */
   public static final String ZIP_TYPE = ".zip";
 
+  /** The Constant GKPG_TYPE: {@value}. */
+  public static final String GKPG_TYPE = ".gpkg";
+
   /** The Constant ZIP_TYPE: {@value}. */
   public static final String ZIP = "zip";
 
