@@ -657,7 +657,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName)) : csvRecord.get(expectedHeaderName));
       } else {
         String headerWithBom = "\uFEFF" + expectedHeaderName;
-        row.add(csvRecord.isMapped(headerWithBom) ? csvRecord.get(headerWithBom) : "");
+        if(csvRecord.isMapped(headerWithBom)){
+          row.add(spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
+                  spatialDataHandling.convertToHEX(csvRecord.get(headerWithBom)) : csvRecord.get(headerWithBom));
+        }
+        else{
+          row.add("");
+        }
       }
     }
 
