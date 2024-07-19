@@ -115,7 +115,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setData(data.jobsList);
         setJobsStatusesList(data.jobsList);
         setRemainingJobs(data.remainingJobs);
-      } else if (!isEmpty(filterBy)) {
+      } else {
         data = await JobsStatusesService.getJobsHistory({
           pageNum: page !== undefined ? page : pageNum,
           numberRows: rows !== undefined ? rows : numberRows,
@@ -135,16 +135,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
             : undefined,
           jobStatus: filterBy.jobStatus?.join()
         });
-        setData(data.jobHistoryVOList);
-        setJobsStatusesList(data.jobHistoryVOList);
-        setFilteredJobs(data.filteredJobs);
-      } else {
-        setIsFiltered(false);
-        setJobsStatusesList([]);
+        if (!isEmpty(filterBy)) {
+          setData(data.jobHistoryVOList);
+          setJobsStatusesList(data.jobHistoryVOList);
+          setFilteredJobs(data.filteredJobs);
+        } else {
+          setIsFiltered(false);
+          setJobsStatusesList([]);
+          if (isProvider && index && !page) {
+            setProvidersTotalRecords(data.filteredRecords);
+          }
+        }
       }
 
       if ((index !== undefined ? index === 0 : activeIndex === 0) || !isEmpty(filterBy)) {
         if (isProvider && !providersTotalRecords) {
+          setProvidersTotalRecords(data.filteredRecords);
+        } else if (index !== undefined && !page) {
           setProvidersTotalRecords(data.filteredRecords);
         }
 
@@ -204,9 +211,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setActiveIndex(index);
     setRemainingJobs(0);
     setFilteredJobs(0);
+    setProvidersTotalRecords(0);
     if (index === 1) {
       setIsFiltered(false);
       setJobsStatusesList([]);
+      getJobsStatuses(index);
     } else {
       if (isEmpty(jobsStatuses) && isEmpty(filterBy)) {
         setIsLoading(true);
@@ -555,7 +564,6 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <Filters
       activeIndex={activeIndex}
       className="lineItems"
-      emptyFilters={isEmpty(filterBy)}
       isJobsStatuses={true}
       isLoading={loadingStatus === 'pending'}
       isProvider={isProvider}
@@ -647,7 +655,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           paginator={true}
           paginatorRight={
             <PaginatorRecordsCount
-              dataLength={isProvider ? providersTotalRecords : totalRecords}
+              dataLength={isProvider && !isAdmin ? providersTotalRecords : totalRecords}
               filteredDataLength={filteredRecords}
               filteredJobsLength={filteredJobs}
               isFiltered={isFiltered}
