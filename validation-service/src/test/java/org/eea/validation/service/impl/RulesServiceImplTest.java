@@ -2363,6 +2363,11 @@ public class RulesServiceImplTest {
     integritySchemaList.add(integritySchema);
     when(integritySchemaRepository.findByOriginOrReferenceDatasetSchemaId(Mockito.any()))
         .thenReturn(integritySchemaList);
+    dataflow.setBigData(true);
+    DataSetMetabaseVO vo = new DataSetMetabaseVO();
+    vo.setId(3L);
+    when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(vo);
 
     rulesServiceImpl.copyRulesSchema(copy);
     Mockito.verify(rulesRepository, times(1)).getRulesWithActiveCriteria(Mockito.any(),
@@ -2541,6 +2546,13 @@ public class RulesServiceImplTest {
         new ByteArrayInputStream(objectMapperRules.writeValueAsBytes(ruleSchema));
     List<byte[]> qcRulesList = new ArrayList<>();
     qcRulesList.add(IOUtils.toByteArray(rulesStream));
+
+    dataflow.setBigData(true);
+    DataSetMetabaseVO vo = new DataSetMetabaseVO();
+    vo.setDataflowId(3L);
+    when(datasetMetabaseController.findDatasetMetabaseById(Mockito.any()))
+        .thenReturn(vo);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(vo.getDataflowId())).thenReturn(dataflow);
 
     rulesServiceImpl.importRulesSchema(qcRulesList, dictionaryOriginTargetObjectId,
         listIntegrityVO);

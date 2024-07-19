@@ -352,7 +352,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       providerId = dataSetMetabaseVO.getDataProviderId();
     }
-    DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+    DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
         if(StringUtils.isNotBlank(tableSchemaId)){

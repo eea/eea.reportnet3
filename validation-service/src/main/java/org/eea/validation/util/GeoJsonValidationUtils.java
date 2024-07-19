@@ -94,7 +94,7 @@ public class GeoJsonValidationUtils {
             result = "";
         }
       }
-      if (result.length() == 0) {
+      if (result.isEmpty()) {
         verifyJson(fieldValue);
       }
     } catch (JsonProcessingException | JSONException | JsonSyntaxException
