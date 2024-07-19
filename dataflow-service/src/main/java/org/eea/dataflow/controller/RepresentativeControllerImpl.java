@@ -28,7 +28,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -404,6 +403,37 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     } catch(Exception e){
       LOG.error("Unexpected error! Could not delete representative with id {} for dataflowId {} Message: {}", dataflowRepresentativeId, dataflowId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Delete all representatives for a dataflow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @ApiOperation(value = "Delete all Representatives for a dataflow", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = EEAErrorMessage.DATAFLOW_NOTFOUND),
+          @ApiResponse(code = 403, message = EEAErrorMessage.NOT_DESIGN_DATAFLOW)})
+  public void deleteRepresentatives(@ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    try {
+      LOG.info("Deleting dataflow representatives for dataflowId {}", dataflowId);
+      representativeService.deleteDataflowRepresentatives(dataflowId);
+      LOG.info("Successfully deleted dataflow representatives for dataflowId {}", dataflowId);
+    } catch (EEAException e) {
+      LOG.error("Error deleting representatives for dataflowId {} Message: {}", dataflowId, e.getMessage(), e);
+      if (e.getMessage() != null && e.getMessage().equals(EEAErrorMessage.NOT_DESIGN_DATAFLOW)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.NOT_DESIGN_DATAFLOW);
+      } else {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATAFLOW_NOTFOUND);
+      }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Could not delete representatives for dataflowId {} Message: {}",
+          dataflowId, e.getMessage());
       throw e;
     }
   }
