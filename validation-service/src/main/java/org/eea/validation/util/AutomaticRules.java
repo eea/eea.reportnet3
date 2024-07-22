@@ -11,6 +11,8 @@ import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
 import org.eea.utils.LiteralConstants;
 import org.eea.validation.persistence.schemas.rule.Rule;
 
+import static org.eea.utils.LiteralConstants.DATASET_PREFIX;
+
 
 /**
  * The Class AutomaticRules.
@@ -20,6 +22,8 @@ public class AutomaticRules {
   public static final String SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE = "select record_id, ST_isValidReason(%s) as reason" +
       "  from %s" +
       "  where OCTET_LENGTH(%s) > 0 and ST_isValid(%s) = false";
+
+  public static final String FROM_CLAUSE_STATEMENT = DATASET_PREFIX + "%s" + "." + "%s";
 
   // we use that class to create a specifies rule for any of diferent automatic validation
 
@@ -433,7 +437,8 @@ public class AutomaticRules {
     String sqlResult;
     if (isBigData) {
       sql = SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE;
-      sqlResult = String.format(sql, fieldName, tableName, fieldName ,fieldName);
+      String fromClause = String.format(FROM_CLAUSE_STATEMENT, datasetId, tableName);
+      sqlResult = String.format(sql, fieldName, fromClause, fieldName ,fieldName);
     } else {
       sql = "select * from ( select rv.id as record_id ,fv.id as \"%s_id\","
           + " public.ST_isValidReason(public.ST_SetSRID(public.ST_GeomFromGeoJSON(fv.value::json->'geometry'),"

@@ -88,6 +88,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
+import static org.eea.validation.util.AutomaticRules.FROM_CLAUSE_STATEMENT;
 import static org.eea.validation.util.AutomaticRules.SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE;
 
 /**
@@ -249,15 +250,9 @@ public class RulesServiceImpl implements RulesService {
   /** The Constant VALID: {@value}. */
   private static final String VALID = "Valid";
 
-  private static final String FROM = "from";
-
-  private static final String WHERE = "where";
-
   private final static String SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_1 = "select * from ( select rv.id as record_id ,fv.id as";
 
   private final static String SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_2 = "select rv.id as record_id , fv.id as";
-
-  private final static String SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE = "select record_id, ST_isValidReason";
 
   /** The path public file. */
   @Value("${validationExportPathFile}")
@@ -802,15 +797,11 @@ public class RulesServiceImpl implements RulesService {
             /*find table path*/
             Document tableSchemaDoc = schemasRepository.findTableSchema(datasetSchemaId,getTableSchemaIdFromIdFieldSchema(schemasRepository.findByIdDataSetSchema(new ObjectId(datasetSchemaId)), referenceId));
             String tableName = tableSchemaDoc.get("nameTableSchema").toString();
-            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
-            S3PathResolver dataTableResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId() != null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), tableName);
-            dataTableResolver.setPath(S3_TABLE_AS_FOLDER_QUERY_PATH);
-            String key = s3Helper.getS3Service().getS3Path(dataTableResolver);
 
             // Validate Geometry
             ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckGeometries(datasetId,
                     document, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                    "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, isBigDataflow, key));
+                    "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, isBigDataflow, tableName));
             // ST_Transform
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
 
@@ -1353,7 +1344,7 @@ public class RulesServiceImpl implements RulesService {
           // automatically in the process when we update the fieldSchema in previous calls of the copy
           // process
           copyData(dictionaryOriginTargetObjectId, originDatasetSchemaId,
-              dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule, datasetId, dataSetMetabaseVO, dataFlowVO);
+              dictionaryOriginTargetDatasetsId, newDatasetSchemaId, rule, datasetId, dataFlowVO);
         }
       }
     }
@@ -1385,10 +1376,10 @@ public class RulesServiceImpl implements RulesService {
    */
   private void copyData(Map<String, String> dictionaryOriginTargetObjectId,
                                        String originDatasetSchemaId, Map<Long, Long> dictionaryOriginTargetDatasetsId,
-                                       String newDatasetSchemaId, Rule rule,Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) throws EEAException {
+                                       String newDatasetSchemaId, Rule rule, Long datasetId, DataFlowVO dataFlowVO) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
-    fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId,datasetId ,dataSetMetabaseVO, dataFlowVO);
+    fillRuleCopied(rule, dictionaryOriginTargetObjectId, dictionaryOriginTargetDatasetsId, datasetId, dataFlowVO);
 
     // If the rule is a Dataset type, we need to do the same process with the
     // IntegritySchema
@@ -1418,7 +1409,7 @@ public class RulesServiceImpl implements RulesService {
    */
   private void fillRuleCopied(Rule rule,
                                              Map<String, String> dictionaryOriginTargetObjectId,
-                                             Map<Long, Long> dictionaryOriginTargetDatasetsId, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) {
+                                             Map<Long, Long> dictionaryOriginTargetDatasetsId, Long datasetId, DataFlowVO dataFlowVO) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
@@ -1480,7 +1471,7 @@ public class RulesServiceImpl implements RulesService {
             if (BooleanUtils.isTrue(dataFlowVO.getBigData())) {
               dictionaryOriginTargetObjectId.forEach((String oldObjectId, String newObjectId) -> {
                 try {
-                  fixSqlSentence(rule, newObjectId, dataSetMetabaseVO, datasetId);
+                  fixSqlSentence(rule, newObjectId, datasetId);
                 } catch (Exception exception) {
                   LOG.error("Error updating isSQLSentence information while copying dataset for rule {}", rule.getRuleId());
                 }
@@ -1697,7 +1688,7 @@ public class RulesServiceImpl implements RulesService {
           iterator.remove();
         } else {
           List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
-          importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities, datasetId, dataSetMetabaseVO, dataFlowVO);
+          importData(dictionaryOriginTargetObjectId, newDatasetSchemaId, rule, integrities, datasetId, dataFlowVO);
         }
       }
     }
@@ -1881,10 +1872,10 @@ public class RulesServiceImpl implements RulesService {
    * @throws EEAException the EEA exception
    */
   private void importData(Map<String, String> dictionaryOriginTargetObjectId,
-                                         String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) throws EEAException {
+                                         String newDatasetSchemaId, Rule rule, List<IntegritySchema> integrities, Long datasetId, DataFlowVO dataFlowVO) throws EEAException {
 
     // Here we change the fields of the rule involved with the help of the dictionary
-    fillRuleImport(rule, dictionaryOriginTargetObjectId, datasetId, dataSetMetabaseVO, dataFlowVO);
+    fillRuleImport(rule, dictionaryOriginTargetObjectId, datasetId, dataFlowVO);
 
     // If the rule is a Dataset type, we need to do the same process with the
     // IntegritySchema
@@ -1910,7 +1901,7 @@ public class RulesServiceImpl implements RulesService {
    * @param dictionaryOriginTargetObjectId the dictionary origin target object id
    */
   private void fillRuleImport(Rule rule,
-                                             Map<String, String> dictionaryOriginTargetObjectId, Long datasetId, DataSetMetabaseVO dataSetMetabaseVO, DataFlowVO dataFlowVO) {
+                                             Map<String, String> dictionaryOriginTargetObjectId, Long datasetId, DataFlowVO dataFlowVO) {
 
     String newRuleId = new ObjectId().toString();
     dictionaryOriginTargetObjectId.put(rule.getRuleId().toString(), newRuleId);
@@ -1957,7 +1948,7 @@ public class RulesServiceImpl implements RulesService {
         rule.setSqlSentence(newSqlSentence);
         if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
           try {
-            fixSqlSentence(rule, newObjectId, dataSetMetabaseVO, datasetId);
+            fixSqlSentence(rule, newObjectId, datasetId);
           } catch (Exception exception) {
             LOG.error("Error updating isSQLSentence information while importing dataset for rule {}", rule.getRuleId());
           }
@@ -2611,35 +2602,25 @@ public class RulesServiceImpl implements RulesService {
     return datasetRepository.getTableId(tableSchemaId, datasetId);
   }
 
-  private String getModifiedSql(Rule rule, String pathToDremioForTable) {
-    //old automatic rule
+  private String getModifiedSql(Rule rule, String tableName, Long datasetId) {
     if (rule.getSqlSentence().startsWith(SPATIAL_DATA_OLD_AUTOMATIC_QC_RULE_1)) {
+      String fromClause = String.format(FROM_CLAUSE_STATEMENT, datasetId, tableName);
       String fieldName = getFieldName(rule);
-      return String.format(SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE, fieldName, pathToDremioForTable, fieldName ,fieldName);
-    } else if (rule.getSqlSentence().startsWith(SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE)) { //new automatic rule with wrong values
-      int fromIndex = rule.getSqlSentence().indexOf(FROM);
-      int whereIndex = rule.getSqlSentence().indexOf(WHERE);
-      String selectClause = rule.getSqlSentence().substring(0, fromIndex + "from ".length());
-      String whereClauseOnwards = rule.getSqlSentence().substring(whereIndex);
-      return selectClause + pathToDremioForTable + " " + whereClauseOnwards;
+      return String.format(SPATIAL_DATA_NEW_AUTOMATIC_QC_RULE_SENTENCE, fieldName, fromClause, fieldName ,fieldName);
     }
     return "";
   }
 
-  private void fixSqlSentence(Rule rule, String newObjectId, DataSetMetabaseVO dataSetMetabaseVO, Long datasetId) {
-    if (!newObjectId.startsWith(DATASET)) {
+  private void fixSqlSentence(Rule rule, String newObjectId, Long datasetId) {
+    if (rule.isAutomatic() && !newObjectId.startsWith(DATASET)) {
       DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(newObjectId));
       if (datasetSchema != null && rule.getReferenceId() != null) {
         String tableSchemaId = getTableSchemaIdFromIdFieldSchema(datasetSchema, String.valueOf(rule.getReferenceId()));
         if (!tableSchemaId.isBlank()) {
-          String tableSchemaName = datasetSchemaController.getTableSchemaName(newObjectId, tableSchemaId);
-          S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L, datasetId, tableSchemaName);
-          String pathToDremioForTable = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-          if (rule.isAutomatic()) {
-            String modifiedSentence = getModifiedSql(rule, pathToDremioForTable);
-            if (!modifiedSentence.isBlank()) {
-              rule.setSqlSentence(modifiedSentence);
-            }
+          String tableName = datasetSchemaController.getTableSchemaName(newObjectId, tableSchemaId);
+          String modifiedSentence = getModifiedSql(rule, tableName, datasetId);
+          if (!modifiedSentence.isBlank()) {
+            rule.setSqlSentence(modifiedSentence);
           }
         }
       }
