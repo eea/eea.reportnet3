@@ -1511,7 +1511,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE')")
   @GetMapping(value = "/v1/{datasetSchemaId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export table definition by table schema id",
@@ -1662,7 +1662,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE', 'REFERENCEDATASET_LEAD_REPORTER')")
   @GetMapping(value = "/v1/dataset/{datasetId}/exportFieldSchemas",
       produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export dataset definition by dataset id",
