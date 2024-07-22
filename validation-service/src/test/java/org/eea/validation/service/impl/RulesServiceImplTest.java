@@ -2702,11 +2702,6 @@ public class RulesServiceImplTest {
 
     Mockito.when(schemasRepository.findTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(document);
-    Mockito.when(datasetMetabaseController.findDatasetMetabaseById(1L))
-        .thenReturn(dataset);
-
-    Mockito.when(s3Helper.getS3Service()).thenReturn(s3Service);
-    Mockito.when(s3Service.getS3Path(new S3PathResolver(1L, 23, 1L, Mockito.any()))).thenReturn("dsfds");
   }
 
 
