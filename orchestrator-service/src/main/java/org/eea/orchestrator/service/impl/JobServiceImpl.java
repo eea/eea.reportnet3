@@ -20,8 +20,6 @@ import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;

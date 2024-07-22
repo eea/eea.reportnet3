@@ -772,6 +772,9 @@ public final class EEAErrorMessage {
   /** The Constant FILE_EXPORT_ERROR_MESSAGE */
   public static final String FILE_EXPORT_ERROR_MESSAGE = "Error exporting file";
 
+  /** The Constant FILE_EXPORT_ERROR_MESSAGE */
+  public static final String AT_LEAST_ONE_FILTER_SHOULD_BE_ACTIVE = "At least one filter should be active";
+
   /**
    * Instantiates a new EEA error message.
    */
