@@ -90,9 +90,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getJobsStatuses = async (index, page, rows, sortOption) => {
     setLoadingStatus('pending');
+    const monitoringTab = index !== undefined ? index === 0 : activeIndex === 0;
     let data;
+
     try {
-      if (index !== undefined ? index === 0 : activeIndex === 0) {
+      if (monitoringTab) {
         data = await JobsStatusesService.getJobsStatuses({
           pageNum: page !== undefined ? page : pageNum,
           numberRows: rows !== undefined ? rows : numberRows,
@@ -116,20 +118,23 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setJobsStatusesList(data.jobsList);
         setRemainingJobs(data.remainingJobs);
       } else {
-        if (!(index && !page && (isCustodian || isAdmin))) {
-          if ((index && !page && isProvider) || (!isEmpty(filterBy) && index === undefined)) {
+        const adminCustodianTabChange = index && !page && (isCustodian || isAdmin);
+        const providerTabChange = index && !page && isProvider;
+
+        if (!adminCustodianTabChange) {
+          if (providerTabChange || (!isEmpty(filterBy) && index === undefined)) {
             data = await JobsStatusesService.getJobsHistory({
               pageNum: page !== undefined ? page : pageNum,
               numberRows: rows !== undefined ? rows : numberRows,
               sortOrder: sortOption !== undefined ? sortOption.sortOrder : sort.order,
               sortField: sortOption !== undefined ? sortOption.sortField : sort.field,
-              jobId: index && !page && isProvider ? undefined : filterBy.jobId,
-              jobType: index && !page && isProvider ? undefined : filterBy.jobType?.join(),
-              dataflowId: index && !page && isProvider ? undefined : filterBy.dataflowId,
-              dataflowName: index && !page && isProvider ? undefined : filterBy.dataflowName,
-              providerId: index && !page && isProvider ? undefined : filterBy.providerId,
-              datasetId: index && !page && isProvider ? undefined : filterBy.datasetId,
-              datasetName: index && !page && isProvider ? undefined : filterBy.datasetName,
+              jobId: providerTabChange ? undefined : filterBy.jobId,
+              jobType: providerTabChange ? undefined : filterBy.jobType?.join(),
+              dataflowId: providerTabChange ? undefined : filterBy.dataflowId,
+              dataflowName: providerTabChange ? undefined : filterBy.dataflowName,
+              providerId: providerTabChange ? undefined : filterBy.providerId,
+              datasetId: providerTabChange ? undefined : filterBy.datasetId,
+              datasetName: providerTabChange ? undefined : filterBy.datasetName,
               creatorUsername: !isAdmin
                 ? isProvider
                   ? userContext.preferredUsername
@@ -153,7 +158,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         }
       }
 
-      if ((index !== undefined ? index === 0 : activeIndex === 0) || (!isEmpty(filterBy) && !(index && !page))) {
+      if (monitoringTab || (!isEmpty(filterBy) && !(index && !page))) {
         if (isProvider && !providersTotalRecords) {
           setProvidersTotalRecords(data.filteredRecords);
         } else if (index !== undefined && !page && !(isCustodian || isAdmin)) {
@@ -526,7 +531,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.footer}>
       <Button
         className="p-button-secondary"
-        disabled={loadingStatus === 'pending' || isEmpty(jobsStatuses)}
+        disabled={loadingStatus === 'pending'}
         icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['refresh']}
         onClick={onRefresh}
