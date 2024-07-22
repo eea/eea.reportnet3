@@ -510,6 +510,27 @@ public class DocumentControllerImpl implements DocumentController {
     return this.getAllDocumentsByDataflow(providerId, dataflowId);
   }
 
+  /**
+   * Clone all documents from the origin dataflow to the destination dataflow.
+   *
+   * @param originDataflowId The ID of the origin dataflow.
+   * @param destinationDataflowId The ID of the destination dataflow.
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/private/cloneAllDocuments")
+  @ApiOperation(value = "clone all documents from origin to destination dataflow", hidden = true)
+  public void cloneAllDocuments(
+          @RequestParam("originDataflowId") final Long originDataflowId,
+          @RequestParam("destinationDataflowId") final Long destinationDataflowId) throws Exception {
+      try {
+          documentService.cloneAllDocumentsInDataflow(originDataflowId, destinationDataflowId);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error cloning documents from dataflowId {} to dataflowId {} Message: {}", originDataflowId, destinationDataflowId, e.getMessage());
+        throw e;
+      }
+  }
+
 
 
   /**
