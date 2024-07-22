@@ -116,25 +116,28 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setJobsStatusesList(data.jobsList);
         setRemainingJobs(data.remainingJobs);
       } else {
-        data = await JobsStatusesService.getJobsHistory({
-          pageNum: page !== undefined ? page : pageNum,
-          numberRows: rows !== undefined ? rows : numberRows,
-          sortOrder: sortOption !== undefined ? sortOption.sortOrder : sort.order,
-          sortField: sortOption !== undefined ? sortOption.sortField : sort.field,
-          jobId: filterBy.jobId,
-          jobType: filterBy.jobType?.join(),
-          dataflowId: filterBy.dataflowId,
-          dataflowName: filterBy.dataflowName,
-          providerId: filterBy.providerId,
-          datasetId: filterBy.datasetId,
-          datasetName: filterBy.datasetName,
-          creatorUsername: !isAdmin
-            ? isProvider
-              ? userContext.preferredUsername
-              : filterBy.creatorUsername
-            : undefined,
-          jobStatus: filterBy.jobStatus?.join()
-        });
+        if (!isEmpty(filterBy) || (isProvider && !isAdmin && index && !page)) {
+          data = await JobsStatusesService.getJobsHistory({
+            pageNum: page !== undefined ? page : pageNum,
+            numberRows: rows !== undefined ? rows : numberRows,
+            sortOrder: sortOption !== undefined ? sortOption.sortOrder : sort.order,
+            sortField: sortOption !== undefined ? sortOption.sortField : sort.field,
+            jobId: filterBy.jobId,
+            jobType: filterBy.jobType?.join(),
+            dataflowId: filterBy.dataflowId,
+            dataflowName: filterBy.dataflowName,
+            providerId: filterBy.providerId,
+            datasetId: filterBy.datasetId,
+            datasetName: filterBy.datasetName,
+            creatorUsername: !isAdmin
+              ? isProvider
+                ? userContext.preferredUsername
+                : filterBy.creatorUsername
+              : undefined,
+            jobStatus: filterBy.jobStatus?.join()
+          });
+        }
+
         if (!isEmpty(filterBy)) {
           setData(data.jobHistoryVOList);
           setJobsStatusesList(data.jobHistoryVOList);
@@ -142,7 +145,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         } else {
           setIsFiltered(false);
           setJobsStatusesList([]);
-          if (isProvider && index && !page) {
+          if (isProvider && !isAdmin && index && !page) {
             setProvidersTotalRecords(data.filteredRecords);
           }
         }
