@@ -90,9 +90,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getJobsStatuses = async (index, page, rows, sortOption) => {
     setLoadingStatus('pending');
+    const monitoringTab = index !== undefined ? index === 0 : activeIndex === 0;
     let data;
+
     try {
-      if (index !== undefined ? index === 0 : activeIndex === 0) {
+      if (monitoringTab) {
         data = await JobsStatusesService.getJobsStatuses({
           pageNum: page !== undefined ? page : pageNum,
           numberRows: rows !== undefined ? rows : numberRows,
@@ -116,29 +118,34 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setJobsStatusesList(data.jobsList);
         setRemainingJobs(data.remainingJobs);
       } else {
-        if (!isEmpty(filterBy) || (isProvider && !isAdmin && index && !page)) {
-          data = await JobsStatusesService.getJobsHistory({
-            pageNum: page !== undefined ? page : pageNum,
-            numberRows: rows !== undefined ? rows : numberRows,
-            sortOrder: sortOption !== undefined ? sortOption.sortOrder : sort.order,
-            sortField: sortOption !== undefined ? sortOption.sortField : sort.field,
-            jobId: filterBy.jobId,
-            jobType: filterBy.jobType?.join(),
-            dataflowId: filterBy.dataflowId,
-            dataflowName: filterBy.dataflowName,
-            providerId: filterBy.providerId,
-            datasetId: filterBy.datasetId,
-            datasetName: filterBy.datasetName,
-            creatorUsername: !isAdmin
-              ? isProvider
-                ? userContext.preferredUsername
-                : filterBy.creatorUsername
-              : undefined,
-            jobStatus: filterBy.jobStatus?.join()
-          });
+        const adminCustodianTabChange = index && !page && (isCustodian || isAdmin);
+        const providerTabChange = index && !page && isProvider;
+
+        if (!adminCustodianTabChange) {
+          if (providerTabChange || (!isEmpty(filterBy) && index === undefined)) {
+            data = await JobsStatusesService.getJobsHistory({
+              pageNum: page !== undefined ? page : pageNum,
+              numberRows: rows !== undefined ? rows : numberRows,
+              sortOrder: sortOption !== undefined ? sortOption.sortOrder : sort.order,
+              sortField: sortOption !== undefined ? sortOption.sortField : sort.field,
+              jobId: providerTabChange ? undefined : filterBy.jobId,
+              jobType: providerTabChange ? undefined : filterBy.jobType?.join(),
+              dataflowId: providerTabChange ? undefined : filterBy.dataflowId,
+              dataflowName: providerTabChange ? undefined : filterBy.dataflowName,
+              providerId: providerTabChange ? undefined : filterBy.providerId,
+              datasetId: providerTabChange ? undefined : filterBy.datasetId,
+              datasetName: providerTabChange ? undefined : filterBy.datasetName,
+              creatorUsername: !isAdmin
+                ? isProvider
+                  ? userContext.preferredUsername
+                  : filterBy.creatorUsername
+                : undefined,
+              jobStatus: filterBy.jobStatus?.join()
+            });
+          }
         }
 
-        if (!isEmpty(filterBy)) {
+        if (!isEmpty(filterBy) && !(index && !page)) {
           setData(data.jobHistoryVOList);
           setJobsStatusesList(data.jobHistoryVOList);
           setFilteredJobs(data.filteredJobs);
@@ -151,10 +158,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         }
       }
 
-      if ((index !== undefined ? index === 0 : activeIndex === 0) || !isEmpty(filterBy)) {
+      if (monitoringTab || (!isEmpty(filterBy) && !(index && !page))) {
         if (isProvider && !providersTotalRecords) {
           setProvidersTotalRecords(data.filteredRecords);
-        } else if (index !== undefined && !page) {
+        } else if (index !== undefined && !page && !(isCustodian || isAdmin)) {
           setProvidersTotalRecords(data.filteredRecords);
         }
 
@@ -524,7 +531,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.footer}>
       <Button
         className="p-button-secondary"
-        disabled={loadingStatus === 'pending' || isEmpty(jobsStatuses)}
+        disabled={loadingStatus === 'pending'}
         icon={isRefreshing ? 'spinnerAnimate' : 'refresh'}
         label={resourcesContext.messages['refresh']}
         onClick={onRefresh}
