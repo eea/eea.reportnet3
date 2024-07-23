@@ -124,12 +124,21 @@ public interface ValidationController {
   void restartTask(@PathVariable("taskId") Long taskId);
 
   /**
-   * Lists the task ids of validation tasks that are in progress for more than the specified period of time
+   * Lists the tasks of validation tasks that are in progress for more than the specified period of time
    * @param timeInMinutes
    * @return
    */
   @GetMapping(value = "/listInProgressValidationTasks/{timeInMinutes}")
-  List<BigInteger> listInProgressValidationTasksThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
+  List<TaskVO> listInProgressValidationTasksThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
+
+  /**
+   * Lists the tasks of validation tasks that are in progress between a specific period of time
+   * @param timeInMinutesFrom
+   * @param timeInMinutesTo
+   * @return
+   */
+  @GetMapping(value = "/listInProgressValidationTasksBetween/{timeInMinutesFrom}/{timeInMinutesTo}")
+  List<TaskVO> listInProgressValidationTasksBetweenTime(@PathVariable("timeInMinutesFrom") long timeInMinutesFrom, @PathVariable("timeInMinutesTo") long timeInMinutesTo);
 
   /**
    * Deletes the locks related to release

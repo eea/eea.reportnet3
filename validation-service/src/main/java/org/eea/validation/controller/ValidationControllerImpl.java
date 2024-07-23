@@ -457,7 +457,7 @@ public class ValidationControllerImpl implements ValidationController {
   @Override
   @GetMapping(value = "/listInProgressValidationTasks/{timeInMinutes}")
   @ApiOperation(value = "Lists the validation tasks that are in progress for more than the specified period of time", hidden = true)
-  public List<BigInteger> listInProgressValidationTasksThatExceedTime(@ApiParam(
+  public List<TaskVO> listInProgressValidationTasksThatExceedTime(@ApiParam(
           value = "Time limit in minutes that in progress validation tasks exceed",
           example = "15") @PathVariable("timeInMinutes") long timeInMinutes) {
     LOG.info("Finding in progress validation tasks that exceed " + timeInMinutes + " minutes");
@@ -465,6 +465,19 @@ public class ValidationControllerImpl implements ValidationController {
       return validationHelper.getInProgressValidationTasksThatExceedTime(timeInMinutes);
     } catch (Exception e) {
       LOG.error("Error while finding in progress tasks that exceed " + timeInMinutes + " minutes " + e.getMessage());
+      return new ArrayList<>();
+    }
+  }
+
+  @Override
+  @GetMapping(value = "/listInProgressValidationTasksBetween/{timeInMinutesFrom}/{timeInMinutesTo}")
+  @ApiOperation(value = "Lists the validation tasks that are in progress between a specified period of time", hidden = true)
+  public List<TaskVO> listInProgressValidationTasksBetweenTime(long timeInMinutesFrom, long timeInMinutesTo) {
+    LOG.info("Finding in progress validation tasks between {} minutes and {} minutes", timeInMinutesFrom, timeInMinutesTo);
+    try {
+      return validationHelper.getInProgressValidationTasksBetweenTime(timeInMinutesFrom, timeInMinutesTo);
+    } catch (Exception e) {
+      LOG.error("Error while finding in progress validation tasks between {} minutes and {} minutes. Error message: {}", timeInMinutesFrom, timeInMinutesTo, e.getMessage());
       return new ArrayList<>();
     }
   }
