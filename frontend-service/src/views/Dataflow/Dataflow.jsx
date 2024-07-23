@@ -102,6 +102,7 @@ export const Dataflow = () => {
     isDataUpdated: false,
     isDeleteAllLeadReportersDialogVisible: false,
     isDeleteDialogVisible: false,
+    isDeletingAllReporters: false,
     isDownloadingUsers: false,
     isExportDialogVisible: false,
     isExportEUDatasetLoading: false,
@@ -544,6 +545,9 @@ export const Dataflow = () => {
   const setIsUpdatingPermissions = isUpdatingPermissions =>
     dataflowDispatch({ type: 'SET_IS_UPDATING_PERMISSIONS', payload: { isUpdatingPermissions } });
 
+  const setIsDeletingAllReporters = isDeletingAllReporters =>
+    dataflowDispatch({ type: 'SET_IS_DELETING_ALL_REPORTERS', payload: { isDeletingAllReporters } });
+
   const setAutomaticReportingDeletion = isAutomaticReportingDeletion =>
     dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { isAutomaticReportingDeletion } });
 
@@ -637,8 +641,10 @@ export const Dataflow = () => {
   };
 
   const onConfirmDeleteAllLeadReporters = async () => {
+    setIsDeletingAllReporters(true);
     try {
       await RepresentativeService.deleteAllLeadReporters(dataflowId);
+      setIsDeletingAllReporters(false);
     } catch (error) {
       console.error('Dataflow - onDeleteAllLeadReporters.', error);
       notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
@@ -679,11 +685,14 @@ export const Dataflow = () => {
       />
       <Button
         className="p-button-animated-blink"
-        disabled={dataflowState.isDeleteAllLeadReportersDialogVisible}
-        icon="trash"
+        disabled={
+          isOpenStatus || dataflowState.isDeleteAllLeadReportersDialogVisible || dataflowState.isDeletingAllReporters
+        }
+        icon={dataflowState.isDeletingAllReporters ? 'spinnerAnimate' : 'trash'}
         label={resourcesContext.messages['deleteAllLeadReportersButton']}
         onClick={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', true)}
-        style={{ display: 'none' }}
+        tooltip={isOpenStatus ? resourcesContext.messages['deleteAllLeadReportersButtonTooltip'] : ''}
+        tooltipOptions={{ position: 'top' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -1484,7 +1493,7 @@ export const Dataflow = () => {
             onConfirm={onConfirmDeleteAllLeadReporters}
             onHide={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', false)}
             visible={dataflowState.isDeleteAllLeadReportersDialogVisible}>
-            {resourcesContext.messages['delateAllLeadReportersDialogMessage']}
+            {resourcesContext.messages['deleteAllLeadReportersDialogMessage']}
           </ConfirmDialog>
         )}
 

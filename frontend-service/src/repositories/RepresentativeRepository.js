@@ -31,9 +31,9 @@ export const RepresentativeRepository = {
       url: getUrl(RepresentativeConfig.deleteLeadReporter, { leadReporterId, dataflowId })
     }),
 
-  deleteAllLeadsReporters: async dataflowId =>
+  deleteAllLeadReporters: async dataflowId =>
     await HTTPRequester.delete({
-      url: getUrl(RepresentativeConfig.deleteLeadReporter, { dataflowId })
+      url: getUrl(RepresentativeConfig.deleteAllLeadReporters, { dataflowId })
     }),
 
   exportFile: async dataflowId =>
