@@ -75,6 +75,7 @@ export const Dataflow = () => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
+    allReportersDeleted: false,
     anySchemaAvailableInPublic: false,
     currentUrl: '',
     data: {},
@@ -548,6 +549,9 @@ export const Dataflow = () => {
   const setIsDeletingAllReporters = isDeletingAllReporters =>
     dataflowDispatch({ type: 'SET_IS_DELETING_ALL_REPORTERS', payload: { isDeletingAllReporters } });
 
+  const setAllReportersDeleted = allReportersDeleted =>
+    dataflowDispatch({ type: 'SET_ALL_REPORTERS_DELETED', payload: { allReportersDeleted } });
+
   const setAutomaticReportingDeletion = isAutomaticReportingDeletion =>
     dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { isAutomaticReportingDeletion } });
 
@@ -641,15 +645,16 @@ export const Dataflow = () => {
   };
 
   const onConfirmDeleteAllLeadReporters = async () => {
+    manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
+    setAllReportersDeleted(false);
     setIsDeletingAllReporters(true);
     try {
       await RepresentativeService.deleteAllLeadReporters(dataflowId);
+      setAllReportersDeleted(true);
       setIsDeletingAllReporters(false);
     } catch (error) {
       console.error('Dataflow - onDeleteAllLeadReporters.', error);
       notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
-    } finally {
-      manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
     }
   };
 
@@ -1369,6 +1374,7 @@ export const Dataflow = () => {
               <ManageLeadReporters
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
+                leadReportersDeleted={dataflowState.allReportersDeleted}
                 representativesImport={dataflowState.representativesImport}
                 selectedDataProviderGroup={{
                   dataProviderGroupId: dataflowState.data.dataProviderGroupId,

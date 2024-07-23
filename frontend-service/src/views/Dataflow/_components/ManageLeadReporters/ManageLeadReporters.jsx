@@ -42,6 +42,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManageLeadReporters = ({
   dataflowId,
   dataflowType,
+  leadReportersDeleted = false,
   representativesImport = false,
   setDataProviderSelected,
   selectedDataProviderGroup,
@@ -113,6 +114,10 @@ export const ManageLeadReporters = ({
       setRepresentativeImport(false);
     }
   }, [representativesImport]);
+
+  useEffect(() => {
+    if (leadReportersDeleted) refreshData();
+  }, [leadReportersDeleted]);
 
   useEffect(() => {
     getInitialData();
