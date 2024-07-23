@@ -5,9 +5,7 @@ import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.*;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
-import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /** The Interface RepresentativeService. */
@@ -33,13 +31,21 @@ public interface RepresentativeService {
    */
   void createProvider(DataProviderVO dataProviderVO) throws Exception;
 
-    /**
-     * Delete dataflow representative.
-     *
-     * @param representativeId the representative id
-     * @throws EEAException the EEA exception
-     */
+  /**
+   * Delete dataflow representative.
+   *
+   * @param representativeId the representative id
+   * @throws EEAException the EEA exception
+   */
   void deleteDataflowRepresentative(Long representativeId) throws EEAException;
+
+  /**
+   * Delete dataflow representatives.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  void deleteDataflowRepresentatives(Long dataflowId) throws EEAException;
 
   /**
    * Update dataflow representative.

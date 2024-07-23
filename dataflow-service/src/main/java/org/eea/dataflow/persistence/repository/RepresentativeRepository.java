@@ -100,4 +100,12 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
    */
   @Query("SELECT distinct r from Representative r left JOIN FETCH r.leadReporters rep WHERE rep.invalid= :invalid")
   List<Representative> findAllByInvalid(@Param("invalid") boolean invalid);
+
+  /**
+   * Delete by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   */
+  void deleteByDataflowId(Long dataflowId);
+
 }
