@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -29,6 +30,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -135,7 +137,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * The Constant QUERY_3_CONDITIONAL.
    */
   private static final String QUERY_3_CONDITIONAL =
-      "AND (cond.id_field_schema = ? AND cond.value = ? AND cond.id_record = fv.id_record or ? IS NULL) ";
+      "AND (cond.id_field_schema = ? AND cond.value = ANY(?) AND cond.id_record = fv.id_record or ? IS NULL) ";
 
   /**
    * The Constant QUERY_ORDER.
@@ -314,36 +316,37 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   private List<FieldVO> executeQueryfindByIdFieldSchemaWithTagOrdered(Session session, String query,
       Integer resultsNumber, String idPk, String labelSchemaId, String searchValue,
       String conditionalSchemaId, String conditionalValue) {
-    return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
-      @Override
-      public List<FieldVO> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-          stmt.setString(1, idPk);
-          stmt.setString(2, labelSchemaId);
-          stmt.setString(3, searchValue);
-          stmt.setString(4, searchValue);
-          stmt.setString(5, searchValue);
-          if (StringUtils.isNotBlank(conditionalSchemaId)) {
-            stmt.setString(6, conditionalSchemaId);
-            stmt.setString(7, conditionalValue);
-            stmt.setString(8, conditionalSchemaId);
-          }
-
-          ResultSet rs = stmt.executeQuery();
-          List<FieldVO> fields = new ArrayList<>();
-          while (rs.next()) {
-            FieldVO fieldVO = new FieldVO();
-            fieldVO.setId(rs.getString("id"));
-            fieldVO.setValue(rs.getString("value"));
-            fieldVO.setIdFieldSchema(rs.getString("id_field_schema"));
-            fieldVO.setLabel(rs.getString("label"));
-            fields.add(fieldVO);
-          }
-          return fields;
-        } catch (Exception e) {
-          LOG.error("Unexpected error! Error executing query {} with max rows {}. Message: {}", query, resultsNumber, e.getMessage());
-          throw e;
+    return session.doReturningWork(conn -> {
+      try (PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setString(1, idPk);
+        stmt.setString(2, labelSchemaId);
+        stmt.setString(3, searchValue);
+        stmt.setString(4, searchValue);
+        stmt.setString(5, searchValue);
+        if (StringUtils.isNotBlank(conditionalSchemaId)) {
+          String[] values = Arrays.stream(conditionalValue.split("[,;]"))
+              .map(String::trim)
+              .toArray(String[]::new);
+          Array array = conn.createArrayOf("VARCHAR", values);
+          stmt.setString(6, conditionalSchemaId);
+          stmt.setArray(7, array);
+          stmt.setString(8, conditionalSchemaId);
         }
+
+        ResultSet rs = stmt.executeQuery();
+        List<FieldVO> fields = new ArrayList<>();
+        while (rs.next()) {
+          FieldVO fieldVO = new FieldVO();
+          fieldVO.setId(rs.getString("id"));
+          fieldVO.setValue(rs.getString("value"));
+          fieldVO.setIdFieldSchema(rs.getString("id_field_schema"));
+          fieldVO.setLabel(rs.getString("label"));
+          fields.add(fieldVO);
+        }
+        return fields;
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error executing query {} with max rows {}. Message: {}", query, resultsNumber, e.getMessage());
+        throw e;
       }
     });
   }
