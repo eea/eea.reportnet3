@@ -7,7 +7,7 @@ import trim from 'lodash/trim';
 
 import styles from './SqlHelp.module.scss';
 
-import { SqlHelpListBox } from './_components/SqlHelpListBox';
+import { SqlHelpListBox } from './_components/SqlHelpListBox/SqlHelpListBox';
 
 import { DataflowService } from 'services/DataflowService';
 
