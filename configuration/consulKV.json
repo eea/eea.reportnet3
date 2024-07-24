@@ -1954,5 +1954,13 @@
   {
     "key": "config/orchestrator/scheduling.inProgress.import.fme.jobs.without.callback.max.time",
     "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.task.min.time",
+    "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
+  },
+  {
+    "key": "config/orchestrator/scheduling.inProgress.validation.task.min.short.version",
+    "value": "JHtGTUVfVE9LRU46QmFzaWMgVW1Wd2IzSjBibVYwTXpwU1pYQnZjblJ1WlhRelh6SXdNakFofQ=="
   }
 ]
