@@ -143,11 +143,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     private SchemasRepository schemasRepository;
 
-    /** The Constant HEADER_NAME: {@value}. */
     private static final String HEADER_NAME = "headerName";
     private static final String TYPE_DATA = "typeData";
     private static final String ID_RECORD = "idRecord";
-    private static final String ID_TABLE_SCHEMA= "idTableSchema";
+    private static final String ID_TABLE_SCHEMA = "idTableSchema";
+    private static final String NAME_TABLE_SCHEMA = "nameTableSchema";
 
 
 
@@ -1420,12 +1420,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (org.apache.commons.lang3.StringUtils.isBlank(searchValue)) {
             searchValue = "";
         }
+        //get the dataset id that contains the reference values
+        Long referenceDatasetId = datasetMetabaseService.getDatasetDestinationForeignRelation(datasetIdOrigin, idPk);
+        String referenceDatasetSchemaId = datasetSchemaService.getDatasetSchemaId(referenceDatasetId);
+        Document referenceFieldSchema = schemasRepository.findFieldSchema(referenceDatasetSchemaId, idPk);
 
-        Long idDatasetDestination =
-                datasetMetabaseService.getDatasetDestinationForeignRelation(datasetIdOrigin, idPk);
-
-        TenantResolver
-                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
+        TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, referenceDatasetId));
         // If the variable resultsNumbers is null, then the limit of results by default it will be 15.
         // Otherwise the limit will be
         // the number passed with a max of 100. That will be the results showed on screen.
@@ -1437,30 +1437,24 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         DataType dataType = DataType.TEXT;
 
-        if(fieldSchema.get(TYPE_DATA) != null){
-            String typeData = (String) fieldSchema.get(TYPE_DATA);
+        if(referenceFieldSchema.get(TYPE_DATA) != null){
+            String typeData = (String) referenceFieldSchema.get(TYPE_DATA);
             if(DataType.fromValue(typeData) != null){
                 dataType = DataType.fromValue(typeData);
             }
         }
 
-        String idRecord = (String) fieldSchema.get(ID_RECORD);
-        Document recordSchema = schemasRepository.findRecordSchema(datasetSchemaId, idRecord);
-        String tableSchemaId = (String) recordSchema.get(ID_TABLE_SCHEMA);
-        // we find table and field to send in notification
-        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
-                tableSchemaId);
-        String tableSchemaName = (String) tableSchema.get("nameTableSchema");
-        String fieldSchemaName = (String) fieldSchema.get(HEADER_NAME);
+        String referenceRecordId = referenceFieldSchema.get(ID_RECORD).toString();
+        Document referenceRecordSchema = schemasRepository.findRecordSchemaByRecordSchemaId(referenceDatasetSchemaId, referenceRecordId);
+        String referenceTableSchemaId = referenceRecordSchema.get(ID_TABLE_SCHEMA).toString();
+        // we find reference dataset information to retrieve data
+        Document referenceTableSchema = schemasRepository.findTableSchema(referenceDatasetSchemaId, referenceTableSchemaId);
+        String referenceTableSchemaName = referenceTableSchema.get(NAME_TABLE_SCHEMA).toString();
+        String referenceFieldName = referenceFieldSchema.get(HEADER_NAME).toString();
 
-        // we catch if the query have error pk data and send notification
         try {
-            /*
-            do a select query from reference dataset and get only field with name the same one in fieldSchema.name
-            iterate through objects and for each value create a FieldVo object and set up label, value, id_fieldSchema
-            return list of FieldVOs.
-             */
-            List<String> linkValues = getLinkValuesFromReferencedDataset(datasetIdOrigin, tableSchemaName, fieldSchemaName, tableSchemaId);
+            //retrieve the value from dremio.
+            List<String> linkValues = getLinkValuesFromReferencedDataset(referenceDatasetId, referenceTableSchemaName, referenceFieldName, referenceTableSchemaId);
             for(String value: linkValues){
                 FieldVO field = new FieldVO();
                 field.setValue(value);
@@ -1473,6 +1467,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             LOG.error("Error with dataset id {}  field  with id {} because data has not correct format {}",
                     datasetIdOrigin, idPk, dataType);
+
+            String idRecord = fieldSchema.get(ID_RECORD).toString();
+            Document recordSchema = schemasRepository.findRecordSchemaByRecordSchemaId(datasetSchemaId, idRecord);
+            String tableSchemaId = recordSchema.get(ID_TABLE_SCHEMA).toString();
+            // we find table and field to send in notification
+            Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId, tableSchemaId);
+            String tableSchemaName = tableSchema.get(NAME_TABLE_SCHEMA).toString();
+            String fieldSchemaName = fieldSchema.get(HEADER_NAME).toString();
+
 
             NotificationVO notificationVO = NotificationVO.builder()
                     .user(SecurityContextHolder.getContext().getAuthentication().getName())
