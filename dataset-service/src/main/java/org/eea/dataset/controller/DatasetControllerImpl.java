@@ -1310,9 +1310,19 @@ public class DatasetControllerImpl implements DatasetController {
                                                 @RequestParam(value = "conditionalValue", required = false) String conditionalValue,
                                                 @RequestParam(value = "searchValue", required = false) String searchValue,
                                                 @RequestParam(value = "resultsNumber", required = false) Integer resultsNumber) {
+    List<FieldVO> fieldVOs;
     try {
-      return datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId,
-              fieldSchemaId, conditionalValue, searchValue, resultsNumber);
+      Long dataflowId = datasetService.getDataFlowIdById(datasetIdOrigin);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+        fieldVOs = bigDataDatasetService.getFieldValuesReferencedDL(datasetIdOrigin, datasetSchemaId,
+                fieldSchemaId, conditionalValue, searchValue, resultsNumber);
+      }
+      else{
+        fieldVOs = datasetService.getFieldValuesReferenced(datasetIdOrigin, datasetSchemaId,
+                fieldSchemaId, conditionalValue, searchValue, resultsNumber);
+      }
+      return fieldVOs;
     } catch (EEAException e) {
       LOG.error("Error with dataset id {}  caused {}", datasetIdOrigin, e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,

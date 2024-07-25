@@ -6,14 +6,17 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.bson.Document;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -53,12 +56,14 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
+import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -136,8 +141,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private final DremioHelperService dremioHelperService;
     private JdbcTemplate dremioJdbcTemplate;
 
+    private SchemasRepository schemasRepository;
+
+    /** The Constant HEADER_NAME: {@value}. */
+    private static final String HEADER_NAME = "headerName";
+    private static final String TYPE_DATA = "typeData";
+    private static final String ID_RECORD = "idRecord";
+    private static final String ID_TABLE_SCHEMA= "idTableSchema";
+
+
+
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
-                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate) {
+                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository) {
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
@@ -146,6 +161,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.parquetConverterService = parquetConverterService;
         this.fileTreatmentHelper = parquetConverterService.getFileTreatmentHelper();
         this.dremioJdbcTemplate = dremioJdbcTemplate;
+        this.schemasRepository = schemasRepository;
     }
 
 
@@ -1378,5 +1394,121 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             LOG.error("Found unhandled file extension for file in path {}", filePathInS3);
         }
         return fileExtension;
+    }
+
+    @Override
+    public List<FieldVO> getFieldValuesReferencedDL(Long datasetIdOrigin, String datasetSchemaId,
+                                                     String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) throws EEAException {
+        List<FieldVO> fieldsVO = new ArrayList<>();
+        Document fieldSchema = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaId);
+        Document referenced = (Document) fieldSchema.get(LiteralConstants.REFERENCED_FIELD);
+        if (referenced == null) {
+            return fieldsVO;
+        }
+        String idPk = referenced.get("idPk").toString();
+        String labelSchemaId = null;
+        String conditionalSchemaId = null;
+        if (referenced.get("labelId") != null) {
+            labelSchemaId = referenced.get("labelId").toString();
+        } else {
+            // In case there's no label selected, the label will the same as the Pk
+            labelSchemaId = idPk;
+        }
+        if (referenced.get("linkedConditionalFieldId") != null) {
+            conditionalSchemaId = referenced.get("linkedConditionalFieldId").toString();
+        }
+        if (org.apache.commons.lang3.StringUtils.isBlank(searchValue)) {
+            searchValue = "";
+        }
+
+        Long idDatasetDestination =
+                datasetMetabaseService.getDatasetDestinationForeignRelation(datasetIdOrigin, idPk);
+
+        TenantResolver
+                .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDatasetDestination));
+        // If the variable resultsNumbers is null, then the limit of results by default it will be 15.
+        // Otherwise the limit will be
+        // the number passed with a max of 100. That will be the results showed on screen.
+        if (resultsNumber == null || resultsNumber == 0) {
+            resultsNumber = 15;
+        } else if (resultsNumber > 400) {
+            resultsNumber = 400;
+        }
+
+        DataType dataType = DataType.TEXT;
+
+        if(fieldSchema.get(TYPE_DATA) != null){
+            String typeData = (String) fieldSchema.get(TYPE_DATA);
+            if(DataType.fromValue(typeData) != null){
+                dataType = DataType.fromValue(typeData);
+            }
+        }
+
+        String idRecord = (String) fieldSchema.get(ID_RECORD);
+        Document recordSchema = schemasRepository.findRecordSchema(datasetSchemaId, idRecord);
+        String tableSchemaId = (String) recordSchema.get(ID_TABLE_SCHEMA);
+        // we find table and field to send in notification
+        Document tableSchema = schemasRepository.findTableSchema(datasetSchemaId,
+                tableSchemaId);
+        String tableSchemaName = (String) tableSchema.get("nameTableSchema");
+        String fieldSchemaName = (String) fieldSchema.get(HEADER_NAME);
+
+        // we catch if the query have error pk data and send notification
+        try {
+            /*
+            do a select query from reference dataset and get only field with name the same one in fieldSchema.name
+            iterate through objects and for each value create a FieldVo object and set up label, value, id_fieldSchema
+            return list of FieldVOs.
+             */
+            List<String> linkValues = getLinkValuesFromReferencedDataset(datasetIdOrigin, tableSchemaName, fieldSchemaName, tableSchemaId);
+            for(String value: linkValues){
+                FieldVO field = new FieldVO();
+                field.setValue(value);
+                //todo
+                field.setLabel("");
+                field.setIdFieldSchema(fieldSchemaId);
+                fieldsVO.add(field);
+            }
+        } catch (DataIntegrityViolationException e) {
+
+            LOG.error("Error with dataset id {}  field  with id {} because data has not correct format {}",
+                    datasetIdOrigin, idPk, dataType);
+
+            NotificationVO notificationVO = NotificationVO.builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .datasetId(datasetIdOrigin).datasetSchemaId(datasetSchemaId)
+                    .tableSchemaId(tableSchemaId).tableSchemaName(tableSchemaName)
+                    .fieldSchemaId(fieldSchemaId).fieldSchemaName(fieldSchemaName).build();
+
+
+            // we send 2 dif notification depends on type
+            DatasetTypeEnum type = datasetService.getDatasetType(datasetIdOrigin);
+            EventType eventType =
+                    DatasetTypeEnum.DESIGN.equals(type) ? EventType.SORT_FIELD_DESIGN_FAILED_EVENT
+                            : EventType.SORT_FIELD_FAILED_EVENT;
+
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+        }
+        return fieldsVO;
+    }
+
+    private List<String> getLinkValuesFromReferencedDataset(Long datasetId, String tableName, String fieldName, String tableSchemaId){
+        DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+        Long dataflowId = dataSetMetabaseVO.getDataflowId();
+        Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+
+
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        if(BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))){
+            s3PathResolver.setIsIcebergTable(true);
+        }
+        String tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        String selectQuery = "SELECT " + fieldName + " FROM " + tablePathInDremio + " WHERE " + fieldName + " != '' AND "
+                + fieldName + " IS NOT NULL";
+
+        List<String> values = dremioJdbcTemplate.queryForList(selectQuery, String.class);
+        return values;
     }
 }
