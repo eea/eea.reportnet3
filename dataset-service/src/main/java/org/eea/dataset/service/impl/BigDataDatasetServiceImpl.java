@@ -148,6 +148,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private static final String ID_RECORD = "idRecord";
     private static final String ID_TABLE_SCHEMA = "idTableSchema";
     private static final String NAME_TABLE_SCHEMA = "nameTableSchema";
+    private static final String VALUE = "refValue";
+    private static final String LABEL = "refLabel";
+
 
 
 
@@ -1452,14 +1455,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String referenceTableSchemaName = referenceTableSchema.get(NAME_TABLE_SCHEMA).toString();
         String referenceFieldName = referenceFieldSchema.get(HEADER_NAME).toString();
 
+        String labelFieldName = referenceFieldName;
+        if(!labelSchemaId.equals(idPk)){
+            Document labelFieldSchema = schemasRepository.findFieldSchema(referenceDatasetSchemaId, labelSchemaId);
+            labelFieldName = labelFieldSchema.get(HEADER_NAME).toString();
+        }
+
         try {
-            //retrieve the value from dremio.
-            List<String> linkValues = getLinkValuesFromReferencedDataset(referenceDatasetId, referenceTableSchemaName, referenceFieldName, referenceTableSchemaId);
-            for(String value: linkValues){
+            //retrieve the value and label from dremio.
+            List<Map<String, Object>> linkValues = getLinkValuesWithLabelsFromReferencedDataset(referenceDatasetId, referenceTableSchemaId, referenceTableSchemaName, referenceFieldName, labelFieldName);
+            for (Map<String, Object> row : linkValues) {
                 FieldVO field = new FieldVO();
-                field.setValue(value);
-                //todo
-                field.setLabel("");
+                field.setValue((String) row.get(VALUE));
+                field.setLabel((String) row.get(LABEL));
                 field.setIdFieldSchema(fieldSchemaId);
                 fieldsVO.add(field);
             }
@@ -1496,7 +1504,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         return fieldsVO;
     }
 
-    private List<String> getLinkValuesFromReferencedDataset(Long datasetId, String tableName, String fieldName, String tableSchemaId){
+    private List<Map<String, Object>> getLinkValuesWithLabelsFromReferencedDataset(Long datasetId, String tableSchemaId, String tableName, String fieldName, String labelFieldName){
         DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         Long dataflowId = dataSetMetabaseVO.getDataflowId();
         Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
@@ -1508,10 +1516,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         String tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        String selectQuery = "SELECT " + fieldName + " FROM " + tablePathInDremio + " WHERE " + fieldName + " != '' AND "
+        String selectQuery = "SELECT " + fieldName + " as " + VALUE + ", " + labelFieldName + " as " + LABEL + " FROM " + tablePathInDremio + " WHERE " + fieldName + " != '' AND "
                 + fieldName + " IS NOT NULL";
 
-        List<String> values = dremioJdbcTemplate.queryForList(selectQuery, String.class);
+        List<Map<String, Object>> values = dremioJdbcTemplate.queryForList(selectQuery);
         return values;
     }
 }
