@@ -192,4 +192,7 @@ public interface BigDataDatasetService {
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 
     void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception;
+
+    List<FieldVO> getFieldValuesReferencedDL(Long datasetIdOrigin, String datasetSchemaId,
+                                     String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) throws EEAException;
 }
