@@ -634,6 +634,10 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void getFieldValuesReferencedTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     List<FieldVO> fields = new ArrayList<>();
     fields.add(new FieldVO());
     Mockito.when(datasetService.getFieldValuesReferenced(Mockito.any(), Mockito.any(),
@@ -1883,6 +1887,10 @@ public class DatasetControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void getFieldValuesReferencedExceptionTest() throws EEAException {
+    Mockito.when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setBigData(false);
+    Mockito.when(dataFlowControllerZuul.getMetabaseById(anyLong())).thenReturn(mockDataflow);
     try {
       doThrow(EEAException.class).when(datasetService).getFieldValuesReferenced(Mockito.any(),
           Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
