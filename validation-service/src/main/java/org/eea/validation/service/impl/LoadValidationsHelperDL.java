@@ -74,7 +74,8 @@ public class LoadValidationsHelperDL {
             validationService.getRuleMessageDL(dataset.getDatasetSchema(), errors);
             validation.setErrors(errors);
             validation.setTotalErrors(dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class));
-            validation.setTotalFilteredRecords((long) errors.size());
+            validation.setTotalFilteredRecords(Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
+                typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, false).size()));
             DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
             List<String> tableNames = schema.getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
             AtomicReference<Long> totalRecords = new AtomicReference<>(0L);
