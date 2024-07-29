@@ -46,7 +46,7 @@ public class DatasetExtendedRepositoryImpl implements DatasetExtendedRepository 
 
 
   /** The Constant RECORD_ID: {@value}. */
-  private static final String RECORD_ID = "record_id";
+  public static final String RECORD_ID = "record_id";
 
   /** The geometry error message. */
   @Value("${query.message.geometry.error}")

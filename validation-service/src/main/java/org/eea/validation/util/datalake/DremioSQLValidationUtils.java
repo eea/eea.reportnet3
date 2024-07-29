@@ -33,6 +33,12 @@ public class DremioSQLValidationUtils {
         return dremioJdbcTemplate.queryForList(query.toString(), String.class);
     }
 
+    public List<Map<String, Object>> isSQLSentenceWithCodeMap(String sql) {
+        StringBuilder query = new StringBuilder();
+        query.append("select * from(").append(sql).append(")");
+        return dremioJdbcTemplate.queryForList(query.toString());
+    }
+
     public List<String> isUniqueConstraint(String fieldName, String tablePath) {
         StringBuilder query = new StringBuilder();
         query.append("with tableAux as (select ").append(fieldName).append(", count(").append(fieldName).append(") from ")

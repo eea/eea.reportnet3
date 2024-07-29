@@ -959,8 +959,9 @@ public class ValidationServiceImpl implements ValidationService {
       for (GroupValidationVO validation : errors) {
         for (Rule rule : rules.getRules()) {
           if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
-                  || EntityTypeEnum.RECORD == validation.getTypeEntity())
-                  && validation.getShortCode().equals(rule.getShortCode().toString())) {
+                  || EntityTypeEnum.RECORD == validation.getTypeEntity()
+                  || EntityTypeEnum.TABLE == validation.getTypeEntity())
+                  && validation.getShortCode().equals(rule.getShortCode())) {
             validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
           }
         }

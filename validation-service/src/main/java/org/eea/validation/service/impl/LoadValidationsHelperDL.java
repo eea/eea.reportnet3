@@ -15,6 +15,7 @@ import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.validation.service.DataLakeValidationService;
+import org.eea.validation.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,22 +35,24 @@ import static org.eea.utils.LiteralConstants.*;
 @Component
 public class LoadValidationsHelperDL {
 
-    private DataLakeValidationService dataLakeValidationService;
-    private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
-    private S3Helper s3Helper;
-    private JdbcTemplate dremioJdbcTemplate;
-    private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-    private DremioHelperService dremioHelperService;
+    private final DataLakeValidationService dataLakeValidationService;
+    private final DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+    private final S3Helper s3Helper;
+    private final JdbcTemplate dremioJdbcTemplate;
+    private final DatasetSchemaControllerZuul datasetSchemaControllerZuul;
+    private final DremioHelperService dremioHelperService;
+    private final ValidationService validationService;
 
     @Autowired
     public LoadValidationsHelperDL(DataLakeValidationService dataLakeValidationService, DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
-                                   DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioHelperService dremioHelperService) {
+                                   DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioHelperService dremioHelperService, @Qualifier("proxyValidationService") ValidationService validationService) {
         this.dataLakeValidationService = dataLakeValidationService;
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.s3Helper = s3Helper;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.datasetSchemaControllerZuul = datasetSchemaControllerZuul;
         this.dremioHelperService = dremioHelperService;
+        this.validationService = validationService;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelperDL.class);
@@ -68,10 +71,10 @@ public class LoadValidationsHelperDL {
         if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
             List<GroupValidationVO> errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter, typeEntitiesFilter, tableFilter,
                     fieldValueFilter, pageable, headerField, asc, true);
+            validationService.getRuleMessageDL(dataset.getDatasetSchema(), errors);
             validation.setErrors(errors);
             validation.setTotalErrors(dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class));
-            validation.setTotalFilteredRecords(Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
-                            typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, false).size()));
+            validation.setTotalFilteredRecords((long) errors.size());
             DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
             List<String> tableNames = schema.getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
             AtomicReference<Long> totalRecords = new AtomicReference<>(0L);

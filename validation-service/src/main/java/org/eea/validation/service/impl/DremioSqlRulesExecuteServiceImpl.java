@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.eea.validation.util.ObjectWrapper;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -50,6 +51,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static org.eea.utils.LiteralConstants.*;
+import static org.eea.validation.persistence.data.repository.DatasetExtendedRepositoryImpl.RECORD_ID;
 
 @ImportDataLakeCommons
 @Service
@@ -136,6 +138,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
+            List<Map<String, Object>> customQueryResultSet = new ArrayList<>();
             if (!ruleMethodName.equals(IS_TABLE_EMPTY)) {
                 Class<?> cls = Class.forName(DREMIO_SQL_VALIDATION_UTILS);
                 Field[] fields = cls.getDeclaredFields();
@@ -146,11 +149,14 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 field.set(object, dremioJdbcTemplate);
                 Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
 
+                //I have checked only the case one (method.getParameters().length) for message parameter value, I don't know if we need to check also the other cases
+                customQueryResultSet = getResultSet(method, ruleMethodName, cls, customQueryResultSet, dataTableResolver, ruleVO, object);
+
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
             }
 
             if (!recordIds.isEmpty()) {
-                runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName);
+                runRuleAndCreateParquet(createParquetWithSQL, dataTableResolver, validationResolver, ruleVO, recordIds, fieldName, fileName, customQueryResultSet);
             }
         } catch (Exception e) {
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e.getMessage());
@@ -181,7 +187,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @throws IOException
      */
     private void runRuleAndCreateParquet(boolean createParquetWithSQL, S3PathResolver dataTableResolver, S3PathResolver validationResolver, RuleVO ruleVO, List<String> recordIds,
-                                         String fieldName, String fileName) throws Exception {
+                                         String fieldName, String fileName, List<Map<String, Object>> customQueryResultSet) throws Exception {
         int ruleIdLength = ruleVO.getRuleId().length();
         if (createParquetWithSQL) {
             //if the dataset to validate is of reference type, then the validation path should be changed
@@ -211,8 +217,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             }
             Schema schema = Schema.createRecord("Data", null, null, false, fields);
             Map<String, String> headerMap = dremioRulesService.createValidationParquetHeaderMap(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), ruleVO, fieldName);
-            if (recordIds.size()>0) {
-                createParquetAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver);
+            if (!recordIds.isEmpty()) {
+                createParquetAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver, customQueryResultSet);
             }
         }
     }
@@ -270,7 +276,6 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @param tableSchemaId
      * @param tablePath
      * @param ruleVO
-     * @param recordIds
      * @param parameters
      * @param fieldName
      * @param object
@@ -310,6 +315,30 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 break;
         }
         return recordIds;
+    }
+
+    private List<Map<String, Object>> getResultSet(Method method, String ruleMethodName, Class<?> cls, List<Map<String, Object>> customQueryResultSet, S3PathResolver dataTableResolver, RuleVO ruleVO, Object object) throws IllegalAccessException, InvocationTargetException {
+        int parameterLength = method.getParameters().length;
+        if (parameterLength == 1 && ruleMethodName.equalsIgnoreCase("isSQLSentenceWithCode")) {
+            Method method1 = dremioRulesService.getRuleMethodFromClass("isSQLSentenceWithCodeMap", cls);
+            customQueryResultSet = getCustomQueryResultSet(dataTableResolver, ruleVO, object, method1);
+        }
+        return customQueryResultSet;
+    }
+
+    private List<Map<String, Object>> getCustomQueryResultSet(S3PathResolver datatableResolver, RuleVO ruleVO, Object object, Method method) throws IllegalAccessException, InvocationTargetException {
+        DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datatableResolver.getDatasetId());
+        String sqlCode = sqlRulesService.proccessQuery(dataSetMetabaseVO, ruleVO.getSqlSentence());
+        sqlCode = sqlRulesService.replaceTableNamesWithS3Path(sqlCode);
+        String providerCode = "XX";
+        if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
+            DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
+            providerCode = provider.getCode();
+        }
+        sqlCode = sqlCode.replace("{%R3_COUNTRY_CODE%}", providerCode);
+        sqlCode = sqlCode.replace("{%R3_COMPANY_CODE%}", providerCode);
+        sqlCode = sqlCode.replace("{%R3_ORGANIZATION_CODE%}", providerCode);
+        return (List<Map<String, Object>>) method.invoke(object, sqlCode);
     }
 
     /**
@@ -418,11 +447,11 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @throws Exception
      */
     private void createParquetAndUploadToS3(RuleVO ruleVO, List<String> recordIds, Map<String, String> headerMap, Schema schema, String fileName,
-                                            S3PathResolver validationResolver) throws Exception {
+                                            S3PathResolver validationResolver, List<Map<String, Object>> customQueryResultSet) throws Exception {
         if (validationSplitParquet) {
-            createSplitParquetFilesAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver);
+            createSplitParquetFilesAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver, customQueryResultSet);
         } else {
-            createParquetFileAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver);
+            createParquetFileAndUploadToS3(ruleVO, recordIds, headerMap, schema, fileName, validationResolver, customQueryResultSet);
         }
     }
 
@@ -437,7 +466,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @throws Exception
      */
     private void createSplitParquetFilesAndUploadToS3(RuleVO ruleVO, List<String> recordIds, Map<String, String> headerMap, Schema schema, String fileName,
-                                                      S3PathResolver validationResolver) throws Exception {
+                                                      S3PathResolver validationResolver, List<Map<String, Object>> customQueryResultSet) throws Exception {
         int count = 1;
         int ruleIdLength = ruleVO.getRuleId().length();
         for (List<String> recordSubList : Lists.partition(recordIds, validationParquetMaxFileSize)) {
@@ -452,7 +481,8 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                         .build()) {
 
                     for (String recordId : recordSubList) {
-                        GenericRecord record = createParquetGenericRecord(ruleVO, headerMap, schema, recordId);
+                        ObjectWrapper objectWrapper = new ObjectWrapper(ruleVO.getThenCondition().get(0), recordId);
+                        GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper);
                         writer.write(record);
                     }
                 } catch (Exception e1) {
@@ -478,7 +508,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
      * @throws Exception
      */
     private void createParquetFileAndUploadToS3(RuleVO ruleVO, List<String> recordIds, Map<String, String> headerMap, Schema schema, String fileName,
-                                                S3PathResolver validationResolver) throws Exception {
+                                                S3PathResolver validationResolver, List<Map<String, Object>> customQueryResultSet) throws Exception {
         String file = fileName + PARQUET_TYPE;
         String parquetFile = parquetFilePath + file;
         int ruleIdLength = ruleVO.getRuleId().length();
@@ -493,11 +523,12 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                     .build()) {
 
                 for (String recordId : recordIds) {
-                    GenericRecord record = createParquetGenericRecord(ruleVO, headerMap, schema, recordId);
+                    ObjectWrapper objectWrapper = new ObjectWrapper(ruleVO.getThenCondition().get(0), recordId);
+                    GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper);
                     writer.write(record);
                 }
             } catch (Exception e1) {
-                LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
+                LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
                 throw e1;
             }
            validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, file, ruleIdLength, parquetFile);
@@ -508,31 +539,46 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
 
     /**
      * Creates parquet generic record
-     * @param ruleVO
      * @param headerMap
      * @param schema
-     * @param recordId
-     * @return
+     * @return The generic Record
      */
-    private static GenericRecord createParquetGenericRecord(RuleVO ruleVO, Map<String, String> headerMap, Schema schema, String recordId) {
+    private static GenericRecord createParquetGenericRecord(Map<String, String> headerMap, Schema schema, List<Map<String, Object>> customQueryResultSet, ObjectWrapper objectWrapper) {
         GenericRecord record = new GenericData.Record(schema);
+        refactorMessage(customQueryResultSet, objectWrapper);
 
-        if (recordId.equals(PK_NOT_USED) || recordId.equals(TABLE_EMPTY)) {
-            recordId = "";
-        } else if (recordId.equals(COMISSION)) {
-            recordId = "";
-            headerMap.put(MESSAGE, ruleVO.getThenCondition().get(0) + " (COMISSION)");
-        } else if (recordId.equals(OMISSION)) {
-            recordId = "";
-            headerMap.put(MESSAGE, ruleVO.getThenCondition().get(0) + " (OMISSION)");
+        headerMap.put(MESSAGE, objectWrapper.getMessage());
+        if (objectWrapper.getRecordId().equals(PK_NOT_USED) || objectWrapper.getRecordId().equals(TABLE_EMPTY)) {
+            objectWrapper.setRecordId("");
+        } else if (objectWrapper.getRecordId().equals(COMISSION)) {
+            objectWrapper.setRecordId("");
+            headerMap.put(MESSAGE, objectWrapper.getMessage() + " (COMISSION)");
+        } else if (objectWrapper.getRecordId().equals(OMISSION)) {
+            objectWrapper.setRecordId("");
+            headerMap.put(MESSAGE, objectWrapper.getMessage() + " (OMISSION)");
         }
 
         for (Map.Entry<String,String> entry : headerMap.entrySet()) {
             record.put(entry.getKey(), entry.getValue());
         }
         record.put(PK, UUID.randomUUID().toString());
-        record.put(PARQUET_RECORD_ID_COLUMN_HEADER, recordId);
+        record.put(PARQUET_RECORD_ID_COLUMN_HEADER, objectWrapper.getRecordId());
         return record;
+    }
+
+    private static void refactorMessage(List<Map<String, Object>> customQueryResultSet, ObjectWrapper objectWrapper) {
+        if (!customQueryResultSet.isEmpty()) {
+            customQueryResultSet.stream()
+                .filter(map -> !map.containsKey("reason") && objectWrapper.getRecordId().equals(String.valueOf(map.get(RECORD_ID))))
+                .findFirst()
+                .ifPresent(map -> {
+                    map.forEach((key, value) -> {
+                        if (!key.equals(RECORD_ID)) {
+                            objectWrapper.setMessage(objectWrapper.getMessage().replace("{%" + key.toLowerCase() + "%}", String.valueOf(value)));
+                        }
+                    });
+                });
+        }
     }
 
     /**
