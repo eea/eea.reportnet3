@@ -988,6 +988,7 @@
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
         { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" },
         { "key": "CONVERT_TABLE_ERROR" },
+        { "key": "RESTORE_TABLE_DATA_ERROR" },
         {
           "key": "VALIDATION_CANCELED_EVENT",
           "navigateTo": {

@@ -73,6 +73,7 @@ export const DatasetConfig = {
   getShowValidationErrorsDL:
     '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getStatistics: '/datasetmetabase/{:datasetId}/loadStatistics',
+  restorePrefilledTables: '/dataset/restorePrefilledTables/{:datasetId}?tableSchemaId={:tableSchemaId}',
   updateFieldOrder: '/dataschema/{:datasetId}/fieldSchema/order',
   updateTableOrder: '/dataschema/{:datasetId}/tableSchema/order',
   getReferencedFieldValues:

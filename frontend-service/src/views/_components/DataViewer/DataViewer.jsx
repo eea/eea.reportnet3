@@ -63,6 +63,7 @@ export const DataViewer = ({
   dataAreManuallyEditable,
   dataProviderId,
   datasetSchemaId,
+  datasetType,
   hasCountryCode,
   hasWritePermissions,
   dataflowType,
@@ -74,12 +75,14 @@ export const DataViewer = ({
   isGroupedValidationSelected,
   isReferenceDataset,
   isReportingWebform,
+  isTableDataRestorationInProgress,
   onChangeButtonsVisibility,
   onChangeTableEditable,
   onDisableManualEditing,
   onHideSelectGroupedValidation,
   onIsTableDataLoading,
   onLoadTableData,
+  onRestoreData,
   onTableConversion,
   reporting,
   selectedRuleId,
@@ -93,7 +96,8 @@ export const DataViewer = ({
   tableId,
   tableName,
   tableReadOnly,
-  tableSchemaColumns
+  tableSchemaColumns,
+  toPrefill
 }) => {
   const { datasetId, dataflowId } = useParams();
 
@@ -108,6 +112,7 @@ export const DataViewer = ({
   const [addDialogVisible, setAddDialogVisible] = useState(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = useState(false);
   const [confirmPasteVisible, setConfirmPasteVisible] = useState(false);
+  const [confirmRestoreVisible, setConfirmRestoreVisible] = useState(false);
   const [editDialogVisible, setEditDialogVisible] = useState(false);
   const [fetchedData, setFetchedData] = useState([]);
   const [hasWebformWritePermissions, setHasWebformWritePermissions] = useState(true);
@@ -835,11 +840,13 @@ export const DataViewer = ({
   const onDisableEditButton = checked => {
     onTableConversion(checked);
 
-    if (onDisableManualEditing) {
-      onDisableManualEditing(checked);
-    }
+    if (onDisableManualEditing) onDisableManualEditing(checked);
 
     setIsEditRecordsManuallyButtonDisabled(checked);
+  };
+
+  const onDisabledRestoreButton = checked => {
+    if (onRestoreData) onRestoreData(checked);
   };
 
   const onMapOpen = (coordinates, mapCells, fieldType, readOnly) =>
@@ -1041,6 +1048,26 @@ export const DataViewer = ({
   };
 
   const onUpdateData = () => setIsDataUpdated(!isDataUpdated);
+
+  const restoreTableData = async () => {
+    setConfirmRestoreVisible(false);
+    onDisabledRestoreButton(true);
+    setIsLoading(true);
+    try {
+      await DatasetService.restorePrefilledTables({
+        datasetId,
+        tableSchemaId: tableId
+      });
+      setIsLoading(false);
+      onDisabledRestoreButton(false);
+      onRefresh();
+    } catch (error) {
+      console.error('DataViewer - restoreTableData.', error);
+      notificationContext.add({ type: 'RESTORE_TABLE_DATA_ERROR' }, true);
+      onDisabledRestoreButton(false);
+      setIsLoading(false);
+    }
+  };
 
   const addRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
@@ -1272,10 +1299,9 @@ export const DataViewer = ({
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}
         datasetId={datasetId}
+        datasetType={datasetType}
         hasCountryCode={hasCountryCode}
-        hasWritePermissions={
-          (hasWritePermissions && !tableFixedNumber && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)
-        }
+        hasWritePermissions={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
         isEditRecordsManuallyButtonDisabled={isEditRecordsManuallyButtonDisabled}
@@ -1284,11 +1310,14 @@ export const DataViewer = ({
         isFilterValidationsActive={isFilterValidationsActive}
         isGroupedValidationSelected={isGroupedValidationSelected}
         isLoading={isLoading}
+        isTableDataRestorationInProgress={isTableDataRestorationInProgress}
         isTableEditable={isTableEditable}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
         levelErrorValidations={levelErrorValidations}
         onChangeButtonsVisibility={onChangeButtonsVisibility}
         onConfirmDeleteTable={onConfirmDeleteTable}
+        onConfirmRestorePrefilledData={() => setConfirmRestoreVisible(true)}
+        onDisabledRestoreButton={onDisabledRestoreButton}
         onDisableEditButton={onDisableEditButton}
         onEnableManualEdit={onEnableManualEdit}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
@@ -1311,6 +1340,7 @@ export const DataViewer = ({
         tableHasErrors={tableHasErrors}
         tableId={tableId}
         tableName={tableName}
+        toPrefill={toPrefill}
       />
       {!bigData && <ContextMenu model={menu} ref={contextMenuRef} />}
       <div className={styles.Table}>
@@ -1572,6 +1602,19 @@ export const DataViewer = ({
           onHide={() => setConfirmDeleteVisible(false)}
           visible={confirmDeleteVisible}>
           {resourcesContext.messages['confirmDeleteRow']}
+        </ConfirmDialog>
+      )}
+      {confirmRestoreVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resourcesContext.messages['restorePrefilledData']}
+          iconConfirm={'check'}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={restoreTableData}
+          onHide={() => setConfirmRestoreVisible(false)}
+          visible={confirmRestoreVisible}>
+          {resourcesContext.messages['confirmRestorePrefilledData']}
         </ConfirmDialog>
       )}
       {confirmPasteVisible && (
