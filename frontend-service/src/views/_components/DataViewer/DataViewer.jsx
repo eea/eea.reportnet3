@@ -1614,7 +1614,10 @@ export const DataViewer = ({
           onConfirm={restoreTableData}
           onHide={() => setConfirmRestoreVisible(false)}
           visible={confirmRestoreVisible}>
-          {resourcesContext.messages['confirmRestorePrefilledData']}
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['confirmRestorePrefilledData'])
+            }}></p>
         </ConfirmDialog>
       )}
       {confirmPasteVisible && (

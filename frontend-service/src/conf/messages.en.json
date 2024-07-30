@@ -155,7 +155,7 @@
     "confirmNewDatasetSchemaCreationHeader": "Confirm new dataset schema creation",
     "confirmReleaseHeader": "Confirm release",
     "confirmReleaseQuestion": "Are you sure you want to release all the datasets to the data collection?",
-    "confirmRestorePrefilledData": "Are you sure you want to restore prefilled table data?",
+    "confirmRestorePrefilledData": "Are you sure you want to restore prefilled table data? <br>The table will be reverted to the initial state and any data changes will be lost.",
     "convertTableError": "Error converting table",
     "cooperatingCountries": "EEA Cooperating Countries",
     "coordinatesMoreInfo": "Click to show detailed GeoJSON info",
