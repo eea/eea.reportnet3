@@ -1430,7 +1430,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (referenced.get("linkedConditionalFieldId") != null) {
             conditionalSchemaId = referenced.get("linkedConditionalFieldId").toString();
         }
-        if (org.apache.commons.lang3.StringUtils.isBlank(searchValue)) {
+        if (StringUtils.isBlank(searchValue)) {
             searchValue = "";
         }
         //get the dataset id that contains the reference values
@@ -1457,15 +1457,22 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
 
-        String referenceRecordId = referenceFieldSchema.get(ID_RECORD).toString();
-        Document referenceRecordSchema = schemasRepository.findRecordSchemaByRecordSchemaId(referenceDatasetSchemaId, referenceRecordId);
+        String record_id = referenceFieldSchema.get(ID_RECORD).toString();
+        Document referenceRecordSchema = schemasRepository.findRecordSchemaByRecordSchemaId(referenceDatasetSchemaId, record_id);
         String referenceTableSchemaId = referenceRecordSchema.get(ID_TABLE_SCHEMA).toString();
         // we find reference dataset information to retrieve data
         Document referenceTableSchema = schemasRepository.findTableSchema(referenceDatasetSchemaId, referenceTableSchemaId);
         String referenceTableSchemaName = referenceTableSchema.get(NAME_TABLE_SCHEMA).toString();
         String referenceFieldName = referenceFieldSchema.get(HEADER_NAME).toString();
 
-        String labelFieldName = referenceFieldName;
+        String labelFieldName;
+        if (StringUtils.isNotBlank(conditionalSchemaId)) {
+            Document referenceFieldSchema1 = schemasRepository.findFieldSchema(referenceDatasetSchemaId, conditionalSchemaId);
+            labelFieldName = referenceFieldSchema1.get(HEADER_NAME).toString();
+
+        } else {
+            labelFieldName = referenceFieldName;
+        }
         if(!labelSchemaId.equals(idPk)){
             Document labelFieldSchema = schemasRepository.findFieldSchema(referenceDatasetSchemaId, labelSchemaId);
             labelFieldName = labelFieldSchema.get(HEADER_NAME).toString();
@@ -1473,7 +1480,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         try {
             //retrieve the value and label from dremio.
-            List<Map<String, Object>> linkValues = getLinkValuesWithLabelsFromReferencedDataset(referenceDatasetId, referenceTableSchemaId, referenceTableSchemaName, referenceFieldName, labelFieldName);
+            List<Map<String, Object>> linkValues = getLinkValuesWithLabelsFromReferencedDataset(referenceDatasetId, referenceTableSchemaId, referenceTableSchemaName, referenceFieldName, labelFieldName, conditionalValue, dataType, searchValue);
             for (Map<String, Object> row : linkValues) {
                 FieldVO field = new FieldVO();
                 field.setValue((String) row.get(VALUE));
@@ -1514,10 +1521,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         return fieldsVO;
     }
 
-    private List<Map<String, Object>> getLinkValuesWithLabelsFromReferencedDataset(Long datasetId, String tableSchemaId, String tableName, String fieldName, String labelFieldName){
+    private List<Map<String, Object>> getLinkValuesWithLabelsFromReferencedDataset(Long datasetId, String tableSchemaId, String tableName, String fieldName, String labelFieldName, String conditionalValue, DataType dataType, String searchValue){
         DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         Long dataflowId = dataSetMetabaseVO.getDataflowId();
-        Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+        long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
 
 
         S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_TABLE_AS_FOLDER_QUERY_PATH);
@@ -1530,8 +1537,32 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             + " FROM " + tablePathInDremio +
             " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
 
+        if (StringUtils.isNotBlank(searchValue)) {
+            selectQuery += " AND ('"
+                + searchValue + "' IS NULL "
+                + "OR LOWER(" + VALUE + ") LIKE LOWER(CONCAT('%', '" + searchValue + "', '%')) "
+                + "OR LOWER(" + LABEL + ") LIKE LOWER(CONCAT('%', '" + searchValue + "', '%'))"
+                + ")";
+        }
 
-        List<Map<String, Object>> values = dremioJdbcTemplate.queryForList(selectQuery);
-        return values;
+        if (StringUtils.isNotBlank(conditionalValue)) {
+            String[] values = Arrays.stream(conditionalValue.split("[,;]"))
+                .map(String::trim)
+                .filter(value -> !value.isEmpty())
+                .toArray(String[]::new);
+
+            String valuesList = Arrays.stream(values)
+                .map(value -> "'" + value + "'")
+                .collect(Collectors.joining(", "));
+
+            if (dataType.equals(DataType.NUMBER_INTEGER)) {
+                selectQuery = selectQuery + " AND " + VALUE + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + VALUE;
+            } else {
+                selectQuery = selectQuery + " AND " + LABEL + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + LABEL;
+            }
+        }
+        return dremioJdbcTemplate.queryForList(selectQuery);
     }
 }
