@@ -17,6 +17,21 @@ body .p-button {
   border-radius: 3px;
 }
 
+body .p-button-reverse {
+  margin: 0;
+  color: var(--button-primary-bg);
+  background-color: var(--button-primary-color);
+  border: var(--button-primary-border);
+  font-size: 14px;
+  -moz-transition: background-color 0.2s, box-shadow 0.2s;
+  -o-transition: background-color 0.2s, box-shadow 0.2s;
+  -webkit-transition: background-color 0.2s, box-shadow 0.2s;
+  transition: background-color 0.2s, box-shadow 0.2s;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+
 body .p-button:enabled:hover {
   background-color: var(--button-primary-bg-hover);
   color: var(--button-primary-color-hover);

@@ -7,6 +7,10 @@ export const DatasetConfig = {
     '/dataset/convertIcebergToParquetTable/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}',
   convertParquetToIceberg:
     '/dataset/convertParquetToIcebergTable/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}',
+  convertIcebergsToParquets:
+  '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaIds={:tableSchemaIds}',
+  convertParquetsToIcebergs:
+  '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaIds={:tableSchemaIds}',
   createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record',
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',

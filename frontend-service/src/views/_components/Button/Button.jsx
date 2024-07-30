@@ -6,6 +6,7 @@ import { config } from 'conf';
 
 import { Button as PrimeButton } from 'primereact/button';
 import { Icon } from 'views/_components/Icon';
+import { Spinner } from 'react-bootstrap';
 
 export const Button = ({
   className = null,
@@ -26,7 +27,8 @@ export const Button = ({
   tooltipOptions = null,
   type = 'button',
   value = '',
-  visible = true
+  visible = true,
+  isLoading = false,
 }) => {
   const iconClassName = `${icon ? config.icons[icon] : ''} ${iconClasses ? iconClasses : ''}`;
   if (layout === 'simple') {
@@ -50,6 +52,10 @@ export const Button = ({
   }
   if (isNull(layout)) {
     return visible ? (
+
+      <>
+
+      {isLoading && <Spinner style={{ top: 0, marginBottom: '2rem' }} />}
       <PrimeButton
         className={`${className} ${helpClassName}`}
         disabled={disabled}
@@ -67,6 +73,8 @@ export const Button = ({
         type={type}
         value={value}
       />
+
+      </>
     ) : null;
   }
 };

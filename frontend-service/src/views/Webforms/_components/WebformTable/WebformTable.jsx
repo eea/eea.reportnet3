@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -59,12 +59,63 @@ export const WebformTable = ({
     isLoading: true,
     webformData: {}
   });
+  const [isIcebergCreated, setIsIcebergCreated] = useState(false);
+  const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
 
   const { isDataUpdated, webformData } = webformTableState;
+
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const alertMessage = ev => {
+      ev.preventDefault();
+      // if table not saved
+      return (ev.returnValue = 'Are you sure you want to close?');
+    };
+    window.addEventListener('beforeunload', alertMessage);
+
+    return () => {
+      window.removeEventListener('beforeunload', alertMessage);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+
+      if (webformData.multipleRecords) {
+        const scrollThreshold = document.documentElement.scrollHeight * 0.18;
+        const maxScrollThreshold = document.documentElement.scrollHeight * 0.62;
+        setIsSticky(scrollPosition > scrollThreshold && scrollPosition < maxScrollThreshold);
+      } else {
+        const scrollThreshold = document.documentElement.scrollHeight * 0.12;
+        const maxScrollThreshold = document.documentElement.scrollHeight * 0.86;
+        setIsSticky(scrollPosition > scrollThreshold && scrollPosition < maxScrollThreshold);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const checkIsIcebergCreated = async tableId => {
+    setIsLoadingIceberg(true);
+    let { data } = await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: tableId
+    });
+    setIsIcebergCreated(data);
+    setIsLoadingIceberg(false);
+  };
 
   useEffect(() => {
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
+
+  useEffect(() => {
+    checkIsIcebergCreated(webformData.tableSchemaId);
+  }, [webformData]);
 
   useEffect(() => {
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
@@ -331,35 +382,152 @@ export const WebformTable = ({
   };
 
   if (webformTableState.isLoading) {
-    return <Spinner style={{ top: 0, margin: '1rem' }} />;
+    if (isLoadingIceberg) {
+      return (
+        <div style={{ top: 0, margin: '1rem' }}>
+          <Spinner style={{ top: 0, margin: '1rem' }} />
+          <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
+            {'Webform tables are being converted.\nPlease wait'}
+          </p>
+        </div>
+      );
+    } else {
+      return <Spinner style={{ top: 0, margin: '1rem' }} />;
+    }
   }
+
+  const convertHelper = () => {
+    isLoading(true);
+    setIsLoadingIceberg(true);
+    let tableArray = webformData?.elements?.filter(el => el?.type === 'TABLE');
+    let tableSchemaIds = [];
+    if (tableArray?.length < 1) {
+      tableSchemaIds[0] = webformData?.tableSchemaId;
+    } else {
+      tableSchemaIds = tableArray.map(record => record.tableSchemaId);
+    }
+
+    convertTables(encodeURIComponent(tableSchemaIds));
+  };
+
+  const convertTables = async tableIds => {
+    try {
+      if (isIcebergCreated) {
+        if (dataProviderId) {
+          await DatasetService.convertIcebergsToParquets({
+            datasetId,
+            dataflowId,
+            providerId: dataProviderId,
+            tableSchemaIds: tableIds
+          });
+        } else {
+          await DatasetService.convertIcebergsToParquets({
+            datasetId,
+            dataflowId,
+            tableSchemaIds: tableIds
+          });
+        }
+      } else {
+        if (dataProviderId) {
+          await DatasetService.convertParquetsToIcebergs({
+            datasetId,
+            dataflowId,
+            providerId: dataProviderId,
+            tableSchemaIds: tableIds
+          });
+        } else {
+          await DatasetService.convertParquetsToIcebergs({
+            datasetId,
+            dataflowId,
+            tableSchemaIds: tableIds
+          });
+        }
+      }
+    } catch (error) {
+      console.error('ActionsToolbar - convertTable.', error);
+      notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
+    }
+    setIsLoadingIceberg(false);
+    isLoading(false);
+  };
 
   return (
     <div className={styles.contentWrap}>
-      <h3 className={styles.title}>
-        <div>
-          {webformData.title
-            ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
-            : webformData.name}
-          {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
+      {webform?.multipleRecords ? (
+        <>
+          <h3 className={styles.title}>
+            <Button
+              icon="plus"
+              label={resourcesContext.messages['addRecord']}
+              className={styles.addRecordButton}
+              onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
+            />
+          </h3>
+
+          <div className={`${styles.wrapper} ${isSticky ? styles.stickyWrapper : styles.initialWrapper}`}>
+            <h3 className={styles.title}>
+              <div>
+                {webformData.title
+                  ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
+                  : webformData.name}
+                {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
+              </div>
+
+              <Button
+                helpClassName={isIcebergCreated && 'p-button-reverse'}
+                icon={isIcebergCreated ? 'lock' : 'unlock'}
+                label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
+                className={styles.openWebformButton}
+                onClick={() => convertHelper()}
+                isLoading={isLoadingIceberg}
+                disabled={isLoadingIceberg}
+                key={isIcebergCreated}
+              />
+            </h3>
+          </div>
+        </>
+      ) : (
+        <div className={`${styles.wrapper} ${isSticky ? styles.stickyWrapper : styles.initialWrapper}`}>
+          <h3 className={styles.title}>
+            <div>
+              {webformData.title
+                ? `${webformData.title}${webformData.subtitle ? `: ${webform.subtitle}` : ''}`
+                : webformData.name}
+              {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
+            </div>
+            <Button
+              helpClassName={isIcebergCreated && 'p-button-reverse'}
+              icon={isIcebergCreated ? 'unlock' : 'lock'}
+              label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
+              className={styles.openWebformButton}
+              onClick={() => convertHelper()}
+              isLoading={isLoadingIceberg}
+            />
+          </h3>
         </div>
-        {webformData.multipleRecords && (
-          <Button
-            icon="plus"
-            label={resourcesContext.messages['addRecord']}
-            onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
-          />
-        )}
-      </h3>
-      {isNil(webformData.tableSchemaId) && (
-        <span
-          className={styles.nonExistTable}
-          dangerouslySetInnerHTML={{
-            __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], { tableName: webformData.name })
-          }}
-        />
       )}
-      {!isNil(webformData.elementsRecords) && renderWebform(webformData.multipleRecords)}
+      <div className={styles.overlay}>
+        <div
+          style={
+            isLoadingIceberg
+              ? { opacity: 0.5, pointerEvents: 'none' }
+              : isIcebergCreated
+              ? { opacity: 1 }
+              : { opacity: 0.5, pointerEvents: 'none' }
+          }>
+          {isNil(webformData.tableSchemaId) && (
+            <span
+              className={styles.nonExistTable}
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], {
+                  tableName: webformData.name
+                })
+              }}
+            />
+          )}
+          {!isNil(webformData.elementsRecords) && renderWebform(webformData.multipleRecords)}
+        </div>
+      </div>
     </div>
   );
 };
