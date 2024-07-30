@@ -1142,8 +1142,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     String refactoredValue = spatialDataHandling.refactorQuery(fieldValue);
                     insertQueryValuesBuilder.append(", ").append(refactoredValue).append(" ");
                 } else {
-                    String fieldValue = (field.getValue() != null) ? field.getValue() : "";
-                    insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
+                    String fieldValue = "";
+                    if (field.getValue() != null) {
+                        if (field.getValue().matches(".*[^\u0000-\u007F].*")) {
+                            fieldValue = "ENCODE('" + field.getValue() + "', 'UTF-8')";
+                            insertQueryValuesBuilder.append(", ").append(fieldValue);
+                        } else {
+                            fieldValue = field.getValue();
+                            insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
+                        }
+                    }
                 }
             }
             insertQueryValuesBuilder.append(" )");
@@ -1516,8 +1524,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         String tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        String selectQuery = "SELECT " + fieldName + " as " + VALUE + ", " + labelFieldName + " as " + LABEL + " FROM " + tablePathInDremio + " WHERE " + fieldName + " != '' AND "
-                + fieldName + " IS NOT NULL";
+        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + labelFieldName + "\" as " + LABEL
+            + " FROM " + tablePathInDremio +
+            " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
+
 
         List<Map<String, Object>> values = dremioJdbcTemplate.queryForList(selectQuery);
         return values;
