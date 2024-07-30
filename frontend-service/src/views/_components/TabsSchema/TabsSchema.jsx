@@ -20,6 +20,7 @@ export const TabsSchema = ({
   dataflowType,
   dataProviderId,
   datasetSchemaId,
+  datasetType,
   hasCountryCode,
   hasWritePermissions = false,
   isExportable = true,
@@ -28,10 +29,12 @@ export const TabsSchema = ({
   isGroupedValidationSelected,
   isReferenceDataset,
   isReportingWebform,
+  isTableDataRestorationInProgress,
   levelErrorTypes,
   onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
+  onRestoreData,
   onTabChange,
   onTableConversion,
   reporting,
@@ -82,6 +85,7 @@ export const TabsSchema = ({
                   dataflowType={dataflowType}
                   dataProviderId={dataProviderId}
                   datasetSchemaId={datasetSchemaId}
+                  datasetType={datasetType}
                   hasCountryCode={hasCountryCode}
                   hasWritePermissions={hasWritePermissions}
                   isExportable={isExportable}
@@ -90,11 +94,13 @@ export const TabsSchema = ({
                   isGroupedValidationSelected={isGroupedValidationSelected}
                   isReferenceDataset={isReferenceDataset}
                   isReportingWebform={isReportingWebform}
+                  isTableDataRestorationInProgress={isTableDataRestorationInProgress}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onChangeButtonsVisibility={onChangeButtonsVisibility}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
+                  onRestoreData={onRestoreData}
                   onTableConversion={onTableConversion}
                   reporting={reporting}
                   selectedRuleId={selectedRuleId}
@@ -115,6 +121,7 @@ export const TabsSchema = ({
                           .filter(f => f.length > 0)[0]
                       : []
                   }
+                  toPrefill={table.toPrefill}
                 />
               </div>
             </TabPanel>

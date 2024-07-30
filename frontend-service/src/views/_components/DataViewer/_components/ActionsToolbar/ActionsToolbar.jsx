@@ -43,6 +43,7 @@ export const ActionsToolbar = ({
   dataflowId,
   dataProviderId = null,
   datasetId,
+  datasetType,
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
@@ -52,14 +53,16 @@ export const ActionsToolbar = ({
   isFilterValidationsActive,
   isGroupedValidationSelected,
   isLoading,
+  isTableDataRestorationInProgress,
   isTableEditable,
   levelErrorTypesWithCorrects,
   levelErrorValidations,
-  onHideSelectGroupedValidation,
   onChangeButtonsVisibility,
   onConfirmDeleteTable,
+  onConfirmRestorePrefilledData,
   onDisableEditButton,
   onEnableManualEdit,
+  onHideSelectGroupedValidation,
   onUpdateData,
   originalColumns,
   prevFilterValue,
@@ -76,7 +79,8 @@ export const ActionsToolbar = ({
   showWriteButtons,
   tableHasErrors,
   tableId,
-  tableName
+  tableName,
+  toPrefill
 }) => {
   const [isFilteredByValue, setIsFilteredByValue] = useState(false);
   const [filter, dispatchFilter] = useReducer(filterReducer, {
@@ -312,6 +316,7 @@ export const ActionsToolbar = ({
             (isTableEditable && hasWritePermissions) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
+            isTableDataRestorationInProgress ||
             actionsContext.importDatasetProcessing ||
             actionsContext.exportDatasetProcessing ||
             actionsContext.deleteDatasetProcessing ||
@@ -460,6 +465,29 @@ export const ActionsToolbar = ({
     }
   };
 
+  const renderRestorePrefilledDataButton = () => {
+    return (
+      <Button
+        className={'p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step'}
+        disabled={
+          !toPrefill ||
+          isTableDataRestorationInProgress ||
+          ((isTableEditable || isEditRecordsManuallyButtonDisabled) && dataAreManuallyEditable) ||
+          actionsContext.importDatasetProcessing ||
+          actionsContext.exportDatasetProcessing ||
+          actionsContext.deleteDatasetProcessing ||
+          actionsContext.importTableProcessing ||
+          actionsContext.exportTableProcessing ||
+          actionsContext.deleteTableProcessing ||
+          actionsContext.validateDatasetProcessing
+        }
+        icon="undo"
+        label={resourcesContext.messages['restorePrefilledData']}
+        onClick={onConfirmRestorePrefilledData}
+      />
+    );
+  };
+
   const renderFilterSearch = () => {
     if (prevFilterValue !== '') {
       return (
@@ -494,6 +522,7 @@ export const ActionsToolbar = ({
       hasWritePermissions={hasWritePermissions}
       isDataflowOpen={isDataflowOpen}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+      isTableDataRestorationInProgress={isTableDataRestorationInProgress}
       isTableEditable={isTableEditable || isEditRecordsManuallyButtonDisabled}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
@@ -535,6 +564,7 @@ export const ActionsToolbar = ({
             isUndefined(records.totalRecords) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
+            isTableDataRestorationInProgress ||
             actionsContext.importDatasetProcessing ||
             actionsContext.exportDatasetProcessing ||
             actionsContext.deleteDatasetProcessing ||
@@ -577,6 +607,7 @@ export const ActionsToolbar = ({
         />
         {renderFilterableButton()}
         {renderFilterSearch()}
+        {bigData && (datasetType === 'TEST' || datasetType === 'REPORTING') && renderRestorePrefilledDataButton()}
         {bigData && renderManualEditButton()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>

@@ -131,6 +131,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [selectedView, setSelectedView] = useState('');
   const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
+  const [isTableDataRestorationInProgress, setIsTableDataRestorationInProgress] = useState(false);
   const [isTestDataset, setIsTestDataset] = useState(false);
 
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
@@ -987,6 +988,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     setIsTableConversionInProgress(conversionInProgress);
   };
 
+  const onRestoreData = restorationInProgress => {
+    setIsTableDataRestorationInProgress(restorationInProgress);
+  };
+
   const datasetInsideTitle = () => {
     if (dataset?.isReleasing) {
       return `${resourcesContext.messages['isReleasing']} `;
@@ -1165,15 +1170,18 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         bigData={metadata?.dataflow.bigData}
         dataProviderId={metadata?.dataset.dataProviderId}
         datasetSchemaId={metadata?.dataset.datasetSchemaId}
+        datasetType={metadata?.dataset.datasetType}
         hasWritePermissions={hasWritePermissions}
         isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
         isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
         isReferenceDataset={isReferenceDataset}
         isReportingWebform={isReportingWebform}
+        isTableDataRestorationInProgress={isTableDataRestorationInProgress}
         levelErrorTypes={levelErrorTypes}
         onChangeButtonsVisibility={onChangeButtonsVisibility}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
+        onRestoreData={onRestoreData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
         onTableConversion={onTableConversion}
         reporting={true}
@@ -1234,6 +1242,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     hasIcebergTables ||
                     !hasWritePermissions ||
                     isTableConversionInProgress ||
+                    isTableDataRestorationInProgress ||
                     actionsContext.importDatasetProcessing ||
                     actionsContext.exportDatasetProcessing ||
                     actionsContext.deleteDatasetProcessing ||
@@ -1264,6 +1273,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               disabled={
                 (hasWritePermissions && hasIcebergTables) ||
                 isTableConversionInProgress ||
+                isTableDataRestorationInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||
@@ -1293,6 +1303,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                 hasIcebergTables ||
                 !hasWritePermissions ||
                 isTableConversionInProgress ||
+                isTableDataRestorationInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||
@@ -1316,6 +1327,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                 hasIcebergTables ||
                 !hasWritePermissions ||
                 isTableConversionInProgress ||
+                isTableDataRestorationInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
                 actionsContext.deleteDatasetProcessing ||

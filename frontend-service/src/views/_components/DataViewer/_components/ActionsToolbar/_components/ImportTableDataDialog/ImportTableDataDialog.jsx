@@ -22,6 +22,7 @@ export const ImportTableDataDialog = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isTableDataRestorationInProgress,
   isTableEditable,
   showWriteButtons,
   tableId,
@@ -120,6 +121,7 @@ export const ImportTableDataDialog = ({
             !hasWritePermissions ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
+            isTableDataRestorationInProgress ||
             actionsContext.importDatasetProcessing ||
             actionsContext.exportDatasetProcessing ||
             actionsContext.deleteDatasetProcessing ||

@@ -276,6 +276,7 @@ export const DatasetService = {
       datasetRunningStatus: datasetTableDataDTO.data.datasetRunningStatus,
       datasetSchemaId: datasetTableDataDTO.data.datasetSchema,
       datasetSchemaName: datasetTableDataDTO.data.dataSetName,
+      datasetType: datasetTableDataDTO.data.datasetTypeEnum,
       dataProviderId: TextUtils.areEquals(datasetTableDataDTO.data.datasetTypeEnum, 'TEST')
         ? 0
         : datasetTableDataDTO.data.dataProviderId
@@ -717,6 +718,9 @@ export const DatasetService = {
       delimiter,
       jobId
     }),
+
+  restorePrefilledTables: async ({ datasetId, tableSchemaId }) =>
+    await DatasetRepository.restorePrefilledTables({ datasetId, tableSchemaId }),
 
   updateField: async (
     datasetId,

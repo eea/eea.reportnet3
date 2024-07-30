@@ -414,6 +414,11 @@ export const DatasetRepository = {
       })
     }),
 
+  restorePrefilledTables: async ({ datasetId, tableSchemaId }) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.restorePrefilledTables, { datasetId, tableSchemaId })
+    }),
+
   updateDatasetFeedbackStatus: async (dataflowId, datasetId, message, feedbackStatus) =>
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDatasetFeedbackStatus),

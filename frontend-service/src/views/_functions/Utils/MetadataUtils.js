@@ -24,6 +24,7 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
       datasetId,
       datasetFeedbackStatus: datasetMetadata.datasetFeedbackStatus,
       datasetRunningStatus: datasetMetadata.datasetRunningStatus,
+      datasetType: datasetMetadata.datasetType,
       name: datasetMetadata.datasetSchemaName || ''
     };
   }
