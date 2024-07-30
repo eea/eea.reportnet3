@@ -1151,6 +1151,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                             fieldValue = field.getValue();
                             insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
                         }
+                    } else {
+                        insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
                     }
                 }
             }
