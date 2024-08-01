@@ -1439,14 +1439,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         Document referenceFieldSchema = schemasRepository.findFieldSchema(referenceDatasetSchemaId, idPk);
 
         TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, referenceDatasetId));
-        // If the variable resultsNumbers is null, then the limit of results by default it will be 15.
-        // Otherwise the limit will be
-        // the number passed with a max of 100. That will be the results showed on screen.
-        if (resultsNumber == null || resultsNumber == 0) {
-            resultsNumber = 15;
-        } else if (resultsNumber > 400) {
-            resultsNumber = 400;
-        }
 
         DataType dataType = DataType.TEXT;
 
@@ -1465,14 +1457,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String referenceTableSchemaName = referenceTableSchema.get(NAME_TABLE_SCHEMA).toString();
         String referenceFieldName = referenceFieldSchema.get(HEADER_NAME).toString();
 
-        String labelFieldName;
+        String labelFieldName = null;
+        String newLabelField = null;
         if (StringUtils.isNotBlank(conditionalSchemaId)) {
             Document referenceFieldSchema1 = schemasRepository.findFieldSchema(referenceDatasetSchemaId, conditionalSchemaId);
-            labelFieldName = referenceFieldSchema1.get(HEADER_NAME).toString();
-
+            newLabelField = referenceFieldSchema1.get(HEADER_NAME).toString();
         } else {
             labelFieldName = referenceFieldName;
         }
+
         if(!labelSchemaId.equals(idPk)){
             Document labelFieldSchema = schemasRepository.findFieldSchema(referenceDatasetSchemaId, labelSchemaId);
             labelFieldName = labelFieldSchema.get(HEADER_NAME).toString();
@@ -1480,7 +1473,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         try {
             //retrieve the value and label from dremio.
-            List<Map<String, Object>> linkValues = getLinkValuesWithLabelsFromReferencedDataset(referenceDatasetId, referenceTableSchemaId, referenceTableSchemaName, referenceFieldName, labelFieldName, conditionalValue, dataType, searchValue);
+            List<Map<String, Object>> linkValues = getLinkValuesWithLabelsFromReferencedDataset(referenceDatasetId, referenceTableSchemaId, referenceTableSchemaName,
+                referenceFieldName, labelFieldName, conditionalValue, dataType, searchValue, newLabelField);
+
             for (Map<String, Object> row : linkValues) {
                 FieldVO field = new FieldVO();
                 field.setValue((String) row.get(VALUE));
@@ -1521,7 +1516,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         return fieldsVO;
     }
 
-    private List<Map<String, Object>> getLinkValuesWithLabelsFromReferencedDataset(Long datasetId, String tableSchemaId, String tableName, String fieldName, String labelFieldName, String conditionalValue, DataType dataType, String searchValue){
+    private List<Map<String, Object>> getLinkValuesWithLabelsFromReferencedDataset(Long datasetId, String tableSchemaId, String tableName,
+                                                                                   String fieldName, String labelFieldName, String conditionalValue,
+                                                                                   DataType dataType, String searchValue, String newLabelField){
         DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         Long dataflowId = dataSetMetabaseVO.getDataflowId();
         long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
@@ -1533,7 +1530,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         String tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + labelFieldName + "\" as " + LABEL
+        String referenceLabel = newLabelField != null && !dataType.equals(DataType.NUMBER_INTEGER) ? newLabelField : labelFieldName;
+
+        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + referenceLabel + "\" as " + LABEL
             + " FROM " + tablePathInDremio +
             " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
 
@@ -1545,6 +1544,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 + ")";
         }
 
+        if (labelFieldName == null && conditionalValue.isBlank()
+            || (StringUtils.isNotBlank(labelFieldName) && StringUtils.isNotBlank(fieldName) && StringUtils.isNotBlank(newLabelField) && conditionalValue.isBlank())) {
+            conditionalValue = "null";
+        }
         if (StringUtils.isNotBlank(conditionalValue)) {
             String[] values = Arrays.stream(conditionalValue.split("[,;]"))
                 .map(String::trim)
@@ -1555,14 +1558,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 .map(value -> "'" + value + "'")
                 .collect(Collectors.joining(", "));
 
+            String refValue = newLabelField != null ? newLabelField : VALUE;
+            String refLabel = newLabelField != null ? newLabelField : LABEL;
             if (dataType.equals(DataType.NUMBER_INTEGER)) {
-                selectQuery = selectQuery + " AND " + VALUE + " IN (" + valuesList + ")";
-                selectQuery = selectQuery + " ORDER BY " + VALUE;
+                selectQuery = selectQuery + " AND " + refValue + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + refValue;
             } else {
-                selectQuery = selectQuery + " AND " + LABEL + " IN (" + valuesList + ")";
-                selectQuery = selectQuery + " ORDER BY " + LABEL;
+                selectQuery = selectQuery + " AND " + refLabel + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + refLabel;
             }
         }
+        LOG.info("Query to execute in links: {}", selectQuery);
         return dremioJdbcTemplate.queryForList(selectQuery);
     }
 }
