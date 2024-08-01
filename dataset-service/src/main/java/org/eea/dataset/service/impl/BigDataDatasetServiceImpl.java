@@ -1144,11 +1144,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 } else {
                     String fieldValue = "";
                     if (field.getValue() != null) {
-                        if (field.getValue().matches(".*[^\u0000-\u007F].*")) {
-                            fieldValue = "ENCODE('" + field.getValue() + "', 'UTF-8')";
+                        fieldValue = field.getValue().replace("'","''");
+                        if (fieldValue.matches(".*[^\u0000-\u007F].*")) {
+                            fieldValue = "ENCODE('" + fieldValue + "', 'UTF-8')";
                             insertQueryValuesBuilder.append(", ").append(fieldValue);
                         } else {
-                            fieldValue = field.getValue();
+                            //fieldValue = field.getValue();
                             insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
                         }
                     } else {
@@ -1181,7 +1182,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType()) && !field.getType().equals(DataType.POINT)) {
                     continue;
                 }
-                String fieldValue = (field.getValue() != null) ? field.getValue() : "";
+                String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
                 updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
                 updateQueryBuilder.append((i != record.getFields().size() -1) ? ", " : " ");
             }
@@ -1537,6 +1538,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
 
         if (StringUtils.isNotBlank(searchValue)) {
+            searchValue = searchValue.replace("'", "''");
             selectQuery += " AND ('"
                 + searchValue + "' IS NULL "
                 + "OR LOWER(" + VALUE + ") LIKE LOWER(CONCAT('%', '" + searchValue + "', '%')) "
