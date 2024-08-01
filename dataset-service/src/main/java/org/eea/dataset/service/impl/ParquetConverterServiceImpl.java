@@ -99,6 +99,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   @Value("${dremio.parquetConverter.custom.maxCsvLinesPerFile}")
   private Integer maxCsvLinesPerFile;
 
+  @Value("${dremio.spatialdata.batch.size}")
+  private Integer spatialDataBatchSize;
+
   private final FileCommonUtils fileCommonUtils;
   private final FileTreatmentHelper fileTreatmentHelper;
   private final DremioHelperService dremioHelperService;
@@ -271,7 +274,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
     } else {
       if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, 5000, datasetType);
+        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, spatialDataBatchSize, datasetType);//
       } else {
         csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, datasetType);
       }
