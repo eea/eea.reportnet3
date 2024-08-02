@@ -1209,7 +1209,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         //create update query for the record
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
-        String fieldValue = (field.getValue() != null) ? field.getValue() : "";
+        String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
         updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
         updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(recordId).append("'");
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
