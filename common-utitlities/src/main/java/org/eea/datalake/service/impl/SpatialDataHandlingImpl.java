@@ -1,5 +1,6 @@
 package org.eea.datalake.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.SpatialDataHelper;
 import org.eea.interfaces.vo.dataset.RecordVO;
@@ -246,7 +247,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       Optional<String> header = getHeaderType(isGeoJsonHeaders, columnName, tableSchemaVO);
       if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
         String escValue = spatialDataHelper.escapeJsonString(value);
-        if (spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
+        if (StringUtils.isNotBlank(escValue) && spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
           String hexStr = convertToHEX(escValue);
           String binaryStr = FROM_XEX + "('" + hexStr + "')";
           int valueStart = matcher.start(3);
