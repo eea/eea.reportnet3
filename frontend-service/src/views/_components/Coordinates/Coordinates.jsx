@@ -117,7 +117,7 @@ export const Coordinates = ({
         return (
           <Button
             className={`p-button-secondary-transparent button ${styles.mapButton}`}
-            disabled={hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
+            disabled={disabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
             icon="marker"
             onClick={() => onMapOpen(initialGeoJson)}
             tooltip={resourcesContext.messages['selectGeographicalDataOnMap']}
@@ -134,7 +134,7 @@ export const Coordinates = ({
             appendTo={document.body}
             ariaLabel={'crs'}
             className={styles.epsgSwitcher}
-            disabled={crsDisabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
+            disabled={disabled || crsDisabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
             onChange={e => {
               if (
                 e.target.value.value === 'EPSG:3035' &&
