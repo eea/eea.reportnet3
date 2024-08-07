@@ -9,7 +9,7 @@
 		<relativePath>../parent-poms/microservice</relativePath>
 	</parent>
 	<properties>
-		<droolsVersion>7.20.0.Final</droolsVersion>
+		<droolsVersion>7.60.0.Final</droolsVersion>
 		<sonar.moduleKey>org.eea:reportnet:validation-service:${sonar.jenkins.branch}</sonar.moduleKey>
 	</properties>
 	<artifactId>validation-service</artifactId>
