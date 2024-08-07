@@ -10,6 +10,7 @@ export const Calendar = forwardRef((props, _) => {
     baseZIndex,
     className,
     dateFormat,
+    disabled,
     disabledDates,
     inline,
     inputClassName,
@@ -88,6 +89,7 @@ export const Calendar = forwardRef((props, _) => {
       baseZIndex={baseZIndex}
       className={className}
       dateFormat={dateFormat}
+      disabled={disabled}
       disabledDates={disabledDates}
       inline={inline}
       inputClassName={inputClassName}

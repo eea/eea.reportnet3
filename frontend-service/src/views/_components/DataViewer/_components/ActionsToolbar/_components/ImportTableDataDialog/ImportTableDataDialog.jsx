@@ -24,6 +24,7 @@ export const ImportTableDataDialog = ({
   isDesignDatasetEditorRead,
   isTableDataRestorationInProgress,
   isTableEditable,
+  isTableFixedNumber,
   showWriteButtons,
   tableId,
   tableName
@@ -110,7 +111,7 @@ export const ImportTableDataDialog = ({
   };
 
   const renderButton = () => {
-    if (hasWritePermissions || showWriteButtons) {
+    if ((hasWritePermissions && !isTableFixedNumber) || showWriteButtons) {
       return (
         <Button
           className={`p-button-rounded p-button-secondary datasetSchema-import-table-help-step ${

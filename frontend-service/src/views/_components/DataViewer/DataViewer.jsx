@@ -1312,6 +1312,7 @@ export const DataViewer = ({
         isLoading={isLoading}
         isTableDataRestorationInProgress={isTableDataRestorationInProgress}
         isTableEditable={isTableEditable}
+        isTableFixedNumber={tableFixedNumber}
         levelErrorTypesWithCorrects={levelErrorAllTypes}
         levelErrorValidations={levelErrorValidations}
         onChangeButtonsVisibility={onChangeButtonsVisibility}
@@ -1518,7 +1519,13 @@ export const DataViewer = ({
             footer={addRowDialogFooter}
             header={resourcesContext.messages['addRecord']}
             modal={true}
-            onHide={() => setAddDialogVisible(false)}
+            onHide={() => {
+              dispatchRecords({
+                type: 'SET_NEW_RECORD',
+                payload: RecordUtils.createEmptyObject(colsSchema, undefined)
+              });
+              setAddDialogVisible(false);
+            }}
             visible={addDialogVisible}
             zIndex={3003}>
             <div className="p-grid p-fluid">

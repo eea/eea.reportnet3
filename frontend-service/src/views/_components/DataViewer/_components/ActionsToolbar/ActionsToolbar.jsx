@@ -57,6 +57,7 @@ export const ActionsToolbar = ({
   isTableEditable,
   levelErrorTypesWithCorrects,
   levelErrorValidations,
+  isTableFixedNumber,
   onChangeButtonsVisibility,
   onConfirmDeleteTable,
   onConfirmRestorePrefilledData,
@@ -471,6 +472,7 @@ export const ActionsToolbar = ({
         className={'p-button-rounded p-button-secondary-transparent datasetSchema-showColumn-help-step'}
         disabled={
           !toPrefill ||
+          !hasWritePermissions ||
           isTableDataRestorationInProgress ||
           ((isTableEditable || isEditRecordsManuallyButtonDisabled) && dataAreManuallyEditable) ||
           actionsContext.importDatasetProcessing ||
@@ -524,6 +526,7 @@ export const ActionsToolbar = ({
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
       isTableDataRestorationInProgress={isTableDataRestorationInProgress}
       isTableEditable={isTableEditable || isEditRecordsManuallyButtonDisabled}
+      isTableFixedNumber={isTableFixedNumber}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
       tableName={tableName}
