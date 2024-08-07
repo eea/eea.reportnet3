@@ -51,8 +51,16 @@ export const Coordinates = ({
   useEffect(() => {
     if (initialGeoJson) {
       const parsedInitialGeoJson = JSON.parse(initialGeoJson);
+      checkCoordinates(
+        parsedInitialGeoJson.geometry.coordinates[0],
+        parsedInitialGeoJson.geometry.coordinates[1],
+        crsValue.value === 'EPSG:3035'
+      );
       setLatitude(parsedInitialGeoJson.geometry.coordinates[0]);
       setLongitude(parsedInitialGeoJson.geometry.coordinates[1]);
+    } else {
+      setLatitude('');
+      setLongitude('');
     }
   }, [initialGeoJson]);
 
