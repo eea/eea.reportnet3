@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -29,6 +30,8 @@ import org.eea.validation.persistence.schemas.DataSetSchema;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.eea.validation.persistence.schemas.TableSchema;
 import org.eea.validation.persistence.schemas.rule.Rule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +40,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class RulesErrorUtils {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RulesErrorUtils.class);
 
   private static final int THIRTYFOUR = 34;
 
@@ -101,6 +106,8 @@ public class RulesErrorUtils {
    * @param e the e
    */
   public void createRuleErrorException(Object lvValue, RuntimeException e) {
+    LOG.info("[272589-PROCESS] - ENTER createRuleErrorException method");
+
     Validation ruleValidation = new Validation();
 
     // with that part we extract the id rule who fail
@@ -143,6 +150,7 @@ public class RulesErrorUtils {
 
         break;
       case "org.eea.validation.persistence.data.domain.TableValue":
+        LOG.info("[272589-PROCESS] - ENTER createRuleErrorException method - TableValue object");
 
         // we convert the Object to TableValue
         TableValue tableValue = tableValueDatas(lvValue, ruleValidation, idRule);
@@ -154,6 +162,7 @@ public class RulesErrorUtils {
         ruleTBValidations.add(ruleTBValidation);
         tableValue.setTableValidations(ruleTBValidations);
         tableRepository.save(tableValue);
+        LOG.info("[272589-PROCESS] - EXIT createRuleErrorException method - TableValue object");
 
         break;
       case "org.eea.validation.persistence.data.domain.DatasetValue":
@@ -172,6 +181,8 @@ public class RulesErrorUtils {
       default:
         break;
     }
+
+    LOG.info("[272589-PROCESS] - EXIT createRuleErrorException method");
 
   }
 
