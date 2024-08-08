@@ -14,6 +14,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExecuteTableValidationCommand extends ExecuteValidationCommand {
 
+  private static final Logger LOG = LoggerFactory.getLogger(ExecuteTableValidationCommand.class);
+
   /** The Constant LOG_ERROR. */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
@@ -45,6 +47,7 @@ public class ExecuteTableValidationCommand extends ExecuteValidationCommand {
   @Override
   public Validator getValidationAction() {
     try {
+      LOG.info("[272589-PROCESS] - ENTER ExecuteTableValidationCommand kafka command");
       return (EEAEventVO eeaEventVO, Long datasetId, KieBase kieBase, Long taskId) -> {
         final Long idTable = Long.parseLong(String.valueOf(eeaEventVO.getData().get("idTable")));
         final String sqlRule = String.valueOf(eeaEventVO.getData().get("sqlRule"));
@@ -52,8 +55,11 @@ public class ExecuteTableValidationCommand extends ExecuteValidationCommand {
         validationService.validateTable(datasetId, idTable, kieBase, sqlRule, dataProviderId, taskId);
       };
     } catch (Exception e) {
+      LOG.info("[272589-PROCESS] - catch ExecuteTableValidationCommand kafka command ");
+
       LOG_ERROR.error("Unexpected error! Error executing event COMMAND_VALIDATE_TABLE. Message: {}", e.getMessage());
       throw e;
     }
+
   }
 }
