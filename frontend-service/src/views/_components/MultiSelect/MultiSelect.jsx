@@ -46,6 +46,7 @@ export class MultiSelect extends Component {
     onChange: null,
     onFilterInputChangeBackend: null,
     onFocus: null,
+    onSubmitSelectedValues: null,
     optionLabel: null,
     optionValue: null,
     options: null,
@@ -91,6 +92,7 @@ export class MultiSelect extends Component {
     onChange: PropTypes.func,
     onFilterInputChangeBackend: PropTypes.func,
     onFocus: PropTypes.func,
+    onSubmitSelectedValues: PropTypes.func,
     optionLabel: PropTypes.string,
     options: PropTypes.array,
     optionValue: PropTypes.string,
@@ -111,7 +113,8 @@ export class MultiSelect extends Component {
     super(props);
     this.state = {
       filter: '',
-      isPanelVisible: false
+      isPanelVisible: false,
+      selectedValue: ''
     };
 
     this.onClick = this.onClick.bind(this);
@@ -223,6 +226,7 @@ export class MultiSelect extends Component {
   }
 
   updateModel(event, value) {
+    this.setState({ selectedValue: value });
     if (this.props.onChange) {
       this.props.onChange({
         originalEvent: event,
@@ -378,6 +382,9 @@ export class MultiSelect extends Component {
   }
 
   componentWillUnmount() {
+    if (this.props.onSubmitSelectedValues) {
+      this.props.onSubmitSelectedValues(this.state.selectedValue);
+    }
     this.unbindDocumentClickListener();
 
     if (this.tooltip) {

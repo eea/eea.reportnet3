@@ -675,23 +675,25 @@ export const FieldEditor = ({
               isLoadingData={isLoadingData}
               maxSelectedLabels={10}
               onChange={e => {
-                try {
-                  setLinkItemsValue(e.value);
-                  onEditorValueChange(cells, e.value);
-                  onEditorSubmitValue(
-                    cells,
-                    e.value.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })),
-                    record
-                  );
-                } catch (error) {
-                  console.error('FieldEditor - renderField - LINK.', error);
-                }
+                setLinkItemsValue(e.value);
+                onEditorValueChange(cells, e.value);
               }}
               onFilterInputChangeBackend={onFilter}
               onFocus={e => {
                 e.preventDefault();
                 if (!isUndefined(codelistItemValue)) {
                   onEditorValueFocus(cells, codelistItemValue);
+                }
+              }}
+              onSubmitSelectedValues={value => {
+                try {
+                  onEditorSubmitValue(
+                    cells,
+                    value.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })),
+                    record
+                  );
+                } catch (error) {
+                  console.error('FieldEditor - renderField - LINK.', error);
                 }
               }}
               optionLabel="itemType"
