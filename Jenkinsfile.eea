@@ -38,23 +38,14 @@ pipeline {
             }
 
         }
-       stage('Report to SonarQube') {
-             tools {
-                maven 'maven3'
-               jdk 'Java17'
-             }       
-             environment {
-               GIT_NAME = "eea.reportnet3"
-               SONARQUBE_TAGS = "reportnet3"
-
-            }
-            steps {
-                withSonarQubeEnv('Sonarqube') {
-                    sh '''mvn sonar:sonar -Dsonar.java.source=11 -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.token=${SONAR_AUTH_TOKEN} -Dsonar.projectKey=${GIT_NAME}-${GIT_BRANCH} -Dsonar.projectName=${GIT_NAME}-${GIT_BRANCH}'''
-                    sh '''try=2; while [ \$try -gt 0 ]; do curl -s -XPOST -u "${SONAR_AUTH_TOKEN}:" "${SONAR_HOST_URL}api/project_tags/set?project=${GIT_NAME}-${BRANCH_NAME}&tags=${SONARQUBE_TAGS},${BRANCH_NAME}" > set_tags_result; if [ \$(grep -ic error set_tags_result ) -eq 0 ]; then try=0; else cat set_tags_result; echo "... Will retry"; sleep 60; try=\$(( \$try - 1 )); fi; done'''
-                }
-            }
-        }
+        stage('Report to SonarQube') {
+           steps {
+               withSonarQubeEnv('Sonarqube') {
+                   // requires SonarQube Scanner for Maven 3.2+
+                   sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -P sonar -Dsonar.java.source=11 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
+               }
+           }
+       }
         stage('Setup sandbox docker images build'){
             steps{
                 script {
