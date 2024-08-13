@@ -48,6 +48,7 @@ public class DremioSQLValidationUtils {
         return dremioJdbcTemplate.queryForList(query.toString(), String.class);
     }
 
+    //the following method is being called via invoke from getIsFieldFKRecordIds.
     public List<String> isfieldFK(FieldSchema fkFieldSchema, boolean pkMustBeUsed, String fkTablePath, String pkTablePath, String foreignKey, String primaryKey,
                                   String optionalFk, String optionalPk) {
         List<String> recordIds;
@@ -109,7 +110,14 @@ public class DremioSQLValidationUtils {
                 Map<String, String> pkWithOptionalMap = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                     HashMap<String,String> result = new HashMap<>();
                     while (rs.next()) {
-                        result.put(rs.getString(optionalPk), rs.getString(primaryKey));
+                        if(result.get(rs.getString(optionalPk)) != null){
+                            String hashmapValues = result.get(rs.getString(optionalPk)) + "," + rs.getString(primaryKey);
+                            result.put(rs.getString(optionalPk), hashmapValues);
+                        }
+                        else{
+                            result.put(rs.getString(optionalPk), rs.getString(primaryKey));
+                        }
+
                     }
                     return result;
                 });
@@ -144,6 +152,9 @@ public class DremioSQLValidationUtils {
                             pkMapAux.put(fkWithOptionalRS.getString(optionalFk),
                                     pksByOptionalValueAux.toString().replace("]", "").replace("[", "").trim());
                         }
+                    }
+                    else{
+                        recordIds.add(fkWithOptionalRS.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
                     }
                 }
                 if (pkMustBeUsed && !pkMapAux.entrySet().isEmpty()) {
