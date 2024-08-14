@@ -147,6 +147,7 @@ const parseNewTableRecordTable = table => {
         fieldData: {
           [field.fieldSchema || field.fieldId]: null,
           type: field.type,
+          name: field.name,
           fieldSchemaId: field.fieldSchema || field.fieldId
         }
       };

@@ -27,8 +27,9 @@ export const DatasetService = {
   convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
     await DatasetRepository.convertParquetToIceberg({ datasetId, dataflowId, providerId, tableSchemaId }),
 
-  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) =>{
-    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId, tableSchemaIds })},
+  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) => {
+    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId, tableSchemaIds })
+  },
 
   convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) =>
     await DatasetRepository.convertIcebergsToParquets({ datasetId, dataflowId, providerId, tableSchemaIds }),
@@ -82,6 +83,7 @@ export const DatasetService = {
 
       datasetTableRecords.push(datasetTableRecord);
     });
+    
 
     return await DatasetRepository.createRecord(datasetId, tableSchemaId, datasetTableRecords);
   },
@@ -749,8 +751,27 @@ export const DatasetService = {
       value: fieldValue,
       splitSRID: true
     });
-
     return await DatasetRepository.updateField(datasetId, recordId, tableSchemaId, datasetTableField, updateInCascade);
+  },
+
+  updateFieldWebform: async (
+    datasetId,
+    field,
+    value,
+    tableSchemaId
+  ) => {
+    const datasetTableField = new DatasetTableField({});
+
+    datasetTableField.id = field?.fieldId;
+    datasetTableField.fieldSchemaId = field?.fieldSchemaId;
+    datasetTableField.name = field?.name;
+    datasetTableField.type = field?.fieldType;
+    datasetTableField.value = DatasetUtils.parseValue({
+      type: field?.fieldType,
+      value: value,
+      splitSRID: true
+    });
+    return await DatasetRepository.updateField(datasetId, field?.recordId, tableSchemaId, datasetTableField, false);
   },
 
   updateFieldDesign: async (datasetId, record) => {

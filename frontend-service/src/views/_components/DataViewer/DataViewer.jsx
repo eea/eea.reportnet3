@@ -779,6 +779,7 @@ export const DataViewer = ({
   };
 
   const onEditorSubmitValue = async (cell, value, record) => {
+    console.log('cell', cell, 'value', value, 'record', record)
     if (!isEmpty(record)) {
       let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
       if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {

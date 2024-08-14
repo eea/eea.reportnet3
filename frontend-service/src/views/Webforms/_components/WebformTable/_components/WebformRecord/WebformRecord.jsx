@@ -107,13 +107,14 @@ export const WebformRecord = ({
 
   const onDeleteMultipleWebform = async () => {
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
-
+    let updateInCascade = webformRecordState.record?.elements?.some(element => element.deleteInCascade)
     try {
-      await DatasetService.deleteRecord(
+      await DatasetService.deleteRecord({
         datasetId,
         selectedRecordId,
-        webformRecordState.record?.elements?.some(element => element.deleteInCascade)
-      );
+        tableId,
+        updateInCascade
+      });
       onRefresh();
       handleDialogs('deleteRow', false);
     } catch (error) {
@@ -292,6 +293,7 @@ export const WebformRecord = ({
                       onUpdateSinglesList={onUpdateSinglesList}
                       pamsRecords={pamsRecords}
                       record={record}
+                      tableSchemaId={tableId}
                     />
                   )}
                 </div>

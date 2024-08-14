@@ -48,7 +48,8 @@ export const WebformField = ({
   onUpdateSinglesList,
   onUpdatePamsValue,
   pamsRecords,
-  record
+  record,
+  tableSchemaId
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -206,29 +207,71 @@ export const WebformField = ({
     }
   };
 
-  const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
-    webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
-    const parsedValue =
-      field.fieldType === 'MULTISELECT_CODELIST' ||
-      ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
-        ? value.join(';')
-        : value;
+  // const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+  //   webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
+  //   const parsedValue =
+  //     field.fieldType === 'MULTISELECT_CODELIST' ||
+  //     ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
+  //       ? value.join(';')
+  //       : value;
     
-        try {
+  //       try {
+  //     if (!isSubmiting && initialFieldValue !== parsedValue) {
+  //       await DatasetService.updateField(
+  //         datasetId,
+  //         option,
+  //         field.fieldId,
+  //         field.fieldType,
+  //         parsedValue,
+  //         updateInCascade
+  //       );
+  //       if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
+  //         onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
+  //       }
+
+  //       if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
+  //         onUpdateSinglesList();
+  //       }
+  //     }
+  //   } catch (error) {
+  //     if (error.response.status === 423) {
+  //       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+  //     } else {
+  //       if (field.fieldType !== 'DATETIME') {
+  //         console.error('WebformField - onEditorSubmitValue.', error);
+  //         if (updateInCascade) {
+  //           notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
+  //         } else {
+  //           notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
+  //         }
+  //       }
+  //     }
+  //   } finally {
+  //     webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
+  //   }
+  // };
+
+  const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+    
+    const parsedValue =
+    field.fieldType === 'MULTISELECT_CODELIST' ||
+    ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
+      ? value.join(';')
+      : value;
+
+    try {
       if (!isSubmiting && initialFieldValue !== parsedValue) {
-        await DatasetService.updateField(
+        await DatasetService.updateFieldWebform(
           datasetId,
-          option,
-          field.fieldId,
-          field.fieldType,
-          parsedValue,
-          updateInCascade
+          field,
+          value,
+          tableSchemaId
         );
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
-          onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
+          onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
         }
 
-        if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
+        if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
         }
       }
@@ -236,7 +279,7 @@ export const WebformField = ({
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
-        if (field.fieldType !== 'DATETIME') {
+        if (field?.fieldType !== 'DATETIME') {
           console.error('WebformField - onEditorSubmitValue.', error);
           if (updateInCascade) {
             notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
@@ -248,6 +291,7 @@ export const WebformField = ({
     } finally {
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
+
   };
 
   const onFileDeleteVisible = (fieldId, fieldSchemaId) =>
