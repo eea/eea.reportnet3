@@ -380,7 +380,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     DataSetMetabase metabase = obtainDatasetMetabase(datasetId);
     DataSetSchema dataschema =
             schemasRepository.findByIdDataSetSchema(new ObjectId(metabase.getDatasetSchema()));
-    LOG.info("Schema retrived by datasetId {}", datasetId);
+    LOG.info("Schema retrieved by datasetId {}", datasetId);
     DataSetSchemaVO dataschemaVO =
             Boolean.TRUE.equals(addRules) ? dataSchemaMapper.entityToClass(dataschema)
                     : noRulesDataSchemaMapper.entityToClass(dataschema);

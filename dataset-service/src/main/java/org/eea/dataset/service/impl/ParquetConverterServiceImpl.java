@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -52,11 +53,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.UncheckedIOException;
+import java.io.*;
 import java.nio.charset.MalformedInputException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -487,8 +484,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
              .setIgnoreHeaderCase(true)
              .setIgnoreEmptyLines(false)
              .setTrim(true).build());
-         BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
-         CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build())) {
+         //BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
+         //CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
+         CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
+                 CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                 CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
       CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
 
@@ -496,14 +496,19 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", csvFile, importFileInDremioInfo);
         recordCounter++;
         if (recordCounter == 1) {
-          csvPrinter.printRecord(typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).collect(Collectors.toList()));
+          String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
+          csvWriter.writeNext(headersArray);
+          //csvPrinter.printRecord(typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).collect(Collectors.toList()));
         }
 
         List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType);
-        csvPrinter.printRecord(row);
+        String[] rowArray = row.toArray(new String[0]);
+        csvWriter.writeNext(rowArray);
+        //csvPrinter.printRecord(row);
       }
 
-      csvPrinter.flush();
+      csvWriter.flush();
+      //csvPrinter.flush();
       modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
     } catch (IOException | UncheckedIOException e) {
       handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
@@ -527,8 +532,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     long recordCounter = 0;
     boolean fileIsEmpty = true;
 
-    BufferedWriter writer = null;
-    CSVPrinter csvPrinter = null;
+    //BufferedWriter writer = null;
+    //CSVPrinter csvPrinter = null;
+    CSVWriter csvWriter = null;
     File csvFileWithAddedColumns = null;
 
     try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
@@ -548,17 +554,29 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         if (recordCounter == 0) {
           csvFileWithAddedColumns = createNewFilePath(csvFile);
-          writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
-          csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
-          csvPrinter.printRecord(typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).collect(Collectors.toList()));
+          //writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
+          //csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
+          csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
+                  CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                  CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+          String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
+          csvWriter.writeNext(headersArray);
+          //csvPrinter.printRecord(typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).collect(Collectors.toList()));
+
         }
 
         List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType);
-        csvPrinter.printRecord(row);
+        //csvPrinter.printRecord(row);
+        String[] rowArray = row.toArray(new String[0]);
+        csvWriter.writeNext(rowArray);
         recordCounter++;
 
         if (recordCounter == batchSize) {
-          closeResources(writer, csvPrinter);
+          //closeResources(writer, csvPrinter);
+          if (csvWriter != null) {
+            csvWriter.flush();
+            csvWriter.close();
+          }
           modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
           recordCounter = 0;
         }
@@ -572,7 +590,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
     } finally {
       if (recordCounter != 0) {
-        closeResources(writer, csvPrinter);
+        //closeResources(writer, csvPrinter);
+        if (csvWriter != null) {
+          csvWriter.flush();
+          csvWriter.close();
+        }
         modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
 
       }
