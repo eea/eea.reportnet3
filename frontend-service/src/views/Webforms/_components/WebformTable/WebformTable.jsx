@@ -153,6 +153,7 @@ export const WebformTable = ({
     });
 
     let newEmptyRecord;
+
     if (!isEmpty(webformData.elementsRecords)) {
       if (webformType === 'PAMS') {
         let sectorObjectivesTable;

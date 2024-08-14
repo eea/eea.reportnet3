@@ -293,6 +293,7 @@ export const WebformRecord = ({
                       onUpdateSinglesList={onUpdateSinglesList}
                       pamsRecords={pamsRecords}
                       record={record}
+                      tableSchemaId={tableId}
                     />
                   )}
                 </div>
