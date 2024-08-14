@@ -1431,6 +1431,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (referenced.get("linkedConditionalFieldId") != null) {
             conditionalSchemaId = referenced.get("linkedConditionalFieldId").toString();
         }
+        if(StringUtils.isBlank(conditionalSchemaId)){
+            //ignore conditional value because in mongo we don't have a conditional set up for the link
+            conditionalValue = "";
+        }
         if (StringUtils.isBlank(searchValue)) {
             searchValue = "";
         }
