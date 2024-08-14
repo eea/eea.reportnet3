@@ -67,19 +67,6 @@ export const WebformTable = ({
   const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
-    const alertMessage = ev => {
-      ev.preventDefault();
-      // if table not saved
-      return (ev.returnValue = 'Are you sure you want to close?');
-    };
-    window.addEventListener('beforeunload', alertMessage);
-
-    return () => {
-      window.removeEventListener('beforeunload', alertMessage);
-    };
-  }, []);
-
-  useEffect(() => {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
 
@@ -166,7 +153,6 @@ export const WebformTable = ({
     });
 
     let newEmptyRecord;
-
     if (!isEmpty(webformData.elementsRecords)) {
       if (webformType === 'PAMS') {
         let sectorObjectivesTable;
@@ -193,6 +179,8 @@ export const WebformTable = ({
     if (mainTable) {
       newEmptyRecord = parseNewTableRecordTable(webformData);
     }
+
+    console.log(newEmptyRecord)
 
     if (!isEmpty(newEmptyRecord)) {
       try {
@@ -420,12 +408,14 @@ export const WebformTable = ({
             providerId: dataProviderId,
             tableSchemaIds: tableIds
           });
+          setIsIcebergCreated(false)
         } else {
           await DatasetService.convertIcebergsToParquets({
             datasetId,
             dataflowId,
             tableSchemaIds: tableIds
           });
+          setIsIcebergCreated(false)
         }
       } else {
         if (dataProviderId) {
@@ -435,12 +425,14 @@ export const WebformTable = ({
             providerId: dataProviderId,
             tableSchemaIds: tableIds
           });
+          setIsIcebergCreated(true)
         } else {
           await DatasetService.convertParquetsToIcebergs({
             datasetId,
             dataflowId,
             tableSchemaIds: tableIds
           });
+          setIsIcebergCreated(true)
         }
       }
     } catch (error) {
