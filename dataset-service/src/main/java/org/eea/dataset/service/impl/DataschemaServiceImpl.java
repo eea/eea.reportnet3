@@ -3516,11 +3516,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         if (fieldSchemaVO!=null) {
           fieldName = fieldSchemaVO.getName();
         }
-      } else { //uniqueConstraint
-        UniqueConstraintVO uniqueConstraint = this.getUniqueConstraint(parameters.get(0));
-        String fieldSchemaId = uniqueConstraint.getFieldSchemaIds().get(0);
-        fieldSchemaVO = this.getFieldSchema(uniqueConstraint.getDatasetSchemaId(), fieldSchemaId);
-        fieldName = fieldSchemaVO.getName();
+      } else {
+        if(parameters.get(0).equals(LiteralConstants.DATASETID)){
+          //link field
+          fieldSchemaVO = this.getFieldSchema(datasetSchemaId, parameters.get(1));
+          fieldName = fieldSchemaVO.getName();
+        }
+        else {
+          //uniqueConstraint
+          UniqueConstraintVO uniqueConstraint = this.getUniqueConstraint(parameters.get(0));
+          String fieldSchemaId = uniqueConstraint.getFieldSchemaIds().get(0);
+          fieldSchemaVO = this.getFieldSchema(uniqueConstraint.getDatasetSchemaId(), fieldSchemaId);
+          fieldName = fieldSchemaVO.getName();
+        }
       }
     }
     return fieldName;

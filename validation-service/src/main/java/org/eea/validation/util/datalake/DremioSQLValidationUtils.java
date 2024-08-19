@@ -1,5 +1,6 @@
 package org.eea.validation.util.datalake;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.validation.configuration.DremioConfiguration;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.springframework.context.annotation.Import;
@@ -68,16 +69,54 @@ public class DremioSQLValidationUtils {
         StringBuilder query = new StringBuilder();
         List<String> recordIds = new ArrayList<>();
         if (!pkMustBeUsed) {
-            if (fkFieldSchema.getIgnoreCaseInLinks() != null && fkFieldSchema.getIgnoreCaseInLinks()) {
-                //FK_SINGLE_WRONG_IGNORE_CASE_LINK
-                query.append("select fk.record_id from ").append(fkTablePath).append(" fk where LOWER(fk.").append(foreignKey).append(") not in (select LOWER(pk.").append(primaryKey)
-                        .append(") from ").append(pkTablePath).append(" pk)");
-            } else {
-                //FK_SINGLE_WRONG
-                query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(foreignKey).append(" not in (select pk.").append(primaryKey)
-                        .append(" from ").append(pkTablePath).append(" pk)");
+            //FK_MULTIPLE_WRONG
+            if(BooleanUtils.isTrue(fkFieldSchema.getPkHasMultipleValues())) {
+                //PK_QUERY_VALUES
+                StringBuilder pkQuery = new StringBuilder();
+                pkQuery.append("select ").append(primaryKey).append(" from ").append(pkTablePath);
+                List<String> pkValueList = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
+                    List<String> result = new ArrayList<>();
+                    while (rs.next()) {
+                        result.add(rs.getString(primaryKey));
+                    }
+                    return result;
+                });
+
+                //FK_QUERY_VALUES
+                StringBuilder fkQuery = new StringBuilder();
+                fkQuery.append("select ").append("record_id").append(",").append(foreignKey).append(" from ").append(fkTablePath);
+                SqlRowSet fkValues = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
+                while (fkValues.next()) {
+                    List<String> recordValues = new ArrayList<>(Arrays.asList(fkValues.getString(foreignKey).split(";")));
+                    for(String recordValue: recordValues){
+                        if(BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())){
+                            //FK_MULTIPLE_WRONG_IGNORE_CASE_LINK
+                            List<String> lowercasePkValues = pkValueList.stream().map(String::toLowerCase) .collect(Collectors.toList());
+                            if (!lowercasePkValues.contains(recordValue.toLowerCase())) {
+                                recordIds.add(fkValues.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+                            }
+                        }
+                        else{
+                            if (!pkValueList.contains(recordValue)) {
+                                recordIds.add(fkValues.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+                            }
+                        }
+                    }
+                }
             }
-            recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
+            else{
+                //FK_SINGLE_WRONG
+                if(BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())){
+                    //FK_SINGLE_WRONG_IGNORE_CASE_LINK
+                    query.append("select fk.record_id from ").append(fkTablePath).append(" fk where LOWER(fk.").append(foreignKey).append(") not in (select LOWER(pk.").append(primaryKey)
+                            .append(") from ").append(pkTablePath).append(" pk)");
+                }
+                else{
+                    query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(foreignKey).append(" not in (select pk.").append(primaryKey)
+                            .append(" from ").append(pkTablePath).append(" pk)");
+                }
+                recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
+            }
         } else {
             if (null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed()) {
                 //PK_MUST_BE_USED
