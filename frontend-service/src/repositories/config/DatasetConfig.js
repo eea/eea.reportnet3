@@ -30,7 +30,7 @@ export const DatasetConfig = {
   deleteData: '/dataset/v1/{:datasetId}/deleteDatasetData?deletePrefilledTables={:deletePrefilledTables}',
   deleteTableData: '/dataset/v1/{:datasetId}/deleteTableData/{:tableId}',
   deleteRecord:
-    '/dataset/{:datasetId}/record/{:recordId}?deleteCascadePK={:deleteInCascade}&tableSchemaId={:tableSchemaId}',
+    '/dataset/{:datasetId}/record/{:selectedRecordId}?deleteCascadePK={:updateInCascade}&tableSchemaId={:tableId}',
   deleteFieldDesign: '/dataschema/{:datasetId}/fieldSchema/{:fieldSchemaId}',
   deleteTableDesign: '/dataschema/{:datasetId}/tableSchema/{:tableSchemaId}',
   downloadPublicDatasetFile:

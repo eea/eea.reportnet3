@@ -82,9 +82,9 @@ export const DatasetRepository = {
         })
     }),
 
-  deleteRecord: async ({ datasetId, recordId, tableSchemaId, deleteInCascade = false }) =>
+  deleteRecord: async ({ datasetId, selectedRecordId, tableId, updateInCascade = false }) =>
     await HTTPRequester.delete({
-      url: getUrl(DatasetConfig.deleteRecord, { datasetId, deleteInCascade, recordId, tableSchemaId })
+      url: getUrl(DatasetConfig.deleteRecord, { datasetId, updateInCascade, selectedRecordId, tableId })
     }),
 
   deleteFieldDesign: async (datasetId, fieldSchemaId) =>
