@@ -31,7 +31,7 @@ public class JobForCleanupOfFinishedJobs {
     }
 
     /**
-     * The job runs every day. It finds jobs that have status FINISHED, REFUSED, CANCELED or FAILED for more than a day
+     * The job runs every day. It finds jobs that have status FINISHED, REFUSED, CANCELED, CANCELED_BY_ADMIN or FAILED for more than a day
      * and removes them from the JOBS table
      */
     public void cleanupFinishedJobs() {
