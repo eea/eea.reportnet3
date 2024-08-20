@@ -117,8 +117,8 @@ export const DatasetService = {
 
   deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
-  deleteRecord: async ({ datasetId, recordId, tableSchemaId, deleteInCascade }) =>
-    await DatasetRepository.deleteRecord({ datasetId, recordId, tableSchemaId, deleteInCascade }),
+  deleteRecord: async ({datasetId, selectedRecordId, tableId, updateInCascade}) => 
+    await DatasetRepository.deleteRecord({ datasetId, selectedRecordId, tableId, updateInCascade }),
 
   deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
 
