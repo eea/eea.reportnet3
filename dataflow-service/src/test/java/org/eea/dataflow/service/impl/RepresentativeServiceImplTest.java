@@ -45,6 +45,7 @@ import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -199,6 +200,55 @@ public class RepresentativeServiceImplTest {
   public void deleteDataflowRepresentativeTest() throws EEAException {
     representativeServiceImpl.deleteDataflowRepresentative(1L);
     Mockito.verify(representativeRepository, times(1)).deleteById(Mockito.any());
+  }
+
+  /**
+   * Delete dataflow representatives null dataflow exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDataflowRepresentativesNullDataflowExceptionTest() throws EEAException {
+    try {
+      representativeServiceImpl.deleteDataflowRepresentatives(null);
+    } catch (EEAException e) {
+      assertEquals("error in the message", EEAErrorMessage.DATAFLOW_NOTFOUND, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Delete dataflow representatives not a design dataflow exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test(expected = EEAException.class)
+  public void deleteDataflowRepresentativesNotDesignDataflowExceptionTest() throws Exception {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+
+    when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
+
+    try {
+      representativeServiceImpl.deleteDataflowRepresentatives(1L);
+    } catch (EEAException e) {
+      assertEquals("error in the message", EEAErrorMessage.NOT_DESIGN_DATAFLOW, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Delete dataflow representatives test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteDataflowRepresentativesTest() throws EEAException {
+    Dataflow dataflow = new Dataflow();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(dataflow));
+    representativeServiceImpl.deleteDataflowRepresentatives(1L);
+    Mockito.verify(representativeRepository, times(1)).deleteByDataflowId(Mockito.any());
   }
 
   /**

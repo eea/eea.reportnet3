@@ -42,6 +42,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManageLeadReporters = ({
   dataflowId,
   dataflowType,
+  leadReportersDeleted = false,
   representativesImport = false,
   setDataProviderSelected,
   selectedDataProviderGroup,
@@ -115,6 +116,10 @@ export const ManageLeadReporters = ({
   }, [representativesImport]);
 
   useEffect(() => {
+    if (leadReportersDeleted) getInitialData(true);
+  }, [leadReportersDeleted]);
+
+  useEffect(() => {
     getInitialData();
   }, [dataflowType, formState.refresher]);
 
@@ -163,13 +168,13 @@ export const ManageLeadReporters = ({
 
   const createUnusedOptionsList = () => formDispatcher({ type: 'CREATE_UNUSED_OPTIONS_LIST' });
 
-  const getAllDataProviders = async () => {
+  const getAllDataProviders = async reportersDeleted => {
     const { representatives, selectedDataProviderGroup } = formState;
     try {
       const responseAllDataProviders = await RepresentativeService.getDataProviders(selectedDataProviderGroup);
 
       const providersNoSelect = [...responseAllDataProviders];
-      if (representatives.length <= responseAllDataProviders.length) {
+      if (representatives.length <= responseAllDataProviders.length || reportersDeleted) {
         responseAllDataProviders.unshift({ dataProviderId: '', label: ' Select...' });
       }
 
@@ -185,7 +190,7 @@ export const ManageLeadReporters = ({
   const getDataProviderGroup = async () =>
     formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
 
-  const getInitialData = async () => {
+  const getInitialData = async reportersDeleted => {
     try {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
       switch (dataflowType) {
@@ -209,7 +214,7 @@ export const ManageLeadReporters = ({
     }
 
     if (!isEmpty(formState.representatives)) {
-      await getAllDataProviders();
+      await getAllDataProviders(reportersDeleted);
       createUnusedOptionsList();
     }
   };

@@ -114,6 +114,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'SET_IS_EXPORTING':
       return { ...state, isExporting: payload };
 
+    case 'SET_ALL_REPORTERS_DELETED':
+      return { ...state, allReportersDeleted: payload.allReportersDeleted };
+
+    case 'SET_IS_DELETING_ALL_REPORTERS':
+      return { ...state, isDeletingAllReporters: payload.isDeletingAllReporters };
+
     case 'SET_IS_UPDATING_PERMISSIONS':
       return { ...state, isUpdatingPermissions: payload.isUpdatingPermissions };
 

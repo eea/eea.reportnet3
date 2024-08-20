@@ -2,14 +2,11 @@ package org.eea.dataflow.service.impl;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.sql.Wrapper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,6 +39,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.*;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
@@ -236,6 +234,26 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
     }
     representativeRepository.deleteById(dataflowRepresentativeId);
+  }
+
+  /**
+   * Delete dataflow representatives.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  @Transactional
+  public void deleteDataflowRepresentatives(Long dataflowId) throws EEAException {
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    Dataflow dataflow = dataflowRepository.findById(dataflowId).
+            orElseThrow(() -> new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND));
+    if (dataflow.getStatus() != TypeStatusEnum.DESIGN) {
+        throw new EEAException(EEAErrorMessage.NOT_DESIGN_DATAFLOW);
+    }
+    representativeRepository.deleteByDataflowId(dataflowId);
   }
 
   /**
