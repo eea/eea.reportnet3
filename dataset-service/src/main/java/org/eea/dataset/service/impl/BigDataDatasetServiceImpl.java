@@ -1528,12 +1528,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         Long dataflowId = dataSetMetabaseVO.getDataflowId();
         long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
 
+        String tablePathInDremio = null;
 
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_TABLE_AS_FOLDER_QUERY_PATH);
-        if(BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))){
-            s3PathResolver.setIsIcebergTable(true);
+        if(dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE) && !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))){
+            S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_DATAFLOW_REFERENCE_QUERY_PATH);
+            tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_DATAFLOW_REFERENCE_QUERY_PATH);
         }
-        String tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        else{
+            S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, S3_DATAFLOW_REFERENCE_QUERY_PATH);
+            if(BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))){
+                s3PathResolver.setIsIcebergTable(true);
+            }
+            tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        }
 
         String referenceLabel = newLabelField != null && !dataType.equals(DataType.NUMBER_INTEGER) ? newLabelField : labelFieldName;
 
