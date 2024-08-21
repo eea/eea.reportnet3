@@ -40,12 +40,14 @@ pipeline {
 
         }
         stage('Report to SonarQube') {
-            steps {
-                withSonarQubeEnv('Sonarqube') {
-                    // requires SonarQube Scanner for Maven 3.2+
-                    sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -P sonar -Dsonar.java.source=11 -Dsonar.jenkins.branch=' + env.BRANCH_NAME.replace('/', '_')
-                }
+           tools {
+              jdk 'Java17'
             }
+           steps {
+               withSonarQubeEnv('Sonarqube') {
+                   sh 'mvn sonar:sonar -Dsonar.java.source=11  -Dsonar.projectKey=eea.reportnet3-${GIT_BRANCH} -Dsonar.projectName=eea.reportnet3-${GIT_BRANCH} -Dsonar.jenkins.branch=main'
+               }
+           }
         }
         stage('Setup sandbox docker images build'){
             steps{
