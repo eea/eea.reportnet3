@@ -84,7 +84,16 @@ public class DremioSQLValidationUtils {
                 }
                 return result;
             });
-            List<String> pkValueListForPkMustBeUsed = new ArrayList<>(pkValueList);
+            List<String> lowercasePkValues;
+            List<String> pkValueListForPkMustBeUsed;
+            if(BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())){
+                lowercasePkValues = pkValueList.stream().map(String::toLowerCase).collect(Collectors.toList());
+                pkValueListForPkMustBeUsed = new ArrayList<>(lowercasePkValues);
+            }
+            else{
+                lowercasePkValues = new ArrayList<>(pkValueList);
+                pkValueListForPkMustBeUsed = new ArrayList<>(pkValueList);
+            }
             //FK_QUERY_VALUES
             StringBuilder fkQuery = new StringBuilder();
             fkQuery.append("select ").append("record_id").append(",").append(foreignKey).append(" from ").append(fkTablePath);
@@ -97,20 +106,18 @@ public class DremioSQLValidationUtils {
                         //remove items from pk that are included in fk
                         if (BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())) {
                             //FK_MULTIPLE_WRONG_IGNORE_CASE_LINK
-                            List<String> lowercasePkValues = pkValueList.stream().map(String::toLowerCase).collect(Collectors.toList());
                             if (lowercasePkValues.contains(recordValue.toLowerCase())) {
-                                pkValueListForPkMustBeUsed.remove(recordValue);
+                                pkValueListForPkMustBeUsed.removeIf(value -> Objects.equals(value, recordValue.toLowerCase()));
                             }
                         } else {
                             if (pkValueList.contains(recordValue)) {
-                                pkValueListForPkMustBeUsed.remove(recordValue);
+                                pkValueListForPkMustBeUsed.removeIf(value -> Objects.equals(value, recordValue));
                             }
                         }
                     }
                     else {
                         if (BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())) {
                             //FK_MULTIPLE_WRONG_IGNORE_CASE_LINK
-                            List<String> lowercasePkValues = pkValueList.stream().map(String::toLowerCase).collect(Collectors.toList());
                             if (!lowercasePkValues.contains(recordValue.toLowerCase())) {
                                 recordIds.add(fkValues.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
                             }
