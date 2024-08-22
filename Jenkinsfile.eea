@@ -48,7 +48,7 @@ pipeline {
                    sh 'mvn sonar:sonar -Dsonar.java.source=11  -Dsonar.projectKey=eea.reportnet3-${GIT_BRANCH} -Dsonar.projectName=eea.reportnet3-${GIT_BRANCH} -Dsonar.jenkins.branch=main'
                }
            }
-        }
+       }
         stage('Setup sandbox docker images build'){
             steps{
                 script {

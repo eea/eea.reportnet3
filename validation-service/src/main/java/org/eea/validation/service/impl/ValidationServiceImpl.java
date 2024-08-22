@@ -413,47 +413,39 @@ public class ValidationServiceImpl implements ValidationService {
   @Transactional
   public void validateTable(Long datasetId, Long idTable, KieBase kieBase, String sqlRule,
       String dataProviderId, Long taskId) {
-    LOG.info("[272589-PROCESS] - ENTER validateTable method ");
-    LOG.info("[272589-PROCESS] - datasetId {}, idTable {}, kieBase {}, sqlRule {}, dataProviderId {}, taskId {}",
-            datasetId, idTable, kieBase.toString(), sqlRule, dataProviderId, taskId);
     // Validating tables
     TableValue table = null;
     KieSession session = null;
     try {
       TenantResolver.setTenantName(LiteralConstants.DATASET_PREFIX + datasetId);
       if (!"null".equals(sqlRule)) {
-        LOG.info("[272589-PROCESS] - ENTER createRuleErrorException method - !\"null\".equals(sqlRule) is true");
         sqlValidationUtils.executeValidationSQLRule(datasetId, sqlRule, dataProviderId);
-        LOG.info("[272589-PROCESS] - EXIT createRuleErrorException method - !\"null\".equals(sqlRule) is true");
       } else {
-        LOG.info("[272589-PROCESS] - ENTER createRuleErrorException method - !\"null\".equals(sqlRule) is false");
         table = tableRepository.findById(idTable).orElse(null);
         session = kieBase.newKieSession();
         if (table != null) {
           tableValidationRepository.saveAll(runTableValidations(table, session));
         }
-        LOG.info("[272589-PROCESS] - EXIT createRuleErrorException method - !\"null\".equals(sqlRule) is false");
       }
     } catch (EEAInvalidSQLException e) {
-      LOG.info("[272589-PROCESS] - ENTER validateTable catch EEAInvalidSQLException {}", e.getMessage());
-      table = tableRepository.findById(idTable).orElse(null);
       LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
-      if (table != null) {
-        rulesErrorUtils.createRuleErrorException(table, new RuntimeException(e.getMessage()));
+      try {
+        table = tableRepository.findById(idTable).orElse(null);
+        if (table != null) {
+          rulesErrorUtils.createRuleErrorException(table, new RuntimeException(e.getMessage()));
+        }
+      } catch (Exception ex1) {
+        LOG_ERROR.error("Saving blockers for the table validation failed: {}", ex1.getMessage(), ex1);
       }
       taskRepository.updateStatusAndFinishDate(taskId, ProcessStatusEnum.IN_QUEUE.toString(),
           new Date());
-      LOG.info("[272589-PROCESS] - EXIT validateTable catch EEAInvalidSQLException");
     } finally {
-      LOG.info("[272589-PROCESS] - ENTER validateTable finally");
       table = null;
       if (session != null) {
         session.destroy();
       }
       System.gc();
-      LOG.info("[272589-PROCESS] - EXIT validateTable finally");
     }
-    LOG.info("[272589-PROCESS] - EXIT validateTable method");
   }
 
   /**
