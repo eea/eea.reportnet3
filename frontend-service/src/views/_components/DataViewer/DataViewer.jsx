@@ -405,6 +405,10 @@ export const DataViewer = ({
     setIsTableEditable(icebergCreated.data);
   };
 
+  useEffect(()=>{
+    onGetIsIcebergCreated();
+  },[window])
+
   const onFetchData = async (
     sField,
     sOrder,

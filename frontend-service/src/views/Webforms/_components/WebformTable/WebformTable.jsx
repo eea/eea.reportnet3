@@ -469,7 +469,7 @@ export const WebformTable = ({
               <Button
                 helpClassName={isIcebergCreated && 'p-button-reverse'}
                 icon={isIcebergCreated ? 'lock' : 'unlock'}
-                label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
+                label={isIcebergCreated ? resourcesContext.messages['closeWebform'] : resourcesContext.messages['openWebform']}
                 className={styles.openWebformButton}
                 onClick={() => convertHelper()}
                 isLoading={isLoadingIceberg}
