@@ -536,6 +536,8 @@
     "editorsRightsDialogConfirmDeleteHeader": "Delete editor",
     "editorsRightsDialogConfirmDeleteQuestion": "Do you really want to delete this editor?",
     "editRecordsManually": "Edit records manually",
+    "openWebform": "Open Webform",
+    "closeWebform":"Close Webform",
     "editReferenceDataflowDialogHeader": "Edit reference dataflow",
     "editReporterConfirmHeader": "Edit reporter",
     "editRequesterConfirmHeader": "Edit requester",
