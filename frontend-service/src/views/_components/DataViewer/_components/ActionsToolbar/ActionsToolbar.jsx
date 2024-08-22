@@ -343,8 +343,8 @@ export const ActionsToolbar = ({
           icon={isEditRecordsManuallyButtonDisabled ? 'spinnerAnimate' : isTableEditable && dataAreManuallyEditable ? 'lock' : 'unlock'}
           label={
             isTableEditable && dataAreManuallyEditable
-              ? resourcesContext.messages['closeWebform']
-              : resourcesContext.messages['openWebform']
+              ? resourcesContext.messages['disableEdit']
+              : resourcesContext.messages['enableEdit']
           }
           className={styles.openWebformButton}
           onClick={e => {
