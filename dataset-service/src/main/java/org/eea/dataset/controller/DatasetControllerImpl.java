@@ -4,6 +4,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
 import lombok.SneakyThrows;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -67,6 +68,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetControllerImpl.
@@ -2847,15 +2849,19 @@ public class DatasetControllerImpl implements DatasetController {
   public void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
+                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
-
+    //if tableSchemaIds is empty, retrieve all table schema ids from the dataset and convert them all.
+    if(tableSchemaIds == null || tableSchemaIds.size() == 0){
+      List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+      tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
+    }
     for (String tableSchemaId : tableSchemaIds) {
       try {
         convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaId);
       }
       catch (ParquetConversionException pce){
-        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} is already converted to iceberg", dataflowId, providerId, datasetId, tableSchemaId);
+        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} does not need to be converted to iceberg", dataflowId, providerId, datasetId, tableSchemaId);
       }
       catch(Exception e){
         LOG.error("Could not convert parquet tables to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
@@ -2871,13 +2877,19 @@ public class DatasetControllerImpl implements DatasetController {
   public void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
+                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
+
+    //if tableSchemaIds is empty, retrieve all table schema ids from the dataset and convert them all.
+    if(tableSchemaIds == null || tableSchemaIds.size() == 0){
+      List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+      tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
+    }
     for (String tableSchemaId : tableSchemaIds) {
       try {
         convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaId);
       }
       catch (ParquetConversionException pce){
-        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} is already converted to parquet", dataflowId, providerId, datasetId, tableSchemaId);
+        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} does not need to be converted to parquet", dataflowId, providerId, datasetId, tableSchemaId);
       }
       catch(Exception e){
         LOG.error("Could not convert iceberg tables to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,

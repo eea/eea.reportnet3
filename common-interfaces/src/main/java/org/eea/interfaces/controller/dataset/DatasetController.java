@@ -900,7 +900,7 @@ public interface DatasetController {
   void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
                                     @RequestParam(value = "dataflowId") Long dataflowId,
                                     @RequestParam(value = "providerId", required = false) Long providerId,
-                                    @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception;
+                                    @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception;
 
   /**
    * Convert Iceberg To Parquet Table
@@ -915,7 +915,7 @@ public interface DatasetController {
   void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
                                     @RequestParam(value = "dataflowId") Long dataflowId,
                                     @RequestParam(value = "providerId", required = false) Long providerId,
-                                    @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception;
+                                    @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception;
 
   /**
    * Check if iceberg table is created
