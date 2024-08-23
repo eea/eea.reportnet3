@@ -302,7 +302,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             else {
                 if(optionalTimeoutMs == null){
                     //use default timeout
-                    Thread.sleep(10000);
+                    Thread.sleep(5000);
                 }
                 else{
                     Thread.sleep(optionalTimeoutMs);
@@ -328,7 +328,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 break;
             }
             else {
-                Thread.sleep(10000);
+                Thread.sleep(2000);
             }
         }
         if(!folderWasPromoted) {
