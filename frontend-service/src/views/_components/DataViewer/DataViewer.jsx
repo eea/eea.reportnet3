@@ -717,8 +717,8 @@ export const DataViewer = ({
       setIsConfirmDeleteButtonDisabled(true);
       await DatasetService.deleteRecord({
         datasetId,
-        recordId: records.selectedRecord.recordId,
-        tableSchemaId: tableId
+        selectedRecordId: records.selectedRecord.recordId,
+        tableId
       });
       const calcRecords = records.totalFilteredRecords >= 0 ? records.totalFilteredRecords : records.totalRecords;
       const page =
