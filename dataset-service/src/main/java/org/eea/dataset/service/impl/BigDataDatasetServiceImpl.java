@@ -16,6 +16,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -31,10 +32,7 @@ import org.eea.interfaces.controller.recordstore.ProcessController.ProcessContro
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
-import org.eea.interfaces.vo.dataset.AttachmentDLVO;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -1583,5 +1581,19 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         LOG.info("Query to execute in links: {}", selectQuery);
         return dremioJdbcTemplate.queryForList(selectQuery);
+    }
+
+    @Override
+    public List<TableSchemaIdNameVO> getAvailableForManualEditingTables(Long datasetId) throws EEAException {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        List<TableSchemaIdNameVO> availableTables = new ArrayList<>();
+        List<TableSchemaIdNameVO> allDatasetTables = datasetSchemaService.getTableSchemasIds(datasetId);
+        for(TableSchemaIdNameVO tableSchemaIdNameVO: allDatasetTables){
+            TableSchema tableSchema = datasetSchemaService.getTableSchema(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
+            if(BooleanUtils.isTrue(tableSchema.getDataAreManuallyEditable())){
+                availableTables.add(tableSchemaIdNameVO);
+            }
+        }
+        return availableTables;
     }
 }
