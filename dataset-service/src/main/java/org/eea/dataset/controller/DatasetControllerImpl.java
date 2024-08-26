@@ -4,6 +4,7 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
 import lombok.SneakyThrows;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -16,6 +17,7 @@ import org.eea.dataset.service.helper.UpdateRecordHelper;
 import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.exception.ParquetConversionException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
@@ -66,6 +68,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * The Class DatasetControllerImpl.
@@ -2803,7 +2806,7 @@ public class DatasetControllerImpl implements DatasetController {
         LOG.info("Converted parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       }
       else{
-        throw new Exception("The table data are not manually editable or the iceberg table is already created");
+        throw new ParquetConversionException("The table data are not manually editable or the iceberg table is already created");
       }
     }
     catch (Exception e){
@@ -2830,7 +2833,7 @@ public class DatasetControllerImpl implements DatasetController {
         LOG.info("Converted iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
       }
       else{
-        throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+        throw new ParquetConversionException("The table data are not manually editable or the iceberg table has not been created");
       }
     }
     catch (Exception e){
@@ -2846,17 +2849,25 @@ public class DatasetControllerImpl implements DatasetController {
   public void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
+                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
-    try{
-      for(String tableSchemaId: tableSchemaIds){
+    //if tableSchemaIds is empty, retrieve all table schema ids from the dataset and convert them all.
+    if(tableSchemaIds == null || tableSchemaIds.size() == 0){
+      List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+      tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
+    }
+    for (String tableSchemaId : tableSchemaIds) {
+      try {
         convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaId);
       }
-    }
-    catch (Exception e){
-      LOG.error("Could not convert parquet tables to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaIds {}. Error message: {}", dataflowId,
-              providerId, datasetId, tableSchemaIds);
-      throw e;
+      catch (ParquetConversionException pce){
+        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} does not need to be converted to iceberg", dataflowId, providerId, datasetId, tableSchemaId);
+      }
+      catch(Exception e){
+        LOG.error("Could not convert parquet tables to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
+                providerId, datasetId, tableSchemaId);
+        throw e;
+      }
     }
   }
 
@@ -2866,16 +2877,25 @@ public class DatasetControllerImpl implements DatasetController {
   public void convertIcebergToParquetTables(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaIds") List<String> tableSchemaIds) throws Exception {
-    try{
-      for(String tableSchemaId: tableSchemaIds){
+                                           @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
+
+    //if tableSchemaIds is empty, retrieve all table schema ids from the dataset and convert them all.
+    if(tableSchemaIds == null || tableSchemaIds.size() == 0){
+      List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+      tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
+    }
+    for (String tableSchemaId : tableSchemaIds) {
+      try {
         convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaId);
       }
-    }
-    catch (Exception e){
-      LOG.error("Could not convert iceberg tables to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaIds {}. Error message: {}", dataflowId,
-              providerId, datasetId, tableSchemaIds);
-      throw e;
+      catch (ParquetConversionException pce){
+        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} does not need to be converted to parquet", dataflowId, providerId, datasetId, tableSchemaId);
+      }
+      catch(Exception e){
+        LOG.error("Could not convert iceberg tables to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
+                providerId, datasetId, tableSchemaId);
+        throw e;
+      }
     }
   }
 
@@ -2920,6 +2940,26 @@ public class DatasetControllerImpl implements DatasetController {
     }
     catch (Exception e){
       LOG.error("Could not retrieve iceberg tables for dataflowId {}, providerId {} and datasetId {}", dataflowId, providerId, datasetId);
+      throw e;
+    }
+  }
+
+  /**
+   * Get available for manual editing tables in dataflow
+   *
+   * @param datasetId the dataset id
+   * @return list of tables info
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getAvailableForManualEditingTables/{datasetId}")
+  public List<TableSchemaIdNameVO> getAvailableForManualEditingTables(@PathVariable("datasetId") Long datasetId) throws Exception {
+    try{
+      return bigDataDatasetService.getAvailableForManualEditingTables(datasetId);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve available for manual editing tables for datasetId {}", datasetId);
       throw e;
     }
   }
