@@ -2944,6 +2944,26 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Get available for manual editing tables in dataflow
+   *
+   * @param datasetId the dataset id
+   * @return list of tables info
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getAvailableForManualEditingTables/{datasetId}")
+  public List<TableSchemaIdNameVO> getAvailableForManualEditingTables(@PathVariable("datasetId") Long datasetId) throws Exception {
+    try{
+      return bigDataDatasetService.getAvailableForManualEditingTables(datasetId);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve available for manual editing tables for datasetId {}", datasetId);
+      throw e;
+    }
+  }
+
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/restorePrefilledTables/{datasetId}")

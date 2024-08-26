@@ -3,12 +3,15 @@ package org.eea.dataset.service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.AttachmentDLVO;
+import org.eea.interfaces.vo.dataset.DatasetTableVO;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -155,7 +158,6 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param datasetId the dataset id
-     * @param tableSchemaName the tableSchemaName
      * @param records the new editted records
      * @param updateCascadePK the updateCascadePK
      *
@@ -195,4 +197,6 @@ public interface BigDataDatasetService {
 
     List<FieldVO> getFieldValuesReferencedDL(Long datasetIdOrigin, String datasetSchemaId,
                                      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) throws EEAException;
+
+    List<TableSchemaIdNameVO> getAvailableForManualEditingTables(Long datasetId) throws EEAException;
 }

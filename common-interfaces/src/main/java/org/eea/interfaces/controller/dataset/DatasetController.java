@@ -4,6 +4,7 @@ import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
@@ -941,6 +942,16 @@ public interface DatasetController {
   List<DatasetTableVO> getIcebergTables(@RequestParam(value = "dataflowId") Long dataflowId,
                                              @RequestParam(value = "providerId", required = false) Long providerId,
                                              @RequestParam(value = "datasetId", required = false) Long datasetId);
+
+  /**
+   * Get available for manual editing tables in dataflow
+   *
+   * @param datasetId the dataset id
+   * @return list of tables info
+   *
+   */
+  @GetMapping("/getAvailableForManualEditingTables/{datasetId}")
+  List<TableSchemaIdNameVO> getAvailableForManualEditingTables(@PathVariable("datasetId") Long datasetId) throws Exception;
 
   /**
    * Restore prefilled tables
