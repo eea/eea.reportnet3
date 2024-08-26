@@ -18,7 +18,7 @@ import { tableWebformReducer } from './_functions/Reducers/tableWebformReducer';
 
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
-export const TableWebform = ({ bigData, dataflowId, dataProviderId, datasetId, isReporting, state, tables = [] }) => {
+export const TableWebform = ({ bigData, dataflowId, dataProviderId, datasetId, isReporting, state, tables = [], isIcebergCreated, isLoadingIceberg }) => {
   const { datasetSchema } = state;
   const { getWebformTabs, onParseWebformData } = WebformsUtils;
 
@@ -80,6 +80,8 @@ export const TableWebform = ({ bigData, dataflowId, dataProviderId, datasetId, i
         dataProviderId={dataProviderId}
         datasetSchemaId={datasetSchema.datasetSchemaId}
         datasetId={datasetId}
+        isIcebergCreated={isIcebergCreated}
+        isLoadingIceberg={isLoadingIceberg}
         isReporting={isReporting}
         onTabChange={tableWebformState.isVisible}
         setIsLoading={setIsLoading}

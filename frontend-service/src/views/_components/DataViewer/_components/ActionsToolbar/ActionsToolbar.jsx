@@ -342,97 +342,6 @@ export const ActionsToolbar = ({
     }
   };
 
-  const renderManualEditButton = () => {
-    return (
-        <Button
-          helpClassName={isTableEditable && dataAreManuallyEditable && 'p-button-reverse'}
-          icon={isEditRecordsManuallyButtonDisabled ? 'spinnerAnimate' : isTableEditable && dataAreManuallyEditable ? 'lock' : 'unlock'}
-          label={
-            isTableEditable && dataAreManuallyEditable
-              ? resourcesContext.messages['disableEdit']
-              : resourcesContext.messages['enableEdit']
-          }
-          className={styles.openWebformButton}
-          onClick={e => {
-            onDisableEditButton(true);
-            convertTable(!(isTableEditable && dataAreManuallyEditable));
-          }}
-          isLoading={isEditRecordsManuallyButtonDisabled}
-          disabled={
-            !hasWritePermissions ||
-            isLoading ||
-            isDataflowOpen ||
-            !dataAreManuallyEditable ||
-            isEditRecordsManuallyButtonDisabled ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
-          }
-        />
-//   <div>
-//   <Checkbox
-//           ariaLabelledBy="check_edit_records_manually_label"
-//           checked={isTableEditable && dataAreManuallyEditable}
-//           disabled={
-//             !hasWritePermissions ||
-//             isLoading ||
-//             isDataflowOpen ||
-//             !dataAreManuallyEditable ||
-//             isEditRecordsManuallyButtonDisabled ||
-//             actionsContext.importDatasetProcessing ||
-//             actionsContext.exportDatasetProcessing ||
-//             actionsContext.deleteDatasetProcessing ||
-//             actionsContext.importTableProcessing ||
-//             actionsContext.exportTableProcessing ||
-//             actionsContext.deleteTableProcessing ||
-//             actionsContext.validateDatasetProcessing
-//           }
-//           id="check_edit_records_manually"
-//           inputId="check_edit_records_manually_checkbox"
-//           onChange={e => {
-//             onDisableEditButton(true);
-
-//             convertTable(e.checked);
-//           }}
-//           role="checkbox"
-//           tableConversionInProgress={isEditRecordsManuallyButtonDisabled}
-//         />
-//         <label
-//           id="check_edit_records_manually_label"
-//           style={{
-//             color:
-//               !isLoading &&
-//               !isDataflowOpen &&
-//               hasWritePermissions &&
-//               dataAreManuallyEditable &&
-//               !isEditRecordsManuallyButtonDisabled &&
-//               !(
-//                 actionsContext.importDatasetProcessing ||
-//                 actionsContext.exportDatasetProcessing ||
-//                 actionsContext.deleteDatasetProcessing ||
-//                 actionsContext.importTableProcessing ||
-//                 actionsContext.exportTableProcessing ||
-//                 actionsContext.deleteTableProcessing ||
-//                 actionsContext.validateDatasetProcessing
-//               )
-//                 ? 'var(--main-font-color)'
-//                 : '#9A9A9A',
-//             cursor: 'auto',
-//             fontSize: '11pt',
-//             marginLeft: '6px',
-//             marginRight: '6px',
-//             opacity: isDesignDatasetEditorRead ? 0.5 : 1
-//           }}>
-//           {resourcesContext.messages['editRecordsManually']}
-//         </label> 
-//         </div>
-    );
-  };
-
   const renderFilterableButton = () => {
     const renderChipButton = () => {
       if (groupedFilter && selectedRuleMessage !== '' && tableId === selectedTableSchemaId) {
@@ -639,8 +548,6 @@ export const ActionsToolbar = ({
         />
         {renderFilterableButton()}
         {renderFilterSearch()}
-        {bigData && (datasetType === 'TEST' || datasetType === 'REPORTING') && renderRestorePrefilledDataButton()}
-        {bigData && renderManualEditButton()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
         <span className={styles.input}>

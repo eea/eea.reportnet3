@@ -82,13 +82,13 @@
   .datasetConfigurationButtons {
     display: flex;
     align-items: center;
-    margin-left: 1rem;
+    margin-left: .5rem;
     > div {
       display: flex;
-      margin-right: 1rem;
+      margin-right: .5rem;
     }
     button:last-child {
-      margin-top: 5px;
+      // margin-top: 5px;
     }
   }
 }

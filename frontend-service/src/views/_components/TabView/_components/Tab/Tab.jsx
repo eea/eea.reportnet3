@@ -27,6 +27,7 @@ import { TooltipButton } from 'views/_components/TooltipButton';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import TooltipButtonRed from 'views/_components/TooltipButton/TooltipButtonRed';
 
 export const Tab = ({
   addTab,
@@ -51,6 +52,7 @@ export const Tab = ({
   initialTabIndexDrag,
   isNavigationHidden,
   leftIcon,
+  manualEdit,
   maxLength,
   newTab,
   notEmpty = true,
@@ -74,7 +76,8 @@ export const Tab = ({
   selected,
   tableSchemaId,
   toPrefill = false,
-  totalTabs
+  totalTabs,
+  viewType
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
@@ -84,7 +87,6 @@ export const Tab = ({
   const [isTableInfoVisible, setIsTableInfoVisible] = useState(false);
   const [menu, setMenu] = useState();
   const [titleHeader, setTitleHeader] = useState(!isUndefined(addTab) ? '' : header);
-
   const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
 
   const resourcesContext = useContext(ResourcesContext);
@@ -209,6 +211,23 @@ export const Tab = ({
     );
   };
 
+
+  const getManualTooltipMessage = () => {
+    const renderDescription = () => {
+        return (
+          <Fragment>
+            <p className={styles.propertyLabel}>{resourcesContext.messages['enableManualEditInfo']}</p>
+          </Fragment>
+        );
+      }
+
+    return(
+      <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
+      {renderDescription()}
+    </div>
+    )
+  }
+
   const getTooltipContent = () =>
     ReactDOMServer.renderToStaticMarkup(
       <div
@@ -219,6 +238,19 @@ export const Tab = ({
           maxWidth: '250px'
         }}>
         {getTooltipMessage()}
+      </div>
+    );
+
+  const getManualTooltipContent = () =>
+    ReactDOMServer.renderToStaticMarkup(
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          maxWidth: '250px'
+        }}>
+        {getManualTooltipMessage()}
       </div>
     );
 
@@ -612,6 +644,14 @@ export const Tab = ({
           )}
           {renderRightSpan()}
           {renderRightSpanTooltip()}
+          {!manualEdit && !viewType?.design && designMode && !addTab && !editingHeader && (
+            <TooltipButtonRed
+              getContent={getManualTooltipContent}
+              onClick={() => setIsTableInfoVisible(true)}
+              tooltipClassName={styles.tooltipContent}
+              uniqueIdentifier={uniqueId('table_more_info_')}
+            />
+          )}
           {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
             <div
               onClick={e => {

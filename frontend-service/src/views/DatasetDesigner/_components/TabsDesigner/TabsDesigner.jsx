@@ -117,7 +117,7 @@ export const TabsDesigner = ({
     const tabIdx = TabsUtils.getIndexByTableProperty(tabSchemaId, inmTabs, 'tableSchemaId');
     if (!isNil(inmTabs[tabIdx].records)) {
       inmTabs[tabIdx].records[0].fields = fields;
-      setTabs(inmTabs);
+      filterManualEdit(inmTabs);
     } else {
       inmTabs[tabIdx].records = [];
       inmTabs[tabIdx].records[0] = {};
@@ -145,20 +145,21 @@ export const TabsDesigner = ({
     inmTabs[tabIdx].notEmpty = notEmpty;
     inmTabs[tabIdx].readOnly = readOnly;
     inmTabs[tabIdx].toPrefill = toPrefill;
-    setTabs(inmTabs);
+    
+    filterManualEdit(inmTabs);
   };
 
   const onLoadSchema = async () => {
     try {
-      setTabs(
-        DatasetDesignerUtils.getTabs({
-          datasetSchema,
-          datasetStatistics,
-          editable,
-          isDataflowOpen,
-          isDesignDatasetEditorRead
-        })
-      );
+      const tabsArray = DatasetDesignerUtils.getTabs({
+        datasetSchema,
+        datasetStatistics,
+        editable,
+        isDataflowOpen,
+        isDesignDatasetEditorRead
+      });
+      
+      filterManualEdit(tabsArray)
     } catch (error) {
       console.error('TabsDesigner - onLoadSchema.', error);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
@@ -166,6 +167,26 @@ export const TabsDesigner = ({
       }
     }
   };
+
+  const filterManualEdit = async (tabsArray)=>{
+    let tempTabs = [];
+    try {
+      const manualEditList = await DatasetService.getIsAvailableForManualEditing({ datasetId });
+
+      tabsArray?.forEach((a, index) => {
+        tempTabs.push({ ...a, manualEdit: false });
+        manualEditList?.data?.forEach(b => {
+          if (a?.tableSchemaId === b?.idTableSchema) tempTabs[index]['manualEdit'] = true;
+        });
+      });
+      setTabs(tempTabs);
+    } catch (error) {
+      console.error('TabsDesigner - onLoadSchema.', error);
+      if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
+        navigate(getUrl(routes.DATAFLOWS, true));
+      }
+    }
+  }
 
   const onTabAdd = (newTabElement, onTabAddCallback) => {
     //Add a temporary Tab with an input text
@@ -177,7 +198,7 @@ export const TabsDesigner = ({
         inmTabs[inmTabs.length - 1]
       ];
       setScrollFn(() => onTabAddCallback);
-      setTabs(inmTabs);
+      filterManualEdit(inmTabs);
     }
   };
 
@@ -186,7 +207,7 @@ export const TabsDesigner = ({
       const inmTabs = [...tabs];
       const newTab = tabs.filter(tab => tab.newTab);
       const filteredTabs = inmTabs.filter(inmTab => inmTab.index !== newTab[0].index);
-      setTabs([...filteredTabs]);
+      filterManualEdit([...filteredTabs]);
     }
   };
 
@@ -263,7 +284,7 @@ export const TabsDesigner = ({
       inmTabs[tabIndex].showContextMenu = false;
       inmTabs[tabIndex].hasInfoTooltip = true;
       setActiveTableSchemaId(data.idTableSchema);
-      setTabs(inmTabs);
+      filterManualEdit(inmTabs);
       getIsTableCreated(true);
     } catch (error) {
       console.error('TabsDesigner - addTable.', error);
@@ -339,7 +360,7 @@ export const TabsDesigner = ({
         setActiveTableSchemaId(inmTabs[0].tableSchemaId);
       }
       onChangeReference(inmTabs, datasetSchema.datasetSchemaId);
-      setTabs(inmTabs);
+      filterManualEdit(inmTabs);
     } catch (error) {
       console.error('TabsDesigner - deleteTable.', error);
     }
@@ -462,6 +483,7 @@ export const TabsDesigner = ({
                   header={tab.header}
                   index={tab.index}
                   key={tab.index}
+                  manualEdit={tab.manualEdit}
                   newTab={tab.newTab}
                   notEmpty={tab.notEmpty}
                   numberOfFields={tab.records ? tab.records[0].fields?.length : 0}
@@ -528,7 +550,7 @@ export const TabsDesigner = ({
 
         shiftedTabs.forEach((tab, i) => (tab.index = !tab.addTab ? i : -1));
         setActiveTableSchemaId(shiftedTabs[index].tableSchemaId);
-        setTabs([...shiftedTabs]);
+        filterManualEdit([...shiftedTabs]);
       }
     } catch (error) {
       console.error('TabsDesigner - reorderTable.', error);
@@ -542,7 +564,7 @@ export const TabsDesigner = ({
       inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].header = tableSchemaName;
       inmTabs[TabsUtils.getIndexByTableProperty(tableSchemaId, inmTabs, 'tableSchemaId')].tableSchemaName =
         tableSchemaName;
-      setTabs(inmTabs);
+      filterManualEdit(inmTabs);
     } catch (error) {
       console.error('TabsDesigner - updateTableName.', error);
       if (error?.response.status === 400) {

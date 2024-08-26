@@ -92,6 +92,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   );
   const [sqlValidationRunning, setSqlValidationRunning] = useState(false);
 
+  const [isIcebergCreated, setIsIcebergCreated] = useState(false);
+  const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
+
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
     arePrefilledTablesDeleted: false,
@@ -231,6 +234,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isLoading: designerState.isLoading,
     referenceDataflowId: dataflowId
   });
+
+  useEffect(() => {
+    if (designerState?.datasetSchemaAllTables)
+      checkIsIcebergCreated(designerState?.datasetSchemaAllTables[0]?.tableSchemaId);
+  }, []);
 
   useEffect(() => {
     leftSideBarContext.removeModels();
@@ -533,7 +541,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     try {
       const data = await WebformService.getAll();
       data.unshift({ id: null, label: resourcesContext.messages['notSelectedWebformOption'], value: null, name: null });
-
       designerDispatch({ type: 'GET_WEBFORMS', payload: { data } });
       setWebformOptionsLoadingStatus('success');
     } catch (error) {
@@ -1207,6 +1214,27 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsHistoryDialogVisible(false);
   };
 
+  const checkIsIcebergCreated = async tableId => {
+    setIsLoadingIceberg(true);
+    let { data } = await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: tableId
+    });
+    setIsIcebergCreated(data);
+    setIsLoadingIceberg(false);
+  };
+
+  const convertHelper = async () => {
+    setIsLoadingIceberg(true);
+    if (isIcebergCreated) {
+      await DatasetService.convertIcebergsToParquets({ dataflowId, datasetId });
+    } else {
+      await DatasetService.convertParquetsToIcebergs({ dataflowId, datasetId });
+    }
+    setIsIcebergCreated(!isIcebergCreated);
+    setIsLoadingIceberg(false);
+  };
+
   const renderQCsHistoryButton = () => {
     if (isDataflowOpen) {
       return (
@@ -1546,7 +1574,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const renderWebformOptionsContent = () => {
     const webform = webformOptions.find(option => option.name === designerState.webform?.name);
-
     if (webformOptionsLoadingStatus === 'pending') return <Spinner style={{ top: 0 }} />;
 
     return (
@@ -1575,6 +1602,15 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   );
 
   if (designerState.isLoading) return layout(<Spinner />);
+  if (isLoadingIceberg)
+    return layout(
+      <div style={{ top: 0, margin: '1rem' }}>
+        <Spinner style={{ top: 0, margin: '1rem' }} />
+        <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
+          {resourcesContext.messages['tablesAreBeingConverted']}
+        </p>
+      </div>
+    );
 
   return layout(
     <SnapshotContext.Provider
@@ -1653,7 +1689,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   style={{
                     color: 'var(--main-font-color)',
                     cursor: isDesignDatasetEditorRead || isDataflowOpen ? 'default' : 'pointer',
-                    fontSize: '11pt',
+                    fontSize: '10pt',
                     fontWeight: 'bold',
                     marginLeft: '6px',
                     marginRight: '6px',
@@ -1687,7 +1723,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                     style={{
                       color: 'var(--main-font-color)',
                       cursor: isDesignDatasetEditorRead ? 'default' : 'pointer',
-                      fontSize: '11pt',
+                      fontSize: '10pt',
                       fontWeight: 'bold',
                       marginLeft: '6px',
                       marginRight: '6px',
@@ -1708,6 +1744,22 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 label={resourcesContext.messages['configureWebform']}
                 onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
               />
+              {designerState?.bigData && (
+                <Button
+                  helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
+                  icon={!isIcebergCreated ? 'lock' : 'unlock'}
+                  label={
+                    !isIcebergCreated
+                      ? resourcesContext.messages['enableEdit']
+                      : resourcesContext.messages['disableEdit']
+                  }
+                  className={styles.openWebformButton}
+                  onClick={() => convertHelper()}
+                  isLoading={isLoadingIceberg}
+                  disabled={isLoadingIceberg}
+                  key={isIcebergCreated}
+                />
+              )}
             </div>
           </div>
           <Toolbar>
@@ -1902,6 +1954,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             options={webformOptions}
             state={designerState}
             webform={designerState.webform}
+            isIcebergCreated={isIcebergCreated}
+            isLoadingIceberg={isLoadingIceberg}
           />
         ) : (
           <TabsDesigner
