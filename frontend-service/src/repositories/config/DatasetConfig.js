@@ -8,13 +8,14 @@ export const DatasetConfig = {
   convertParquetToIceberg:
     '/dataset/convertParquetToIcebergTable/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}',
   convertIcebergsToParquets:
-  '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaIds={:tableSchemaIds}',
+  '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
   convertParquetsToIcebergs:
-  '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaIds={:tableSchemaIds}',
+  '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
   createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record',
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
   getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}',
+  getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
   getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:

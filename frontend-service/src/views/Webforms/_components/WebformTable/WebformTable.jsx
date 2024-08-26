@@ -30,6 +30,8 @@ export const WebformTable = ({
   datasetSchemaId,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
   isGroup,
+  isIcebergCreated,
+  isLoadingIceberg,
   isRefresh,
   isReporting,
   onTabChange,
@@ -59,8 +61,6 @@ export const WebformTable = ({
     isLoading: true,
     webformData: {}
   });
-  const [isIcebergCreated, setIsIcebergCreated] = useState(false);
-  const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
 
   const { isDataUpdated, webformData } = webformTableState;
 
@@ -86,23 +86,23 @@ export const WebformTable = ({
     };
   }, []);
 
-  const checkIsIcebergCreated = async tableId => {
-    setIsLoadingIceberg(true);
-    let { data } = await DatasetService.getIsIcebergTableCreated({
-      datasetId,
-      tableSchemaId: tableId
-    });
-    setIsIcebergCreated(data);
-    setIsLoadingIceberg(false);
-  };
+  // const checkIsIcebergCreated = async tableId => {
+  //   setIsLoadingIceberg(true);
+  //   let { data } = await DatasetService.getIsIcebergTableCreated({
+  //     datasetId,
+  //     tableSchemaId: tableId
+  //   });
+  //   setIsIcebergCreated(data);
+  //   setIsLoadingIceberg(false);
+  // };
 
   useEffect(() => {
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
 
-  useEffect(() => {
-    checkIsIcebergCreated(webformData.tableSchemaId);
-  }, [webformData]);
+  // useEffect(() => {
+  //   checkIsIcebergCreated(webformData.tableSchemaId);
+  // }, [webformData]);
 
   useEffect(() => {
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
@@ -181,7 +181,7 @@ export const WebformTable = ({
       newEmptyRecord = parseNewTableRecordTable(webformData);
     }
 
-    console.log(newEmptyRecord)
+    console.log(newEmptyRecord);
 
     if (!isEmpty(newEmptyRecord)) {
       try {
@@ -370,79 +370,79 @@ export const WebformTable = ({
     });
   };
 
-  if (webformTableState.isLoading) {
-    if (isLoadingIceberg) {
+  if (isLoadingIceberg) {
+    if (webformTableState.isLoading) {
+      return <Spinner style={{ top: 0, margin: '1rem' }} />;
+    } else {
       return (
         <div style={{ top: 0, margin: '1rem' }}>
           <Spinner style={{ top: 0, margin: '1rem' }} />
           <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
-            {'Webform tables are being converted.\nPlease wait'}
+            {resourcesContext.messages['tablesAreBeingConverted']}
           </p>
         </div>
       );
-    } else {
-      return <Spinner style={{ top: 0, margin: '1rem' }} />;
     }
   }
 
-  const convertHelper = () => {
-    isLoading(true);
-    setIsLoadingIceberg(true);
-    let tableArray = webformData?.elements?.filter(el => el?.type === 'TABLE');
-    let tableSchemaIds = [];
-    if (tableArray?.length < 1) {
-      tableSchemaIds[0] = webformData?.tableSchemaId;
-    } else {
-      tableSchemaIds = tableArray.map(record => record.tableSchemaId);
-    }
+  // const convertHelper = () => {
+  //   isLoading(true);
+  //   setIsLoadingIceberg(true);
+  //   let tableArray = webformData?.elements?.filter(el => el?.type === 'TABLE');
+  //   let tableSchemaIds = [];
+  //   if (tableArray?.length < 1) {
+  //     tableSchemaIds[0] = webformData?.tableSchemaId;
+  //   } else {
+  //     tableSchemaIds = tableArray.map(record => record.tableSchemaId);
+  //   }
 
-    convertTables(encodeURIComponent(tableSchemaIds));
-  };
+  //   convertTables(encodeURIComponent(tableSchemaIds));
+  // };
 
-  const convertTables = async tableIds => {
-    try {
-      if (isIcebergCreated) {
-        if (dataProviderId) {
-          await DatasetService.convertIcebergsToParquets({
-            datasetId,
-            dataflowId,
-            providerId: dataProviderId,
-            tableSchemaIds: tableIds
-          });
-          setIsIcebergCreated(false)
-        } else {
-          await DatasetService.convertIcebergsToParquets({
-            datasetId,
-            dataflowId,
-            tableSchemaIds: tableIds
-          });
-          setIsIcebergCreated(false)
-        }
-      } else {
-        if (dataProviderId) {
-          await DatasetService.convertParquetsToIcebergs({
-            datasetId,
-            dataflowId,
-            providerId: dataProviderId,
-            tableSchemaIds: tableIds
-          });
-          setIsIcebergCreated(true)
-        } else {
-          await DatasetService.convertParquetsToIcebergs({
-            datasetId,
-            dataflowId,
-            tableSchemaIds: tableIds
-          });
-          setIsIcebergCreated(true)
-        }
-      }
-    } catch (error) {
-      console.error('ActionsToolbar - convertTable.', error);
-      notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
-    }
-    setIsLoadingIceberg(false);
-    isLoading(false);
-  };
+  // const convertTables = async tableIds => {
+  //   try {
+  //     if (isIcebergCreated) {
+  //       if (dataProviderId) {
+  //         await DatasetService.convertIcebergsToParquets({
+  //           datasetId,
+  //           dataflowId,
+  //           providerId: dataProviderId,
+  //           tableSchemaIds: tableIds
+  //         });
+  //         setIsIcebergCreated(false)
+  //       } else {
+  //         await DatasetService.convertIcebergsToParquets({
+  //           datasetId,
+  //           dataflowId,
+  //           tableSchemaIds: tableIds
+  //         });
+  //         setIsIcebergCreated(false)
+  //       }
+  //     } else {
+  //       if (dataProviderId) {
+  //         await DatasetService.convertParquetsToIcebergs({
+  //           datasetId,
+  //           dataflowId,
+  //           providerId: dataProviderId,
+  //           tableSchemaIds: tableIds
+  //         });
+  //         setIsIcebergCreated(true)
+  //       } else {
+  //         await DatasetService.convertParquetsToIcebergs({
+  //           datasetId,
+  //           dataflowId,
+  //           tableSchemaIds: tableIds
+  //         });
+  //         setIsIcebergCreated(true)
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('ActionsToolbar - convertTable.', error);
+  //     notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
+  //   }
+  //   setIsLoadingIceberg(false);
+  //   isLoading(false);
+  // };
 
   return (
     <div className={styles.contentWrap}>
@@ -465,17 +465,6 @@ export const WebformTable = ({
                   : webformData.name}
                 {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
               </div>
-
-              <Button
-                helpClassName={isIcebergCreated && 'p-button-reverse'}
-                icon={isIcebergCreated ? 'lock' : 'unlock'}
-                label={isIcebergCreated ? resourcesContext.messages['disableEdit'] : resourcesContext.messages['enableEdit']}
-                className={styles.openWebformButton}
-                onClick={() => convertHelper()}
-                isLoading={isLoadingIceberg}
-                disabled={isLoadingIceberg}
-                key={isIcebergCreated}
-              />
             </h3>
           </div>
         </>
@@ -488,14 +477,14 @@ export const WebformTable = ({
                 : webformData.name}
               {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
             </div>
-            <Button
+            {/* <Button
               helpClassName={isIcebergCreated && 'p-button-reverse'}
               icon={isIcebergCreated ? 'unlock' : 'lock'}
               label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
               className={styles.openWebformButton}
               onClick={() => convertHelper()}
               isLoading={isLoadingIceberg}
-            />
+            /> */}
           </h3>
         </div>
       )}

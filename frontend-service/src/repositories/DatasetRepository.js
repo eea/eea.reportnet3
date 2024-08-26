@@ -18,14 +18,14 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.convertParquetToIceberg, { datasetId, dataflowId, providerId, tableSchemaId })
     }),
 
-  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) =>
+  convertParquetsToIcebergs: async ({ dataflowId, datasetId, providerId }) =>
     await HTTPRequester.post({
-      url: getUrl(DatasetConfig.convertParquetsToIcebergs, { datasetId, dataflowId, providerId, tableSchemaIds })
+      url: getUrl(DatasetConfig.convertParquetsToIcebergs, { dataflowId, datasetId, providerId })
     }),
 
-  convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) =>
+  convertIcebergsToParquets: async ({ dataflowId, datasetId, providerId}) =>
     await HTTPRequester.post({
-      url: getUrl(DatasetConfig.convertIcebergsToParquets, { datasetId, dataflowId, providerId, tableSchemaIds })
+      url: getUrl(DatasetConfig.convertIcebergsToParquets, { dataflowId, datasetId, providerId })
     }),
 
   createRecordDesign: async (datasetId, datasetTableRecordField) =>
@@ -240,6 +240,9 @@ export const DatasetRepository = {
 
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) =>
     await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsIcebergTableCreated, { datasetId, tableSchemaId }) }),
+
+  getIsAvailableForManualEditing: async ({ datasetId }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsAvailableForManualEditing, { datasetId }) }),
 
   getPresignedUrl: async ({
     datasetId,

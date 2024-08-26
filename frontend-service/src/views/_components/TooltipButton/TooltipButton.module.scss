@@ -21,6 +21,23 @@
   }
 }
 
+.tooltipButtonRed {
+  border-radius: 50%;
+  width: 0.6em !important;
+  height: 0.6em !important;
+  font-size: 12pt !important;
+  color: var(--errors) !important;
+  margin-left: 0.4rem !important;
+  background-color: var(--c-white-color) !important;
+  &:focus {
+    box-shadow: var(--c-white-color) !important;
+  }
+  position: absolute !important;
+  top:50% !important;
+  transform: translateY(-50%);
+  margin-top: 0 !important;
+}
+
 .maxWidth {
   max-width: 60vw;
 

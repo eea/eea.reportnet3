@@ -27,12 +27,12 @@ export const DatasetService = {
   convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
     await DatasetRepository.convertParquetToIceberg({ datasetId, dataflowId, providerId, tableSchemaId }),
 
-  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) => {
-    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId, tableSchemaIds })
+  convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId }) => {
+    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId })
   },
 
-  convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId, tableSchemaIds }) =>
-    await DatasetRepository.convertIcebergsToParquets({ datasetId, dataflowId, providerId, tableSchemaIds }),
+  convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId }) =>
+    await DatasetRepository.convertIcebergsToParquets({ datasetId, dataflowId, providerId }),
 
   createRecordDesign: async (datasetId, datasetTableRecordField) => {
     const datasetTableFieldDesign = new DatasetTableField({});
@@ -274,6 +274,10 @@ export const DatasetService = {
   getIsIcebergTableCreated: async ({ datasetId, tableSchemaId }) => {
     return await DatasetRepository.getIsIcebergTableCreated({ datasetId, tableSchemaId });
   },
+
+  getIsAvailableForManualEditing: async ({ datasetId }) => {
+    return await DatasetRepository.getIsAvailableForManualEditing({ datasetId });
+  }, 
 
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);

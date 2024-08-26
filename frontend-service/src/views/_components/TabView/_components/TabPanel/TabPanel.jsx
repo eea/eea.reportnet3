@@ -15,6 +15,7 @@ TabPanel.propTypes = {
   headerClassName: PropTypes.string,
   headerStyle: PropTypes.object,
   leftIcon: PropTypes.string,
+  manualEdit: PropTypes.bool,
   notEmpty: PropTypes.bool,
   numberOfFields: PropTypes.number,
   readOnly: PropTypes.bool,

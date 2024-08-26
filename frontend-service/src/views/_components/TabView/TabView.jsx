@@ -235,6 +235,7 @@ export const TabView = ({
           isNavigationHidden={isNavigationHidden}
           key={id}
           leftIcon={tab.props.leftIcon}
+          manualEdit={tab.props.manualEdit}
           maxLength={maxLength}
           newTab={tab.props.newTab}
           notEmpty={tab.props.notEmpty}
@@ -264,6 +265,7 @@ export const TabView = ({
           tableSchemaId={tab.props.tableSchemaId}
           toPrefill={tab.props.toPrefill}
           totalTabs={totalTabs}
+          viewType={viewType}
         />
       )
     );
