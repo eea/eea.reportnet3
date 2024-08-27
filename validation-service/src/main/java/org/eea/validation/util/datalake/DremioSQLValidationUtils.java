@@ -165,8 +165,18 @@ public class DremioSQLValidationUtils {
                     }
                 }
                 else{
-                    query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(foreignKey).append(" not in (select pk.").append(primaryKey)
-                            .append(" from ").append(pkTablePath).append(" pk)");
+                    String fieldName = "fk." + foreignKey;
+                    query.append("select fk.record_id from ")
+                        .append(fkTablePath).append(" fk ")
+                        .append("where ")
+                        .append(fieldName)
+                        .append(" IS NOT NULL").append(" AND ")
+                        .append(fieldName)
+                        .append(" <> ''").append(" AND ")
+                        .append(fieldName)
+                        .append(" not in (select pk.").append(primaryKey)
+                        .append(" from ")
+                        .append(pkTablePath).append(" pk)");
                     recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 }
             }
