@@ -479,16 +479,16 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                         .withSchema(schema)
                         .withCompressionCodec(CompressionCodecName.SNAPPY)
                         .build()) {
-
                     for (String recordId : recordSubList) {
                         ObjectWrapper objectWrapper = new ObjectWrapper(ruleVO.getThenCondition().get(0), recordId);
                         GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper);
                         writer.write(record);
                     }
                 } catch (Exception e1) {
-                    LOG.error("Error creating parquet file {},{]", parquetFile, e1.getMessage());
+                    LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
                     throw e1;
                 }
+                LOG.info("Created validation parquet file {}", parquetFile);
                 validationHelper.uploadValidationParquetToS3(ruleVO, validationResolver, subFile, ruleIdLength, parquetFile);
                 count++;
             } finally {

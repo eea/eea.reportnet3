@@ -63,7 +63,7 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
         String partTableFilter = originFilterDL(tableFilter, TABLE);
         String partFieldFilter = originFilterDL(fieldValueFilter, FIELD);
         validationQuery.append(partLevelError).append(partTypeEntities).append(partTableFilter).append(partFieldFilter);
-        validationQuery.append(" group by v.qc_code ");
+        validationQuery.append(" group by v.qc_code, v.table_name, v.field_name ");
         String orderPart = addOrderByDL(headerField, asc);
         validationQuery.append(orderPart);
         String page = paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";
