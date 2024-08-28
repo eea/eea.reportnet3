@@ -42,11 +42,16 @@ public class DremioSQLValidationUtils {
     }
 
     public List<String> isUniqueConstraint(String fieldName, String tablePath) {
+        //if the unique constraint is applied to multiple fields, fieldName will contain all field names separated by comma
         StringBuilder query = new StringBuilder();
-        query.append("with tableAux as (select ").append(fieldName).append(", count(").append(fieldName).append(") from ")
-                .append(tablePath).append(" group by ").append(fieldName).append(" having count(").append(fieldName)
-                .append(")>1)").append(" select t.record_id from ").append(tablePath).append(" t where t.")
-                .append(fieldName).append(" in (select tab.").append(fieldName).append(" from tableAux tab)");
+        List<String> fieldNames = Arrays.asList(fieldName.split(","));
+        String tFieldNames = String.join(",", fieldNames.stream().map(element -> "t." + element).collect(Collectors.toList()));
+        String tabFieldNames = String.join(",", fieldNames.stream().map(element -> "tab." + element).collect(Collectors.toList()));
+
+        query.append("with tableAux as (select ").append(fieldName).append(", count(*) from ")
+                .append(tablePath).append(" group by ").append(fieldName).append(" having count(*)>1)")
+                .append(" select t.record_id from ").append(tablePath).append(" t where (")
+                .append(tFieldNames).append(") in (select ").append(tabFieldNames).append(" from tableAux tab)");
         return dremioJdbcTemplate.queryForList(query.toString(), String.class);
     }
 
