@@ -94,6 +94,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const [isIcebergCreated, setIsIcebergCreated] = useState(false);
   const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
+  const [noEditableCheck, setNoEditableCheck] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -1756,7 +1757,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   className={styles.openWebformButton}
                   onClick={() => convertHelper()}
                   isLoading={isLoadingIceberg}
-                  disabled={isLoadingIceberg}
+                  disabled={isLoadingIceberg || noEditableCheck}
                   key={isIcebergCreated}
                 />
               )}
@@ -1994,6 +1995,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 payload: { ...dataViewerOptions, tableSchemaId: tabSchemaId }
               })
             }
+            setNoEditableCheck={setNoEditableCheck}
             tableSchemaId={dataViewerOptions.tableSchemaId}
             viewType={designerState.viewType}
           />

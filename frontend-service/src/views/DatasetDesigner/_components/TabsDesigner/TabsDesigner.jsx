@@ -59,6 +59,7 @@ export const TabsDesigner = ({
   selectedShortCode,
   selectedTableSchemaId,
   setActiveTableSchemaId,
+  setNoEditableCheck,
   tableSchemaId,
   viewType
 }) => {
@@ -169,17 +170,19 @@ export const TabsDesigner = ({
   };
 
   const filterManualEdit = async (tabsArray)=>{
-    let tempTabs = [];
     try {
-      const manualEditList = await DatasetService.getIsAvailableForManualEditing({ datasetId });
+      let checkTabs=[];
+      tabsArray.forEach((a)=>checkTabs.push(a))
+      checkTabs.pop();
+      let length = checkTabs.length;
 
-      tabsArray?.forEach((a, index) => {
-        tempTabs.push({ ...a, manualEdit: false });
-        manualEditList?.data?.forEach(b => {
-          if (a?.tableSchemaId === b?.idTableSchema) tempTabs[index]['manualEdit'] = true;
-        });
-      });
-      setTabs(tempTabs);
+      checkTabs?.forEach((item)=>{
+        if(!item?.dataAreManuallyEditable) length-=1;
+      })
+
+      if(length===0) {setNoEditableCheck(true)}else{setNoEditableCheck(false)}
+      
+      setTabs(tabsArray);
     } catch (error) {
       console.error('TabsDesigner - onLoadSchema.', error);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
@@ -483,7 +486,7 @@ export const TabsDesigner = ({
                   header={tab.header}
                   index={tab.index}
                   key={tab.index}
-                  manualEdit={tab.manualEdit}
+                  manualEdit={tab.dataAreManuallyEditable}
                   newTab={tab.newTab}
                   notEmpty={tab.notEmpty}
                   numberOfFields={tab.records ? tab.records[0].fields?.length : 0}
