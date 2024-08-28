@@ -120,7 +120,6 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
                                           CSVWriter csvWriter) throws IOException {
-        int size = 0;
         int counter = 0;
         for (int i = 0; i < exportFilenames.size(); i++) {
             File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
@@ -129,8 +128,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 GenericRecord record;
 
                 while ((record = r.read()) != null) {
+                    int size = record.getSchema().getFields().size();
                     if (i == 0 && counter == 0) {
-                        size = record.getSchema().getFields().size();
                       csvWriter.writeNext(record.getSchema().getFields().stream()
                           .map(Schema.Field::name).toArray(String[]::new), false);
                         counter++;
