@@ -1181,13 +1181,12 @@ public class ValidationHelper implements DisposableBean {
      */
     private boolean checkFinishedValidations(Long datasetId, String processId, Long taskId) throws EEAException {
       boolean isFinished = false;
-      LOG.info("checkFinishedValidations for processId {}, datasetId {} and taskId {}", processId, datasetId, taskId);
       if (taskRepository.isProcessFinished(processId)) {
-        LOG.info("isProcessFinished for processId " + processId);
+        LOG.info("isProcessFinished for datasetId {}, processId {} and taskId {}", datasetId, processId, taskId);
         if (finishProcessInMap(processId)) {
-          LOG.info("Removed process {} from processesMap", processId);
+          LOG.info("Removed process for datasetId {}, processId {} and taskId {} from processesMap", datasetId, processId, taskId);
           ProcessVO process = processControllerZuul.findById(processId);
-          LOG.info("Process {} finished for dataset {}", processId, datasetId);
+          LOG.info("Process {} with taskId {} finished for dataset {}", processId, taskId, datasetId);
           // Release the lock manually
           Map<String, Object> executeValidation = new HashMap<>();
           executeValidation.put(LiteralConstants.SIGNATURE,
@@ -1294,7 +1293,6 @@ public class ValidationHelper implements DisposableBean {
           isFinished = true;
         }
       } else {
-        LOG.info("Process {} not finished for dataset {}. TaskId {}", processId, datasetId, taskId);
         if (taskRepository.isProcessEnding(processId)) {
           try {
             LOG.info("Process {} for dataset {} ending", processId, datasetId);
@@ -1302,6 +1300,10 @@ public class ValidationHelper implements DisposableBean {
           } catch (InterruptedException eeaEx) {
             LOG.error("interrupting the sleep because of {}", eeaEx);
           }
+          /* the last tasks, which are in_progress, check if the process is ending (we don't have any more in_queue tasks).
+          If so we do a timeout for 5 sec and call the same method (checkFinishedValidations) again recursively
+          The tasks might be finished but the threads are still running and checking if the process is ending.
+          */
           checkFinishedValidations(datasetId, processId, taskId);
         }
         LOG.info("Process {} not ending for dataset {}. TaskId {}", processId, datasetId, taskId);
