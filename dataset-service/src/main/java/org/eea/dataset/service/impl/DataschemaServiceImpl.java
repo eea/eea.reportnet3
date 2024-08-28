@@ -3523,11 +3523,14 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
           fieldName = fieldSchemaVO.getName();
         }
         else {
-          //uniqueConstraint
+          //uniqueConstraint (might have multiple fields)
           UniqueConstraintVO uniqueConstraint = this.getUniqueConstraint(parameters.get(0));
-          String fieldSchemaId = uniqueConstraint.getFieldSchemaIds().get(0);
-          fieldSchemaVO = this.getFieldSchema(uniqueConstraint.getDatasetSchemaId(), fieldSchemaId);
-          fieldName = fieldSchemaVO.getName();
+          List<String> fieldNames =  new ArrayList<>();
+          for(String fieldSchemaId: uniqueConstraint.getFieldSchemaIds()) {
+            fieldSchemaVO = this.getFieldSchema(uniqueConstraint.getDatasetSchemaId(), fieldSchemaId);
+            fieldNames.add(fieldSchemaVO.getName());
+          }
+         fieldName = String.join(",", fieldNames);
         }
       }
     }
