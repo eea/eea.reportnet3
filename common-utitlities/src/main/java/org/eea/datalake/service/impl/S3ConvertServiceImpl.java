@@ -128,19 +128,16 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 GenericRecord record;
 
                 while ((record = r.read()) != null) {
-                    int size = record.getSchema().getFields().size();
+                    long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals("dir0")).count();
                     if (i == 0 && counter == 0) {
                       csvWriter.writeNext(record.getSchema().getFields().stream()
                           .map(Schema.Field::name).filter(t -> !t.equals("dir0")).toArray(String[]::new), false);
                         counter++;
                     }
-                    String[] columns = new String[size];
+                    String[] columns = new String[(int) size];
                     int index = 0;
-                    for (Schema.Field field : record.getSchema().getFields()) {
-                        var containsDir0 = field.name().equals("dir0");
-                        if (containsDir0) {
-                            continue;
-                        }
+                    var fields_2 = record.getSchema().getFields().stream().filter( t -> !t.name().equals("dir0")).collect(Collectors.toList());
+                    for (Schema.Field field : fields_2) {
                         Object fieldValue = record.get(index);
                         if (fieldValue instanceof ByteBuffer) {
                             ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
