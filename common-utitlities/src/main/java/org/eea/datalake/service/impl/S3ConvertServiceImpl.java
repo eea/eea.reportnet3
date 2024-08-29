@@ -44,6 +44,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
     private final S3Helper s3Helper;
     private final SpatialDataHandling spatialDataHandling;
+    public static final String DIR_0 = "dir0";
 
     public S3ConvertServiceImpl(SpatialDataHandling spatialDataHandling, S3Helper s3Helper) {
         this.s3Helper = s3Helper;
@@ -128,16 +129,16 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 GenericRecord record;
 
                 while ((record = r.read()) != null) {
-                    long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals("dir0")).count();
+                    long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
                     if (i == 0 && counter == 0) {
                       csvWriter.writeNext(record.getSchema().getFields().stream()
-                          .map(Schema.Field::name).filter(t -> !t.equals("dir0")).toArray(String[]::new), false);
+                          .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
                         counter++;
                     }
                     String[] columns = new String[(int) size];
                     int index = 0;
-                    var fields_2 = record.getSchema().getFields().stream().filter( t -> !t.name().equals("dir0")).collect(Collectors.toList());
-                    for (Schema.Field field : fields_2) {
+                    var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                    for (Schema.Field field : filteredFields) {
                         Object fieldValue = record.get(field.name());
                         if (fieldValue instanceof ByteBuffer) {
                             ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
@@ -175,7 +176,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
                     while ((record = r.read()) != null) {
                         if (counter == 0) {
-                            headers = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals("dir0")).collect(Collectors.toList());
+                            headers = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).collect(Collectors.toList());
                             headersSize = headers.size();
                             bufferedWriter.write("{");
                             counter++;
@@ -183,19 +184,15 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                             bufferedWriter.write(",{");
                         }
                         int index = 0;
-                        for (Schema.Field field : record.getSchema().getFields()) {
-                            var containsDir0 = field.name().equals("dir0");
-                            if (containsDir0) {
-                                continue;
-                            }
-
-                            String recordValue = record.get(index).toString();
+                        var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                        for (Schema.Field field : filteredFields) {
+                            String recordValue = record.get(field.name()).toString();
                             boolean isNumeric = pattern.matcher(recordValue).matches();
                             bufferedWriter.write("\"" + headers.get(index) + "\":");
                             if (isNumeric) {
                                 bufferedWriter.write(recordValue);
                             } else {
-                                Object fieldValue = record.get(index);
+                                Object fieldValue = record.get(field.name());
                                 if (fieldValue instanceof ByteBuffer) {
                                     ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
                                     String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
