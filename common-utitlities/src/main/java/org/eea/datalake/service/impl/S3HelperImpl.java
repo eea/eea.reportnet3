@@ -105,8 +105,13 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver, String path) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver, path);
+        if(!key.endsWith("/")){
+            //adding suffix to differentiate between folders with the same prefix
+            key = key + "/";
+        }
+        String finalKey = key;
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
-        return s3Client.listObjects(b -> b.bucket(bucketName).prefix(key)).contents().size() > 0;
+        return s3Client.listObjects(b -> b.bucket(bucketName).prefix(finalKey)).contents().size() > 0;
     }
 
     /**
@@ -117,8 +122,13 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public boolean checkFolderExist(S3PathResolver s3PathResolver) {
         String key = s3Service.getTableAsFolderQueryPath(s3PathResolver);
+        if(!key.endsWith("/")){
+            //adding suffix to differentiate between folders with the same prefix
+            key = key + "/";
+        }
+        String finalKey = key;
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
-        return s3Client.listObjects(b -> b.bucket(bucketName).prefix(key)).contents().size() > 0;
+        return s3Client.listObjects(b -> b.bucket(bucketName).prefix(finalKey)).contents().size() > 0;
     }
 
     /**
