@@ -81,7 +81,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
+            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
@@ -118,8 +118,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         return jsonFile;
     }
 
-    private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
-                                          CSVWriter csvWriter) throws IOException {
+    private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
+                                     CSVWriter csvWriter) throws IOException {
         int counter = 0;
         for (int i = 0; i < exportFilenames.size(); i++) {
             File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
@@ -131,11 +131,15 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     int size = record.getSchema().getFields().size();
                     if (i == 0 && counter == 0) {
                       csvWriter.writeNext(record.getSchema().getFields().stream()
-                          .map(Schema.Field::name).toArray(String[]::new), false);
+                          .map(Schema.Field::name).filter(t -> !t.equals("dir0")).toArray(String[]::new), false);
                         counter++;
                     }
                     String[] columns = new String[size];
                     for (int j = 0; j < size; j++) {
+                        var containsDir0 = record.getSchema().getFields().get(j).name().equals("dir0");
+                        if (containsDir0) {
+                            continue;
+                        }
                         Object fieldValue = record.get(j);
                         if (fieldValue instanceof ByteBuffer) {
                             ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
@@ -166,36 +170,46 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 File parquetFile =
                     s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
                         exportDLPath, PARQUET_TYPE, datasetId);
-                InputStream inputStream = new FileInputStream(parquetFile);
-                ParquetStream parquetStream = new ParquetStream(inputStream);
-                ParquetReader<GenericRecord> r =
-                    AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
-
-                Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-                GenericRecord record;
-                while ((record = r.read()) != null) {
-                    if (counter == 0) {
-                        headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                        headersSize = headers.size();
-                        bufferedWriter.write("{");
-                        counter++;
-                    } else {
-                        bufferedWriter.write(",{");
-                    }
-                    for (int i = 0; i < headersSize; i++) {
-                        String recordValue = record.get(i).toString();
-                        boolean isNumeric = pattern.matcher(recordValue).matches();
-                        bufferedWriter.write("\"" + headers.get(i) + "\":");
-                        if (isNumeric) {
-                            bufferedWriter.write(recordValue);
+                try (InputStream inputStream = new FileInputStream(parquetFile);
+                     ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
+                    GenericRecord record;
+                    Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+                    while ((record = r.read()) != null) {
+                        if (counter == 0) {
+                            headers = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals("dir0")).collect(Collectors.toList());
+                            headersSize = headers.size();
+                            bufferedWriter.write("{");
+                            counter++;
                         } else {
-                            bufferedWriter.write("\"" + recordValue + "\"");
+                            bufferedWriter.write(",{");
                         }
-                        if (i < headersSize - 1) {
-                            bufferedWriter.write(",");
+                        for (int i = 0; i < headersSize; i++) {
+                            var containsDir0 = record.getSchema().getFields().get(i).name().equals("dir0");
+                            if (containsDir0) {
+                                continue;
+                            }
+
+                            String recordValue = record.get(i).toString();
+                            boolean isNumeric = pattern.matcher(recordValue).matches();
+                            bufferedWriter.write("\"" + headers.get(i) + "\":");
+                            if (isNumeric) {
+                                bufferedWriter.write(recordValue);
+                            } else {
+                                Object fieldValue = record.get(i);
+                                if (fieldValue instanceof ByteBuffer) {
+                                    ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                                    String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
+                                    bufferedWriter.write(modifiedJson);
+                                }else {
+                                    bufferedWriter.write("\"" + recordValue + "\"");
+                                }
+                            }
+                            if (i < headersSize - 1) {
+                                bufferedWriter.write(",");
+                            }
                         }
+                        bufferedWriter.write("}");
                     }
-                    bufferedWriter.write("}");
                 }
             }
             bufferedWriter.write("],\"tableName\":\"");
