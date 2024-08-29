@@ -135,19 +135,21 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         counter++;
                     }
                     String[] columns = new String[size];
-                    for (int j = 0; j < size; j++) {
-                        var containsDir0 = record.getSchema().getFields().get(j).name().equals("dir0");
+                    int index = 0;
+                    for (Schema.Field field : record.getSchema().getFields()) {
+                        var containsDir0 = field.name().equals("dir0");
                         if (containsDir0) {
                             continue;
                         }
-                        Object fieldValue = record.get(j);
+                        Object fieldValue = record.get(index);
                         if (fieldValue instanceof ByteBuffer) {
                             ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
                             String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
-                            columns[j] = modifiedJson;
+                            columns[index] = modifiedJson;
                         } else {
-                            columns[j] = (fieldValue != null) ? fieldValue.toString() : "";
+                            columns[index] = (fieldValue != null) ? fieldValue.toString() : "";
                         }
+                        index++;
                     }
                     csvWriter.writeNext(columns, false);
                 }
@@ -183,19 +185,20 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         } else {
                             bufferedWriter.write(",{");
                         }
-                        for (int i = 0; i < headersSize; i++) {
-                            var containsDir0 = record.getSchema().getFields().get(i).name().equals("dir0");
+                        int index = 0;
+                        for (Schema.Field field : record.getSchema().getFields()) {
+                            var containsDir0 = field.name().equals("dir0");
                             if (containsDir0) {
                                 continue;
                             }
 
-                            String recordValue = record.get(i).toString();
+                            String recordValue = record.get(index).toString();
                             boolean isNumeric = pattern.matcher(recordValue).matches();
-                            bufferedWriter.write("\"" + headers.get(i) + "\":");
+                            bufferedWriter.write("\"" + headers.get(index) + "\":");
                             if (isNumeric) {
                                 bufferedWriter.write(recordValue);
                             } else {
-                                Object fieldValue = record.get(i);
+                                Object fieldValue = record.get(index);
                                 if (fieldValue instanceof ByteBuffer) {
                                     ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
                                     String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
@@ -204,9 +207,10 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                                     bufferedWriter.write("\"" + recordValue + "\"");
                                 }
                             }
-                            if (i < headersSize - 1) {
+                            if (index < headersSize - 1) {
                                 bufferedWriter.write(",");
                             }
+                            index++;
                         }
                         bufferedWriter.write("}");
                     }
