@@ -138,7 +138,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     int index = 0;
                     var fields_2 = record.getSchema().getFields().stream().filter( t -> !t.name().equals("dir0")).collect(Collectors.toList());
                     for (Schema.Field field : fields_2) {
-                        Object fieldValue = record.get(index);
+                        Object fieldValue = record.get(field.name());
                         if (fieldValue instanceof ByteBuffer) {
                             ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
                             String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
