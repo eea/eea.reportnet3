@@ -63,6 +63,10 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
+
+    @Value("${validation.errors.limit.bigData}")
+    private Integer validationErrorsLimit;
+
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
     private RulesService rulesService;
@@ -479,10 +483,17 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                         .withSchema(schema)
                         .withCompressionCodec(CompressionCodecName.SNAPPY)
                         .build()) {
+
+                    int recordCounter = 0;
                     for (String recordId : recordSubList) {
                         ObjectWrapper objectWrapper = new ObjectWrapper(ruleVO.getThenCondition().get(0), recordId);
                         GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper);
                         writer.write(record);
+                        recordCounter++;
+                        if(recordCounter >= validationErrorsLimit){
+                            //there are too many errors for a code, so we should limit them
+                            break;
+                        }
                     }
                 } catch (Exception e1) {
                     LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
@@ -522,10 +533,16 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                     .withRowGroupSize(16 * 1024)
                     .build()) {
 
+                int recordCounter = 0;
                 for (String recordId : recordIds) {
                     ObjectWrapper objectWrapper = new ObjectWrapper(ruleVO.getThenCondition().get(0), recordId);
                     GenericRecord record = createParquetGenericRecord(headerMap, schema, customQueryResultSet, objectWrapper);
                     writer.write(record);
+                    recordCounter++;
+                    if(recordCounter >= validationErrorsLimit){
+                        //there are too many errors for a code, so we should limit them
+                        break;
+                    }
                 }
             } catch (Exception e1) {
                 LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());

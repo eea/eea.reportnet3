@@ -51,6 +51,10 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
+
+    @Value("${validation.errors.limit.bigData}")
+    private Integer validationErrorsLimit;
+
     private final JdbcTemplate dremioJdbcTemplate;
     private final S3Service s3Service;
     private final RulesService rulesService;
@@ -263,9 +267,15 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                         .withCompressionCodec(CompressionCodecName.SNAPPY)
                         .build()) {
 
+                    int recordCounter = 0;
                     for (String recordId : recordSubList) {
                         GenericRecord record = createParquetGenericRecord(headerMap, recordId, schema);
                         writer.write(record);
+                        recordCounter++;
+                        if(recordCounter >= validationErrorsLimit){
+                            //there are too many errors for a code, so we should limit them
+                            break;
+                        }
                     }
                 } catch (Exception e1) {
                     LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
@@ -301,6 +311,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         dremioHelperService.deleteFileFromR3IfExists(parquetFile);
         try (ParquetWriter<GenericRecord> writer = AvroParquetWriter.<GenericRecord>builder(new Path(parquetFile)).withSchema(schema)
                 .withCompressionCodec(CompressionCodecName.SNAPPY).withPageSize(4 * 1024).withRowGroupSize(16 * 1024).build()) {
+            int recordCounter = 0;
             while (rs.next()) {
                 boolean isValid = isRecordValid(parameters, fieldName, rs, method, object);
                 if (!isValid) {
@@ -309,6 +320,11 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
                     }
                     GenericRecord record = createParquetGenericRecord(headerMap, rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER), schema);
                     writer.write(record);
+                    recordCounter++;
+                    if(recordCounter >= validationErrorsLimit){
+                        //there are too many errors for a code, so we should limit them
+                        break;
+                    }
                 }
             }
             if (parquetRecordCount > 0) {

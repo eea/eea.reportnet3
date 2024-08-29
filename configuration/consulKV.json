@@ -2022,5 +2022,9 @@
   {
     "key": "config/application/s3.iceberg.bucket.path",
     "value": "bWFyaWE="
+  },
+  {
+    "key": "config/validation/validation.errors.limit.bigData",
+    "value": "bWFyaWE="
   }
 ]
