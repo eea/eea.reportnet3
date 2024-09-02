@@ -213,9 +213,12 @@ public class CSVWriterStrategy implements WriterStrategy {
     int totalPages = (int) Math.ceil((double) totalRecords / batchSize);
     LOG.info("Total number of pages in export process: {}", totalPages);
     for (int numPage = 0; numPage < totalPages; numPage++) {
-      for (RecordVO recordVO : fileCommon.exportFileWithFilters(datasetId, idTableSchema,
+      var records = fileCommon.exportFileWithFilters(datasetId, idTableSchema,
           levelErrorList, PageRequest.of(numPage, batchSize), idRulesList,
-          filters.getFieldValue())) {
+          filters.getFieldValue());
+
+      LOG.info("recordsSize:{}, numPage: {}, totalRecords: {}, totalPages: {}", records.size(), numPage, totalRecords, totalPages);
+      for (RecordVO recordVO : records) {
 
         List<FieldVO> fields = recordVO.getFields();
         List<String> unknownColumns = new ArrayList<>();
@@ -236,7 +239,11 @@ public class CSVWriterStrategy implements WriterStrategy {
             }
           }
         }
-        csvWriter.writeNext(joinOutputArray(unknownColumns, fieldsToWrite), false);
+        var columns = joinOutputArray(unknownColumns, fieldsToWrite);
+        if (columns.length == 0) {
+          LOG.info("EMPTY OUTPUT ARRAY");
+        }
+        csvWriter.writeNext(columns, false);
 
       }
     }
