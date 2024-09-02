@@ -99,4 +99,10 @@ public class S3PathResolver {
         this.datasetId = datasetId;
         this.path = path;
     }
+
+    public S3PathResolver(long dataflowId, String filename, String path) {
+        this.dataflowId = dataflowId;
+        this.filename = filename;
+        this.path = path;
+    }
 }

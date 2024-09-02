@@ -5,6 +5,7 @@ import java.io.InputStream;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.document.DocumentVO;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * The interface Dataset service.
@@ -26,6 +27,16 @@ public interface DocumentService {
       DocumentVO documentVO, Long size) throws EEAException, IOException;
 
   /**
+   * Upload a document in s3.
+   *
+   * @param multipartFile the file
+   * @param fileName the file name
+   * @param documentVO the document VO
+   * @param size the size
+   */
+  void uploadDocumentDL(MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException;
+
+  /**
    * Gets the document.
    *
    * @param documentId the document id
@@ -34,6 +45,14 @@ public interface DocumentService {
    * @throws EEAException the EEA exception
    */
   FileResponse getDocument(Long documentId, Long dataFlowId) throws EEAException;
+
+  /**
+   * Gets the document.
+   *
+   * @param document document
+   * @return the document in bytes
+   */
+  FileResponse getDocumentDL(DocumentVO document) throws EEAException;
 
 
   /**
@@ -45,6 +64,15 @@ public interface DocumentService {
    * @throws EEAException the EEA exception
    */
   void deleteDocument(Long documentId, Long dataFlowId, Boolean deleteMetabase) throws EEAException;
+
+  /**
+   * Delete document.
+   *
+   * @param documentVO the document
+   * @param deleteMetabase the delete metabase
+   * @throws EEAException the EEA exception
+   */
+  void deleteDocumentDL(DocumentVO documentVO, Boolean deleteMetabase) throws EEAException;
 
   /**
    * Upload schema snapshot.

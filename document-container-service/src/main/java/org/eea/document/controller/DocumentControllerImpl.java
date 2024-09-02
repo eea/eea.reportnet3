@@ -5,15 +5,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Produces;
+
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -67,6 +71,9 @@ public class DocumentControllerImpl implements DocumentController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
 
   /**
    * The Constant LOG.
@@ -122,9 +129,17 @@ public class DocumentControllerImpl implements DocumentController {
       documentVO.setLanguage(language);
       documentVO.setIsPublic(isPublic);
       LOG.info("Uploading document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
-      documentService.uploadDocument(file.getInputStream(), file.getContentType(),
-          file.getOriginalFilename(), documentVO, file.getSize());
-      LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+        documentService.uploadDocumentDL(file, file.getOriginalFilename(), documentVO, file.getSize());
+        LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
+      }
+      else{
+        documentService.uploadDocument(file.getInputStream(), file.getContentType(),
+                file.getOriginalFilename(), documentVO, file.getSize());
+      }
+
+
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG.error("Error uploading document to dataflow help: Dataflow {} is not DRAFT",
@@ -189,7 +204,14 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
+      FileResponse file;
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+        file = documentService.getDocumentDL(document);
+      }
+      else{
+        file = documentService.getDocument(documentId, document.getDataflowId());
+      }
       return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
       LOG.error("Error retrieving document with documentId {} for dataflowId {}. Message: {}", documentId, dataflowId,
@@ -245,7 +267,14 @@ public class DocumentControllerImpl implements DocumentController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
       if (Boolean.TRUE.equals(document.getIsPublic())) {
-        FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
+        FileResponse file;
+        DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(document.getDataflowId());
+        if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+          file = documentService.getDocumentDL(document);
+        }
+        else{
+          file = documentService.getDocument(documentId, document.getDataflowId());
+        }
         return new ByteArrayResource(file.getBytes());
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -307,8 +336,14 @@ public class DocumentControllerImpl implements DocumentController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
       LOG.info("Deleting document with id {} for dataflowId {}", documentId, dataflowId);
-      documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
-      LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+        documentService.deleteDocumentDL(document, deleteMetabase);
+        LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
+      }
+      else{
+        documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
+      }
     } catch (final FeignException e) {
       LOG.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
           documentId, dataflowId, e.getMessage(), e);

@@ -148,4 +148,10 @@ public interface S3Helper {
      * @param key The file Path to delete
      */
     void deleteFileFromS3(String key);
+
+    /**
+     *  Gets file as bytes
+     * @param key The file Path to get
+     */
+    byte[] getBytesFromS3(String key);
 }
