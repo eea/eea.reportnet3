@@ -11,8 +11,12 @@ import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,6 +69,12 @@ public class DocumentControllerImplTest {
 
   /** The authentication. */
   Authentication authentication;
+
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Mock
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /**
    * Inits the mocks.
@@ -155,6 +165,9 @@ public class DocumentControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(documentService).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     try {
       documentController.uploadDocument(fileMock, 1L, "ES", "desc", true);
     } catch (ResponseStatusException e) {
@@ -177,6 +190,9 @@ public class DocumentControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     try {
       documentController.uploadDocument(fileMock, 1L, "ES", "desc", true);
     } catch (ResponseStatusException e) {
@@ -200,6 +216,9 @@ public class DocumentControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     documentController.uploadDocument(fileMock, 1L, "ES", "desc", true);
     Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -220,6 +239,9 @@ public class DocumentControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(documentService).uploadDocument(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     documentController.uploadDocumentLegacy(fileMock, 1L, "ES", "desc", true);
     Mockito.verify(documentService, times(1)).uploadDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
@@ -250,7 +272,13 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void getDocumentExceptionTest() throws EEAException {
-    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    DocumentVO document = new DocumentVO();
+    document.setDataflowId(1L);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
@@ -269,7 +297,13 @@ public class DocumentControllerImplTest {
    */
   @Test
   public void getDocumentException2Test() throws EEAException {
-    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    DocumentVO document = new DocumentVO();
+    document.setDataflowId(1L);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
@@ -291,7 +325,12 @@ public class DocumentControllerImplTest {
   public void getDocumentSuccessTest() throws EEAException, IOException {
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
-    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    DocumentVO document = new DocumentVO();
+    document.setIsPublic(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
     documentController.getDocument(1L, 1L);
     Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
@@ -309,7 +348,13 @@ public class DocumentControllerImplTest {
   public void getDocumentLegacySuccessTest() throws EEAException, IOException {
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
-    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    DocumentVO document = new DocumentVO();
+    document.setDataflowId(1L);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
     documentController.getDocumentLegacy(1L, 1L);
     Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
@@ -341,9 +386,15 @@ public class DocumentControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
+    DocumentVO document = new DocumentVO();
+    document.setDataflowId(1L);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.deleteDocument(1L, 1L, null);
@@ -359,6 +410,11 @@ public class DocumentControllerImplTest {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
 
+    DocumentVO document = new DocumentVO();
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
@@ -397,7 +453,13 @@ public class DocumentControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
-    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    DocumentVO document = new DocumentVO();
+    document.setDataflowId(1L);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.deleteDocument(1L, 1L, null);
     Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
@@ -418,7 +480,13 @@ public class DocumentControllerImplTest {
     Mockito.when(authentication.getName()).thenReturn("user");
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
-    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(new DocumentVO());
+    DocumentVO document = new DocumentVO();
+    document.setDataflowId(1L);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     doNothing().when(documentService).deleteDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.deleteDocumentLegacy(1L, 1L, null);
     Mockito.verify(documentService, times(1)).deleteDocument(Mockito.any(), Mockito.any(),
@@ -767,22 +835,30 @@ public class DocumentControllerImplTest {
   }
 
   @Test
-  public void testUploadCollaborationSuccess() throws EEAException, IOException {
+  public void testUploadCollaborationSuccess() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doNothing().when(documentService).uploadCollaborationDocument(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc.json", "json",
-        1L);
+        1L, 1L);
     Mockito.verify(documentService, times(1)).uploadCollaborationDocument(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   @Test
-  public void testGetCollaborationDocumentSuccess() throws EEAException, IOException {
+  public void testGetCollaborationDocumentSuccess() throws Exception {
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
-
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    MessageVO messageVO = new MessageVO();
+    dataFlowVO.setBigData(false);
+    when(collaborationControllerZuul.getMessage(1L)).thenReturn(messageVO);
     when(documentService.getCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any()))
         .thenReturn(content);
     documentController.getCollaborationDocument(1L, "test", 1L);
@@ -798,6 +874,12 @@ public class DocumentControllerImplTest {
     content.setBytes(fileMock.getBytes());
     doNothing().when(documentService).deleteCollaborationDocument(Mockito.any(), Mockito.any(),
         Mockito.any());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    MessageVO messageVO = new MessageVO();
+    dataFlowVO.setBigData(false);
+    when(collaborationControllerZuul.getMessage(1L)).thenReturn(messageVO);
     documentController.deleteCollaborationDocument(1L, "test", 1L);
     Mockito.verify(documentService, times(1)).deleteCollaborationDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
@@ -806,31 +888,34 @@ public class DocumentControllerImplTest {
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testUploadCollaborationDocumentException() throws EEAException {
+  public void testUploadCollaborationDocumentException() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
-    documentController.uploadCollaborationDocument(null, 1L, "desc.json", "json", 1L);
+    documentController.uploadCollaborationDocument(null, 1L, "desc.json", "json", 1L, 1L);
   }
 
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testUploadCollaborationException2() throws EEAException, IOException {
+  public void testUploadCollaborationException2() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     documentController.uploadCollaborationDocument(fileMock.getBytes(), null, "desc.json", "json",
-        1L);
+        1L, 1L);
   }
 
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testUploadCollaborationException3() throws EEAException, IOException {
+  public void testUploadCollaborationException3() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException()).when(documentService).uploadCollaborationDocument(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L, 1L);
   }
 
   /**
@@ -840,26 +925,34 @@ public class DocumentControllerImplTest {
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Test(expected = ResponseStatusException.class)
-  public void testUploadCollaborationIOException() throws EEAException, IOException {
+  public void testUploadCollaborationIOException() throws Exception {
     IOException ioException = new IOException(EEAErrorMessage.DOCUMENT_NOT_FOUND);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(ioException).when(documentService).uploadCollaborationDocument(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    documentController.uploadCollaborationDocument(fileMock.getBytes(), 1L, "desc", "json", 1L, 1L);
   }
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testGetCollaborationDocumentExceptionNull() throws EEAException {
-
+  public void testGetCollaborationDocumentExceptionNull() throws Exception {
     documentController.getCollaborationDocument(null, "test", 1L);
   }
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testGetCollaborationDocumentException() throws EEAException {
+  public void testGetCollaborationDocumentException() throws Exception {
 
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    MessageVO messageVO = new MessageVO();
+    dataFlowVO.setBigData(false);
+    when(collaborationControllerZuul.getMessage(1L)).thenReturn(messageVO);
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .getCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.getCollaborationDocument(1L, "test", 1L);
@@ -867,8 +960,13 @@ public class DocumentControllerImplTest {
 
 
   @Test(expected = ResponseStatusException.class)
-  public void testGetCollaborationDocumentException2() throws EEAException {
-
+  public void testGetCollaborationDocumentException2() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    MessageVO messageVO = new MessageVO();
+    dataFlowVO.setBigData(false);
+    when(collaborationControllerZuul.getMessage(1L)).thenReturn(messageVO);
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .getCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
     documentController.getCollaborationDocument(1L, "test", 1L);
@@ -883,17 +981,30 @@ public class DocumentControllerImplTest {
 
 
   @Test(expected = ResponseStatusException.class)
-  public void tetsDeleteCollaborationDocumentException() throws Exception {
+  public void testDeleteCollaborationDocumentException() throws Exception {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .deleteCollaborationDocument(Mockito.any(), Mockito.any(), Mockito.any());
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    MessageVO messageVO = new MessageVO();
+    dataFlowVO.setBigData(false);
+    when(collaborationControllerZuul.getMessage(1L)).thenReturn(messageVO);
+
     documentController.deleteCollaborationDocument(1L, "test", 1L);
   }
 
 
   @Test(expected = ResponseStatusException.class)
   public void testDeleteCollaborationDocumentException2() throws Exception {
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
+    MessageVO messageVO = new MessageVO();
+    dataFlowVO.setBigData(false);
+    when(collaborationControllerZuul.getMessage(1L)).thenReturn(messageVO);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("user");
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
@@ -913,7 +1024,12 @@ public class DocumentControllerImplTest {
   public void getPublicDocumentTest() throws EEAException, IOException {
     DocumentVO document = new DocumentVO();
     document.setId(1L);
+    document.setDataflowId(1L);
     document.setIsPublic(true);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
     Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);
@@ -936,6 +1052,7 @@ public class DocumentControllerImplTest {
     DocumentVO document = new DocumentVO();
     document.setId(1L);
     document.setIsPublic(false);
+    document.setIsBigData(false);
     Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);
     try {
       Resource resource = documentController.getPublicDocument(1L);
@@ -946,15 +1063,20 @@ public class DocumentControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void getPublicDocumentDocumentInternalServerErrorExceptionTest()
+  public void getPublicDocumentInternalServerErrorExceptionTest()
       throws EEAException, IOException {
     DocumentVO document = new DocumentVO();
     document.setId(1L);
+    document.setDataflowId(1L);
     document.setIsPublic(true);
+    document.setIsBigData(false);
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
     Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenThrow(EEAException.class);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     try {
       Resource resource = documentController.getPublicDocument(1L);
     } catch (ResponseStatusException e) {
@@ -964,10 +1086,15 @@ public class DocumentControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void getPublicDocumentDocumentNotFoundExceptionTest() throws EEAException, IOException {
+  public void getPublicDocumentNotFoundExceptionTest() throws EEAException, IOException {
     DocumentVO document = new DocumentVO();
     document.setId(1L);
+    document.setDataflowId(1L);
     document.setIsPublic(true);
+    document.setIsBigData(false);
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     FileResponse content = new FileResponse();
     content.setBytes(fileMock.getBytes());
     Mockito.when(dataflowController.getDocumentInfoById(Mockito.anyLong())).thenReturn(document);

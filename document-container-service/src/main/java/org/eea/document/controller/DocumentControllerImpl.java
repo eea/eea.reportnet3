@@ -5,15 +5,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Produces;
+
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.collaboration.CollaborationController.CollaborationControllerZuul;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowDocumentController.DataFlowDocumentControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
@@ -67,6 +73,12 @@ public class DocumentControllerImpl implements DocumentController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private CollaborationControllerZuul collaborationControllerZuul;
 
   /**
    * The Constant LOG.
@@ -122,9 +134,18 @@ public class DocumentControllerImpl implements DocumentController {
       documentVO.setLanguage(language);
       documentVO.setIsPublic(isPublic);
       LOG.info("Uploading document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
-      documentService.uploadDocument(file.getInputStream(), file.getContentType(),
-          file.getOriginalFilename(), documentVO, file.getSize());
-      LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+        documentVO.setIsBigData(true);
+        documentService.uploadDocumentDL(file, file.getOriginalFilename(), documentVO, file.getSize());
+        LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
+      }
+      else{
+        documentVO.setIsBigData(false);
+        documentService.uploadDocument(file.getInputStream(), file.getContentType(),
+                file.getOriginalFilename(), documentVO, file.getSize());
+      }
+
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG.error("Error uploading document to dataflow help: Dataflow {} is not DRAFT",
@@ -189,7 +210,14 @@ public class DocumentControllerImpl implements DocumentController {
       if (document == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
+      FileResponse file;
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
+        file = documentService.getDocumentDL(document);
+      }
+      else{
+        file = documentService.getDocument(documentId, document.getDataflowId());
+      }
       return new ByteArrayResource(file.getBytes());
     } catch (final EEAException e) {
       LOG.error("Error retrieving document with documentId {} for dataflowId {}. Message: {}", documentId, dataflowId,
@@ -245,7 +273,14 @@ public class DocumentControllerImpl implements DocumentController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
       if (Boolean.TRUE.equals(document.getIsPublic())) {
-        FileResponse file = documentService.getDocument(documentId, document.getDataflowId());
+        FileResponse file;
+        DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(document.getDataflowId());
+        if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
+          file = documentService.getDocumentDL(document);
+        }
+        else{
+          file = documentService.getDocument(documentId, document.getDataflowId());
+        }
         return new ByteArrayResource(file.getBytes());
       } else {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -307,8 +342,14 @@ public class DocumentControllerImpl implements DocumentController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
       LOG.info("Deleting document with id {} for dataflowId {}", documentId, dataflowId);
-      documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
-      LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
+        documentService.deleteDocumentDL(document, deleteMetabase);
+        LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
+      }
+      else{
+        documentService.deleteDocument(documentId, document.getDataflowId(), deleteMetabase);
+      }
     } catch (final FeignException e) {
       LOG.error("Error deleting document: DocumentId {}. DataflowId {}. Message: {}",
           documentId, dataflowId, e.getMessage(), e);
@@ -659,7 +700,8 @@ public class DocumentControllerImpl implements DocumentController {
       @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("fileName") final String fileName,
       @RequestParam("extension") final String extension,
-      @RequestParam("messageId") final Long messageId) {
+      @RequestParam("messageId") final Long messageId,
+      @RequestParam(value="providerId", required = false) Long providerId) throws Exception {
     // Set the user name on the thread
     ThreadPropertiesManager.setVariable("user",
         SecurityContextHolder.getContext().getAuthentication().getName());
@@ -673,9 +715,14 @@ public class DocumentControllerImpl implements DocumentController {
     try {
       ByteArrayInputStream inStream = new ByteArrayInputStream(file);
       LOG.info("Uploading collaboration document {} for dataflowId {}", fileName, dataflowId);
-      documentService.uploadCollaborationDocument(inStream, extension, fileName, dataflowId,
-          messageId);
-      LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", fileName, dataflowId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+        documentService.uploadCollaborationDocumentDL(inStream, fileName, dataflowId, providerId, messageId);
+        LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", fileName, dataflowId);
+      }
+      else{
+        documentService.uploadCollaborationDocument(inStream, extension, fileName, dataflowId, messageId);
+      }
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG.error(
@@ -719,8 +766,16 @@ public class DocumentControllerImpl implements DocumentController {
             EEAErrorMessage.DATAFLOW_INCORRECT_ID);
       }
       LOG.info("Deleting collaboration document {} for dataflowId {}", fileName, dataflowId);
-      documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
-      LOG.info("Successfully deleted collaboration document {} for dataflowId {}", fileName, dataflowId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      MessageVO messageVO = collaborationControllerZuul.getMessage(messageId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(messageVO.getIsBigData())) {
+        documentService.deleteCollaborationDocumentDL(fileName, dataflowId, messageVO.getProviderId(), messageId);
+        LOG.info("Successfully deleted collaboration document {} for dataflowId {}", fileName, dataflowId);
+      }
+      else{
+        documentService.deleteCollaborationDocument(fileName, dataflowId, messageId);
+      }
+
     } catch (final EEAException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG.error(
@@ -755,14 +810,21 @@ public class DocumentControllerImpl implements DocumentController {
   @ApiOperation(value = "Get Collaboration Document", hidden = true)
   public byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("fileName") final String fileName,
-      @RequestParam("messageId") final Long messageId) {
+      @RequestParam("messageId") final Long messageId) throws Exception {
     try {
 
       if (dataflowId == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      FileResponse file = documentService.getCollaborationDocument(fileName, dataflowId, messageId);
-
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      MessageVO messageVO = collaborationControllerZuul.getMessage(messageId);
+      FileResponse file;
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(messageVO.getIsBigData())) {
+        file = documentService.getCollaborationDocumentDL(fileName, dataflowId, messageVO.getProviderId(), messageId);
+      }
+      else{
+         file = documentService.getCollaborationDocument(fileName, dataflowId, messageId);
+      }
       ByteArrayResource resource = new ByteArrayResource(file.getBytes());
       return resource.getByteArray();
     } catch (final EEAException e) {

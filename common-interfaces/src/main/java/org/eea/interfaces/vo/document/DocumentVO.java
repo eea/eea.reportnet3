@@ -44,4 +44,7 @@ public class DocumentVO implements Serializable {
 
   /** The is public. */
   private Boolean isPublic;
+
+  /** The is big data. */
+  private Boolean isBigData;
 }

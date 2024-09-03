@@ -53,7 +53,7 @@ public interface CollaborationController {
   @PostMapping("/createMessage/dataflow/{dataflowId}/attachment")
   MessageVO createMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
-      @RequestPart("fileAttachment") MultipartFile fileAttachment);
+      @RequestPart("fileAttachment") MultipartFile fileAttachment) throws Exception;
 
   /**
    * Update message read status.
@@ -101,7 +101,7 @@ public interface CollaborationController {
   @GetMapping("/findMessages/dataflow/{dataflowId}/getMessageAttachment")
   ResponseEntity<byte[]> getMessageAttachment(@PathVariable("dataflowId") Long dataflowId,
       @RequestParam("providerId") Long providerId,
-      @RequestParam("messageAttachmentId") Long messageAttachmentId);
+      @RequestParam("messageAttachmentId") Long messageAttachmentId) throws Exception;
 
   /**
    * Notify new messages.
@@ -121,4 +121,10 @@ public interface CollaborationController {
       @RequestParam("modifiedDatasetId") Long modifiedDatasetId,
       @RequestParam("datasetStatus") DatasetStatusEnum datasetStatus,
       @RequestParam("datasetName") String datasetName, @RequestParam("eventType") String eventType);
+
+  @GetMapping("/private/getMessageById/{messageId}")
+  MessageVO getMessage(@PathVariable("messageId") Long messageId) throws Exception;
+
+  @PutMapping("/private/setBigData/{messageId}")
+  void setBigData(@PathVariable("messageId") Long messageId, @RequestParam("bigData") Boolean bigData) throws Exception;
 }

@@ -406,7 +406,8 @@ public class S3HelperImpl implements S3Helper {
             .build();
     }
 
-    private byte[] getBytesFromS3(String key) {
+    @Override
+    public byte[] getBytesFromS3(String key) {
         GetObjectRequest objectRequest = GetObjectRequest
             .builder()
             .key(key)

@@ -59,6 +59,10 @@ public class Document {
   @Column(name = "IS_PUBLIC")
   private Boolean isPublic;
 
+  /** The is big data. */
+  @Column(name = "BIG_DATA")
+  private Boolean isBigData;
+
   /**
    * Equals.
    *

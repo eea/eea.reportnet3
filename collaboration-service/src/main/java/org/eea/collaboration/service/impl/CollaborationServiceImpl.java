@@ -2,6 +2,7 @@ package org.eea.collaboration.service.impl;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.persistence.repository.MessageRepository;
@@ -11,10 +12,12 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.MessageAttachmentVO;
 import org.eea.interfaces.vo.dataflow.MessagePaginatedVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
@@ -99,6 +102,9 @@ public class CollaborationServiceImpl implements CollaborationService {
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
 
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /**
    * Creates the message.
    *
@@ -175,7 +181,7 @@ public class CollaborationServiceImpl implements CollaborationService {
   @Transactional
   public MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
       String fileName, String fileSize, String contentType)
-      throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
+          throws Exception {
 
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
@@ -192,6 +198,12 @@ public class CollaborationServiceImpl implements CollaborationService {
       message.setDirection(direction);
       message.setType(MessageTypeEnum.ATTACHMENT);
       message.setFileSize(fileSize);
+
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+        message.setIsBigData(true);
+      }
+
       message = messageRepository.save(message);
 
       String extension = FilenameUtils.getExtension(fileName);
@@ -205,7 +217,7 @@ public class CollaborationServiceImpl implements CollaborationService {
       messageVO.setMessageAttachment(messageAttachmentVO);
 
       documentControllerZuul.uploadCollaborationDocument(IOUtils.toByteArray(is), dataflowId,
-          fileName, contentType, message.getId());
+          fileName, contentType, message.getId(), providerId);
 
       String eventType = EventType.RECEIVED_MESSAGE.toString();
       collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null,
@@ -350,8 +362,20 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @return the message attachment
    */
   @Override
-  public byte[] getMessageAttachment(Long messageId, Long dataflowId, String fileName) {
+  public byte[] getMessageAttachment(Long messageId, Long dataflowId, String fileName) throws Exception {
     return documentControllerZuul.getCollaborationDocument(dataflowId, fileName, messageId);
+  }
+
+  /**
+   * Sets the big data param
+   *
+   * @param messageId the message id
+   * @param bigData the bigData
+   * @return
+   */
+  @Override
+  public void setBigData(Long messageId, Boolean bigData){
+    messageRepository.setBigData(messageId, bigData);
   }
 
   /**

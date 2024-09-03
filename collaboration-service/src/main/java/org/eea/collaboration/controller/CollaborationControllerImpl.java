@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.collaboration.mapper.MessageMapper;
 import org.eea.collaboration.persistence.domain.Message;
 import org.eea.collaboration.service.CollaborationService;
 import org.eea.collaboration.service.helper.CollaborationServiceHelper;
@@ -63,6 +64,10 @@ public class CollaborationControllerImpl implements CollaborationController {
   @Autowired
   private CollaborationServiceHelper collaborationServiceHelper;
 
+  /** The message mapper. */
+  @Autowired
+  private MessageMapper messageMapper;
+
   /**
    * Creates the message.
    *
@@ -121,7 +126,7 @@ public class CollaborationControllerImpl implements CollaborationController {
           @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
           @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
           @ApiParam(
-                  value = "The file which is going to be attached") @RequestPart("fileAttachment") MultipartFile fileAttachment) {
+                  value = "The file which is going to be attached") @RequestPart("fileAttachment") MultipartFile fileAttachment) throws Exception {
     try {
       if (providerId == null || dataflowId == null || null == fileAttachment
               || null == fileAttachment.getOriginalFilename()) {
@@ -297,7 +302,7 @@ public class CollaborationControllerImpl implements CollaborationController {
   public ResponseEntity<byte[]> getMessageAttachment(
           @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId,
           @ApiParam(value = "Provider Id", example = "0") @RequestParam("providerId") Long providerId,
-          @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) {
+          @ApiParam(value = "Message Id", example = "0") @RequestParam("messageId") Long messageId) throws Exception {
 
     LOG.info("Downloading message attachment from the dataflowId {}", dataflowId);
     try {
@@ -351,6 +356,37 @@ public class CollaborationControllerImpl implements CollaborationController {
               datasetStatus, datasetName, eventType);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error releasing new message notifications for dataflowId {} providerId {} modifiedDatasetId {} and eventType {}. Message: {}", dataflowId, providerId, modifiedDatasetId, eventType, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the message object.
+   *
+   * @param messageId the message id
+   * @return the message
+   */
+  @Override
+  @GetMapping("/private/getMessageById/{messageId}")
+  public MessageVO getMessage(@PathVariable("messageId") Long messageId) throws Exception {
+    try{
+      Message message = collaborationService.getMessage(messageId);
+      return messageMapper.entityToClass(message);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve message with id {} Error: ", messageId, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Override
+  @PutMapping("/private/setBigData/{messageId}")
+  public void setBigData(@PathVariable("messageId") Long messageId, @RequestParam("bigData") Boolean bigData) throws Exception{
+    try{
+      collaborationService.setBigData(messageId, bigData);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve message with id {} Error: ", messageId, e.getMessage());
       throw e;
     }
   }
