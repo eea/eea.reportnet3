@@ -70,7 +70,10 @@ public class DatasetTableServiceImpl implements DatasetTableService {
         List<DatasetTable> datasetTables = datasetTableRepository.findByDatasetIdAndIsIcebergTableCreated(datasetId, true);
         for(DatasetTable table: datasetTables){
             TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getTableSchemaId(), table.getDatasetSchemaId());
-            table.setTableName(tableSchemaVO.getNameTableSchema());
+            //need to check for null because custodian might have created iceberg tables and then delete them, so they do not exist in mongo anymore
+            if(tableSchemaVO != null && tableSchemaVO.getNameTableSchema() != null){
+                table.setTableName(tableSchemaVO.getNameTableSchema());
+            }
         }
         return datasetTables;
     }
