@@ -8,9 +8,11 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.exception.EEAForbiddenException;
 import org.eea.exception.EEAIllegalArgumentException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -36,6 +38,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CollaborationServiceImplTest {
@@ -70,6 +73,9 @@ public class CollaborationServiceImplTest {
   @Mock
   private Authentication authentication;
 
+  @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   @Before
   public void initMocks() {
     SecurityContextHolder.setContext(securityContext);
@@ -95,8 +101,7 @@ public class CollaborationServiceImplTest {
     MessageVO messageVO = new MessageVO();
     messageVO.setProviderId(1L);
     messageVO.setContent("content");
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(new ArrayList<Long>());
     try {
@@ -120,11 +125,10 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(1L)));
     authorities.add(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(datasetIds);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     collaborationServiceImpl.createMessage(1L, messageVO, "test", null);
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
@@ -144,11 +148,10 @@ public class CollaborationServiceImplTest {
     authorities.add(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
     ReflectionTestUtils.setField(collaborationServiceImpl, "maxMessageLength", 10);
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(datasetIds);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     collaborationServiceImpl.createMessage(1L, messageVO, "test", null);
     Mockito.verify(messageMapper, Mockito.times(1)).entityToClass(Mockito.any());
@@ -184,7 +187,7 @@ public class CollaborationServiceImplTest {
 
   @Test
   public void createMessageAttachmentTest()
-      throws EEAForbiddenException, EEAIllegalArgumentException, IOException {
+          throws Exception {
 
     List<Long> datasetIds = new ArrayList<>();
     datasetIds.add(1L);
@@ -195,19 +198,21 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
     MessageVO messageVO = new MessageVO();
 
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(datasetIds);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(messageMapper.entityToClass(Mockito.any())).thenReturn(messageVO);
+    when(messageMapper.entityToClass(Mockito.any())).thenReturn(messageVO);
 
     Message message = new Message();
     message.setContent("file.csv");
     message.setId(1L);
-    Mockito.when(messageRepository.save(Mockito.any())).thenReturn(message);
+    when(messageRepository.save(Mockito.any())).thenReturn(message);
 
+    DataFlowVO dataFlowVO = new DataFlowVO();
+    dataFlowVO.setBigData(false);
+    when(dataFlowControllerZuul.getMetabaseById(1L)).thenReturn(dataFlowVO);
     collaborationServiceImpl.createMessageAttachment(1L, 1L,
         new MockMultipartFile("file.csv", "content".getBytes()).getInputStream(), "fileName",
         "fileSize", "test/test");
@@ -253,9 +258,9 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities
         .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
-    Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
+    when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
         .thenReturn(messages);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     try {
       collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
@@ -281,9 +286,9 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities
         .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
-    Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
+    when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
         .thenReturn(messages);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
     Mockito.verify(messageRepository, Mockito.times(1)).saveAll(Mockito.anyIterable());
@@ -304,9 +309,9 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities
         .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(1L)));
-    Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
+    when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
         .thenReturn(messages);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
     Mockito.verify(messageRepository, Mockito.times(1)).saveAll(Mockito.anyIterable());
@@ -330,11 +335,11 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(1L)));
     List<Long> providerIds = new ArrayList<>();
     providerIds.add(1L);
-    Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
+    when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
         .thenReturn(messages);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(dataSetMetabaseControllerZuul.getUserProviderIdsByDataflowId(Mockito.anyLong()))
+    when(dataSetMetabaseControllerZuul.getUserProviderIdsByDataflowId(Mockito.anyLong()))
         .thenReturn(providerIds);
     collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
     Mockito.verify(messageRepository, Mockito.times(1)).saveAll(Mockito.anyIterable());
@@ -357,9 +362,9 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(1L)));
     List<Long> providerIds = new ArrayList<>();
     providerIds.add(1L);
-    Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
+    when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
         .thenReturn(messages);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     try {
       collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
@@ -386,9 +391,9 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(1L)));
     List<Long> providerIds = new ArrayList<>();
     providerIds.add(1L);
-    Mockito.when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
+    when(messageRepository.findByDataflowIdAndIdIn(Mockito.anyLong(), Mockito.any()))
         .thenReturn(messages);
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     try {
       collaborationServiceImpl.updateMessageReadStatus(1L, messageVOs);
@@ -405,7 +410,7 @@ public class CollaborationServiceImplTest {
     message.setId(1L);
     message.setContent("test");
     message.setType(MessageTypeEnum.TEXT);
-    Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
+    when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
     collaborationServiceImpl.deleteMessage(1L);
     Mockito.verify(messageRepository, times(1)).delete(Mockito.any());
   }
@@ -416,7 +421,7 @@ public class CollaborationServiceImplTest {
     message.setId(1L);
     message.setContent("");
     message.setType(MessageTypeEnum.ATTACHMENT);
-    Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
+    when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
 
     collaborationServiceImpl.deleteMessage(1L);
     Mockito.verify(messageRepository, times(1)).delete(Mockito.any());
@@ -428,7 +433,7 @@ public class CollaborationServiceImplTest {
     message.setId(1L);
     message.setContent("");
     message.setType(MessageTypeEnum.TEXT);
-    Mockito.when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
+    when(messageRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(message));
     Mockito.doNothing().when(messageRepository).delete(Mockito.any());
     collaborationServiceImpl.deleteMessage(1L);
     Mockito.verify(messageRepository, times(1)).delete(Mockito.any());
@@ -453,16 +458,15 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities
         .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(Arrays.asList(1L));
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(messageRepository.findByDataflowIdAndProviderIdAndRead(Mockito.anyLong(),
+    when(messageRepository.findByDataflowIdAndProviderIdAndRead(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.anyBoolean(), Mockito.any())).thenReturn(pageResponse);
-    Mockito.when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
-    Mockito.when(messageMapper.entityListToClass(Mockito.any()))
+    when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
+    when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, true, 1));
   }
@@ -473,22 +477,21 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities
         .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_CUSTODIAN.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(Arrays.asList(1L));
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(messageRepository.findByDataflowIdAndProviderId(Mockito.anyLong(),
+    when(messageRepository.findByDataflowIdAndProviderId(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any())).thenReturn(pageResponse);
-    Mockito.when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
-    Mockito.when(messageMapper.entityListToClass(Mockito.any()))
+    when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
+    when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, null, 1));
   }
 
   @Test
-  public void getMessageAttachmentTest() throws EEAException {
+  public void getMessageAttachmentTest() throws Exception {
     collaborationServiceImpl.getMessageAttachment(1L, 1L, "test.csv");
     Mockito.verify(documentControllerZuul, times(1)).getCollaborationDocument(Mockito.anyLong(),
         Mockito.any(), Mockito.any());
@@ -500,16 +503,15 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities
         .add(new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_STEWARD.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(Arrays.asList(1L));
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(messageRepository.findByDataflowIdAndProviderIdAndRead(Mockito.anyLong(),
+    when(messageRepository.findByDataflowIdAndProviderIdAndRead(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.anyBoolean(), Mockito.any())).thenReturn(pageResponse);
-    Mockito.when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
-    Mockito.when(messageMapper.entityListToClass(Mockito.any()))
+    when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
+    when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, true, 1));
   }
@@ -522,16 +524,15 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_LEAD_REPORTER.getAccessRole(1L)));
     authorities.add(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_LEAD_REPORTER.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(Arrays.asList(1L));
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(messageRepository.findByDataflowIdAndProviderId(Mockito.anyLong(),
+    when(messageRepository.findByDataflowIdAndProviderId(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any())).thenReturn(pageResponse);
-    Mockito.when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
-    Mockito.when(messageMapper.entityListToClass(Mockito.any()))
+    when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
+    when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, null, 1));
   }
@@ -543,11 +544,10 @@ public class CollaborationServiceImplTest {
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
     authorities.add(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_READ.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(Arrays.asList(1L));
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
 
     try {
@@ -566,16 +566,15 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_READ.getAccessRole(1L)));
     authorities.add(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_READ.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(Arrays.asList(1L));
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
-    Mockito.when(messageRepository.findByDataflowIdAndProviderId(Mockito.anyLong(),
+    when(messageRepository.findByDataflowIdAndProviderId(Mockito.anyLong(),
         Mockito.anyLong(), Mockito.any())).thenReturn(pageResponse);
-    Mockito.when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
-    Mockito.when(messageMapper.entityListToClass(Mockito.any()))
+    when(pageResponse.getContent()).thenReturn(new ArrayList<Message>());
+    when(messageMapper.entityListToClass(Mockito.any()))
         .thenReturn(new ArrayList<MessageVO>());
     Assert.assertNotNull(collaborationServiceImpl.findMessages(1L, 1L, null, 1));
   }
@@ -591,8 +590,7 @@ public class CollaborationServiceImplTest {
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATAFLOW_REPORTER_WRITE.getAccessRole(1L)));
     authorities.add(
         new SimpleGrantedAuthority(ObjectAccessRoleEnum.DATASET_REPORTER_WRITE.getAccessRole(1L)));
-    Mockito
-        .when(dataSetMetabaseControllerZuul
+    when(dataSetMetabaseControllerZuul
             .getDatasetIdsByDataflowIdAndDataProviderId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(null);
     try {

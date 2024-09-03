@@ -275,7 +275,7 @@ public class DocumentControllerImpl implements DocumentController {
       if (Boolean.TRUE.equals(document.getIsPublic())) {
         FileResponse file;
         DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(document.getDataflowId());
-        if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+        if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
           file = documentService.getDocumentDL(document);
         }
         else{
@@ -343,7 +343,7 @@ public class DocumentControllerImpl implements DocumentController {
       }
       LOG.info("Deleting document with id {} for dataflowId {}", documentId, dataflowId);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
         documentService.deleteDocumentDL(document, deleteMetabase);
         LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
       }

@@ -75,7 +75,8 @@ public class CollaborationControllerImplTest {
 
   @Test
   public void createMessageAttachmentTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
+          throws Exception {
+
     Mockito
         .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -86,7 +87,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
+          throws Exception {
     Mockito
         .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -102,7 +103,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAForbiddenExceptionTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
+          throws Exception {
     Mockito
         .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -118,7 +119,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentIOExceptionTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException, IOException {
+          throws Exception {
     Mockito
         .when(collaborationService.createMessageAttachment(Mockito.anyLong(), Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
@@ -134,7 +135,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionProviderIdNullTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException {
+          throws Exception {
     try {
       collaborationControllerImpl.createMessageAttachment(null, 1L,
           new MockMultipartFile("file.csv", "content".getBytes()));
@@ -146,7 +147,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionDataflowIdNullTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException {
+          throws Exception {
     try {
       collaborationControllerImpl.createMessageAttachment(1L, null,
           new MockMultipartFile("file.csv", "content".getBytes()));
@@ -158,7 +159,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionFileAttachmentNullTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException {
+          throws Exception {
     try {
       collaborationControllerImpl.createMessageAttachment(1L, 1L, null);
     } catch (ResponseStatusException e) {
@@ -169,7 +170,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionFileAttachmentNameNullTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException {
+          throws Exception {
     try {
       MultipartFile multipartFile = Mockito.mock(MultipartFile.class);
       Mockito.when(multipartFile.getOriginalFilename()).thenReturn(null);
@@ -182,7 +183,7 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionFileSizeTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException {
+          throws Exception {
     try {
       byte[] arrayBytes21MB = new byte[1024 * 1024 * 21];
       MockMultipartFile file = new MockMultipartFile("21MB", "file.csv", "content", arrayBytes21MB);
@@ -344,7 +345,7 @@ public class CollaborationControllerImplTest {
   }
 
   @Test
-  public void testGetMessageAttachment() throws EEAException {
+  public void testGetMessageAttachment() throws Exception {
 
     Message message = new Message();
     message.setContent("file.csv");
@@ -359,7 +360,7 @@ public class CollaborationControllerImplTest {
   }
 
   @Test(expected = ResponseStatusException.class)
-  public void testGetMessageAttachmentException() throws EEAException {
+  public void testGetMessageAttachmentException() throws Exception {
     Mockito.when(collaborationService.getMessage(Mockito.anyLong())).thenThrow(EEAException.class);
 
     try {
