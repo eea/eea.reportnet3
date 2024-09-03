@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
@@ -170,6 +173,7 @@ public class DocumentServiceImpl implements DocumentService {
     documentVO.setDate(new Date());
     documentVO.setName(fileName);
     Long idDocument = dataflowController.insertDocument(documentVO);
+    String modifiedFileName = "document_" + idDocument + "_" + fileName;
     if (idDocument != null) {
       LOG.info("Inserting document {} to s3 with id {}", fileName, idDocument);
 
@@ -187,7 +191,7 @@ public class DocumentServiceImpl implements DocumentService {
         throw e;
       }
 
-      S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(dataflowId, file.getName(), LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
+      S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
       String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
       s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
       file.delete();
@@ -283,7 +287,8 @@ public class DocumentServiceImpl implements DocumentService {
   @Override
   public FileResponse getDocumentDL(DocumentVO document) {
 
-    S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(document.getDataflowId(), document.getName(), LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
+    String modifiedFileName = "document_" + document.getId() + "_" + document.getName();
+    S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(document.getDataflowId(), modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
     String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
     byte[] fileAsBytes = s3HelperPrivate.getBytesFromS3(attachmentPathInS3);
     FileResponse fileResponse = new FileResponse();
@@ -352,7 +357,8 @@ public class DocumentServiceImpl implements DocumentService {
   public void deleteDocumentDL(DocumentVO documentVO, Boolean deleteMetabase) throws EEAException {
     try {
 
-      S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(documentVO.getDataflowId(), documentVO.getName(), LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
+      String modifiedFileName = "document_" + documentVO.getId() + "_" + documentVO.getName();
+      S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(documentVO.getDataflowId(), modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
       String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
       s3HelperPrivate.deleteFileFromS3(attachmentPathInS3);
 
@@ -552,6 +558,36 @@ public class DocumentServiceImpl implements DocumentService {
 
   }
 
+  /**
+   * Upload collaboration document in s3.
+   *
+   * @param inputStream the input stream
+   * @param filename the filename
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public void uploadCollaborationDocumentDL(InputStream inputStream, String filename,
+                                     Long dataflowId, Long providerId, Long messageId) throws IOException{
+
+    String modifiedFileName = "message_" + messageId + "_" + filename;
+    String absolutePath = importPath + "/" + dataflowId + "/" + modifiedFileName;
+    Path path = Paths.get(absolutePath);
+    try {
+      Files.copy(inputStream, path);
+      S3PathResolver s3TechnicalAcceptancePathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
+      s3TechnicalAcceptancePathResolver.setDataProviderId(providerId);
+      String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3TechnicalAcceptancePathResolver);
+      s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, absolutePath);
+      Files.delete(path);
+      } finally {
+        inputStream.close();
+      }
+  }
+
 
   /**
    * Delete collaboration document.
@@ -591,6 +627,24 @@ public class DocumentServiceImpl implements DocumentService {
     }
   }
 
+  /**
+   * Delete collaboration document from s3.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  @Override
+  public void deleteCollaborationDocumentDL(String documentName, Long dataflowId, Long providerId, Long messageId){
+
+    String fileName = "message_" + messageId + "_" + documentName;
+    S3PathResolver s3TechnicalAcceptancePathResolver = new S3PathResolver(dataflowId, fileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
+    s3TechnicalAcceptancePathResolver.setDataProviderId(providerId);
+    String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3TechnicalAcceptancePathResolver);
+    s3HelperPrivate.deleteFileFromS3(attachmentPathInS3);
+  }
+
 
   /**
    * Gets the collaboration document.
@@ -626,6 +680,27 @@ public class DocumentServiceImpl implements DocumentService {
     } finally {
       oakRepositoryUtils.cleanUp(session, ns);
     }
+    return fileResponse;
+  }
+
+  /**
+   * Gets the collaboration document from s3.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  @Override
+  public FileResponse getCollaborationDocumentDL(final String documentName, final Long dataflowId, Long providerId, Long messageId){
+    String fileName = "message_" + messageId + "_" + documentName;
+    S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(dataflowId, fileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
+    s3AttachmentsPathResolver.setDataProviderId(providerId);
+    String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
+    byte[] fileAsBytes = s3HelperPrivate.getBytesFromS3(attachmentPathInS3);
+    FileResponse fileResponse = new FileResponse();
+    fileResponse.setBytes(fileAsBytes);
+
     return fileResponse;
   }
 
