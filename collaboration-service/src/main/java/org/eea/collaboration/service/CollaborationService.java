@@ -45,7 +45,7 @@ public interface CollaborationService {
    */
   MessageVO createMessageAttachment(Long dataflowId, Long providerId, InputStream is,
       String fileName, String fileSize, String contentType)
-      throws EEAIllegalArgumentException, EEAForbiddenException, IOException;
+          throws Exception;
 
   /**
    * Update message read status.
@@ -97,5 +97,14 @@ public interface CollaborationService {
    * @param fileName the file name
    * @return the message attachment
    */
-  byte[] getMessageAttachment(Long messageId, Long dataflowId, String fileName);
+  byte[] getMessageAttachment(Long messageId, Long dataflowId, String fileName) throws Exception;
+
+  /**
+   * Sets the big data param
+   *
+   * @param messageId the message id
+   * @param bigData the bigData
+   * @return
+   */
+  void setBigData(Long messageId, Boolean bigData);
 }

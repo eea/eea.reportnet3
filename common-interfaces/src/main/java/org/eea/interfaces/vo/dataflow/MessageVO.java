@@ -39,4 +39,11 @@ public class MessageVO {
 
   /** The message attachment VO. */
   private MessageAttachmentVO messageAttachment;
+
+  /** The is big data. */
+  private Boolean isBigData;
+
+  public MessageVO() {
+    this.isBigData = false;
+  }
 }

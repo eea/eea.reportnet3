@@ -6,6 +6,7 @@ import org.eea.collaboration.persistence.domain.Message;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  * The Interface MessageRepository.
@@ -51,4 +52,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
    * @return the long
    */
   Long countByDataflowIdAndProviderId(Long dataflowId, Long providerId);
+
+  @Query("UPDATE Message SET isBigData = :bigData where id = :messageId")
+  void setBigData(Long messageId, Boolean bigData);
 }

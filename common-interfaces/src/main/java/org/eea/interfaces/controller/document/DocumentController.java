@@ -219,7 +219,8 @@ public interface DocumentController {
       @PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("fileName") final String fileName,
       @RequestParam("extension") final String extension,
-      @RequestParam("messageId") final Long messageId);
+      @RequestParam("messageId") final Long messageId,
+      @RequestParam(value="providerId", required = false) Long providerId) throws Exception;
 
 
   /**
@@ -246,6 +247,6 @@ public interface DocumentController {
   @GetMapping(value = "/private/{dataflowId}/collaborationattachment")
   byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
       @RequestParam("fileName") final String fileName,
-      @RequestParam("messageId") final Long messageId);
+      @RequestParam("messageId") final Long messageId) throws Exception;
 
 }

@@ -128,6 +128,20 @@ public interface DocumentService {
   void uploadCollaborationDocument(InputStream inputStream, String contentType, String filename,
       Long dataflowId, Long messageId) throws EEAException, IOException;
 
+  /**
+   * Upload collaboration document in s3.
+   *
+   * @param inputStream the input stream
+   * @param filename the filename
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+   void uploadCollaborationDocumentDL(InputStream inputStream, String filename,
+                                            Long dataflowId, Long providerId, Long messageId) throws IOException;
+
 
   /**
    * Delete collaboration document.
@@ -137,8 +151,17 @@ public interface DocumentService {
    * @param messageId the message id
    * @throws EEAException the EEA exception
    */
-  void deleteCollaborationDocument(String documentName, Long dataflowId, Long messageId)
-      throws EEAException;
+  void deleteCollaborationDocument(String documentName, Long dataflowId, Long messageId) throws EEAException;
+
+  /**
+   * Delete collaboration document from s3.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  void deleteCollaborationDocumentDL(String documentName, Long dataflowId, Long providerId, Long messageId);
 
   /**
    * Gets the collaboration document.
@@ -149,7 +172,16 @@ public interface DocumentService {
    * @return the collaboration document
    * @throws EEAException the EEA exception
    */
-  FileResponse getCollaborationDocument(final String documentName, final Long dataflowId,
-      Long messageId) throws EEAException;
+  FileResponse getCollaborationDocument(final String documentName, final Long dataflowId, Long messageId) throws EEAException;
+
+  /**
+   * Gets the collaboration document from s3.
+   *
+   * @param documentName the document name
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param messageId the message id
+   */
+  FileResponse getCollaborationDocumentDL(final String documentName, final Long dataflowId, Long providerId, Long messageId);
 
 }

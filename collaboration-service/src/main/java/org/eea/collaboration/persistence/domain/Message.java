@@ -68,4 +68,12 @@ public class Message {
   /** The file size. */
   @Column(name = "file_size")
   private String fileSize;
+
+  /** The is big data. */
+  @Column(name = "BIG_DATA")
+  private Boolean isBigData;
+
+  public Message() {
+    this.isBigData = false;
+  }
 }
