@@ -132,13 +132,14 @@ public class DocumentControllerImpl implements DocumentController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
       if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
         documentService.uploadDocumentDL(file, file.getOriginalFilename(), documentVO, file.getSize());
+        documentVO.setIsBigData(true);
         LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
       }
       else{
+        documentVO.setIsBigData(false);
         documentService.uploadDocument(file.getInputStream(), file.getContentType(),
                 file.getOriginalFilename(), documentVO, file.getSize());
       }
-
 
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
@@ -206,7 +207,7 @@ public class DocumentControllerImpl implements DocumentController {
       }
       FileResponse file;
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
         file = documentService.getDocumentDL(document);
       }
       else{
