@@ -70,12 +70,12 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isLoadingIceberg={isLoadingIceberg}
           isReleasing={isReleasing}
           isReporting={isReporting}
           overview={selectedConfiguration.overview}
           state={state}
           tables={selectedConfiguration.tables}
-          isLoadingIceberg={isLoadingIceberg}
         />
       );
     case 'TABLES':
@@ -85,11 +85,11 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isIcebergCreated={isIcebergCreated}
+          isLoadingIceberg={isLoadingIceberg}
           isReporting={isReporting}
           state={state}
           tables={selectedConfiguration.tables}
-          isIcebergCreated={isIcebergCreated}
-          isLoadingIceberg={isLoadingIceberg}
         />
       );
     case 'QA':
@@ -99,10 +99,10 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isLoadingIceberg={isLoadingIceberg}
           isReporting={isReporting}
           state={state}
           tables={selectedConfiguration.tables}
-          isLoadingIceberg={isLoadingIceberg}
         />
       );
     default:

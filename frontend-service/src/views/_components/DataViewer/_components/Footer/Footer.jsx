@@ -9,34 +9,29 @@ export const Footer = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
-  isEditRecordsManuallyButtonDisabled,
-  isTableEditable,
+  isIcebergCreated,
   onAddClick,
   onPasteClick
 }) => {
   const resourcesContext = useContext(ResourcesContext);
   return (
     <div className="p-clearfix datasetSchema-addRecordsBar-help-step" style={{ width: '100%' }}>
-      {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) && (
+      {(!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) && (
         <Button
           className={`${isDataflowOpen ? '' : 'p-button-animated-blink'}`}
-          disabled={
-            isEditRecordsManuallyButtonDisabled || !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead
-          }
+          disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
           icon="add"
           label={resourcesContext.messages['addRecord']}
           onClick={onAddClick}
           style={{ float: 'left' }}
         />
       )}
-      {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) && (
+      {(!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) && (
         <Button
           className={`p-button-secondary ${
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
-          disabled={
-            isEditRecordsManuallyButtonDisabled || !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead
-          }
+          disabled={!hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead}
           icon="clipboard"
           label={resourcesContext.messages['pasteRecords']}
           onClick={async () => {

@@ -41,16 +41,15 @@ export const TabsDesigner = ({
   isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
+  isIcebergCreated,
   isReferenceDataset,
   manageDialogs,
   manageUniqueConstraint,
   maxLength,
   onChangeReference,
-  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onTabChange,
-  onTableConversion,
   onUpdateSchema,
   onUpdateTable,
   selectedRuleId,
@@ -146,7 +145,7 @@ export const TabsDesigner = ({
     inmTabs[tabIdx].notEmpty = notEmpty;
     inmTabs[tabIdx].readOnly = readOnly;
     inmTabs[tabIdx].toPrefill = toPrefill;
-    
+
     filterManualEdit(inmTabs);
   };
 
@@ -159,8 +158,8 @@ export const TabsDesigner = ({
         isDataflowOpen,
         isDesignDatasetEditorRead
       });
-      
-      filterManualEdit(tabsArray)
+
+      filterManualEdit(tabsArray);
     } catch (error) {
       console.error('TabsDesigner - onLoadSchema.', error);
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
@@ -169,19 +168,25 @@ export const TabsDesigner = ({
     }
   };
 
-  const filterManualEdit = async (tabsArray)=>{
+  const filterManualEdit = async tabsArray => {
     try {
-      let checkTabs=[];
-      tabsArray.forEach((a)=>checkTabs.push(a))
-      checkTabs.pop();
+      let checkTabs = [];
+      tabsArray.forEach(a => checkTabs.push(a));
+
+      if (checkTabs.some(item => item?.header === '+')) checkTabs.pop();
+
       let length = checkTabs.length;
 
-      checkTabs?.forEach((item)=>{
-        if(!item?.dataAreManuallyEditable) length-=1;
-      })
+      checkTabs?.forEach(item => {
+        if (!item?.dataAreManuallyEditable) length -= 1;
+      });
 
-      if(length===0) {setNoEditableCheck(true)}else{setNoEditableCheck(false)}
-      
+      if (length === 0) {
+        setNoEditableCheck(true);
+      } else {
+        setNoEditableCheck(false);
+      }
+
       setTabs(tabsArray);
     } catch (error) {
       console.error('TabsDesigner - onLoadSchema.', error);
@@ -189,7 +194,7 @@ export const TabsDesigner = ({
         navigate(getUrl(routes.DATAFLOWS, true));
       }
     }
-  }
+  };
 
   const onTabAdd = (newTabElement, onTabAddCallback) => {
     //Add a temporary Tab with an input text
@@ -448,6 +453,7 @@ export const TabsDesigner = ({
     return (
       <TabView
         activeIndex={idx !== -1 ? idx : 0}
+        bigData={bigData}
         checkEditingTabs={checkEditingTabs}
         designMode={true}
         initialTabIndexDrag={initialTabIndexDrag}
@@ -509,17 +515,16 @@ export const TabsDesigner = ({
                       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                       isGroupedValidationDeleted={isGroupedValidationDeleted}
                       isGroupedValidationSelected={isGroupedValidationSelected}
+                      isIcebergCreated={isIcebergCreated}
                       isReferenceDataset={isReferenceDataset}
                       key={tab.index}
                       manageDialogs={manageDialogs}
                       manageUniqueConstraint={manageUniqueConstraint}
-                      onChangeButtonsVisibility={onChangeButtonsVisibility}
                       onChangeFields={onChangeFields}
                       onChangeReference={onChangeReference}
                       onChangeTableProperties={onChangeTableProperties}
                       onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                       onLoadTableData={onLoadTableData}
-                      onTableConversion={onTableConversion}
                       selectedRuleId={selectedRuleId}
                       selectedRuleLevelError={selectedRuleLevelError}
                       selectedRuleMessage={selectedRuleMessage}

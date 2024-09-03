@@ -32,6 +32,7 @@ import TooltipButtonRed from 'views/_components/TooltipButton/TooltipButtonRed';
 export const Tab = ({
   addTab,
   ariaControls,
+  bigData = false,
   checkEditingTabs,
   className,
   closeIcon,
@@ -211,22 +212,17 @@ export const Tab = ({
     );
   };
 
-
   const getManualTooltipMessage = () => {
     const renderDescription = () => {
-        return (
-          <Fragment>
-            <p className={styles.propertyLabel}>{resourcesContext.messages['enableManualEditInfo']}</p>
-          </Fragment>
-        );
-      }
+      return (
+        <Fragment>
+          <p className={styles.propertyLabel}>{resourcesContext.messages['enableManualEditInfo']}</p>
+        </Fragment>
+      );
+    };
 
-    return(
-      <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>
-      {renderDescription()}
-    </div>
-    )
-  }
+    return <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>{renderDescription()}</div>;
+  };
 
   const getTooltipContent = () =>
     ReactDOMServer.renderToStaticMarkup(
@@ -644,7 +640,7 @@ export const Tab = ({
           )}
           {renderRightSpan()}
           {renderRightSpanTooltip()}
-          {!manualEdit && !viewType?.design && designMode && !addTab && !editingHeader && (
+          {bigData && !manualEdit && !viewType?.design && designMode && !addTab && !editingHeader && (
             <TooltipButtonRed
               getContent={getManualTooltipContent}
               onClick={() => setIsTableInfoVisible(true)}

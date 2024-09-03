@@ -31,12 +31,10 @@ export const TabsSchema = ({
   isReportingWebform,
   isTableDataRestorationInProgress,
   levelErrorTypes,
-  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
   onRestoreData,
   onTabChange,
-  onTableConversion,
   reporting,
   selectedRuleId,
   selectedRuleLevelError,
@@ -97,11 +95,9 @@ export const TabsSchema = ({
                   isTableDataRestorationInProgress={isTableDataRestorationInProgress}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
-                  onChangeButtonsVisibility={onChangeButtonsVisibility}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
                   onRestoreData={onRestoreData}
-                  onTableConversion={onTableConversion}
                   reporting={reporting}
                   selectedRuleId={selectedRuleId}
                   selectedRuleLevelError={selectedRuleLevelError}

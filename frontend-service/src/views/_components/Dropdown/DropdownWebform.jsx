@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import isEmpty from 'lodash/isEmpty';
 import isNull from 'lodash/isNull';
@@ -77,15 +76,15 @@ const DropdownWebform = props => {
   const nativeSelectRef = useRef(null);
   const itemsWrapperRef = useRef(null);
 
-  let documentClickListener,
-    selfClick,
-    searchValue,
-    hideTimeout,
-    currentSearchChar,
+  let currentSearchChar,
+    documentClickListener,
     editableInputClick,
-    overlayClick,
     expeditableInputClick,
-    selectedOptionUpdated;
+    hideTimeout,
+    overlayClick,
+    searchValue,
+    selectedOptionUpdated,
+    selfClick;
 
   const onKeyPress = event => {
     if (props.onKeyPress && event.which === 13) {
@@ -805,15 +804,12 @@ const DropdownWebform = props => {
       {labelElement}
       {clearIcon}
       {dropdownIcon}
-      <DropdownPanel
-        appendTo={appendTo}
-        filter={filterElement}
+      <DropdownPanel appendTo={appendTo} filter={filterElement} itemsWrapperRef={itemsWrapperRef}>
         onClick={panelRefClick}
         panelRefClassName={panelRefClassName}
         panelRefStyle={panelRefStyle}
         ref={panelRef}
         scrollHeight={scrollHeight}
-        itemsWrapperRef={itemsWrapperRef}>
         {items}
       </DropdownPanel>
     </div>

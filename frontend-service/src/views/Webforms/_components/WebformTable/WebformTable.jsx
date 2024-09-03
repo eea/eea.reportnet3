@@ -181,8 +181,6 @@ export const WebformTable = ({
       newEmptyRecord = parseNewTableRecordTable(webformData);
     }
 
-    console.log(newEmptyRecord);
-
     if (!isEmpty(newEmptyRecord)) {
       try {
         await DatasetService.createRecord(datasetId, tableSchemaId, [newEmptyRecord]);
@@ -450,9 +448,9 @@ export const WebformTable = ({
         <>
           <h3 className={styles.title}>
             <Button
+              className={styles.addRecordButton}
               icon="plus"
               label={resourcesContext.messages['addRecord']}
-              className={styles.addRecordButton}
               onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
             />
           </h3>

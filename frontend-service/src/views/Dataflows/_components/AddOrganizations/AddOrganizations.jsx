@@ -60,7 +60,6 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-
   useEffect(() => {
     getOrganizations();
   }, [pagination, sort]);
@@ -237,7 +236,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const renderAddOrganizationForm = () => {
     const hasError = !isEmpty(organizationName) && (isRepeatedOrganization() || !isValidOrganizationName());
-    const hasCodeError = !isEmpty(organizationCode) && (!isValidOrganizationCode());
+    const hasCodeError = !isEmpty(organizationCode) && !isValidOrganizationCode();
 
     return (
       <div className={styles.addDialog}>
@@ -260,13 +259,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
             {resourcesContext.messages['code']}
           </label>
           <InputText
+            className={hasCodeError ? styles.error : ''}
             disabled={false}
             id="codeInput"
-            className={hasCodeError ? styles.error : ''}
+            onChange={event =>
+              setOrganizationCode(event.target.value?.replaceAll(' ', '').substring(0, 20).toUpperCase())
+            }
             placeholder={resourcesContext.messages['organizationCodeDots']}
             style={{ margin: '0.3rem 0' }}
             value={organizationCode}
-            onChange={(event)=>setOrganizationCode(event.target.value?.replaceAll(' ', '').substring(0, 20).toUpperCase())}
           />
         </div>
         <div className={styles.inputWrapper}>
@@ -470,7 +471,13 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         <ConfirmDialog
           confirmTooltip={getTooltipMessage()}
           dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
-          disabledConfirm={hasEmptyData() || isLoadingButton || isRepeatedOrganization() || !isValidOrganizationName() || !isValidOrganizationCode()}
+          disabledConfirm={
+            hasEmptyData() ||
+            isLoadingButton ||
+            isRepeatedOrganization() ||
+            !isValidOrganizationName() ||
+            !isValidOrganizationCode()
+          }
           header={resourcesContext.messages['addOrganization']}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}

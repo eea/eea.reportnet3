@@ -20,6 +20,7 @@ import { QuerystringUtils, TabsUtils } from 'views/_functions/Utils';
 
 export const TabView = ({
   activeIndex = -1,
+  bigData = false,
   checkEditingTabs,
   children,
   className = null,
@@ -214,6 +215,7 @@ export const TabView = ({
           additionalInfo={tab.props.description}
           addTab={tab.props.addTab}
           ariaControls={ariaControls}
+          bigData={bigData}
           checkEditingTabs={checkEditingTabs}
           children={tab.props.children}
           className={classNamed}
