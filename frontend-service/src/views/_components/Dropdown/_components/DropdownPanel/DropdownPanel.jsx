@@ -4,27 +4,26 @@ import ReactDOM from 'react-dom';
 import classNames from 'classnames';
 import './DropdownPanel.scss';
 
-const DropdownPanel =
-  forwardRef(
-    ({ appendTo, children, filter, itemsWrapperRef, onClick, panelClassName, panelStyle, scrollHeight }, ref) => {
-      const className = classNames('p-dropdown-panel p-hidden p-input-overlay', panelClassName);
+const DropdownPanel = forwardRef(
+  ({ appendTo, children, filter, itemsWrapperRef, onClick, panelClassName, panelStyle, scrollHeight }, ref) => {
+    const className = classNames('p-dropdown-panel p-hidden p-input-overlay', panelClassName);
 
-      const element = (
-        <div className={className} onClick={onClick} style={panelStyle} ref={ref}>
-          {filter}
-          <div className="p-dropdown-items-wrapper" style={{ maxHeight: scrollHeight || 'auto' }} ref={itemsWrapperRef}>
-            <ul className="p-dropdown-items p-dropdown-list p-component">{children}</ul>
-          </div>
+    const element = (
+      <div className={className} onClick={onClick} ref={ref} style={panelStyle}>
+        {filter}
+        <div className="p-dropdown-items-wrapper" ref={itemsWrapperRef} style={{ maxHeight: scrollHeight || 'auto' }}>
+          <ul className="p-dropdown-items p-dropdown-list p-component">{children}</ul>
         </div>
-      );
+      </div>
+    );
 
-      if (appendTo) {
-        return ReactDOM.createPortal(element, appendTo);
-      } else {
-        return element;
-      }
+    if (appendTo) {
+      return ReactDOM.createPortal(element, appendTo);
+    } else {
+      return element;
     }
-  )
+  }
+);
 
 DropdownPanel.propTypes = {
   appendTo: PropTypes.object,

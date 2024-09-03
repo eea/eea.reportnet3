@@ -80,8 +80,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { resetFilterState } = useApplyFilters('uniqueConstraints');
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
-  const [hasIcebergTables, setHasIcebergTables] = useState(false);
-  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
@@ -337,7 +335,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onGetIcebergTables = async () => {
     const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId });
-    setHasIcebergTables(!isEmpty(icebergTables?.data));
+    setIsIcebergCreated(!isEmpty(icebergTables?.data));
   };
 
   const refreshUniqueList = value => setNeedsRefreshUnique(value);
@@ -706,10 +704,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
-  const onChangeButtonsVisibility = () => {
-    onGetIcebergTables();
-  };
-
   const onHideDelete = () => {
     onResetDelete();
   };
@@ -772,10 +766,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       });
     }
   }, [snapshotState.isRestoring]);
-
-  const onTableConversion = conversionInProgress => {
-    setIsTableConversionInProgress(conversionInProgress);
-  };
 
   useEffect(() => {
     const validationFinished = notificationContext.toShow.find(
@@ -1747,18 +1737,18 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               {designerState?.bigData && (
                 <Button
+                  className={styles.openWebformButton}
+                  disabled={isDataflowOpen || isLoadingIceberg || noEditableCheck}
                   helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
                   icon={!isIcebergCreated ? 'lock' : 'unlock'}
+                  isLoading={isLoadingIceberg}
+                  key={isIcebergCreated}
                   label={
                     !isIcebergCreated
                       ? resourcesContext.messages['enableEdit']
                       : resourcesContext.messages['disableEdit']
                   }
-                  className={styles.openWebformButton}
                   onClick={() => convertHelper()}
-                  isLoading={isLoadingIceberg}
-                  disabled={isLoadingIceberg || noEditableCheck}
-                  key={isIcebergCreated}
                 />
               )}
             </div>
@@ -1772,8 +1762,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 disabled={
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
-                  hasIcebergTables ||
-                  isTableConversionInProgress ||
+                  isIcebergCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1804,8 +1793,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 disabled={
                   isDataflowOpen ||
                   isDesignDatasetEditorRead ||
-                  hasIcebergTables ||
-                  isTableConversionInProgress ||
+                  isIcebergCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1832,8 +1820,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               />
               <DatasetDeleteDataDialog
                 disabled={
-                  hasIcebergTables ||
-                  isTableConversionInProgress ||
+                  isIcebergCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1857,8 +1844,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               <DatasetValidateDialog
                 disabled={
                   isDesignDatasetEditorRead ||
-                  hasIcebergTables ||
-                  isTableConversionInProgress ||
+                  isIcebergCreated ||
                   actionsContext.importDatasetProcessing ||
                   actionsContext.exportDatasetProcessing ||
                   actionsContext.deleteDatasetProcessing ||
@@ -1952,11 +1938,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             bigData={designerState.bigData}
             dataflowId={dataflowId}
             datasetId={datasetId}
+            isIcebergCreated={isIcebergCreated}
+            isLoadingIceberg={isLoadingIceberg}
             options={webformOptions}
             state={designerState}
             webform={designerState.webform}
-            isIcebergCreated={isIcebergCreated}
-            isLoadingIceberg={isLoadingIceberg}
           />
         ) : (
           <TabsDesigner
@@ -1973,15 +1959,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
             isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+            isIcebergCreated={isIcebergCreated}
             isReferenceDataset={designerState.referenceDataset}
             manageDialogs={manageDialogs}
             manageUniqueConstraint={manageUniqueConstraint}
-            onChangeButtonsVisibility={onChangeButtonsVisibility}
             onChangeReference={onChangeReference}
             onHideSelectGroupedValidation={onHideSelectGroupedValidation}
             onLoadTableData={onLoadTableData}
             onTabChange={onTabChange}
-            onTableConversion={onTableConversion}
             onUpdateSchema={onUpdateSchema}
             onUpdateTable={onUpdateTable}
             selectedRuleId={dataViewerOptions.selectedRuleId}

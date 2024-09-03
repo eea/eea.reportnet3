@@ -113,14 +113,6 @@ export const DataCollection = () => {
   };
 
   const getExtensionsList = () => {
-    // const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(exportType => {
-    //   if (bigDataRef.current) {
-    //     return exportType.code !== 'xlsx+validations';
-    //   } else {
-    //     return exportType.code !== 'xlsx+validations' && exportType.code !== 'csv';
-    //   }
-    // });
-
     const internalExtensionsList = config.exportTypes.exportDatasetTypes
       .map(type => {
         const extensionsTypes = !isNil(type.code) && type.code.split('+');

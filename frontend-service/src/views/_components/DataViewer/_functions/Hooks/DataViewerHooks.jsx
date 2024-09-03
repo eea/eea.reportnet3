@@ -108,8 +108,7 @@ export const useSetColumns = (
   validationsTemplate,
   isReporting,
   dataAreManuallyEditable,
-  isTableEditable,
-  isEditRecordsManuallyButtonDisabled
+  isIcebergCreated
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
@@ -133,21 +132,21 @@ export const useSetColumns = (
         {!isNil(value) && value !== '' && (
           <Button
             className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
-            disabled={isEditRecordsManuallyButtonDisabled}
+            disabled={!isIcebergCreated}
             icon="export"
             iconPos="right"
             label={value}
             onClick={() => onFileDownload(value, fieldId, recordId, fieldName)}
           />
         )}
-        {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) &&
+        {(!bigData || (bigData && dataAreManuallyEditable)) &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
           (!colSchema.readOnly || !isReporting) && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
-              disabled={isEditRecordsManuallyButtonDisabled}
+              disabled={!isIcebergCreated}
               icon="import"
               onClick={() => {
                 setIsAttachFileVisible(true);
@@ -163,7 +162,7 @@ export const useSetColumns = (
               }}
             />
           )}
-        {(!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) &&
+        {(!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) &&
           hasWritePermissions &&
           !isDataflowOpen &&
           !isDesignDatasetEditorRead &&
@@ -172,7 +171,6 @@ export const useSetColumns = (
           value !== '' && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
-              disabled={isEditRecordsManuallyButtonDisabled}
               icon="trash"
               onClick={() => onFileDeleteVisible(fieldId, fieldSchemaId, value, fieldName, recordId)}
             />
@@ -428,9 +426,11 @@ export const useSetColumns = (
             isDataflowOpen && isDesignDatasetEditorRead ? styles.fieldDisabled : ''
           }`}
           editor={
-            ['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(column.type) ||
-            ((!bigData ||
-              (bigData && dataAreManuallyEditable && !isEditRecordsManuallyButtonDisabled && isTableEditable)) &&
+            (['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
+              column.type
+            ) &&
+              isIcebergCreated) ||
+            ((!bigData || (bigData && dataAreManuallyEditable && isIcebergCreated)) &&
               hasWebformWritePermissions &&
               hasWritePermissions &&
               column.type !== 'ATTACHMENT' &&
@@ -513,7 +513,7 @@ export const useSetColumns = (
     );
 
     if (!hasCountryCode) {
-      (!bigData || (bigData && isTableEditable && dataAreManuallyEditable)) && hasWritePermissions
+      (!bigData || (bigData && isIcebergCreated && dataAreManuallyEditable)) && hasWritePermissions
         ? columnsArr.unshift(editCol, validationCol)
         : columnsArr.unshift(validationCol);
     }
@@ -537,8 +537,7 @@ export const useSetColumns = (
     initialCellValue,
     records.selectedRecord.recordId,
     dataAreManuallyEditable,
-    isTableEditable,
-    isEditRecordsManuallyButtonDisabled
+    isIcebergCreated
   ]);
 
   return {

@@ -12,7 +12,6 @@ import { config } from 'conf';
 import styles from './ActionsToolbar.module.scss';
 
 import { Button } from 'views/_components/Button';
-import { Checkbox } from 'views/_components/Checkbox';
 import { ChipButton } from 'views/_components/ChipButton';
 import { DeleteDialog } from './_components/DeleteDialog';
 import { DropdownFilter } from 'views/Dataset/_components/DropdownFilter';
@@ -47,22 +46,18 @@ export const ActionsToolbar = ({
   hasWritePermissions,
   isDataflowOpen,
   isDesignDatasetEditorRead,
-  isEditRecordsManuallyButtonDisabled,
   isExportable,
   isFilterable = true,
   isFilterValidationsActive,
   isGroupedValidationSelected,
   isLoading,
   isTableDataRestorationInProgress,
-  isTableEditable,
   levelErrorTypesWithCorrects,
   levelErrorValidations,
+  isIcebergCreated,
   isTableFixedNumber,
-  onChangeButtonsVisibility,
   onConfirmDeleteTable,
   onConfirmRestorePrefilledData,
-  onDisableEditButton,
-  onEnableManualEdit,
   onHideSelectGroupedValidation,
   onUpdateData,
   originalColumns,
@@ -156,49 +151,6 @@ export const ActionsToolbar = ({
       }
     })
     .filter(item => item !== null);
-
-  const convertTable = async checked => {
-    try {
-      if (checked) {
-        if (dataProviderId) {
-          await DatasetService.convertParquetToIceberg({
-            datasetId,
-            dataflowId,
-            providerId: dataProviderId,
-            tableSchemaId: tableId
-          });
-        } else {
-          await DatasetService.convertParquetToIceberg({
-            datasetId,
-            dataflowId,
-            tableSchemaId: tableId
-          });
-        }
-      } else {
-        if (dataProviderId) {
-          await DatasetService.convertIcebergToParquet({
-            datasetId,
-            dataflowId,
-            providerId: dataProviderId,
-            tableSchemaId: tableId
-          });
-        } else {
-          await DatasetService.convertIcebergToParquet({
-            datasetId,
-            dataflowId,
-            tableSchemaId: tableId
-          });
-        }
-      }
-      onChangeButtonsVisibility();
-      onEnableManualEdit(checked);
-      onDisableEditButton(false);
-    } catch (error) {
-      console.error('ActionsToolbar - convertTable.', error);
-      notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
-      onDisableEditButton(false);
-    }
-  };
 
   const onExportTableData = async type => {
     const action = 'TABLE_EXPORT';
@@ -313,8 +265,7 @@ export const ActionsToolbar = ({
             isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
-            isEditRecordsManuallyButtonDisabled ||
-            (isTableEditable && hasWritePermissions) ||
+            (isIcebergCreated && dataAreManuallyEditable && hasWritePermissions) ||
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             isTableDataRestorationInProgress ||
@@ -412,7 +363,7 @@ export const ActionsToolbar = ({
           !toPrefill ||
           !hasWritePermissions ||
           isTableDataRestorationInProgress ||
-          ((isTableEditable || isEditRecordsManuallyButtonDisabled) && dataAreManuallyEditable) ||
+          (isIcebergCreated && dataAreManuallyEditable) ||
           actionsContext.importDatasetProcessing ||
           actionsContext.exportDatasetProcessing ||
           actionsContext.deleteDatasetProcessing ||
@@ -462,8 +413,8 @@ export const ActionsToolbar = ({
       hasWritePermissions={hasWritePermissions}
       isDataflowOpen={isDataflowOpen}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+      isIcebergCreated={isIcebergCreated && dataAreManuallyEditable}
       isTableDataRestorationInProgress={isTableDataRestorationInProgress}
-      isTableEditable={isTableEditable || isEditRecordsManuallyButtonDisabled}
       isTableFixedNumber={isTableFixedNumber}
       showWriteButtons={showWriteButtons}
       tableId={tableId}
@@ -499,8 +450,7 @@ export const ActionsToolbar = ({
         />
         <DeleteDialog
           disabled={
-            isEditRecordsManuallyButtonDisabled ||
-            isTableEditable ||
+            (isIcebergCreated && dataAreManuallyEditable) ||
             !hasWritePermissions ||
             isUndefined(records.totalRecords) ||
             isDataflowOpen ||
@@ -548,6 +498,7 @@ export const ActionsToolbar = ({
         />
         {renderFilterableButton()}
         {renderFilterSearch()}
+        {bigData && (datasetType === 'TEST' || datasetType === 'REPORTING') && renderRestorePrefilledDataButton()}
       </div>
       <div className={`p-toolbar-group-right ${styles.valueFilterWrapper}`}>
         <span className={styles.input}>

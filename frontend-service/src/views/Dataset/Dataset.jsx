@@ -109,9 +109,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   });
   const [dataflowType, setDataflowType] = useState('');
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
-  const [hasIcebergTables, setHasIcebergTables] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
+  const [isIcebergCreated, setIsIcebergCreated] = useState(false);
+  const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
     name: ''
@@ -130,13 +131,13 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [isRefreshHighlighted, setIsRefreshHighlighted] = useState(false);
   const [isReportingWebform, setIsReportingWebform] = useState(false);
   const [selectedView, setSelectedView] = useState('');
-  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [isTableDataRestorationInProgress, setIsTableDataRestorationInProgress] = useState(false);
   const [isTestDataset, setIsTestDataset] = useState(false);
 
   const [isUpdatableDialogVisible, setIsUpdatableDialogVisible] = useState(false);
   const [levelErrorTypes, setLevelErrorTypes] = useState([]);
   const [metadata, setMetadata] = useState(undefined);
+  const [noEditableCheck, setNoEditableCheck] = useState(false);
   const [replaceData, setReplaceData] = useState(false);
   const [schemaTables, setSchemaTables] = useState([]);
   const [tableSchema, setTableSchema] = useState();
@@ -313,9 +314,34 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
+  useEffect(() => {
+    if (datasetSchemaAllTables) checkIsIcebergCreated(datasetSchemaAllTables[0]?.tableSchemaId);
+  }, []);
+
+  const checkIsIcebergCreated = async tableId => {
+    setIsLoadingIceberg(true);
+    let { data } = await DatasetService.getIsIcebergTableCreated({
+      datasetId,
+      tableSchemaId: tableId
+    });
+    setIsIcebergCreated(data);
+    setIsLoadingIceberg(false);
+  };
+
+  const convertHelper = async () => {
+    setIsLoadingIceberg(true);
+    if (isIcebergCreated) {
+      await DatasetService.convertIcebergsToParquets({ dataflowId, datasetId });
+    } else {
+      await DatasetService.convertParquetsToIcebergs({ dataflowId, datasetId });
+    }
+    setIsIcebergCreated(!isIcebergCreated);
+    setIsLoadingIceberg(false);
+  };
+
   const onGetIcebergTables = async () => {
     const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId });
-    setHasIcebergTables(!isEmpty(icebergTables?.data));
+    setIsIcebergCreated(!isEmpty(icebergTables?.data));
   };
 
   const changeProgressStepBar = stepInfo => {
@@ -478,10 +504,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       console.error('DataCollection - getMetadata.', error);
       notificationContext.add({ type: 'GET_METADATA_ERROR', content: { dataflowId, datasetId } }, true);
     }
-  };
-
-  const onChangeButtonsVisibility = () => {
-    onGetIcebergTables();
   };
 
   const onConfirmDelete = async () => {
@@ -818,6 +840,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const getDataSchema = async () => {
     try {
       const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
+      filterManualEdit(datasetSchema.tables);
       setDatasetSchemaAllTables(datasetSchema.tables);
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
@@ -830,6 +853,20 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       return datasetSchema;
     } catch (error) {
       throw new Error('SCHEMA_BY_ID_ERROR');
+    }
+  };
+
+  const filterManualEdit = tablesArray => {
+    let length = tablesArray.length;
+
+    tablesArray?.forEach(table => {
+      if (!table?.dataAreManuallyEditable) length -= 1;
+    });
+
+    if (length === 0) {
+      setNoEditableCheck(true);
+    } else {
+      setNoEditableCheck(false);
     }
   };
 
@@ -982,10 +1019,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       }
       setIsDownloadingQCRules(false);
     }
-  };
-
-  const onTableConversion = conversionInProgress => {
-    setIsTableConversionInProgress(conversionInProgress);
   };
 
   const onRestoreData = restorationInProgress => {
@@ -1152,6 +1185,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           dataflowId={dataflowId}
           dataProviderId={metadata?.dataset.dataProviderId}
           datasetId={datasetId}
+          isIcebergCreated={isIcebergCreated}
+          isLoadingIceberg={isLoadingIceberg}
           isReleasing={dataset.isReleasing}
           isReporting
           options={webformOptions}
@@ -1178,12 +1213,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         isReportingWebform={isReportingWebform}
         isTableDataRestorationInProgress={isTableDataRestorationInProgress}
         levelErrorTypes={levelErrorTypes}
-        onChangeButtonsVisibility={onChangeButtonsVisibility}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
         onRestoreData={onRestoreData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-        onTableConversion={onTableConversion}
         reporting={true}
         selectedRuleId={dataViewerOptions.selectedRuleId}
         selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
@@ -1200,6 +1233,16 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   if (isLoading) {
     return layout(<Spinner />);
   }
+
+  if (isLoadingIceberg)
+    return layout(
+      <div style={{ top: 0, margin: '1rem' }}>
+        <Spinner style={{ top: 0, margin: '1rem' }} />
+        <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
+          {resourcesContext.messages['tablesAreBeingConverted']}
+        </p>
+      </div>
+    );
 
   return layout(
     <SnapshotContext.Provider
@@ -1239,9 +1282,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     !hasWritePermissions ? null : 'p-button-animated-blink'
                   }`}
                   disabled={
-                    hasIcebergTables ||
+                    isIcebergCreated ||
                     !hasWritePermissions ||
-                    isTableConversionInProgress ||
                     isTableDataRestorationInProgress ||
                     actionsContext.importDatasetProcessing ||
                     actionsContext.exportDatasetProcessing ||
@@ -1271,8 +1313,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             <Button
               className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
               disabled={
-                (hasWritePermissions && hasIcebergTables) ||
-                isTableConversionInProgress ||
+                (hasWritePermissions && isIcebergCreated) ||
                 isTableDataRestorationInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
@@ -1300,9 +1341,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
             <DatasetDeleteDataDialog
               disabled={
-                hasIcebergTables ||
+                isIcebergCreated ||
                 !hasWritePermissions ||
-                isTableConversionInProgress ||
                 isTableDataRestorationInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
@@ -1324,9 +1364,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           <div className="p-toolbar-group-right">
             <DatasetValidateDialog
               disabled={
-                hasIcebergTables ||
+                isIcebergCreated ||
                 !hasWritePermissions ||
-                isTableConversionInProgress ||
                 isTableDataRestorationInProgress ||
                 actionsContext.importDatasetProcessing ||
                 actionsContext.exportDatasetProcessing ||
@@ -1381,6 +1420,20 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               label={resourcesContext.messages['refresh']}
               onClick={onLoadDatasetSchema}
             />
+            {metadata?.dataflow.bigData && (
+              <Button
+                className={styles.openWebformButton}
+                disabled={!hasWritePermissions || isLoadingIceberg || noEditableCheck}
+                helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
+                icon={!isIcebergCreated ? 'lock' : 'unlock'}
+                isLoading={isLoadingIceberg}
+                key={isIcebergCreated}
+                label={
+                  !isIcebergCreated ? resourcesContext.messages['enableEdit'] : resourcesContext.messages['disableEdit']
+                }
+                onClick={() => convertHelper()}
+              />
+            )}
           </div>
         </Toolbar>
       </div>

@@ -51,15 +51,14 @@ export const FieldsDesigner = ({
   isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
+  isIcebergCreated,
   isReferenceDataset,
   manageDialogs,
   manageUniqueConstraint,
   onChangeFields,
   onChangeTableProperties,
-  onChangeButtonsVisibility,
   onHideSelectGroupedValidation,
   onLoadTableData,
-  onTableConversion,
   selectedRuleId,
   selectedRuleLevelError,
   selectedRuleMessage,
@@ -84,13 +83,11 @@ export const FieldsDesigner = ({
   const [initialTableDescription, setInitialTableDescription] = useState();
   const [isCodelistOrLink, setIsCodelistOrLink] = useState(false);
   const [isDeleteDialogVisible, setIsDeleteDialogVisible] = useState(false);
-  const [isTableEditable, setIsTableEditable] = useState(false);
   const [isErrorDialogVisible, setIsErrorDialogVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPkChecked, setIsPkChecked] = useState(false);
   const [isReadOnlyTable, setIsReadOnlyTable] = useState(false);
   const [isTableLoading, setIsTableLoading] = useState(false);
-  const [isTableConversionInProgress, setIsTableConversionInProgress] = useState(false);
   const [dataAreManuallyEditable, setDataAreManuallyEditable] = useState(false);
   const [markedForDeletion, setMarkedForDeletion] = useState([]);
   const [notEmpty, setNotEmpty] = useState(true);
@@ -113,19 +110,6 @@ export const FieldsDesigner = ({
       setFixedNumber(table.fixedNumber || false);
     }
   }, [table]);
-
-  useEffect(() => {
-    onGetIsIcebergCreated();
-  }, []);
-
-  const onGetIsIcebergCreated = async () => {
-    const icebergCreated = await DatasetService.getIsIcebergTableCreated({
-      datasetId,
-      tableSchemaId: table.tableSchemaId
-    });
-
-    setIsTableEditable(icebergCreated.data);
-  };
 
   useEffect(() => {
     if (!isLoading && !isNil(refElement)) {
@@ -302,10 +286,6 @@ export const FieldsDesigner = ({
     });
   };
 
-  const onChangeTableEditable = checked => {
-    setIsTableEditable(checked);
-  };
-
   const onChangeToPrefill = checked => {
     setToPrefill(checked);
     updateTableDesign({
@@ -351,10 +331,6 @@ export const FieldsDesigner = ({
       notEmpty,
       dataAreManuallyEditable: checked
     });
-  };
-
-  const onDisableManualEditing = checked => {
-    setIsTableConversionInProgress(checked);
   };
 
   const onFieldDragAndDrop = (draggedFieldIdx, droppedFieldName, upDownOrder = false, order) =>
@@ -540,15 +516,12 @@ export const FieldsDesigner = ({
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
           isGroupedValidationSelected={isGroupedValidationSelected}
+          isIcebergCreated={isIcebergCreated}
           key={table.id}
           levelErrorTypes={table.levelErrorTypes}
-          onChangeButtonsVisibility={onChangeButtonsVisibility}
-          onChangeTableEditable={onChangeTableEditable}
-          onDisableManualEditing={onDisableManualEditing}
           onHideSelectGroupedValidation={onHideSelectGroupedValidation}
           onIsTableDataLoading={onIsTableDataLoading}
           onLoadTableData={onLoadTableData}
-          onTableConversion={onTableConversion}
           reporting={false}
           selectedRuleId={selectedRuleId}
           selectedRuleLevelError={selectedRuleLevelError}
@@ -1081,13 +1054,7 @@ export const FieldsDesigner = ({
                 ariaLabelledBy={`${table.tableSchemaId}_check_manual_edit_label`}
                 checked={dataAreManuallyEditable}
                 className={styles.fieldDesignerItem}
-                disabled={
-                  isTableConversionInProgress ||
-                  isTableLoading ||
-                  isTableEditable ||
-                  isDataflowOpen ||
-                  isDesignDatasetEditorRead
-                }
+                disabled={isTableLoading || isIcebergCreated || isDataflowOpen || isDesignDatasetEditorRead}
                 id={`${table.tableSchemaId}_check_manual_edit`}
                 inputId={`${table.tableSchemaId}_check_manual_edit`}
                 label="Default"

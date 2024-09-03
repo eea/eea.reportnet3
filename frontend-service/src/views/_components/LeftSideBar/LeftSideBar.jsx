@@ -162,7 +162,6 @@ export const LeftSideBar = ({ setIsNotificationVisible, setIsSystemNotificationV
   };
   const renderOpenClose = () => {
     const openCloseProps = {
-      // href: '#',
       className: 'dataflowList-left-side-bar-expand-help-step',
       icon: leftSideBarContext.isLeftSideBarOpened ? 'angleDoubleLeft' : 'angleDoubleRight',
       label: '',
