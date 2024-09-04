@@ -27,6 +27,7 @@ export const TabsSchema = ({
   isFilterable,
   isGroupedValidationDeleted,
   isGroupedValidationSelected,
+  isIcebergCreated,
   isReferenceDataset,
   isReportingWebform,
   isTableDataRestorationInProgress,
@@ -90,6 +91,7 @@ export const TabsSchema = ({
                   isFilterable={isFilterable}
                   isGroupedValidationDeleted={isGroupedValidationDeleted}
                   isGroupedValidationSelected={isGroupedValidationSelected}
+                  isIcebergCreated={isIcebergCreated}
                   isReferenceDataset={isReferenceDataset}
                   isReportingWebform={isReportingWebform}
                   isTableDataRestorationInProgress={isTableDataRestorationInProgress}

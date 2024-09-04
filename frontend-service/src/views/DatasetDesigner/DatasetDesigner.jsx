@@ -235,11 +235,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   });
 
   useEffect(() => {
-    if (designerState?.datasetSchemaAllTables)
-      checkIsIcebergCreated(designerState?.datasetSchemaAllTables[0]?.tableSchemaId);
-  }, []);
-
-  useEffect(() => {
     leftSideBarContext.removeModels();
     onGetIcebergTables();
     onLoadSchema();
@@ -1203,16 +1198,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onCloseHistoryDialog = () => {
     setIsHistoryDialogVisible(false);
-  };
-
-  const checkIsIcebergCreated = async tableId => {
-    setIsLoadingIceberg(true);
-    let { data } = await DatasetService.getIsIcebergTableCreated({
-      datasetId,
-      tableSchemaId: tableId
-    });
-    setIsIcebergCreated(data);
-    setIsLoadingIceberg(false);
   };
 
   const convertHelper = async () => {
