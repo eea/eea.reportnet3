@@ -314,20 +314,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
-  useEffect(() => {
-    if (datasetSchemaAllTables) checkIsIcebergCreated(datasetSchemaAllTables[0]?.tableSchemaId);
-  }, []);
-
-  const checkIsIcebergCreated = async tableId => {
-    setIsLoadingIceberg(true);
-    let { data } = await DatasetService.getIsIcebergTableCreated({
-      datasetId,
-      tableSchemaId: tableId
-    });
-    setIsIcebergCreated(data);
-    setIsLoadingIceberg(false);
-  };
-
   const convertHelper = async () => {
     setIsLoadingIceberg(true);
     if (isIcebergCreated) {
@@ -1209,6 +1195,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         hasWritePermissions={hasWritePermissions}
         isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
         isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+        isIcebergCreated={isIcebergCreated}
         isReferenceDataset={isReferenceDataset}
         isReportingWebform={isReportingWebform}
         isTableDataRestorationInProgress={isTableDataRestorationInProgress}
