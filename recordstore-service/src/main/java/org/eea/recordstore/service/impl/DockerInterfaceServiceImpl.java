@@ -121,13 +121,6 @@ public class DockerInterfaceServiceImpl implements DockerInterfaceService, Close
       throws InterruptedException {
     final OutputStream output = new ByteArrayOutputStream();
     final OutputStream errorOutput = new ByteArrayOutputStream();
-    /*
-     * //"export PGPASSWORD=root && psql -h localhost -U root -p 5432 -d datasets -c \"psql -h localhost -U root -p 5432 -d datasets -c \"create table \"dataset_1\".record(    id integer NOT NULL,    name \"char\",    CONSTRAINT record_pkey PRIMARY KEY (id))\"\""
-     * "/bin/bash", "-c", // "psql -h localhost -U root -p 5432 -d datasets -f /pgwal/init.sql" //&&
-     * psql -h localhost -U root -p 5432 -d datasets -c
-     * "create table "dataset_1".record(    id integer NOT NULL,    name "
-     * char",    CONSTRAINT record_pkey PRIMARY KEY (id))" command
-     */
 
     final ExecCreateCmdResponse execCreateCmdResponse =
         dockerClient.dockerClient().execCreateCmd(container.getId()).withAttachStdout(true)
