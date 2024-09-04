@@ -1396,10 +1396,6 @@
     "value": "JHtTTkFQU0hPVF9UQVNLX1BBUkFMTEVMSVNNOjR9"
   },
   {
-    "key": "config/application/importPath",
-    "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
-  },
-  {
     "key": "config/dataset/importStorePath",
     "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
   },
@@ -2022,5 +2018,9 @@
   {
     "key": "config/application/s3.iceberg.bucket.path",
     "value": "bWFyaWE="
+  },
+  {
+    "key": "config/application/importPath",
+    "value": "JHtEQVRBU0VUX1BBVEg6QzpcaW1wb3J0XH0="
   }
 ]
