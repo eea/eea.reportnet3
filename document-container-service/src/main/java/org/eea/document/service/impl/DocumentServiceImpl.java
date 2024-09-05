@@ -1,12 +1,7 @@
 package org.eea.document.service.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import javax.jcr.PathNotFoundException;
 import javax.jcr.Repository;
@@ -15,10 +10,6 @@ import javax.jcr.Session;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
-import org.eea.datalake.service.S3Helper;
-import org.eea.datalake.service.S3Service;
-import org.eea.datalake.service.annotation.ImportDataLakeCommons;
-import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.document.utils.OakRepositoryUtils;
@@ -30,23 +21,18 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.thread.ThreadPropertiesManager;
-import org.eea.utils.LiteralConstants;
 import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.multipart.MultipartFile;
 /**
  * The type Document service.
  *
  * @author ruben.lozano
  */
 @Service("documentService")
-@ImportDataLakeCommons
 public class DocumentServiceImpl implements DocumentService {
 
   /**

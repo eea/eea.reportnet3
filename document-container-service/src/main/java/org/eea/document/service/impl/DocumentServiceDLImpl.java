@@ -2,6 +2,7 @@ package org.eea.document.service.impl;
 
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.document.service.DocumentServiceDL;
 import org.eea.document.type.FileResponse;
@@ -33,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.Date;
 
 @Service("documentServiceDL")
+@ImportDataLakeCommons
 public class DocumentServiceDLImpl implements DocumentServiceDL {
 
     /**
