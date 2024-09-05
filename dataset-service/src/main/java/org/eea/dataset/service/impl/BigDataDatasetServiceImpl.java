@@ -1004,6 +1004,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
+        if(providerId == null) {
+            providerId = datasetService.getDataProviderIdById(datasetId);
+        }
         providerId = providerId != null ? providerId : 0L;
         DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
         String parquetTableQueryPathConstant = (datasetType == DatasetTypeEnum.REFERENCE ) ? S3_DATAFLOW_REFERENCE_QUERY_PATH : S3_TABLE_AS_FOLDER_QUERY_PATH;
@@ -1039,6 +1042,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
+        if(providerId == null) {
+            providerId = datasetService.getDataProviderIdById(datasetId);
+        }
         providerId = providerId != null ? providerId : 0L;
         DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
 
