@@ -781,6 +781,7 @@ const DropdownWebform = props => {
   );
   let dropdownIcon = renderDropdownIcon();
   let items = renderItems(selectedOption);
+  console.log(items)
   let filterElement = renderFilter();
   let clearIcon = renderClearIcon();
 
@@ -804,12 +805,13 @@ const DropdownWebform = props => {
       {labelElement}
       {clearIcon}
       {dropdownIcon}
-      <DropdownPanel appendTo={appendTo} filter={filterElement} itemsWrapperRef={itemsWrapperRef}>
+      <DropdownPanel appendTo={appendTo} filter={filterElement} itemsWrapperRef={itemsWrapperRef}         
         onClick={panelRefClick}
         panelRefClassName={panelRefClassName}
         panelRefStyle={panelRefStyle}
         ref={panelRef}
-        scrollHeight={scrollHeight}
+        scrollHeight={scrollHeight}>
+
         {items}
       </DropdownPanel>
     </div>
