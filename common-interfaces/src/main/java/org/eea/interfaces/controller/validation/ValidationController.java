@@ -129,16 +129,7 @@ public interface ValidationController {
    * @return
    */
   @GetMapping(value = "/listInProgressValidationTasks/{timeInMinutes}")
-  List<TaskVO> listInProgressValidationTasksThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
-
-  /**
-   * Lists the tasks of validation tasks that are in progress between a specific period of time
-   * @param timeInMinutesFrom
-   * @param timeInMinutesTo
-   * @return
-   */
-  @GetMapping(value = "/listInProgressValidationTasksBetween/{timeInMinutesFrom}/{timeInMinutesTo}")
-  List<TaskVO> listInProgressValidationTasksBetweenTime(@PathVariable("timeInMinutesFrom") long timeInMinutesFrom, @PathVariable("timeInMinutesTo") long timeInMinutesTo);
+  List<BigInteger> listInProgressValidationTasksThatExceedTime(@PathVariable("timeInMinutes") long timeInMinutes);
 
   /**
    * Deletes the locks related to release

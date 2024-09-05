@@ -95,7 +95,6 @@ public class SQLValidationUtils {
    */
   public void executeValidationSQLRule(Long datasetId, String ruleId, String dataProviderCode)
       throws EEAInvalidSQLException {
-    LOG.info("[272589-PROCESS] - ENTER executeValidationSQLRule method");
     Rule rule = sqlRulesService.getRule(datasetId, ruleId);
     rule.setSqlSentence(rule.getSqlSentence().replace(";", ""));
     DataSetMetabaseVO dataSetMetabaseVO =
@@ -152,7 +151,6 @@ public class SQLValidationUtils {
         System.gc();
       }
     }
-    LOG.info("[272589-PROCESS] - EXIT executeValidationSQLRule method");
   }
 
   /**
@@ -351,7 +349,6 @@ public class SQLValidationUtils {
    */
   private void executeTableSQLRuleValidation(Rule rule, TableValue tableToEvaluate,
       Optional<DataSetSchema> dataSetSchema, Optional<TableValue> tableValue, String tableName) {
-    LOG.info("[272589-PROCESS] - ENTER executeTableSQLRuleValidation");
     if (tableValue.isPresent() && !tableToEvaluate.getRecords().isEmpty()) {
       TableValue table = tableValue.get();
       TableValidation tableValidation = new TableValidation();
@@ -361,7 +358,6 @@ public class SQLValidationUtils {
       table.getTableValidations().add(tableValidation);
       saveTable(table);
     }
-    LOG.info("[272589-PROCESS] - EXIT executeTableSQLRuleValidation");
   }
 
   /**

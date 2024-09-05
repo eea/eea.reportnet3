@@ -112,16 +112,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   boolean isProcessEnding(@Param("processId") String processId);
 
   @Query(nativeQuery = true,
-      value = "select * from task where status='IN_PROGRESS' and task_type='VALIDATION_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
-  List<Task> getInProgressValidationTasksThatExceedTime(@Param("timeInMinutes") long timeInMinutes);
-
-  @Query(nativeQuery = true,
-          value = "SELECT * FROM task " +
-                  "WHERE status='IN_PROGRESS' " +
-                  "AND task_type='VALIDATION_TASK' " +
-                  "AND (EXTRACT(EPOCH FROM LOCALTIMESTAMP - date_start) / 60) > :timeInMinutesFrom " +
-                  "AND (EXTRACT(EPOCH FROM LOCALTIMESTAMP - date_start) / 60) < :timeInMinutesTo")
-  List<Task> getInProgressValidationTasksBetweenTime(@Param("timeInMinutesFrom") long timeInMinutesFrom, @Param("timeInMinutesTo") long timeInMinutesTo);
+          value = "select id from task where status='IN_PROGRESS' and task_type='VALIDATION_TASK' and (extract(epoch from LOCALTIMESTAMP - date_start) / 60) > :timeInMinutes")
+  List<BigInteger> getInProgressValidationTasksThatExceedTime(@Param("timeInMinutes") long timeInMinutes);
 
   /**
    * Finds tasks by processId
