@@ -8,22 +8,12 @@ export const DatasetRepository = {
       url: getUrl(DatasetConfig.testImportProcess, { datasetId })
     }),
 
-  convertIcebergToParquet: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
-    await HTTPRequester.post({
-      url: getUrl(DatasetConfig.convertIcebergToParquet, { datasetId, dataflowId, providerId, tableSchemaId })
-    }),
-
-  convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
-    await HTTPRequester.post({
-      url: getUrl(DatasetConfig.convertParquetToIceberg, { datasetId, dataflowId, providerId, tableSchemaId })
-    }),
-
   convertParquetsToIcebergs: async ({ dataflowId, datasetId, providerId }) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.convertParquetsToIcebergs, { dataflowId, datasetId, providerId })
     }),
 
-  convertIcebergsToParquets: async ({ dataflowId, datasetId, providerId}) =>
+  convertIcebergsToParquets: async ({ dataflowId, datasetId, providerId }) =>
     await HTTPRequester.post({
       url: getUrl(DatasetConfig.convertIcebergsToParquets, { dataflowId, datasetId, providerId })
     }),
@@ -62,24 +52,24 @@ export const DatasetRepository = {
     await HTTPRequester.delete({
       url: dataProviderId
         ? getUrl(DatasetConfig.deleteAttachmentWithProviderId, {
-          dataflowId,
-          datasetId,
-          fieldId,
-          providerId: dataProviderId,
-          tableSchemaName,
-          fieldName,
-          fileName,
-          recordId
-        })
+            dataflowId,
+            datasetId,
+            fieldId,
+            providerId: dataProviderId,
+            tableSchemaName,
+            fieldName,
+            fileName,
+            recordId
+          })
         : getUrl(DatasetConfig.deleteAttachment, {
-          dataflowId,
-          datasetId,
-          fieldId,
-          tableSchemaName,
-          fieldName,
-          fileName,
-          recordId
-        })
+            dataflowId,
+            datasetId,
+            fieldId,
+            tableSchemaName,
+            fieldName,
+            fileName,
+            recordId
+          })
     }),
 
   deleteRecord: async ({ datasetId, selectedRecordId, tableId, updateInCascade = false }) =>
@@ -134,24 +124,24 @@ export const DatasetRepository = {
     await HTTPRequester.download({
       url: dataProviderId
         ? getUrl(DatasetConfig.downloadFileDataWithProviderId, {
-          dataflowId,
-          datasetId,
-          fieldId,
-          providerId: dataProviderId,
-          fileName,
-          recordId,
-          tableSchemaName,
-          fieldName
-        })
+            dataflowId,
+            datasetId,
+            fieldId,
+            providerId: dataProviderId,
+            fileName,
+            recordId,
+            tableSchemaName,
+            fieldName
+          })
         : getUrl(DatasetConfig.downloadFileData, {
-          dataflowId,
-          datasetId,
-          fieldId,
-          fileName,
-          recordId,
-          tableSchemaName,
-          fieldName
-        })
+            dataflowId,
+            datasetId,
+            fieldId,
+            fileName,
+            recordId,
+            tableSchemaName,
+            fieldName
+          })
     }),
 
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>

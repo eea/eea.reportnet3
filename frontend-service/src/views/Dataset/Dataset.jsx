@@ -317,9 +317,17 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const convertHelper = async () => {
     setIsLoadingIceberg(true);
     if (isIcebergCreated) {
-      await DatasetService.convertIcebergsToParquets({ dataflowId, datasetId });
+      await DatasetService.convertIcebergsToParquets({
+        dataflowId,
+        datasetId,
+        providerId: !isTestDataset ? metadata?.dataset.dataProviderId : undefined
+      });
     } else {
-      await DatasetService.convertParquetsToIcebergs({ dataflowId, datasetId });
+      await DatasetService.convertParquetsToIcebergs({
+        dataflowId,
+        datasetId,
+        providerId: !isTestDataset ? metadata?.dataset.dataProviderId : undefined
+      });
     }
     setIsIcebergCreated(!isIcebergCreated);
     setIsLoadingIceberg(false);

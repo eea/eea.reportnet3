@@ -3,14 +3,10 @@ export const DatasetConfig = {
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
   uploadAttachmentWithProviderId:
     '/dataset/v1/{:datasetId}/field/{:fieldId}/attachment?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaName={:tableSchemaName}&fieldName={:fieldName}&recordId={:recordId}&previousFileName={:previousFileName}',
-  convertIcebergToParquet:
-    '/dataset/convertIcebergToParquetTable/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}',
-  convertParquetToIceberg:
-    '/dataset/convertParquetToIcebergTable/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}',
   convertIcebergsToParquets:
-  '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
+    '/dataset/convertIcebergToParquetTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
   convertParquetsToIcebergs:
-  '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
+    '/dataset/convertParquetToIcebergTables/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}',
   createRecord: '/dataset/{:datasetId}/table/{:tableSchemaId}/record',
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
