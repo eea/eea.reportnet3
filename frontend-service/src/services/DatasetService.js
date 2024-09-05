@@ -21,14 +21,8 @@ import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const DatasetService = {
-  convertIcebergToParquet: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
-    await DatasetRepository.convertIcebergToParquet({ datasetId, dataflowId, providerId, tableSchemaId }),
-
-  convertParquetToIceberg: async ({ datasetId, dataflowId, providerId, tableSchemaId }) =>
-    await DatasetRepository.convertParquetToIceberg({ datasetId, dataflowId, providerId, tableSchemaId }),
-
   convertParquetsToIcebergs: async ({ datasetId, dataflowId, providerId }) => {
-    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId })
+    await DatasetRepository.convertParquetsToIcebergs({ datasetId, dataflowId, providerId });
   },
 
   convertIcebergsToParquets: async ({ datasetId, dataflowId, providerId }) =>
@@ -83,7 +77,6 @@ export const DatasetService = {
 
       datasetTableRecords.push(datasetTableRecord);
     });
-    
 
     return await DatasetRepository.createRecord(datasetId, tableSchemaId, datasetTableRecords);
   },
@@ -117,7 +110,7 @@ export const DatasetService = {
 
   deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
-  deleteRecord: async ({datasetId, selectedRecordId, tableId, updateInCascade}) => 
+  deleteRecord: async ({ datasetId, selectedRecordId, tableId, updateInCascade }) =>
     await DatasetRepository.deleteRecord({ datasetId, selectedRecordId, tableId, updateInCascade }),
 
   deleteSchema: async datasetId => await DatasetRepository.deleteSchema(datasetId),
@@ -184,10 +177,10 @@ export const DatasetService = {
       allDatasetLevelErrors.push(CoreUtils.getDashboardLevelErrorByTable(datasetTablesDTO.data));
       tableStatisticValues.push([
         datasetTableDTO.totalRecords -
-        (datasetTableDTO.totalRecordsWithBlockers +
-          datasetTableDTO.totalRecordsWithErrors +
-          datasetTableDTO.totalRecordsWithWarnings +
-          datasetTableDTO.totalRecordsWithInfos),
+          (datasetTableDTO.totalRecordsWithBlockers +
+            datasetTableDTO.totalRecordsWithErrors +
+            datasetTableDTO.totalRecordsWithWarnings +
+            datasetTableDTO.totalRecordsWithInfos),
         datasetTableDTO.totalRecordsWithInfos,
         datasetTableDTO.totalRecordsWithWarnings,
         datasetTableDTO.totalRecordsWithErrors,
@@ -277,7 +270,7 @@ export const DatasetService = {
 
   getIsAvailableForManualEditing: async ({ datasetId }) => {
     return await DatasetRepository.getIsAvailableForManualEditing({ datasetId });
-  }, 
+  },
 
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
@@ -479,42 +472,42 @@ export const DatasetService = {
     const tables = datasetSchemaDTO.data.tableSchemas.map(datasetTableDTO => {
       const records = !isNull(datasetTableDTO.recordSchema)
         ? [datasetTableDTO.recordSchema].map(dataTableRecordDTO => {
-          const fields = !isNull(dataTableRecordDTO.fieldSchema)
-            ? dataTableRecordDTO.fieldSchema.map(
-              dataTableFieldDTO =>
-                new DatasetTableField({
-                  codelistItems: dataTableFieldDTO.codelistItems,
-                  description: dataTableFieldDTO.description,
-                  fieldId: dataTableFieldDTO.id,
-                  maxSize: dataTableFieldDTO.maxSize,
-                  pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
-                  pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
-                    ? dataTableFieldDTO.pkHasMultipleValues
-                    : false,
-                  ignoreCaseInLinks: !isNull(dataTableFieldDTO.ignoreCaseInLinks)
-                    ? dataTableFieldDTO.ignoreCaseInLinks
-                    : false,
-                  pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
-                  pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
-                  name: dataTableFieldDTO.name,
-                  readOnly: dataTableFieldDTO.readOnly,
-                  recordId: dataTableFieldDTO.idRecord,
-                  referencedField: dataTableFieldDTO.referencedField,
-                  required: dataTableFieldDTO.required,
-                  type: dataTableFieldDTO.type,
-                  validExtensions: !isNull(dataTableFieldDTO.validExtensions)
-                    ? dataTableFieldDTO.validExtensions
-                    : []
-                })
-            )
-            : null;
+            const fields = !isNull(dataTableRecordDTO.fieldSchema)
+              ? dataTableRecordDTO.fieldSchema.map(
+                  dataTableFieldDTO =>
+                    new DatasetTableField({
+                      codelistItems: dataTableFieldDTO.codelistItems,
+                      description: dataTableFieldDTO.description,
+                      fieldId: dataTableFieldDTO.id,
+                      maxSize: dataTableFieldDTO.maxSize,
+                      pk: !isNull(dataTableFieldDTO.pk) ? dataTableFieldDTO.pk : false,
+                      pkHasMultipleValues: !isNull(dataTableFieldDTO.pkHasMultipleValues)
+                        ? dataTableFieldDTO.pkHasMultipleValues
+                        : false,
+                      ignoreCaseInLinks: !isNull(dataTableFieldDTO.ignoreCaseInLinks)
+                        ? dataTableFieldDTO.ignoreCaseInLinks
+                        : false,
+                      pkMustBeUsed: !isNull(dataTableFieldDTO.pkMustBeUsed) ? dataTableFieldDTO.pkMustBeUsed : false,
+                      pkReferenced: !isNull(dataTableFieldDTO.pkReferenced) ? dataTableFieldDTO.pkReferenced : false,
+                      name: dataTableFieldDTO.name,
+                      readOnly: dataTableFieldDTO.readOnly,
+                      recordId: dataTableFieldDTO.idRecord,
+                      referencedField: dataTableFieldDTO.referencedField,
+                      required: dataTableFieldDTO.required,
+                      type: dataTableFieldDTO.type,
+                      validExtensions: !isNull(dataTableFieldDTO.validExtensions)
+                        ? dataTableFieldDTO.validExtensions
+                        : []
+                    })
+                )
+              : null;
 
-          return new DatasetTableRecord({
-            datasetPartitionId: dataTableRecordDTO.id,
-            fields,
-            recordSchemaId: dataTableRecordDTO.idRecordSchema
-          });
-        })
+            return new DatasetTableRecord({
+              datasetPartitionId: dataTableRecordDTO.id,
+              fields,
+              recordSchemaId: dataTableRecordDTO.idRecordSchema
+            });
+          })
         : null;
 
       return new DatasetTable({
@@ -758,12 +751,7 @@ export const DatasetService = {
     return await DatasetRepository.updateField(datasetId, recordId, tableSchemaId, datasetTableField, updateInCascade);
   },
 
-  updateFieldWebform: async (
-    datasetId,
-    field,
-    value,
-    tableSchemaId
-  ) => {
+  updateFieldWebform: async (datasetId, field, value, tableSchemaId) => {
     const datasetTableField = new DatasetTableField({});
 
     datasetTableField.id = field?.fieldId;
