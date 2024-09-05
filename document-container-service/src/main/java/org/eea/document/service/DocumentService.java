@@ -25,17 +25,6 @@ public interface DocumentService {
    */
   void uploadDocument(InputStream inputStream, String contentType, String fileName,
       DocumentVO documentVO, Long size) throws EEAException, IOException;
-
-  /**
-   * Upload a document in s3.
-   *
-   * @param multipartFile the file
-   * @param fileName the file name
-   * @param documentVO the document VO
-   * @param size the size
-   */
-  void uploadDocumentDL(MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException;
-
   /**
    * Gets the document.
    *
@@ -46,13 +35,6 @@ public interface DocumentService {
    */
   FileResponse getDocument(Long documentId, Long dataFlowId) throws EEAException;
 
-  /**
-   * Gets the document.
-   *
-   * @param document document
-   * @return the document in bytes
-   */
-  FileResponse getDocumentDL(DocumentVO document) throws EEAException;
 
 
   /**
@@ -64,15 +46,6 @@ public interface DocumentService {
    * @throws EEAException the EEA exception
    */
   void deleteDocument(Long documentId, Long dataFlowId, Boolean deleteMetabase) throws EEAException;
-
-  /**
-   * Delete document.
-   *
-   * @param documentVO the document
-   * @param deleteMetabase the delete metabase
-   * @throws EEAException the EEA exception
-   */
-  void deleteDocumentDL(DocumentVO documentVO, Boolean deleteMetabase) throws EEAException;
 
   /**
    * Upload schema snapshot.
@@ -129,21 +102,6 @@ public interface DocumentService {
       Long dataflowId, Long messageId) throws EEAException, IOException;
 
   /**
-   * Upload collaboration document in s3.
-   *
-   * @param inputStream the input stream
-   * @param filename the filename
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param messageId the message id
-   * @throws EEAException the EEA exception
-   * @throws IOException Signals that an I/O exception has occurred.
-   */
-   void uploadCollaborationDocumentDL(InputStream inputStream, String filename,
-                                            Long dataflowId, Long providerId, Long messageId) throws IOException;
-
-
-  /**
    * Delete collaboration document.
    *
    * @param documentName the document name
@@ -152,16 +110,6 @@ public interface DocumentService {
    * @throws EEAException the EEA exception
    */
   void deleteCollaborationDocument(String documentName, Long dataflowId, Long messageId) throws EEAException;
-
-  /**
-   * Delete collaboration document from s3.
-   *
-   * @param documentName the document name
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param messageId the message id
-   */
-  void deleteCollaborationDocumentDL(String documentName, Long dataflowId, Long providerId, Long messageId);
 
   /**
    * Gets the collaboration document.
@@ -173,15 +121,5 @@ public interface DocumentService {
    * @throws EEAException the EEA exception
    */
   FileResponse getCollaborationDocument(final String documentName, final Long dataflowId, Long messageId) throws EEAException;
-
-  /**
-   * Gets the collaboration document from s3.
-   *
-   * @param documentName the document name
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param messageId the message id
-   */
-  FileResponse getCollaborationDocumentDL(final String documentName, final Long dataflowId, Long providerId, Long messageId);
 
 }
