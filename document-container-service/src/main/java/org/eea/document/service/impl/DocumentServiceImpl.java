@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.oak.plugins.document.DocumentNodeStore;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
@@ -45,6 +46,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author ruben.lozano
  */
 @Service("documentService")
+@ImportDataLakeCommons
 public class DocumentServiceImpl implements DocumentService {
 
   /**
@@ -83,22 +85,21 @@ public class DocumentServiceImpl implements DocumentService {
   @Autowired
   private OakRepositoryUtils oakRepositoryUtils;
 
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
   /**
    * The dataflow controller.
    */
-  @Autowired
-  private DataFlowDocumentControllerZuul dataflowController;
+  private final DataFlowDocumentControllerZuul dataflowController;
 
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
+  private final S3Helper s3Helper;
 
-  private final S3Helper s3HelperPrivate;
+  private final S3Service s3Service;
 
-  private final S3Service s3ServicePrivate;
-
-  public DocumentServiceImpl(S3Helper s3HelperPrivate, S3Service s3ServicePrivate) {
-    this.s3HelperPrivate = s3HelperPrivate;
-    this.s3ServicePrivate = s3ServicePrivate;
+  public DocumentServiceImpl(DataFlowDocumentControllerZuul dataflowController, S3Helper s3Helper) {
+    this.s3Helper = s3Helper;
+    this.s3Service = s3Helper.getS3Service();
+    this.dataflowController = dataflowController;
   }
 
   /**
@@ -192,8 +193,8 @@ public class DocumentServiceImpl implements DocumentService {
       }
 
       S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
-      String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
-      s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
+      String attachmentPathInS3 = s3Service.getS3Path(s3AttachmentsPathResolver);
+      s3Helper.uploadFileToBucket(attachmentPathInS3, file.getAbsolutePath());
       file.delete();
 
       // Release finish event
@@ -289,8 +290,8 @@ public class DocumentServiceImpl implements DocumentService {
 
     String modifiedFileName = "document_" + document.getId() + "_" + document.getName();
     S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(document.getDataflowId(), modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
-    String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
-    byte[] fileAsBytes = s3HelperPrivate.getBytesFromS3(attachmentPathInS3);
+    String attachmentPathInS3 = s3Service.getS3Path(s3AttachmentsPathResolver);
+    byte[] fileAsBytes = s3Helper.getBytesFromS3(attachmentPathInS3);
     FileResponse fileResponse = new FileResponse();
     fileResponse.setBytes(fileAsBytes);
 
@@ -359,8 +360,8 @@ public class DocumentServiceImpl implements DocumentService {
 
       String modifiedFileName = "document_" + documentVO.getId() + "_" + documentVO.getName();
       S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(documentVO.getDataflowId(), modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
-      String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
-      s3HelperPrivate.deleteFileFromS3(attachmentPathInS3);
+      String attachmentPathInS3 = s3Service.getS3Path(s3AttachmentsPathResolver);
+      s3Helper.deleteFileFromS3(attachmentPathInS3);
 
       if (Boolean.TRUE.equals(deleteMetabase)) {
         dataflowController.deleteDocument(documentVO.getId());
@@ -580,8 +581,8 @@ public class DocumentServiceImpl implements DocumentService {
       Files.copy(inputStream, path);
       S3PathResolver s3TechnicalAcceptancePathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
       s3TechnicalAcceptancePathResolver.setDataProviderId(providerId);
-      String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3TechnicalAcceptancePathResolver);
-      s3HelperPrivate.uploadFileToBucket(attachmentPathInS3, absolutePath);
+      String attachmentPathInS3 = s3Service.getS3Path(s3TechnicalAcceptancePathResolver);
+      s3Helper.uploadFileToBucket(attachmentPathInS3, absolutePath);
       Files.delete(path);
       } finally {
         inputStream.close();
@@ -641,8 +642,8 @@ public class DocumentServiceImpl implements DocumentService {
     String fileName = "message_" + messageId + "_" + documentName;
     S3PathResolver s3TechnicalAcceptancePathResolver = new S3PathResolver(dataflowId, fileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
     s3TechnicalAcceptancePathResolver.setDataProviderId(providerId);
-    String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3TechnicalAcceptancePathResolver);
-    s3HelperPrivate.deleteFileFromS3(attachmentPathInS3);
+    String attachmentPathInS3 = s3Service.getS3Path(s3TechnicalAcceptancePathResolver);
+    s3Helper.deleteFileFromS3(attachmentPathInS3);
   }
 
 
@@ -696,8 +697,8 @@ public class DocumentServiceImpl implements DocumentService {
     String fileName = "message_" + messageId + "_" + documentName;
     S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(dataflowId, fileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
     s3AttachmentsPathResolver.setDataProviderId(providerId);
-    String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3AttachmentsPathResolver);
-    byte[] fileAsBytes = s3HelperPrivate.getBytesFromS3(attachmentPathInS3);
+    String attachmentPathInS3 = s3Service.getS3Path(s3AttachmentsPathResolver);
+    byte[] fileAsBytes = s3Helper.getBytesFromS3(attachmentPathInS3);
     FileResponse fileResponse = new FileResponse();
     fileResponse.setBytes(fileAsBytes);
 
