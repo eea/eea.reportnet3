@@ -47,6 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -143,6 +144,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     int numberOfFailedImportsForWrongNumberOfRecords = 0;
     int numberOfFailedImportsForOnlyReadOnlyFields = 0;
     int numberOfFailedImportsForReadOnlyTables = 0;
+    if(importFileInDremioInfo.getReplaceData()) {
+      deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()));
+    }
     for (File csvFile : csvFiles) {
       //initialize warning message
       importFileInDremioInfo.setWarningMessage(null);
@@ -292,17 +296,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       }
     }
 
-    if (importFileInDremioInfo.getReplaceData()) {
-      //remove tables and folders that contain the previous csv files because data will be replaced
-      LOG.info("Removing csv files for job {}", importFileInDremioInfo);
-      removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder);
-
-      //delete attachments if they exist
-      if (s3Helper.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
-        s3Helper.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
-      }
-    }
-
     boolean needToDemoteTable = true;
 
     for (FileWithRecordNum entry : csvFilesWithAddedColumns) {
@@ -322,15 +315,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
       if (needToDemoteTable) {
         //demote table folder
-        dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
-        if (importFileInDremioInfo.getReplaceData()) {
-          LOG.info("Removing parquet files for job {}", importFileInDremioInfo);
-          //remove folders that contain the previous parquet files because data will be replaced
-          if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-            s3Helper.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
-          }
+        if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+          dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
+          needToDemoteTable = false;
         }
-        needToDemoteTable = false;
       }
 
       //create parquet file
@@ -1010,5 +998,54 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     if (recordCounter == 0) {
       LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, inputFile.getName());
     }
+  }
+
+  private void deleteAllDataBeforeImport (ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId) throws Exception {
+    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
+    if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
+      TableSchema tableSchema = datasetSchemaService.getTableSchema(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
+      deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType);
+    }
+    else{
+      List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(importFileInDremioInfo.getDatasetId());
+      for(TableSchemaIdNameVO tableInfo: tableSchemaIdNameVOS){
+        TableSchema tableSchema = datasetSchemaService.getTableSchema(tableInfo.getIdTableSchema(), datasetSchemaId);
+        deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType);
+      }
+    }
+  }
+
+  private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType) throws Exception {
+    S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchema.getNameTableSchema(), tableSchema.getNameTableSchema(), S3_IMPORT_FILE_PATH);
+    S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchema.getNameTableSchema(), tableSchema.getNameTableSchema(), S3_TABLE_NAME_FOLDER_PATH);
+    //path in s3 for the folder that contains the stored csv files
+    String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+
+    //remove tables and folders that contain the previous csv files because data will be replaced
+    LOG.info("Removing csv files for job {}", importFileInDremioInfo);
+    removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder);
+
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && (BooleanUtils.isTrue(tableSchema.getToPrefill()))){
+      //restore prefilled data
+      Long designDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId, null);
+      bigDataDatasetService.createPrefilledTables(designDatasetId, datasetSchemaId, importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getProviderId(), String.valueOf(tableSchema.getIdTableSchema()));
+      return;
+    }
+
+    //delete attachments if they exist
+    if (s3Helper.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
+      s3Helper.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
+    }
+
+    //demote table folder
+    if (importFileInDremioInfo.getReplaceData()) {
+      LOG.info("Removing parquet files for job {}", importFileInDremioInfo);
+      //remove folders that contain the previous parquet files because data will be replaced
+      if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+        dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchema.getNameTableSchema());
+        s3Helper.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+      }
+    }
+
   }
 }
