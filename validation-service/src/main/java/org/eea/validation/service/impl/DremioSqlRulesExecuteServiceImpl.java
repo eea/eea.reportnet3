@@ -150,7 +150,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
 
                 //I have checked only the case one (method.getParameters().length) for message parameter value, I don't know if we need to check also the other cases
-                customQueryResultSet = getResultSet(method, ruleMethodName, cls, customQueryResultSet, dataTableResolver, ruleVO, object);
+                if(ruleVO.getDescription().contains("{%")) {
+                    customQueryResultSet = getResultSet(method, ruleMethodName, cls, customQueryResultSet, dataTableResolver, ruleVO, object);
+                }
 
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
             }
