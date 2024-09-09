@@ -817,6 +817,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 s3PathResolver.setDataProviderId(dataset.getDataProviderId());
                 s3PathResolver.setDatasetId(datasetId);
                 break;
+            case TEST:
             case DESIGN:
                 s3PathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH);
                 s3PathResolver.setDataProviderId(0L);
@@ -825,8 +826,6 @@ public class FileTreatmentHelper implements DisposableBean {
             case COLLECTION:
                 s3PathResolver.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
                 s3PathResolver.setDatasetId(datasetId);
-                break;
-            case TEST:
                 break;
             case EUDATASET:
                 s3PathResolver.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
