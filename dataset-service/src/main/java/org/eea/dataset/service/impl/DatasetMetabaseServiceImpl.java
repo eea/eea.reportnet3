@@ -1182,4 +1182,10 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
             .entityListToClass(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, providerId));
   }
 
+  @Override
+  public DesignDataset getDesignDatasetByDataflowIdAndDatasetSchemaId(Long dataflowId, String datasetSchemaId){
+    return designDatasetRepository.findByDataflowIdAndDatasetSchema(dataflowId, datasetSchemaId);
+  }
+
+
 }

@@ -22,6 +22,8 @@ import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.configuration.util.CsvHeaderMapping;
 import org.eea.dataset.exception.InvalidFileException;
+import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -111,6 +113,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final SpatialDataHandling spatialDataHandling;
   private final BigDataDatasetService bigDataDatasetService;
 
+  private TableSchemaMapper tableSchemaMapper;
+
   private JdbcTemplate dremioJdbcTemplate;
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
@@ -122,7 +126,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      SpatialDataHandling spatialDataHandling,
                                      @Lazy FileTreatmentHelper fileTreatmentHelper,
                                      JdbcTemplate dremioJdbcTemplate,
-                                     @Lazy BigDataDatasetService bigDataDatasetService) {
+                                     @Lazy BigDataDatasetService bigDataDatasetService,
+                                     TableSchemaMapper tableSchemaMapper) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -134,6 +139,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.fileTreatmentHelper = fileTreatmentHelper;
     this.dremioJdbcTemplate = dremioJdbcTemplate;
     this.bigDataDatasetService = bigDataDatasetService;
+    this.tableSchemaMapper = tableSchemaMapper;
   }
 
   @Override
@@ -291,7 +297,19 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     Long numberOfRecordsToBeInserted = csvFilesWithAddedColumns.stream().mapToLong(FileWithRecordNum::getNumberOfRecords).sum();
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType) && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
-      if(!canImportForFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted, dremioPathForParquetFolder, s3TablePathResolver)){
+      DesignDataset designDataset = datasetMetabaseService.getDesignDatasetByDataflowIdAndDatasetSchemaId(importFileInDremioInfo.getDataflowId(), String.valueOf(dataSetSchema.getIdDataSetSchema()));
+      ImportFileInDremioInfo designImportInfo = new ImportFileInDremioInfo(importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDataflowId(), 0L, designDataset.getId());
+      S3PathResolver s3DesignTablePathResolver = constructS3PathResolver(designImportInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+      //path in dremio for the folder in current that represents the table of the design dataset
+      String designTableQueryPath = getImportQueryPathForFolder(designImportInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+      //remove data for table
+      TableSchema tableSchema = tableSchemaMapper.classToEntity(tableSchemaVO);
+      deleteTableDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()), tableSchema, datasetType, true);
+      if(!canImportForFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted, designTableQueryPath, s3DesignTablePathResolver)){
+        if(importFileInDremioInfo.getReplaceData()){
+          //restore old data from design dataset
+          bigDataDatasetService.createPrefilledTables(designDataset.getId(), String.valueOf(dataSetSchema.getIdDataSetSchema()), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getProviderId(), String.valueOf(tableSchemaVO.getIdTableSchema()));
+        }
         return;
       }
     }
@@ -882,10 +900,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
   }
 
-  private Boolean canImportForFixedNumberOfRecords(ImportFileInDremioInfo importFileInDremioInfo, Long numberOfRecordsToBeInserted, String tableQueryPath, S3PathResolver s3PathResolver){
+  private Boolean canImportForFixedNumberOfRecords(ImportFileInDremioInfo importFileInDremioInfo, Long numberOfRecordsToBeInserted, String designTableQueryPath, S3PathResolver s3DesignPathResolver){
     Long numberOfExistingRecords = 0L;
-    if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
-      String recordsCountQuery = "SELECT COUNT (record_id) FROM " + tableQueryPath;
+    if (s3Helper.checkFolderExist(s3DesignPathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.checkFolderPromoted(s3DesignPathResolver, s3DesignPathResolver.getTableName())) {
+      String recordsCountQuery = "SELECT COUNT (record_id) FROM " + designTableQueryPath;
       numberOfExistingRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery, Long.class);
     }
 
@@ -1004,18 +1022,24 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
     if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
       TableSchema tableSchema = datasetSchemaService.getTableSchema(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
-      deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType);
+      deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType, false);
     }
     else{
       List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(importFileInDremioInfo.getDatasetId());
       for(TableSchemaIdNameVO tableInfo: tableSchemaIdNameVOS){
         TableSchema tableSchema = datasetSchemaService.getTableSchema(tableInfo.getIdTableSchema(), datasetSchemaId);
-        deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType);
+        deleteTableDataBeforeImport(importFileInDremioInfo, datasetSchemaId, tableSchema, datasetType, false);
       }
     }
   }
 
-  private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType) throws Exception {
+  private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType, Boolean removeFixedNumberData) throws Exception {
+    Boolean allReadOnlyFields = tableSchema.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchema::getReadOnly);
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && (tableSchema.getReadOnly() || allReadOnlyFields || (tableSchema.getFixedNumber() && !removeFixedNumberData))){
+      //we shouldn't remove data from tables that are read only or have all of their fields read only
+      return;
+    }
+
     S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchema.getNameTableSchema(), tableSchema.getNameTableSchema(), S3_IMPORT_FILE_PATH);
     S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchema.getNameTableSchema(), tableSchema.getNameTableSchema(), S3_TABLE_NAME_FOLDER_PATH);
     //path in s3 for the folder that contains the stored csv files
@@ -1025,10 +1049,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     LOG.info("Removing csv files for job {}", importFileInDremioInfo);
     removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder);
 
-    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && (BooleanUtils.isTrue(tableSchema.getToPrefill()))){
+    Boolean readOnlyFieldsExist = tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && BooleanUtils.isTrue(tableSchema.getToPrefill()) && readOnlyFieldsExist){
       //restore prefilled data
-      Long designDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId, null);
-      bigDataDatasetService.createPrefilledTables(designDatasetId, datasetSchemaId, importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getProviderId(), String.valueOf(tableSchema.getIdTableSchema()));
+      DesignDataset designDataset = datasetMetabaseService.getDesignDatasetByDataflowIdAndDatasetSchemaId(importFileInDremioInfo.getDataflowId(), datasetSchemaId);
+      bigDataDatasetService.createPrefilledTables(designDataset.getId(), datasetSchemaId, importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getProviderId(), String.valueOf(tableSchema.getIdTableSchema()));
       return;
     }
 

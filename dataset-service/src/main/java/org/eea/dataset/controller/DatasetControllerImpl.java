@@ -10,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
@@ -2971,7 +2972,8 @@ public class DatasetControllerImpl implements DatasetController {
     try{
       DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
-      Long designDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(datasetSchemaId, null);
+      DesignDataset designDataset = datasetMetabaseService.getDesignDatasetByDataflowIdAndDatasetSchemaId(dataSetMetabaseVO.getDataflowId(), datasetSchemaId);
+      Long designDatasetId = designDataset.getId();
       Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
 
       bigDataDatasetService.createPrefilledTables(designDatasetId, datasetSchemaId, datasetId, providerId, tableSchemaId);
