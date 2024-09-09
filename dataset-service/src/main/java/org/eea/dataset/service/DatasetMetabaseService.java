@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Future;
+
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
@@ -307,5 +309,14 @@ public interface DatasetMetabaseService {
    * @return the reportings by provider id and dataflow id
    */
   List<DataSetMetabaseVO> getDatasetsByDataflowIdAndProviderId(Long dataflowId, Long providerId);
+
+  /**
+   * Gets the design dataset
+   *
+   * @param dataflowId the dataflow id
+   * @param datasetSchemaId the datasetSchemaId
+   * @return the dataset
+   */
+  DesignDataset getDesignDatasetByDataflowIdAndDatasetSchemaId(Long dataflowId, String datasetSchemaId);
 
 }

@@ -38,4 +38,11 @@ public class ImportFileInDremioInfo {
         this.integrationId = integrationId;
         this.dataProviderCode = dataProviderCode;
     }
+
+    public ImportFileInDremioInfo(Long jobId, Long dataflowId, Long providerId, Long datasetId) {
+        this.jobId = jobId;
+        this.dataflowId = dataflowId;
+        this.providerId = providerId;
+        this.datasetId = datasetId;
+    }
 }
