@@ -275,4 +275,22 @@ public class DataCollectionControllerImpl implements DataCollectionController {
     return dataCollectionService.getProvidersPendingToCopyIntoEU(id);
   }
 
+  /**
+   * Find data collection id by dataset schema id
+   *
+   * @param datasetSchemaId the  dataset schema id
+   * @return the id
+   */
+  @Override
+  @GetMapping(value = "/private/datasetSchema/{datasetSchemaId}")
+  public Long findDataCollectionIdByDatasetSchemaId(@PathVariable("datasetSchemaId") String datasetSchemaId){
+   try{
+     return dataCollectionService.findDataCollectionIdByDatasetSchemaId(datasetSchemaId);
+   }
+   catch (Exception e){
+     LOG.error("Could not retrieve data collection id for dataset schema id {} Error: {}", datasetSchemaId, e.getMessage());
+     throw e;
+   }
+  }
+
 }

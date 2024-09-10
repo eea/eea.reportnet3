@@ -44,4 +44,5 @@ public interface DataProviderRepository extends PagingAndSortingRepository<DataP
           "VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM data_provider), ?, ?, ?)",
           nativeQuery = true)
   void saveDataProvider(String label, String code, Long groupId);
+
 }

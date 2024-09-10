@@ -196,6 +196,14 @@ public class S3ServiceImpl implements S3Service {
             case S3_TECHNICAL_ACCEPTANCE_FILE_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, fileName);
                 break;
+            case S3_ATTACHMENTS_DC_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder, tableName,
+                        dataProviderFolder, fileName);
+                break;
+            case S3_ATTACHMENTS_EU_PATH:
+                path = String.format(path, dataflowFolder, euDatasetFolder, tableName,
+                        dataProviderFolder, fileName);
+                break;
             default:
                 LOG.info("Wrong type value: {}", path);
                 path = null;
@@ -209,38 +217,38 @@ public class S3ServiceImpl implements S3Service {
         String dataflowFolder = formatFolderName(s3PathResolver.getDataflowId(), S3_DATAFLOW_PATTERN);
         String dataProviderFolder = formatFolderName(s3PathResolver.getDataProviderId(), S3_DATA_PROVIDER_PATTERN);
         String datasetFolder = formatFolderName(s3PathResolver.getDatasetId(), S3_DATASET_PATTERN);
+        String dataCollectionFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_DATA_COLLECTION_PATTERN);
+        String euDatasetFolder =  formatFolderName(s3PathResolver.getDatasetId(), S3_EU_DATASET_PATTERN);
 
         switch (path) {
             case S3_EXPORT_PREFILLED_TABLE_FILE_PATH:
             case S3_IMPORT_FILE_PATH:
             case S3_TABLE_NAME_PATH:
-                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
-                    s3PathResolver.getTableName(), s3PathResolver.getFilename());
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), s3PathResolver.getFilename());
             case S3_IMPORT_CSV_FILE_QUERY_PATH:
-                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
-                    datasetFolder, s3PathResolver.getTableName(), s3PathResolver.getFilename());
+                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName(), s3PathResolver.getFilename());
             case S3_REFERENCE_FOLDER_PATH:
                 return String.format(path, dataflowFolder);
             case S3_DATAFLOW_REFERENCE_FOLDER_PATH:
                 return String.format(path, dataflowFolder, s3PathResolver.getTableName());
             case S3_DATAFLOW_REFERENCE_QUERY_PATH:
-                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder,
-                    s3PathResolver.getTableName());
+                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, s3PathResolver.getTableName());
             case S3_EXPORT_PREFILLED_TABLE_AS_FOLDER_QUERY_PATH:
             case S3_TABLE_AS_FOLDER_QUERY_PATH:
                 if(BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())){
-                    return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
-                            datasetFolder, s3PathResolver.getTableName());
+                    return S3_ICEBERG_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
                 }
-                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder,
-                    datasetFolder, s3PathResolver.getTableName());
+                return S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
             case S3_IMPORT_TABLE_NAME_FOLDER_PATH:
             case S3_VALIDATION_TABLE_PATH:
             case S3_TABLE_NAME_FOLDER_PATH:
             case S3_ATTACHMENTS_TABLE_PATH:
             case S3_CURRENT_PATH:
-                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder,
-                    s3PathResolver.getTableName());
+                return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
+            case S3_ATTACHMENTS_DC_FOLDER_PATH:
+                return String.format(path, dataflowFolder, dataCollectionFolder, s3PathResolver.getTableName(), dataProviderFolder);
+            case S3_ATTACHMENTS_EU_FOLDER_PATH:
+                return String.format(path, dataflowFolder, euDatasetFolder, s3PathResolver.getTableName(), dataProviderFolder);
             default:
                 LOG.info("Wrong type value: {}", path);
                 break;

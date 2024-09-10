@@ -902,7 +902,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         //retrieve file from s3
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3);
+        if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+            //get correct providerId
+            s3PathResolver.setPath(S3_ATTACHMENTS_DC_PATH);
+        }
+        else if(datasetType.equals(DatasetTypeEnum.EUDATASET)){
+            s3PathResolver.setPath(S3_ATTACHMENTS_EU_PATH);
+        }
+        else{
+            s3PathResolver.setPath(S3_ATTACHMENTS_PATH);
+        }
         String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
         try {
             File attachmentInS3 = s3HelperPrivate.getFileFromS3(attachmentPathInS3, fileName, importPath, null);

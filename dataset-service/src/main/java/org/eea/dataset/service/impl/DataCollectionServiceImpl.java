@@ -1847,4 +1847,19 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 .anyMatch(fieldSchema -> Boolean.TRUE.equals(fieldSchema.getPk()))));
   }
 
+  /**
+   * Gets the data collection id by dataset schema id
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the data collection id
+   */
+  @Override
+  public Long findDataCollectionIdByDatasetSchemaId(String datasetSchemaId){
+    Optional<DataCollection> dataCollectionOptional = dataCollectionRepository.findFirstByDatasetSchema(datasetSchemaId);
+    if(dataCollectionOptional.isPresent()){
+      return dataCollectionOptional.get().getId();
+    }
+    return null;
+  }
+
 }
