@@ -132,7 +132,6 @@ export const useSetColumns = (
         {!isNil(value) && value !== '' && (
           <Button
             className={`${value === '' && 'p-button-animated-blink'} p-button-secondary-transparent`}
-            disabled={!isIcebergCreated}
             icon="export"
             iconPos="right"
             label={value}
