@@ -3,7 +3,7 @@
   padding: 1rem;
 }
 
-.userName {
+.userPersonalName {
   color: var(--subtitle-color);
   font-weight: bold;
   margin-top: 0.5rem;
@@ -11,9 +11,14 @@
 }
 
 .userMail {
-  margin-top: 0.1rem;
+  margin-top: 0.3rem;
   margin-bottom: 1rem;
   font-size: 1em;
-  font-weight: bold;
+  color: var(--main-font-color);
+}
+.userName {
+  margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+  font-size: 1em;
   color: var(--main-font-color);
 }

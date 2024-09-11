@@ -1,10 +1,5 @@
 package org.eea.ums.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.times;
-import java.util.ArrayList;
-import java.util.List;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
@@ -13,6 +8,10 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
+import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.redis.RedisLockService;
+import org.eea.lock.redis.RedisLockServiceImpl;
+import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.ums.service.SecurityProviderInterfaceService;
 import org.eea.ums.service.keycloak.model.GroupInfo;
 import org.eea.ums.service.keycloak.service.KeycloakConnectorService;
@@ -23,6 +22,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
 
 /**
  * The Class UserNationalCoordinatorServiceImplTest.
@@ -49,6 +62,15 @@ public class UserNationalCoordinatorServiceImplTest {
   @Mock
   private SecurityProviderInterfaceService securityProviderInterfaceService;
 
+  @Mock
+  private KafkaSenderUtils kafkaSenderUtils;
+
+  @Mock
+  private RedisTemplate<String, String> redisTemplate;
+
+  @Mock
+  private RedisLockService redisLockService = new RedisLockServiceImpl(redisTemplate);
+
   /**
    * Sets the up.
    *
@@ -57,6 +79,14 @@ public class UserNationalCoordinatorServiceImplTest {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.openMocks(this);
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken("userId", "123", new HashSet<>());
+    Map<String, String> details = new HashMap<>();
+    details.put(AuthenticationDetails.USER_ID, "userId");
+    authentication.setDetails(details);
+    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    Mockito.when(redisLockService.checkAndAcquireLock(Mockito.any(), Mockito.any(), Mockito.anyLong())).thenReturn(true);
   }
 
   /**
@@ -82,6 +112,7 @@ public class UserNationalCoordinatorServiceImplTest {
    */
   @Test
   public void createNationalCoordinatorTest() throws EEAException {
+
     UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
     userNC.setCountryCode("ES");
     userNC.setEmail("abc@abc.com");
@@ -106,15 +137,15 @@ public class UserNationalCoordinatorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test(expected = ResponseStatusException.class)
   public void createNationalCoordinatorUserNotFoundTest() throws EEAException {
     UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
     userNC.setCountryCode("ES");
     userNC.setEmail("abc@abc.com");
     try {
       userNationalCoordinatorServiceImpl.createNationalCoordinator(userNC);
-    } catch (EEAException e) {
-      assertEquals(String.format(EEAErrorMessage.USER_NOTFOUND, userNC.getEmail()), e.getMessage());
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.USER_NOTFOUND, userNC.getEmail()), e.getReason());
       throw e;
     }
   }
@@ -124,15 +155,15 @@ public class UserNationalCoordinatorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test(expected = ResponseStatusException.class)
   public void createNationalCoordinatorNotEmailTest() throws EEAException {
     UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
     userNC.setCountryCode("ES");
     userNC.setEmail("abc");
     try {
       userNationalCoordinatorServiceImpl.createNationalCoordinator(userNC);
-    } catch (EEAException e) {
-      assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, userNC.getEmail()), e.getMessage());
+    } catch (ResponseStatusException e) {
+      assertEquals(String.format(EEAErrorMessage.NOT_EMAIL, userNC.getEmail()), e.getReason());
       throw e;
     }
   }
@@ -143,13 +174,13 @@ public class UserNationalCoordinatorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test(expected = ResponseStatusException.class)
   public void createNationalCoordinatorExceptionUserTest() throws EEAException {
     UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
     try {
       userNationalCoordinatorServiceImpl.createNationalCoordinator(userNC);
-    } catch (EEAException e) {
-      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getMessage());
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.USER_REQUEST_NOTFOUND, e.getReason());
       throw e;
     }
   }
@@ -160,7 +191,7 @@ public class UserNationalCoordinatorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test(expected = ResponseStatusException.class)
   public void createNationalCoordinatorCountryNotFoundTest() throws EEAException {
     UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
     userNC.setCountryCode("ES");
@@ -169,8 +200,8 @@ public class UserNationalCoordinatorServiceImplTest {
     Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any())).thenReturn(userRep);
     try {
       userNationalCoordinatorServiceImpl.createNationalCoordinator(userNC);
-    } catch (EEAException e) {
-      assertEquals(EEAErrorMessage.COUNTRY_CODE_NOTFOUND, e.getMessage());
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.COUNTRY_CODE_NOTFOUND, e.getReason());
       throw e;
     }
   }
@@ -205,7 +236,7 @@ public class UserNationalCoordinatorServiceImplTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = EEAException.class)
+  @Test(expected = ResponseStatusException.class)
   public void deleteNationalCoordinatorCountryNotFoundTest() throws EEAException {
     UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
     userNC.setCountryCode("ES");
@@ -214,8 +245,8 @@ public class UserNationalCoordinatorServiceImplTest {
     Mockito.when(keycloakConnectorService.getUsersByEmail(Mockito.any())).thenReturn(userRep);
     try {
       userNationalCoordinatorServiceImpl.deleteNationalCoordinator(userNC);
-    } catch (EEAException e) {
-      assertEquals(EEAErrorMessage.COUNTRY_CODE_NOTFOUND, e.getMessage());
+    } catch (ResponseStatusException e) {
+      assertEquals(EEAErrorMessage.COUNTRY_CODE_NOTFOUND, e.getReason());
       throw e;
     }
   }

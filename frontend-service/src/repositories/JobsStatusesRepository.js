@@ -43,6 +43,39 @@ export const JobsStatusesRepository = {
       })
     }),
 
+  getJobsHistory: async ({
+    pageNum,
+    numberRows,
+    sortOrder,
+    sortField = '',
+    jobId,
+    jobType,
+    dataflowId,
+    dataflowName,
+    providerId,
+    datasetId,
+    datasetName,
+    creatorUsername,
+    jobStatus
+  }) =>
+    await HTTPRequester.get({
+      url: getUrl(JobsStatusesConfig.getJobsHistory, {
+        pageNum,
+        numberRows,
+        sortOrder,
+        sortField,
+        jobId,
+        jobType,
+        dataflowId,
+        dataflowName,
+        providerId,
+        datasetId,
+        datasetName,
+        creatorUsername,
+        jobStatus
+      })
+    }),
+
   cancelJob: async jobId =>
     await HTTPRequester.update({
       url: getUrl(JobsStatusesConfig.cancelJob, {

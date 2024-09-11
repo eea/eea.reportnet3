@@ -46,6 +46,7 @@ import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
@@ -132,9 +133,17 @@ export const BigButtonList = ({
   const { resetFiltersState: resetManualAcceptanceDatasetsFiltersState } = useFilters('manualAcceptanceDatasets');
   const { resetFiltersState: resetHistoricReleasesFiltersState } = useFilters('historicReleases');
 
-  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  const changeIsActiveButtonState = buttonState => {
+    setIsActiveButton(buttonState);
+    LocalUserStorageUtils.setPropertyToSessionStorage({
+      isCreateDataCollectionsButtonActive: buttonState,
+      dataflowId: dataflowId
+    });
+  };
+
+  useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
-  useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], setIsActiveButton, true);
+  useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(
     ['COPY_DATA_TO_EUDATASET_COMPLETED_EVENT', 'COPY_DATA_TO_EUDATASET_FAILED_EVENT'],
     setIsCopyDataCollectionToEUDatasetLoading,
@@ -168,6 +177,21 @@ export const BigButtonList = ({
   useEffect(() => {
     getExpirationDate();
   }, [dataflowState.obligations?.expirationDate]);
+
+  useEffect(() => {
+    const sessionStorageButtonState = LocalUserStorageUtils.getPropertyFromSessionStorage(
+      'isCreateDataCollectionsButtonActive'
+    );
+    const sessionStorageDataflowId = LocalUserStorageUtils.getPropertyFromSessionStorage('dataflowId');
+    if (sessionStorageButtonState === false && sessionStorageDataflowId === dataflowId) {
+      setIsActiveButton(false);
+    } else {
+      LocalUserStorageUtils.setPropertyToSessionStorage({
+        isCreateDataCollectionsButtonActive: undefined,
+        dataflowId: undefined
+      });
+    }
+  }, []);
 
   const checkShowPublicInfo = (
     <div style={{ float: 'left' }}>
@@ -289,7 +313,7 @@ export const BigButtonList = ({
 
     notificationContext.add({ type: 'CREATE_DATA_COLLECTION_INIT', content: {} });
 
-    setIsActiveButton(false);
+    changeIsActiveButtonState(false);
 
     try {
       return await DataCollectionService.create(
@@ -306,7 +330,7 @@ export const BigButtonList = ({
       } = await getMetadata({ dataflowId });
 
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
-      setIsActiveButton(true);
+      changeIsActiveButtonState(true);
     } finally {
       setDataCollectionDialog(false);
     }
@@ -335,6 +359,7 @@ export const BigButtonList = ({
       setInvalidAndDisabledRulesAmount({ invalidRules, disabledRules });
       setEmptyTable(emptyTable);
       setIsQCsNotValidWarningVisible(true);
+      changeIsActiveButtonState(true);
       setIsActiveButton(true);
     } else if (notificationContext.hidden.find(notification => notification.key === 'EMPTY_TABLE_EVENT')) {
       setEmptyTable(true);
@@ -369,7 +394,7 @@ export const BigButtonList = ({
 
   const onUpdateDataCollection = async () => {
     setIsUpdateDataCollectionDialogVisible(false);
-    setIsActiveButton(false);
+    changeIsActiveButtonState(false);
 
     try {
       return await DataCollectionService.update(dataflowId);
@@ -475,7 +500,7 @@ export const BigButtonList = ({
   const getDate = () => new Date(dayjs(dataCollectionDueDate).utc(true).endOf('day').valueOf()).getTime();
 
   const onCreateDataCollectionsWithNotValids = async () => {
-    setIsActiveButton(false);
+    changeIsActiveButtonState(false);
 
     try {
       notificationContext.removeHiddenByKey('DISABLE_RULES_ERROR_EVENT');
@@ -486,7 +511,7 @@ export const BigButtonList = ({
         dataflow: { name: dataflowName }
       } = await getMetadata({ dataflowId });
       notificationContext.add({ type: 'CREATE_DATA_COLLECTION_ERROR', content: { dataflowId, dataflowName } }, true);
-      setIsActiveButton(true);
+      changeIsActiveButtonState(true);
     } finally {
       setIsQCsNotValidWarningVisible(false);
       setEmptyTable(false);

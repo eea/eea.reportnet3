@@ -42,10 +42,11 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const ManageLeadReporters = ({
   dataflowId,
   dataflowType,
+  leadReportersDeleted = false,
   representativesImport = false,
   setDataProviderSelected,
   selectedDataProviderGroup,
-  setFormHasRepresentatives,
+  setFormHasLeadReporters,
   setHasRepresentativesWithoutDatasets,
   setRepresentativeImport
 }) => {
@@ -115,6 +116,10 @@ export const ManageLeadReporters = ({
   }, [representativesImport]);
 
   useEffect(() => {
+    if (leadReportersDeleted) getInitialData(true);
+  }, [leadReportersDeleted]);
+
+  useEffect(() => {
     getInitialData();
   }, [dataflowType, formState.refresher]);
 
@@ -131,7 +136,11 @@ export const ManageLeadReporters = ({
 
   useEffect(() => {
     if (!isEmpty(formState.representatives)) {
-      setFormHasRepresentatives(formState.representatives.length > 1);
+      const representativesHasLeadReporters = formState.representatives.filter(
+        representative => representative.leadReporters.filter(leadReporter => leadReporter.id !== 'empty').length > 0
+      );
+
+      setFormHasLeadReporters(!isEmpty(representativesHasLeadReporters));
     }
   }, [formState.representatives]);
 
@@ -159,13 +168,13 @@ export const ManageLeadReporters = ({
 
   const createUnusedOptionsList = () => formDispatcher({ type: 'CREATE_UNUSED_OPTIONS_LIST' });
 
-  const getAllDataProviders = async () => {
+  const getAllDataProviders = async reportersDeleted => {
     const { representatives, selectedDataProviderGroup } = formState;
     try {
       const responseAllDataProviders = await RepresentativeService.getDataProviders(selectedDataProviderGroup);
 
       const providersNoSelect = [...responseAllDataProviders];
-      if (representatives.length <= responseAllDataProviders.length) {
+      if (representatives.length <= responseAllDataProviders.length || reportersDeleted) {
         responseAllDataProviders.unshift({ dataProviderId: '', label: ' Select...' });
       }
 
@@ -181,7 +190,7 @@ export const ManageLeadReporters = ({
   const getDataProviderGroup = async () =>
     formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
 
-  const getInitialData = async () => {
+  const getInitialData = async reportersDeleted => {
     try {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
       switch (dataflowType) {
@@ -189,6 +198,7 @@ export const ManageLeadReporters = ({
           await getDataProviderGroup();
           break;
         case config.dataflowType.CITIZEN_SCIENCE.value:
+          formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
           await getGroupOrganizations();
           break;
         default:
@@ -204,7 +214,7 @@ export const ManageLeadReporters = ({
     }
 
     if (!isEmpty(formState.representatives)) {
-      await getAllDataProviders();
+      await getAllDataProviders(reportersDeleted);
       createUnusedOptionsList();
     }
   };
@@ -518,7 +528,10 @@ export const ManageLeadReporters = ({
   };
 
   const renderRepresentativesDropdown = () => {
-    if (TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value)) {
+    if (
+      TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ||
+      TextUtils.areEquals(dataflowType, config.dataflowType.CITIZEN_SCIENCE.value)
+    ) {
       return (
         <Dropdown
           ariaLabel="dataProviders"

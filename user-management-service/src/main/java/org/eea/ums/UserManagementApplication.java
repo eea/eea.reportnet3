@@ -1,12 +1,12 @@
 package org.eea.ums;
 
+import org.eea.lock.redis.EnableRedisLock;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-
 
 /**
  * The Class org.eea.ums.configuration.UserManagementApplication.
@@ -16,6 +16,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableCircuitBreaker
 @EnableEEASwagger
 @EnableCaching
+@EnableRedisLock
 public class UserManagementApplication {
 
   /**

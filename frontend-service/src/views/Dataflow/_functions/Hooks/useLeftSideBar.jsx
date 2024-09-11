@@ -34,9 +34,15 @@ export const useLeftSideBar = (
       const editBtn = {
         className: 'dataflow-edit-help-step',
         icon: 'edit',
-        isVisible: buttonsVisibility.editBtn,
+        isVisible: dataProviderId || !buttonsVisibility.editBtn ? false : true,
         label: 'edit',
-        onClick: () => manageDialogs('isReportingDataflowDialogVisible', true),
+        onClick: () =>
+          manageDialogs(
+            dataflowState.dataflowType === 'CITIZEN_SCIENCE'
+              ? 'isCitizenScienceDataflowDialogVisible'
+              : 'isReportingDataflowDialogVisible',
+            true
+          ),
         title: 'edit'
       };
 

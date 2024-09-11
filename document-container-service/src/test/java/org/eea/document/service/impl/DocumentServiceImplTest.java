@@ -78,7 +78,6 @@ public class DocumentServiceImplTest {
    */
   @Test
   public void uploadDocumentExceptionTest() throws EEAException, IOException {
-    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     try {
       documentService.uploadDocument(fileMock.getInputStream(), null, null, null, 1L);
     } catch (EEAException e) {
@@ -95,7 +94,6 @@ public class DocumentServiceImplTest {
   @Test
   public void uploadDocumentException2Test() throws EEAException, IOException {
     fileMock = new MockMultipartFile("file", "fileOriginal", null, (byte[]) null);
-    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     try {
       documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
           fileMock.getOriginalFilename(), null, 1L);
@@ -114,7 +112,6 @@ public class DocumentServiceImplTest {
   @Test
   public void uploadDocumentException3Test() throws EEAException, RepositoryException, IOException {
     when(dataflowController.insertDocument(Mockito.any())).thenReturn(null);
-    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     try {
       documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
           fileMock.getOriginalFilename(), documentVO, 1L);
@@ -132,7 +129,6 @@ public class DocumentServiceImplTest {
    */
   @Test
   public void uploadDocumentException4Test() throws EEAException, RepositoryException, IOException {
-    doNothing().when(oakRepositoryUtils).cleanUp(Mockito.any(), Mockito.any());
     try {
       documentService.uploadDocument(fileMock.getInputStream(), fileMock.getContentType(),
           "filename", documentVO, 1L);

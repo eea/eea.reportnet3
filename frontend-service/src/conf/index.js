@@ -15,9 +15,6 @@ import languageCode from './language.code.json';
 import notifications from './notifications.json';
 import permissions from './permissions.json';
 import primeIcons from './prime.icons.json';
-import providerGroup from './providerGroup.json';
-import providerGroupDev from './providerGroupDev.json';
-import providerGroupTest from './providerGroupTest.json';
 import storage from './storage.config.json';
 import systemNotifications from './systemNotifications.json';
 import theme from './theme.config.json';
@@ -38,6 +35,7 @@ export const config = {
   GEOGRAPHICAL_LONG_COORD_3035: { min: -16.1, max: 40.18 },
   SQL_SENTENCE_LOW_COST: 20,
   SQL_SENTENCE_HIGH_COST: 50,
+  MAX_ATTACHMENT_SIZE_FEEDBACK: 100 * 1024 * 1024,
   MAX_ATTACHMENT_SIZE: 20 * 1024 * 1024,
   IMPORT_FILE_DELIMITER: ',',
   IMPORT_ERROR_LIFETIME: 120000,
@@ -59,9 +57,6 @@ export const config = {
   notifications: notifications,
   systemNotifications: systemNotifications,
   permissions: permissions,
-  providerGroup: providerGroup,
-  providerGroupDev: providerGroupDev,
-  providerGroupTest: providerGroupTest,
   storage: storage,
   datasetStatus: datasetStatus,
   theme: theme,

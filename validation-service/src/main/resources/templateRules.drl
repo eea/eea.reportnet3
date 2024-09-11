@@ -17,6 +17,8 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.validation.util.*;
 import java.util.regex.*;
 import java.util.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang3.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,28 +43,32 @@ end template
 function boolean isCodelist( String value , String codelistItems){
 	if(!isBlank(value)){
 		return true;
-	}	
+	}
 	return ValidationDroolsUtils.codelistValidate(value,codelistItems,true);
 }
 
 function boolean isMultiSelectCodelistValidate( String value , String codelistItems){
 	if(!isBlank(value)){
 		return true;
-	}	
+	}
 	return ValidationDroolsUtils.multiSelectCodelistValidate(value,codelistItems);
 }
 
 function boolean isCodelistInsensitive( String value ,  String codelistItems){
 	if(!isBlank(value)){
 		return true;
-	}	
+	}
 	return ValidationDroolsUtils.codelistValidate(value,codelistItems,false);
 }
 
 //////////////////////////////////////////VALIDATION EMPTY VALUE////////////////////////////////////////////////////////////
 function boolean isBlank(String value){
 	return !StringUtils.isBlank(value);
-} 
+}
+
+function boolean isNotEmpty(String value) {
+	return !StringUtils.isEmpty(value);
+}
 
 //////////////////////////////////////////VALIDATION EMPTY POINT VALUE////////////////////////////////////////////////////////////
 function boolean isBlankPoint(FieldValue fieldValue){
@@ -77,52 +83,53 @@ function boolean isBlankPoint(FieldValue fieldValue){
     } else {
     	return false;
     }
-} 
+}
 
 //////////////////////////////////////////VALIDATION BOOLEAN////////////////////////////////////////////////////////////
 function boolean isBoolean(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
-	}	
+	}
 	if((!value.equalsIgnoreCase("TRUE") && !value.equalsIgnoreCase("FALSE"))){
 		return false;
 	}
 		return true;
-} 
+}
 
 //////////////////////////////////////////VALIDATION DATE////////////////////////////////////////////////////////////
 function boolean isDateYYYYMMDD( String value ){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
-	}	
-	
- SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
- 	if(!isBlank(value)){
+	}
+
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+ 	if(!isNotEmpty(value)){
 		return true;
 	}
  	Date dateDrools = null;
     try {
       sdf.setLenient(false);
       dateDrools = sdf.parse(value);
+      LocalDate fieldDate = LocalDate.parse(value, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     } catch( Exception e ){
         return false;
     }
-    
+
     return true;
 }
 
 //////////////////////////////////////////VALIDATION DATETIME////////////////////////////////////////////////////////////
 function boolean isDateTime( String value ){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
-    
+
 	if(!value.matches(".+[zZ0-9]$")){
         return false;
     }
-	
- SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
- 	if(!isBlank(value)){
+
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+ 	if(!isNotEmpty(value)){
 		return true;
 	}
  	Date dateDrools = null;
@@ -132,55 +139,55 @@ function boolean isDateTime( String value ){
     } catch( Exception e ){
         return false;
     }
-    
+
     return true;
 }
 
 //////////////////////////////////////////VALIDATION NUMBER_INTEGER///////////////////////////////////////////////////////////
 function boolean isNumberInteger(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
     try {
         Long.valueOf(value);
         return true;
     } catch( Exception e ){
-        return false;        
+        return false;
     }
  }
 
 //////////////////////////////////////////VALIDATION NUMBER_DECIMAL///////////////////////////////////////////////////////////
 function boolean isNumberDecimal(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
     try {
         Double.valueOf( value );
         return true;
     } catch( Exception e ){
-        return false;        
+        return false;
     }
  }
- 
+
 //////////////////////////////////////////VALIDATION URL///////////////////////////////////////////////////////////
-function boolean isURL( String value ){	
-	if(!isBlank(value)){
+function boolean isURL( String value ){
+	if(!isNotEmpty(value)){
 		return true;
 	}
-	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_URL");	    
+	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_URL");
 }
 
 //////////////////////////////////////////VALIDATION EMAIL///////////////////////////////////////////////////////////
 function boolean isEmail(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
-	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_EMAIL");		
+	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_EMAIL");
  }
- 
+
  //////////////////////////////////////////VALIDATION PHONE///////////////////////////////////////////////////////////
 function boolean isPhone(String value){
-	if(!isBlank(value)){
+	if(!isNotEmpty(value)){
 		return true;
 	}
 	return ValidationDroolsUtils.validateRegExpression(value,"REG_EXP_PHONE");

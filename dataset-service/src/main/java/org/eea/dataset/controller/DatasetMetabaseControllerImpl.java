@@ -517,10 +517,11 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @ApiOperation(value = "get lists of dataset ids by dataflow id and provider Id", hidden = true)
   @GetMapping("/private/getDatasetIdsByDataflowIdAndDataProviderId")
   public List<Long> getDatasetIdsByDataflowIdAndDataProviderId(
-          @ApiParam(type = "Long", value = "dataflow Id",
-                  example = "0") @RequestParam("dataflowId") Long dataflowId,
-          @ApiParam(type = "Long", value = "provider Id",
-                  example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
+      @ApiParam(type = "Long", value = "dataflow Id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "provider Id",
+          example = "0") @RequestParam("dataProviderId") Long dataProviderId) {
+    LOG.info("getDatasetIdsByDataflowIdAndDataProviderId started");
     return datasetMetabaseService.getDatasetIdsByDataflowIdAndDataProviderId(dataflowId,
             dataProviderId);
   }

@@ -106,13 +106,8 @@ export const ReferenceDataflow = () => {
 
   const getLeftSidebarButtonsVisibility = () => ({
     apiKeyBtn: dataflowState.isCustodian,
-    datasetsInfoBtn: dataflowState.isAdmin,
-    editBtn:
-      (dataflowState.status === config.dataflowStatus.DESIGN && dataflowState.isCustodian) || dataflowState.isAdmin,
-    exportBtn:
-      dataflowState.bigData &&
-      (dataflowState.isCustodian || dataflowState.isAdmin) &&
-      dataflowState.designDatasetSchemas.length > 0,
+    datasetsInfoBtn: dataflowState.isAdmin || dataflowState.isCustodian,
+    editBtn: dataflowState.isCustodian || dataflowState.isAdmin,
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:
@@ -269,6 +264,10 @@ export const ReferenceDataflow = () => {
 
     try {
       const referenceDataflow = await ReferenceDataflowService.get(referenceDataflowId);
+
+      if (referenceDataflow.type !== 'REFERENCE') {
+        navigate(getUrl(routes.DATAFLOW, { dataflowId: referenceDataflowId }, true));
+      }
 
       dataflowDispatch({
         type: 'LOADING_SUCCESS',
@@ -498,7 +497,11 @@ export const ReferenceDataflow = () => {
             resetDatasetInfoFiltersState();
           }}
           visible={dataflowState.isDatasetsInfoDialogVisible}>
-          <DatasetsInfo dataflowId={referenceDataflowId} dataflowType={dataflowState.dataflowType} />
+          <DatasetsInfo
+            dataflowId={referenceDataflowId}
+            dataflowType={dataflowState.dataflowType}
+            isReferenceDataset={true}
+          />
         </Dialog>
       )}
     </div>

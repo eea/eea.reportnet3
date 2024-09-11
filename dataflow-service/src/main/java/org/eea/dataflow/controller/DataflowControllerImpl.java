@@ -58,15 +58,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.Api;
@@ -521,26 +513,28 @@ public class DataflowControllerImpl implements DataFlowController {
     String message = "";
     HttpStatus status = HttpStatus.OK;
     boolean isAdmin = dataflowService.isAdmin();
+    boolean isCustodian = dataflowService.isCustodian();
+    boolean isAdminOrCustodian = isAdmin || isCustodian;
 
-    if (!isAdmin && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
-            && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
+    if (!isAdminOrCustodian && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+        && null != dataFlowVO.getDeadlineDate() && (dataFlowVO.getDeadlineDate().before(dateToday)
             || dataFlowVO.getDeadlineDate().equals(dateToday))) {
       message = EEAErrorMessage.DATE_AFTER_INCORRECT;
       status = HttpStatus.BAD_REQUEST;
     }
 
-    if (!isAdmin && status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
-            || StringUtils.isBlank(dataFlowVO.getDescription()))) {
+    if (!isAdminOrCustodian && status == HttpStatus.OK && (StringUtils.isBlank(dataFlowVO.getName())
+        || StringUtils.isBlank(dataFlowVO.getDescription()))) {
       message = EEAErrorMessage.DATAFLOW_DESCRIPTION_NAME;
       status = HttpStatus.BAD_REQUEST;
     } else {
-      if (isAdmin && status == HttpStatus.OK && StringUtils.isBlank(dataFlowVO.getName())) {
+      if (isAdminOrCustodian && status == HttpStatus.OK && StringUtils.isBlank(dataFlowVO.getName())) {
         message = EEAErrorMessage.DATAFLOW_NAME_EMPTY;
         status = HttpStatus.BAD_REQUEST;
       }
     }
 
-    if (status == HttpStatus.OK && !isAdmin) {
+    if (status == HttpStatus.OK && !isAdminOrCustodian) {
       try {
         DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
         if (!TypeStatusEnum.DESIGN.equals(dataflow.getStatus())
@@ -560,8 +554,8 @@ public class DataflowControllerImpl implements DataFlowController {
       }
     }
 
-    if (!isAdmin && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
-            && status == HttpStatus.OK && (null == dataFlowVO.getObligation()
+    if (!isAdminOrCustodian && !TypeDataflowEnum.REFERENCE.equals(dataFlowVO.getType())
+        && status == HttpStatus.OK && (null == dataFlowVO.getObligation()
             || null == dataFlowVO.getObligation().getObligationId())) {
       message = EEAErrorMessage.DATAFLOW_OBLIGATION;
       status = HttpStatus.BAD_REQUEST;
@@ -571,7 +565,7 @@ public class DataflowControllerImpl implements DataFlowController {
     if (TypeDataflowEnum.BUSINESS.equals(dataFlowVO.getType()) && status == HttpStatus.OK) {
       try {
         DataFlowVO dataflow = dataflowService.getMetabaseById(dataFlowVO.getId());
-        if ((!isAdmin && !TypeStatusEnum.DESIGN.equals(dataflow.getStatus()))) {
+        if ((!isAdminOrCustodian && !TypeStatusEnum.DESIGN.equals(dataflow.getStatus()))) {
           message = EEAErrorMessage.DATAFLOW_UPDATE_ERROR;
           status = HttpStatus.BAD_REQUEST;
         }
@@ -898,8 +892,10 @@ public class DataflowControllerImpl implements DataFlowController {
 
     try {
       dataflows = dataflowService.getDataflowsByDataProviderIds(dataProviderIds);
+      LOG.info("getDataflowsByDataProviderIds finished");
       dataProviderIds.stream().forEach(
               dataProvider -> result.addAll(dataflowService.getUserRoles(dataProvider, dataflows)));
+      LOG.info("streaming getDataflowsByDataProviderIds finished");
     } catch (Exception e){
       LOG.error("Unexpected error! Could not retrieve dataflows by providerIds. Message: {}", e.getMessage());
       throw e;
@@ -1012,7 +1008,7 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("hasAnyRole('ADMIN')")
+  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
   @GetMapping("/{dataflowId}/datasetsSummary")
   @ApiOperation(value = "Get a summary of the information of all the dataset types of a dataflow",
           hidden = true)

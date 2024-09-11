@@ -120,8 +120,9 @@ public interface DatasetService {
    *
    * @param tableSchemaId the id table schema
    * @param datasetId the dataset id
+   * @param deleteReferenceTables the deleteReferenceTables
    */
-  void deleteTableBySchema(String tableSchemaId, @DatasetId Long datasetId);
+  void deleteTableBySchema(String tableSchemaId, @DatasetId Long datasetId, Boolean deleteReferenceTables);
 
   /**
    * Creates the records.

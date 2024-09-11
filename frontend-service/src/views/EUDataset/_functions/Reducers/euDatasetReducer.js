@@ -35,6 +35,9 @@ export const euDatasetReducer = (state, { type, payload }) => {
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
 
+    case 'MANAGE_DIALOGS':
+      return { ...state, [payload.dialog]: payload.value, [payload.secondDialog]: payload.secondValue };
+
     case 'ON_HIGHLIGHT_REFRESH':
       return { ...state, isRefreshHighlighted: payload.value };
 

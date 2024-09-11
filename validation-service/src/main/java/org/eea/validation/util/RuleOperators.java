@@ -632,7 +632,8 @@ public class RuleOperators {
   public static boolean recordStringMatches(String fieldSchemaId, String regex) {
     try {
       String value = getValue(fieldSchemaId);
-      return value.isEmpty() || value.matches(replaceKeywords(regex));
+      boolean result = value.isEmpty() || value.matches(replaceKeywords(regex));
+      return result;
     } catch (PatternSyntaxException e) {
       return false;
     } catch (Exception e) {

@@ -4,7 +4,7 @@ export const reportingDataflowReducer = (state, { type, payload }) => {
       return { ...state, ...payload };
 
     case 'ON_LOAD_DATA':
-      return { ...state, name: payload.name, description: payload.description };
+      return { ...state, name: payload.name, description: payload.description, providerGroup: payload.providerGroup };
 
     case 'ON_LOAD_OBLIGATION':
       return { ...state, obligation: { id: payload.id, title: payload.title } };

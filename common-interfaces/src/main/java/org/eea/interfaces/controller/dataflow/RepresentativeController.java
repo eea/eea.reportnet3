@@ -40,8 +40,16 @@ public interface RepresentativeController {
    *
    * @param dataProviderVO the provider to be created
    */
-  @PostMapping("/create-provider")
+  @PostMapping("/provider/create")
   void createProvider(@RequestBody DataProviderVO dataProviderVO) throws Exception;
+
+  /**
+   * Updates a provider.
+   *
+   * @param dataProviderVO the provider to be created
+   */
+  @PutMapping("/provider/update")
+  void updateProvider(@RequestBody DataProviderVO dataProviderVO) throws Exception;
 
   /**
    * Find all data providers
@@ -63,12 +71,14 @@ public interface RepresentativeController {
                                        @RequestParam(value = "groupId", required = false) Integer groupId,
                                        @RequestParam(value = "label", required = false) String label);
 
-  /**
-   * Find all data provider by group id.
-   *
-   * @param groupId the group id
-   * @return the list
-   */
+  @GetMapping(value = "/dataProviderGroups", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataProviderCodeVO> findAllDataProviderGroups();
+    /**
+     * Find all data provider by group id.
+     *
+     * @param groupId the group id
+     * @return the list
+     */
   @GetMapping(value = "/dataProvider/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataProviderVO> findAllDataProviderByGroupId(@PathVariable("groupId") Long groupId);
 
@@ -136,6 +146,13 @@ public interface RepresentativeController {
   void deleteRepresentative(@PathVariable("dataflowRepresentativeId") Long dataflowRepresentativeId,
       @PathVariable("dataflowId") Long dataflowId);
 
+  /**
+   * Delete all representatives for a dataflow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @DeleteMapping(value = "/dataflow/{dataflowId}")
+  void deleteRepresentatives(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Find data provider by id.

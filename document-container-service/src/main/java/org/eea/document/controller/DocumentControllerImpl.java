@@ -7,6 +7,12 @@ import java.util.List;
 import javax.ws.rs.Produces;
 
 import org.apache.commons.lang.BooleanUtils;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import feign.FeignException;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.document.service.DocumentService;
 import org.eea.document.service.DocumentServiceDL;
@@ -44,12 +50,11 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import feign.FeignException;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
+
+import javax.ws.rs.Produces;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * The type Document controller.
@@ -525,11 +530,10 @@ public class DocumentControllerImpl implements DocumentController {
       responseContainer = "List", hidden = false,
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN, STEWARD SUPPORT")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
-  public List<DocumentVO> getAllDocumentsByDataflow(
+  public List<DocumentVO> getAllDocumentsByDataflow(@ApiParam(value = "Provider Id", example = "abc") @RequestParam(name = "providerId",
+      required = false) final Long providerId,
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-    List<DocumentVO> documents = new ArrayList<>();
-    documents = dataflowController.getAllDocumentsByDataflowId(dataflowId);
-    return documents;
+    return dataflowController.getAllDocumentsByDataflowId(dataflowId);
   }
 
   /**
@@ -547,8 +551,31 @@ public class DocumentControllerImpl implements DocumentController {
       responseContainer = "List", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public List<DocumentVO> getAllDocumentsByDataflowLegacy(
+      @ApiParam(value = "Provider Id", example = "abc") @RequestParam(name = "providerId",
+          required = false) final Long providerId,
       @PathVariable("dataflowId") Long dataflowId) {
-    return this.getAllDocumentsByDataflow(dataflowId);
+    return this.getAllDocumentsByDataflow(providerId, dataflowId);
+  }
+
+  /**
+   * Clone all documents from the origin dataflow to the destination dataflow.
+   *
+   * @param originDataflowId The ID of the origin dataflow.
+   * @param destinationDataflowId The ID of the destination dataflow.
+   */
+  @Override
+  @HystrixCommand
+  @PostMapping(value = "/private/cloneAllDocuments")
+  @ApiOperation(value = "clone all documents from origin to destination dataflow", hidden = true)
+  public void cloneAllDocuments(
+          @RequestParam("originDataflowId") final Long originDataflowId,
+          @RequestParam("destinationDataflowId") final Long destinationDataflowId) throws Exception {
+      try {
+          documentService.cloneAllDocumentsInDataflow(originDataflowId, destinationDataflowId);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error cloning documents from dataflowId {} to dataflowId {} Message: {}", originDataflowId, destinationDataflowId, e.getMessage());
+        throw e;
+      }
   }
 
 

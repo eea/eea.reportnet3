@@ -280,7 +280,7 @@ export const ActionsToolbar = ({
           icon={actionsContext.exportTableProcessing ? 'spinnerAnimate' : 'export'}
           id="buttonExportTable"
           label={
-            actionsContext.exportTableProcessing
+            actionsContext.isInProgress && actionsContext.exportTableProcessing
               ? resourcesContext.messages['exportInProgress']
               : resourcesContext.messages['exportTable']
           }
@@ -465,9 +465,9 @@ export const ActionsToolbar = ({
             actionsContext.validateDatasetProcessing
           }
           hasWritePermissions={hasWritePermissions}
-          icon={actionsContext.deleteTableProcessing ? 'spinnerAnimate' : 'trash'}
+          icon={actionsContext.isInProgress && actionsContext.deleteTableProcessing ? 'spinnerAnimate' : 'trash'}
           label={
-            actionsContext.deleteTableProcessing
+            actionsContext.isInProgress && actionsContext.deleteTableProcessing
               ? resourcesContext.messages['deleteInProgress']
               : resourcesContext.messages['deleteTable']
           }

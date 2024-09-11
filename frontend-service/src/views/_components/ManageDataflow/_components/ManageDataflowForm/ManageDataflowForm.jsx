@@ -1,6 +1,9 @@
-import { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
 import styles from './ManageDataflowForm.module.scss';
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 
 import { config } from 'conf';
 
@@ -14,6 +17,7 @@ import { useInputTextFocus } from 'views/_functions/Hooks/useInputTextFocus';
 
 import { DataflowService } from 'services/DataflowService';
 import { CitizenScienceDataflowService } from 'services/CitizenScienceDataflowService';
+import { RepresentativeService } from 'services/RepresentativeService';
 import { UserService } from 'services/UserService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -21,16 +25,22 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { Dropdown } from 'views/_components/Dropdown';
 
 export const ManageDataflowForm = forwardRef(
   (
     {
       dataflowId,
+      dataProviderGroup,
+      deliveryDate,
       dialogName,
       getData,
+      isAdmin,
       isCitizenScienceDataflow,
+      isDataflowOpen,
       isEditing,
       metadata,
+      onChangeDate,
       onCreate,
       onEdit,
       onResetData,
@@ -60,16 +70,37 @@ export const ManageDataflowForm = forwardRef(
       name: { message: '', hasErrors: false },
       obligation: { message: '', hasErrors: false }
     });
+    const [groupOfCompanies, setGroupOfCompanies] = useState([]);
     const [name, setName] = useState(metadata.name);
+    const [selectedGroup, setSelectedGroup] = useState();
 
     const form = useRef(null);
     const inputRef = useRef(null);
+
+    dayjs.extend(utc);
 
     useImperativeHandle(ref, () => ({
       handleSubmit: onConfirm
     }));
 
     useInputTextFocus(refresh, inputRef);
+
+    const getDropdownsOptions = async () => {
+      try {
+        const responseGroupOfCompanies = await RepresentativeService.getGroupOrganizations();
+        setGroupOfCompanies(responseGroupOfCompanies.data);
+      } catch (error) {
+        console.error('ManageDataflowForm - getDropdownsOptions.', error);
+      }
+    };
+
+    useEffect(() => {
+      getDropdownsOptions();
+    }, []);
+
+    const handleErrors = ({ field, hasErrors, message }) => {
+      setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
+    };
 
     const checkIsCorrectLength = inputValue => inputValue.length <= config.INPUT_MAX_LENGTH;
 
@@ -106,28 +137,42 @@ export const ManageDataflowForm = forwardRef(
         onSubmit(true);
 
         try {
-          const service = isCitizenScienceDataflow ? CitizenScienceDataflowService : DataflowService;
-
           if (isEditing) {
-            await service.update(
-              dataflowId,
-              name,
-              description,
-              metadata.obligation.id,
-              metadata.isReleasable,
-              metadata.showPublicInfo,
-              bigData
-            );
+            isCitizenScienceDataflow
+              ? await CitizenScienceDataflowService.update(
+                  dataflowId,
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  metadata.isReleasable,
+                  metadata.showPublicInfo,
+                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
+                  isDataflowOpen && deliveryDate
+                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                    : undefined
+                )
+              : await DataflowService.update(
+                  dataflowId,
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  metadata.isReleasable,
+                  metadata.showPublicInfo,
+                  isDataflowOpen && deliveryDate
+                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                    : undefined
+                );
 
             onEdit(name, description, metadata.obligation.id);
           } else {
-            const creationResponse = await service.create(
-              name,
-              description,
-              metadata.obligation.id,
-              undefined,
-              bigData
-            );
+            const creationResponse = isCitizenScienceDataflow
+              ? await CitizenScienceDataflowService.create(
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  selectedGroup.dataProviderGroupId
+                )
+              : await DataflowService.create(name, description, metadata.obligation.id);
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
@@ -160,6 +205,11 @@ export const ManageDataflowForm = forwardRef(
           onSubmit(false);
         }
       }
+    };
+
+    const onSelectGroup = group => {
+      setSelectedGroup(group);
+      getData({ ...metadata, providerGroup: group });
     };
 
     return (
@@ -200,7 +250,7 @@ export const ManageDataflowForm = forwardRef(
           <div className={`formField ${errors.description.hasErrors ? 'error' : ''}`}>
             <InputTextarea
               className={styles.inputTextArea}
-              disabled={isEditing && (!isLeadDesigner || !isDesign)}
+              disabled={isEditing && !isLeadDesigner && !isAdmin}
               id="dataflowDescription"
               name="description"
               onBlur={() => checkIsCorrectInputValue(description, 'description')}
@@ -232,9 +282,42 @@ export const ManageDataflowForm = forwardRef(
             </div>
           </div>
 
+          {isCitizenScienceDataflow && (
+            <div className={styles.dropdownsWrapper}>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="groupOfCompanies"
+                className={styles.groupOfCompaniesWrapper}
+                disabled={isEditing && !isDesign}
+                name="groupOfCompanies"
+                onChange={event => onSelectGroup(event.target.value)}
+                onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
+                optionLabel="label"
+                options={groupOfCompanies}
+                placeholder={resourcesContext.messages['selectGroupOfCompanies']}
+                tooltip={isDesign ? resourcesContext.messages['groupOfCompaniesDisabledTooltip'] : ''}
+                value={selectedGroup ? selectedGroup : dataProviderGroup}
+              />
+            </div>
+          )}
+
+          {isEditing && isDataflowOpen && (
+            <div className={`${styles.deliveryDate}`}>
+              <Button
+                disabled={isEditing && !isLeadDesigner && !isAdmin}
+                icon="calendar"
+                label={resourcesContext.messages['deliveryDate']}
+                onClick={onChangeDate}
+              />
+              <span className={styles.deliveryDateText} id={'deliveryDate'}>
+                {deliveryDate}
+              </span>
+            </div>
+          )}
+
           <div className={`${styles.search}`}>
             <Button
-              disabled={isEditing && (!isLeadDesigner || !isDesign)}
+              disabled={isEditing && !isLeadDesigner && !isAdmin}
               icon="search"
               label={resourcesContext.messages['searchObligations']}
               onClick={onSearch}

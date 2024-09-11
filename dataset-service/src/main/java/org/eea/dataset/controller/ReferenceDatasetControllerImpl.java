@@ -106,11 +106,13 @@ public class ReferenceDatasetControllerImpl implements ReferenceDatasetControlle
   @HystrixCommand
   @PutMapping("/{datasetId}")
   @ApiOperation(value = "update referenced dataset", hidden = true)
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId)) OR checkApiKey(#dataflowId,null,#datasetId,'DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully update dataset"),
       @ApiResponse(code = 404, message = "Dataset not found")})
   public void updateReferenceDataset(
       @ApiParam(type = "Long", value = "dataset Id", example = "0") @PathVariable Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow Id",
+              example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @ApiParam(type = "Boolean", value = "updatable",
           example = "0") @RequestParam("updatable") Boolean updatable) {
     try {

@@ -878,14 +878,17 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param datasetId    the dataset id
      * @param etlDatasetVO the etl dataset VO
      * @param providerId   the provider id
+     * @param replaceData
      * @throws EEAException the EEA exception
      */
+    @Async
     public void etlImportDataset(@DatasetId Long datasetId, ETLDatasetVO etlDatasetVO,
-                                 Long providerId) throws EEAException {
+                                 Long providerId, Boolean replaceData, Long jobId) throws EEAException {
         // Get the datasetSchemaId by the datasetId
         LOG.info("Import data into dataset {}", datasetId);
         String datasetSchemaId = datasetRepository.findIdDatasetSchemaById(datasetId);
         if (null == datasetSchemaId) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
             throw new EEAException(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, datasetId));
         }
 
@@ -893,59 +896,73 @@ public class FileTreatmentHelper implements DisposableBean {
         DataSetSchema datasetSchema =
                 schemasRepository.findById(new ObjectId(datasetSchemaId)).orElse(null);
         if (null == datasetSchema) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
             throw new EEAException(
                     String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, datasetSchemaId));
         }
 
-        // Obtain the data provider code to insert into the record
-        DataProviderVO provider =
-                providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
+        try {
 
-        // Get the partition for the partiton id
-        final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+            // Obtain the data provider code to insert into the record
+            DataProviderVO provider =
+                    providerId != null ? representativeControllerZuul.findDataProviderById(providerId) : null;
 
-        // Construct Maps to relate ids
-        Map<String, TableSchema> tableMap = new HashMap<>();
-        Map<String, FieldSchema> fieldMap = new HashMap<>();
-        Set<String> tableWithAttachmentFieldSet = new HashSet<>();
-        for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
-            tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
-            // Match each fieldSchemaId with its headerName
-            for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
-                fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
-                if (DataType.ATTACHMENT.equals(field.getType())) {
-                    LOG.warn("Table with id schema {} contains attachment field, processing",
-                            tableSchema.getIdTableSchema());
-                    tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
+            // Get the partition for the partiton id
+            final PartitionDataSetMetabase partition = obtainPartition(datasetId, USER);
+
+            // Construct Maps to relate ids
+            Map<String, TableSchema> tableMap = new HashMap<>();
+            Map<String, FieldSchema> fieldMap = new HashMap<>();
+            Set<String> tableWithAttachmentFieldSet = new HashSet<>();
+            for (TableSchema tableSchema : datasetSchema.getTableSchemas()) {
+                tableMap.put(tableSchema.getNameTableSchema().toLowerCase(), tableSchema);
+                // Match each fieldSchemaId with its headerName
+                for (FieldSchema field : tableSchema.getRecordSchema().getFieldSchema()) {
+                    fieldMap.put(field.getHeaderName().toLowerCase() + tableSchema.getIdTableSchema(), field);
+                    if (DataType.ATTACHMENT.equals(field.getType())) {
+                        LOG.warn("Table with id schema {} contains attachment field, processing",
+                                tableSchema.getIdTableSchema());
+                        tableWithAttachmentFieldSet.add(tableSchema.getIdTableSchema().toString());
+                    }
                 }
             }
+
+            // Construct object to be save
+            DatasetValue dataset = new DatasetValue();
+            List<TableValue> tables = new ArrayList<>();
+            List<String> readOnlyTables = new ArrayList<>();
+            List<String> fixedNumberTables = new ArrayList<>();
+
+            // Loops to build the entity
+            dataset.setId(datasetId);
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(dataset.getId());
+
+            etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
+                    readOnlyTables, fixedNumberTables, datasetType, replaceData);
+            dataset.setTableValues(tables);
+            dataset.setIdDatasetSchema(datasetSchemaId);
+
+            List<RecordValue> allRecords = new ArrayList<>();
+
+            tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
+                    tableWithAttachmentFieldSet, datasetSchema);
+            recordRepository.saveAll(allRecords);
+            LOG.info("Data saved for datasetId {}", datasetId);
+            //update geometries
+            updateGeometry(datasetId, datasetSchema);
+            // now the view is not updated, update the check to false
+            datasetService.updateCheckView(datasetId, false);
+            // delete the temporary table from etlExport
+            datasetService.deleteTempEtlExport(datasetId);
+            //update job status
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+            LOG.info("Etl import for jobId {} is completed", jobId);
         }
-
-        // Construct object to be save
-        DatasetValue dataset = new DatasetValue();
-        List<TableValue> tables = new ArrayList<>();
-        List<String> readOnlyTables = new ArrayList<>();
-        List<String> fixedNumberTables = new ArrayList<>();
-
-        // Loops to build the entity
-        dataset.setId(datasetId);
-        DatasetTypeEnum datasetType = datasetService.getDatasetType(dataset.getId());
-
-        etlTableFor(etlDatasetVO, provider, partition, tableMap, fieldMap, dataset, tables,
-                readOnlyTables, fixedNumberTables, datasetType);
-        dataset.setTableValues(tables);
-        dataset.setIdDatasetSchema(datasetSchemaId);
-
-        List<RecordValue> allRecords = new ArrayList<>();
-
-        tableValueFor(datasetId, dataset, readOnlyTables, fixedNumberTables, allRecords,
-                tableWithAttachmentFieldSet, datasetSchema);
-        recordRepository.saveAll(allRecords);
-        LOG.info("Data saved for datasetId {}", datasetId);
-        // now the view is not updated, update the check to false
-        datasetService.updateCheckView(datasetId, false);
-        // delete the temporary table from etlExport
-        datasetService.deleteTempEtlExport(datasetId);
+        catch (Exception e){
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            LOG.error("EtlImport failed for jobId {} with error message {}", jobId, e.getMessage());
+            throw e;
+        }
     }
 
     /**
@@ -1109,11 +1126,16 @@ public class FileTreatmentHelper implements DisposableBean {
         if (checkSchemaGeometry(datasetSchema)) {
             LOG.info("Updating geometries for dataset {}", datasetId);
             // update geometries (native)
-            Map<Integer, Map<String, String>> mapFieldValue = getFieldValueGeometry(datasetId);
-            int size = mapFieldValue.keySet().size();
-            for (int i = 0; i < size; i++) {
-                executeUpdateGeometry(datasetId, mapFieldValue.get(i));
+            long limit = 1000L;
+            long offset = 0L;
+
+            ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+                    .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+            while (getFieldValueGeometry(datasetId, limit, offset, connectionDataVO)) {
+                offset += limit;
+                LOG.info("Current offset is {}", offset);
             }
+            LOG.info("Finished updating geometries for dataset {}", datasetId);
         }
     }
 
@@ -1151,66 +1173,43 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     /**
-     * Check field value geometry.
-     *
-     * @param datasetId the dataset id
-     * @return true, if successful
-     */
-    private boolean checkFieldValueGeometry(Long datasetId) {
-        boolean result = false;
-        String query = "select count(fv.id) from dataset_" + datasetId
-                + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
-        Integer count = Integer.parseInt(fieldRepository.queryExecutionSingle(query).toString());
-        if (count != null && count > 0) {
-            result = true;
-        }
-        return result;
-    }
-
-    /**
      * Gets the field value geometry.
      *
      * @param datasetId the dataset id
+     * @param limit the limit
+     * @param currentOffset the offset
      * @return the field value geometry
      */
-    private Map<Integer, Map<String, String>> getFieldValueGeometry(Long datasetId) {
-        String query = "select id, value from dataset_" + datasetId
-                + ".field_value fv where fv.type in ('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')";
-        List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
-        Map<Integer, Map<String, String>> resultMap = new HashMap<>();
-        for (int i = 0; i < resultQuery.size(); i++) {
-            Map<String, String> fieldMap = new HashMap<>();
-            for (int j = 0; j < 10000 && !resultQuery.isEmpty(); j++) {
-                fieldMap.put(resultQuery.get(0)[0].toString(), resultQuery.get(0)[1].toString());
+    private boolean getFieldValueGeometry(Long datasetId, long limit, long currentOffset, ConnectionDataVO connectionDataVO) {
+        String query = "SELECT id, value FROM dataset_" + datasetId +
+            ".field_value fv " +
+            "WHERE fv.type IN " +
+            "('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')" +
+            " ORDER BY id" +
+            " LIMIT " + limit + " OFFSET " + currentOffset;
+        boolean moreRecords = false;
+        try {
+            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
+            moreRecords = !resultQuery.isEmpty();
+
+            String queryGeometry = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
+            while (!resultQuery.isEmpty()) {
+                queryGeometry += "row('" + resultQuery.get(0)[0].toString() + "', '" + resultQuery.get(0)[1].toString() + "'),";
                 resultQuery.remove(resultQuery.get(0));
             }
-            resultMap.put(i, fieldMap);
-        }
-        return resultMap;
-    }
+            if (moreRecords) {
+                queryGeometry = queryGeometry.substring(0, queryGeometry.length() - 1);
+                queryGeometry += "] as public.geom_update[]));";
 
-    /**
-     * Execute update geometry.
-     *
-     * @param datasetId     the dataset id
-     * @param mapFieldValue the map field value
-     */
-    private void executeUpdateGeometry(Long datasetId, Map<String, String> mapFieldValue) {
-        String query =
-                "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
-
-        Iterator<Entry<String, String>> iterator = mapFieldValue.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, String> entry = iterator.next();
-            query += "row('" + entry.getKey() + "', '" + entry.getValue();
-            if (iterator.hasNext()) {
-                query += "'), ";
-            } else {
-                query += "')";
+                fieldRepository.queryExecutionSingle(queryGeometry, connectionDataVO);
             }
+            return moreRecords;
+
+        }catch (Exception ex) {
+            LOG.info("Geometry field: Geometry update failed for dataset id {}", datasetId, ex);
         }
-        query += "] as public.geom_update[]));";
-        fieldRepository.queryExecutionSingle(query);
+        return moreRecords;
+
     }
 
 
@@ -1539,7 +1538,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Start RN3-Import process: datasetId={}, files={}", datasetId, files);
 
             // delete precious data if necessary
-            wipeData(datasetId, tableSchemaId, replace);
+            wipeData(datasetId, tableSchemaId, replace, false);
             LOG.info("Data has been wiped during rn3FileProcess datasetId {}, files {}", datasetId, files);
 
             // Wait a second before continue to avoid duplicated insertions
@@ -1602,7 +1601,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Start RN3-Import segmentation process: datasetId={}, files={}", datasetId, files);
 
             // delete precious data if necessary
-            wipeData(datasetId, tableSchemaId, replace);
+            wipeData(datasetId, tableSchemaId, replace, false);
             LOG.info("Data has been wiped during rn3FileProcessIntoTasks datasetId {}, files {}", datasetId, files);
 
             // Wait a second before continue to avoid duplicated insertions
@@ -1884,11 +1883,12 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param datasetId the dataset id
          * @param tableSchemaId the table schema id
          * @param delete the delete
+         * @param deleteReferenceTables the deleteReferenceTables
          */
-        private void wipeData (Long datasetId, String tableSchemaId,boolean delete){
+        private void wipeData (Long datasetId, String tableSchemaId,boolean delete, Boolean deleteReferenceTables){
             if (delete) {
                 if (null != tableSchemaId) {
-                    datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+                    datasetService.deleteTableBySchema(tableSchemaId, datasetId, deleteReferenceTables);
                 } else {
                     datasetService.deleteImportData(datasetId, true);
                 }
@@ -1908,7 +1908,7 @@ public class FileTreatmentHelper implements DisposableBean {
         private void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
                 IntegrationVO integrationVO, Long jobId){
             if (null != tableSchemaId) {
-                datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+                datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
             } else {
                 datasetService.deleteImportData(datasetId, true);
             }
@@ -2057,7 +2057,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         lines++;
                         batchCounter++;
                     }
-                    if (batchCounter < 5000 && batchCounter >0) {
+                    if (batchCounter <= 5000 && batchCounter >0) {
                         // left overs if the last batch is less than 5000
                         this.addImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
                                 schema, connectionDataVO, lines-batchCounter, lines, processId, EventType.COMMAND_IMPORT_CSV_FILE_CHUNK_TO_DATASET, delimiter);
@@ -2397,16 +2397,23 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param readOnlyTables the read only tables
          * @param fixedNumberTables the fixed number tables
          * @param datasetType the dataset type
+         * @param replaceData the replaceData
          */
         private void etlTableFor (ETLDatasetVO etlDatasetVO, DataProviderVO provider,
         final PartitionDataSetMetabase partition, Map<String, TableSchema > tableMap,
                 Map < String, FieldSchema > fieldMap, DatasetValue dataset, List < TableValue > tables,
-                List < String > readOnlyTables, List < String > fixedNumberTables, DatasetTypeEnum datasetType){
+                List < String > readOnlyTables, List < String > fixedNumberTables, DatasetTypeEnum datasetType, Boolean replaceData){
             for (ETLTableVO etlTable : etlDatasetVO.getTables()) {
                 etlBuildEntity(provider, partition, tableMap, fieldMap, dataset, tables, etlTable,
                         datasetType);
                 // Check if table is read Only and save into a list
                 TableSchema tableSchema = tableMap.get(etlTable.getTableName().toLowerCase());
+
+                // if needed remove already existing data from table
+                if(replaceData){
+                    wipeData(dataset.getId(), String.valueOf(tableSchema.getIdTableSchema()), true, true);
+                }
+
                 if (tableSchema != null && Boolean.TRUE.equals(tableSchema.getReadOnly())) {
                     readOnlyTables.add(tableSchema.getIdTableSchema().toString());
                 }
@@ -2597,6 +2604,7 @@ public class FileTreatmentHelper implements DisposableBean {
                             datasetToFile.getDataProviderId());
                 } else {
                     datasetToFile.setPublicFileName(null);
+                    dataSetMetabaseRepository.save(datasetToFile);
                     dataSetMetabaseRepository.save(datasetToFile);
                 }
             }

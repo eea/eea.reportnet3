@@ -3,17 +3,29 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
+    case 'CHECK_SELECTED_DATE':
+      return {
+        ...state,
+        isSameExpirationDate: payload.isSameExpirationDate
+      };
+
     case 'SET_DATA_PROVIDER_SELECTED':
       return {
         ...state,
         dataProviderSelected: payload
       };
 
+    case 'SET_DUE_DATE':
+      return {
+        ...state,
+        dataCollectionDueDate: payload.dueDate
+      };
+
     case 'SET_HAS_REPRESENTATIVES_WITHOUT_DATASETS':
       return { ...state, hasRepresentativesWithoutDatasets: payload.hasRepresentativesWithoutDatasets };
 
-    case 'SET_FORM_HAS_REPRESENTATIVES':
-      return { ...state, formHasRepresentatives: payload.formHasRepresentatives };
+    case 'SET_FORM_HAS_LEAD_REPORTERS':
+      return { ...state, formHasLeadReporters: payload.formHasLeadReporters };
 
     case 'SET_REPRESENTATIVES_IMPORT':
       return { ...state, representativesImport: payload };
@@ -45,6 +57,7 @@ export const dataflowDataReducer = (state, { type, payload }) => {
       return {
         ...state,
         description: payload.description,
+        isCitizenScienceDataflowDialogVisible: payload.isCitizenScienceDataflowDialogVisible,
         isReportingDataflowDialogVisible: payload.isReportingDataflowDialogVisible,
         isExportDialogVisible: payload.isExportDialogVisible,
         name: payload.name
@@ -100,6 +113,12 @@ export const dataflowDataReducer = (state, { type, payload }) => {
 
     case 'SET_IS_EXPORTING':
       return { ...state, isExporting: payload };
+
+    case 'SET_ALL_REPORTERS_DELETED':
+      return { ...state, allReportersDeleted: payload.allReportersDeleted };
+
+    case 'SET_IS_DELETING_ALL_REPORTERS':
+      return { ...state, isDeletingAllReporters: payload.isDeletingAllReporters };
 
     case 'SET_IS_UPDATING_PERMISSIONS':
       return { ...state, isUpdatingPermissions: payload.isUpdatingPermissions };

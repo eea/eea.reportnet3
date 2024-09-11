@@ -144,7 +144,7 @@ public interface DatasetController {
    * @param deletePrefilledTables the delete prefilled tables
    */
   @DeleteMapping("/v1/{datasetId}/deleteDatasetData")
-  void deleteDatasetData(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> deleteDatasetData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "deletePrefilledTables", defaultValue = "false",
@@ -186,7 +186,7 @@ public interface DatasetController {
    * @param providerId the provider id
    */
   @DeleteMapping("/v1/{datasetId}/deleteTableData/{tableSchemaId}")
-  void deleteTableData(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> deleteTableData(@PathVariable("datasetId") Long datasetId,
       @PathVariable("tableSchemaId") String tableSchemaId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId);
@@ -411,11 +411,13 @@ public interface DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @PostMapping("/v1/{datasetId}/etlImport")
-  void etlImportDataset(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> etlImportDataset(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "replaceData", required = false) Boolean replaceData);
 
   /**
    * Etl import dataset legacy.
@@ -424,11 +426,13 @@ public interface DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @PostMapping("/{datasetId}/etlImport")
-  void etlImportDatasetLegacy(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> etlImportDatasetLegacy(@PathVariable("datasetId") Long datasetId,
       @RequestBody ETLDatasetVO etlDatasetVO, @RequestParam("dataflowId") Long dataflowId,
-      @RequestParam(value = "providerId", required = false) Long providerId);
+      @RequestParam(value = "providerId", required = false) Long providerId,
+      @RequestParam(value = "replaceData", required = false) Boolean replaceData);
 
   /**
    * Gets the attachment.

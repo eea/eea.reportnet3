@@ -255,6 +255,13 @@ public interface DataflowService {
   boolean isAdmin();
 
   /**
+   * Checks if user is custodian.
+   *
+   * @return true, if is custodian
+   */
+  boolean isCustodian();
+
+  /**
    * Gets the private dataflow by id.
    *
    * @param dataflowId the dataflow id

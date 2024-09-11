@@ -5,9 +5,7 @@ import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.*;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataProviderEnum;
-import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 /** The Interface RepresentativeService. */
@@ -24,17 +22,30 @@ public interface RepresentativeService {
   Long createRepresentative(Long dataflowId, RepresentativeVO representativeVO) throws EEAException;
 
   /**
+   * @param dataProviderVO the data provider to be updated
+   */
+  void updateProvider(DataProviderVO dataProviderVO) throws Exception;
+
+  /**
    * @param dataProviderVO the data provider to be created
    */
   void createProvider(DataProviderVO dataProviderVO) throws Exception;
 
-    /**
-     * Delete dataflow representative.
-     *
-     * @param representativeId the representative id
-     * @throws EEAException the EEA exception
-     */
+  /**
+   * Delete dataflow representative.
+   *
+   * @param representativeId the representative id
+   * @throws EEAException the EEA exception
+   */
   void deleteDataflowRepresentative(Long representativeId) throws EEAException;
+
+  /**
+   * Delete dataflow representatives.
+   *
+   * @param dataflowId the dataflow id
+   * @throws EEAException the EEA exception
+   */
+  void deleteDataflowRepresentatives(Long dataflowId) throws EEAException;
 
   /**
    * Update dataflow representative.
@@ -43,6 +54,17 @@ public interface RepresentativeService {
    * @return the long
    */
   Long updateDataflowRepresentative(RepresentativeVO representativeVO);
+
+  /**
+   * Find all data providers
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
+   */
+  List<DataProviderCodeVO> getAllDataProviderGroups();
 
   /**
    * Find all data providers

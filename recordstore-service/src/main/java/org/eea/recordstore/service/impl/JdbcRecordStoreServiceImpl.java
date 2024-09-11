@@ -1159,23 +1159,24 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     }
 
     datasetSchema.getTableSchemas().stream()
-            .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
-            .forEach(table -> {
-              List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
-              try {
-                // create materialiced view or query view of all tableSchemas
-                executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
-                        datasetId, true);
-                createIndexMaterializedView(datasetId, table.getNameTableSchema());
-                // execute view permission
-                executeViewPermissions(table.getNameTableSchema(), datasetId);
-              } catch (RecordStoreAccessException e) {
-                LOG.error("Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
-              } catch (Exception e) {
-                LOG.error("Unexpected error! Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
-                throw e;
-              }
-            });
+        .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
+        .forEach(table -> {
+          List<FieldSchemaVO> columns = table.getRecordSchema().getFieldSchema();
+          try {
+            LOG.info("Creating or updating query view for datasetId {} and table {} with id {}", datasetId, table.getNameTableSchema(), table.getIdTableSchema());
+            // create materialiced view or query view of all tableSchemas
+            executeViewQuery(columns, table.getNameTableSchema(), table.getIdTableSchema(),
+                datasetId, true);
+            createIndexMaterializedView(datasetId, table.getNameTableSchema());
+            // execute view permission
+            executeViewPermissions(table.getNameTableSchema(), datasetId);
+          } catch (RecordStoreAccessException e) {
+            LOG.error("Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
+          } catch (Exception e) {
+            LOG.error("Unexpected error! Error creating Query view for datasetId {}: {}", datasetId, e.getMessage(), e);
+            throw e;
+          }
+        });
   }
 
 

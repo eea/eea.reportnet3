@@ -110,8 +110,11 @@ public class UserRoleServiceImpl implements UserRoleService {
     Map<String, List<GroupInfo>> groupInfoMap = new HashMap<>();
     List<UserRoleVO> finalList = new ArrayList<>();
 
+    LOG.info("datasetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId started");
     List<Long> datasetIds = datasetMetabaseControllerZuul
         .getDatasetIdsByDataflowIdAndDataProviderId(dataflowId, dataProviderId);
+
+    LOG.info("datasetMetabaseControllerZuul.getDatasetIdsByDataflowIdAndDataProviderId finished");
     if (null != datasetIds && !datasetIds.isEmpty()) {
       getGroupInfoMap(groupInfoMap, datasetIds.get(0));
 
@@ -134,6 +137,7 @@ public class UserRoleServiceImpl implements UserRoleService {
       getUsersRolesByGroup(groupInfoMap, finalList, SecurityRoleEnum.STEWARD_SUPPORT.toString());
 
     }
+    LOG.info("getGroupInfoMap finished");
     return finalList;
   }
 

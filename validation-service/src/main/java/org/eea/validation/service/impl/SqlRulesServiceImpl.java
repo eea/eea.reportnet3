@@ -1,6 +1,19 @@
 package org.eea.validation.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Helper;
@@ -626,7 +639,10 @@ public class SqlRulesServiceImpl implements SqlRulesService {
     boolean queryContainsKeyword = true;
     String[] queryKeywords = KEYWORDS.split(",");
     for (String word : queryKeywords) {
-      if (query.toLowerCase().contains(word.toLowerCase())) {
+      String regex = "\\b" + word + "\\b";
+      Pattern pattern = Pattern.compile(regex);
+      Matcher matcher = pattern.matcher(query);
+      if (matcher.find()) {
         queryContainsKeyword = false;
         break;
       }

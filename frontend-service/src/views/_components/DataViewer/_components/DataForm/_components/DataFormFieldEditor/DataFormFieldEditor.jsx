@@ -522,7 +522,7 @@ export const DataFormFieldEditor = ({
           ref={linkDropdownRef}
           value={RecordUtils.getMultiselectValues(
             columnWithLinks.linkItems,
-            !Array.isArray(fieldValue) ? fieldValue.replace('; ', ';').split(';') : fieldValue
+            !Array.isArray(fieldValue) ? fieldValue.replaceAll('; ', ';').split(';') : fieldValue
           )}
           valuesSeparator=";"
         />

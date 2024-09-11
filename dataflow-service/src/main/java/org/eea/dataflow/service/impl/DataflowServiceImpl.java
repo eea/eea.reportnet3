@@ -1,16 +1,8 @@
 package org.eea.dataflow.service.impl;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
@@ -89,9 +81,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import feign.FeignException;
+
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The Class DataflowServiceImpl.
@@ -567,6 +568,9 @@ public class DataflowServiceImpl implements DataflowService {
         if (null != dataflowVO.getDataProviderGroupId()) {
           dataflowSave.get().setDataProviderGroupId(dataflowVO.getDataProviderGroupId());
         }
+        if (null != dataflowVO.getDeadlineDate()) {
+          dataflowSave.get().setDeadlineDate(dataflowVO.getDeadlineDate());
+        }
         dataflowRepository.save(dataflowSave.get());
         LOG.info("The dataflow {} has been updated.", dataflowSave.get().getName());
       }
@@ -845,6 +849,8 @@ public class DataflowServiceImpl implements DataflowService {
   @Override
   public List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList) {
     List<DataflowUserRoleVO> dataflowUserRoleVOList = new ArrayList<>();
+    LOG.info("getUserRoles started");
+
     for (DataFlowVO dataflowVO : dataflowList) {
       if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
         DataflowUserRoleVO dataflowUserRoleVO = new DataflowUserRoleVO();
@@ -852,6 +858,7 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowUserRoleVO.setDataflowName(dataflowVO.getName());
         dataflowUserRoleVO.setUsers(userManagementControllerZull
             .getUserRolesByDataflowAndCountry(dataflowVO.getId(), dataProviderId));
+        LOG.info("userManagementControllerZull.getUserRolesByDataflowAndCountry ended");
         if (!dataflowUserRoleVO.getUsers().isEmpty()) {
           dataflowUserRoleVOList.add(dataflowUserRoleVO);
         }
@@ -932,13 +939,19 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public List<DataFlowVO> getDataflowsByDataProviderIds(List<Long> dataProviderIds) {
-    return dataflowMapper
-        .entityListToClass(
-            dataflowRepository
-                .findDataflowsByDataproviderIdsAndDataflowIds(
-                    userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
-                        .stream().map(ResourceAccessVO::getId).collect(Collectors.toList()),
-                    dataProviderIds));
+    List<DataFlowVO> list = new ArrayList<>();
+    try {
+      List<Long> resources = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW)
+              .stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+
+      List<Dataflow> dataflows = dataflowRepository.findDataflowsByDataproviderIdsAndDataflowIds(resources, dataProviderIds);
+
+      list = dataflowMapper.entityListToClass(dataflows);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Could not get dataflows by data provider ids.", e);
+    }
+
+    return list;
   }
 
 
@@ -1043,6 +1056,13 @@ public class DataflowServiceImpl implements DataflowService {
     String roleAdmin = "ROLE_" + SecurityRoleEnum.ADMIN;
     return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
         .anyMatch(role -> roleAdmin.equals(role.getAuthority()));
+  }
+
+  @Override
+  public boolean isCustodian() {
+    String roleCustodian = "ROLE_" + SecurityRoleEnum.DATA_CUSTODIAN;
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(role -> roleCustodian.equals(role.getAuthority()));
   }
 
   /**
@@ -1217,6 +1237,12 @@ public class DataflowServiceImpl implements DataflowService {
                 .orElse(new DataProviderGroup()).getName());
         dataflowVO.setFmeUserName(fmeUserRepository.findById(dataflowVO.getFmeUserId())
             .orElse(new FMEUser()).getUsername());
+      }
+
+      if (TypeDataflowEnum.CITIZEN_SCIENCE.equals(dataflowVO.getType())) {
+        dataflowVO.setDataProviderGroupName(
+            dataProviderGroupRepository.findById(dataflowVO.getDataProviderGroupId())
+                .orElse(new DataProviderGroup()).getName());
       }
 
       // filter design datasets (schemas) showed to the user depending on permissions
@@ -1519,7 +1545,7 @@ public class DataflowServiceImpl implements DataflowService {
       if (null != dataflow) {
         dataflowPrivateVO = dataflowPrivateMapper.entityToClass(dataflow);
         dataflowPrivateVO
-            .setDocuments(documentControllerZuul.getAllDocumentsByDataflow(dataflowId));
+            .setDocuments(documentControllerZuul.getAllDocumentsByDataflow(null, dataflowId));
       } else {
         throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
       }
@@ -1586,7 +1612,6 @@ public class DataflowServiceImpl implements DataflowService {
 //      if (dataflow.getType() == TypeDataflowEnum.REFERENCE && !isAdmin) {
 //        continue;
 //      }
-
       newDataflowCountVO.setType(dataflow.getType());
       newDataflowCountVO.setAmount(dataflow.getAmount());
       dataflowCountVOList.add(newDataflowCountVO);

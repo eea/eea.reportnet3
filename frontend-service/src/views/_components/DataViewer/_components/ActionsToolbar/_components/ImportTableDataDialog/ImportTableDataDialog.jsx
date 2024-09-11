@@ -133,7 +133,7 @@ export const ImportTableDataDialog = ({
           }
           icon={actionsContext.importTableProcessing ? 'spinnerAnimate' : 'import'}
           label={
-            actionsContext.importTableProcessing
+            actionsContext.isInProgress && actionsContext.importTableProcessing
               ? resourcesContext.messages['importInProgress']
               : resourcesContext.messages['importTable']
           }

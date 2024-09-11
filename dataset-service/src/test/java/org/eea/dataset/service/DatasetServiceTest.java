@@ -939,7 +939,7 @@ DatasetServiceTest {
         .thenReturn("5ce524fad31fc52540abae73");
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     doNothing().when(recordRepository).deleteRecordWithIdTableSchema(Mockito.any());
-    datasetService.deleteTableBySchema("5ce524fad31fc52540abae73", 1L);
+    datasetService.deleteTableBySchema("5ce524fad31fc52540abae73", 1L, false);
     Mockito.verify(recordRepository, times(1)).deleteRecordWithIdTableSchema(Mockito.any());
   }
 

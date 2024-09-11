@@ -1,12 +1,6 @@
 package org.eea.document.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import java.io.IOException;
-import java.util.ArrayList;
+import feign.FeignException;
 import org.eea.document.service.DocumentService;
 import org.eea.document.type.FileResponse;
 import org.eea.exception.EEAErrorMessage;
@@ -34,7 +28,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
-import feign.FeignException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The Class DocumentControllerImplTest.
@@ -1017,7 +1016,7 @@ public class DocumentControllerImplTest {
   public void getAllDocumentsByDataflowTest() {
     Mockito.when(dataflowController.getAllDocumentsByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    Assert.assertNotNull(documentController.getAllDocumentsByDataflow(1L));
+    Assert.assertNotNull(documentController.getAllDocumentsByDataflow(2L, 1L));
   }
 
   @Test
@@ -1112,7 +1111,7 @@ public class DocumentControllerImplTest {
   public void getAllDocumentsByDataflowLegacyTest() {
     Mockito.when(dataflowController.getAllDocumentsByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    Assert.assertNotNull(documentController.getAllDocumentsByDataflowLegacy(1L));
+    Assert.assertNotNull(documentController.getAllDocumentsByDataflowLegacy(2L,1L));
   }
 
 

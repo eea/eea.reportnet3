@@ -1,10 +1,13 @@
 package org.eea.dataset.persistence.data.repository;
 
-import java.util.List;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.springframework.dao.DataIntegrityViolationException;
+
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * The Interface DatasetExtendedRepository.
@@ -62,9 +65,9 @@ public interface FieldExtendedRepository {
    * Query execution single.
    *
    * @param generatedQuery the generated query
-   * @return the object
+   * @param connectionDataVO the ConnectionDataVO
    */
-  Object queryExecutionSingle(String generatedQuery);
+  void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) throws SQLException;
 
   /**
    * Query execution list.

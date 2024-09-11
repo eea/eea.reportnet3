@@ -28,14 +28,19 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const ManageDataflow = ({
   dataflowId,
+  dataProviderGroup,
+  deliveryDate,
+  isAdmin,
   isCitizenScienceDataflow,
   isCustodian,
+  isDataflowOpen,
   isEditing = false,
   isVisible,
   manageDialogs,
   obligation,
   onCreateDataflow,
   onEditDataflow,
+  resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
   state
@@ -57,6 +62,7 @@ export const ManageDataflow = ({
     obligation,
     pinDataflow: false,
     bigDataStorage: false,
+    providerGroup: null,
     isReleasable: state.isReleasable
   };
 
@@ -75,8 +81,8 @@ export const ManageDataflow = ({
 
   useEffect(() => {
     if (isEditing) {
-      onLoadObligation({ id: state.obligations.obligationId, title: state.obligations.title });
-      setCheckedObligation({ id: state.obligations.obligationId, title: state.obligations.title });
+      onLoadObligation({ id: obligation.id, title: obligation.title });
+      setCheckedObligation({ id: obligation.id, title: obligation.title });
     }
   }, [state]);
 
@@ -92,6 +98,7 @@ export const ManageDataflow = ({
 
   const onHideDataflowDialog = () => {
     onResetData();
+    resetDeliveryDate && resetDeliveryDate();
     resetObligations();
     manageDialogs(dialogName, false);
   };
@@ -113,8 +120,8 @@ export const ManageDataflow = ({
     }
   };
 
-  const onLoadData = ({ name, description }) =>
-    reportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description } });
+  const onLoadData = ({ name, description, providerGroup }) =>
+    reportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description, providerGroup } });
 
   const onLoadObligation = ({ id, title }) =>
     reportingDataflowDispatch({ type: 'ON_LOAD_OBLIGATION', payload: { id, title } });
@@ -129,8 +136,8 @@ export const ManageDataflow = ({
     reportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
   const onSave = () => {
-    if (formRef.current)
-      formRef.current.handleSubmit(reportingDataflowState.pinDataflow, reportingDataflowState.bigDataStorage);
+    if (formRef.current) formRef.current.handleSubmit(reportingDataflowState.pinDataflow);
+    resetObligations();
   };
 
   const renderCancelButton = action => (
@@ -156,7 +163,7 @@ export const ManageDataflow = ({
 
   const renderDataflowDialog = () => {
     const renderDeleteDataflowButton = () => {
-      if (isEditing && isCustodian && state.status === config.dataflowStatus.DESIGN) {
+      if (isEditing && !isDataflowOpen && (isCustodian || isAdmin)) {
         return (
           <Button
             className="p-button-danger p-button-animated-blink"
@@ -249,6 +256,7 @@ export const ManageDataflow = ({
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
         <Button
           className={`p-button-primary ${
+            !(isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup)) &&
             !isEmpty(reportingDataflowState.name) &&
             !isEmpty(reportingDataflowState.description) &&
             !isNil(reportingDataflowState.obligation?.id) &&
@@ -257,6 +265,7 @@ export const ManageDataflow = ({
               : ''
           }`}
           disabled={
+            (isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup) && isEmpty(dataProviderGroup)) ||
             isEmpty(reportingDataflowState.name) ||
             isEmpty(reportingDataflowState.description) ||
             isNil(reportingDataflowState.obligation?.id) ||
@@ -282,12 +291,16 @@ export const ManageDataflow = ({
           visible={isVisible}>
           <ManageDataflowForm
             dataflowId={dataflowId}
+            dataProviderGroup={dataProviderGroup}
+            deliveryDate={deliveryDate}
             dialogName={dialogName}
             getData={onLoadData}
+            isAdmin={isAdmin}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
+            isDataflowOpen={isDataflowOpen}
             isEditing={isEditing}
             metadata={reportingDataflowState}
-            obligation={reportingDataflowState.obligation}
+            onChangeDate={() => manageDialogs('isDeliveryDateDialogVisible', true)}
             onCreate={onCreateDataflow}
             onEdit={onEditDataflow}
             onHide={onHideDataflowDialog}

@@ -65,7 +65,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"; // NOSONAR
 
   /** The valid columns. */
-  List<String> validColumns = Arrays.asList("code", "group_id", "label");
+  List<String> validColumns = Arrays.asList("id", "code", "group_id", "label");
 
 
   /** The representative service. */
@@ -114,7 +114,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PostMapping("/provider/create")
   @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
-  @ApiOperation(value = "Create the list of providers", response = DataProviderVO.class, hidden = true)
+  @ApiOperation(value = "Creates a single provider", response = DataProviderVO.class, hidden = true)
   public void createProvider(
       @ApiParam(type = "Object", value = "Data Provider Object") @RequestBody DataProviderVO dataProviderVO) throws Exception {
 
@@ -125,6 +125,38 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.CREATING_PROVIDER);
     } catch(Exception e){
       LOG.error("Unexpected error! Could not create data provider {} Message: {}", dataProviderVO, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Updates a provider.
+   *
+   * @param dataProviderVO the provider to be created
+   */
+  @Override
+  @LockMethod
+  @HystrixCommand
+  @PutMapping("/provider/update")
+  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+  @ApiOperation(value = "Updates a single provider", response = DataProviderVO.class, hidden = true)
+  public void updateProvider(
+      @ApiParam(type = "Object", value = "Data Provider Object") @RequestBody DataProviderVO dataProviderVO) throws Exception {
+
+    if (dataProviderVO == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER_NULL_OBJECT);
+    }
+    if (dataProviderVO.getId() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER_NULL_ID);
+    }
+
+    try {
+      representativeService.updateProvider(dataProviderVO);
+    } catch (EEAException e) {
+      LOG.error("Error creating new data provider {} Message: {}", dataProviderVO, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.UPDATING_PROVIDER);
+    } catch(Exception e){
+      LOG.error("Unexpected error! Could not update data provider {} Message: {}", dataProviderVO, e.getMessage());
       throw e;
     }
   }
@@ -166,6 +198,33 @@ public class RepresentativeControllerImpl implements RepresentativeController {
       throw e;
     }
 
+  }
+
+  /**
+   * Find all data providers
+   * @param pageNum
+   * @param pageSize
+   * @param asc
+   * @param sortedColumn
+   * @param providerCode
+   * @param groupId
+   * @param label
+   * @return the data providers vo object
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/dataProviderGroups", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Find all DataProviders  by their Group Id",
+          produces = MediaType.APPLICATION_JSON_VALUE, response = DataProviderVO.class,
+          responseContainer = "List", hidden = true)
+  public List<DataProviderCodeVO> findAllDataProviderGroups() {
+    try {
+      return representativeService.getAllDataProviderGroups();
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve all data group providers");
+      throw e;
+    }
   }
 
   /**
@@ -344,6 +403,37 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           EEAErrorMessage.REPRESENTATIVE_NOT_FOUND);
     } catch(Exception e){
       LOG.error("Unexpected error! Could not delete representative with id {} for dataflowId {} Message: {}", dataflowRepresentativeId, dataflowId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Delete all representatives for a dataflow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @HystrixCommand
+  @DeleteMapping(value = "/dataflow/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @ApiOperation(value = "Delete all Representatives for a dataflow", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 404, message = EEAErrorMessage.DATAFLOW_NOTFOUND),
+          @ApiResponse(code = 403, message = EEAErrorMessage.NOT_DESIGN_DATAFLOW)})
+  public void deleteRepresentatives(@ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    try {
+      LOG.info("Deleting dataflow representatives for dataflowId {}", dataflowId);
+      representativeService.deleteDataflowRepresentatives(dataflowId);
+      LOG.info("Successfully deleted dataflow representatives for dataflowId {}", dataflowId);
+    } catch (EEAException e) {
+      LOG.error("Error deleting representatives for dataflowId {} Message: {}", dataflowId, e.getMessage(), e);
+      if (e.getMessage() != null && e.getMessage().equals(EEAErrorMessage.NOT_DESIGN_DATAFLOW)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, EEAErrorMessage.NOT_DESIGN_DATAFLOW);
+      } else {
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATAFLOW_NOTFOUND);
+      }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Could not delete representatives for dataflowId {} Message: {}",
+          dataflowId, e.getMessage());
       throw e;
     }
   }

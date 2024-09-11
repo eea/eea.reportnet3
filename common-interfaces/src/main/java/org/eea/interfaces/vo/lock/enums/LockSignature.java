@@ -33,6 +33,10 @@ public enum LockSignature {
   /** DatasetSnapshotControllerImpl.createReleaseSnapshots(..) */
   RELEASE_SNAPSHOTS("DatasetSnapshotControllerImpl.createReleaseSnapshots(..)"),
 
+  NATIONAL_COORDINATOR_CREATE("UserManagementControllerImpl.createNationalCoordinator(..)"),
+
+  NATIONAL_COORDINATOR_DELETE("UserManagementControllerImpl.deleteNationalCoordinator(..)"),
+
   /** DataCollectionControllerImpl.createEmptyDataCollection(..) */
   CREATE_DATA_COLLECTION("DataCollectionControllerImpl.createEmptyDataCollection(..)"),
 

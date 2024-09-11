@@ -73,7 +73,7 @@ public class ReferenceDatasetControllerImplTest {
 
   @Test
   public void updateReferenceDatasetSuccessTest() throws EEAException, IOException {
-    referenceDatasetControllerImpl.updateReferenceDataset(1L, true);
+    referenceDatasetControllerImpl.updateReferenceDataset(1L, null, true);
     Mockito.verify(referenceDatasetService, Mockito.times(1))
         .updateUpdatableReferenceDataset(Mockito.anyLong(), Mockito.anyBoolean());
   }
@@ -89,7 +89,7 @@ public class ReferenceDatasetControllerImplTest {
     doThrow(new EEAException("Fail")).when(referenceDatasetService)
         .updateUpdatableReferenceDataset(Mockito.anyLong(), Mockito.anyBoolean());
     try {
-      referenceDatasetControllerImpl.updateReferenceDataset(1L, true);
+      referenceDatasetControllerImpl.updateReferenceDataset(1L, null, true);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(EEAErrorMessage.UPDATING_REFERENCE_DATASET, e.getReason());
       Assert.assertEquals(HttpStatus.NOT_FOUND, e.getStatus());

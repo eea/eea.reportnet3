@@ -19,5 +19,14 @@ export const AddOrganizationsRepository = {
         groupId,
         label
       })
+    }),
+  getProviderGroups: async () =>
+    await HTTPRequester.get({
+      url: getUrl(AddOrganizationsConfig.getProviderGroups)
+    }),
+  updateProvider: async (id, label) =>
+    await HTTPRequester.update({
+      url: getUrl(AddOrganizationsConfig.updateProvider),
+      data: { id, label }
     })
 };

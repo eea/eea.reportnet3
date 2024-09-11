@@ -495,18 +495,30 @@ public class DataCollectionServiceImpl implements DataCollectionService {
               "No primary key in any schemas in the dataflow {}. So stop the process to create the reference dataset",
               dataflowId);
           releaseLockAndNotification(dataflowId, "No primary key in any schemas in the dataflow",
-              isCreation, hasPk);
+                  isCreation, hasPk);
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-              EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
+                  EEAErrorMessage.NO_PK_REFERENCE_DATAFLOW);
         }
       }
       LOG.info("Validate SQL Rules for dataflowId {}, Data Collection creation process.", dataflowId);
       List<Boolean> rulesWithError = new ArrayList<>();
       List<Long> emptyDatasetTables = new ArrayList<>();
       designs.stream().forEach(dataset -> {
-        recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
+
+        //we will update the materialized views only once and only for not reference datasets
+        if(stopAndNotifySQLErrors) {
+          DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(dataset.getDatasetSchema());
+          if (schema != null && schema.getReferenceDataset() != null
+                  && Boolean.TRUE.equals(schema.getReferenceDataset())) {
+            LOG.info("Will not create or update materialized views for reference dataset with id {}", dataset.getId());
+          }
+          else{
+            recordStoreControllerZuul.createUpdateQueryView(dataset.getId(), false);
+          }
+        }
+
         List<RuleVO> rulesSql =
-            rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
+                rulesControllerZuul.findSqlSentencesByDatasetSchemaId(dataset.getDatasetSchema());
         if (null != rulesSql && !rulesSql.isEmpty()) {
           rulesSql.stream().forEach(ruleVO -> rulesWithError.add(rulesControllerZuul
               .validateSqlRuleDataCollection(dataset.getId(), dataset.getDatasetSchema(), ruleVO)));
@@ -520,12 +532,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       });
       LOG.info(
-          "Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
-          rulesWithError.size());
+              "Data Collection creation process for dataflowId {} stopped: there are SQL rules containing: {} errors", dataflowId,
+              rulesWithError.size());
       if (stopAndNotifySQLErrors) {
         rulesOk = checkSQLRulesErrors(dataflowId, rulesOk, designs, rulesWithError, emptyDatasetTables);
       }
     }
+
     // remove from the list of designs the ones that are going to be referenceDatasets
     List<DesignDatasetVO> referenceDatasets = new ArrayList<>();
     List<String> referenceSchemasId = new ArrayList<>();
@@ -536,6 +549,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         referenceDatasets.add(dataset);
         referenceSchemasId.add(dataset.getDatasetSchema());
         if (isCreation) {
+          //we will update the materialized views for reference datasets
+          LOG.info("Will update reference dataset with id {} and recreate materialized views", dataset.getId());
           datasetSchemaService.updateReferenceDataset(dataset.getId(), dataset.getDatasetSchema(),
               true);
           LOG.info("There are reference datasets for dataflowId {}. Deleting its export eu dataset integrations", dataflowId);
@@ -545,11 +560,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     });
     designs.removeIf(design -> referenceDatasets.contains(design));
 
-    // Now we have splitted the schemas between designs ("normal") schemas and schemas that are
-    // reference,
+    // Now we have splitted the schemas between designs ("normal") schemas and schemas that are reference,
     // we have to check if there are links on reference datasets. If it is the case, then the links
-    // can't point to
-    // normal schemas. If this happens, convert the type Link to Text
+    // can't point to normal schemas. If this happens, convert the type Link to Text
     checkLinksInReferenceDatasets(referenceDatasets, referenceSchemasId);
 
     // check if there are designs (or reference) to continue the process

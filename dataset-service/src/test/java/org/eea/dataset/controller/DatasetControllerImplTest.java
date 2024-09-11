@@ -728,11 +728,13 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void etlImportDatasetTest() throws EEAException {
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
-    datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+    datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L, false);
     Mockito.verify(fileTreatmentHelper, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -742,11 +744,13 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void etlImportDatasetLegacyTest() throws EEAException {
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
-    datasetControllerImpl.etlImportDatasetLegacy(1L, new ETLDatasetVO(), 1L, 1L);
+    datasetControllerImpl.etlImportDatasetLegacy(1L, new ETLDatasetVO(), 1L, 1L, false);
     Mockito.verify(fileTreatmentHelper, times(1)).etlImportDataset(Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any());
   }
 
   /**
@@ -758,7 +762,7 @@ public class DatasetControllerImplTest {
   public void etlImportDatasetDataflowExceptionTest() throws EEAException {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(null);
     try {
-      datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+      datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.FORBIDDEN, e.getStatus());
       throw e;
@@ -772,12 +776,15 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void etlImportDatasetExceptionTest() throws EEAException {
+    Mockito.when(jobControllerZuul.checkEligibilityOfJob(Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong(), Mockito.anyLong(), Mockito.anyList())).thenReturn(JobStatusEnum.IN_PROGRESS);
+    Mockito.when(jobControllerZuul.addEtlImportJob(Mockito.anyLong(), Mockito.anyLong(), Mockito.anyLong(), Mockito.any())).thenReturn(1L);
+    Mockito.doNothing().when(jobControllerZuul).updateJobStatus(Mockito.any(), Mockito.any());
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.TRUE);
     doThrow(new EEAException()).when(fileTreatmentHelper).etlImportDataset(Mockito.any(),
-        Mockito.any(), Mockito.any());
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
     try {
-      datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+      datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       throw e;
@@ -794,7 +801,7 @@ public class DatasetControllerImplTest {
     Mockito.when(datasetService.getDataFlowIdById(Mockito.any())).thenReturn(1L);
     Mockito.when(datasetService.isDatasetReportable(Mockito.any())).thenReturn(Boolean.FALSE);
     try {
-      datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L);
+      datasetControllerImpl.etlImportDataset(1L, new ETLDatasetVO(), 1L, 1L, false);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals(String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, 1L), e.getReason());
@@ -1639,7 +1646,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteDatasetData(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.nullable(Long.class));
   }
 
   /**
@@ -1658,7 +1665,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteImportDataLegacy(1L, null, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.nullable(Long.class));
   }
 
 
@@ -1675,7 +1682,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteDatasetData(1L, 1L, 1L, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.nullable(Long.class));
   }
 
   /**
@@ -1690,7 +1697,7 @@ public class DatasetControllerImplTest {
     when(dataFlowControllerZuul.findById(1L, null)).thenReturn(dataFlowVO);
     datasetControllerImpl.privateDeleteDatasetData(1L, null, false);
     Mockito.verify(deleteHelper, times(1)).executeDeleteDatasetProcess(Mockito.anyLong(),
-        Mockito.anyBoolean(), Mockito.anyBoolean());
+        Mockito.anyBoolean(), Mockito.anyBoolean(), Mockito.nullable(Long.class));
   }
 
   /**
@@ -1749,7 +1756,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), Mockito.nullable(Long.class));
   }
 
   /**
@@ -1768,7 +1775,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteImportTableLegacy(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), Mockito.nullable(Long.class));
   }
 
   @Test
@@ -1784,7 +1791,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), Mockito.nullable(Long.class));
   }
 
   @Test(expected = ResponseStatusException.class)

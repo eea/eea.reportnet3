@@ -414,8 +414,16 @@ export const DataflowService = {
 
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData) =>
-    await DataflowRepository.update(dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData),
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, deadlineDate) =>
+    await DataflowRepository.update(
+      dataflowId,
+      name,
+      description,
+      obligationId,
+      isReleasable,
+      showPublicInfo,
+      deadlineDate
+    ),
 
   updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
     await DataflowRepository.updateAutomaticDelete(dataflowId, isAutomaticReportingDeletion),

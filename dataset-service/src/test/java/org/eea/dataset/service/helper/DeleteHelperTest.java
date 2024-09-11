@@ -62,7 +62,7 @@ public class DeleteHelperTest {
 
   @Test
   public void executeDeleteProcessTest() throws EEAException, IOException, InterruptedException {
-    Mockito.doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any());
+    Mockito.doNothing().when(datasetService).deleteTableBySchema(Mockito.any(), Mockito.any(), Mockito.any());
     Mockito.when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
 
     Mockito.doNothing().when(kafkaSenderUtils).releaseNotificableKafkaEvent(Mockito.any(),
@@ -75,7 +75,7 @@ public class DeleteHelperTest {
     dfVO.setName("dfName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
-    deleteHelper.executeDeleteTableProcess(1L, "");
+    deleteHelper.executeDeleteTableProcess(1L, "", null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }
@@ -95,7 +95,7 @@ public class DeleteHelperTest {
     dfVO.setName("dfName");
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dfVO);
 
-    deleteHelper.executeDeleteDatasetProcess(1L, false, false);
+    deleteHelper.executeDeleteDatasetProcess(1L, false, false, null);
     Mockito.verify(kafkaSenderUtils, times(1)).releaseNotificableKafkaEvent(Mockito.any(),
         Mockito.any(), Mockito.any());
   }

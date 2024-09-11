@@ -19,6 +19,7 @@ import { Checkbox } from 'views/_components/Checkbox';
 import { CustomFileUpload } from 'views/_components/CustomFileUpload';
 import { DatasetDashboardDialog } from 'views/_components/DatasetDashboardDialog';
 import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDialog';
+import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
@@ -60,6 +61,7 @@ import { useApplyFilters } from 'views/_functions/Hooks/useApplyFilters';
 import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useDatasetDesigner } from 'views/_components/Snapshots/_hooks/useDatasetDesigner';
+import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
@@ -150,6 +152,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isCitizenScienceDataflow: false,
     isConfigureWebformDialogVisible: false,
     isDataflowOpen: false,
+    isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
     isDownloadingQCRules: false,
     isDownloadingValidations: false,
@@ -200,6 +203,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     webformOptionsLoadingStatus: 'pending'
   });
 
+  const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
+  const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
+
   const {
     arePrefilledTablesDeleted,
     datasetDescription,
@@ -243,6 +249,26 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       getWebformList();
     }
   }, []);
+
+  useEffect(() => {
+    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+
+    leftSideBarContext.removeModels();
+
+    if (isAdmin || isDataCustodian) {
+      leftSideBarContext.addModels([
+        {
+          className: 'dataflow-help-datasets-info-step',
+          icon: 'listClipboard',
+          isVisible: true,
+          label: 'datasetsInfo',
+          onClick: () => manageDialogs('isDatasetsInfoDialogVisible', true),
+          title: 'datasetsInfo'
+        }
+      ]);
+    }
+  }, [userContext]);
 
   useEffect(() => {
     if (!isUndefined(userContext.contextRoles)) {
@@ -849,13 +875,18 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   );
 
   useCheckNotifications(
-    ['VALIDATE_RULES_COMPLETED_EVENT', 'VALIDATE_RULES_ERROR_EVENT'],
+    [
+      'VALIDATE_RULES_COMPLETED_EVENT',
+      'VALIDATE_ALL_RULES_COMPLETED_EVENT',
+      'VALIDATE_RULES_ERROR_EVENT',
+      'VALIDATE_QCS_ERROR_EVENT'
+    ],
     setSqlValidationRunning,
     false
   );
 
   useCheckNotifications(
-    ['VALIDATE_ALL_RULES_COMPLETED_EVENT', 'DISABLE_NAMES_TYPES_RULES_ERROR_EVENT'],
+    ['VALIDATE_ALL_RULES_COMPLETED_EVENT', 'DISABLE_NAMES_TYPES_RULES_ERROR_EVENT', 'VALIDATE_ALL_QCS_ERROR_EVENT'],
     setAllSqlValidationRunning,
     false
   );
@@ -1174,7 +1205,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       console.error('DatasetDesigner - validateAllQcRules.', error);
       notificationContext.add(
         {
-          type: 'VALIDATE__ALL_QCS_ERROR_EVENT',
+          type: 'VALIDATE_ALL_QCS_ERROR_EVENT',
           content: {
             customContent: { origin: 'DESIGN' },
             dataflowId,
@@ -1210,6 +1241,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsIcebergCreated(!isIcebergCreated);
     setIsLoadingIceberg(false);
   };
+
+  const renderDialogFooterCloseBtn = modalType => (
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon="cancel"
+      label={resourcesContext.messages['close']}
+      onClick={() => {
+        manageDialogs(modalType, false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
+    />
+  );
 
   const renderQCsHistoryButton = () => {
     if (isDataflowOpen) {
@@ -1269,6 +1313,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
       <Button
         className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
+        disabled={allSqlValidationRunning}
         icon={allSqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateAllSqlRulesBtn']}
         onClick={validateAllQcRules}
@@ -1277,6 +1322,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       />
       <Button
         className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
+        disabled={sqlValidationRunning}
         icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
         label={resourcesContext.messages['validateSqlRulesBtn']}
         onClick={validateQcRules}
@@ -1756,9 +1802,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   actionsContext.deleteTableProcessing ||
                   actionsContext.validateDatasetProcessing
                 }
-                icon={actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'}
                 label={
-                  actionsContext.importDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.importDatasetProcessing
                     ? resourcesContext.messages['importInProgress']
                     : resourcesContext.messages['importDataset']
                 }
@@ -1787,10 +1832,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   actionsContext.deleteTableProcessing ||
                   actionsContext.validateDatasetProcessing
                 }
-                icon={actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
                 id="buttonExportDataset"
                 label={
-                  actionsContext.exportDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.exportDatasetProcessing
                     ? resourcesContext.messages['exportInProgress']
                     : resourcesContext.messages['exportDataset']
                 }
@@ -1814,9 +1858,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   actionsContext.deleteTableProcessing ||
                   actionsContext.validateDatasetProcessing
                 }
-                icon={actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
                 label={
-                  actionsContext.deleteDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
                     ? resourcesContext.messages['deleteInProgress']
                     : resourcesContext.messages['deleteDatasetData']
                 }
@@ -1838,9 +1881,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   actionsContext.deleteTableProcessing ||
                   actionsContext.validateDatasetProcessing
                 }
-                icon={actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'}
                 label={
-                  actionsContext.validateDatasetProcessing
+                  actionsContext.isInProgress && actionsContext.validateDatasetProcessing
                     ? resourcesContext.messages['validationInProgress']
                     : resourcesContext.messages['validate']
                 }
@@ -1970,6 +2012,25 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             viewType={designerState.viewType}
           />
         )}
+
+        {designerState.isDatasetsInfoDialogVisible && (
+          <Dialog
+            footer={renderDialogFooterCloseBtn('isDatasetsInfoDialogVisible')}
+            header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowId}`}
+            onHide={() => {
+              manageDialogs('isDatasetsInfoDialogVisible', false);
+              resetDatasetInfoFiltersState();
+            }}
+            visible={designerState.isDatasetsInfoDialogVisible}>
+            <DatasetsInfo
+              dataflowId={dataflowId}
+              dataflowType={designerState.dataflowType}
+              datasetId={datasetId}
+              isReferenceDataset={isReferenceDataset}
+            />
+          </Dialog>
+        )}
+
         {designerState.datasetSchema && designerState.tabs && validationContext.isVisible && (
           <Validations
             bigData={designerState.bigData}

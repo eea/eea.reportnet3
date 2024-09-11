@@ -126,7 +126,7 @@ export const DataflowRepository = {
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData) =>
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, deadlineDate) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
@@ -136,7 +136,7 @@ export const DataflowRepository = {
         obligation: { obligationId },
         releasable: isReleasable,
         showPublicInfo,
-        bigData
+        deadlineDate
       }
     }),
 

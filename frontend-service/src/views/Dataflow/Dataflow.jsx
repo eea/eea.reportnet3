@@ -1,5 +1,7 @@
 import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
+import dayjs from 'dayjs';
 import first from 'lodash/first';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -59,6 +61,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { Calendar } from 'views/_components/Calendar';
 
 export const Dataflow = () => {
   const navigate = useNavigate();
@@ -72,17 +75,20 @@ export const Dataflow = () => {
   const userContext = useContext(UserContext);
 
   const dataflowInitialState = {
+    allReportersDeleted: false,
     anySchemaAvailableInPublic: false,
     bigData: false,
     currentUrl: '',
     data: {},
+    dataCollectionDueDate: null,
     dataflowType: '',
+    dataProviderGroup: {},
     dataProviderId: [],
     dataProviderSelected: {},
     deleteInput: '',
     description: '',
     designDatasetSchemas: [],
-    formHasRepresentatives: false,
+    formHasLeadReporters: false,
     hasCustodianPermissions: false,
     hasIcebergTables: false,
     hasReporters: false,
@@ -92,12 +98,14 @@ export const Dataflow = () => {
     isApiKeyDialogVisible: false,
     isAutomaticReportingDeletion: false,
     isBusinessDataflowDialogVisible: false,
+    isCitizenScienceDataflowDialogVisible: false,
     isCopyDataCollectionToEUDatasetLoading: false,
     isDataSchemaCorrect: [],
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
     isDeleteAllLeadReportersDialogVisible: false,
     isDeleteDialogVisible: false,
+    isDeletingAllReporters: false,
     isDownloadingUsers: false,
     isExportDialogVisible: false,
     isExportEUDatasetLoading: false,
@@ -118,6 +126,7 @@ export const Dataflow = () => {
     isReleaseDialogVisible: false,
     isReportingDataflowDialogVisible: false,
     isRightPermissionsChanged: false,
+    isSameExpirationDate: false,
     isShowPublicInfoDialogVisible: false,
     isShowPublicInfoUpdating: false,
     isSnapshotDialogVisible: false,
@@ -139,6 +148,7 @@ export const Dataflow = () => {
   };
 
   const [dataflowState, dataflowDispatch] = useReducer(dataflowDataReducer, dataflowInitialState);
+  const hasExpirationDate = new Date(dataflowState.obligations?.expirationDate) > new Date();
 
   const usersTypes = { REPORTERS: 'Reporters', REQUESTERS: 'Requesters' };
 
@@ -147,6 +157,7 @@ export const Dataflow = () => {
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
   const { resetFiltersState: resetShareRightsFiltersState } = useFilters('shareRights');
   const { resetFilterState: resetObligationsFilterState } = useApplyFilters('reportingObligations');
+  const { resetFilterState: resetDeliveryDateFilterState } = useApplyFilters('changeDeliveryDate');
 
   const {
     obligation,
@@ -170,6 +181,7 @@ export const Dataflow = () => {
   const isCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowState.id, [
     config.permissions.roles.CUSTODIAN.key
   ]);
+  const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
 
   const isLeadDesigner = isSteward || isCustodian;
 
@@ -249,6 +261,19 @@ export const Dataflow = () => {
       window.location.href = '/dataflows/error/loadDataflowData';
     }
   }, []);
+
+  useEffect(() => {
+    if (dataflowState.dataCollectionDueDate) {
+      dataflowDispatch({
+        type: 'CHECK_SELECTED_DATE',
+        payload: {
+          isSameExpirationDate:
+            new Date(dayjs(dataflowState?.data?.expirationDate).format('ddd MMM DD YYYY')).getTime() ===
+            dataflowState.dataCollectionDueDate?.getTime()
+        }
+      });
+    }
+  }, [dataflowState.dataCollectionDueDate]);
 
   useBreadCrumbs({
     currentPage: CurrentPage.DATAFLOW,
@@ -331,9 +356,9 @@ export const Dataflow = () => {
 
     return {
       apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
-      datasetsInfoBtn: isAdmin && isNil(dataProviderId),
-      editBtn: !isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
-      editBusinessBtn: isBusinessDataflow && ((isDesign && isLeadDesigner) || isAdmin),
+      datasetsInfoBtn: isAdmin || isDataCustodian,
+      editBtn: !isBusinessDataflow && (isLeadDesigner || isAdmin),
+      editBusinessBtn: isBusinessDataflow && (isLeadDesigner || isAdmin),
       exportBtn: isLeadDesigner && dataflowState.designDatasetSchemas.length > 0,
       manageReportersBtn: isLeadReporterOfCountry,
       manageRequestersBtn: isAdmin || (isBusinessDataflow && isSteward) || (!isBusinessDataflow && isLeadDesigner),
@@ -359,8 +384,11 @@ export const Dataflow = () => {
       const representativesNoDatasets = dataflowState.data.representatives.filter(
         representative => !representative.hasDatasets
       );
+      const representativesHasLeadReporters = dataflowState.data.representatives.filter(
+        representative => representative.leadReporters.length > 0
+      );
       setHasRepresentativesWithoutDatasets(!isEmpty(representativesNoDatasets));
-      setFormHasRepresentatives(!isEmpty(representativesNoDatasets));
+      setFormHasLeadReporters(!isEmpty(representativesHasLeadReporters));
     }
   }, [dataflowState.data.representatives]);
 
@@ -401,6 +429,13 @@ export const Dataflow = () => {
     dataflowDispatch({
       type: 'SET_HAS_REPORTERS',
       payload: { hasReporters }
+    });
+  };
+
+  const setDataCollectionDueDate = dueDate => {
+    dataflowDispatch({
+      type: 'SET_DUE_DATE',
+      payload: { dueDate }
     });
   };
 
@@ -464,8 +499,8 @@ export const Dataflow = () => {
 
   const setDataProviderSelected = value => dataflowDispatch({ type: 'SET_DATA_PROVIDER_SELECTED', payload: value });
 
-  const setFormHasRepresentatives = value =>
-    dataflowDispatch({ type: 'SET_FORM_HAS_REPRESENTATIVES', payload: { formHasRepresentatives: value } });
+  const setFormHasLeadReporters = value =>
+    dataflowDispatch({ type: 'SET_FORM_HAS_LEAD_REPORTERS', payload: { formHasLeadReporters: value } });
 
   const setHasRepresentativesWithoutDatasets = value =>
     dataflowDispatch({
@@ -513,6 +548,12 @@ export const Dataflow = () => {
   const setIsUpdatingPermissions = isUpdatingPermissions =>
     dataflowDispatch({ type: 'SET_IS_UPDATING_PERMISSIONS', payload: { isUpdatingPermissions } });
 
+  const setIsDeletingAllReporters = isDeletingAllReporters =>
+    dataflowDispatch({ type: 'SET_IS_DELETING_ALL_REPORTERS', payload: { isDeletingAllReporters } });
+
+  const setAllReportersDeleted = allReportersDeleted =>
+    dataflowDispatch({ type: 'SET_ALL_REPORTERS_DELETED', payload: { allReportersDeleted } });
+
   const setAutomaticReportingDeletion = isAutomaticReportingDeletion =>
     dataflowDispatch({ type: 'SET_AUTOMATIC_REPORTING_DELETION', payload: { isAutomaticReportingDeletion } });
 
@@ -536,6 +577,7 @@ export const Dataflow = () => {
       payload: {
         name: newName,
         description: newDescription,
+        isCitizenScienceDataflowDialogVisible: false,
         isReportingDataflowDialogVisible: false,
         isExportDialogVisible: false
       }
@@ -605,13 +647,16 @@ export const Dataflow = () => {
   };
 
   const onConfirmDeleteAllLeadReporters = async () => {
+    manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
+    setAllReportersDeleted(false);
+    setIsDeletingAllReporters(true);
     try {
       await RepresentativeService.deleteAllLeadReporters(dataflowId);
+      setAllReportersDeleted(true);
+      setIsDeletingAllReporters(false);
     } catch (error) {
       console.error('Dataflow - onDeleteAllLeadReporters.', error);
       notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
-    } finally {
-      manageDialogs('isDeleteAllLeadReportersDialogVisible', false);
     }
   };
 
@@ -647,11 +692,14 @@ export const Dataflow = () => {
       />
       <Button
         className="p-button-animated-blink"
-        disabled={dataflowState.isDeleteAllLeadReportersDialogVisible}
-        icon="trash"
+        disabled={
+          isOpenStatus || dataflowState.isDeleteAllLeadReportersDialogVisible || dataflowState.isDeletingAllReporters
+        }
+        icon={dataflowState.isDeletingAllReporters ? 'spinnerAnimate' : 'trash'}
         label={resourcesContext.messages['deleteAllLeadReportersButton']}
         onClick={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', true)}
-        style={{ display: 'none' }}
+        tooltip={isOpenStatus ? resourcesContext.messages['deleteAllLeadReportersButtonTooltip'] : ''}
+        tooltipOptions={{ position: 'top' }}
       />
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
@@ -772,6 +820,10 @@ export const Dataflow = () => {
     try {
       const dataflow = await DataflowService.get(dataflowId);
 
+      if (dataflow.type === 'REFERENCE') {
+        navigate(getUrl(routes.REFERENCE_DATAFLOW, { referenceDataflowId: dataflowId }, true));
+      }
+
       const icebergTables =
         dataProviderId && (await DataflowService.getIcebergTables({ dataflowId, providerId: dataProviderId }));
 
@@ -783,6 +835,10 @@ export const Dataflow = () => {
           bigData: dataflow.bigData,
           data: dataflow,
           dataflowType: dataflow.type,
+          dataProviderGroup: {
+            dataProviderGroupId: dataflow.dataProviderGroupId,
+            label: dataflow.dataProviderGroupName
+          },
           description: dataflow.description,
           hasIcebergTables: !isEmpty(icebergTables?.data),
           isAutomaticReportingDeletion: dataflow.isAutomaticReportingDeletion,
@@ -1027,6 +1083,21 @@ export const Dataflow = () => {
     setObligationToPrevious();
   };
 
+  const onConfirmDeliveryDateDialog = () => {
+    manageDialogs('isDeliveryDateDialogVisible', false);
+    resetDeliveryDateFilterState();
+  };
+
+  const onHideDeliveryDateDialog = () => {
+    manageDialogs('isDeliveryDateDialogVisible', false);
+    resetDeliveryDateFilterState();
+    setDataCollectionDueDate(null);
+  };
+
+  const resetDeliveryDate = () => {
+    setDataCollectionDueDate(null);
+  };
+
   const renderObligationFooter = () => (
     <Fragment>
       <Button
@@ -1122,6 +1193,7 @@ export const Dataflow = () => {
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable,
         dataflowState.showPublicInfo,
+        undefined,
         dataflowState.isAutomaticReportingDeletion
       );
       onLoadReportingDataflow();
@@ -1320,13 +1392,14 @@ export const Dataflow = () => {
               <ManageLeadReporters
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
+                leadReportersDeleted={dataflowState.allReportersDeleted}
                 representativesImport={dataflowState.representativesImport}
                 selectedDataProviderGroup={{
                   dataProviderGroupId: dataflowState.data.dataProviderGroupId,
                   label: dataflowState.data.dataProviderGroupName
                 }}
                 setDataProviderSelected={setDataProviderSelected}
-                setFormHasRepresentatives={setFormHasRepresentatives}
+                setFormHasLeadReporters={setFormHasLeadReporters}
                 setHasRepresentativesWithoutDatasets={setHasRepresentativesWithoutDatasets}
                 setRepresentativeImport={isImport =>
                   dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: isImport })
@@ -1444,7 +1517,7 @@ export const Dataflow = () => {
             onConfirm={onConfirmDeleteAllLeadReporters}
             onHide={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', false)}
             visible={dataflowState.isDeleteAllLeadReportersDialogVisible}>
-            {resourcesContext.messages['delateAllLeadReportersDialogMessage']}
+            {resourcesContext.messages['deleteAllLeadReportersDialogMessage']}
           </ConfirmDialog>
         )}
 
@@ -1657,9 +1730,41 @@ export const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            deliveryDate={
+              dataflowState.dataCollectionDueDate
+                ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
+                : dayjs(dataflowState?.data?.expirationDate).format(userContext.userProps.dateFormat)
+            }
+            isAdmin={isAdmin}
             isCustodian={isLeadDesigner}
+            isDataflowOpen={isOpenStatus}
             isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
+            manageDialogs={manageDialogs}
+            obligation={obligation}
+            onEditDataflow={onEditDataflow}
+            resetDeliveryDate={resetDeliveryDate}
+            resetObligations={resetObligations}
+            setCheckedObligation={setCheckedObligation}
+            state={dataflowState}
+          />
+        )}
+
+        {dataflowState.isCitizenScienceDataflowDialogVisible && (
+          <ManageDataflow
+            dataflowId={dataflowId}
+            dataProviderGroup={dataflowState.dataProviderGroup}
+            deliveryDate={
+              dataflowState.dataCollectionDueDate
+                ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
+                : dayjs(dataflowState?.data?.expirationDate).format(userContext.userProps.dateFormat)
+            }
+            isAdmin={isAdmin}
+            isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
+            isCustodian={isLeadDesigner}
+            isDataflowOpen={isOpenStatus}
+            isEditing={true}
+            isVisible={dataflowState.isCitizenScienceDataflowDialogVisible}
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
@@ -1703,6 +1808,47 @@ export const Dataflow = () => {
             visible={dataflowState.isReportingObligationsDialogVisible}>
             <ReportingObligations obligationChecked={obligation} setCheckedObligation={setCheckedObligation} />
           </Dialog>
+        )}
+
+        {dataflowState.isDeliveryDateDialogVisible && (
+          <ConfirmDialog
+            className={styles.calendarConfirm}
+            confirmTooltip={dataflowState.isSameExpirationDate && resourcesContext.messages['newDeliveryDate']}
+            disabledConfirm={isNil(dataflowState.dataCollectionDueDate) || dataflowState.isSameExpirationDate}
+            header={resourcesContext.messages['changeDeliveryDate']}
+            labelCancel={resourcesContext.messages['close']}
+            labelConfirm={resourcesContext.messages['save']}
+            onConfirm={onConfirmDeliveryDateDialog}
+            onHide={onHideDeliveryDateDialog}
+            visible={dataflowState.isDeliveryDateDialogVisible}>
+            {hasExpirationDate ? (
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: TextUtils.parseText(resourcesContext.messages['dataCollectionExpirationDate'], {
+                    expirationData: dayjs(dataflowState.obligations.expirationDate).format(
+                      userContext.userProps.dateFormat
+                    )
+                  })
+                }}></p>
+            ) : (
+              <p className={styles.dataCollectionDialogMessagesWrapper}>
+                <span>{`${resourcesContext.messages['chooseExpirationDate']}`}</span>
+                <span>{`${resourcesContext.messages['chooseExpirationDateSecondLine']}`}</span>
+              </p>
+            )}
+            <Calendar
+              className={styles.calendar}
+              inline={true}
+              monthNavigator={true}
+              onChange={event => setDataCollectionDueDate(event.target.value)}
+              value={
+                dataflowState.dataCollectionDueDate
+                  ? dataflowState.dataCollectionDueDate
+                  : new Date(dayjs(dataflowState?.data?.expirationDate).format('ddd MMM DD YYYY'))
+              }
+              yearNavigator={true}
+            />
+          </ConfirmDialog>
         )}
 
         {dataflowState.isApiKeyDialogVisible && (

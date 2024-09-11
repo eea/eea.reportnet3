@@ -287,7 +287,7 @@ public final class EEAErrorMessage {
   public static final String INTEGRATION_NOT_FOUND = "Integration not found";
 
   /** The Constant DATASET_NOT_REPORTABLE: {@value}. */
-  public static final String DATASET_NOT_REPORTABLE = "Dataset %d is not Reportable";
+  public static final String DATASET_NOT_REPORTABLE = "Dataset %d is closed for edition";
 
   /** The Constant NOT_EMAIL: {@value}. */
   public static final String NOT_EMAIL = "%s is not an email";
@@ -491,7 +491,23 @@ public final class EEAErrorMessage {
 
   /** The Constant CREATING_PROVIDER: {@value}. */
   public static final String CREATING_PROVIDER =
-      "An unknown error happenned while creating a representative.";
+      "An unknown error happened while creating a provider.";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER =
+      "An unknown error happened while updating a provider.";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER_NULL_OBJECT =
+      "Cannot update provider with an empty request";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER_NULL_ID =
+      "Provider ID is missing, please specify the provider.";
+
+  /** The Constant CREATING_PROVIDER: {@value}. */
+  public static final String UPDATING_PROVIDER_FAILED_LABEL_EXISTS =
+      "Given provider label already exists at this group, please specify another label.";
 
   /** The Constant DUPLICATE_PROVIDER_CODE: {@value}. */
   public static final String DUPLICATE_PROVIDER_CODE =
@@ -540,6 +556,18 @@ public final class EEAErrorMessage {
   /** The Constant IMPORTING_FILE_ICEBERG: {@value}. */
   public static final String IMPORTING_FILE_ICEBERG =
           "Can not import because the table is iceberg";
+
+  /** The Constant IMPORTING_FILE_DATASET: {@value}. */
+  public static final String IMPORTING_REFUSED =
+          "An import can not be executed right now because there is another job being executed and is related to the same dataset id";
+
+  /** The Constant DELETING_TABLE_DATA_REFUSED: {@value}. */
+  public static final String DELETING_TABLE_DATA_REFUSED =
+          "A delete table data can not be executed right now because there is another job being executed and is related to the same dataset id";
+
+  /** The Constant DELETING_DATASET_DATA_REFUSED: {@value}. */
+  public static final String DELETING_DATASET_DATA_REFUSED =
+          "A delete dataset data can not be executed right now because there is another job being executed and is related to the same dataset id";
 
   /** The Constant EXPORTING_FILE_INTEGRATION: {@value}. */
   public static final String EXPORTING_FILE_INTEGRATION =
@@ -765,6 +793,9 @@ public final class EEAErrorMessage {
 
   /** The Constant FILE_EXPORT_ERROR_MESSAGE */
   public static final String FILE_EXPORT_ERROR_MESSAGE = "Error exporting file";
+
+  /** The Constant FILE_EXPORT_ERROR_MESSAGE */
+  public static final String AT_LEAST_ONE_FILTER_SHOULD_BE_ACTIVE = "At least one filter should be active";
 
   /**
    * Instantiates a new EEA error message.

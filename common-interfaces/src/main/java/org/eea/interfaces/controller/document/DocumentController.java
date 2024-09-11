@@ -1,6 +1,5 @@
 package org.eea.interfaces.controller.document;
 
-import java.util.List;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.core.io.Resource;
@@ -14,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * The interface Document controller.
@@ -148,7 +149,8 @@ public interface DocumentController {
    * @return the all documents by dataflow
    */
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DocumentVO> getAllDocumentsByDataflow(@PathVariable("dataflowId") Long dataflowId);
+  List<DocumentVO> getAllDocumentsByDataflow(@RequestParam(name = "providerId",
+      required = false) final Long providerId, @PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Gets the all documents by dataflow legacy.
@@ -157,7 +159,16 @@ public interface DocumentController {
    * @return the all documents by dataflow legacy
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<DocumentVO> getAllDocumentsByDataflowLegacy(@PathVariable("dataflowId") Long dataflowId);
+  List<DocumentVO> getAllDocumentsByDataflowLegacy(@RequestParam(name = "providerId",
+      required = false) final Long providerId, @PathVariable("dataflowId") Long dataflowId);
+
+
+  @PostMapping(value = "/private/cloneAllDocuments")
+  public void cloneAllDocuments(
+          @RequestParam("originDataflowId") final Long originDataflowId,
+          @RequestParam("destinationDataflowId") final Long destinationDataflowId
+  ) throws Exception;
+
 
   /**
    * Upload schema snapshot document.

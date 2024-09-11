@@ -1,7 +1,6 @@
 package org.eea.dataset.service.helper;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -62,6 +61,7 @@ import org.eea.interfaces.controller.communication.NotificationController.Notifi
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -213,6 +213,10 @@ public class FileTreatmentHelperTest {
   /** The design dataset repository. */
   @Mock
   private DesignDatasetRepository designDatasetRepository;
+
+  /** The jobControllerZuul. */
+  @Mock
+  private JobControllerZuul jobControllerZuul;
 
   /**
    * Inits the mocks.
@@ -713,7 +717,7 @@ public class FileTreatmentHelperTest {
   @Test(expected = EEAException.class)
   public void etlImportDatasetSchemaIdNotFoundTest() throws EEAException {
     try {
-      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L);
+      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L, false, null);
     } catch (EEAException e) {
       assertEquals(String.format(EEAErrorMessage.DATASET_SCHEMA_ID_NOT_FOUND, 1L), e.getMessage());
       throw e;
@@ -731,7 +735,7 @@ public class FileTreatmentHelperTest {
         .thenReturn("5cf0e9b3b793310e9ceca190");
     Mockito.when(schemasRepository.findById(Mockito.any())).thenReturn(Optional.empty());
     try {
-      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L);
+      fileTreatmentHelper.etlImportDataset(1L, new ETLDatasetVO(), 1L, false, null);
     } catch (EEAException e) {
       assertEquals(
           String.format(EEAErrorMessage.DATASET_SCHEMA_NOT_FOUND, "5cf0e9b3b793310e9ceca190"),
@@ -805,7 +809,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L);
+    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L, false, null);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 
@@ -886,7 +890,7 @@ public class FileTreatmentHelperTest {
     Mockito.when(partitionDataSetMetabaseRepository
         .findFirstByIdDataSet_idAndUsername(Mockito.any(), Mockito.any()))
         .thenReturn(Optional.of(new PartitionDataSetMetabase()));
-    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L);
+    fileTreatmentHelper.etlImportDataset(1L, etlDatasetVO, 1L, false, null);
     Mockito.verify(recordRepository, times(1)).saveAll(Mockito.any());
   }
 

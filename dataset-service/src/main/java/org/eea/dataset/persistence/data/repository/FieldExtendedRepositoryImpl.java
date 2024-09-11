@@ -1,25 +1,11 @@
 package org.eea.dataset.persistence.data.repository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.mapper.FieldNoValidationMapper;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.hibernate.Session;
@@ -27,8 +13,28 @@ import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Repository;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import java.sql.Array;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 
 
@@ -53,6 +59,24 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   @Autowired
   private FieldNoValidationMapper fieldNoValidationMapper;
+
+  /**
+   * The connection url.
+   */
+  @Value("${spring.datasource.url}")
+  private String connectionUrl;
+
+  /**
+   * The connection username.
+   */
+  @Value("${spring.datasource.dataset.username}")
+  private String connectionUsername;
+
+  /**
+   * The connection password.
+   */
+  @Value("${spring.datasource.dataset.password}")
+  private String connectionPassword;
 
 
   /** The Constant QUERY_FIELD_SCHEMA_AND_VALUE: {@value}. */
@@ -113,7 +137,7 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * The Constant QUERY_3_CONDITIONAL.
    */
   private static final String QUERY_3_CONDITIONAL =
-      "AND (cond.id_field_schema = ? AND cond.value = ? AND cond.id_record = fv.id_record or ? IS NULL) ";
+      "AND (cond.id_field_schema = ? AND cond.value = ANY(?) AND cond.id_record = fv.id_record or ? IS NULL) ";
 
   /**
    * The Constant QUERY_ORDER.
@@ -143,13 +167,21 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    * Query execution single.
    *
    * @param generatedQuery the generated query
-   * @return the list
+   * @param connectionDataVO the ConnectionDataVO
    */
   @Override
-  public Object queryExecutionSingle(String generatedQuery) {
-    Query query = entityManager.createNativeQuery(generatedQuery);
-    return query.getSingleResult();
+  public void queryExecutionSingle(String generatedQuery, ConnectionDataVO connectionDataVO) {
+
+      try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+           connectionDataVO.getUser(), connectionDataVO.getPassword());
+           PreparedStatement pstmt = connection.prepareStatement(generatedQuery);
+           ResultSet rs = pstmt.executeQuery()) {
+
+      } catch (Exception e) {
+          LOG.info("Geometry field: Geometry update failed for queryExecutionSingle.", e);
+      }
   }
+
 
   /**
    * Find by id field schema with tag ordered.
@@ -284,36 +316,37 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   private List<FieldVO> executeQueryfindByIdFieldSchemaWithTagOrdered(Session session, String query,
       Integer resultsNumber, String idPk, String labelSchemaId, String searchValue,
       String conditionalSchemaId, String conditionalValue) {
-    return session.doReturningWork(new ReturningWork<List<FieldVO>>() {
-      @Override
-      public List<FieldVO> execute(Connection conn) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(query)) {
-          stmt.setString(1, idPk);
-          stmt.setString(2, labelSchemaId);
-          stmt.setString(3, searchValue);
-          stmt.setString(4, searchValue);
-          stmt.setString(5, searchValue);
-          if (StringUtils.isNotBlank(conditionalSchemaId)) {
-            stmt.setString(6, conditionalSchemaId);
-            stmt.setString(7, conditionalValue);
-            stmt.setString(8, conditionalSchemaId);
-          }
-
-          ResultSet rs = stmt.executeQuery();
-          List<FieldVO> fields = new ArrayList<>();
-          while (rs.next()) {
-            FieldVO fieldVO = new FieldVO();
-            fieldVO.setId(rs.getString("id"));
-            fieldVO.setValue(rs.getString("value"));
-            fieldVO.setIdFieldSchema(rs.getString("id_field_schema"));
-            fieldVO.setLabel(rs.getString("label"));
-            fields.add(fieldVO);
-          }
-          return fields;
-        } catch (Exception e) {
-          LOG.error("Unexpected error! Error executing query {} with max rows {}. Message: {}", query, resultsNumber, e.getMessage());
-          throw e;
+    return session.doReturningWork(conn -> {
+      try (PreparedStatement stmt = conn.prepareStatement(query)) {
+        stmt.setString(1, idPk);
+        stmt.setString(2, labelSchemaId);
+        stmt.setString(3, searchValue);
+        stmt.setString(4, searchValue);
+        stmt.setString(5, searchValue);
+        if (StringUtils.isNotBlank(conditionalSchemaId)) {
+          String[] values = Arrays.stream(conditionalValue.split("[,;]"))
+              .map(String::trim)
+              .toArray(String[]::new);
+          Array array = conn.createArrayOf("VARCHAR", values);
+          stmt.setString(6, conditionalSchemaId);
+          stmt.setArray(7, array);
+          stmt.setString(8, conditionalSchemaId);
         }
+
+        ResultSet rs = stmt.executeQuery();
+        List<FieldVO> fields = new ArrayList<>();
+        while (rs.next()) {
+          FieldVO fieldVO = new FieldVO();
+          fieldVO.setId(rs.getString("id"));
+          fieldVO.setValue(rs.getString("value"));
+          fieldVO.setIdFieldSchema(rs.getString("id_field_schema"));
+          fieldVO.setLabel(rs.getString("label"));
+          fields.add(fieldVO);
+        }
+        return fields;
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error executing query {} with max rows {}. Message: {}", query, resultsNumber, e.getMessage());
+        throw e;
       }
     });
   }

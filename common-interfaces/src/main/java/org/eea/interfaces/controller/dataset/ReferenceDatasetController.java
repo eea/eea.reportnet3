@@ -67,10 +67,11 @@ public interface ReferenceDatasetController {
    * Update reference dataset if it is marked as updateable.
    *
    * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
    * @param updatable the updatable
    */
   @PutMapping("/{datasetId}")
-  void updateReferenceDataset(@PathVariable Long datasetId,
+  void updateReferenceDataset(@PathVariable Long datasetId, @RequestParam("dataflowId") Long dataflowId,
       @RequestParam("updatable") Boolean updatable);
 
 }

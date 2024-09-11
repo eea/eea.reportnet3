@@ -46,6 +46,42 @@ export const JobsStatusesService = {
     return response.data;
   },
 
+  getJobsHistory: async ({
+    pageNum,
+    numberRows,
+    sortOrder,
+    sortField,
+    jobId,
+    jobType,
+    dataflowId,
+    dataflowName,
+    providerId,
+    datasetId,
+    datasetName,
+    creatorUsername,
+    jobStatus
+  }) => {
+    const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
+
+    const response = await JobsStatusesRepository.getJobsHistory({
+      pageNum,
+      numberRows,
+      sortOrder: ServiceUtils.getSortOrder(sortOrder),
+      sortField: parsedSortField,
+      jobId,
+      jobType,
+      dataflowId,
+      dataflowName,
+      providerId,
+      datasetId,
+      datasetName,
+      creatorUsername,
+      jobStatus
+    });
+
+    return response.data;
+  },
+
   cancelJob: async jobId => {
     await JobsStatusesRepository.cancelJob(jobId);
   }

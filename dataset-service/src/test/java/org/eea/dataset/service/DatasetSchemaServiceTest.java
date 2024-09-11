@@ -1,21 +1,6 @@
 package org.eea.dataset.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import com.mongodb.client.result.UpdateResult;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -102,7 +87,21 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
-import com.mongodb.client.result.UpdateResult;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 /**
  * The Class DatasetSchemaServiceTest.
@@ -816,8 +815,6 @@ public class DatasetSchemaServiceTest {
    */
   @Test
   public void updateTableSchemaTest() throws EEAException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
     DataSetMetabase dataSetMetabase = new DataSetMetabase();
     dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
     Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
@@ -840,7 +837,7 @@ public class DatasetSchemaServiceTest {
    *
    * @throws EEAException the EEA exception
    */
-  @Test(expected = NullPointerException.class)
+  @Test
   public void updateTableSchemaNullValuesTest() throws EEAException {
     DataSetMetabase dataSetMetabase = new DataSetMetabase();
     dataSetMetabase.setDatasetSchema("5eb4269d06390651aced7c93");
@@ -856,7 +853,8 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
-      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO, true);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
+      Mockito.verify(schemasRepository, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
     } catch (NullPointerException e) {
       throw e;
     }
@@ -2811,7 +2809,7 @@ public class DatasetSchemaServiceTest {
     design.setId(1L);
     design.setDataSetName("DS");
     design.setDatasetSchema(new ObjectId().toString());
-    Mockito.when(designDatasetRepository.findById(Mockito.anyLong()))
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(design));
 
     DataSetSchema schema = new DataSetSchema();
@@ -2830,13 +2828,13 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
 
     dataSchemaServiceImpl.exportZipFieldSchemas(1L);
-    Mockito.verify(designDatasetRepository, times(1)).findById(Mockito.anyLong());
+    Mockito.verify(dataSetMetabaseRepository, times(1)).findById(Mockito.anyLong());
   }
 
   @Test(expected = EEAException.class)
   public void testExportZipFieldSchemasException() throws IOException, EEAException {
 
-    Mockito.when(designDatasetRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
     try {
       dataSchemaServiceImpl.exportZipFieldSchemas(1L);
     } catch (EEAException e) {

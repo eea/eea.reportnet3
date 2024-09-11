@@ -236,6 +236,34 @@ public class RepresentativeControllerImplTest {
   }
 
   /**
+   * Delete representatives exception test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteRepresentativesExceptionTest() throws EEAException {
+    doThrow(new EEAException()).when(representativeService)
+            .deleteDataflowRepresentatives(Mockito.any());
+    try {
+      representativeControllerImpl.deleteRepresentatives(1L);
+    } catch (ResponseStatusException e) {
+      assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
+      assertEquals(EEAErrorMessage.DATAFLOW_NOTFOUND, e.getReason());
+    }
+  }
+
+  /**
+   * Delete representatives success test.
+   *
+   * @throws EEAException the EEA exception
+   */
+  @Test
+  public void deleteRepresentativesSuccessTest() throws EEAException {
+    representativeControllerImpl.deleteRepresentatives(0L);
+    Mockito.verify(representativeService, times(1)).deleteDataflowRepresentatives(Mockito.any());
+  }
+
+  /**
    * Creates the representative test.
    *
    * @throws EEAException the EEA exception

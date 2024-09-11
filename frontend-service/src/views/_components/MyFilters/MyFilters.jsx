@@ -195,7 +195,6 @@ export const MyFilters = ({
 
   const onChange = ({ key, value }) => {
     const filteredData = onApplyFilters({ filterBy: { ...filterBy, [key]: value } });
-
     setFilterBy({ ...filterBy, [key]: value });
     setFilteredData(filteredData);
   };
@@ -208,7 +207,6 @@ export const MyFilters = ({
 
   const onSearch = value => {
     const filteredData = onApplyFilters({ filterBy, searchValue: value });
-
     setFilterBy({ ...filterBy, searchBy: value });
     setSearchBy(value);
     setFilteredData(filteredData);
@@ -415,6 +413,45 @@ export const MyFilters = ({
       return option.nestedOptions.map(nestedOption => renderMultiSelect(nestedOption));
     }
 
+    let options = option.multiSelectOptions ?? getOptionsTypes(data, option.key);
+
+    options.sort((a, b) => {
+      const fieldA = convertToComparableString(a.value);
+      const fieldB = convertToComparableString(b.value);
+
+      return fieldA.localeCompare(fieldB, undefined, { sensitivity: 'base' });
+    });
+
+    function convertToComparableString(value) {
+      if (value === undefined || value === null) {
+        return '';
+      }
+      if (typeof value !== 'string') {
+        return String(value);
+      }
+      return value;
+    }
+
+    // TaskMan 263503: If a table has been selected, filter fields to only show applicable ones
+    // The below simulates a filtering for every field present among all tables
+    // if resulting array (tempdata) is empty, this means that filtering with the
+    // selected table and the iterated field (opt) does not yield results
+    // thus this field is not pushed to the final array of fields to be rendered in the dropdown
+    let finoptions=[];
+    if (option?.label === 'Field'){
+      if(filterBy?.table && filterBy?.table.length>0){
+        options?.forEach((opt)=>{
+          let tempfilt = { filterBy: { ...filterBy, 'field': [opt.value] } }
+          let tempdata = onApplyFilters(tempfilt);
+          if(tempdata?.length>0) finoptions.push(opt)
+        })
+      }else{
+        finoptions=options;
+      }
+    }else{
+      finoptions=options;
+    }
+
     return (
       <div className={styles.block} key={option.key}>
         {option.isSortable ? renderSortButton({ key: option.key }) : renderSortButtonEmpty()}
@@ -436,7 +473,7 @@ export const MyFilters = ({
           notCheckAllHeader={resourcesContext.messages['uncheckAllFilter']}
           onChange={event => onChange({ key: option.key, value: event.target.value })}
           optionLabel="type"
-          options={option.multiSelectOptions ? option.multiSelectOptions : getOptionsTypes(data, option.key)}
+          options={finoptions}
           value={filterBy[option.key]}
         />
       </div>

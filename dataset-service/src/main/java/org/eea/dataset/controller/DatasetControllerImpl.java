@@ -833,15 +833,31 @@ public class DatasetControllerImpl implements DatasetController {
     notificationControllerZuul.createUserNotificationPrivate("DELETE_DATASET_DATA_INIT",
             userNotificationContentVO);
 
+    Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
+    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+
     // Rest API only: Check if the dataflow belongs to the dataset
-    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
       String errorMessage =
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
       LOG.error(errorMessage);
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
+
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
+    Long jobId = null;
     try {
+      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
+              false, dataflowId, providerId, Collections.singletonList(datasetId));
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, null, dataflowId, providerId,
+              deletePrefilledTables, jobStatus);
+
+      if (JobStatusEnum.REFUSED.equals(jobStatus)) {
+        throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_DATASET_DATA_REFUSED);
+      }
+
       if (dataflowId == null) {
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
@@ -857,6 +873,16 @@ public class DatasetControllerImpl implements DatasetController {
         deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
       }
       LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
+
+      Map<String, Object> result = new HashMap<>();
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if(providerId != null){
+        pollingUrl+= "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+
+      return result;
     } catch (Exception e) {
       // Release the lock manually
       Map<String, Object> deleteDatasetValues = new HashMap<>();
@@ -998,8 +1024,11 @@ public class DatasetControllerImpl implements DatasetController {
     notificationControllerZuul.createUserNotificationPrivate("DELETE_TABLE_DATA_INIT",
             userNotificationContentVO);
 
+    Long expectedDataflowId = datasetService.getDataFlowIdById(datasetId);
+    dataflowId = dataflowId != null ? dataflowId : expectedDataflowId;
+
     // Rest API only: Check if the dataflow belongs to the dataset
-    if (null != dataflowId && !dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+    if (dataflowId == null || !dataflowId.equals(expectedDataflowId)) {
       String errorMessage =
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
       LOG.error(errorMessage);
@@ -1007,7 +1036,19 @@ public class DatasetControllerImpl implements DatasetController {
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
 
+    JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
+    Long jobId = null;
     try {
+      jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.DELETE.getValue(),
+              false, dataflowId, providerId, Collections.singletonList(datasetId));
+
+      jobId = jobControllerZuul.addDeleteDataJob(datasetId, tableSchemaId, dataflowId, providerId,
+              null, jobStatus);
+
+      if (JobStatusEnum.REFUSED.equals(jobStatus)) {
+        throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.DELETING_TABLE_DATA_REFUSED);
+      }
+
       if (dataflowId == null) {
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
@@ -1023,6 +1064,16 @@ public class DatasetControllerImpl implements DatasetController {
         deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
       }
       LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
+
+      Map<String, Object> result = new HashMap<>();
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if(providerId != null){
+        pollingUrl+= "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+
+      return result;
     } catch (Exception e) {
       // Release the lock manually
       Map<String, Object> deleteImportTable = new HashMap<>();
@@ -1572,6 +1623,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @Override
   @PostMapping("/v1/{datasetId}/etlImport")
@@ -1579,16 +1631,18 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiOperation(value = "Import data by dataset id",
           notes = "Allowed roles: \n\n Reporting dataset: REPORTER WRITE, LEAD REPORTER \n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported"),
-          @ApiResponse(code = 500, message = "Error importing data"),
-          @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
-  public void etlImportDataset(
-          @ApiParam(type = "Long", value = "Dataset id",
-                  example = "0") @PathVariable("datasetId") Long datasetId,
-          @ApiParam(value = "Data object") @RequestBody ETLDatasetVO etlDatasetVO,
-          @ApiParam(type = "Long", value = "Dataflow id",
-                  example = "0") @RequestParam("dataflowId") Long dataflowId,
-          @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+      @ApiResponse(code = 500, message = "Error importing data"),
+      @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
+  public Map<String, Object> etlImportDataset(
+      @ApiParam(type = "Long", value = "Dataset id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Data object") @RequestBody ETLDatasetVO etlDatasetVO,
+      @ApiParam(type = "Long", value = "Dataflow id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "Boolean", value = "Replace Data",
+              example = "0") @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData) {
 
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -1603,18 +1657,43 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               String.format(EEAErrorMessage.DATASET_NOT_REPORTABLE, datasetId));
     }
-
+    Long jobId = null;
     try {
-      LOG.info("Calling etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId);
-      LOG.info("Successfully called etlImport for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      //check eligibility of new job
+      List<Long> datasetIds = new ArrayList<>();
+      datasetIds.add(datasetId);
+      JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.ETL_IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+      if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+        LOG.info("Added etl import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+        throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_REFUSED);
+      }
+      jobId = jobControllerZuul.addEtlImportJob(datasetId, dataflowId, providerId, jobStatus);
+
+      LOG.info("Calling etlImport for jobId {} dataflowId {} datasetId {} and replaceData {}", jobId, dataflowId, datasetId, replaceData);
+      fileTreatmentHelper.etlImportDataset(datasetId, etlDatasetVO, providerId, replaceData, jobId);
+
+      Map<String, Object> result = new HashMap<>();
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if(providerId != null){
+        pollingUrl+= "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+
+      return result;
     } catch (EEAException e) {
-      LOG.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
-              e.getMessage(), e);
+      if (jobId != null){
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
+      LOG_ERROR.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
+          e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               EEAErrorMessage.IMPORTING_DATA_DATASET);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error in etlImportDataset for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      if (jobId != null){
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
+      LOG_ERROR.error("Unexpected error! Error in etlImportDataset for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }
   }
@@ -1626,23 +1705,26 @@ public class DatasetControllerImpl implements DatasetController {
    * @param etlDatasetVO the etl dataset VO
    * @param dataflowId the dataflow id
    * @param providerId the provider id
+   * @param replaceData
    */
   @Override
   @PostMapping("/{datasetId}/etlImport")
   @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @ApiOperation(value = "Import data by dataset id", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported"),
-          @ApiResponse(code = 500, message = "Error importing data"),
-          @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
-  public void etlImportDatasetLegacy(
-          @ApiParam(type = "Long", value = "Dataset id",
-                  example = "0") @PathVariable("datasetId") Long datasetId,
-          @ApiParam(value = "Data object") @RequestBody ETLDatasetVO etlDatasetVO,
-          @ApiParam(type = "Long", value = "Dataflow id",
-                  example = "0") @RequestParam("dataflowId") Long dataflowId,
-          @ApiParam(type = "Long", value = "Provider id",
-                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
-    this.etlImportDataset(datasetId, etlDatasetVO, dataflowId, providerId);
+      @ApiResponse(code = 500, message = "Error importing data"),
+      @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
+  public Map<String, Object> etlImportDatasetLegacy(
+      @ApiParam(type = "Long", value = "Dataset id",
+          example = "0") @PathVariable("datasetId") Long datasetId,
+      @ApiParam(value = "Data object") @RequestBody ETLDatasetVO etlDatasetVO,
+      @ApiParam(type = "Long", value = "Dataflow id",
+          example = "0") @RequestParam("dataflowId") Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id",
+          example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+      @ApiParam(type = "Boolean", value = "Replace Data",
+              example = "0") @RequestParam(value = "replaceData", required = false, defaultValue = "false") Boolean replaceData) {
+    return this.etlImportDataset(datasetId, etlDatasetVO, dataflowId, providerId, replaceData);
   }
 
   /**
