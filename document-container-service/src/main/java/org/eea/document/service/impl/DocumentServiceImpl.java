@@ -78,9 +78,6 @@ public class DocumentServiceImpl implements DocumentService {
   @Autowired
   private DataFlowDocumentControllerZuul dataflowController;
 
-  @Autowired
-  private KafkaSenderUtils kafkaSenderUtils;
-
   /**
    * upload a document to the jackrabbit content repository.
    *
@@ -233,7 +230,7 @@ public class DocumentServiceImpl implements DocumentService {
   public void cloneAllDocumentsInDataflow(final Long originDataflowId, final Long destinationDataflowId) throws Exception {
 
     // Copy the dataflow documents
-    List<DocumentVO> documents = dataFlowDocumentControllerZuul.getAllDocumentsByDataflowId(originDataflowId);
+    List<DocumentVO> documents = dataflowController.getAllDocumentsByDataflowId(originDataflowId);
     if (documents != null) {
       for (DocumentVO documentVO : documents) {
         cloneDocument(documentVO, destinationDataflowId);
@@ -284,7 +281,7 @@ public class DocumentServiceImpl implements DocumentService {
                       .fileName(fileName)
                       .error(e.getMessage())
                       .build());
-      LOG_ERROR.error("Error in uploadDocument {} for dataflowId {} due to exception: {}", fileName, destinationDataflowId, e.getMessage());
+      LOG.error("Error in uploadDocument {} for dataflowId {} due to exception: {}", fileName, destinationDataflowId, e.getMessage());
       throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR, e);
     }
     finally {

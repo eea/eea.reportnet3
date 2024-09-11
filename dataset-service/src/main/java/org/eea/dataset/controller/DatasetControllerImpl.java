@@ -815,7 +815,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiResponse(code = 403, message = "Dataset not belong dataflow"),
           @ApiResponse(code = 401, message = "Unauthorize"),
           @ApiResponse(code = 500, message = "Error deleting data")})
-  public void deleteDatasetData(
+  public Map<String, Object> deleteDatasetData(
           @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
                   name = "datasetId") @PathVariable("datasetId") Long datasetId,
           @ApiParam(type = "Long", value = "Dataflow id",
@@ -870,7 +870,7 @@ public class DatasetControllerImpl implements DatasetController {
       }
       else {
         LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-        deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+        deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false, jobId);
       }
       LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
 
@@ -1006,7 +1006,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiResponse(code = 403, message = "Dataset not belong dataflow"),
           @ApiResponse(code = 401, message = "Unauthorize"),
           @ApiResponse(code = 500, message = "Error deleting data")})
-  public void deleteTableData(
+  public Map<String, Object> deleteTableData(
           @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
                   name = "datasetId") @PathVariable("datasetId") Long datasetId,
           @ApiParam(type = "String", value = "Table schema id",
@@ -1061,7 +1061,7 @@ public class DatasetControllerImpl implements DatasetController {
       else {
         LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
         // This method will release the lock
-        deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+        deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId, jobId);
       }
       LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
 

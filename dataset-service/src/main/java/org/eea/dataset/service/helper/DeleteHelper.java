@@ -139,7 +139,7 @@ public class DeleteHelper {
       try {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
       } catch (EEAException e) {
-        LOG_ERROR.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+        LOG.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
       }
 
       if (jobId != null) {
@@ -202,7 +202,7 @@ public class DeleteHelper {
         try {
           kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
         } catch (EEAException e) {
-          LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
+          LOG.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
         }
       }
 
@@ -214,7 +214,6 @@ public class DeleteHelper {
       if (jobId != null) {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
       }
-
       throw e;
     } finally {
       // Release the lock manually
@@ -223,6 +222,41 @@ public class DeleteHelper {
               LockSignature.DELETE_DATASET_VALUES.getValue());
       deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
       lockService.removeLockByCriteria(deleteDatasetValues);
+    }
+  }
+
+  public void releaseDeleteDatasetDataLocksAndSendNotification(final Long datasetId, boolean technicallyAccepted){
+    EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+            ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
+            : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
+
+    // Release the lock manually
+    Map<String, Object> deleteDatasetValues = new HashMap<>();
+    deleteDatasetValues.put(LiteralConstants.SIGNATURE,
+            LockSignature.DELETE_DATASET_VALUES.getValue());
+    deleteDatasetValues.put(LiteralConstants.DATASETID, datasetId);
+    lockService.removeLockByCriteria(deleteDatasetValues);
+
+    // If technically accepted is false, it will be notified and the dataset validated
+    if (!technicallyAccepted) {
+      // after the dataset values have been deleted, an event is sent to notify it
+      Map<String, Object> value = new HashMap<>();
+      NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetId(datasetId).build();
+      DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+      notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+      notificationVO.setDataflowName(
+              dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+
+      value.put(LiteralConstants.DATASET_ID, datasetId);
+
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+      } catch (EEAException e) {
+        LOG.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
+      }
     }
   }
 

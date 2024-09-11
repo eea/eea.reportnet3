@@ -118,7 +118,7 @@ public class ValidationScheduler extends MessageReceiver {
           } catch (EEAException | JsonProcessingException e) {
             LOG.error("failed the validation task shedule because of {} ", e);
           } catch (ObjectOptimisticLockingFailureException e) {
-            newDelay = 1L;
+            newDelay = delay;
           } finally {
             redisLockService.releaseLock(lockKey, value);
           }
