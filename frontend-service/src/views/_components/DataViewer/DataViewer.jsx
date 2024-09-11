@@ -254,7 +254,7 @@ export const DataViewer = ({
   const onCoordinatesMoreInfoClick = geoJson =>
     dispatchRecords({ type: 'OPEN_COORDINATES_MORE_INFO', payload: geoJson });
 
-  const onFileDownload = async (fileName, fieldId, recordId, fieldName) => {
+  const onFileDownload = async (fileName, fieldId, recordId, fieldName, dataProviderCode) => {
     try {
       const { data } = await DatasetService.downloadFileData({
         dataflowId,
@@ -264,7 +264,8 @@ export const DataViewer = ({
         fileName,
         recordId,
         tableSchemaName: tableName,
-        fieldName
+        fieldName,
+        providerCode: dataProviderCode
       });
       DownloadFile(data, fileName);
     } catch (error) {

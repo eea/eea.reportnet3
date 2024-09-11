@@ -137,7 +137,8 @@ export const DatasetService = {
     fileName,
     recordId,
     tableSchemaName,
-    fieldName
+    fieldName,
+    providerCode
   }) =>
     await DatasetRepository.downloadFileData({
       dataflowId,
@@ -147,7 +148,8 @@ export const DatasetService = {
       fileName,
       recordId,
       tableSchemaName,
-      fieldName
+      fieldName,
+      providerCode
     }),
 
   downloadPublicDatasetFile: async (dataflowId, dataProviderId, fileName) =>
