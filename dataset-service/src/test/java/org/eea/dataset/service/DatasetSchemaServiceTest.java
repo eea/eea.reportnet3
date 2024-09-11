@@ -853,7 +853,7 @@ public class DatasetSchemaServiceTest {
     Mockito.when(schemasRepository.updateTableSchema(Mockito.any(), Mockito.any()))
         .thenReturn(UpdateResult.acknowledged(1L, 0L, null));
     try {
-      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO);
+      dataSchemaServiceImpl.updateTableSchema(1L, tableSchemaVO, false);
       Mockito.verify(schemasRepository, times(1)).updateTableSchema(Mockito.any(), Mockito.any());
     } catch (NullPointerException e) {
       throw e;

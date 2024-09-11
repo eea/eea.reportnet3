@@ -866,7 +866,6 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
         bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
-        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
       }
       else {
         LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
@@ -937,11 +936,10 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataFlowVO.getBigData()) {
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
         bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false);
-        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
       }
       else {
         LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-        deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+        deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted, null);
       }
       LOG.info("Successfully privately deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
@@ -1056,7 +1054,6 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
         bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId);
-        deleteHelper.releaseDeleteTableDataLocksAndSendNotification(datasetId, tableSchemaId);
       }
       else {
         LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
@@ -1685,7 +1682,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (jobId != null){
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
       }
-      LOG_ERROR.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
+      LOG.error("The etlImportDataset failed on dataflowId {} and datasetId {} Message: {}", dataflowId, datasetId,
           e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               EEAErrorMessage.IMPORTING_DATA_DATASET);
@@ -1693,7 +1690,7 @@ public class DatasetControllerImpl implements DatasetController {
       if (jobId != null){
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
       }
-      LOG_ERROR.error("Unexpected error! Error in etlImportDataset for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
+      LOG.error("Unexpected error! Error in etlImportDataset for dataflowId {} datasetId {} and providerId {} Message: {}", dataflowId, datasetId, providerId, e.getMessage());
       throw e;
     }
   }

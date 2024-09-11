@@ -664,7 +664,7 @@ public enum EventType {
   COMMAND_VALIDATE_EMPTY_RULE(LiteralConstants.COMMAND_TOPIC, "execute_validations_empty_rule_key", false),
 
   /** The command validated sql datalake completed. */
-  COMMAND_VALIDATED_EMPTY_RULE_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "empty_rule_validated_key", true);
+  COMMAND_VALIDATED_EMPTY_RULE_COMPLETED(LiteralConstants.BROADCAST_TOPIC, "empty_rule_validated_key", true),
 
 
   DELETING_NATIONAL_COORDINATOR_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
