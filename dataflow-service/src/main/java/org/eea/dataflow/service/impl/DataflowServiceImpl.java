@@ -1729,4 +1729,8 @@ public class DataflowServiceImpl implements DataflowService {
     result.setDocuments(null);
   }
 
+  @Override
+  public Long findDataProviderGroupIdById(Long dataflowId){
+    return dataflowRepository.findDataProviderGroupIdById(dataflowId);
+  }
 }

@@ -320,6 +320,9 @@ public interface DataflowRepository
       value = "select case when (select d.show_public_info from Dataflow d where d.id=:dataflowId) = true then true else false end")
   boolean getPublicInfoByDataflowId(@Param("dataflowId") Long dataflowId);
 
+  @Query(nativeQuery = true, value = "select dataprovider_group_id from Dataflow where id = :dataflowId")
+  Long findDataProviderGroupIdById(@Param("dataflowId") Long dataflowId);
+
 
   /**
    * The Interface IDatasetStatus.

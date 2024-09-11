@@ -15,6 +15,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * The Interface DataflowService.
@@ -298,4 +299,5 @@ public interface DataflowService {
    */
   List<DataFlowVO> getDataflowsMetabaseById(List<Long> dataflowIds);
 
+  Long findDataProviderGroupIdById(Long dataflowId);
 }

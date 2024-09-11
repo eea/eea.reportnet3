@@ -1250,4 +1250,22 @@ public class DataflowControllerImpl implements DataFlowController {
     }
     return false;
   }
+
+  /**
+   * Find dataflow name by id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data flow name
+   */
+  @Override
+  @GetMapping(value = "/private/findDataProviderGroupIdById/{dataflowId}")
+  public Long findDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId){
+    try{
+      return dataflowService.findDataProviderGroupIdById(dataflowId);
+    }
+    catch(Exception e){
+      LOG.error("Unexpected error! Could not retrieve provider group id for dataflow with id {} ", dataflowId, e);
+      throw e;
+    }
+  }
 }
