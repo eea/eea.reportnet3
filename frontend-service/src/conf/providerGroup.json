@@ -7,5 +7,6 @@
   "MAP_MY_TREE_PROVIDERS": { "key": "MAP_MY_TREE_PROVIDERS", "label": "mapMyTreeProviders" },
   "COMPANY_GROUP_1": { "key": "COMPANY_GROUP_1", "label": "companyGroup1" },
   "LDV_MANUFACTURERS": { "key": "LDV_MANUFACTURERS", "label": "ldvManufacturers" },
-  "COUNTRIES": { "key": "COUNTRIES", "label": "countriesGroup" }
+  "COUNTRIES": { "key": "COUNTRIES", "label": "countriesGroup" },
+  "HDV_MANUFACTURERS": { "key": "HDV_MANUFACTURERS", "label": "hdvManufacturers" }
 }

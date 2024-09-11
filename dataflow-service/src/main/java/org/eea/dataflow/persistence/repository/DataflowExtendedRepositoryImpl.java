@@ -407,16 +407,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     if (CollectionUtils.isNotEmpty(dataflowIds)) {
       query.setParameter("dataflowList", dataflowIds);
-      if (null != type && TypeDataflowEnum.REFERENCE.equals(type)) {
-        query.setParameter("status1", "DRAFT");
-        query.setParameter("status2", "DESIGN");
-      }
-
-    } else {
-      if (null != type && TypeDataflowEnum.REFERENCE.equals(type)) {
-        query.setParameter("status1", "DRAFT");
-        query.setParameter("status2", "DESIGN");
-      }
     }
 
 
@@ -469,23 +459,10 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
 
       if (CollectionUtils.isNotEmpty(dataflowIds)) {
-        if (null != type && TypeDataflowEnum.REFERENCE.equals(type)) {
-          addAnd(stringQuery, addAnd);
-          stringQuery.append(String.format(REFERENCE_IN,
-              CollectionUtils.isEmpty(pinnedDataflows) ? "d." : "tablePinned."));
-          addAnd = true;
-        } else {
-          addAnd(stringQuery, addAnd);
-          stringQuery.append(String.format(DATAFLOW_IN,
-              CollectionUtils.isEmpty(pinnedDataflows) ? "d." : "tablePinned."));
-          addAnd = true;
-        }
-      } else {
-        if (null != type && TypeDataflowEnum.REFERENCE.equals(type)) {
-          addAnd(stringQuery, addAnd);
-          stringQuery.append(REFERENCE_STATUS);
-          addAnd = true;
-        }
+        addAnd(stringQuery, addAnd);
+        stringQuery.append(String.format(DATAFLOW_IN,
+                CollectionUtils.isEmpty(pinnedDataflows) ? "d." : "tablePinned."));
+        addAnd = true;
       }
 
       if (isPublic) {
