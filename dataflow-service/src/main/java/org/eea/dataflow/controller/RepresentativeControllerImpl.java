@@ -898,6 +898,18 @@ public class RepresentativeControllerImpl implements RepresentativeController {
     LOG.info("Successfully updated representative visibility restrictions for dataflowId {} and dataProviderId {}", dataflowId, dataProviderId);
   }
 
-
+  @Override
+  @GetMapping(value = "/private/code/{code}/group/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public DataProviderVO findDataProviderByCodeAndGroupId(
+          @ApiParam(value = "Code", example = "AT") @PathVariable("code") String code,
+          @ApiParam(value = "Group id", example = "0") @PathVariable("groupId") Long groupId) {
+    try{
+       return representativeService.findDataProviderByCodeAndGroupId(code, groupId);
+    }
+    catch (Exception e){
+      LOG.error("Could not find provider with code {} and group {} Error: {}", code, groupId, e.getMessage());
+      throw e;
+    }
+  }
 
 }

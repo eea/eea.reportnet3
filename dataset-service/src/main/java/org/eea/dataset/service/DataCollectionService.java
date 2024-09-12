@@ -6,6 +6,7 @@ import org.eea.dataset.service.model.FKDataCollection;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataCollectionVO;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /** The Interface DataCollectionService. */
 public interface DataCollectionService {
@@ -81,5 +82,13 @@ public interface DataCollectionService {
    * @return the providers pending to copy into EU
    */
   List<String> getProvidersPendingToCopyIntoEU(Long dataCollectionId);
+
+  /**
+   * Gets the data collection id by dataset schema id
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @return the data collection id
+   */
+  Long findDataCollectionIdByDatasetSchemaId(String datasetSchemaId);
 
 }

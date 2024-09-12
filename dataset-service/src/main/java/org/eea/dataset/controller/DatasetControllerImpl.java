@@ -1759,7 +1759,8 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
           @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
           @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
-          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
+          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
+          @ApiParam(type = "String", value = "Provider code", example = "AT") @RequestParam(value = "providerCode", required = false) String providerCode) {
 
     LOG.info("Downloading attachment from the datasetId {}", datasetId);
     try {
@@ -1767,7 +1768,7 @@ public class DatasetControllerImpl implements DatasetController {
       byte[] file = null;
       String filename = null;
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
-        AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
+        AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode);
         file = attachment.getContent();
         filename = attachment.getFileName();
       }
@@ -1822,8 +1823,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Table schema name", example = "table") @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
           @ApiParam(type = "String", value = "Field name", example = "table") @RequestParam(value = "fieldName", required = false) String fieldName,
           @ApiParam(type = "String", value = "File name", example = "file") @RequestParam(value = "fileName", required = false) String fileName,
-          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId) {
-    return this.getAttachment(datasetId, idField, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId);
+          @ApiParam(type = "String", value = "Record id", example = "SDHFKSD792812") @RequestParam(value = "recordId", required = false) String recordId,
+          @ApiParam(type = "String", value = "Provider code", example = "AT") @RequestParam(value = "providerCode", required = false) String providerCode) {
+    return this.getAttachment(datasetId, idField, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode);
   }
 
   /**

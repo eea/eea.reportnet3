@@ -1327,4 +1327,20 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     return importResult;
   }
 
+  /**
+   * Find data providers by ids.
+   *
+   * @param code the code
+   * @return the list
+   */
+  @Override
+  public DataProviderVO findDataProviderByCodeAndGroupId(String code, Long groupId) {
+    Optional<DataProvider> dataProvider = dataProviderRepository.findFirstByCodeAndDataProviderGroup_id(code, groupId);
+    if (dataProvider.isPresent()) {
+      return dataProviderMapper.entityToClass(dataProvider.get());
+    }
+    else return null;
+  }
+
+
 }

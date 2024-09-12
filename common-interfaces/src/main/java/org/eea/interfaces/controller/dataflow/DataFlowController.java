@@ -398,4 +398,10 @@ public interface DataFlowController {
   @PostMapping(value = "/private/dataflows/getmetabase",
       produces = MediaType.APPLICATION_JSON_VALUE)
   List<DataFlowVO> getDataflowsMetabaseById(@RequestBody List<Long> dataflowIds);
+
+  @GetMapping(value = "/private/findDataProviderGroupIdById/{dataflowId}")
+  Long findDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId);
+
+  @PutMapping(value = "/private/updateDataProviderGroupIdById/{dataflowId}")
+  void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId);
 }

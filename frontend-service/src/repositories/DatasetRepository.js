@@ -119,7 +119,8 @@ export const DatasetRepository = {
     fileName,
     recordId,
     tableSchemaName,
-    fieldName
+    fieldName,
+    providerCode
   }) =>
     await HTTPRequester.download({
       url: dataProviderId
@@ -131,7 +132,8 @@ export const DatasetRepository = {
             fileName,
             recordId,
             tableSchemaName,
-            fieldName
+            fieldName,
+            providerCode
           })
         : getUrl(DatasetConfig.downloadFileData, {
             dataflowId,
@@ -140,7 +142,8 @@ export const DatasetRepository = {
             fileName,
             recordId,
             tableSchemaName,
-            fieldName
+            fieldName,
+            providerCode
           })
     }),
 

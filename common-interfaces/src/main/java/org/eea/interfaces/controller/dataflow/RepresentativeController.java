@@ -318,4 +318,7 @@ public interface RepresentativeController {
       @RequestParam(value = "restrictFromPublic", required = true,
           defaultValue = "false") Boolean restrictFromPublic);
 
+  @GetMapping(value = "/private/code/{code}/group/{groupId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  DataProviderVO findDataProviderByCodeAndGroupId(@PathVariable("code") String code, @PathVariable("groupId") Long groupId);
+
 }

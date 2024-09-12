@@ -1,6 +1,8 @@
 package org.eea.dataflow.persistence.repository;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.eea.dataflow.persistence.domain.DataProvider;
 import org.eea.dataflow.persistence.domain.DataProviderGroup;
 import org.springframework.data.jpa.repository.Modifying;
@@ -46,4 +48,14 @@ public interface DataProviderRepository extends PagingAndSortingRepository<DataP
           "VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM data_provider), ?, ?, ?)",
           nativeQuery = true)
   void saveDataProvider(String label, String code, Long groupId);
+
+  /**
+   * Find by code and group id.
+   *
+   * @param code the code
+   * @param dataProviderGroup the data provider group
+   * @return the optional
+   */
+  Optional<DataProvider> findFirstByCodeAndDataProviderGroup_id(String code, Long dataProviderGroup);
+
 }

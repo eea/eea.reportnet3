@@ -618,7 +618,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       LOG.info("dataset {}", dataset);
       if (dataflow.getBigData()) {
+        Long dataProviderId = dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0;
         if (DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
+          //todo use copyFileToAnotherDestination to copy attachments
           LOG.info("Create data snapshot for EU dataset {}", idDataset);
           S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
 
@@ -634,30 +636,40 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
           LOG.info("Getting tableNameFilenames for path resolver {}", dcPath);
           List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(dcPath);
+          Long finalEuDatasetId = euDatasetId;
           tableNameFilenames.forEach(file -> {
             String key = file.key();
             String filename = new File(key).getName();
-            euPath.setFilename(filename);
-            euPath.setTableName(key.split("/")[4]);
-            euPath.setPath(S3_EU_SNAPSHOT_PATH);
-            euPath.setDataProviderName(key.split("/")[5]);
-            euPath.setParquetFolder(key.split("/")[6]);
-            euPath.setSnapshotId(idSnapshot);
-            try {
-              LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-              File parquetFile = s3Helper.getFileFromS3(key, filename + idDataset, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-              String tableNameSnapshotPath = s3Service.getS3Path(euPath);
-              LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
-              s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
-              parquetFile.delete();
-              LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
-            } catch (IOException e) {
-              LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
+            if (!key.contains("/attachments/")) {
+              euPath.setFilename(filename);
+              euPath.setTableName(key.split("/")[4]);
+              euPath.setPath(S3_EU_SNAPSHOT_PATH);
+              euPath.setDataProviderName(key.split("/")[5]);
+              euPath.setParquetFolder(key.split("/")[6]);
+              euPath.setSnapshotId(idSnapshot);
+              try {
+                LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                File parquetFile = s3Helper.getFileFromS3(key, filename + idDataset, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+                String tableNameSnapshotPath = s3Service.getS3Path(euPath);
+                LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
+                s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                parquetFile.delete();
+                LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
+              } catch (IOException e) {
+                LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
+              }
+            }
+            else{
+              //copy attachments to eu dataset
+              String extractedValue = key.replaceFirst(".*?/attachments/", "");
+              String tableName = extractedValue.replaceFirst("/.*", "");;
+              S3PathResolver s3AttachmentDCFolderPathResolver = new S3PathResolver(dataflowId, dataProviderId, finalEuDatasetId, tableName, filename, S3_ATTACHMENTS_EU_PATH);
+              String attachmentDCPathInS3 = s3Service.getS3Path(s3AttachmentDCFolderPathResolver);
+              s3Helper.copyFileToAnotherDestination(key, attachmentDCPathInS3);
             }
           });
         } else {
           LOG.info("Create data snapshot dataset {}", idDataset);
-          Long dataProviderId = dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0;
           S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataProviderId, idDataset);
 
           //Get table name file from S3, save it locally and then upload to DC table name path
@@ -669,25 +681,36 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   .collect(Collectors.toList()).forEach(file -> {
                     String key = file.key();
                     String filename = new File(key).getName();
-                    snapshotPath.setFilename(filename);
-                    snapshotPath.setTableName(key.split("/")[4]);
-                    snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
-                    snapshotPath.setParquetFolder(key.split("/")[5]);
-                    snapshotPath.setSnapshotId(idSnapshot);
-                    try {
-                      LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
-                      File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot,
-                              LiteralConstants.PARQUET_TYPE);
-                      String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
-                      LOG.info("Uploading file to bucket parquetFile path : {} in path: {}",
-                              tableNameSnapshotPath, parquetFile.getPath());
-                      s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
-                      LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
-                      parquetFile.delete();
-                    } catch (IOException e) {
-                      LOG.error(
-                              "Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
-                              idDataset, dataflowId, e);
+                    if (!key.contains("/attachments/")) {
+                      snapshotPath.setFilename(filename);
+                      snapshotPath.setTableName(key.split("/")[4]);
+                      snapshotPath.setPath(S3_PROVIDER_SNAPSHOT_PATH);
+                      snapshotPath.setParquetFolder(key.split("/")[5]);
+                      snapshotPath.setSnapshotId(idSnapshot);
+                      try {
+                        LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                        File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot,
+                                LiteralConstants.PARQUET_TYPE);
+                        String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
+                        LOG.info("Uploading file to bucket parquetFile path : {} in path: {}",
+                                tableNameSnapshotPath, parquetFile.getPath());
+                        s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
+                        LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
+                        parquetFile.delete();
+                      } catch (IOException e) {
+                        LOG.error(
+                                "Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
+                                idDataset, dataflowId, e);
+                      }
+                    }
+                    else{
+                      //copy attachments to data collection
+                      Long dataCollectionId = dataCollectionControllerZuul.findDataCollectionIdByDatasetSchemaId(dataset.getDatasetSchema());
+                      String extractedValue = key.replaceFirst(".*?/attachments/", "");
+                      String tableName = extractedValue.replaceFirst("/.*", "");;
+                      S3PathResolver s3AttachmentDCFolderPathResolver = new S3PathResolver(dataflowId, dataProviderId, dataCollectionId, tableName, filename, S3_ATTACHMENTS_DC_PATH);
+                      String attachmentDCPathInS3 = s3Service.getS3Path(s3AttachmentDCFolderPathResolver);
+                      s3Helper.copyFileToAnotherDestination(key, attachmentDCPathInS3);
                     }
                   });
         }

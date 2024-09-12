@@ -896,15 +896,37 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @SneakyThrows
     @Override
     public AttachmentDLVO getAttachmentDL(Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
-                                          String fieldName, String fileName, String recordId) {
+                                          String fieldName, String fileName, String recordId, String dataProviderCode) {
 
-        byte[] attachmentContent;
-
-        //retrieve file from s3
         String fileNameInS3 = fieldName + "_" + recordId + "." + FilenameUtils.getExtension(fileName);
-        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3, S3_ATTACHMENTS_PATH);
+        DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
+        S3PathResolver s3PathResolver = new S3PathResolver(dataflowId, (providerId != null)? providerId : 0L, datasetId, tableSchemaName, fileNameInS3);
+        DataProviderVO providerVO = null;
+        if(StringUtils.isNotBlank(dataProviderCode)) {
+            Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataflowId);
+            providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(dataProviderCode, dataProviderGroupId);
+        }
+        if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+            //get correct providerId
+            if(providerVO != null) {
+                s3PathResolver.setDataProviderId(providerVO.getId());
+            }
+            s3PathResolver.setPath(S3_ATTACHMENTS_DC_PATH);
+        }
+        else if(datasetType.equals(DatasetTypeEnum.EUDATASET)){
+            //get correct providerId
+            if(providerVO != null) {
+                s3PathResolver.setDataProviderId(providerVO.getId());
+            }
+            s3PathResolver.setPath(S3_ATTACHMENTS_EU_PATH);
+        }
+        else{
+            s3PathResolver.setPath(S3_ATTACHMENTS_PATH);
+        }
+        byte[] attachmentContent;
         String attachmentPathInS3 = s3ServicePrivate.getS3Path(s3PathResolver);
         try {
+            //retrieve file from s3
             File attachmentInS3 = s3HelperPrivate.getFileFromS3(attachmentPathInS3, fileName, importPath, null);
             attachmentContent = FileUtils.readFileToByteArray(attachmentInS3);
         } catch (Exception e) {

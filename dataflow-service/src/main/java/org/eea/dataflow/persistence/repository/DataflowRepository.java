@@ -320,6 +320,21 @@ public interface DataflowRepository
       value = "select case when (select d.show_public_info from Dataflow d where d.id=:dataflowId) = true then true else false end")
   boolean getPublicInfoByDataflowId(@Param("dataflowId") Long dataflowId);
 
+  @Query(nativeQuery = true, value = "select dataprovider_group_id from Dataflow where id = :dataflowId")
+  Long findDataProviderGroupIdById(@Param("dataflowId") Long dataflowId);
+
+  /**
+   * Update data provider group id.
+   *
+   * @param dataflowId the dataflow id
+   * @param dataProviderGroupId the dataProviderGroupId
+   */
+  @Modifying
+  @Transactional
+  @CacheEvict(value = "dataflowVO", key = "#dataflowId")
+  @Query(nativeQuery = true, value = "update dataflow set dataprovider_group_id = :dataProviderGroupId where id = :dataflowId")
+  void updateDataProviderGroupId(@Param("dataflowId") Long dataflowId, @Param("dataProviderGroupId") Long dataProviderGroupId);
+
 
   /**
    * The Interface IDatasetStatus.

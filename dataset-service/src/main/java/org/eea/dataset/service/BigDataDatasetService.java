@@ -79,11 +79,12 @@ public interface BigDataDatasetService {
      * @param fieldName the field name
      * @param fileName the file name
      * @param recordId the recordId
+     * @param dataProviderCode the dataProviderCode
      * @return the attachment
      *
      */
     AttachmentDLVO getAttachmentDL(@DatasetId Long datasetId, Long dataflowId, Long providerId, String tableSchemaName,
-                                   String fieldName, String fileName, String recordId);
+                                   String fieldName, String fileName, String recordId, String dataProviderCode);
 
     /**
      * Delete attachment for big data dataflows.

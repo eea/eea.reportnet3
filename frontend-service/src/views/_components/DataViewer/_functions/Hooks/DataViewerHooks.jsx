@@ -125,7 +125,7 @@ export const useSetColumns = (
     <div className={styles.providerCode}>{!isUndefined(rowData) ? rowData.providerCode : null}</div>
   );
 
-  const renderAttachment = (value = '', fieldId, fieldSchemaId, recordId, fieldName) => {
+  const renderAttachment = (value = '', fieldId, fieldSchemaId, recordId, fieldName, dataProviderCode) => {
     const colSchema = colsSchema.filter(colSchema => colSchema.field === fieldSchemaId)[0];
     return (
       <div className={styles.attachment}>
@@ -135,7 +135,7 @@ export const useSetColumns = (
             icon="export"
             iconPos="right"
             label={value}
-            onClick={() => onFileDownload(value, fieldId, recordId, fieldName)}
+            onClick={() => onFileDownload(value, fieldId, recordId, fieldName, dataProviderCode)}
           />
         )}
         {(!bigData || (bigData && dataAreManuallyEditable)) &&
@@ -334,6 +334,7 @@ export const useSetColumns = (
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
     let recordId = rowData.recordId;
     let fieldName = field.fieldData.fieldName;
+    let dataProviderCode = !isEmpty(rowData?.providerCode) ? rowData?.providerCode : undefined;
 
     const renderField = () => {
       if (!isNil(field)) {
@@ -366,7 +367,8 @@ export const useSetColumns = (
             field.fieldData['id'],
             column.field,
             recordId,
-            fieldName
+            fieldName,
+            dataProviderCode
           );
         } else if (field.fieldData.type === 'POINT') {
           return renderPoint(field.fieldData[column.field]);

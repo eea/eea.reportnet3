@@ -75,4 +75,13 @@ public interface DataCollectionController {
    */
   @GetMapping(value = "/private/pendingProviders/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<String> findProvidersPendingInEuDataset(@PathVariable("id") Long id);
+
+  /**
+   * Find data collection id by dataset schema id
+   *
+   * @param datasetSchemaId the  dataset schema id
+   * @return the id
+   */
+  @GetMapping(value = "/private/datasetSchema/{datasetSchemaId}")
+  Long findDataCollectionIdByDatasetSchemaId(@PathVariable("datasetSchemaId") String datasetSchemaId);
 }

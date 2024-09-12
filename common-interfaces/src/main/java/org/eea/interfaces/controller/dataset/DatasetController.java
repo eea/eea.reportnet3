@@ -445,6 +445,7 @@ public interface DatasetController {
    * @param fieldName the field name
    * @param fileName the file name
    * @param recordId the recordId
+   * @param providerCode the providerCode
    * @return the attachment
    */
   @GetMapping(value = "/v1/{datasetId}/field/{fieldId}/attachment",
@@ -455,7 +456,8 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @RequestParam(value = "fieldName", required = false) String fieldName,
       @RequestParam(value = "fileName", required = false) String fileName,
-      @RequestParam(value = "recordId", required = false) String recordId);
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "providerCode", required = false) String providerCode);
   /**
    * Gets the attachment legacy.
    *
@@ -467,6 +469,7 @@ public interface DatasetController {
    * @param fieldName the field name
    * @param fileName the file name
    * @param recordId the recordId
+   * @param providerCode the providerCode
    * @return the attachment legacy
    */
   @GetMapping(value = "/{datasetId}/field/{fieldId}/attachment",
@@ -477,7 +480,8 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaName", required = false) String tableSchemaName,
       @RequestParam(value = "fieldName", required = false) String fieldName,
       @RequestParam(value = "fileName", required = false) String fileName,
-      @RequestParam(value = "recordId", required = false) String recordId);
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "providerCode", required = false) String providerCode);
 
   /**
    * Update attachment.
