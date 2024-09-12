@@ -1268,4 +1268,16 @@ public class DataflowControllerImpl implements DataFlowController {
       throw e;
     }
   }
+
+  @Override
+  @PutMapping(value = "/private/updateDataProviderGroupIdById/{dataflowId}")
+  public void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId){
+    try{
+      dataflowService.updateDataProviderGroupIdById(dataflowId, dataProviderGroupId);
+    }
+    catch(Exception e){
+      LOG.error("Unexpected error! Could not update provider group id {} for dataflow with id {} ", dataProviderGroupId, dataflowId, e);
+      throw e;
+    }
+  }
 }

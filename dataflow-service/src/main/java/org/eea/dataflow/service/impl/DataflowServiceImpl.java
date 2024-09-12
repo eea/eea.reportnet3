@@ -1733,4 +1733,9 @@ public class DataflowServiceImpl implements DataflowService {
   public Long findDataProviderGroupIdById(Long dataflowId){
     return dataflowRepository.findDataProviderGroupIdById(dataflowId);
   }
+
+  @Override
+  public void updateDataProviderGroupIdById(Long dataflowId, Long dataProviderGroupId){
+    dataflowRepository.updateDataProviderGroupId(dataflowId, dataProviderGroupId);
+  }
 }

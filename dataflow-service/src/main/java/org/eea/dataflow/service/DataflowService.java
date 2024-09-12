@@ -300,4 +300,6 @@ public interface DataflowService {
   List<DataFlowVO> getDataflowsMetabaseById(List<Long> dataflowIds);
 
   Long findDataProviderGroupIdById(Long dataflowId);
+
+  void updateDataProviderGroupIdById(Long dataflowId, Long dataProviderGroupId);
 }
