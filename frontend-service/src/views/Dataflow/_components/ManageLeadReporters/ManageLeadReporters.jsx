@@ -25,6 +25,7 @@ import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 import ReactTooltip from 'react-tooltip';
 
+import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -373,6 +374,11 @@ export const ManageLeadReporters = ({
           TextUtils.areEquals(leadReporter.id, 'empty')
             ? await RepresentativeService.createLeadReporter(inputValue, representativeId, dataflowId)
             : await RepresentativeService.updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
+
+          await DataflowService.updateGroupId({
+            dataflowId,
+            dataProviderGroupId: formState.selectedDataProviderGroup.dataProviderGroupId
+          });
 
           formDispatcher({ type: 'REFRESH' });
         } catch (error) {

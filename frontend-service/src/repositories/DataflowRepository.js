@@ -141,6 +141,14 @@ export const DataflowRepository = {
       }
     }),
 
+  updateGroupId: async ({ dataflowId, dataProviderGroupId }) =>
+    await HTTPRequester.update({
+      url: getUrl(DataflowConfig.updateGroupId, {
+        dataflowId,
+        dataProviderGroupId
+      })
+    }),
+
   updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.updateAutomaticDelete, { dataflowId, isAutomaticReportingDeletion })
