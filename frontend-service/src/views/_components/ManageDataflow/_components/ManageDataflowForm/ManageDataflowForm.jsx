@@ -146,6 +146,7 @@ export const ManageDataflowForm = forwardRef(
                   metadata.obligation.id,
                   metadata.isReleasable,
                   metadata.showPublicInfo,
+                  bigData,
                   selectedGroup ? selectedGroup.dataProviderGroupId : null,
                   isDataflowOpen && deliveryDate
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
@@ -158,6 +159,7 @@ export const ManageDataflowForm = forwardRef(
                   metadata.obligation.id,
                   metadata.isReleasable,
                   metadata.showPublicInfo,
+                  bigData,
                   isDataflowOpen && deliveryDate
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
                     : undefined
@@ -170,6 +172,8 @@ export const ManageDataflowForm = forwardRef(
                   name,
                   description,
                   metadata.obligation.id,
+                  undefined,
+                  bigData,
                   selectedGroup.dataProviderGroupId
                 )
               : await DataflowService.create(name, description, metadata.obligation.id);

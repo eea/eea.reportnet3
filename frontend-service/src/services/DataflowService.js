@@ -414,7 +414,7 @@ export const DataflowService = {
 
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, deadlineDate) =>
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData, deadlineDate) =>
     await DataflowRepository.update(
       dataflowId,
       name,
@@ -422,6 +422,7 @@ export const DataflowService = {
       obligationId,
       isReleasable,
       showPublicInfo,
+      bigData,
       deadlineDate
     ),
 

@@ -5,16 +5,17 @@ import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
 
 export const CitizenScienceDataflowRepository = {
-  create: async (name, description, obligationId, dataProviderGroupId) =>
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId) =>
     await HTTPRequester.post({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
         name,
         description,
         obligation: { obligationId },
-        releasable: true,
         type: 'CITIZEN_SCIENCE',
-        dataProviderGroupId
+        bigData,
+        dataProviderGroupId,
+        releasable: true
       }
     }),
 
@@ -31,22 +32,23 @@ export const CitizenScienceDataflowRepository = {
     obligationId,
     isReleasable,
     showPublicInfo,
+    bigData,
     dataProviderGroupId,
     deadlineDate
   ) =>
     await HTTPRequester.update({
       url: getUrl(DataflowConfig.createUpdate),
       data: {
-        bigData,
-        description,
         id: dataflowId,
         name,
+        description,
         obligation: { obligationId },
         releasable: isReleasable,
         showPublicInfo,
-        type: 'CITIZEN_SCIENCE',
+        bigData,
         dataProviderGroupId,
-        deadlineDate
+        deadlineDate,
+        type: 'CITIZEN_SCIENCE'
       }
     })
 };

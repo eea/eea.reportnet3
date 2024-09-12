@@ -138,32 +138,18 @@ export const DataCollection = () => {
     }
   };
 
-  const getExtensionsList = () => {
-    const internalExtensionsList = config.exportTypes.exportDatasetTypes
-      .map(type => {
-        const extensionsTypes = !isNil(type.code) && type.code.split('+');
-        if (bigDataRef.current) {
-          if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
-            return {
-              command: () => onExportDataInternalExtension(type.code),
-              icon: extensionsTypes[0],
-              label: resourcesContext.messages[type.key]
-            };
-          } else {
-            return null;
-          }
-        } else {
-          return {
-            command: () => onExportDataInternalExtension(type.code),
-            icon: extensionsTypes[0],
-            label: resourcesContext.messages[type.key]
-          };
-        }
-      })
-      .filter(item => item !== null);
+  const internalExtensionsList = config.exportTypes.exportDatasetTypes.filter(
+    exportType => exportType.code !== 'xlsx+validations'
+  );
 
-    setExportButtonsList(internalExtensionsList);
-  };
+  const internalExtensions = internalExtensionsList.map(type => {
+    const extensionsTypes = type.code.split('+');
+    return {
+      label: resourcesContext.messages[type.key],
+      icon: extensionsTypes[0],
+      command: () => onExportDataInternalExtension(type.code)
+    };
+  });
 
   const onExportDataInternalExtension = async fileType => {
     setIsLoadingFile(true);

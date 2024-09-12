@@ -1699,7 +1699,7 @@
     "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
     "canceled_by_admin": "Canceled by admin",
     "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks",
-    "emptyTableEvent": "One or more tables in the design dataset(s) are empty"
+    "emptyTableEvent": "One or more tables in the design dataset(s) are empty",
     "exportFileStartEvent": "Exporting file {:fileName}",
     "addingNationalCoordinatorFinishedEvent": "National coordinator has been added successfully",
     "deletingNationalCoordinatorFinishedEvent": "National coordinator has been deleted successfully",

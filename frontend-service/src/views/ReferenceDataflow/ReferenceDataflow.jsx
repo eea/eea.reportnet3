@@ -108,6 +108,10 @@ export const ReferenceDataflow = () => {
     apiKeyBtn: dataflowState.isCustodian,
     datasetsInfoBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     editBtn: dataflowState.isCustodian || dataflowState.isAdmin,
+    exportBtn:
+      dataflowState.bigData &&
+      (dataflowState.isCustodian || dataflowState.isAdmin) &&
+      dataflowState.designDatasetSchemas.length > 0,
     manageRequestersBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     propertiesBtn: true,
     reportingDataflowsBtn:
