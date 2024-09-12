@@ -429,6 +429,12 @@ export const DataflowService = {
   updateAutomaticDelete: async (dataflowId, isAutomaticReportingDeletion) =>
     await DataflowRepository.updateAutomaticDelete(dataflowId, isAutomaticReportingDeletion),
 
+  updateGroupId: async ({ dataflowId, dataProviderGroupId }) =>
+    await DataflowRepository.updateGroupId({
+      dataflowId,
+      dataProviderGroupId
+    }),
+
   getDatasetsInfo: async dataflowId => {
     const datasetsInfoDTO = await DataflowRepository.getDatasetsInfo(dataflowId);
     const parsedDatasetsInfoDTO = DataflowUtils.parseDatasetsInfoDTO(datasetsInfoDTO.data);

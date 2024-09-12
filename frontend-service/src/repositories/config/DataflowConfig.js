@@ -24,7 +24,8 @@ export const DataflowConfig = {
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
   getDetails: '/dataflow/v1/{:dataflowId}/getmetabase',
-  getIcebergTables: '/dataset/getIcebergTables?dataflowId={:dataflowId}&providerId={:providerId}&datasetId={:datasetId}',
+  getIcebergTables:
+    '/dataset/getIcebergTables?dataflowId={:dataflowId}&providerId={:providerId}&datasetId={:datasetId}',
   getPublicData:
     '/dataflow/getPublicDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',
@@ -37,5 +38,7 @@ export const DataflowConfig = {
   importSchema: '/dataschema/import?dataflowId={:dataflowId}',
   updateAutomaticDelete:
     '/dataflow/{:dataflowId}/updateAutomaticDelete?automaticDelete={:isAutomaticReportingDeletion}',
+  updateGroupId:
+    '/dataflow/private/updateDataProviderGroupIdById/{:dataflowId}?dataProviderGroupId={:dataProviderGroupId}',
   validateAllDataflowsUsers: '/dataflow/validateAllReporters'
 };
