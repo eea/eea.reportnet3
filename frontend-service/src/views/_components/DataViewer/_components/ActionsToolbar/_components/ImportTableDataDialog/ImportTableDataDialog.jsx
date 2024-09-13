@@ -123,15 +123,9 @@ export const ImportTableDataDialog = ({
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             isTableDataRestorationInProgress ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
+            actionsContext.isInProgress
           }
-          icon={actionsContext.importTableProcessing ? 'spinnerAnimate' : 'import'}
+          icon={actionsContext.isInProgress && actionsContext.importTableProcessing ? 'spinnerAnimate' : 'import'}
           label={
             actionsContext.isInProgress && actionsContext.importTableProcessing
               ? resourcesContext.messages['importInProgress']

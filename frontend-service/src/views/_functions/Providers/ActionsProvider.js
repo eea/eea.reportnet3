@@ -74,7 +74,7 @@ export const ActionsProvider = ({ children }) => {
       } else {
         setIsInProgress(true);
         const jobInProgress = jobsInProgress.jobsList.find(job => job.jobStatus === 'IN_PROGRESS');
-        setJobTypeInProgress(jobInProgress.jobType);
+        setJobTypeInProgress(jobInProgress?.jobType);
       }
 
       if (!pageRefresh && !action) {

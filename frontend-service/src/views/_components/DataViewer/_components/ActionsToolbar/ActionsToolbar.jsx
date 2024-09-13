@@ -269,15 +269,9 @@ export const ActionsToolbar = ({
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             isTableDataRestorationInProgress ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
+            actionsContext.isInProgress
           }
-          icon={actionsContext.exportTableProcessing ? 'spinnerAnimate' : 'export'}
+          icon={actionsContext.isInProgress && actionsContext.exportTableProcessing ? 'spinnerAnimate' : 'export'}
           id="buttonExportTable"
           label={
             actionsContext.isInProgress && actionsContext.exportTableProcessing
@@ -364,13 +358,7 @@ export const ActionsToolbar = ({
           !hasWritePermissions ||
           isTableDataRestorationInProgress ||
           (isIcebergCreated && dataAreManuallyEditable) ||
-          actionsContext.importDatasetProcessing ||
-          actionsContext.exportDatasetProcessing ||
-          actionsContext.deleteDatasetProcessing ||
-          actionsContext.importTableProcessing ||
-          actionsContext.exportTableProcessing ||
-          actionsContext.deleteTableProcessing ||
-          actionsContext.validateDatasetProcessing
+          actionsContext.isInProgress
         }
         icon="undo"
         label={resourcesContext.messages['restorePrefilledData']}
@@ -456,13 +444,7 @@ export const ActionsToolbar = ({
             isDataflowOpen ||
             isDesignDatasetEditorRead ||
             isTableDataRestorationInProgress ||
-            actionsContext.importDatasetProcessing ||
-            actionsContext.exportDatasetProcessing ||
-            actionsContext.deleteDatasetProcessing ||
-            actionsContext.importTableProcessing ||
-            actionsContext.exportTableProcessing ||
-            actionsContext.deleteTableProcessing ||
-            actionsContext.validateDatasetProcessing
+            actionsContext.isInProgress
           }
           hasWritePermissions={hasWritePermissions}
           icon={actionsContext.isInProgress && actionsContext.deleteTableProcessing ? 'spinnerAnimate' : 'trash'}
