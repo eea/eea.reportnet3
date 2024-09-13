@@ -375,11 +375,6 @@ export const ManageLeadReporters = ({
             ? await RepresentativeService.createLeadReporter(inputValue, representativeId, dataflowId)
             : await RepresentativeService.updateLeadReporter(inputValue, leadReporter.id, representativeId, dataflowId);
 
-          await DataflowService.updateGroupId({
-            dataflowId,
-            dataProviderGroupId: formState.selectedDataProviderGroup.dataProviderGroupId
-          });
-
           formDispatcher({ type: 'REFRESH' });
         } catch (error) {
           console.error('RepresentativesList - onSubmitLeadReporter.', error);
@@ -388,6 +383,17 @@ export const ManageLeadReporters = ({
       } else {
         onCreateError(dataProviderId, hasErrors, leadReporter.id);
       }
+    }
+  };
+
+  const updateProviderGroupId = async dataProviderGroup => {
+    try {
+      await DataflowService.updateGroupId({
+        dataflowId,
+        dataProviderGroupId: dataProviderGroup?.dataProviderGroupId
+      });
+    } catch (error) {
+      console.error('ManageLeadReporters - updateProviderGroupId.', error);
     }
   };
 
@@ -557,7 +563,10 @@ export const ManageLeadReporters = ({
         className={styles.dataProvidersDropdown}
         disabled={formState.representatives.length > 1}
         name="dataProvidersDropdown"
-        onChange={event => formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value })}
+        onChange={event => {
+          formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value });
+          updateProviderGroupId(event.target.value);
+        }}
         optionLabel="label"
         options={
           formState.selectedDataProviderGroup
