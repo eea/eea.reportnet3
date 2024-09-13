@@ -1266,7 +1266,8 @@ public class DataflowControllerImpl implements DataFlowController {
   }
 
   @Override
-  @PutMapping(value = "/private/updateDataProviderGroupIdById/{dataflowId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PutMapping(value = "/updateDataProviderGroupIdById/{dataflowId}")
   public void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId){
     try{
       dataflowService.updateDataProviderGroupIdById(dataflowId, dataProviderGroupId);

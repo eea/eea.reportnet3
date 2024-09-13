@@ -402,6 +402,6 @@ public interface DataFlowController {
   @GetMapping(value = "/private/findDataProviderGroupIdById/{dataflowId}")
   Long findDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId);
 
-  @PutMapping(value = "/private/updateDataProviderGroupIdById/{dataflowId}")
+  @PutMapping(value = "/updateDataProviderGroupIdById/{dataflowId}")
   void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId);
 }

@@ -39,6 +39,6 @@ export const DataflowConfig = {
   updateAutomaticDelete:
     '/dataflow/{:dataflowId}/updateAutomaticDelete?automaticDelete={:isAutomaticReportingDeletion}',
   updateGroupId:
-    '/dataflow/private/updateDataProviderGroupIdById/{:dataflowId}?dataProviderGroupId={:dataProviderGroupId}',
+    '/dataflow/updateDataProviderGroupIdById/{:dataflowId}?dataProviderGroupId={:dataProviderGroupId}',
   validateAllDataflowsUsers: '/dataflow/validateAllReporters'
 };
