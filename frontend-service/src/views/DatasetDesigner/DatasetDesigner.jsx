@@ -1791,16 +1791,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  isDataflowOpen ||
-                  isDesignDatasetEditorRead ||
-                  isIcebergCreated ||
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                  isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || actionsContext.isInProgress
+                }
+                icon={
+                  actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
                 }
                 label={
                   actionsContext.isInProgress && actionsContext.importDatasetProcessing
@@ -1821,16 +1815,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  isDataflowOpen ||
-                  isDesignDatasetEditorRead ||
-                  isIcebergCreated ||
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                  isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || actionsContext.isInProgress
+                }
+                icon={
+                  actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'
                 }
                 id="buttonExportDataset"
                 label={
@@ -1848,15 +1836,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 ref={exportMenuRef}
               />
               <DatasetDeleteDataDialog
-                disabled={
-                  isIcebergCreated ||
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                disabled={isIcebergCreated || actionsContext.isInProgress}
+                icon={
+                  actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'
                 }
                 label={
                   actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
@@ -1870,16 +1852,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             </div>
             <div className="p-toolbar-group-right">
               <DatasetValidateDialog
-                disabled={
-                  isDesignDatasetEditorRead ||
-                  isIcebergCreated ||
-                  actionsContext.importDatasetProcessing ||
-                  actionsContext.exportDatasetProcessing ||
-                  actionsContext.deleteDatasetProcessing ||
-                  actionsContext.importTableProcessing ||
-                  actionsContext.exportTableProcessing ||
-                  actionsContext.deleteTableProcessing ||
-                  actionsContext.validateDatasetProcessing
+                disabled={isDesignDatasetEditorRead || isIcebergCreated || actionsContext.isInProgress}
+                icon={
+                  actionsContext.isInProgress && actionsContext.validateDatasetProcessing
+                    ? 'spinnerAnimate'
+                    : 'validate'
                 }
                 label={
                   actionsContext.isInProgress && actionsContext.validateDatasetProcessing

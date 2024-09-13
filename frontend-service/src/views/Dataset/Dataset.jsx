@@ -1329,13 +1329,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                     isIcebergCreated ||
                     !hasWritePermissions ||
                     isTableDataRestorationInProgress ||
-                    actionsContext.importDatasetProcessing ||
-                    actionsContext.exportDatasetProcessing ||
-                    actionsContext.deleteDatasetProcessing ||
-                    actionsContext.importTableProcessing ||
-                    actionsContext.exportTableProcessing ||
-                    actionsContext.deleteTableProcessing ||
-                    actionsContext.validateDatasetProcessing
+                    actionsContext.isInProgress
+                  }
+                  icon={
+                    actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
                   }
                   label={
                     actionsContext.isInProgress && actionsContext.importDatasetProcessing
@@ -1358,15 +1355,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               disabled={
                 (hasWritePermissions && isIcebergCreated) ||
                 isTableDataRestorationInProgress ||
-                actionsContext.importDatasetProcessing ||
-                actionsContext.exportDatasetProcessing ||
-                actionsContext.deleteDatasetProcessing ||
-                actionsContext.importTableProcessing ||
-                actionsContext.exportTableProcessing ||
-                actionsContext.deleteTableProcessing ||
-                actionsContext.validateDatasetProcessing
+                actionsContext.isInProgress
               }
-              icon={actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
+              icon={actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
               id="buttonExportDataset"
               label={
                 actionsContext.isInProgress && actionsContext.exportDatasetProcessing
@@ -1387,15 +1378,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                 isIcebergCreated ||
                 !hasWritePermissions ||
                 isTableDataRestorationInProgress ||
-                actionsContext.importDatasetProcessing ||
-                actionsContext.exportDatasetProcessing ||
-                actionsContext.deleteDatasetProcessing ||
-                actionsContext.importTableProcessing ||
-                actionsContext.exportTableProcessing ||
-                actionsContext.deleteTableProcessing ||
-                actionsContext.validateDatasetProcessing
+                actionsContext.isInProgress
               }
-              icon={actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
+              icon={actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
               label={
                 actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
                   ? resourcesContext.messages['deleteInProgress']
@@ -1410,13 +1395,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
                 isIcebergCreated ||
                 !hasWritePermissions ||
                 isTableDataRestorationInProgress ||
-                actionsContext.importDatasetProcessing ||
-                actionsContext.exportDatasetProcessing ||
-                actionsContext.deleteDatasetProcessing ||
-                actionsContext.importTableProcessing ||
-                actionsContext.exportTableProcessing ||
-                actionsContext.deleteTableProcessing ||
-                actionsContext.validateDatasetProcessing
+                actionsContext.isInProgress
+              }
+              icon={
+                actionsContext.isInProgress && actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'
               }
               label={
                 actionsContext.isInProgress && actionsContext.validateDatasetProcessing
