@@ -67,7 +67,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
           geometry.setSRID(Integer.parseInt(srid));
         }
         value = "";
-        byte[] geomByteArray = new WKBWriter().write(geometry);
+        byte[] geomByteArray = wkbWriter.write(geometry);
         String HexString = spatialDataHelper.bytesToHex(geomByteArray);
         geomByteArray = null;
         return HexString;
