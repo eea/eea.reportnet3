@@ -66,10 +66,15 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         if (!srid.isBlank()) {
           geometry.setSRID(Integer.parseInt(srid));
         }
-        return spatialDataHelper.bytesToHex(wkbWriter.write(geometry));
+        value = "";
+        byte[] geomByteArray = new WKBWriter().write(geometry);
+        String HexString = spatialDataHelper.bytesToHex(geomByteArray);
+        geomByteArray = null;
+        return HexString;
       }
     } catch (ParseException | IOException e) {
-      LOG.error("Invalid GeoJson!! Tried to convert this geoJson : {} , to HEX but failed", value, e);
+      //LOG.error("Invalid GeoJson!! Tried to convert this geoJson : {} , to HEX but failed", value, e);
+      LOG.error("Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed", e);
     }
     return spatialDataHelper.bytesToHex(new byte[0]);
   }
