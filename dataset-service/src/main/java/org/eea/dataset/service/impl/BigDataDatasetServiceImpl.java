@@ -1449,9 +1449,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 List<FieldSchemaVO> fieldSchemas = tableSchemaVO.getRecordSchema().getFieldSchema();
                 String tableHeaders = constructRecordIdCreationForQuery();
                 tableHeaders += ", " + providerCode + " AS " + PARQUET_PROVIDER_CODE_COLUMN_HEADER + ", ";
-                tableHeaders += fieldSchemas.stream()
-                        .map(FieldSchemaVO::getName)
-                        .collect(Collectors.joining(","));
+                for (FieldSchemaVO fieldSchema: fieldSchemas){
+                    if(fieldSchema.getType().equals(DataType.ATTACHMENT)){
+                        //remove attachment file name
+                        tableHeaders += " '' AS ";
+                    }
+                    tableHeaders +=  " " + fieldSchema.getName() + " ,";
+                }
+                if(tableHeaders.endsWith(",")){
+                    tableHeaders = tableHeaders.substring(0, tableHeaders.length()-1);
+                }
 
                 //remove previous data if they exist
                 S3PathResolver s3TablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
