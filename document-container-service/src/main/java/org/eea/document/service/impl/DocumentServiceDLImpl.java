@@ -32,6 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.List;
 
 @Service("documentServiceDL")
 @ImportDataLakeCommons
@@ -156,6 +157,32 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.DELETE_DOCUMENT_FAILED_EVENT, null,
                     NotificationVO.builder().user(String.valueOf(ThreadPropertiesManager.getVariable("user")))
                             .dataflowId(documentVO.getDataflowId()).error(e.getMessage()).build());
+        }
+    }
+
+    /**
+     * Clone all documents
+     *
+     * @param originDataflowId the originDataflowId
+     * @param destinationDataflowId thed estinationDataflowId
+     *
+     */
+    @Override
+    public void cloneAllDocumentsInDataflow(final Long originDataflowId, final Long destinationDataflowId) throws EEAException {
+        // Copy the dataflow documents
+        List<DocumentVO> documents = dataflowController.getAllDocumentsByDataflowId(originDataflowId);
+        for (DocumentVO documentVO : documents) {
+            documentVO.setDataflowId(destinationDataflowId);
+            Long idDocument = dataflowController.insertDocument(documentVO);
+            if (idDocument == null) {
+                throw new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR);
+            }
+            String modifiedFileName = "document_" + idDocument + "_" + documentVO.getName();
+            S3PathResolver s3OriginDocumentPathResolver = new S3PathResolver(originDataflowId, modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
+            String originDocumentPathInS3 = s3Service.getS3Path(s3OriginDocumentPathResolver);
+            S3PathResolver s3DestDocumentPathResolver = new S3PathResolver(destinationDataflowId, modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
+            String destDocumentPathInS3 = s3Service.getS3Path(s3DestDocumentPathResolver);
+            s3Helper.copyFileToAnotherDestination(originDocumentPathInS3, destDocumentPathInS3);
         }
     }
 

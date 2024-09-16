@@ -196,6 +196,9 @@ public class S3ServiceImpl implements S3Service {
             case S3_TECHNICAL_ACCEPTANCE_FILE_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, fileName);
                 break;
+            case S3_ATTACHMENTS_DC_FOLDER_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder);
+                break;
             case S3_ATTACHMENTS_DC_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder, tableName,
                         dataProviderFolder, fileName);
@@ -307,7 +310,8 @@ public class S3ServiceImpl implements S3Service {
         return null;
     }
 
-    private String formatFolderName(Long id, String pattern) {
+    @Override
+    public String formatFolderName(Long id, String pattern) {
         String idStr = String.valueOf(id);
         String providerFolder = StringUtils.leftPad(idStr, S3_NAME_PATTERN_LENGTH, S3_LEFT_PAD);
         return String.format(pattern, providerFolder);

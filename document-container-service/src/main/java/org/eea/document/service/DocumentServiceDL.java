@@ -39,6 +39,16 @@ public interface DocumentServiceDL {
 
 
     /**
+     * Clone all documents
+     *
+     * @param originDataflowId the originDataflowId
+     * @param destinationDataflowId thed estinationDataflowId
+     *
+     */
+    void cloneAllDocumentsInDataflow(final Long originDataflowId, final Long destinationDataflowId) throws EEAException;
+
+
+    /**
      * Upload collaboration document in s3.
      *
      * @param inputStream the input stream

@@ -53,4 +53,5 @@ public interface S3Service {
 
     String getS3IcebergBucketName();
 
+    String formatFolderName(Long id, String pattern);
 }

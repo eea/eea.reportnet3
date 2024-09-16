@@ -69,6 +69,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.sql.DataSource;
@@ -663,9 +664,17 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               //copy attachments to eu dataset
               String extractedValue = key.replaceFirst(".*?/attachments/", "");
               String tableName = extractedValue.replaceFirst("/.*", "");;
-              S3PathResolver s3AttachmentDCFolderPathResolver = new S3PathResolver(dataflowId, dataProviderId, finalEuDatasetId, tableName, filename, S3_ATTACHMENTS_EU_PATH);
+              S3PathResolver s3AttachmentDCFolderPathResolver = new S3PathResolver(dataflowId, dataProviderId, dataset.getId(), tableName, filename, S3_ATTACHMENTS_DC_FOLDER_PATH);
               String attachmentDCPathInS3 = s3Service.getS3Path(s3AttachmentDCFolderPathResolver);
-              s3Helper.copyFileToAnotherDestination(key, attachmentDCPathInS3);
+              List<ObjectIdentifier> attachmentsInDC = s3Helper.listObjectsInBucket(attachmentDCPathInS3);
+              for (ObjectIdentifier attachmentInDC : attachmentsInDC) {
+                String attachmentPathInDC = attachmentInDC.key();
+                String euDatasetFormattedFolder = s3Service.formatFolderName(finalEuDatasetId, S3_EU_DATASET_PATTERN);
+                String attachmentPathInEU = attachmentPathInDC.replaceAll("dc-[0-9]+", euDatasetFormattedFolder);
+                //remove current folder
+                attachmentPathInEU = attachmentPathInEU.replace("/current", "");
+                s3Helper.copyFileToAnotherDestination(attachmentPathInDC, attachmentPathInEU);
+              }
             }
           });
         } else {

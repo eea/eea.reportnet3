@@ -464,10 +464,19 @@ public class DocumentControllerImpl implements DocumentController {
       if (file == null || file.isEmpty()) {
         documentService.updateDocument(documentVO);
       } else {
-        documentService.uploadDocument(file.getInputStream(), file.getContentType(),
-            file.getOriginalFilename(), documentVO, file.getSize());
+        DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+        if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+          documentVO.setIsBigData(true);
+          documentServiceDL.deleteDocumentDL(documentVO, false);
+          documentServiceDL.uploadDocumentDL(file, file.getOriginalFilename(), documentVO, file.getSize());
+          LOG.info("Successfully updated document with id {} for dataflowId {}", idDocument, dataflowId);
+        }
+        else {
+          documentVO.setIsBigData(false);
+          documentService.uploadDocument(file.getInputStream(), file.getContentType(),
+                  file.getOriginalFilename(), documentVO, file.getSize());
+        }
       }
-      LOG.info("Successfully updated document with id {} for dataflowId {}", idDocument, dataflowId);
     } catch (EEAException | IOException e) {
       if (EEAErrorMessage.DOCUMENT_NOT_FOUND.equals(e.getMessage())) {
         LOG.error("Error updating document: DocumentId {}. DataflowId {}. Message: {}",
@@ -571,7 +580,17 @@ public class DocumentControllerImpl implements DocumentController {
           @RequestParam("originDataflowId") final Long originDataflowId,
           @RequestParam("destinationDataflowId") final Long destinationDataflowId) throws Exception {
       try {
+        DataFlowVO originDataFlowVO = dataFlowControllerZuul.getMetabaseById(originDataflowId);
+        DataFlowVO destinationDataFlowVO = dataFlowControllerZuul.getMetabaseById(destinationDataflowId);
+        if(BooleanUtils.isTrue(originDataFlowVO.getBigData()) && BooleanUtils.isTrue(destinationDataFlowVO.getBigData())){
+          documentServiceDL.cloneAllDocumentsInDataflow(originDataflowId, destinationDataflowId);
+        }
+        else if(!BooleanUtils.isTrue(originDataFlowVO.getBigData()) && !BooleanUtils.isTrue(destinationDataFlowVO.getBigData())){
           documentService.cloneAllDocumentsInDataflow(originDataflowId, destinationDataflowId);
+        }
+        else{
+          LOG.error("Can not clone documents between originDataflowId {} and destinationDataflowId {} because one dataflow is big data and the other is not.", originDataflowId, destinationDataflowId);
+        }
       } catch (Exception e) {
         LOG.error("Unexpected error! Error cloning documents from dataflowId {} to dataflowId {} Message: {}", originDataflowId, destinationDataflowId, e.getMessage());
         throw e;

@@ -140,7 +140,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private JdbcTemplate dremioJdbcTemplate;
 
     private SchemasRepository schemasRepository;
-
     private static final String HEADER_NAME = "headerName";
     private static final String TYPE_DATA = "typeData";
     private static final String ID_RECORD = "idRecord";
@@ -787,83 +786,154 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId) throws Exception {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
-            throw new Exception("Can not delete table data because iceberg table is created");
-        }
-        String tableSchemaName = tableSchemaVO.getNameTableSchema();
-
-        if(providerId == null){
-            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-            providerId = dataSetMetabaseVO.getDataProviderId();
-        }
-        if(providerId == null){
-            providerId = 0L;
-        }
-        S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
-        //path in s3 for the folder that contains the stored csv files
-        String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
-
-        //remove csv files that are related to the table
-        parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder);
-
-        S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
-        //remove folders that contain the previous parquet files
-        if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-            //demote table folder
-            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
-            s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
-        }
-
-        //delete attachments if they exist
-        if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
-            s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
-        }
-
-        //if dataset is reference, remove the data from reference folder
-        DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
-        if(datasetType == DatasetTypeEnum.REFERENCE){
-            //demote reference table folder
-            S3PathResolver s3ReferenceTablePathResolver = new S3PathResolver(s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName, tableSchemaName, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
-            if (s3HelperPrivate.checkFolderExist(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH)) {
-                dremioHelperService.demoteFolderOrFile(s3ReferenceTablePathResolver, tableSchemaName);
-                //remove folders that contain the previous parquet files because data will be replaced
-                s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, Long jobId) throws Exception {
+        try {
+            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaId))) {
+                throw new Exception("Can not delete table data because iceberg table is created");
             }
+            String tableSchemaName = tableSchemaVO.getNameTableSchema();
+
+            if (providerId == null) {
+                DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+                providerId = dataSetMetabaseVO.getDataProviderId();
+            }
+            if (providerId == null) {
+                providerId = 0L;
+            }
+            S3PathResolver s3ImportPathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
+            //path in s3 for the folder that contains the stored csv files
+            String s3PathForCsvFolder = s3ServicePrivate.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+
+            //remove csv files that are related to the table
+            parquetConverterService.removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchemaName, s3PathForCsvFolder);
+
+            S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+            //remove folders that contain the previous parquet files
+            if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+                //demote table folder
+                dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
+                s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+            }
+
+            //delete attachments if they exist
+            if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
+                s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
+            }
+
+            //if dataset is reference, remove the data from reference folder
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+            if (datasetType == DatasetTypeEnum.REFERENCE) {
+                //demote reference table folder
+                S3PathResolver s3ReferenceTablePathResolver = new S3PathResolver(s3TablePathResolver.getDataflowId(), s3TablePathResolver.getDataProviderId(), s3TablePathResolver.getDatasetId(), tableSchemaName, tableSchemaName, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+                if (s3HelperPrivate.checkFolderExist(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH)) {
+                    dremioHelperService.demoteFolderOrFile(s3ReferenceTablePathResolver, tableSchemaName);
+                    //remove folders that contain the previous parquet files because data will be replaced
+                    s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
+                }
+            }
+
+            if (jobId != null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+
+                // after the table has been deleted, an event is sent to notify it
+                EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+                        ? EventType.DELETE_TABLE_COMPLETED_EVENT
+                        : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
+                Map<String, Object> value = new HashMap<>();
+                NotificationVO notificationVO = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+                        .tableSchemaId(tableSchemaId).build();
+                DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+                notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+                notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+                notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+
+                value.put(LiteralConstants.DATASET_ID, datasetId);
+
+                try {
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+                } catch (EEAException e) {
+                    LOG.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+                }
+            }
+
+        }
+        catch (Exception e){
+            if (jobId != null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            }
+            throw e;
         }
     }
 
     @Override
-    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables) throws Exception {
+    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Boolean technicallyAccepted, Long jobId) throws Exception {
 
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
-        for(TableSchemaIdNameVO entry: tableSchemas){
-            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-                throw new Exception("Can not delete table data because iceberg table is created");
-            }
-        }
-
-        DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-        if(providerId == null){
-            providerId = dataSetMetabaseVO.getDataProviderId();
-        }
-        List<TableSchemaIdNameVO> tableSchemaIdNameVOs = datasetSchemaService.getTableSchemasIds(datasetId);
-        for (TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOs){
-            if(!deletePrefilledTables){
-                //do not delete prefilled tables
-                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), dataSetMetabaseVO.getDatasetSchema());
-                if(tableSchemaVO.getToPrefill()){
-                    LOG.info("The data for table with tableSchemaId {} for datasetId {} will not be deleted because the table is prefilled.", tableSchemaIdNameVO.getIdTableSchema(), datasetId );
-                    continue;
+        try {
+            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+            for (TableSchemaIdNameVO entry : tableSchemas) {
+                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+                    throw new Exception("Can not delete table data because iceberg table is created");
                 }
             }
-            deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema());
+
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            if (providerId == null) {
+                providerId = dataSetMetabaseVO.getDataProviderId();
+            }
+            List<TableSchemaIdNameVO> tableSchemaIdNameVOs = datasetSchemaService.getTableSchemasIds(datasetId);
+            for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOs) {
+                if (!deletePrefilledTables) {
+                    //do not delete prefilled tables
+                    TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), dataSetMetabaseVO.getDatasetSchema());
+                    if (tableSchemaVO.getToPrefill()) {
+                        LOG.info("The data for table with tableSchemaId {} for datasetId {} will not be deleted because the table is prefilled.", tableSchemaIdNameVO.getIdTableSchema(), datasetId);
+                        continue;
+                    }
+                }
+                //we do not pass a job id because there is a job for the whole dataset data deletion
+                deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), null);
+            }
+
+            if (jobId != null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+
+                EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+                        ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
+                        : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
+
+                if (!technicallyAccepted) {
+                    // after the dataset values have been deleted, an event is sent to notify it
+                    Map<String, Object> value = new HashMap<>();
+                    NotificationVO notificationVO = NotificationVO.builder()
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                            .datasetId(datasetId).build();
+                    DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+                    notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+                    notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+                    notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+
+                    value.put(LiteralConstants.DATASET_ID, datasetId);
+
+                    try {
+                        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+                    } catch (EEAException e) {
+                        LOG.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
+                    }
+                }
+            }
+        }
+        catch (Exception e){
+            if (jobId != null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            }
+            throw e;
         }
     }
 
