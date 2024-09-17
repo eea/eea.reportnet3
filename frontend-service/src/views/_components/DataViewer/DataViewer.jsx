@@ -200,6 +200,8 @@ export const DataViewer = ({
   const mapEditingEnabled =
     hasWritePermissions && !isDesignDatasetEditorRead && !isDataflowOpen && !records.geometryReadOnly;
 
+  const mapVisibilityEnabled = bigData && !isIcebergCreated;
+
   const cellDataEditor = (cells, record) => {
     return (
       <FieldEditor
@@ -315,7 +317,8 @@ export const DataViewer = ({
     validationsTemplate,
     reporting,
     dataAreManuallyEditable,
-    isIcebergCreated
+    isIcebergCreated,
+    mapVisibilityEnabled
   );
 
   useEffect(() => {
@@ -1124,14 +1127,18 @@ export const DataViewer = ({
       <Button
         className={`p-button-animated-blink ${styles.saveButton}`}
         icon="check"
-        label={mapEditingEnabled ? resourcesContext.messages['save'] : resourcesContext.messages['ok']}
+        label={
+          mapEditingEnabled && !mapVisibilityEnabled
+            ? resourcesContext.messages['save']
+            : resourcesContext.messages['ok']
+        }
         onClick={
           mapEditingEnabled
             ? () => onSavePoint(records.newPoint)
             : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
         }
       />
-      {mapEditingEnabled && (
+      {mapEditingEnabled && !mapVisibilityEnabled && (
         <Button
           className="p-button-secondary button-right-aligned"
           icon="cancel"
