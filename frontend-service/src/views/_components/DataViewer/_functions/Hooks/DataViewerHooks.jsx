@@ -108,7 +108,8 @@ export const useSetColumns = (
   validationsTemplate,
   isReporting,
   dataAreManuallyEditable,
-  isIcebergCreated
+  isIcebergCreated,
+  mapVisibilityEnabled
 ) => {
   const [columns, setColumns] = useState([]);
   const [originalColumns, setOriginalColumns] = useState([]);
@@ -430,7 +431,7 @@ export const useSetColumns = (
             (['POINT', 'LINESTRING', 'POLYGON', 'MULTILINESTRING', 'MULTIPOLYGON', 'MULTIPOINT'].includes(
               column.type
             ) &&
-              isIcebergCreated) ||
+              (isIcebergCreated || mapVisibilityEnabled)) ||
             ((!bigData || (bigData && dataAreManuallyEditable && isIcebergCreated)) &&
               hasWebformWritePermissions &&
               hasWritePermissions &&
@@ -538,7 +539,8 @@ export const useSetColumns = (
     initialCellValue,
     records.selectedRecord.recordId,
     dataAreManuallyEditable,
-    isIcebergCreated
+    isIcebergCreated,
+    mapVisibilityEnabled
   ]);
 
   return {
