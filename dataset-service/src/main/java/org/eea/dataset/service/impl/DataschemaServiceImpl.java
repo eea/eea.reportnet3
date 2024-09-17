@@ -3570,4 +3570,24 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     }
     return null;
   }
+
+  /**
+   * Updates for all tables in the dataset schema the dataAreManuallyEditable value
+   *
+   * @param datasetId the dataset id
+   * @param manuallyEditable the value
+   */
+  @Override
+  public void updateManuallyEditableByDatasetId(Long datasetId, Boolean manuallyEditable) throws EEAException {
+    String datasetSchemaId = getDatasetSchemaId(datasetId);
+    List<TableSchemaIdNameVO> tableSchemaIds = getTableSchemasIds(datasetId);
+    for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIds){
+      TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
+      if(tableSchemaVO != null){
+        tableSchemaVO.setDataAreManuallyEditable(manuallyEditable);
+        updateTableSchema(datasetId, tableSchemaVO, false);
+      }
+    }
+  }
+
 }

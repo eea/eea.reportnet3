@@ -1766,4 +1766,23 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
     }
     return null;
   }
+  /**
+   * Updates for all tables in the dataset schema the dataAreManuallyEditable value
+   *
+   * @param datasetId the dataset id
+   * @param manuallyEditable the value
+   */
+  @Override
+  @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE'))")
+  @PutMapping(value = "/manuallyEditable/{datasetId}")
+  public void updateManuallyEditableByDatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam("manuallyEditable") Boolean manuallyEditable){
+    try{
+
+    }
+    catch (Exception e){
+      LOG.error("Could not update manualy editable value to {} for datasetId {} Error:", manuallyEditable, datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
 }

@@ -608,4 +608,12 @@ public interface DatasetSchemaService {
    * @return the field schema id
    */
   String getFieldSchemaIdByDatasetIdTableNameAndFieldName(Long datasetId, String tableSchemaName, String fieldName);
+
+  /**
+   * Updates for all tables in the dataset schema the dataAreManuallyEditable value
+   *
+   * @param datasetId the dataset id
+   * @param manuallyEditable the value
+   */
+  void updateManuallyEditableByDatasetId(Long datasetId, Boolean manuallyEditable) throws EEAException;
 }
