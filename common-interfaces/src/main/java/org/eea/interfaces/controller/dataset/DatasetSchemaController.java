@@ -513,5 +513,5 @@ public interface DatasetSchemaController {
    * @param manuallyEditable the value
    */
   @PutMapping(value = "/manuallyEditable/{datasetId}")
-  void updateManuallyEditableByDatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam("manuallyEditable") Boolean manuallyEditable);
+  void updateManuallyEditableByDatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam("manuallyEditable") Boolean manuallyEditable) throws Exception;
 }

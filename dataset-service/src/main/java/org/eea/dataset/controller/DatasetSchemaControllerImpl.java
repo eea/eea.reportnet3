@@ -1775,9 +1775,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Override
   @PreAuthorize("(secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_EDITOR_WRITE'))")
   @PutMapping(value = "/manuallyEditable/{datasetId}")
-  public void updateManuallyEditableByDatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam("manuallyEditable") Boolean manuallyEditable){
+  public void updateManuallyEditableByDatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam("manuallyEditable") Boolean manuallyEditable) throws Exception {
     try{
-
+      dataschemaService.updateManuallyEditableByDatasetId(datasetId, manuallyEditable);
     }
     catch (Exception e){
       LOG.error("Could not update manualy editable value to {} for datasetId {} Error:", manuallyEditable, datasetId, e.getMessage());
