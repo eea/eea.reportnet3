@@ -353,17 +353,31 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const convertHelper = async () => {
     setIsLoadingIceberg(true);
     if (isIcebergCreated) {
-      await DatasetService.convertIcebergsToParquets({
-        dataflowId,
-        datasetId,
-        providerId: !isTestDataset ? metadata?.dataset.dataProviderId : undefined
-      });
+      if (metadata?.dataset?.dataProviderId) {
+        await DatasetService.convertIcebergsToParquets({
+          dataflowId,
+          datasetId,
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+        });
+      } else {
+        await DatasetService.convertIcebergsToParquets({
+          dataflowId,
+          datasetId
+        });
+      }
     } else {
-      await DatasetService.convertParquetsToIcebergs({
-        dataflowId,
-        datasetId,
-        providerId: !isTestDataset ? metadata?.dataset.dataProviderId : undefined
-      });
+      if (metadata?.dataset?.dataProviderId) {
+        await DatasetService.convertParquetsToIcebergs({
+          dataflowId,
+          datasetId,
+          providerId: !isTestDataset ? metadata.dataset.dataProviderId : undefined
+        });
+      } else {
+        await DatasetService.convertParquetsToIcebergs({
+          dataflowId,
+          datasetId
+        });
+      }
     }
     setIsIcebergCreated(!isIcebergCreated);
     setIsLoadingIceberg(false);
