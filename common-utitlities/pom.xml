@@ -201,7 +201,7 @@
 		<dependency>
 			<groupId>org.locationtech.jts</groupId>
 			<artifactId>jts-core</artifactId>
-			<version>1.17.0</version>
+			<version>1.19.0</version>
 		</dependency>
 		<dependency>
 			<groupId>mil.nga.sf</groupId>

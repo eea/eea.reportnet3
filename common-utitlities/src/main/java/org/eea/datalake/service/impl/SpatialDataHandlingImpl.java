@@ -40,14 +40,12 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   private final SpatialDataHelper spatialDataHelper;
   private final WKBReader wkbReader;
-  private final WKBWriter wkbWriter;
   private final GeoJsonReader geoJsonReader;
   private final GeoJSONWriter geoJSONWriter;
 
   public SpatialDataHandlingImpl(SpatialDataHelper spatialDataHelper) {
     this.spatialDataHelper = spatialDataHelper;
     this.wkbReader = new WKBReader();
-    this.wkbWriter = new WKBWriter(2, true);
     this.geoJsonReader = new GeoJsonReader();
     this.geoJSONWriter = new GeoJSONWriter();
   }
@@ -67,13 +65,12 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
           geometry.setSRID(Integer.parseInt(srid));
         }
         value = "";
-        byte[] geomByteArray = wkbWriter.write(geometry);
+        byte[] geomByteArray = new WKBWriter(2, true).write(geometry);
         String HexString = spatialDataHelper.bytesToHex(geomByteArray);
         geomByteArray = null;
         return HexString;
       }
     } catch (ParseException | IOException e) {
-      //LOG.error("Invalid GeoJson!! Tried to convert this geoJson : {} , to HEX but failed", value, e);
       LOG.error("Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed", e);
     }
     return spatialDataHelper.bytesToHex(new byte[0]);
