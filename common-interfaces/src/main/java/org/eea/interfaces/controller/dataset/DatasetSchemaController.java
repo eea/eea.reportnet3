@@ -505,4 +505,13 @@ public interface DatasetSchemaController {
   String getFieldName(@RequestParam("datasetSchemaId") String datasetSchemaId, @RequestParam("tableSchemaId") String tableSchemaId,
                       @RequestParam(value = "parameters", required = false) List<String> parameters, @RequestParam("ruleReferenceId") String ruleReferenceId,
                       @RequestParam(value = "ruleReferenceFieldSchemaPKId", required = false) String ruleReferenceFieldSchemaPKId);
+
+  /**
+   * Updates for all tables in the dataset schema the dataAreManuallyEditable value
+   *
+   * @param datasetId the dataset id
+   * @param manuallyEditable the value
+   */
+  @PutMapping(value = "/manuallyEditable/{datasetId}")
+  void updateManuallyEditableByDatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam("manuallyEditable") Boolean manuallyEditable) throws Exception;
 }
