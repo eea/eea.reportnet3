@@ -60,7 +60,7 @@ public interface DocumentServiceDL {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     void uploadCollaborationDocumentDL(InputStream inputStream, String filename,
-                                       Long dataflowId, Long providerId, Long messageId) throws IOException;
+                                       Long dataflowId, Long providerId, Long messageId) throws IOException, EEAException;
 
 
     /**

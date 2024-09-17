@@ -1,5 +1,7 @@
 package org.eea.document.service.impl;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
@@ -63,6 +65,10 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
 
     @Override
     public void uploadDocumentDL(MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException {
+        if (multipartFile.getOriginalFilename() == null || StringUtils.isBlank(FilenameUtils.getExtension(multipartFile.getOriginalFilename()))) {
+            throw new EEAException(EEAErrorMessage.FILE_FORMAT);
+        }
+
         Long dataflowId = documentVO.getDataflowId();
 
         // save to metabase
@@ -199,7 +205,10 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
      */
     @Override
     public void uploadCollaborationDocumentDL(InputStream inputStream, String filename,
-                                              Long dataflowId, Long providerId, Long messageId) throws IOException{
+                                              Long dataflowId, Long providerId, Long messageId) throws IOException, EEAException {
+        if (filename == null || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
+            throw new EEAException(EEAErrorMessage.FILE_FORMAT);
+        }
 
         String modifiedFileName = "message_" + messageId + "_" + filename;
         String absolutePath = importPath + "/" + dataflowId + "/" + modifiedFileName;

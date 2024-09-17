@@ -1780,7 +1780,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       dataschemaService.updateManuallyEditableByDatasetId(datasetId, manuallyEditable);
     }
     catch (Exception e){
-      LOG.error("Could not update manualy editable value to {} for datasetId {} Error:", manuallyEditable, datasetId, e.getMessage());
+      LOG.error("Could not update manually editable value to {} for datasetId {} Error:", manuallyEditable, datasetId, e.getMessage());
       throw e;
     }
   }
