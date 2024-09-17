@@ -41,7 +41,10 @@ public class SpatialDataHelperImpl implements SpatialDataHelper {
       hexChars[j * 2] = HEX_ARRAY[v >>> 4];
       hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
     }
-    return new String(hexChars);
+    String tmp = new String(hexChars);
+    hexChars = null;
+    bytes = null;
+    return tmp;
   }
 
   @Override
