@@ -67,6 +67,7 @@ export const Map = ({
   geoJson = '',
   geometryType = '',
   hasLegend = false,
+  mapVisibilityEnabled = false,
   onSelectPoint,
   options = {
     zoom: [15],
@@ -269,33 +270,35 @@ export const Map = ({
   };
 
   const onDoubleClick = e => {
-    if (TextUtils.areEquals(geometryType, 'POINT') && !disabledEdition) {
-      if (
-        currentCRS.value === 'EPSG:3035' &&
-        (!MapUtils.inBounds({
-          coord: e.latlng.lat,
-          coordType: 'latitude',
-          checkProjected: true
-        }) ||
-          !MapUtils.inBounds({
-            coord: e.latlng.lng,
-            coordType: 'longitude',
+    if (!mapVisibilityEnabled) {
+      if (TextUtils.areEquals(geometryType, 'POINT') && !disabledEdition) {
+        if (
+          currentCRS.value === 'EPSG:3035' &&
+          (!MapUtils.inBounds({
+            coord: e.latlng.lat,
+            coordType: 'latitude',
             checkProjected: true
-          }))
-      ) {
-        setHasErrors({ ...hasErrors, newPointError: true });
-        return false;
-      } else {
-        setNewPositionMarker([e.latlng.lat, e.latlng.lng]);
-        onSelectPoint(
-          projectPointCoordinates({
-            coordinates: [e.latlng.lat, e.latlng.lng],
-            CRS: 'EPSG:4326',
-            newCRS: currentCRS.value
-          }),
-          currentCRS.value
-        );
-        mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
+          }) ||
+            !MapUtils.inBounds({
+              coord: e.latlng.lng,
+              coordType: 'longitude',
+              checkProjected: true
+            }))
+        ) {
+          setHasErrors({ ...hasErrors, newPointError: true });
+          return false;
+        } else {
+          setNewPositionMarker([e.latlng.lat, e.latlng.lng]);
+          onSelectPoint(
+            projectPointCoordinates({
+              coordinates: [e.latlng.lat, e.latlng.lng],
+              CRS: 'EPSG:4326',
+              newCRS: currentCRS.value
+            }),
+            currentCRS.value
+          );
+          mapRef.current.leafletElement.setView(e.latlng, mapRef.current.leafletElement.zoom);
+        }
       }
     }
   };
@@ -421,7 +424,7 @@ export const Map = ({
             <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourCurrent}`} />
             <div className={styles.pointLegendItemLabel}>
               <label>
-                {TextUtils.areEquals(geometryType, 'POINT')
+                {TextUtils.areEquals(geometryType, 'POINT') && !mapVisibilityEnabled
                   ? resourcesContext.messages['currentPoint']
                   : resourcesContext.messages['geometryCoordinates']}
                 :{' '}
@@ -433,7 +436,7 @@ export const Map = ({
               </span>
             </div>
           </div>
-          {TextUtils.areEquals(geometryType, 'POINT') && (
+          {TextUtils.areEquals(geometryType, 'POINT') && !mapVisibilityEnabled && (
             <Fragment>
               <div className={styles.pointLegendItem}>
                 <div className={`${styles.pointLegendItemColour} ${styles.pointLegendItemColourNew}`} />

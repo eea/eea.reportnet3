@@ -34,6 +34,7 @@ export const FieldEditor = ({
   colsSchema,
   datasetId,
   datasetSchemaId,
+  mapVisibilityEnabled,
   onChangePointCRS,
   onCoordinatesMoreInfoClick,
   onEditorKeyChange,
@@ -544,6 +545,7 @@ export const FieldEditor = ({
               id={cells.field}
               initialGeoJson={RecordUtils.getCellValue(cells, cells.field)}
               isCellEditor={true}
+              mapVisibilityEnabled={mapVisibilityEnabled}
               onBlur={coordinates => onCoordinatesBlur(coordinates)}
               onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
               onCrsChange={crs => onCrsChange(crs)}

@@ -1059,7 +1059,7 @@ export const FieldsDesigner = ({
                 inputId={`${table.tableSchemaId}_check_manual_edit`}
                 label="Default"
                 onChange={e => onChangeManualEdit(e.checked)}
-                tooltip={isIcebergCreated && resourcesContext.messages['availableForManualEditingTooltip']}
+                tooltip={isIcebergCreated ? resourcesContext.messages['availableForManualEditingTooltip'] : null}
               />
               <label className="srOnly" htmlFor={`${table.tableSchemaId}_check_manual_edit`}>
                 {resourcesContext.messages['manualEdit']}
