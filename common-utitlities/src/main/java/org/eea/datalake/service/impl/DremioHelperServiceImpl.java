@@ -178,8 +178,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         folderId = getFolderId(s3PathResolver, folderName);
         if (folderId == null) {
           try {
-            Thread.sleep(2000);
-            folderId = getFolderId(s3PathResolver, folderName);
+              LOG.info("Folder id was null, so I am trying again");
+              Thread.sleep(2000);
+              folderId = getFolderId(s3PathResolver, folderName);
+              LOG.info("Folder id {} after second try", folderId);
           } catch (InterruptedException e) {
             throw new RuntimeException(e);
           }
