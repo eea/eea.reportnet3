@@ -24,6 +24,7 @@ export const Coordinates = ({
   id,
   initialGeoJson,
   isCellEditor = false,
+  mapVisibilityEnabled = false,
   onBlur = () => {},
   onCoordinatesMoreInfoClick = () => {},
   onCrsChange = () => {},
@@ -134,7 +135,9 @@ export const Coordinates = ({
             appendTo={document.body}
             ariaLabel={'crs'}
             className={styles.epsgSwitcher}
-            disabled={disabled || crsDisabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds}
+            disabled={
+              mapVisibilityEnabled || disabled || crsDisabled || hasErrors.latOutOfBounds || hasErrors.longOutOfBounds
+            }
             onChange={e => {
               if (
                 e.target.value.value === 'EPSG:3035' &&
@@ -223,7 +226,7 @@ export const Coordinates = ({
               [styles.error]: hasErrors.latitude || hasErrors.latOutOfBounds,
               [styles.isCellEditor]: isCellEditor
             })}
-            disabled={disabled}
+            disabled={mapVisibilityEnabled || disabled}
             id={`${id}_lat`}
             keyfilter="coordinates"
             onBlur={e => {
@@ -255,7 +258,7 @@ export const Coordinates = ({
               [styles.error]: hasErrors.longitude || hasErrors.longOutOfBounds,
               [styles.isCellEditor]: isCellEditor
             })}
-            disabled={disabled}
+            disabled={mapVisibilityEnabled || disabled}
             id={`${id}_long`}
             keyfilter="coordinates"
             onBlur={e => {

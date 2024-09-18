@@ -215,6 +215,7 @@ export const DataViewer = ({
         colsSchema={colsSchema}
         datasetId={datasetId}
         datasetSchemaId={datasetSchemaId}
+        mapVisibilityEnabled={mapVisibilityEnabled}
         onChangePointCRS={onChangePointCRS}
         onCoordinatesMoreInfoClick={onCoordinatesMoreInfoClick}
         onEditorKeyChange={onEditorKeyChange}
@@ -759,7 +760,8 @@ export const DataViewer = ({
   const onEditorSubmitValue = async (cell, value, record) => {
     if (!isEmpty(record)) {
       let field = record.dataRow.filter(row => Object.keys(row.fieldData)[0] === cell.field)[0].fieldData;
-      if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId) {
+
+      if (value !== initialCellValue && record.recordId === records.selectedRecord.recordId && !mapVisibilityEnabled) {
         try {
           await DatasetService.updateField(
             datasetId,
@@ -1161,6 +1163,7 @@ export const DataViewer = ({
       geoJson={records.mapGeoJson}
       geometryType={records.geometryType}
       hasLegend={true}
+      mapVisibilityEnabled={mapVisibilityEnabled}
       onSelectPoint={onSelectPoint}
       selectedCRS={records.crs}></Map>
   );
