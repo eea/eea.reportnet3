@@ -118,11 +118,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         setJobsStatusesList(data.jobsList);
         setRemainingJobs(data.remainingJobs);
       } else {
-        const adminCustodianTabChange = index && !page && (isCustodian || isAdmin);
+        const adminCustodianTabChange = index && page === undefined && (isCustodian || isAdmin);
         const providerTabChange = index && !page && isProvider;
 
         if (!adminCustodianTabChange) {
-          if (providerTabChange || (!isEmpty(filterBy) && index === undefined)) {
+          if (providerTabChange || (!isEmpty(filterBy) && (index === undefined || page !== undefined))) {
             data = await JobsStatusesService.getJobsHistory({
               pageNum: page !== undefined ? page : pageNum,
               numberRows: rows !== undefined ? rows : numberRows,
@@ -145,7 +145,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           }
         }
 
-        if (!isEmpty(filterBy) && !(index && !page)) {
+        if (!isEmpty(filterBy) && !(index && page === undefined)) {
           setData(data.jobHistoryVOList);
           setJobsStatusesList(data.jobHistoryVOList);
           setFilteredJobs(data.filteredJobs);
