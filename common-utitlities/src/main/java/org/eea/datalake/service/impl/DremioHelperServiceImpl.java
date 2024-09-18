@@ -176,6 +176,14 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
 
         folderId = getFolderId(s3PathResolver, folderName);
+        if (folderId == null) {
+          try {
+            Thread.sleep(2000);
+            folderId = getFolderId(s3PathResolver, folderName);
+          } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+          }
+        }
 
         try {
             dremioApiController.promote(token, folderId, requestBody);
