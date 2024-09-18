@@ -66,8 +66,10 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         }
         value = "";
         byte[] geomByteArray = new WKBWriter(2, true).write(geometry);
+        geometry = null;
         String HexString = spatialDataHelper.bytesToHex(geomByteArray);
         geomByteArray = null;
+        System.gc();
         return HexString;
       }
     } catch (ParseException | IOException e) {
