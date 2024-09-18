@@ -575,6 +575,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         //csvPrinter.printRecord(row);
         String[] rowArray = row.toArray(new String[0]);
         csvWriter.writeNext(rowArray);
+        row.clear();
+        row = null;
+        rowArray = null;
         recordCounter++;
 
         if (recordCounter == batchSize) {
