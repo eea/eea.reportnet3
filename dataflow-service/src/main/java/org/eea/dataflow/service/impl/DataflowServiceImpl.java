@@ -1590,11 +1590,11 @@ public class DataflowServiceImpl implements DataflowService {
     boolean isAdmin = isAdmin();
 
     List<ResourceAccessVO> resourcesByUser = userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATAFLOW);
-    LOG.info("resourcesByUser {}", resourcesByUser);
+    //LOG.info("resourcesByUser {}", resourcesByUser);
     resourcesByUser = removeResourcesIfNeeded(resourcesByUser);
-    LOG.info("resourcesByUser after deletion {}", resourcesByUser);
+    //LOG.info("resourcesByUser after deletion {}", resourcesByUser);
     List<Long>  idsResources = resourcesByUser.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
-    LOG.info("idsResources {}", idsResources);
+    //LOG.info("idsResources {}", idsResources);
 
     List<IDataflowCount> dataflowCountList = new ArrayList<>();
 
