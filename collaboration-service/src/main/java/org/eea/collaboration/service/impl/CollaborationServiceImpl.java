@@ -215,8 +215,9 @@ public class CollaborationServiceImpl implements CollaborationService {
 
       messageVO = messageMapper.entityToClass(message);
       messageVO.setMessageAttachment(messageAttachmentVO);
+      byte[] fileInBytes = IOUtils.toByteArray(is);
 
-      documentControllerZuul.uploadCollaborationDocument(IOUtils.toByteArray(is), dataflowId,
+      documentControllerZuul.uploadCollaborationDocument(fileInBytes, dataflowId,
           fileName, contentType, message.getId(), providerId);
 
       String eventType = EventType.RECEIVED_MESSAGE.toString();
