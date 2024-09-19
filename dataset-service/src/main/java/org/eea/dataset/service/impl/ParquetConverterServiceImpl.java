@@ -589,6 +589,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           if (csvWriter != null) {
             csvWriter.flush();
             csvWriter.close();
+            System.gc();
           }
           modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
           recordCounter = 0;
