@@ -580,6 +580,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         rowArray = null;
         recordCounter++;
 
+        if (recordCounter % 100 == 0) {
+          System.gc();
+        }
+
         if (recordCounter == batchSize) {
           //closeResources(writer, csvPrinter);
           if (csvWriter != null) {
@@ -589,7 +593,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
           recordCounter = 0;
         }
-        System.gc();
       }
 
       if (fileIsEmpty) {
