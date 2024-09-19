@@ -608,6 +608,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
 
       }
+      System.gc();
     }
 
     LOG.info(MEASUREMENTS + " with job {} modifyCsvFile finished", importFileInDremioInfo);
