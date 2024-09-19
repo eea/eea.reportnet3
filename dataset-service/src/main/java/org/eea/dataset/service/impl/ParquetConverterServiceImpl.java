@@ -585,11 +585,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           if (csvWriter != null) {
             csvWriter.flush();
             csvWriter.close();
-            System.gc();
           }
           modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
           recordCounter = 0;
         }
+        System.gc();
       }
 
       if (fileIsEmpty) {
@@ -608,6 +608,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
 
       }
+      System.gc();
     }
 
     LOG.info(MEASUREMENTS + " with job {} modifyCsvFile finished", importFileInDremioInfo);
