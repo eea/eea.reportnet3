@@ -69,7 +69,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         geometry = null;
         String HexString = spatialDataHelper.bytesToHex(geomByteArray);
         geomByteArray = null;
-        System.gc();
         return HexString;
       }
     } catch (ParseException | IOException e) {
