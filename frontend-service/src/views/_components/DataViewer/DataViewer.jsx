@@ -1131,7 +1131,7 @@ export const DataViewer = ({
         className={`p-button-animated-blink ${styles.saveButton}`}
         icon="check"
         label={
-          mapEditingEnabled && !mapVisibilityEnabled
+          mapEditingEnabled && !mapVisibilityEnabled && MapUtils.getGeometryType(records.mapGeoJson) === 'POINT'
             ? resourcesContext.messages['save']
             : resourcesContext.messages['ok']
         }
@@ -1141,7 +1141,7 @@ export const DataViewer = ({
             : () => dispatchRecords({ type: 'TOGGLE_MAP_VISIBILITY', payload: false })
         }
       />
-      {mapEditingEnabled && !mapVisibilityEnabled && (
+      {mapEditingEnabled && !mapVisibilityEnabled && MapUtils.getGeometryType(records.mapGeoJson) === 'POINT' && (
         <Button
           className="p-button-secondary button-right-aligned"
           icon="cancel"
