@@ -254,7 +254,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       return;
     }
 
-    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) {
+    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) {
       importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
       return;
     }
@@ -1043,8 +1043,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType, Boolean removeFixedNumberData) throws Exception {
     Boolean allReadOnlyFields = tableSchema.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchema::getReadOnly);
-    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && (tableSchema.getReadOnly() || allReadOnlyFields || (tableSchema.getFixedNumber() && !removeFixedNumberData))){
-      //we shouldn't remove data from tables that are read only or have all of their fields read only
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && (allReadOnlyFields || (tableSchema.getFixedNumber() && !removeFixedNumberData))){
+      //we shouldn't remove data from tables that have all of their fields read only or are fixed number of records
+      return;
+    }
+
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && tableSchema.getReadOnly()){
+      //we shouldn't remove data from tables that are not reference and are read only
       return;
     }
 

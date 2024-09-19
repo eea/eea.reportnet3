@@ -1,5 +1,6 @@
 package org.eea.document.service.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.S3Helper;
@@ -209,20 +210,33 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
         if (filename == null || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
             throw new EEAException(EEAErrorMessage.FILE_FORMAT);
         }
-
+        String attachmentPathInS3 = null;
         String modifiedFileName = "message_" + messageId + "_" + filename;
         String absolutePath = importPath + "/" + dataflowId + "/" + modifiedFileName;
-        Path path = Paths.get(absolutePath);
+        File file = null;
         try {
             // Ensure that the directory exists
-            Files.createDirectories(path.getParent());
-            Files.copy(inputStream, path);
+            File folder = new File(importPath + "/" + dataflowId);
+            if (!folder.exists()) {
+                folder.mkdir();
+            }
+            file = new File(absolutePath);
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                FileCopyUtils.copy(inputStream, fos);
+            }
             S3PathResolver s3TechnicalAcceptancePathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
             s3TechnicalAcceptancePathResolver.setDataProviderId(providerId);
-            String attachmentPathInS3 = s3Service.getS3Path(s3TechnicalAcceptancePathResolver);
+            attachmentPathInS3 = s3Service.getS3Path(s3TechnicalAcceptancePathResolver);
             s3Helper.uploadFileToBucket(attachmentPathInS3, absolutePath);
-            Files.delete(path);
-        } finally {
+        }
+        catch (Exception e){
+            LOG.error("Error while uploading file {} to s3 in path {} Error: {}", absolutePath, attachmentPathInS3, e.getMessage());
+            throw e;
+        }
+        finally {
+            if(file.exists()){
+                file.delete();
+            }
             inputStream.close();
         }
     }
