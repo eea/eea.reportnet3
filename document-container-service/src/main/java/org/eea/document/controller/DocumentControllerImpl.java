@@ -857,7 +857,7 @@ public class DocumentControllerImpl implements DocumentController {
   @Override
   @GetMapping(value = "/private/{dataflowId}/collaborationattachment")
   @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   @ApiOperation(value = "Get Collaboration Document", hidden = true)
   public byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
