@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.ws.rs.Produces;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.apache.commons.lang.BooleanUtils;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import feign.FeignException;
@@ -855,7 +856,8 @@ public class DocumentControllerImpl implements DocumentController {
    */
   @Override
   @GetMapping(value = "/private/{dataflowId}/collaborationattachment")
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @Produces(value = {MediaType.APPLICATION_OCTET_STREAM_VALUE})
   @ApiOperation(value = "Get Collaboration Document", hidden = true)
   public byte[] getCollaborationDocument(@PathVariable("dataflowId") final Long dataflowId,
