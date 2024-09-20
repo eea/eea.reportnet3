@@ -1,6 +1,5 @@
 package org.eea.document.service.impl;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.datalake.service.S3Helper;
@@ -21,8 +20,8 @@ import org.eea.utils.LiteralConstants;
 import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,9 +30,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 
@@ -49,8 +45,7 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
     @Value("${importPath}")
     private String importPath;
 
-    @Autowired
-    private KafkaSenderUtils kafkaSenderUtils;
+    private final KafkaSenderUtils kafkaSenderUtils;
 
     private final DataFlowDocumentControllerZuul dataflowController;
 
@@ -58,13 +53,15 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
 
     private final S3Service s3Service;
 
-    public DocumentServiceDLImpl(DataFlowDocumentControllerZuul dataflowController, S3Helper s3Helper) {
+    public DocumentServiceDLImpl(DataFlowDocumentControllerZuul dataflowController, S3Helper s3Helper, KafkaSenderUtils kafkaSenderUtils) {
         this.s3Helper = s3Helper;
         this.s3Service = s3Helper.getS3Service();
         this.dataflowController = dataflowController;
+        this.kafkaSenderUtils = kafkaSenderUtils;
     }
 
     @Override
+    @Async
     public void uploadDocumentDL(MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException {
         if (multipartFile.getOriginalFilename() == null || StringUtils.isBlank(FilenameUtils.getExtension(multipartFile.getOriginalFilename()))) {
             throw new EEAException(EEAErrorMessage.FILE_FORMAT);
@@ -140,6 +137,7 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
      */
     @Override
     @Modified
+    @Async
     public void deleteDocumentDL(DocumentVO documentVO, Boolean deleteMetabase) throws EEAException {
         try {
 
@@ -205,6 +203,7 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
      * @throws IOException Signals that an I/O exception has occurred.
      */
     @Override
+    @Async
     public void uploadCollaborationDocumentDL(InputStream inputStream, String filename,
                                               Long dataflowId, Long providerId, Long messageId) throws IOException, EEAException {
         if (filename == null || StringUtils.isBlank(FilenameUtils.getExtension(filename))) {
@@ -214,31 +213,28 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
         String modifiedFileName = "message_" + messageId + "_" + filename;
         String absolutePath = importPath + "/" + dataflowId + "/" + modifiedFileName;
         File file = null;
-        try {
-            // Ensure that the directory exists
-            File folder = new File(importPath + "/" + dataflowId);
-            if (!folder.exists()) {
-                folder.mkdir();
-            }
-            file = new File(absolutePath);
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-                FileCopyUtils.copy(inputStream, fos);
-            }
-            S3PathResolver s3TechnicalAcceptancePathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
-            s3TechnicalAcceptancePathResolver.setDataProviderId(providerId);
-            attachmentPathInS3 = s3Service.getS3Path(s3TechnicalAcceptancePathResolver);
-            s3Helper.uploadFileToBucket(attachmentPathInS3, absolutePath);
+      try (inputStream) {
+        // Ensure that the directory exists
+        File folder = new File(importPath + "/" + dataflowId);
+        if (!folder.exists()) {
+          folder.mkdir();
         }
-        catch (Exception e){
-            LOG.error("Error while uploading file {} to s3 in path {} Error: {}", absolutePath, attachmentPathInS3, e.getMessage());
-            throw e;
+        file = new File(absolutePath);
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+          FileCopyUtils.copy(inputStream, fos);
         }
-        finally {
-            if(file.exists()){
-                file.delete();
-            }
-            inputStream.close();
+        S3PathResolver s3TechnicalAcceptancePathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_TECHNICAL_ACCEPTANCE_FILE_PATH);
+        s3TechnicalAcceptancePathResolver.setDataProviderId(providerId);
+        attachmentPathInS3 = s3Service.getS3Path(s3TechnicalAcceptancePathResolver);
+        s3Helper.uploadFileToBucket(attachmentPathInS3, absolutePath);
+      } catch (Exception e) {
+        LOG.error("Error while uploading file {} to s3 in path {} Error: {}", absolutePath, attachmentPathInS3, e.getMessage());
+        throw e;
+      } finally {
+        if (file != null && file.exists()) {
+          file.delete();
         }
+      }
     }
 
 
