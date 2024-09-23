@@ -170,7 +170,9 @@ export const DataForm = ({
         return null;
       })
     ) : (
-      <span className={styles.allAttachmentMessage}>{resourcesContext.messages['allAttachmentOrComplexGeom']}</span>
+      <span className={styles.allAttachmentMessage}>
+        {resourcesContext.messages['notEditableAttachmentOrComplexGeom']}
+      </span>
     );
 
   const newRecordForm =

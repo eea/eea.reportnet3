@@ -1037,6 +1037,13 @@ export const DataViewer = ({
     }
   };
 
+  const nonAttachmentsOrComplexGeomTypes = colsSchema
+    .filter(
+      col =>
+        !['ATTACHMENT', 'POLYGON', 'LINESTRING', 'MULTIPOLYGON', 'MULTILINESTRING', 'MULTIPOINT'].includes(col.type)
+    )
+    .filter(col => col.field !== 'id' && col.field !== 'datasetPartitionId');
+
   const addRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       {isNewRecord && (
@@ -1078,29 +1085,34 @@ export const DataViewer = ({
     </div>
   );
 
-  const editRowDialogFooter = (
-    <div className="ui-dialog-buttonpane p-clearfix">
-      <Button
-        className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
-        disabled={isSaving || records.isSaveDisabled}
-        icon={isSaving ? 'spinnerAnimate' : 'check'}
-        label={resourcesContext.messages['save']}
-        onClick={() => {
-          try {
-            onSaveRecord(records.editedRecord);
-          } catch (error) {
-            console.error('DataViewer - editRowDialogFooter.', error);
-          }
-        }}
-      />
-      <Button
-        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        icon="cancel"
-        label={resourcesContext.messages['cancel']}
-        onClick={onCancelRowEdit}
-      />
-    </div>
-  );
+  const editRowDialogFooter =
+    nonAttachmentsOrComplexGeomTypes.length !== 0 ? (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <Button
+          className={!isSaving && !records.isSaveDisabled && 'p-button-animated-blink'}
+          disabled={isSaving || records.isSaveDisabled}
+          icon={isSaving ? 'spinnerAnimate' : 'check'}
+          label={resourcesContext.messages['save']}
+          onClick={() => {
+            try {
+              onSaveRecord(records.editedRecord);
+            } catch (error) {
+              console.error('DataViewer - editRowDialogFooter.', error);
+            }
+          }}
+        />
+        <Button
+          className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+          icon="cancel"
+          label={resourcesContext.messages['cancel']}
+          onClick={onCancelRowEdit}
+        />
+      </div>
+    ) : (
+      <div className="ui-dialog-buttonpane p-clearfix">
+        <Button icon="check" label={resourcesContext.messages['ok']} onClick={onCancelRowEdit} />
+      </div>
+    );
 
   const coordinatesMoreInfoDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
