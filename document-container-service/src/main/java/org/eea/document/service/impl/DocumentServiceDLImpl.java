@@ -90,6 +90,8 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
             catch (Exception e){
                 LOG.error("Could not store supporting file to disk for dataflowId {} fileName {}", dataflowId, file.getName());
                 throw e;
+            } finally {
+                inputStream.close();
             }
 
             S3PathResolver s3AttachmentsPathResolver = new S3PathResolver(dataflowId, modifiedFileName, LiteralConstants.S3_SUPPORTING_DOCUMENTS_FILE_PATH);
