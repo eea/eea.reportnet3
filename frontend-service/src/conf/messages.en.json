@@ -1079,6 +1079,7 @@
     "noTablesToSelect": "There are no tables to select",
     "notAllowedError": "You are not allowed to see the requested page",
     "notAllowedForThisDataflow": "The selected action is not allowed for this dataflow",
+    "notEditableAttachmentOrComplexGeom": "This record is not editable. It contains only attachment or complex geometries field types.",
     "notEmpty": "Mandatory table",
     "notFieldToSelect": "No field",
     "notFoundError": "Page not found error. The requested page does not exist",
