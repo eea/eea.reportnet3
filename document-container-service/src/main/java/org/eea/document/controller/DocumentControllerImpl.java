@@ -146,7 +146,7 @@ public class DocumentControllerImpl implements DocumentController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
       if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
         documentVO.setIsBigData(true);
-        documentServiceDL.uploadDocumentDL(file, file.getOriginalFilename(), documentVO, file.getSize());
+        documentServiceDL.uploadDocumentDL(file.getInputStream(), file, file.getOriginalFilename(), documentVO, file.getSize());
         LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
       }
       else{
@@ -468,7 +468,7 @@ public class DocumentControllerImpl implements DocumentController {
         if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
           documentVO.setIsBigData(true);
           documentServiceDL.deleteDocumentDL(documentVO, false);
-          documentServiceDL.uploadDocumentDL(file, file.getOriginalFilename(), documentVO, file.getSize());
+          documentServiceDL.uploadDocumentDL(file.getInputStream(), file, file.getOriginalFilename(), documentVO, file.getSize());
           LOG.info("Successfully updated document with id {} for dataflowId {}", idDocument, dataflowId);
         }
         else {

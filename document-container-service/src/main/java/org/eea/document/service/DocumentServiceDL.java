@@ -17,7 +17,7 @@ public interface DocumentServiceDL {
      * @param documentVO the document VO
      * @param size the size
      */
-    void uploadDocumentDL(MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException;
+    void uploadDocumentDL(InputStream inputStream, MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException;
 
 
     /**

@@ -62,7 +62,7 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
 
     @Override
     @Async
-    public void uploadDocumentDL(MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException {
+    public void uploadDocumentDL(InputStream inputStream, MultipartFile multipartFile, final String fileName, DocumentVO documentVO, final Long size) throws EEAException, IOException {
         if (multipartFile.getOriginalFilename() == null || StringUtils.isBlank(FilenameUtils.getExtension(multipartFile.getOriginalFilename()))) {
             throw new EEAException(EEAErrorMessage.FILE_FORMAT);
         }
@@ -85,7 +85,7 @@ public class DocumentServiceDLImpl implements DocumentServiceDL {
             String filePathInReportnet = folder.getAbsolutePath() + "/" + multipartFile.getOriginalFilename();
             File file = new File(filePathInReportnet);
             try (FileOutputStream fos = new FileOutputStream(file)) {
-                FileCopyUtils.copy(multipartFile.getInputStream(), fos);
+                FileCopyUtils.copy(inputStream, fos);
             }
             catch (Exception e){
                 LOG.error("Could not store supporting file to disk for dataflowId {} fileName {}", dataflowId, file.getName());
