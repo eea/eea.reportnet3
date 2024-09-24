@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -43,32 +44,30 @@ public class WebformServiceImpl implements WebformService {
   private static final Logger LOG = LoggerFactory.getLogger(WebformServiceImpl.class);
 
   /** The webform config repository. */
-  private final WebformConfigRepository webformConfigRepository;
+  @Autowired
+  private WebformConfigRepository webformConfigRepository;
 
 
   /** The webform repository. */
-  private final WebformRepository webformRepository;
+  @Autowired
+  private WebformRepository webformRepository;
 
 
   /** The webform metabase mapper. */
-  private final WebformMetabaseMapper webformMetabaseMapper;
+  @Autowired
+  private WebformMetabaseMapper webformMetabaseMapper;
 
 
   /** The schemas repository. */
-  private final SchemasRepository schemasRepository;
+  @Autowired
+  private SchemasRepository schemasRepository;
 
   /**
    * The dataset schema service
    */
-  private final DatasetSchemaService datasetSchemaService;
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
-  public WebformServiceImpl (WebformConfigRepository webformConfigRepository,  WebformRepository webformRepository, WebformMetabaseMapper webformMetabaseMapper, SchemasRepository schemasRepository, DatasetSchemaService datasetSchemaService) {
-    this.webformConfigRepository = webformConfigRepository;
-    this.webformRepository = webformRepository;
-    this.webformMetabaseMapper = webformMetabaseMapper;
-    this.schemasRepository =schemasRepository;
-    this.datasetSchemaService = datasetSchemaService;
-  }
 
   /**
    * Gets the webforms list.

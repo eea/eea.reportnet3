@@ -2,19 +2,14 @@ package org.eea.dataset.controller;
 
 import java.util.List;
 
-import com.fasterxml.jackson.core.json.JsonReadFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.ApiParam;
-import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
-import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.WebformController;
 import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
-import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
