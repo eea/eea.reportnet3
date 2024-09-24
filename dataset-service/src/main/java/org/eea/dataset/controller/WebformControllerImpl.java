@@ -106,12 +106,12 @@ public class WebformControllerImpl implements WebformController {
       @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
   @PostMapping("/{datasetId}/uploadWebformConfig")
   @ApiOperation(value = "Upload web-form config json into the system", hidden = true)
-  public ResponseEntity<?> uploadWebformConfig(@RequestBody WebformConfigVO webformConfig,
-                                               @ApiParam(type = "Long", value = "Dataset id",
+  public ResponseEntity<?> uploadWebformConfig(@ApiParam(value = "Web-form config Schema containing the data") @RequestBody WebformConfigVO webformConfig,
+                                               @ApiParam(type = "Long", value = "The Dataset id",
                                                    example = "0") @PathVariable("datasetId") Long datasetId,
-                                               @ApiParam(type = "Long", value = "Dataflow id",
+                                               @ApiParam(type = "Long", value = "The Dataflow id",
                                                    example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
-                                               @ApiParam(type = "Long", value = "Provider id",
+                                               @ApiParam(type = "Long", value = "The Provider id",
                                                    example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
 
     return webformService.uploadWebFormConfig(webformConfig, datasetId);
