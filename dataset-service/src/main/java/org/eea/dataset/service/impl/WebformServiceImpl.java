@@ -12,14 +12,18 @@ import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -39,23 +43,32 @@ public class WebformServiceImpl implements WebformService {
   private static final Logger LOG = LoggerFactory.getLogger(WebformServiceImpl.class);
 
   /** The webform config repository. */
-  @Autowired
-  private WebformConfigRepository webformConfigRepository;
+  private final WebformConfigRepository webformConfigRepository;
 
 
   /** The webform repository. */
-  @Autowired
-  WebformRepository webformRepository;
+  private final WebformRepository webformRepository;
 
 
   /** The webform metabase mapper. */
-  @Autowired
-  private WebformMetabaseMapper webformMetabaseMapper;
+  private final WebformMetabaseMapper webformMetabaseMapper;
 
 
   /** The schemas repository. */
-  @Autowired
-  private SchemasRepository schemasRepository;
+  private final SchemasRepository schemasRepository;
+
+  /**
+   * The dataset schema service
+   */
+  private final DatasetSchemaService datasetSchemaService;
+
+  public WebformServiceImpl (WebformConfigRepository webformConfigRepository,  WebformRepository webformRepository, WebformMetabaseMapper webformMetabaseMapper, SchemasRepository schemasRepository, DatasetSchemaService datasetSchemaService) {
+    this.webformConfigRepository = webformConfigRepository;
+    this.webformRepository = webformRepository;
+    this.webformMetabaseMapper = webformMetabaseMapper;
+    this.schemasRepository =schemasRepository;
+    this.datasetSchemaService = datasetSchemaService;
+  }
 
   /**
    * Gets the webforms list.
@@ -212,6 +225,52 @@ public class WebformServiceImpl implements WebformService {
         throw new EEAException(EEAErrorMessage.ERROR_WEBFORM_IN_USE);
       }
     }
+  }
+
+  /**
+   * Upload a webform config
+   *
+   * @param webformConfig The webform to upload
+   * @param datasetId GThe selected datasetId
+   * @return The response entity
+   */
+  @Override
+  @Transactional
+  public ResponseEntity<?> uploadWebFormConfig(WebformConfigVO webformConfig, Long datasetId) {
+    String message = "";
+    HttpStatus status = HttpStatus.OK;
+
+    try {
+      String webformConfigName = webformConfig.getName();
+      List<WebformMetabaseVO> existingWebforms = getListWebforms();
+      var nameRepeated = existingWebforms.stream().filter(w -> w.getLabel().equals(webformConfigName)).findFirst();
+      if (nameRepeated.isEmpty()) {
+        insertWebformConfig(webformConfig.getName(), webformConfig.getContent(),
+            webformConfig.getType());
+      }
+    } catch (EEAException e) {
+      message = e.getMessage();
+      status = HttpStatus.BAD_REQUEST;
+      LOG.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+    } catch (Exception e) {
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      LOG.error("Unexpected error! Error inserting webform config with name {} Message: {}", webformConfig.getName(), e.getMessage());
+    }
+
+    String datasetSchemaId = null;
+    try{
+      datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      WebformVO webformVO = new WebformVO();
+      webformVO.setName(webformConfig.getName());
+      webformVO.setType(webformConfig.getType().getValue());
+      datasetSchemaService.updateWebform(datasetSchemaId, webformVO);
+    } catch (Exception e) {
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      LOG.error("Unexpected error! Error updating dataset schema {} for datasetId {} Message: {}", datasetSchemaId, datasetId, e.getMessage());
+    }
+    return new ResponseEntity<>(message, status);
   }
 
   /**

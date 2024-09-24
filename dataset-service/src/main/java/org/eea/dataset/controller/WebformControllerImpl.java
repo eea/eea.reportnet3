@@ -1,16 +1,25 @@
 package org.eea.dataset.controller;
 
 import java.util.List;
+
+import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
+import io.swagger.annotations.ApiParam;
+import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.WebformService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.WebformController;
 import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
+import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +28,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,6 +98,23 @@ public class WebformControllerImpl implements WebformController {
       LOG.error("Unexpected error! Error inserting webform config with name {} Message: {}", name, e.getMessage());
       throw e;
     }
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','DATAFLOW_CUSTODIAN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','DATAFLOW_CUSTODIAN')")
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+  @PostMapping("/{datasetId}/uploadWebformConfig")
+  @ApiOperation(value = "Upload web-form config json into the system", hidden = true)
+  public ResponseEntity<?> uploadWebformConfig(@RequestBody WebformConfigVO webformConfig,
+                                               @ApiParam(type = "Long", value = "Dataset id",
+                                                   example = "0") @PathVariable("datasetId") Long datasetId,
+                                               @ApiParam(type = "Long", value = "Dataflow id",
+                                                   example = "0") @RequestParam(value = "dataflowId") Long dataflowId,
+                                               @ApiParam(type = "Long", value = "Provider id",
+                                                   example = "0") @RequestParam(value = "providerId", required = false) Long providerId) {
+
+    return webformService.uploadWebFormConfig(webformConfig, datasetId);
   }
 
 

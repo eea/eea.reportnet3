@@ -3,9 +3,10 @@ package org.eea.dataset.service;
 import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-
+import org.springframework.http.ResponseEntity;
 
 
 /**
@@ -58,4 +59,13 @@ public interface WebformService {
    * @throws EEAException the EEA exception
    */
   void deleteWebformConfig(Long id) throws EEAException;
+
+  /**
+   * Uploads the selected webform to the selected dataset
+   *
+   * @param webformConfigVO The webform to upload
+   * @param datasetId GThe selected datasetId
+   * @return The response
+   */
+  ResponseEntity<?> uploadWebFormConfig(WebformConfigVO webformConfigVO, Long datasetId) ;
 }
