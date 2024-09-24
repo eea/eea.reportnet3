@@ -231,7 +231,7 @@ public class WebformServiceImpl implements WebformService {
    * Upload a webform config
    *
    * @param webformConfig The webform to upload
-   * @param datasetId GThe selected datasetId
+   * @param datasetId The selected datasetId
    * @return The response entity
    */
   @Override
@@ -240,6 +240,7 @@ public class WebformServiceImpl implements WebformService {
     String message = "";
     HttpStatus status = HttpStatus.OK;
 
+    //Insert or update webform on metabase(webform) and on Mongo(webformConfig)
     try {
       String webformConfigName = webformConfig.getName();
       List<WebformMetabaseVO> existingWebforms = getListWebforms();
@@ -247,17 +248,23 @@ public class WebformServiceImpl implements WebformService {
       if (nameRepeated.isEmpty()) {
         insertWebformConfig(webformConfig.getName(), webformConfig.getContent(),
             webformConfig.getType());
+      } else if (webformConfig.getIdReferenced() != null)  {
+        updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
+            webformConfig.getContent(), webformConfig.getType());
       }
     } catch (EEAException e) {
       message = e.getMessage();
       status = HttpStatus.BAD_REQUEST;
       LOG.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+      return new ResponseEntity<>(message, status);
     } catch (Exception e) {
       message = e.getMessage();
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       LOG.error("Unexpected error! Error inserting webform config with name {} Message: {}", webformConfig.getName(), e.getMessage());
+      return new ResponseEntity<>(message, status);
     }
 
+    // Update webform properties on Mongo (DatasetSchema)
     String datasetSchemaId = null;
     try{
       datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
@@ -269,7 +276,9 @@ public class WebformServiceImpl implements WebformService {
       message = e.getMessage();
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       LOG.error("Unexpected error! Error updating dataset schema {} for datasetId {} Message: {}", datasetSchemaId, datasetId, e.getMessage());
+      return new ResponseEntity<>(message, status);
     }
+
     return new ResponseEntity<>(message, status);
   }
 
