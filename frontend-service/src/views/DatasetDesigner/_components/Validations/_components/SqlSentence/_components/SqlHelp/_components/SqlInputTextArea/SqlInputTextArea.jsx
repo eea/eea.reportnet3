@@ -72,7 +72,6 @@ export class SqlInputTextArea extends Component {
   };
 
   onInput = e => {
-    console.log('inside on input');
     if (this.props.autoResize) {
       this.resize();
     }
@@ -163,7 +162,9 @@ export class SqlInputTextArea extends Component {
               border: '1px solid #ccc',
               borderRadius: '4px',
               whiteSpace: 'pre-wrap',
-              wordWrap: 'break-word'
+              wordWrap: 'break-word',
+              overflow: 'auto',
+              minHeight: '440px'
             }}
             textareaId={this.props.id}
             value={this.props.value}
