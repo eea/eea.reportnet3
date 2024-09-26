@@ -63,7 +63,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: {
           ...state.candidateRule,
           [payload.key]: payload.value,
-          fieldType: payload.fieldType,
+          fieldType: payload.fieldType
         }
       };
 
@@ -295,7 +295,7 @@ export const createValidationReducer = (state, { type, payload }) => {
         candidateRule: {
           ...state.candidateRule,
           expressionType: payload,
-          sqlSentence: payload !== 'sqlSentence' ? null : state.candidateRule.sqlSentence
+          sqlSentence: payload !== 'sqlSentence' ? undefined : state.candidateRule.sqlSentence
         }
       };
 
