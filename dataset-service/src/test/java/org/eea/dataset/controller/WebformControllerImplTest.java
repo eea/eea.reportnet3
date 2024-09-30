@@ -138,4 +138,16 @@ public class WebformControllerImplTest {
     }
   }
 
+  @Test
+  public void testUploadWebformConfig() {
+    WebformConfigVO webform = new WebformConfigVO();
+    webform.setContent("json");
+    webform.setIdReferenced(1L);
+    webform.setName("test");
+    Long datasetId = 1258L;
+    Long dataflowId = 5469L;
+    Long providerId = 52L;
+    webFormControllerImpl.uploadWebformConfig(webform, datasetId, dataflowId, providerId);
+    Mockito.verify(webformservice, times(1)).uploadWebFormConfig(Mockito.any(WebformConfigVO.class), Mockito.eq(datasetId));
+  }
 }
