@@ -43,7 +43,7 @@ const checkDuplicates = (fields, name, fieldId) => {
 };
 
 const checkInvalidCharacters = name => {
-  const invalidCharsRegex = new RegExp(/[^a-zA-Z0-9_-\s]/);
+  const invalidCharsRegex = new RegExp(/^[^a-zA-Z_]|[^a-zA-Z0-9_\s]/);
   return invalidCharsRegex.test(name);
 };
 
