@@ -1,7 +1,5 @@
 package org.eea.orchestrator.scheduling;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.ums.TokenVO;
@@ -18,7 +16,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JobForRestartingDelayedValidationTasks {
@@ -82,12 +82,12 @@ public class JobForRestartingDelayedValidationTasks {
 //                            JsonNode jsonNode = objectMapper.readTree(taskVO.getJson());
 //                            String eventType = jsonNode.get(EVENT_TYPE).asText();
 //                            if (!eventType.equals(COMMAND_VALIDATE_TABLE)) {
-                                LOG.info("Restarting task {}", taskId);
+                                LOG.info("Restarting task {}", taskId, taskVO);
                                 validationControllerZuul.restartTask(taskId.longValue());
 //                            }
                         }
                     } catch (Exception e) {
-                        LOG.error("Error while running scheduled task restartDelayedTasks for task {}", taskId);
+                        LOG.error("Error while running scheduled task restartDelayedTasks for task id: {}, task {}", taskId);
                     }
                 });
             }
@@ -96,21 +96,4 @@ public class JobForRestartingDelayedValidationTasks {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

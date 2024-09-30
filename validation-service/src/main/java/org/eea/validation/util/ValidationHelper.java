@@ -362,6 +362,7 @@ public class ValidationHelper implements DisposableBean {
 
   /**
    * Update materialized views of reference datasets in SQL.
+   * Returns the IDs of the datasets that need to update their materialized views.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
@@ -980,7 +981,7 @@ public class ValidationHelper implements DisposableBean {
 
   @Transactional
   public List<BigInteger> getInProgressValidationTasksThatExceedTime(long timeInMinutes) {
-     return taskRepository.getInProgressValidationTasksThatExceedTime(timeInMinutes);
+    return taskRepository.getInProgressValidationTasksThatExceedTime(timeInMinutes);
   }
 
   /**

@@ -151,7 +151,6 @@ public class SQLValidationUtils {
         System.gc();
       }
     }
-
   }
 
   /**

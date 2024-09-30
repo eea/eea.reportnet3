@@ -131,6 +131,14 @@ export const PublicFrontpage = () => {
                       </li>
                       <li>
                         <a
+                          href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/mfa-for-eu-login.pdf`}
+                          rel="noopener noreferrer"
+                          target="_blank">
+                          Authentication
+                        </a>
+                      </li>
+                      <li>
+                        <a
                           href={`https://www.eionet.europa.eu/reportnet/docs/${window.env.DOCUMENTATION_FOLDER}/reporter_howto_reportnet3`}
                           rel="noopener noreferrer"
                           target="_blank">

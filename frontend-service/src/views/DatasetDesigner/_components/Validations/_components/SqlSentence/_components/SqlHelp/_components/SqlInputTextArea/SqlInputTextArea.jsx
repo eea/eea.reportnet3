@@ -72,7 +72,6 @@ export class SqlInputTextArea extends Component {
   };
 
   onInput = e => {
-    console.log('inside on input');
     if (this.props.autoResize) {
       this.resize();
     }
@@ -144,27 +143,33 @@ export class SqlInputTextArea extends Component {
   render() {
     return (
       <Fragment>
-        <Editor
-          highlight={e => highlight(e, languages.sql, 'sql')}
-          onBlur={this.onBlur}
-          onFocus={this.onFocus}
-          onKeyUp={this.onKeyUp}
-          onValueChange={this.onInput}
-          padding={10}
-          ref={this.editorRef}
+        <div
           style={{
-            height: `440px`,
-            fontFamily: '"Fira code", "Fira Mono", monospace',
-            fontSize: 14,
-            border: '1px solid #ccc',
-            borderRadius: '4px',
             overflow: 'auto',
-            whiteSpace: 'pre-wrap',
-            wordWrap: 'break-word'
-          }}
-          textareaId={this.props.id}
-          value={this.props.value}
-        />
+            maxHeight: '440px'
+          }}>
+          <Editor
+            highlight={e => highlight(e, languages.sql, 'sql')}
+            onBlur={this.onBlur}
+            onFocus={this.onFocus}
+            onKeyUp={this.onKeyUp}
+            onValueChange={this.onInput}
+            padding={10}
+            ref={this.editorRef}
+            style={{
+              fontFamily: '"Fira code", "Fira Mono", monospace',
+              fontSize: 14,
+              border: '1px solid #ccc',
+              borderRadius: '4px',
+              whiteSpace: 'pre-wrap',
+              wordWrap: 'break-word',
+              overflow: 'auto',
+              minHeight: '440px'
+            }}
+            textareaId={this.props.id}
+            value={this.props.value}
+          />
+        </div>
         <label className="srOnly" htmlFor={this.props.id}>
           {this.props.placeholder || this.props.id}
         </label>
