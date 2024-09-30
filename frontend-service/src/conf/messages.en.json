@@ -846,7 +846,7 @@
     "invalid": "Invalid",
     "invalidatedQcRuleEvent": "The rule <strong title='{:shortCode}'>{:shortShortCode}</strong> is not valid, please check it",
     "invalidCharacter": "Invalid character",
-    "invalidCharactersFieldMessage": "The field name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-' and '_').",
+    "invalidCharactersFieldMessage": "The field name must start with a letter (a-z and A-Z) or '_' and contain letters, numbers (0-9), white space between other characters and '_'.",
     "invalidCharactersFieldTitle": "Invalid field name",
     "invalidCharactersSchemaError": "The schema name must contain only valid characters (Letters: a-z and A-Z, Numbers: 0-9, white space between other characters, '-', '_', '(' and ')').",
     "invalidCharactersTabHeader": "Invalid table name",
