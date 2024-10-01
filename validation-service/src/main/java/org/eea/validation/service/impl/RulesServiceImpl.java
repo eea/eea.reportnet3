@@ -621,7 +621,9 @@ public class RulesServiceImpl implements RulesService {
           .append(
               "', this.records.size > 0 && this.records.get(0) != null && this.records.get(0).dataProviderCode != null ? this.records.get(0).dataProviderCode : 'XX'")
           .append(")").toString());
-      recordStoreController.createUpdateQueryView(datasetId, false);
+//      ticket: https://taskman.eionet.europa.eu/issues/276970
+//      commented out to create a manual button of updating the views
+//      recordStoreController.createUpdateQueryView(datasetId, false);
       sqlRulesService.validateSQLRule(datasetId, datasetSchemaId, rule);
     }
     createRule(datasetSchemaId, rule);

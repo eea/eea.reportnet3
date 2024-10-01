@@ -658,14 +658,16 @@ public class RecordStoreControllerImpl implements RecordStoreController {
    */
   @PutMapping("/createUpdateQueryView")
   @PreAuthorize("isAuthenticated()")
+  @HystrixCommand
   @ApiOperation(value = "Creates or updates a View", hidden = true)
   public void createUpdateView(
       @ApiParam(value = "Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId,
       @ApiParam(value = "Is the schema going to be materialized?",
-          example = "true") @RequestParam("isMaterialized") boolean isMaterialized) {
+          example = "true") @RequestParam("isMaterialized") boolean isMaterialized) throws EEAException {
     try {
       LOG.info("Update query view for datasetId {}", datasetId);
-      recordStoreService.createUpdateQueryView(datasetId, isMaterialized);
+      recordStoreService.createUpdateQueryViewAsyncWithNotification(datasetId, isMaterialized);
+      LOG.info("Update has started asynchronous for dataset id: {}, notifications will appear at the UI", datasetId);
     } catch (Exception e) {
       LOG_ERROR.error("Unexpected error! Error creating update query view for datasetId {}. Message: {}", datasetId, e.getMessage());
       throw e;

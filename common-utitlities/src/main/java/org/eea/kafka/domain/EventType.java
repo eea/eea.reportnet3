@@ -415,6 +415,19 @@ public enum EventType {
   UPDATE_MATERIALIZED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "update_materialized_view_event", true),
 
+  // the events below had to be added for different notifications than the above
+  /** The update materialized views finished event. */
+  UPDATE_MATERIALIZED_VIEWS_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "update_materialized_views_finished_event", true),
+
+  /** The update materialized views failed event. */
+  UPDATE_MATERIALIZED_VIEWS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "update_materialized_views_failed_event", true),
+
+  /** The update materialized vieww started event. */
+  UPDATE_MATERIALIZED_VIEWS_INIT_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "update_materialized_views_init_event", true),
+
   /** The refresh materialized view event. */
   REFRESH_MATERIALIZED_VIEW_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "refresh_materialized_view_event", true),
