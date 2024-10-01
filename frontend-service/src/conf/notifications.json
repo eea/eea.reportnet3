@@ -7,6 +7,9 @@
       "fixed": false,
       "types": [
         {
+          "key": "UPDATE_MATERIALIZED_VIEWS_FAILED_EVENT"
+        },
+        {
           "key": "IMPORT_REPORTING_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -996,6 +999,9 @@
       "fixed": false,
       "types": [
         {
+          "key":  "UPDATE_MATERIALIZED_VIEWS_FINISHED_EVENT"
+        },
+        {
           "key": "DATASET_SERVICE_DELETE_DATA_BY_ID_SUCCESS",
           "navigateTo": {
             "section": "DATASET",
@@ -1265,6 +1271,7 @@
       "types": [
         { "key": "DATASET_DATA_LOADING_INIT", "messageKeys": {} },
         { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
+        { "key": "UPDATE_MATERIALIZED_VIEWS_INIT_EVENT" },
         { "key": "DELETE_DOCUMENT_INIT_INFO" },
         {
           "key": "VALIDATE_QCS_INIT",

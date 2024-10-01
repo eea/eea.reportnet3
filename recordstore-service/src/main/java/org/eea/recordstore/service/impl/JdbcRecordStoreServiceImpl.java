@@ -6,6 +6,7 @@ import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.communication.NotificationController;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -18,6 +19,7 @@ import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetCo
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
+import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -45,6 +47,7 @@ import org.eea.recordstore.persistence.repository.TaskRepository;
 import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.RecordStoreService;
 import org.eea.recordstore.service.TaskService;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.postgresql.copy.CopyIn;
 import org.postgresql.copy.CopyManager;
@@ -238,6 +241,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
   /** The data set metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  /** The notification controller zuul. */
+  @Autowired
+  private NotificationController.NotificationControllerZuul notificationControllerZuul;
 
   /** The dataset schema controller. */
   @Autowired
@@ -1041,6 +1048,40 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         });
   }
 
+  @Async
+  @Override
+  public void createUpdateQueryViewAsyncWithNotification(Long datasetId, boolean isMaterialized) throws EEAException {
+    LOG.info("Creating/updating materialized views for datasetId: {} asynchronous.", datasetId);
+    // create notification started
+    String user = SecurityContextHolder.getContext().getAuthentication().getName();
+    Map<String, Object> value = new HashMap<>();
+    value.put(LiteralConstants.USER, SecurityContextHolder.getContext().getAuthentication().getName());
+    value.put(LiteralConstants.DATASET_ID, datasetId);
+
+    releaseNotificableKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEWS_INIT_EVENT,
+            value,
+            datasetId,
+            null);
+
+    // call async method to create/update materialized vies
+    try {
+      createUpdateQueryView(datasetId, isMaterialized);
+    } catch (Exception e){
+      LOG.info("Creating/updating materialized views for datasetId: {} asynchronous failed. Message: {}", datasetId, e.getMessage());
+      releaseNotificableKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEWS_FAILED_EVENT,
+              value,
+              datasetId,
+              e.getMessage());
+      throw e;
+    }
+    LOG.info("Creating/updating materialized views for datasetId: {} asynchronous finished.", datasetId);
+
+    // notification if it is finished
+    releaseNotificableKafkaEvent(EventType.UPDATE_MATERIALIZED_VIEWS_FINISHED_EVENT,
+            value,
+            datasetId,
+            null);
+  }
 
   /**
    * Creates the update query view async.

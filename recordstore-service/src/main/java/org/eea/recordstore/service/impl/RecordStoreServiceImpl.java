@@ -506,6 +506,11 @@ public class RecordStoreServiceImpl implements RecordStoreService {
     LOG.info("Create or Update Query-Materialized View");
   }
 
+  @Override
+  public void createUpdateQueryViewAsyncWithNotification(Long datasetId, boolean isMaterialized) {
+    LOG.info("Create or Update Query-Materialized View Async with Notification");
+  }
+
   /**
    * Restore specific file snapshot
    *

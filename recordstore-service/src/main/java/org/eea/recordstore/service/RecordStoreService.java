@@ -221,6 +221,7 @@ public interface RecordStoreService {
    */
   void createUpdateQueryViewAsync(Long datasetId, boolean isMaterialized);
 
+  void createUpdateQueryViewAsyncWithNotification(Long datasetId, boolean isMaterialized) throws EEAException;
   /**
    * Restore specific file snapshot
    *
