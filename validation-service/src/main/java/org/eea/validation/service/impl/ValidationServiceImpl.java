@@ -436,14 +436,14 @@ public class ValidationServiceImpl implements ValidationService {
         }
       }
     } catch (EEAInvalidSQLException e) {
-      LOG_ERROR.error("The Table Validation failed: {}", e.getMessage(), e);
+      LOG.error("The Table Validation failed: {}", e.getMessage(), e);
       try {
         table = tableRepository.findById(idTable).orElse(null);
         if (table != null) {
           rulesErrorUtils.createRuleErrorException(table, new RuntimeException(e.getMessage()));
         }
       } catch (Exception ex1) {
-        LOG_ERROR.error("Saving blockers for the table validation failed: {}", ex1.getMessage(), ex1);
+        LOG.error("Saving blockers for the table validation failed: {}", ex1.getMessage(), ex1);
       }
       taskRepository.updateStatusAndFinishDate(taskId, ProcessStatusEnum.IN_QUEUE.toString(),
           new Date());
