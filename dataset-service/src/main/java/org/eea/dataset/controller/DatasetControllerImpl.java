@@ -2870,6 +2870,7 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
       }
       info.setJobId(jobId);
+      LOG.info("For jobId {} sending presigned url for dataflowId {}, datasetId {} and providerId {}", jobId, dataflowId, datasetId, providerId);
     }
     catch (Exception e){
       LOG.error("Could not generate import presigned url for datasetId {}, dataflowId {} and providerId {}", datasetId, dataflowId, providerId);
