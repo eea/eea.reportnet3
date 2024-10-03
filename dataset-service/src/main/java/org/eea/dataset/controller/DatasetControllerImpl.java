@@ -349,6 +349,8 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "Fme Job Id",
                   example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
 
+    LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} and fmeJobId {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId);
+
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
     }
