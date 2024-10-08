@@ -5,14 +5,23 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const PaginatorRecordsCount = ({
   dataLength,
   filteredDataLength,
+  filteredJobsLength,
   remainingJobsLength,
   isFiltered,
   nameRecords = 'records'
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
+  const getFilteredJobs = () => {
+    if (!filteredJobsLength) {
+      return '';
+    }
+
+    return `${resourcesContext.messages['filteredJobs']}: ${filteredJobsLength} | `;
+  };
+
   const getRemainingJobs = () => {
-    if (!remainingJobsLength) {
+    if (!remainingJobsLength || filteredJobsLength) {
       return '';
     }
 
@@ -39,5 +48,5 @@ export const PaginatorRecordsCount = ({
     nameRecords
   ].toLowerCase()}`;
 
-  return `${getRemainingJobs()}${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
+  return `${getFilteredJobs()}${getRemainingJobs()}${getRecordsDifferentFiltered()}${recordsTotal}${getRecordsEqualsFiltered()}`;
 };
