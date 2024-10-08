@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.3</api-gateway.version>
-      <communication.version>v3.3</communication.version>
-      <collaboration.version>v3.3</collaboration.version>
-      <dataflow.version>v3.3</dataflow.version>
-      <dataset.version>v3.3</dataset.version>
-      <document.version>v3.3</document.version>
-      <frontend.version>v3.3</frontend.version>
-      <indexsearch.version>v3.3</indexsearch.version>
-      <inspire.version>v3.3</inspire.version>
-      <recordstore.version>v3.3</recordstore.version>
-      <ums.version>v3.3</ums.version>
-      <validation.version>v3.3</validation.version>
-      <common-interfaces.version>v3.3</common-interfaces.version>
-      <common-utitlities.version>v3.3</common-utitlities.version>
-      <rod.version>v3.3</rod.version>
-      <orchestrator.version>v3.3</orchestrator.version>
+      <api-gateway.version>v3.3-JOB-HISTORY-TRANSPORT</api-gateway.version>
+      <communication.version>v3.3-JOB-HISTORY-TRANSPORT</communication.version>
+      <collaboration.version>v3.3-JOB-HISTORY-TRANSPORT</collaboration.version>
+      <dataflow.version>v3.3-JOB-HISTORY-TRANSPORT</dataflow.version>
+      <dataset.version>v3.3-JOB-HISTORY-TRANSPORT</dataset.version>
+      <document.version>v3.3-JOB-HISTORY-TRANSPORT</document.version>
+      <frontend.version>v3.3-JOB-HISTORY-TRANSPORT</frontend.version>
+      <indexsearch.version>v3.3-JOB-HISTORY-TRANSPORT</indexsearch.version>
+      <inspire.version>v3.3-JOB-HISTORY-TRANSPORT</inspire.version>
+      <recordstore.version>v3.3-JOB-HISTORY-TRANSPORT</recordstore.version>
+      <ums.version>v3.3-JOB-HISTORY-TRANSPORT</ums.version>
+      <validation.version>v3.3-JOB-HISTORY-TRANSPORT</validation.version>
+      <common-interfaces.version>v3.3-JOB-HISTORY-TRANSPORT</common-interfaces.version>
+      <common-utitlities.version>v3.3-JOB-HISTORY-TRANSPORT</common-utitlities.version>
+      <rod.version>v3.3-JOB-HISTORY-TRANSPORT</rod.version>
+      <orchestrator.version>v3.3-JOB-HISTORY-TRANSPORT</orchestrator.version>
   </properties>
 </project>
