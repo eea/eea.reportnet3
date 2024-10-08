@@ -144,6 +144,7 @@ export const BigButtonList = ({
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(['ADD_DATACOLLECTION_FAILED_EVENT_ICEBERG_EXISTS'], changeIsActiveButtonState, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], onUpdateData);
+  useCheckNotifications(['UPDATE_DATACOLLECTION_COMPLETED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(['UPDATE_DATACOLLECTION_FAILED_EVENT'], changeIsActiveButtonState, true);
   useCheckNotifications(
     ['COPY_DATA_TO_EUDATASET_COMPLETED_EVENT', 'COPY_DATA_TO_EUDATASET_FAILED_EVENT'],
