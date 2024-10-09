@@ -314,9 +314,9 @@ export const CustomFileUpload = ({
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        if (!state.uploadWithS3) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
+        if (!bigData) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
         if (xhr.status >= 200 && xhr.status < 300) {
-          if (state.uploadWithS3) {
+          if (bigData) {
             importS3ToDlh();
           } else if (!timeoutBeforeClose) {
             onUpload({ xhr: xhr, files: _files.current });
@@ -331,14 +331,14 @@ export const CustomFileUpload = ({
     };
 
     let nUrl = presignedUrl ? presignedUrl : url;
-    if (!state.uploadWithS3 && replaceCheck) {
+    if (!bigData && replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
       nUrl += 'replace=' + state.replace;
     }
 
-    xhr.open(state.uploadWithS3 ? 'PUT' : operation, nUrl, true);
+    xhr.open(bigData ? 'PUT' : operation, nUrl, true);
 
-    if (!state.uploadWithS3) {
+    if (!bigData) {
       const tokens = LocalUserStorageUtils.getTokens();
       xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
@@ -566,30 +566,33 @@ export const CustomFileUpload = ({
       </div>
     );
   };
-  const renderS3Check = () => {
-    return (
-      <div className={styles.s3CheckboxWrapper}>
-        <Checkbox
-          checked={state.uploadWithS3}
-          id="s3Checkbox"
-          inputId="s3Checkbox"
-          onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}
-          role="checkbox"
-        />
-        <label htmlFor="s3Checkbox">
-          <span onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}>
-            {s3CheckLabel}
-          </span>
-        </label>
-      </div>
-    );
-  };
+
+  // Checkbox for selecting S3 import option
+
+  // const renderS3Check = () => {
+  //   return (
+  //     <div className={styles.s3CheckboxWrapper}>
+  //       <Checkbox
+  //         checked={state.uploadWithS3}
+  //         id="s3Checkbox"
+  //         inputId="s3Checkbox"
+  //         onChange={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}
+  //         role="checkbox"
+  //       />
+  //       <label htmlFor="s3Checkbox">
+  //         <span onClick={() => dispatch({ type: 'UPLOAD_PROPERTY', payload: { uploadWithS3: !state.uploadWithS3 } })}>
+  //           {s3CheckLabel}
+  //         </span>
+  //       </label>
+  //     </div>
+  //   );
+  // };
 
   const renderAdvanced = () => {
     const cClassName = classNames('p-fileupload p-component', className);
     let filesList, progressBar;
 
-    if (hasFiles() || state.uploadWithS3) {
+    if (hasFiles() || bigData) {
       filesList = renderFiles();
       progressBar = <ProgressBar showValue={false} value={state.progress} />;
     }
@@ -610,7 +613,7 @@ export const CustomFileUpload = ({
             {filesList}
           </div>
           {replaceCheck && renderReplaceCheck()}
-          {bigData && s3Check && renderS3Check()}
+          {/* {bigData && s3Check && renderS3Check()} */}
         </div>
         <p className={`${styles.invalidExtensionMsg} ${state.isValid ? styles.isValid : undefined}`}>
           {invalidExtensionMessage}
@@ -644,7 +647,7 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                if (bigData && state.uploadWithS3) {
+                if (bigData) {
                   onGetPresignedUrl();
                 } else {
                   upload();
