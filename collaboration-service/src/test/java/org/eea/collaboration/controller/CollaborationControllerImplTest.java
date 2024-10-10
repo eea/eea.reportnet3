@@ -188,10 +188,10 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionFileSizeTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException {
+          throws Exception {
     try {
-      byte[] arrayBytes21MB = new byte[1024 * 1024 * 21];
-      MockMultipartFile file = new MockMultipartFile("21MB", "file.csv", "content", arrayBytes21MB);
+      byte[] arrayBytes105MB = new byte[1024 * 1024 * 105];
+      MockMultipartFile file = new MockMultipartFile("21MB", "file.csv", "content", arrayBytes105MB);
       collaborationControllerImpl.createMessageAttachment(1L, 1L, file);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
