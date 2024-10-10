@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataflow.MessageVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.MessageTypeEnum;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -39,6 +41,10 @@ public class CollaborationControllerImplTest {
   @Mock
   private CollaborationServiceHelper collaborationServiceHelper;
 
+  @Before
+  public void setUp() throws Exception {
+    ReflectionTestUtils.setField(collaborationControllerImpl, "maxFileSize", 105857600L);
+  }
 
   @Test
   public void createMessageTest() throws EEAIllegalArgumentException, EEAForbiddenException {
@@ -182,10 +188,10 @@ public class CollaborationControllerImplTest {
 
   @Test(expected = ResponseStatusException.class)
   public void createMessageAttachmentEEAIllegalArgumentExceptionFileSizeTest()
-      throws EEAIllegalArgumentException, EEAForbiddenException {
+          throws Exception {
     try {
-      byte[] arrayBytes21MB = new byte[1024 * 1024 * 21];
-      MockMultipartFile file = new MockMultipartFile("21MB", "file.csv", "content", arrayBytes21MB);
+      byte[] arrayBytes105MB = new byte[1024 * 1024 * 105];
+      MockMultipartFile file = new MockMultipartFile("21MB", "file.csv", "content", arrayBytes105MB);
       collaborationControllerImpl.createMessageAttachment(1L, 1L, file);
     } catch (ResponseStatusException e) {
       Assert.assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
