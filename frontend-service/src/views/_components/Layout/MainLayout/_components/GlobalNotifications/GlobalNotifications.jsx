@@ -215,8 +215,14 @@ export const GlobalNotifications = ({ bigData }) => {
         : notification.content.datasetName;
 
       const { data } = bigData
-        ? await DatasetService.downloadExportDatasetFileDL(notification.content.datasetId, downloadFileName)
-        : await DatasetService.downloadExportDatasetFile(notification.content.datasetId, downloadFileName);
+        ? await DatasetService.downloadExportDatasetFileDL(
+            notification.content.datasetId,
+            encodeURIComponent(downloadFileName)
+          )
+        : await DatasetService.downloadExportDatasetFile(
+            notification.content.datasetId,
+            encodeURIComponent(downloadFileName)
+          );
 
       if (data.size !== 0) {
         DownloadFile(data, downloadFileName);

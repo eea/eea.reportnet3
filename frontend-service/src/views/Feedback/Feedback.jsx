@@ -243,7 +243,7 @@ export const Feedback = () => {
   const onDrop = event => {
     let files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
     if (!isEmpty(files)) {
-      if (files[0].size <= config.MAX_ATTACHMENT_SIZE) {
+      if (files[0].size <= config.MAX_ATTACHMENT_SIZE_FEEDBACK) {
         dispatchFeedback({ type: 'SET_DRAGGED_FILES', payload: files });
       } else {
         notificationContext.add({ type: 'FEEDBACK_MAX_FILE_SIZE_ERROR' }, true);
@@ -504,7 +504,7 @@ export const Feedback = () => {
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} any`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
           isDialog={true}
-          maxFileSize={config.MAX_ATTACHMENT_SIZE}
+          maxFileSize={config.MAX_ATTACHMENT_SIZE_FEEDBACK}
           name="fileAttachment"
           onError={onImportFileError}
           onUpload={onUpload}
