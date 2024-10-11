@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.3-ARCHITECTURE_DATALAKES</api-gateway.version>
-      <communication.version>v3.3-ARCHITECTURE_DATALAKES</communication.version>
-      <collaboration.version>v3.3-ARCHITECTURE_DATALAKES</collaboration.version>
-      <dataflow.version>v3.3-ARCHITECTURE_DATALAKES</dataflow.version>
-      <dataset.version>v3.3-ARCHITECTURE_DATALAKES</dataset.version>
-      <document.version>v3.3-ARCHITECTURE_DATALAKES</document.version>
-      <frontend.version>v3.3-ARCHITECTURE_DATALAKES</frontend.version>
-      <indexsearch.version>v3.3-ARCHITECTURE_DATALAKES</indexsearch.version>
-      <inspire.version>v3.3-ARCHITECTURE_DATALAKES</inspire.version>
-      <recordstore.version>v3.3-ARCHITECTURE_DATALAKES</recordstore.version>
-      <ums.version>v3.3-ARCHITECTURE_DATALAKES</ums.version>
-      <validation.version>v3.3-ARCHITECTURE_DATALAKES</validation.version>
-      <common-interfaces.version>v3.3-ARCHITECTURE_DATALAKES</common-interfaces.version>
-      <common-utitlities.version>v3.3-ARCHITECTURE_DATALAKES</common-utitlities.version>
-      <rod.version>v3.3-ARCHITECTURE_DATALAKES</rod.version>
-      <orchestrator.version>v3.3-ARCHITECTURE_DATALAKES</orchestrator.version>
+      <api-gateway.version>v3.3-DEV</api-gateway.version>
+      <communication.version>v3.3-DEV</communication.version>
+      <collaboration.version>v3.3-DEV</collaboration.version>
+      <dataflow.version>v3.3-DEV</dataflow.version>
+      <dataset.version>v3.3-DEV</dataset.version>
+      <document.version>v3.3-DEV</document.version>
+      <frontend.version>v3.3-DEV</frontend.version>
+      <indexsearch.version>v3.3-DEV</indexsearch.version>
+      <inspire.version>v3.3-DEV</inspire.version>
+      <recordstore.version>v3.3-DEV</recordstore.version>
+      <ums.version>v3.3-DEV</ums.version>
+      <validation.version>v3.3-DEV</validation.version>
+      <common-interfaces.version>v3.3-DEV</common-interfaces.version>
+      <common-utitlities.version>v3.3-DEV</common-utitlities.version>
+      <rod.version>v3.3-DEV</rod.version>
+      <orchestrator.version>v3.3-DEV</orchestrator.version>
   </properties>
 </project>
