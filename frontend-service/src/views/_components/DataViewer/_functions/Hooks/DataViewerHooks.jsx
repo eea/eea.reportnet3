@@ -146,7 +146,7 @@ export const useSetColumns = (
           (!colSchema.readOnly || !isReporting) && (
             <Button
               className="p-button-animated-blink p-button-secondary-transparent"
-              disabled={!isIcebergCreated}
+              disabled={bigData && !isIcebergCreated}
               icon="import"
               onClick={() => {
                 setIsAttachFileVisible(true);
