@@ -491,7 +491,7 @@ export const WebformTable = ({
           style={
             isLoadingIceberg
               ? { opacity: 0.5, pointerEvents: 'none' }
-              : isIcebergCreated
+              : !bigData || isIcebergCreated
               ? { opacity: 1 }
               : { opacity: 0.5, pointerEvents: 'none' }
           }>
