@@ -757,7 +757,7 @@ export const DatasetService = {
     const datasetTableField = new DatasetTableField({});
 
     datasetTableField.id = field?.fieldId;
-    datasetTableField.fieldSchemaId = field?.fieldSchemaId;
+    datasetTableField.idFieldSchema = field?.fieldSchemaId;
     datasetTableField.name = field?.name;
     datasetTableField.type = field?.fieldType;
     datasetTableField.value = DatasetUtils.parseValue({
