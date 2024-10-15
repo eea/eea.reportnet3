@@ -2125,8 +2125,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             onError={onImportDatasetError}
             onUpload={onUpload}
             replaceCheck={true}
-            s3Check={true}
-            s3TestCheck={true}
+            s3={designerState.bigData ? true : false}
             timeoutBeforeClose={true}
             url={`${window.env.REACT_APP_BACKEND}${
               isNil(selectedCustomImportIntegration.id)

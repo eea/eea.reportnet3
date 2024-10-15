@@ -54,7 +54,6 @@ export const CustomFileUpload = ({
   invalidFileSizeMessageDetail = 'maximum upload size is {0}.',
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
   invalidNumberOfFilesMessageSummary = 'You can only upload {0} {1}.',
-  isAttachmentUpload = false,
   isDialog = false,
   isImportDatasetDesignerSchema = false,
   maxFileSize = null,
@@ -73,8 +72,7 @@ export const CustomFileUpload = ({
   replaceCheckLabel = 'Replace data',
   replaceCheckLabelMessage = '',
   replaceCheckDisabled = false,
-  s3Check = false,
-  s3CheckLabel = 'S3',
+  s3 = false,
   style = null,
   tableSchemaId,
   timeoutBeforeClose = false,
@@ -314,9 +312,9 @@ export const CustomFileUpload = ({
 
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4) {
-        if (!bigData) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
+        if (!(bigData && s3)) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
         if (xhr.status >= 200 && xhr.status < 300) {
-          if (bigData) {
+          if (bigData && s3) {
             importS3ToDlh();
           } else if (!timeoutBeforeClose) {
             onUpload({ xhr: xhr, files: _files.current });
@@ -331,14 +329,14 @@ export const CustomFileUpload = ({
     };
 
     let nUrl = presignedUrl ? presignedUrl : url;
-    if (!bigData && replaceCheck) {
+    if (!(bigData && s3) && replaceCheck) {
       nUrl += nUrl.indexOf('?') !== -1 ? '&' : '?';
       nUrl += 'replace=' + state.replace;
     }
 
-    xhr.open(bigData ? 'PUT' : operation, nUrl, true);
+    xhr.open(bigData && s3 ? 'PUT' : operation, nUrl, true);
 
-    if (!bigData) {
+    if (!(bigData && s3)) {
       const tokens = LocalUserStorageUtils.getTokens();
       xhr.setRequestHeader('Authorization', `Bearer ${tokens.accessToken}`);
 
@@ -592,7 +590,7 @@ export const CustomFileUpload = ({
     const cClassName = classNames('p-fileupload p-component', className);
     let filesList, progressBar;
 
-    if (hasFiles() || bigData) {
+    if (hasFiles() || (bigData && s3)) {
       filesList = renderFiles();
       progressBar = <ProgressBar showValue={false} value={state.progress} />;
     }
@@ -647,7 +645,7 @@ export const CustomFileUpload = ({
               if (isImportDatasetDesignerSchema) {
                 setIsCreateDatasetSchemaConfirmDialogVisible(true);
               } else {
-                if (bigData) {
+                if (bigData && s3) {
                   onGetPresignedUrl();
                 } else {
                   upload();
