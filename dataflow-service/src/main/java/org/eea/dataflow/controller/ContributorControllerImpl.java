@@ -1,6 +1,8 @@
 package org.eea.dataflow.controller;
 
 import java.util.List;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.eea.dataflow.service.ContributorService;
 import org.eea.dataflow.service.impl.DataflowServiceImpl;
 import org.eea.exception.EEAErrorMessage;
@@ -256,7 +258,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @return the response entity
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "120000")})
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @PutMapping(value = "/requester/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)

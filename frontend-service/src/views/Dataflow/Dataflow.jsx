@@ -1193,8 +1193,8 @@ export const Dataflow = () => {
         dataflowState.obligations.obligationId,
         dataflowState.isReleasable,
         dataflowState.showPublicInfo,
-        undefined,
-        dataflowState.isAutomaticReportingDeletion
+        dataflowState.data.bigData,
+        undefined
       );
       onLoadReportingDataflow();
     } catch (error) {
