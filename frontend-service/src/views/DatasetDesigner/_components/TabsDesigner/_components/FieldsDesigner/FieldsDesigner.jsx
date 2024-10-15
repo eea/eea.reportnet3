@@ -1118,8 +1118,6 @@ export const FieldsDesigner = ({
             replaceCheck={true}
             replaceCheckDisabled={hasPKReferenced}
             replaceCheckLabelMessage={resourcesContext.messages['replaceDataPKInUse']}
-            s3Check={true}
-            s3TestCheck={true}
             url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importTableSchema, {
               datasetSchemaId: designerState.datasetSchemaId,
               datasetId: datasetId,

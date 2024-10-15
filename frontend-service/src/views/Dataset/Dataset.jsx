@@ -1546,8 +1546,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           onUpload={onUpload}
           providerId={metadata?.dataset.dataProviderId}
           replaceCheck={true}
-          s3Check={true}
-          s3TestCheck={true}
+          s3={metadata?.dataflow.bigData ? true : false}
           timeoutBeforeClose={true}
           url={`${window.env.REACT_APP_BACKEND}${
             isNil(selectedCustomImportIntegration.id)
