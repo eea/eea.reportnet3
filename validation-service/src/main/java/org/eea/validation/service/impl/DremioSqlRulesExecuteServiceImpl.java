@@ -152,7 +152,11 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 //I have checked only the case one (method.getParameters().length) for message parameter value, I don't know if we need to check also the other cases
                 if(ruleVO.getThenCondition() != null &&
                     !ruleVO.getThenCondition().isEmpty() && ruleVO.getThenCondition().get(0).contains("{%")) {
-                    customQueryResultSet = getResultSet(method, ruleMethodName, cls, customQueryResultSet, dataTableResolver, ruleVO, object);
+                    if (ruleContainCodes(ruleVO)) {
+                        replaceCodes(dataTableResolver, ruleVO);
+                    } else {
+                        customQueryResultSet = getResultSet(method, ruleMethodName, cls, customQueryResultSet, dataTableResolver, ruleVO, object);
+                    }
                 }
 
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
@@ -165,6 +169,38 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e.getMessage());
             throw new DremioValidationException(e.getMessage());
         }
+    }
+
+    /**
+     * If the error message contains the 3 codes just replace them with the real provider code
+     *
+     * @param dataTableResolver The datatable resolver
+     * @param ruleVO The ruleVo object
+     */
+    private void replaceCodes(S3PathResolver dataTableResolver, RuleVO ruleVO) {
+        DataSetMetabaseVO dataSetMetabaseVO = dataSetMetabaseControllerZuul.findDatasetMetabaseById(dataTableResolver.getDatasetId());
+        String providerCode = "XX";
+        if (dataSetMetabaseVO.getDataProviderId()!=null && dataSetMetabaseVO.getDataProviderId()!=0) {
+            DataProviderVO provider = representativeControllerZuul.findDataProviderById(dataSetMetabaseVO.getDataProviderId());
+            providerCode = provider.getCode();
+        }
+        String replacedString = ruleVO.getThenCondition().get(0)
+            .replace("{%R3_COUNTRY_CODE%}", providerCode)
+            .replace("{%R3_COMPANY_CODE%}", providerCode)
+            .replace("{%R3_ORGANIZATION_CODE%}", providerCode);
+        ruleVO.getThenCondition().set(0, replacedString);
+    }
+
+    /**
+     * Check if the message error contains one of the 3 codes
+     *
+     * @param ruleVO The ruleVo object
+     * @return True if contains
+     */
+    private boolean ruleContainCodes(RuleVO ruleVO) {
+        return ruleVO.getThenCondition().get(0).contains("{%R3_COUNTRY_CODE%}")
+            || ruleVO.getThenCondition().get(0).contains("{%R3_COMPANY_CODE%}")
+            || ruleVO.getThenCondition().get(0).contains("{%R3_ORGANIZATION_CODE%}");
     }
 
     /**
