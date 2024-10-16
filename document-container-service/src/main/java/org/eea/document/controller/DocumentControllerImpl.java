@@ -143,8 +143,8 @@ public class DocumentControllerImpl implements DocumentController {
       documentVO.setLanguage(language);
       documentVO.setIsPublic(isPublic);
       LOG.info("Uploading document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+      Boolean isBigDataFlow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(BooleanUtils.isTrue(isBigDataFlow)){
         documentVO.setIsBigData(true);
         documentServiceDL.uploadDocumentDL(file.getInputStream(), file, file.getOriginalFilename(), documentVO, file.getSize());
         LOG.info("Successfully uploaded document {} for dataflowId {}", file.getOriginalFilename(), dataflowId);
@@ -220,8 +220,8 @@ public class DocumentControllerImpl implements DocumentController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
       FileResponse file;
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(BooleanUtils.isTrue(isBigDataflow) && BooleanUtils.isTrue(document.getIsBigData())){
         file = documentServiceDL.getDocumentDL(document);
       }
       else{
@@ -351,8 +351,8 @@ public class DocumentControllerImpl implements DocumentController {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
       LOG.info("Deleting document with id {} for dataflowId {}", documentId, dataflowId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(BooleanUtils.isTrue(isBigDataflow) && BooleanUtils.isTrue(document.getIsBigData())){
         documentServiceDL.deleteDocumentDL(document, deleteMetabase);
         LOG.info("Successfully deleted document with id {} for dataflowId {}", documentId, dataflowId);
       }
@@ -464,8 +464,8 @@ public class DocumentControllerImpl implements DocumentController {
       if (file == null || file.isEmpty()) {
         documentService.updateDocument(documentVO);
       } else {
-        DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-        if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+        Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+        if(BooleanUtils.isTrue(isBigDataflow)){
           documentVO.setIsBigData(true);
           documentServiceDL.deleteDocumentDL(documentVO, false);
           documentServiceDL.uploadDocumentDL(file.getInputStream(), file, file.getOriginalFilename(), documentVO, file.getSize());
@@ -765,8 +765,8 @@ public class DocumentControllerImpl implements DocumentController {
     try {
       ByteArrayInputStream inStream = new ByteArrayInputStream(file);
       LOG.info("Uploading collaboration document {} for dataflowId {}", fileName, dataflowId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(BooleanUtils.isTrue(isBigDataflow)) {
         documentServiceDL.uploadCollaborationDocumentDL(inStream, fileName, dataflowId, providerId, messageId);
         LOG.info("Successfully uploaded collaboration document {} for dataflowId {}", fileName, dataflowId);
       }
@@ -816,9 +816,9 @@ public class DocumentControllerImpl implements DocumentController {
             EEAErrorMessage.DATAFLOW_INCORRECT_ID);
       }
       LOG.info("Deleting collaboration document {} for dataflowId {}", fileName, dataflowId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       MessageVO messageVO = collaborationControllerZuul.getMessage(messageId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(messageVO.getIsBigData())) {
+      if(BooleanUtils.isTrue(isBigDataflow) && BooleanUtils.isTrue(messageVO.getIsBigData())) {
         documentServiceDL.deleteCollaborationDocumentDL(fileName, dataflowId, messageVO.getProviderId(), messageId);
         LOG.info("Successfully deleted collaboration document {} for dataflowId {}", fileName, dataflowId);
       }
@@ -867,10 +867,10 @@ public class DocumentControllerImpl implements DocumentController {
       if (dataflowId == null) {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DOCUMENT_NOT_FOUND);
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       MessageVO messageVO = collaborationControllerZuul.getMessage(messageId);
       FileResponse file;
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(messageVO.getIsBigData())) {
+      if(BooleanUtils.isTrue(isBigDataflow) && BooleanUtils.isTrue(messageVO.getIsBigData())) {
         file = documentServiceDL.getCollaborationDocumentDL(fileName, dataflowId, messageVO.getProviderId(), messageId);
       }
       else{
