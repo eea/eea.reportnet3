@@ -205,6 +205,16 @@ public interface DataFlowController {
 
 
   /**
+   * Checks if the dataflow is Bigdata or not
+   *
+   * @param dataflowId The dataflow id
+   * @return True if is bigdata , false if it is not big data
+   */
+  @GetMapping(value = "/private/v1/{dataflowId}/isBigDataflow", produces = MediaType.APPLICATION_JSON_VALUE)
+  Boolean isBigDataflow(@PathVariable("dataflowId") Long dataflowId);
+
+
+  /**
    * Gets the metabase by id legacy.
    *
    * @param dataflowId the dataflow id
