@@ -264,7 +264,7 @@ export const WebformField = ({
         await DatasetService.updateFieldWebform(
           datasetId,
           field,
-          value,
+          parsedValue,
           tableSchemaId
         );
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
