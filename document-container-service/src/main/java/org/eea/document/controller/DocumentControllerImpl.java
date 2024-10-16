@@ -283,8 +283,8 @@ public class DocumentControllerImpl implements DocumentController {
       }
       if (Boolean.TRUE.equals(document.getIsPublic())) {
         FileResponse file;
-        DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(document.getDataflowId());
-        if(BooleanUtils.isTrue(dataFlowVO.getBigData()) && BooleanUtils.isTrue(document.getIsBigData())){
+        Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(document.getDataflowId());
+        if(BooleanUtils.isTrue(isBigDataflow) && BooleanUtils.isTrue(document.getIsBigData())){
           file = documentServiceDL.getDocumentDL(document);
         }
         else{

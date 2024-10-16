@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.4-SANDBOX</api-gateway.version>
-      <communication.version>v3.4-SANDBOX</communication.version>
-      <collaboration.version>v3.4-SANDBOX</collaboration.version>
-      <dataflow.version>v3.4-SANDBOX</dataflow.version>
-      <dataset.version>v3.4-SANDBOX</dataset.version>
-      <document.version>v3.4-SANDBOX</document.version>
-      <frontend.version>v3.4-SANDBOX</frontend.version>
-      <indexsearch.version>v3.4-SANDBOX</indexsearch.version>
-      <inspire.version>v3.4-SANDBOX</inspire.version>
-      <recordstore.version>v3.4-SANDBOX</recordstore.version>
-      <ums.version>v3.4-SANDBOX</ums.version>
-      <validation.version>v3.4-SANDBOX</validation.version>
-      <common-interfaces.version>v3.4-SANDBOX</common-interfaces.version>
-      <common-utitlities.version>v3.4-SANDBOX</common-utitlities.version>
-      <rod.version>v3.4-SANDBOX</rod.version>
-      <orchestrator.version>v3.4-SANDBOX</orchestrator.version>
+      <api-gateway.version>v3.4-278929</api-gateway.version>
+      <communication.version>v3.4-278929</communication.version>
+      <collaboration.version>v3.4-278929</collaboration.version>
+      <dataflow.version>v3.4-278929</dataflow.version>
+      <dataset.version>v3.4-278929</dataset.version>
+      <document.version>v3.4-278929</document.version>
+      <frontend.version>v3.4-278929</frontend.version>
+      <indexsearch.version>v3.4-278929</indexsearch.version>
+      <inspire.version>v3.4-278929</inspire.version>
+      <recordstore.version>v3.4-278929</recordstore.version>
+      <ums.version>v3.4-278929</ums.version>
+      <validation.version>v3.4-278929</validation.version>
+      <common-interfaces.version>v3.4-278929</common-interfaces.version>
+      <common-utitlities.version>v3.4-278929</common-utitlities.version>
+      <rod.version>v3.4-278929</rod.version>
+      <orchestrator.version>v3.4-278929</orchestrator.version>
   </properties>
 </project>
