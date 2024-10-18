@@ -2110,7 +2110,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               tableNameFilenames.stream().forEach(file -> {
                 String key = file.key();
                 String filename = new File(key).getName();
-                dataCollectionPath.setFilename(filename);//issue
+                dataCollectionPath.setFilename(filename);
                 dataCollectionPath.setPath(S3_TABLE_NAME_DC_PATH);
                 dataCollectionPath.setTableName(key.split("/")[4]);
                 dataCollectionPath.setParquetFolder(key.split("/")[5]);
