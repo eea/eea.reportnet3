@@ -16,7 +16,5 @@ public interface JobHistoryService {
 
     JobsHistoryVO getJobHistory(Pageable pageable, boolean asc, String sortedColumn,
                                 Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
-                                Long datasetId, String datasetName, String creatorUsername, String jobStatuses);
-
-    void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo);
+                                Long datasetId, String datasetName, String creatorUsername, String jobStatuses);void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo, Integer lineNumber);
 }

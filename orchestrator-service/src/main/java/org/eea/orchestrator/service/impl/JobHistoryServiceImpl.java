@@ -30,6 +30,7 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     @Autowired
     private JobHistoryMapper jobHistoryMapper;
 
+    /** The job Utils. */
     @Autowired
     private JobUtils jobUtils;
 
@@ -47,7 +48,8 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public JobsHistoryVO getJobHistory(Pageable pageable, boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
+    public JobsHistoryVO getJobHistory(Pageable pageable, boolean asc, String sortedColumn,
+                                       Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId,
                                        Long datasetId, String datasetName, String creatorUsername, String jobStatuses) {
 
         String sortedTableColumn = jobUtils.getJobColumnNameByObjectName(sortedColumn);
@@ -63,10 +65,10 @@ public class JobHistoryServiceImpl implements JobHistoryService {
     }
 
     @Override
-    public void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo){
+    public void updateJobInfoOfLastHistoryEntry(Long jobId, JobInfoEnum jobInfo, Integer lineNumber){
         Optional<JobHistory> optionalJobHistory = jobHistoryRepository.findFirstByJobIdOrderByIdDesc(jobId);
         if(optionalJobHistory.isPresent()){
-            optionalJobHistory.get().setJobInfo(jobInfo.getValue());
+            optionalJobHistory.get().setJobInfo(jobInfo.getValue(lineNumber));
             jobHistoryRepository.save(optionalJobHistory.get());
         }
     }
