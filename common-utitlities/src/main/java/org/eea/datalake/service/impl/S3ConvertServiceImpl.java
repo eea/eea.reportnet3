@@ -161,41 +161,43 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int headersSize = 0;
             int counter = 0;
 
-            for (int j = 0; j < exportFilenames.size(); j++) {
-                File parquetFile =
-                    s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
-                        exportDLPath, PARQUET_TYPE, datasetId);
-                InputStream inputStream = new FileInputStream(parquetFile);
-                ParquetStream parquetStream = new ParquetStream(inputStream);
-                ParquetReader<GenericRecord> r =
-                    AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
+            for (S3Object obj : exportFilenames) {
+                File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+                if (obj.key().split("/")[4].equals(tableName)) {
+                    try (InputStream inputStream = new FileInputStream(parquetFile);
+                         ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream))
+                             .disableCompatibility()
+                             .build()) {
+                        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+                        GenericRecord record;
 
-                Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-                GenericRecord record;
-                while ((record = r.read()) != null) {
-                    if (counter == 0) {
-                        headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                        headersSize = headers.size();
-                        bufferedWriter.write("{");
-                        counter++;
-                    } else {
-                        bufferedWriter.write(",{");
-                    }
-                    for (int i = 0; i < headersSize; i++) {
-                        String recordValue = record.get(i).toString();
-                        boolean isNumeric = pattern.matcher(recordValue).matches();
-                        bufferedWriter.write("\"" + headers.get(i) + "\":");
-                        if (isNumeric) {
-                            bufferedWriter.write(recordValue);
-                        } else {
-                            bufferedWriter.write("\"" + recordValue + "\"");
+                        while ((record = r.read()) != null) {
+                            if (counter == 0) {
+                                headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+                                headersSize = headers.size();
+                                bufferedWriter.write("{");
+                                counter++;
+                            } else {
+                                bufferedWriter.write(",{");
+                            }
+                            for (int i = 0; i < headersSize; i++) {
+                                String recordValue = record.get(i).toString();
+                                boolean isNumeric = pattern.matcher(recordValue).matches();
+                                bufferedWriter.write("\"" + headers.get(i) + "\":");
+                                if (isNumeric) {
+                                    bufferedWriter.write(recordValue);
+                                } else {
+                                    bufferedWriter.write("\"" + recordValue + "\"");
+                                }
+                                if (i < headersSize - 1) {
+                                    bufferedWriter.write(",");
+                                }
+                            }
+                            bufferedWriter.write("}");
                         }
-                        if (i < headersSize - 1) {
-                            bufferedWriter.write(",");
-                        }
                     }
-                    bufferedWriter.write("}");
                 }
+                parquetFile.delete();
             }
             bufferedWriter.write("],\"tableName\":\"");
             bufferedWriter.write(tableName);
