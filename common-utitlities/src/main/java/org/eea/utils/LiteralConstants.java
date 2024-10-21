@@ -271,6 +271,9 @@ public final class LiteralConstants {
   /** The Constant S3_TABLE_NAME_FOLDER_PATH: {@value}. */
   public static final String S3_TABLE_NAME_FOLDER_PATH = "%s/%s/%s/current/%s";
 
+  /** The Constant S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX: {@value}. */
+  public static final String S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX = "%s/%s/%s/current/%s/";
+
   /** The Constant S3_CURRENT_PATH: {@value}. */
   public static final String S3_CURRENT_PATH = "%s/%s/%s/current";
 
