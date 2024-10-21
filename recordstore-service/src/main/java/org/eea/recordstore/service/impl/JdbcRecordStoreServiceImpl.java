@@ -2158,7 +2158,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                   String key = file.key();
                   String filename = new File(key).getName();
                   snapshotPath.setFilename(filename);
-                  snapshotPath.setTableName(nameTableSchema);
+                  snapshotPath.setTableName(key.split("/")[4]);
                   snapshotPath.setPath(S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH);
                   snapshotPath.setParquetFolder(key.split("/")[6]);
                   snapshotPath.setSnapshotId(idSnapshot);
@@ -2191,7 +2191,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 String key = file.key();
                 String filename = new File(key).getName();
                 referencePath.setFilename(filename);
-                referencePath.setTableName(nameTableSchema);
+                referencePath.setTableName(key.split("/")[4]);
                 referencePath.setPath(S3_DATAFLOW_REFERENCE_PATH);
                 referencePath.setParquetFolder(key.split("/")[5]);
                 try {
