@@ -122,38 +122,41 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
                                      CSVWriter csvWriter) throws IOException {
         int counter = 0;
-        for (int i = 0; i < exportFilenames.size(); i++) {
-            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
-            try (InputStream inputStream = new FileInputStream(parquetFile);
-                ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
-                GenericRecord record;
+        for (S3Object obj : exportFilenames) {
+            File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+            if (obj.key().split("/")[4].equals(tableName)) {
+                try (InputStream inputStream = new FileInputStream(parquetFile);
+                     ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
+                    GenericRecord record;
 
-                while ((record = r.read()) != null) {
-                    long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
-                    if (i == 0 && counter == 0) {
-                      csvWriter.writeNext(record.getSchema().getFields().stream()
-                          .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
-                        counter++;
-                    }
-                    String[] columns = new String[(int) size];
-                    int index = 0;
-                    var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
-                    for (Schema.Field field : filteredFields) {
-                        Object fieldValue = record.get(field.name());
-                        if (fieldValue instanceof ByteBuffer) {
-                            ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
-                            String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
-                            columns[index] = modifiedJson;
-                        } else {
-                            columns[index] = (fieldValue != null) ? fieldValue.toString() : "";
+                    while ((record = r.read()) != null) {
+                        long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
+                        if (counter == 0) {
+                            csvWriter.writeNext(record.getSchema().getFields().stream()
+                                .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
+                            counter++;
                         }
-                        index++;
+                        String[] columns = new String[(int) size];
+                        int index = 0;
+                        var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                        for (Schema.Field field : filteredFields) {
+                            Object fieldValue = record.get(field.name());
+                            if (fieldValue instanceof ByteBuffer) {
+                                ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                                String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
+                                columns[index] = modifiedJson;
+                            } else {
+                                columns[index] = (fieldValue != null) ? fieldValue.toString() : "";
+                            }
+                            index++;
+                        }
+                        csvWriter.writeNext(columns, false);
                     }
-                    csvWriter.writeNext(columns, false);
+                } catch (ParseException e) {
+                    LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
                 }
-            } catch (ParseException e) {
-                LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
             }
+            parquetFile.delete();
         }
     }
 
@@ -166,49 +169,50 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int headersSize = 0;
             int counter = 0;
 
-            for (int j = 0; j < exportFilenames.size(); j++) {
-                File parquetFile =
-                    s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
-                        exportDLPath, PARQUET_TYPE, datasetId);
-                try (InputStream inputStream = new FileInputStream(parquetFile);
-                     ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
-                    GenericRecord record;
-                    Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-                    while ((record = r.read()) != null) {
-                        if (counter == 0) {
-                            headers = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).collect(Collectors.toList());
-                            headersSize = headers.size();
-                            bufferedWriter.write("{");
-                            counter++;
-                        } else {
-                            bufferedWriter.write(",{");
-                        }
-                        int index = 0;
-                        var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
-                        for (Schema.Field field : filteredFields) {
-                            String recordValue = record.get(field.name()).toString();
-                            boolean isNumeric = pattern.matcher(recordValue).matches();
-                            bufferedWriter.write("\"" + headers.get(index) + "\":");
-                            if (isNumeric) {
-                                bufferedWriter.write(recordValue);
+            for (S3Object obj : exportFilenames) {
+                File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+                if (obj.key().split("/")[4].equals(tableName)) {
+                    try (InputStream inputStream = new FileInputStream(parquetFile);
+                         ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
+                        GenericRecord record;
+                        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+                        while ((record = r.read()) != null) {
+                            if (counter == 0) {
+                                headers = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).collect(Collectors.toList());
+                                headersSize = headers.size();
+                                bufferedWriter.write("{");
+                                counter++;
                             } else {
-                                Object fieldValue = record.get(field.name());
-                                if (fieldValue instanceof ByteBuffer) {
-                                    ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
-                                    String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
-                                    bufferedWriter.write(modifiedJson);
-                                }else {
-                                    bufferedWriter.write("\"" + recordValue + "\"");
+                                bufferedWriter.write(",{");
+                            }
+                            int index = 0;
+                            var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                            for (Schema.Field field : filteredFields) {
+                                String recordValue = record.get(field.name()).toString();
+                                boolean isNumeric = pattern.matcher(recordValue).matches();
+                                bufferedWriter.write("\"" + headers.get(index) + "\":");
+                                if (isNumeric) {
+                                    bufferedWriter.write(recordValue);
+                                } else {
+                                    Object fieldValue = record.get(field.name());
+                                    if (fieldValue instanceof ByteBuffer) {
+                                        ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                                        String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
+                                        bufferedWriter.write(modifiedJson);
+                                    }else {
+                                        bufferedWriter.write("\"" + recordValue + "\"");
+                                    }
                                 }
+                                if (index < headersSize - 1) {
+                                    bufferedWriter.write(",");
+                                }
+                                index++;
                             }
-                            if (index < headersSize - 1) {
-                                bufferedWriter.write(",");
-                            }
-                            index++;
+                            bufferedWriter.write("}");
                         }
-                        bufferedWriter.write("}");
                     }
                 }
+                parquetFile.delete();
             }
             bufferedWriter.write("],\"tableName\":\"");
             bufferedWriter.write(tableName);
