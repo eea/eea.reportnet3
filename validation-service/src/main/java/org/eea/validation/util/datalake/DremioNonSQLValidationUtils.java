@@ -35,7 +35,14 @@ public class DremioNonSQLValidationUtils {
         }
         try {
             Double.valueOf( value );
-            return true;
+            boolean numeric = true;
+            numeric = value.matches("-?\\d+(\\.\\d+)?");
+            if(numeric) {
+                return true;
+            }
+            else {
+                return false;
+            }
         } catch( Exception e ){
             return false;
         }
