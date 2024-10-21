@@ -114,31 +114,41 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
-        CSVWriter csvWriter) throws IOException {
+                                          CSVWriter csvWriter) throws IOException {
         int size = 0;
         int counter = 0;
-        for (int i = 0; i < exportFilenames.size(); i++) {
-            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE,
-                datasetId);
-            InputStream inputStream = new FileInputStream(parquetFile);
-            ParquetStream parquetStream = new ParquetStream(inputStream);
-            ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
-            GenericRecord record;
 
-            while ((record = r.read()) != null) {
-                if (i == 0 && counter == 0) {
-                    size = record.getSchema().getFields().size();
-                    List<String> headers =
-                        record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                    csvWriter.writeNext(headers.toArray(String[]::new), false);
-                    counter++;
+        for (S3Object obj : exportFilenames) {
+            File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+            if (obj.key().split("/")[4].equals(tableName)) {
+                try (InputStream inputStream = new FileInputStream(parquetFile);
+                     ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream))
+                         .disableCompatibility()
+                         .build()) {
+
+                    GenericRecord record;
+                    while ((record = reader.read()) != null) {
+                        if (counter == 0) {
+                            size = record.getSchema().getFields().size();
+                            List<String> headers = record.getSchema()
+                                .getFields()
+                                .stream()
+                                .map(Schema.Field::name)
+                                .collect(Collectors.toList());
+                            csvWriter.writeNext(headers.toArray(String[]::new), false);
+                            counter++;
+                        }
+
+                        // Write the record data to CSV
+                        String[] columns = new String[size];
+                        for (int j = 0; j < size; j++) {
+                            columns[j] = record.get(j) != null ? record.get(j).toString() : "";
+                        }
+                        csvWriter.writeNext(columns, false);
+                    }
                 }
-                String[] columns = new String[size];
-                for (int j = 0; j < size; j++) {
-                    columns[j] = record.get(j).toString();
-                }
-                csvWriter.writeNext(columns, false);
             }
+            parquetFile.delete();
         }
     }
 
