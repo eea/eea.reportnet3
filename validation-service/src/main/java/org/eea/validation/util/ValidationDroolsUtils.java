@@ -1,5 +1,7 @@
 package org.eea.validation.util;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -40,6 +42,10 @@ public class ValidationDroolsUtils {
    */
   public static Boolean codelistValidate(final String value, String codelistItems,
       final boolean sensitive) {
+
+    if (StringUtils.isBlank(value)){
+      return Boolean.TRUE;
+    }
     Boolean validationResult = false;
     // we delete the first character and the last one because we receive a string surrounded by []
     // symbols
