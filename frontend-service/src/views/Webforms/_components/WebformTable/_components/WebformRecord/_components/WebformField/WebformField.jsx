@@ -144,8 +144,6 @@ export const WebformField = ({
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
           async () => {
-            
-            
             const referencedFieldValues = await DatasetService.getReferencedFieldValues(
               datasetId,
               element.fieldSchemaId,
@@ -155,7 +153,7 @@ export const WebformField = ({
                   ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
                   : conditionalField.value
                 : encodeURIComponent(element.value),
-                localDatasetSchemaId,
+              localDatasetSchemaId,
               400
             );
             return referencedFieldValues
@@ -214,7 +212,7 @@ export const WebformField = ({
   //     ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
   //       ? value.join(';')
   //       : value;
-    
+
   //       try {
   //     if (!isSubmiting && initialFieldValue !== parsedValue) {
   //       await DatasetService.updateField(
@@ -252,15 +250,16 @@ export const WebformField = ({
   // };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
-    
     const parsedValue =
-    field.fieldType === 'MULTISELECT_CODELIST' ||
-    ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
-      ? value.join(';')
-      : value;
-
+      field.fieldType === 'MULTISELECT_CODELIST' ||
+      ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
+        ? value.join(';')
+        : value;
+  
+    const encodedValue = encodeURIComponent(parsedValue);
+  
     try {
-      if (!isSubmiting && initialFieldValue !== parsedValue) {
+      if (!isSubmiting && initialFieldValue !== parsedValue && parsedValue === '') {
         await DatasetService.updateFieldWebform(
           datasetId,
           field,
@@ -270,7 +269,7 @@ export const WebformField = ({
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
           onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
         }
-
+  
         if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
         }
@@ -291,8 +290,8 @@ export const WebformField = ({
     } finally {
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
-
   };
+  
 
   const onFileDeleteVisible = (fieldId, fieldSchemaId) =>
     webformFieldDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fieldId, fieldSchemaId } });
@@ -419,8 +418,10 @@ export const WebformField = ({
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               maxSelectedLabels={10}
-              onChange={event => {
+              onUpdate={(event)=>{
                 onFillField(field, option, event.target.value, isConditional);
+              }}
+              onChange={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
               }}
@@ -441,12 +442,14 @@ export const WebformField = ({
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
+              onUpdate={(event)=>{
+                onFillField(field, option, event.target.value, isConditional);
+              }}
               onChange={event => {
                 const value =
                   typeof event.target.value === 'object' && !Array.isArray(event.target.value)
                     ? event.target.value.value
                     : event.target.value;
-                onFillField(field, option, value, isConditional);
                 webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                 if (isNil(field.recordId)) onSaveField(option, value);
                 else onEditorSubmitValue(field, option, value);
@@ -514,7 +517,14 @@ export const WebformField = ({
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false, field.updatesGroupInfo);
+              else
+                onEditorSubmitValue(
+                  field,
+                  option,
+                  event.target.value,
+                  field.isPrimary || false,
+                  field.updatesGroupInfo
+                );
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onFocus={event => onFocusField(event.target.value)}
