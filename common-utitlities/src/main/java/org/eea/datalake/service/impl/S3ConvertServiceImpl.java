@@ -13,6 +13,7 @@ import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.ParquetStream;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.locationtech.jts.io.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.EUDATASET;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
 import static org.eea.utils.LiteralConstants.*;
 
 @Service
@@ -74,7 +77,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
         File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         LOG.info("Creating file for export: {}", csvFile);
 
@@ -82,7 +85,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter);
+            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
@@ -106,25 +109,24 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    public void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
         LOG.info("Creating file for export: {}", jsonFile);
 
         try (FileWriter fw = new FileWriter(jsonFile);
             BufferedWriter bw = new BufferedWriter(fw)) {
-            convertParquetToJSON(exportFilenames, tableName, datasetId, bw);
+            convertParquetToJSON(exportFilenames, tableName, datasetId, bw, datasetTypeEnum);
         } catch (Exception e) {
             LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
         }
-        return jsonFile;
     }
 
     private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
-                                     CSVWriter csvWriter) throws IOException {
+                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum) throws IOException {
         int counter = 0;
         for (S3Object obj : exportFilenames) {
             File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
-            if (obj.key().split("/")[4].equals(tableName)) {
+            if (containsPath(tableName, obj, datasetTypeEnum)) {
                 try (InputStream inputStream = new FileInputStream(parquetFile);
                      ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
                     GenericRecord record;
@@ -161,7 +163,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter) {
+    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter, DatasetTypeEnum datasetTypeEnum) {
 
         try {
             bufferedWriter.write("{\"tables\":[{\"records\":[");
@@ -171,7 +173,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
             for (S3Object obj : exportFilenames) {
                 File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
-                if (obj.key().split("/")[4].equals(tableName)) {
+                if (containsPath(tableName, obj, datasetTypeEnum)) {
                     try (InputStream inputStream = new FileInputStream(parquetFile);
                          ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
                         GenericRecord record;
@@ -312,5 +314,23 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             "csv file should have .csv extension");
 
         LOG.info("Converting {} to {}", parquetFile.getName(), csvOutputFile.getName());
+    }
+
+    /**
+     * Check if on the amazon S3 path our table exists
+     *
+     * @param tableName The table name we want to check
+     * @param obj the key object
+     * @param datasetTypeEnum The dataset type
+     * @return True if path exists
+     */
+    private boolean containsPath(String tableName, S3Object obj, DatasetTypeEnum datasetTypeEnum) {
+        if (datasetTypeEnum.equals(REFERENCE)) {
+            return obj.key().split("/")[2].equals(tableName);
+        } else if (datasetTypeEnum.equals(EUDATASET)) {
+            return obj.key().split("/")[3].equals(tableName);
+        } else {
+            return obj.key().split("/")[4].equals(tableName);
+        }
     }
 }
