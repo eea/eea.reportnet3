@@ -112,11 +112,11 @@ public class DataLakeDataRetrieverUtils {
         dataQuery.append(" where (");
         List<String> headers = fieldIdMap.values().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
         LOG.info("headers : {}", headers);
-        dataQuery.append(headers.get(0)).append(" like '%").append(fieldValue).append("%'");
+        dataQuery.append("\"").append(headers.get(0)).append("\"").append(" like '%").append(fieldValue).append("%'");
         LOG.info("headers.get(0) : {}", headers.get(0));
         headers.remove(headers.get(0));
         LOG.info("headers : {}", headers);
-        headers.forEach(header -> dataQuery.append(" OR ").append(header).append(" like '%").append(fieldValue).append("%'"));
+        headers.forEach(header -> dataQuery.append(" OR ").append("\"").append(header).append("\"").append(" like '%").append(fieldValue).append("%'"));
         dataQuery.append(")");
     }
 
