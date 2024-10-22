@@ -13,6 +13,7 @@ import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.ParquetStream;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.locationtech.jts.io.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.EUDATASET;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
 import static org.eea.utils.LiteralConstants.*;
 
 @Service
@@ -74,7 +77,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
         File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         LOG.info("Creating file for export: {}", csvFile);
 
@@ -82,7 +85,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter);
+            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
@@ -106,59 +109,61 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    public void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
         LOG.info("Creating file for export: {}", jsonFile);
 
         try (FileWriter fw = new FileWriter(jsonFile);
             BufferedWriter bw = new BufferedWriter(fw)) {
-            convertParquetToJSON(exportFilenames, tableName, datasetId, bw);
+            convertParquetToJSON(exportFilenames, tableName, datasetId, bw, datasetTypeEnum);
         } catch (Exception e) {
             LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
         }
-        return jsonFile;
     }
 
     private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
-                                     CSVWriter csvWriter) throws IOException {
+                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum) throws IOException {
         int counter = 0;
-        for (int i = 0; i < exportFilenames.size(); i++) {
-            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
-            try (InputStream inputStream = new FileInputStream(parquetFile);
-                ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
-                GenericRecord record;
+        for (S3Object obj : exportFilenames) {
+            File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+            if (containsPath(tableName, obj, datasetTypeEnum)) {
+                try (InputStream inputStream = new FileInputStream(parquetFile);
+                     ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
+                    GenericRecord record;
 
-                while ((record = r.read()) != null) {
-                    long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
-                    if (i == 0 && counter == 0) {
-                      csvWriter.writeNext(record.getSchema().getFields().stream()
-                          .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
-                        counter++;
-                    }
-                    String[] columns = new String[(int) size];
-                    int index = 0;
-                    var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
-                    for (Schema.Field field : filteredFields) {
-                        Object fieldValue = record.get(field.name());
-                        if (fieldValue instanceof ByteBuffer) {
-                            ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
-                            String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
-                            columns[index] = modifiedJson;
-                        } else {
-                            columns[index] = (fieldValue != null) ? fieldValue.toString() : "";
+                    while ((record = r.read()) != null) {
+                        long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
+                        if (counter == 0) {
+                            csvWriter.writeNext(record.getSchema().getFields().stream()
+                                .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
+                            counter++;
                         }
-                        index++;
+                        String[] columns = new String[(int) size];
+                        int index = 0;
+                        var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                        for (Schema.Field field : filteredFields) {
+                            Object fieldValue = record.get(field.name());
+                            if (fieldValue instanceof ByteBuffer) {
+                                ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                                String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
+                                columns[index] = modifiedJson;
+                            } else {
+                                columns[index] = (fieldValue != null) ? fieldValue.toString() : "";
+                            }
+                            index++;
+                        }
+                        csvWriter.writeNext(columns, false);
                     }
-                    csvWriter.writeNext(columns, false);
+                } catch (ParseException e) {
+                    LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
                 }
-            } catch (ParseException e) {
-                LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
             }
+            parquetFile.delete();
         }
     }
 
     @Override
-    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter) {
+    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter, DatasetTypeEnum datasetTypeEnum) {
 
         try {
             bufferedWriter.write("{\"tables\":[{\"records\":[");
@@ -166,49 +171,50 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int headersSize = 0;
             int counter = 0;
 
-            for (int j = 0; j < exportFilenames.size(); j++) {
-                File parquetFile =
-                    s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
-                        exportDLPath, PARQUET_TYPE, datasetId);
-                try (InputStream inputStream = new FileInputStream(parquetFile);
-                     ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
-                    GenericRecord record;
-                    Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-                    while ((record = r.read()) != null) {
-                        if (counter == 0) {
-                            headers = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).collect(Collectors.toList());
-                            headersSize = headers.size();
-                            bufferedWriter.write("{");
-                            counter++;
-                        } else {
-                            bufferedWriter.write(",{");
-                        }
-                        int index = 0;
-                        var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
-                        for (Schema.Field field : filteredFields) {
-                            String recordValue = record.get(field.name()).toString();
-                            boolean isNumeric = pattern.matcher(recordValue).matches();
-                            bufferedWriter.write("\"" + headers.get(index) + "\":");
-                            if (isNumeric) {
-                                bufferedWriter.write(recordValue);
+            for (S3Object obj : exportFilenames) {
+                File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+                if (containsPath(tableName, obj, datasetTypeEnum)) {
+                    try (InputStream inputStream = new FileInputStream(parquetFile);
+                         ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
+                        GenericRecord record;
+                        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+                        while ((record = r.read()) != null) {
+                            if (counter == 0) {
+                                headers = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).collect(Collectors.toList());
+                                headersSize = headers.size();
+                                bufferedWriter.write("{");
+                                counter++;
                             } else {
-                                Object fieldValue = record.get(field.name());
-                                if (fieldValue instanceof ByteBuffer) {
-                                    ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
-                                    String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
-                                    bufferedWriter.write(modifiedJson);
-                                }else {
-                                    bufferedWriter.write("\"" + recordValue + "\"");
+                                bufferedWriter.write(",{");
+                            }
+                            int index = 0;
+                            var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                            for (Schema.Field field : filteredFields) {
+                                String recordValue = record.get(field.name()).toString();
+                                boolean isNumeric = pattern.matcher(recordValue).matches();
+                                bufferedWriter.write("\"" + headers.get(index) + "\":");
+                                if (isNumeric) {
+                                    bufferedWriter.write(recordValue);
+                                } else {
+                                    Object fieldValue = record.get(field.name());
+                                    if (fieldValue instanceof ByteBuffer) {
+                                        ByteBuffer byteBuffer = (ByteBuffer) fieldValue;
+                                        String modifiedJson = spatialDataHandling.decodeSpatialData(byteBuffer.array());
+                                        bufferedWriter.write(modifiedJson);
+                                    }else {
+                                        bufferedWriter.write("\"" + recordValue + "\"");
+                                    }
                                 }
+                                if (index < headersSize - 1) {
+                                    bufferedWriter.write(",");
+                                }
+                                index++;
                             }
-                            if (index < headersSize - 1) {
-                                bufferedWriter.write(",");
-                            }
-                            index++;
+                            bufferedWriter.write("}");
                         }
-                        bufferedWriter.write("}");
                     }
                 }
+                parquetFile.delete();
             }
             bufferedWriter.write("],\"tableName\":\"");
             bufferedWriter.write(tableName);
@@ -308,5 +314,23 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             "csv file should have .csv extension");
 
         LOG.info("Converting {} to {}", parquetFile.getName(), csvOutputFile.getName());
+    }
+
+    /**
+     * Check if on the amazon S3 path our table exists
+     *
+     * @param tableName The table name we want to check
+     * @param obj the key object
+     * @param datasetTypeEnum The dataset type
+     * @return True if path exists
+     */
+    private boolean containsPath(String tableName, S3Object obj, DatasetTypeEnum datasetTypeEnum) {
+        if (datasetTypeEnum.equals(REFERENCE)) {
+            return obj.key().split("/")[2].equals(tableName);
+        } else if (datasetTypeEnum.equals(EUDATASET)) {
+            return obj.key().split("/")[3].equals(tableName);
+        } else {
+            return obj.key().split("/")[4].equals(tableName);
+        }
     }
 }
