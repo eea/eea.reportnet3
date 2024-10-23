@@ -376,6 +376,9 @@ public final class LiteralConstants {
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLSX_TYPE = ".xlsx";
 
+  /** The Constant XLSX_TYPE: {@value}. */
+  public static final String XLS_TYPE = ".xls";
+
   /** The Constant PARQUET_TYPE: {@value}. */
   public static final String PARQUET_TYPE = ".parquet";
 
