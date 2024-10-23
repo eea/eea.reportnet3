@@ -258,14 +258,21 @@ export const TableManagement = ({
     });
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
+
       let data;
+      let sortedTableSchemaId;
+
+      if (parentTable?.records[0].fields.find(field => field.fieldSchema === sortFieldSchemaId)) {
+        sortedTableSchemaId = parentTable?.tableSchemaId;
+      }
       if (bigData) {
         data = await DatasetService.getTableDataDL({
           datasetId,
           tableSchemaId: parentTable.tableSchemaId,
           pageSize: 300,
           fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+          sortedTableSchemaId: sortedTableSchemaId
         });
       } else {
         data = await DatasetService.getTableData({
