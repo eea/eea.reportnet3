@@ -62,7 +62,7 @@ export const PublicFrontpage = () => {
       <div className={styles.content} style={contentStyles}>
         <div className={styles.mainTextWrapper}>
           <div className="rep-container">
-            <div className={`${styles.pageContent} rep-row`}>
+            <div className={`${styles.pageContent} ${styles.repRow}`}>
               <div className={styles.frontText}>
                 <div className={styles.text}>
                   <h2>The next generation for e-Reporting environmental and climate data</h2>
@@ -177,9 +177,9 @@ export const PublicFrontpage = () => {
           </div>
         </div>
         <div className="rep-container">
-          <div className={`${styles.pageContent} rep-row`}>
+          <div className={`${styles.pageContent} ${styles.repRow}`}>
             <div className={styles.showPublicBox}>
-              <div className={styles.title}>
+              <div className={styles.titleDataflowStatus}>
                 <h3>Dataflow status</h3>
               </div>
               <div className={styles.showPublicData}>
@@ -200,7 +200,7 @@ export const PublicFrontpage = () => {
               </div>
             </div>
             <div className={styles.otherPortals}>
-              <div className={styles.title}>
+              <div className={styles.titleExternalPortals}>
                 <h3>External portals</h3>
               </div>
               <div className={styles.portalList}>
@@ -221,6 +221,15 @@ export const PublicFrontpage = () => {
                   <img alt="ROD 3 Portal" height="50px" src={logo} />
                   <h4>ROD 3</h4>
                   <p>EEA's reporting obligations database</p>
+                </a>
+                <a
+                  className={styles.portalBox}
+                  href="https://datahub.eea.europa.eu/"
+                  rel="noopener noreferrer"
+                  target="_blank">
+                  <img alt="Datahub Portal" height="50px" src={logo} />
+                  <h4>Datahub</h4>
+                  <p>Search and download EU datasets and products derived from reporting</p>
                 </a>
               </div>
             </div>

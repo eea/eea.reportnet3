@@ -1,3 +1,43 @@
+.repRow {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 996px) {
+  .repRow {
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 480px) {
+  .repRow {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .repRow {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+}
+
+@media (min-width: 996px) {
+  .repRow {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+}
+
+@media (min-width: 1140px) {
+  .repRow {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+}
+
 .content {
   margin-top: 6px;
   .mainTextWrapper {
@@ -240,24 +280,45 @@
     }
   }
 
-  .otherPortals {
+  .titleDataflowStatus,
+  .titleExternalPortals {
     width: 100%;
+    text-align: left;
+  }
+
+  .showPublicData,
+  .portalList {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 768px) {
+    .showPublicDataButton,
+    .portalBox {
+      width: 45%;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .showPublicDataButton,
+    .portalBox {
+      width: 100%;
+    }
+  }
+
+  .otherPortals {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1rem;
+    margin-left: 1rem;
+    width: 48%;
     padding-bottom: 4rem;
     .portalList {
-      display: flex;
       justify-content: flex-start;
-      flex-wrap: wrap;
-      width: 100%;
-      padding-top: 0.5rem;
       .portalBox {
-        display: flex;
         flex-direction: column;
-        align-items: center;
-        width: 280px;
         border-radius: 5px;
-        padding: 1rem;
         box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
-        margin-right: 1rem;
         cursor: pointer;
         p {
           text-align: center;
@@ -282,28 +343,29 @@
     }
   }
 
+  .showPublicDataButton,
+  .portalBox {
+    width: 30%;
+    margin: 0.5rem 0.8rem 0rem 0rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+  }
+
   .showPublicBox {
-    margin-top: 2rem;
-    margin-right: 2rem;
-    margin-bottom: 2rem;
+    margin-top: 1rem;
+    margin-right: 1rem;
+    width: 48%;
 
     .showPublicData {
-      display: flex;
       justify-content: flex-start;
 
       .showPublicDataButton {
         background-color: var(--public-custom-header-bg);
         color: var(--c-white-color);
         position: relative;
-        display: flex;
         flex-direction: column;
-        align-items: center;
-        width: 350px;
-        margin-top: 0.5rem;
-        margin-right: 1rem;
-        padding-top: 1rem;
-        padding-right: 1rem;
-        padding-left: 1rem;
         border-radius: 5px;
         box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.5);
         cursor: pointer;
@@ -326,7 +388,7 @@
         p {
           text-align: center;
           margin-bottom: 1rem;
-          font-size: 1.5rem;
+          font-size: 1.1rem;
         }
         &:hover {
           box-shadow: var(--card-item-box-shadow-hover);
