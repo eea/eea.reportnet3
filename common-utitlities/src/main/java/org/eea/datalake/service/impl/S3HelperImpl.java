@@ -140,7 +140,12 @@ public class S3HelperImpl implements S3Helper {
     public void deleteFolder(S3PathResolver s3PathResolver, String folderPath) {
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
         String folderName = s3Service.getTableAsFolderQueryPath(s3PathResolver, folderPath);
-        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(bucketName).prefix(folderName));
+        if(!folderName.endsWith("/")){
+            //adding suffix to differentiate between folders with the same prefix
+            folderName = folderName + "/";
+        }
+        String finalKey = folderName;
+        ListObjectsV2Response result = s3Client.listObjectsV2(b -> b.bucket(bucketName).prefix(finalKey));
         GetBucketVersioningResponse bucketVersioning = s3Client.getBucketVersioning(builder -> builder.bucket(bucketName));
         if (bucketVersioning.status()!=null && (bucketVersioning.status().equals(BucketVersioningStatus.ENABLED) || bucketVersioning.status().equals(BucketVersioningStatus.SUSPENDED))) {
             result.contents().forEach(s3Object -> {
