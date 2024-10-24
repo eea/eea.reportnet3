@@ -36,8 +36,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.EUDATASET;
-import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.*;
 import static org.eea.utils.LiteralConstants.*;
 
 @Service
@@ -126,7 +125,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         int counter = 0;
         for (S3Object obj : exportFilenames) {
             File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
-            if (containsPath(tableName, obj, datasetTypeEnum)) {
+            if (containsPath(tableName, obj.key(), datasetTypeEnum)) {
                 try (InputStream inputStream = new FileInputStream(parquetFile);
                      ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
                     GenericRecord record;
@@ -173,7 +172,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
             for (S3Object obj : exportFilenames) {
                 File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
-                if (containsPath(tableName, obj, datasetTypeEnum)) {
+                if (containsPath(tableName, obj.key(), datasetTypeEnum)) {
                     try (InputStream inputStream = new FileInputStream(parquetFile);
                          ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
                         GenericRecord record;
@@ -320,17 +319,20 @@ public class S3ConvertServiceImpl implements S3ConvertService {
      * Check if on the amazon S3 path our table exists
      *
      * @param tableName The table name we want to check
-     * @param obj the key object
+     * @param key the key string from s3
      * @param datasetTypeEnum The dataset type
      * @return True if path exists
      */
-    private boolean containsPath(String tableName, S3Object obj, DatasetTypeEnum datasetTypeEnum) {
+    @Override
+    public boolean containsPath(String tableName, String key, DatasetTypeEnum datasetTypeEnum) {
         if (datasetTypeEnum.equals(REFERENCE)) {
-            return obj.key().split("/")[2].equals(tableName);
+            return key.split("/")[2].equals(tableName);
         } else if (datasetTypeEnum.equals(EUDATASET)) {
-            return obj.key().split("/")[3].equals(tableName);
+            return key.split("/")[3].equals(tableName);
+        } else if (key.contains("import") && datasetTypeEnum.equals(DESIGN)) {
+            return key.split("/")[5].equals(tableName);
         } else {
-            return obj.key().split("/")[4].equals(tableName);
+            return key.split("/")[4].equals(tableName);
         }
     }
 }
