@@ -329,7 +329,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             return key.split("/")[2].equals(tableName);
         } else if (datasetTypeEnum.equals(EUDATASET)) {
             return key.split("/")[3].equals(tableName);
-        } else if (key.contains("import") && datasetTypeEnum.equals(DESIGN)) {
+        } else if (key.contains("/import/") && datasetTypeEnum.equals(DESIGN)) {
             return key.split("/")[5].equals(tableName);
         } else {
             return key.split("/")[4].equals(tableName);
