@@ -70,6 +70,7 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReleasing={isReleasing}
           isReporting={isReporting}

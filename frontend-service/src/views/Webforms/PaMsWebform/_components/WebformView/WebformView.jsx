@@ -36,6 +36,7 @@ export const WebformView = ({
   datasetSchemaId,
   getFieldSchemaId,
   isAddingPamsId = false,
+  isIcebergCreated,
   isRefresh,
   isReporting,
   onUpdatePamsValue,
@@ -276,6 +277,7 @@ export const WebformView = ({
         datasetSchemaId={datasetSchemaId}
         getFieldSchemaId={getFieldSchemaId}
         isGroup={isGroup}
+        isIcebergCreated={isIcebergCreated}
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
