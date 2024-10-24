@@ -256,15 +256,23 @@ export const TableManagement = ({
         ) || configParentTables.includes(!isNil(schemaTable['header']) && schemaTable['header'].toUpperCase())
       );
     });
+
+    let sortedTableSchemaId;
+
+    /*Gets the TableSchemaId of the table that contains the sortFieldSchemaId*/
+    if (bigData) {
+      sortedTableSchemaId = parentTables.find(async parentTable => {
+        parentTable?.records[0]?.fields.find(
+          field => field.fieldSchema === getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id')
+        );
+      })?.tableSchemaId;
+    }
+
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
 
       let data;
-      let sortedTableSchemaId;
 
-      if (parentTable?.records[0].fields.find(field => field.fieldSchema === sortFieldSchemaId)) {
-        sortedTableSchemaId = parentTable?.tableSchemaId;
-      }
       if (bigData) {
         data = await DatasetService.getTableDataDL({
           datasetId,
@@ -272,7 +280,7 @@ export const TableManagement = ({
           pageSize: 300,
           fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-          sortedTableSchemaId: sortedTableSchemaId
+          sortedTableSchemaId: sortFieldSchemaId !== '' ? sortedTableSchemaId : undefined
         });
       } else {
         data = await DatasetService.getTableData({
