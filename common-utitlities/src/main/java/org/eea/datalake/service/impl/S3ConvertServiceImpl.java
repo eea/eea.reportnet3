@@ -3,8 +3,6 @@ package org.eea.datalake.service.impl;
 import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -14,11 +12,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.model.ParquetStream;
-import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.utils.LiteralConstants;
-import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +28,8 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.EUDATASET;
+import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REFERENCE;
 import static org.eea.utils.LiteralConstants.*;
 
 @Service
@@ -68,7 +64,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
         File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         LOG.info("Creating file for export: {}", csvFile);
 
@@ -76,7 +72,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter);
+            csvConvertionFromParquet(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
@@ -100,50 +96,59 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId) {
+    public void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
         File jsonFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + JSON_TYPE);
         LOG.info("Creating file for export: {}", jsonFile);
 
         try (FileWriter fw = new FileWriter(jsonFile);
             BufferedWriter bw = new BufferedWriter(fw)) {
-            convertParquetToJSON(exportFilenames, tableName, datasetId, bw);
+            convertParquetToJSON(exportFilenames, tableName, datasetId, bw, datasetTypeEnum);
         } catch (Exception e) {
             LOG.error("Error in convert method for jsonOutputFile {} and tableName {}", jsonFile, tableName, e);
         }
-        return jsonFile;
     }
 
     private void csvConvertionFromParquet(List<S3Object> exportFilenames, String tableName, Long datasetId,
-        CSVWriter csvWriter) throws IOException {
+                                          CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum) throws IOException {
         int size = 0;
         int counter = 0;
-        for (int i = 0; i < exportFilenames.size(); i++) {
-            File parquetFile = s3Helper.getFileFromS3Export(exportFilenames.get(i).key(), tableName, exportDLPath, PARQUET_TYPE,
-                datasetId);
-            InputStream inputStream = new FileInputStream(parquetFile);
-            ParquetStream parquetStream = new ParquetStream(inputStream);
-            ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
-            GenericRecord record;
 
-            while ((record = r.read()) != null) {
-                if (i == 0 && counter == 0) {
-                    size = record.getSchema().getFields().size();
-                    List<String> headers =
-                        record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                    csvWriter.writeNext(headers.toArray(String[]::new), false);
-                    counter++;
+        for (S3Object obj : exportFilenames) {
+            File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+            if (containsPath(tableName, obj, datasetTypeEnum)) {
+                try (InputStream inputStream = new FileInputStream(parquetFile);
+                     ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream))
+                         .disableCompatibility()
+                         .build()) {
+
+                    GenericRecord record;
+                    while ((record = reader.read()) != null) {
+                        if (counter == 0) {
+                            size = record.getSchema().getFields().size();
+                            List<String> headers = record.getSchema()
+                                .getFields()
+                                .stream()
+                                .map(Schema.Field::name)
+                                .collect(Collectors.toList());
+                            csvWriter.writeNext(headers.toArray(String[]::new), false);
+                            counter++;
+                        }
+
+                        // Write the record data to CSV
+                        String[] columns = new String[size];
+                        for (int j = 0; j < size; j++) {
+                            columns[j] = record.get(j) != null ? record.get(j).toString() : "";
+                        }
+                        csvWriter.writeNext(columns, false);
+                    }
                 }
-                String[] columns = new String[size];
-                for (int j = 0; j < size; j++) {
-                    columns[j] = record.get(j).toString();
-                }
-                csvWriter.writeNext(columns, false);
             }
+            parquetFile.delete();
         }
     }
 
     @Override
-    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter) {
+    public void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, BufferedWriter bufferedWriter, DatasetTypeEnum datasetTypeEnum) {
 
         try {
             bufferedWriter.write("{\"tables\":[{\"records\":[");
@@ -151,41 +156,43 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             int headersSize = 0;
             int counter = 0;
 
-            for (int j = 0; j < exportFilenames.size(); j++) {
-                File parquetFile =
-                    s3Helper.getFileFromS3Export(exportFilenames.get(j).key(), tableName,
-                        exportDLPath, PARQUET_TYPE, datasetId);
-                InputStream inputStream = new FileInputStream(parquetFile);
-                ParquetStream parquetStream = new ParquetStream(inputStream);
-                ParquetReader<GenericRecord> r =
-                    AvroParquetReader.<GenericRecord>builder(parquetStream).disableCompatibility().build();
+            for (S3Object obj : exportFilenames) {
+                File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
+                if (containsPath(tableName, obj, datasetTypeEnum)) {
+                    try (InputStream inputStream = new FileInputStream(parquetFile);
+                         ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream))
+                             .disableCompatibility()
+                             .build()) {
+                        Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
+                        GenericRecord record;
 
-                Pattern pattern = Pattern.compile("-?\\d+(\\.\\d+)?");
-                GenericRecord record;
-                while ((record = r.read()) != null) {
-                    if (counter == 0) {
-                        headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
-                        headersSize = headers.size();
-                        bufferedWriter.write("{");
-                        counter++;
-                    } else {
-                        bufferedWriter.write(",{");
-                    }
-                    for (int i = 0; i < headersSize; i++) {
-                        String recordValue = record.get(i).toString();
-                        boolean isNumeric = pattern.matcher(recordValue).matches();
-                        bufferedWriter.write("\"" + headers.get(i) + "\":");
-                        if (isNumeric) {
-                            bufferedWriter.write(recordValue);
-                        } else {
-                            bufferedWriter.write("\"" + recordValue + "\"");
+                        while ((record = r.read()) != null) {
+                            if (counter == 0) {
+                                headers = record.getSchema().getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+                                headersSize = headers.size();
+                                bufferedWriter.write("{");
+                                counter++;
+                            } else {
+                                bufferedWriter.write(",{");
+                            }
+                            for (int i = 0; i < headersSize; i++) {
+                                String recordValue = record.get(i).toString();
+                                boolean isNumeric = pattern.matcher(recordValue).matches();
+                                bufferedWriter.write("\"" + headers.get(i) + "\":");
+                                if (isNumeric) {
+                                    bufferedWriter.write(recordValue);
+                                } else {
+                                    bufferedWriter.write("\"" + recordValue + "\"");
+                                }
+                                if (i < headersSize - 1) {
+                                    bufferedWriter.write(",");
+                                }
+                            }
+                            bufferedWriter.write("}");
                         }
-                        if (i < headersSize - 1) {
-                            bufferedWriter.write(",");
-                        }
                     }
-                    bufferedWriter.write("}");
                 }
+                parquetFile.delete();
             }
             bufferedWriter.write("],\"tableName\":\"");
             bufferedWriter.write(tableName);
@@ -285,5 +292,23 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             "csv file should have .csv extension");
 
         LOG.info("Converting {} to {}", parquetFile.getName(), csvOutputFile.getName());
+    }
+
+    /**
+     * Check if on the amazon S3 path our table exists
+     *
+     * @param tableName The table name we want to check
+     * @param obj the key object
+     * @param datasetTypeEnum The dataset type
+     * @return True if path exists
+     */
+    private boolean containsPath(String tableName, S3Object obj, DatasetTypeEnum datasetTypeEnum) {
+        if (datasetTypeEnum.equals(REFERENCE)) {
+            return obj.key().split("/")[2].equals(tableName);
+        } else if (datasetTypeEnum.equals(EUDATASET)) {
+            return obj.key().split("/")[3].equals(tableName);
+        } else {
+            return obj.key().split("/")[4].equals(tableName);
+        }
     }
 }
