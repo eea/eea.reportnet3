@@ -243,7 +243,7 @@ public class WebformServiceImpl implements WebformService {
     try {
       String userWebformConfigName = userWebformConfig.getName();
       WebformMetabase webformMetabase = webformRepository.findByLabel(userWebformConfigName);
-      WebformConfig configMongo = webformConfigRepository.findByName(userWebformConfig.getName());
+      WebformConfig configMongo = webformMetabase != null ? webformConfigRepository.findByIdReferenced(webformMetabase.getId()) : null;
       Long refIdFromMongo = configMongo != null ? configMongo.getIdReferenced() : null;
       if (webformMetabase == null) {
         insertWebformConfig(userWebformConfig.getName(), userWebformConfig.getContent(),
