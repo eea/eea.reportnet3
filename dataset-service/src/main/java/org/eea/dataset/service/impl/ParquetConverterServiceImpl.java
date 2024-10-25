@@ -15,6 +15,7 @@ import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
 import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
@@ -36,10 +37,8 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -47,9 +46,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -112,6 +109,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final DatasetSchemaService datasetSchemaService;
   private final SpatialDataHandling spatialDataHandling;
   private final BigDataDatasetService bigDataDatasetService;
+  private final S3ConvertService s3ConvertService;
 
   private TableSchemaMapper tableSchemaMapper;
 
@@ -127,6 +125,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      @Lazy FileTreatmentHelper fileTreatmentHelper,
                                      JdbcTemplate dremioJdbcTemplate,
                                      @Lazy BigDataDatasetService bigDataDatasetService,
+                                     S3ConvertService s3ConvertService,
                                      TableSchemaMapper tableSchemaMapper) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
@@ -140,6 +139,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.dremioJdbcTemplate = dremioJdbcTemplate;
     this.bigDataDatasetService = bigDataDatasetService;
     this.tableSchemaMapper = tableSchemaMapper;
+    this.s3ConvertService = s3ConvertService;
   }
 
   @Override
@@ -456,16 +456,19 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   @Override
-  public void removeCsvFilesThatWillBeReplaced(S3PathResolver s3PathResolver, String tableSchemaName, String s3PathForCsvFolder) {
+  public void removeCsvFilesThatWillBeReplaced(S3PathResolver s3PathResolver, String tableSchemaName, String s3PathForCsvFolder, Long datasetId) {
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     List<ObjectIdentifier> csvFilesInS3 = s3Helper.listObjectsInBucket(s3PathForCsvFolder);
     for (ObjectIdentifier csvFileInS3 : csvFilesInS3) {
-      String[] csvFileNameSplit = csvFileInS3.key().split("/");
-      String csvFileName = csvFileNameSplit[csvFileNameSplit.length - 1];
-      //set up temporary s3PathResolver fileName so that the csv file will be demoted
-      s3PathResolver.setFilename(csvFileName);
-      dremioHelperService.demoteFolderOrFile(s3PathResolver, csvFileName);
-      //revert s3PathResolver fileName
-      s3PathResolver.setFilename(tableSchemaName);
+      if (s3ConvertService.containsPath(tableSchemaName, csvFileInS3.key(), dataset.getDatasetTypeEnum())) {
+        String[] csvFileNameSplit = csvFileInS3.key().split("/");
+        String csvFileName = csvFileNameSplit[csvFileNameSplit.length - 1];
+        //set up temporary s3PathResolver fileName so that the csv file will be demoted
+        s3PathResolver.setFilename(csvFileName);
+        dremioHelperService.demoteFolderOrFile(s3PathResolver, csvFileName);
+        //revert s3PathResolver fileName
+        s3PathResolver.setFilename(tableSchemaName);
+      }
     }
     if (s3Helper.checkFolderExist(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH)) {
       s3Helper.deleteFolder(s3PathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
@@ -1061,7 +1064,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     //remove tables and folders that contain the previous csv files because data will be replaced
     LOG.info("Removing csv files for job {}", importFileInDremioInfo);
-    removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder);
+    removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder, importFileInDremioInfo.getDatasetId());
 
     Boolean readOnlyFieldsExist = tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
     if(!datasetType.equals(DatasetTypeEnum.DESIGN) && BooleanUtils.isTrue(tableSchema.getToPrefill()) && readOnlyFieldsExist){
