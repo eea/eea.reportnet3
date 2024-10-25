@@ -353,7 +353,7 @@ export const CustomFileUpload = ({
       await DatasetService.importTableFileWithS3({
         datasetId,
         dataflowId,
-        providerId,
+        providerId: !isNil(providerId) ? providerId : undefined,
         tableSchemaId,
         replace: state.replace,
         integrationId,
@@ -476,7 +476,7 @@ export const CustomFileUpload = ({
     const data = await DatasetService.getPresignedUrl({
       datasetId,
       dataflowId,
-      providerId,
+      providerId: !isNil(providerId) ? providerId : undefined,
       tableSchemaId,
       replace: state.replace,
       integrationId,
