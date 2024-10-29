@@ -257,19 +257,17 @@ export const TableManagement = ({
       );
     });
 
-    let sortedTableSchemaId;
-
-    /*Gets the TableSchemaId of the table that contains the sortFieldSchemaId*/
-    if (bigData) {
-      sortedTableSchemaId = parentTables.find(async parentTable => {
-        parentTable?.records[0]?.fields.find(
-          field => field.fieldSchema === getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id')
-        );
-      })?.tableSchemaId;
-    }
-
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
+
+      let referencedFieldSchemaId;
+
+      /*Gets the fieldSchemaId of the field that has a referencedField with idPk equal to sortFieldSchemaId*/
+      if (bigData) {
+        referencedFieldSchemaId = parentTable?.records[0]?.fields.find(
+          field => field?.referencedField?.idPk === getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id')
+        )?.fieldSchema;
+      }
 
       let data;
 
@@ -278,9 +276,13 @@ export const TableManagement = ({
           datasetId,
           tableSchemaId: parentTable.tableSchemaId,
           pageSize: 300,
-          fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
-          sortedTableSchemaId: sortFieldSchemaId !== '' ? sortedTableSchemaId : undefined
+          fields:
+            sortFieldSchemaId !== ''
+              ? referencedFieldSchemaId
+                ? `${referencedFieldSchemaId}:${1}`
+                : `${sortFieldSchemaId}:${1}`
+              : undefined,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
         });
       } else {
         data = await DatasetService.getTableData({

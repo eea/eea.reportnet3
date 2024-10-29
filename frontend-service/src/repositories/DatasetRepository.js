@@ -381,8 +381,7 @@ export const DatasetRepository = {
     levelError,
     qcCodes,
     fieldSchemaId,
-    value,
-    sortedTableSchemaId
+    value
   ) =>
     await HTTPRequester.get({
       url: getUrl(DatasetConfig.getTableDataDL, {
@@ -394,8 +393,7 @@ export const DatasetRepository = {
         pageNum,
         pageSize,
         tableSchemaId,
-        value,
-        sortedTableSchemaId
+        value
       })
     }),
 

@@ -628,8 +628,7 @@ export const DatasetService = {
     pageSize,
     qcCodes = undefined,
     tableSchemaId,
-    value = '',
-    sortedTableSchemaId
+    value = ''
   }) => {
     const tableDataDTO = await DatasetRepository.getTableDataDL(
       datasetId,
@@ -640,8 +639,7 @@ export const DatasetService = {
       levelError,
       qcCodes,
       fieldSchemaId,
-      value,
-      sortedTableSchemaId
+      value
     );
     const table = new DatasetTable({});
 
