@@ -263,7 +263,7 @@ export const WebformField = ({
         await DatasetService.updateFieldWebform(
           datasetId,
           field,
-          value,
+          parsedValue,
           bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
