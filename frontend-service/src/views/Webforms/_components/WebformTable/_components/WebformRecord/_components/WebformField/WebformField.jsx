@@ -34,6 +34,7 @@ import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_com
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformField = ({
+  bigData = false,
   columnsSchema,
   dataProviderId,
   dataflowId,
@@ -49,6 +50,7 @@ export const WebformField = ({
   onUpdatePamsValue,
   pamsRecords,
   record,
+  referencedTableSchemaId,
   tableSchemaId
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -144,8 +146,6 @@ export const WebformField = ({
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
           async () => {
-            
-            
             const referencedFieldValues = await DatasetService.getReferencedFieldValues(
               datasetId,
               element.fieldSchemaId,
@@ -155,7 +155,7 @@ export const WebformField = ({
                   ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
                   : conditionalField.value
                 : encodeURIComponent(element.value),
-                localDatasetSchemaId,
+              localDatasetSchemaId,
               400
             );
             return referencedFieldValues
@@ -214,7 +214,7 @@ export const WebformField = ({
   //     ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
   //       ? value.join(';')
   //       : value;
-    
+
   //       try {
   //     if (!isSubmiting && initialFieldValue !== parsedValue) {
   //       await DatasetService.updateField(
@@ -252,12 +252,11 @@ export const WebformField = ({
   // };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
-    
     const parsedValue =
-    field.fieldType === 'MULTISELECT_CODELIST' ||
-    ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
-      ? value.join(';')
-      : value;
+      field.fieldType === 'MULTISELECT_CODELIST' ||
+      ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
+        ? value.join(';')
+        : value;
 
     try {
       if (!isSubmiting && initialFieldValue !== parsedValue) {
@@ -265,7 +264,7 @@ export const WebformField = ({
           datasetId,
           field,
           value,
-          tableSchemaId
+          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
           onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
@@ -291,7 +290,6 @@ export const WebformField = ({
     } finally {
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
-
   };
 
   const onFileDeleteVisible = (fieldId, fieldSchemaId) =>
@@ -514,7 +512,14 @@ export const WebformField = ({
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false, field.updatesGroupInfo);
+              else
+                onEditorSubmitValue(
+                  field,
+                  option,
+                  event.target.value,
+                  field.isPrimary || false,
+                  field.updatesGroupInfo
+                );
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onFocus={event => onFocusField(event.target.value)}
