@@ -22,7 +22,6 @@ import org.eea.interfaces.vo.dataset.enums.WebformTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.WebformConfigVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -72,7 +71,6 @@ public class WebformServiceTest {
   /**
    * Gets the list webforms test.
    *
-   * @return the list webforms test
    */
   @Test
   public void getListWebformsTest() {
@@ -173,12 +171,15 @@ public class WebformServiceTest {
     webformMetabase.setId(1L);
     webformMetabase.setLabel("test");
     webformMetabase.setValue("test");
+    Mockito.when(webformRepository.findByLabel(Mockito.anyString()))
+        .thenReturn(webformMetabase);
     Mockito.when(webformRepository.findById(Mockito.anyLong()))
         .thenReturn(Optional.of(webformMetabase));
     WebformConfig webform = new WebformConfig();
     webform.setId(new ObjectId());
     webform.setName("test");
     webform.setIdReferenced(1L);
+    //Mockito.when(webformConfigRepository.findByName(Mockito.anyString())).thenReturn(webform);
     Mockito.when(webformConfigRepository.findByIdReferenced(Mockito.anyLong())).thenReturn(webform);
 
     Mockito.when(datasetSchemaService.getDatasetSchemaId(Mockito.anyLong())).thenReturn("schemaId");

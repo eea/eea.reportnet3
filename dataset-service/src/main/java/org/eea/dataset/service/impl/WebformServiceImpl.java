@@ -229,37 +229,38 @@ public class WebformServiceImpl implements WebformService {
   /**
    * Upload a webform config
    *
-   * @param webformConfig The webform to upload
+   * @param userWebformConfig The webform to upload
    * @param datasetId The selected datasetId
    * @return The response entity
    */
   @Override
   @Transactional
-  public ResponseEntity<?> uploadWebFormConfig(WebformConfigVO webformConfig, Long datasetId) {
+  public ResponseEntity<?> uploadWebFormConfig(WebformConfigVO userWebformConfig, Long datasetId) {
     String message = "";
     HttpStatus status = HttpStatus.OK;
 
     //Insert or update webform on metabase(webform) and on Mongo(webformConfig)
     try {
-      String webformConfigName = webformConfig.getName();
-      List<WebformMetabaseVO> existingWebforms = getListWebforms();
-      var nameRepeated = existingWebforms.stream().filter(w -> w.getLabel().equals(webformConfigName)).findFirst();
-      if (nameRepeated.isEmpty()) {
-        insertWebformConfig(webformConfig.getName(), webformConfig.getContent(),
-            webformConfig.getType());
-      } else if (webformConfig.getIdReferenced() != null)  {
-        updateWebformConfig(webformConfig.getIdReferenced(), webformConfig.getName(),
-            webformConfig.getContent(), webformConfig.getType());
+      String userWebformConfigName = userWebformConfig.getName();
+      WebformMetabase webformMetabase = webformRepository.findByLabel(userWebformConfigName);
+      WebformConfig configMongo = webformMetabase != null ? webformConfigRepository.findByIdReferenced(webformMetabase.getId()) : null;
+      Long refIdFromMongo = configMongo != null ? configMongo.getIdReferenced() : null;
+      if (webformMetabase == null) {
+        insertWebformConfig(userWebformConfig.getName(), userWebformConfig.getContent(),
+            userWebformConfig.getType());
+      } else if (refIdFromMongo != null)  {
+        updateWebformConfig(refIdFromMongo, userWebformConfig.getName(),
+            userWebformConfig.getContent(), userWebformConfig.getType());
       }
     } catch (EEAException e) {
       message = e.getMessage();
       status = HttpStatus.BAD_REQUEST;
-      LOG.error("Error when inserting webform config {} with type {}. Message: {}", webformConfig.getName(), webformConfig.getType(), e.getMessage());
+      LOG.error("Error when inserting webform config {} with type {}. Message: {}", userWebformConfig.getName(), userWebformConfig.getType(), e.getMessage());
       return new ResponseEntity<>(message, status);
     } catch (Exception e) {
       message = e.getMessage();
       status = HttpStatus.INTERNAL_SERVER_ERROR;
-      LOG.error("Unexpected error! Error inserting webform config with name {} Message: {}", webformConfig.getName(), e.getMessage());
+      LOG.error("Unexpected error! Error inserting webform config with name {} Message: {}", userWebformConfig.getName(), e.getMessage());
       return new ResponseEntity<>(message, status);
     }
 
@@ -268,8 +269,8 @@ public class WebformServiceImpl implements WebformService {
     try{
       datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
       WebformVO webformVO = new WebformVO();
-      webformVO.setName(webformConfig.getName());
-      webformVO.setType(webformConfig.getType().getValue());
+      webformVO.setName(userWebformConfig.getName());
+      webformVO.setType(userWebformConfig.getType().getValue());
       datasetSchemaService.updateWebform(datasetSchemaId, webformVO);
     } catch (Exception e) {
       message = e.getMessage();

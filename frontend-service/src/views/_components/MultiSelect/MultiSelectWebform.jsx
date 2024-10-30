@@ -14,6 +14,7 @@ import Tooltip from 'primereact/tooltip';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import MultiSelectUtils from './_functions/MultiSelectUtils';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
+import { useOnClickOutside } from 'views/_functions/Hooks/useOnClickOutside';
 
 const MultiSelectWebform = props => {
   var {
@@ -25,7 +26,7 @@ const MultiSelectWebform = props => {
     clearButton = true,
     dataKey = null,
     disabled = false,
-    filter=false,
+    filter = false,
     filterBy = null,
     filterMatchMode = 'contains',
     filterPlaceholder = null,
@@ -45,6 +46,7 @@ const MultiSelectWebform = props => {
     onChange = null,
     onFilterInputChangeBackend = null,
     onFocus = null,
+    onUpdate = null,
     optionLabel = null,
     optionValue = null,
     options = null,
@@ -64,6 +66,7 @@ const MultiSelectWebform = props => {
 
   const [filterState, setFilterState] = useState('');
   const [isPanelVisible, setIsPanelVisible] = useState(false);
+  const [dropdownState, setDropDownState] = useState(null);
   const panelRef = useRef(null);
   const containerRef = useRef(null);
   const focusInputRef = useRef(null);
@@ -71,6 +74,9 @@ const MultiSelectWebform = props => {
   let documentClickListener, selfClick, hideTimeout, panelClick;
 
   const onOptionClick = event => {
+    event.originalEvent.preventDefault();
+    event.originalEvent.stopPropagation();
+
     let optionValue = getOptionValue(event.option);
     let selectionIndex = findSelectionIndex(optionValue);
     let newValue;
@@ -148,6 +154,7 @@ const MultiSelectWebform = props => {
     }
   };
 
+
   const onToggleAll = event => {
     let newValue;
 
@@ -167,19 +174,28 @@ const MultiSelectWebform = props => {
   };
 
   const updateModel = (event, value) => {
-    if (onChange) {
-      onChange({
-        originalEvent: event,
-        value: value,
-        stopPropagation: () => {},
-        preventDefault: () => {},
-        target: {
-          name: name,
-          id: id,
-          value: value
-        }
-      });
-    }
+    setDropDownState({
+      originalEvent: event,
+      value: value,
+      stopPropagation: () => {},
+      preventDefault: () => {},
+      target: {
+        name: name,
+        id: id,
+        value: value
+      }
+    });
+    onUpdate({
+      originalEvent: event,
+      value: value,
+      stopPropagation: () => {},
+      preventDefault: () => {},
+      target: {
+        name: name,
+        id: id,
+        value: value
+      }
+    });
   };
 
   const onFilter = event => {
@@ -204,29 +220,31 @@ const MultiSelectWebform = props => {
           DomHandler.addClass(panelRef.current.element, 'p-input-overlay-visible');
           DomHandler.removeClass(panelRef.current.element, 'p-input-overlay-hidden');
         }, 1);
-
+  
         alignPanel();
         bindDocumentClickListener();
         setIsPanelVisible(true);
       }
     }
   }, [panelRef, options]);
-
+  
   const hide = () => {
-    DomHandler.addClass(panelRef.current.element, 'p-input-overlay-hidden');
-    DomHandler.removeClass(panelRef.current.element, 'p-input-overlay-visible');
-    unbindDocumentClickListener();
-    clearClickState();
-
-    setTimeout(() => {
-      if (panelRef.current.element) {
-        panelRef.current.element.style.display = 'none';
-        DomHandler.removeClass(panelRef.current.element, 'p-input-overlay-hidden');
-        clearFilter();
-        setIsPanelVisible(false);
-      }
-    }, 150);
+    if (panelRef.current && panelRef.current.element) {
+      DomHandler.addClass(panelRef.current.element, 'p-input-overlay-hidden');
+      DomHandler.removeClass(panelRef.current.element, 'p-input-overlay-visible');
+      unbindDocumentClickListener();
+      clearClickState();
+      setTimeout(() => {
+        if (panelRef.current.element) {
+          panelRef.current.element.style.display = 'none';
+          DomHandler.removeClass(panelRef.current.element, 'p-input-overlay-hidden');
+          clearFilter();
+          setIsPanelVisible(false);
+        }
+      }, 150);
+    }
   };
+  
 
   const alignPanel = () => {
     if (appendTo) {
@@ -296,14 +314,19 @@ const MultiSelectWebform = props => {
 
   const bindDocumentClickListener = () => {
     if (!documentClickListener) {
-      documentClickListener = () => {
-        if (!selfClick) {
+      documentClickListener = (event) => {
+        if (
+          panelRef.current && 
+          containerRef.current && 
+          !containerRef.current.contains(event.target) && 
+          !panelRef.current.element.contains(event.target)
+        ) {
           hide();
         }
-
+  
         clearClickState();
       };
-
+  
       document.addEventListener('click', documentClickListener);
     }
   };

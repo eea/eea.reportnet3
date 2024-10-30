@@ -27,4 +27,12 @@ public interface WebformConfigRepository
    */
   void deleteByIdReferenced(Long idReferenced);
 
+  /**
+   * Find by name
+   *
+   * @param The webForm name
+   * @return the webForm config
+   */
+  WebformConfig findByName(String name);
+
 }
