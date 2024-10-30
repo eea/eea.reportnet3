@@ -58,6 +58,7 @@ const checkShowRequired = (element, elements) => {
 
 export const WebformRecord = ({
   addingOnTableSchemaId,
+  bigData,
   calculateSingle,
   columnsSchema,
   dataflowId,
@@ -77,6 +78,7 @@ export const WebformRecord = ({
   onUpdateSinglesList,
   pamsRecords,
   record,
+  referencedTableSchemaId,
   tableId,
   tableName,
   webformType
@@ -107,7 +109,7 @@ export const WebformRecord = ({
 
   const onDeleteMultipleWebform = async () => {
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
-    let updateInCascade = webformRecordState.record?.elements?.some(element => element.deleteInCascade)
+    let updateInCascade = webformRecordState.record?.elements?.some(element => element.deleteInCascade);
     try {
       await DatasetService.deleteRecord({
         datasetId,
@@ -272,6 +274,7 @@ export const WebformRecord = ({
                     calculateSingle(element)
                   ) : (
                     <WebformField
+                      bigData={bigData}
                       columnsSchema={columnsSchema}
                       dataflowId={dataflowId}
                       dataProviderId={dataProviderId}
@@ -293,6 +296,7 @@ export const WebformRecord = ({
                       onUpdateSinglesList={onUpdateSinglesList}
                       pamsRecords={pamsRecords}
                       record={record}
+                      referencedTableSchemaId={referencedTableSchemaId}
                       tableSchemaId={tableId}
                     />
                   )}
@@ -388,6 +392,7 @@ export const WebformRecord = ({
                     return (
                       <WebformRecord
                         addingOnTableSchemaId={addingOnTableSchemaId}
+                        bigData={bigData}
                         calculateSingle={calculateSingle}
                         columnsSchema={columnsSchema}
                         dataflowId={dataflowId}
@@ -406,6 +411,7 @@ export const WebformRecord = ({
                         onUpdateSinglesList={onUpdateSinglesList}
                         pamsRecords={pamsRecords}
                         record={record}
+                        referencedTableSchemaId={element?.tableSchemaId}
                         tableId={tableId}
                         tableName={element.title}
                       />
@@ -432,7 +438,6 @@ export const WebformRecord = ({
         record.fields.filter(field => field.fieldSchemaId === filteredIdSchema.fieldSchema)[0].value ===
         filteredIdField.value
     );
-
     return filtered;
   };
 

@@ -34,6 +34,7 @@ import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_com
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformField = ({
+  bigData = false,
   columnsSchema,
   dataProviderId,
   dataflowId,
@@ -49,6 +50,7 @@ export const WebformField = ({
   onUpdatePamsValue,
   pamsRecords,
   record,
+  referencedTableSchemaId,
   tableSchemaId
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -255,16 +257,14 @@ export const WebformField = ({
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
         ? value.join(';')
         : value;
-  
-    const encodedValue = encodeURIComponent(parsedValue);
-  
+
     try {
       if (!isSubmiting && initialFieldValue !== parsedValue && parsedValue === '') {
         await DatasetService.updateFieldWebform(
           datasetId,
           field,
           parsedValue,
-          tableSchemaId
+          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
           onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);

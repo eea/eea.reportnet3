@@ -781,7 +781,6 @@ const DropdownWebform = props => {
   );
   let dropdownIcon = renderDropdownIcon();
   let items = renderItems(selectedOption);
-  console.log(items)
   let filterElement = renderFilter();
   let clearIcon = renderClearIcon();
 
