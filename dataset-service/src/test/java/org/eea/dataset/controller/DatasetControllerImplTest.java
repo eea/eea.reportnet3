@@ -510,6 +510,13 @@ public class DatasetControllerImplTest {
       when(datasetSchemaService.getDatasetSchemaId(anyLong())).thenReturn("");
       tableSchemaVO.setRecordSchema(new RecordSchemaVO());
       when(datasetSchemaService.getTableSchemaVO(any(), any())).thenReturn(tableSchemaVO);
+      Mockito.when(datasetService.getTableFixedNumberOfRecords(Mockito.anyLong(), Mockito.any(),
+              Mockito.any())).thenReturn(true);
+      DataFlowVO mockDataflow = new DataFlowVO();
+      mockDataflow.setBigData(false);
+      Mockito.when(dataFlowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
+      when(datasetService.getDataFlowIdById(1L)).thenReturn(1L);
+
 
       datasetControllerImpl.deleteRecord(1L, recordId, false, null);
     } catch (ResponseStatusException e) {
