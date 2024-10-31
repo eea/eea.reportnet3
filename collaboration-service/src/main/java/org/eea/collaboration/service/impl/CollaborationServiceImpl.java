@@ -158,6 +158,10 @@ public class CollaborationServiceImpl implements CollaborationService {
     message.setFileSize("0");
     message = messageRepository.save(message);
 
+    // Trigger the notification after message creation
+    String eventType = EventType.RECEIVED_MESSAGE.toString();
+    collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null, eventType);
+
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
   }

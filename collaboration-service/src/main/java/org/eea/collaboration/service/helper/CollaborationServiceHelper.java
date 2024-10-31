@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
@@ -40,6 +41,10 @@ public class CollaborationServiceHelper {
   @Autowired
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
+  /** The data flow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
@@ -59,6 +64,7 @@ public class CollaborationServiceHelper {
   public void notifyNewMessages(Long dataflowId, Long providerId, String custodianUserName, Long modifiedDatasetId,
       DatasetStatusEnum datasetStatus, String datasetName, String eventType) {
     EventType event = EventType.valueOf(eventType);
+    String dataflowName = dataFlowControllerZuul.getMetabaseById(dataflowId).getName();
     Collection<? extends GrantedAuthority> authorities =
         SecurityContextHolder.getContext().getAuthentication().getAuthorities();
     Set<String> set = new HashSet<>();
@@ -96,8 +102,8 @@ public class CollaborationServiceHelper {
     try {
       for (String user : set) {
         NotificationVO notificationVO = NotificationVO.builder().user(user).dataflowId(dataflowId)
-            .datasetStatus(datasetStatus).datasetId(modifiedDatasetId).datasetName(datasetName)
-            .providerId(providerId).build();
+                .datasetStatus(datasetStatus).datasetId(modifiedDatasetId).dataflowName(dataflowName)
+                .datasetName(datasetName).providerId(providerId).build();
         kafkaSenderUtils.releaseNotificableKafkaEvent(event, null, notificationVO);
       }
     } catch (EEAException e) {
