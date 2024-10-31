@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.eea.datalake.service.S3Service;
@@ -59,6 +60,7 @@ import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
@@ -671,7 +673,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     List<TableSchema> tableSchemaList = datasetSchema.getTableSchemas();
 
     // create primary json
-    if (tableSchemaId != null) {
+    if (StringUtils.isNotBlank(tableSchemaId)) {
       tableSchemaList = tableSchemaList.stream()
           .filter(tableSchema -> tableSchema.getIdTableSchema().equals(new ObjectId(tableSchemaId)))
           .collect(Collectors.toList());
@@ -684,7 +686,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       for (int i = 0; i< tableSchemaList.size(); i++) {
         TableSchema tableSchema = tableSchemaList.get(i);
 
-        Long totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true));
+        Long totalRecords;
+        try {
+          totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true));
+        } catch (UncategorizedSQLException ex) {
+          totalRecords = 0L;
+          bw.write("{\"records\":[");
+          bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
+        }
 
         if (totalRecords != null && totalRecords > 0L) {
           String query = totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, false);
@@ -693,7 +702,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         }
         if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
             || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-          bw.write(",\"totalRecords\":\"" + totalRecords + "\"");
+          bw.write(",\"totalRecords\":" + totalRecords);
         }
         if (i == tableSchemaList.size() - 1) {
           bw.write("}");
@@ -971,7 +980,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return
    */
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw, Long datasetId)
-      throws SQLException, IOException, EEAException {
+      throws IOException, EEAException {
 
     DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling);
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -987,13 +996,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       int fieldsSize = recordVO.getFields().size();
       for (int j = 0; j < recordVO.getFields().size(); j++) {
         FieldVO fieldVO = recordVO.getFields().get(j);
-        bw.write("{\"fieldName\":\"" + fieldVO.getName() + "\",");
+        bw.write("{\"fieldName\":\"" + StringEscapeUtils.escapeJson(fieldVO.getName()) + "\",");
         if (fieldVO.getValue().contains("\"")) {
-          String noQuotes = fieldVO.getValue().replaceAll("\"", "");
+          String noQuotes = StringEscapeUtils.escapeJson(fieldVO.getValue()).replaceAll("\"", "");
           noQuotes = "\\\"" + noQuotes + "\\\"";
           bw.write("\"value\":\"" + noQuotes + "\",");
         } else {
-          bw.write("\"value\":\"" + fieldVO.getValue() + "\",");
+          bw.write("\"value\":\"" + StringEscapeUtils.escapeJson(fieldVO.getValue()) + "\",");
         }
         bw.write("\"field_value_id\":\"" + fieldVO.getIdFieldSchema() + "\"");
         if (j == fieldsSize - 1) {
