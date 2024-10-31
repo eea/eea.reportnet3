@@ -1314,6 +1314,13 @@
         { "key": "DOCUMENT_UPLOADING_INIT_INFO" },
         { "key": "DELETE_DOCUMENT_INIT_INFO" },
         {
+          "key": "RECEIVED_MESSAGE",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId","dataflowName"]
+          }
+        },
+        {
           "key": "VALIDATE_QCS_INIT",
           "navigateTo": {
             "section": "DATASET",
@@ -1355,7 +1362,6 @@
         { "key": "DELETE_TABLE_DATA_INIT" },
         { "key": "RELEASE_START_EVENT" },
         { "key": "IMPORT_TABLE_SCHEMA_INIT" },
-        { "key": "RECEIVED_MESSAGE" },
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
         { "key": "EXPORT_TABLE_DATA_START" },
         { "key": "EXPORT_FILE_START_EVENT" },
@@ -1465,7 +1471,6 @@
     "EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT",
     "DISABLE_RULES_ERROR_EVENT",
     "EMPTY_TABLE_EVENT",
-    "RECEIVED_MESSAGE",
     "NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT",
     "EXPORT_SCHEMA_INFORMATION_COMPLETED_EVENT",
     "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT",
