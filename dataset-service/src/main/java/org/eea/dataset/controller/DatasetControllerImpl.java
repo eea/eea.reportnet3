@@ -659,21 +659,20 @@ public class DatasetControllerImpl implements DatasetController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
       }
 
-      if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
-              && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
-        LOG.error(
-                "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
-                recordId, datasetId);
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
-                        datasetService.findRecordSchemaIdById(datasetId, recordId)));
-      }
-
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
 
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+                && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
+          LOG.error(
+                  "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
+                  recordId, datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+                          datasetService.findRecordSchemaIdById(datasetId, recordId)));
+        }
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
@@ -684,6 +683,16 @@ public class DatasetControllerImpl implements DatasetController {
         }
       }
       else {
+        if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
+                && Boolean.TRUE.equals(datasetService.getTableFixedNumberOfRecords(datasetId,
+                datasetService.findRecordSchemaIdById(datasetId, recordId), EntityTypeEnum.RECORD))) {
+          LOG.error(
+                  "Error deleting record with id {} in the datasetId {}. The table has a fixed number of records",
+                  recordId, datasetId);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                  String.format(EEAErrorMessage.FIXED_NUMBER_OF_RECORDS,
+                          datasetService.findRecordSchemaIdById(datasetId, recordId)));
+        }
         updateRecordHelper.executeDeleteProcess(datasetId, recordId, deleteCascadePK);
       }
       LOG.info("Successfully deleted record with id {} for datasetId {}", recordId, datasetId);
