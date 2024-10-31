@@ -7,6 +7,8 @@ import java.util.List;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -31,6 +33,9 @@ public class CollaborationServiceHelperTest {
 
   @Mock
   private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
@@ -68,6 +73,12 @@ public class CollaborationServiceHelperTest {
         .thenReturn(datasetIds);
     Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.anyString()))
         .thenReturn(users);
+
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setName("Test Dataflow Name"); // Set a valid name
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong()))
+            .thenReturn(mockDataflow);
+
     collaborationServiceHelper.notifyNewMessages(1L, 1L,  null,null, null, null,
         EventType.RECEIVED_MESSAGE.toString());
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
@@ -87,6 +98,12 @@ public class CollaborationServiceHelperTest {
     Mockito.doReturn(authorities).when(authentication).getAuthorities();
     Mockito.when(userManagementControllerZull.getUsersByGroup(Mockito.anyString()))
         .thenReturn(users);
+
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setName("Test Dataflow Name"); // Set a valid name
+    Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong()))
+            .thenReturn(mockDataflow);
+
     collaborationServiceHelper.notifyNewMessages(1L, 1L,null, null, null, null,
         EventType.RECEIVED_MESSAGE.toString());
     Mockito.verify(kafkaSenderUtils, Mockito.times(1)).releaseNotificableKafkaEvent(Mockito.any(),
