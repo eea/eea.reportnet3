@@ -664,7 +664,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public File findAndGenerateETLJsonDL(Long datasetId, String tableSchemaId, Integer limit,
       Integer offset, String filterValue, String columnName, String dataProviderCodes,
-      File jsonFile) throws EEAException, SQLException, IOException {
+      File jsonFile) throws EEAException, IOException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
