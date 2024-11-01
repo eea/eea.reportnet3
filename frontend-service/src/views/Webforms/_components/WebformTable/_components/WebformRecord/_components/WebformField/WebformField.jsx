@@ -34,6 +34,7 @@ import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_com
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformField = ({
+  bigData = false,
   columnsSchema,
   dataProviderId,
   dataflowId,
@@ -49,6 +50,7 @@ export const WebformField = ({
   onUpdatePamsValue,
   pamsRecords,
   record,
+  referencedTableSchemaId,
   tableSchemaId
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -255,21 +257,19 @@ export const WebformField = ({
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
         ? value.join(';')
         : value;
-  
-    const encodedValue = encodeURIComponent(parsedValue);
-  
+
     try {
-      if (!isSubmiting && initialFieldValue !== parsedValue && parsedValue === '') {
+      if (!isSubmiting && initialFieldValue !== parsedValue) {
         await DatasetService.updateFieldWebform(
           datasetId,
           field,
           parsedValue,
-          tableSchemaId
+          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
           onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
         }
-  
+
         if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
         }
@@ -291,7 +291,6 @@ export const WebformField = ({
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
   };
-  
 
   const onFileDeleteVisible = (fieldId, fieldSchemaId) =>
     webformFieldDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fieldId, fieldSchemaId } });
@@ -418,10 +417,8 @@ export const WebformField = ({
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               maxSelectedLabels={10}
-              onUpdate={(event)=>{
-                onFillField(field, option, event.target.value, isConditional);
-              }}
               onChange={event => {
+                onFillField(field, option, event.target.value, isConditional);
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
               }}
@@ -442,14 +439,12 @@ export const WebformField = ({
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
-              onUpdate={(event)=>{
-                onFillField(field, option, event.target.value, isConditional);
-              }}
               onChange={event => {
                 const value =
                   typeof event.target.value === 'object' && !Array.isArray(event.target.value)
                     ? event.target.value.value
                     : event.target.value;
+                onFillField(field, option, value, isConditional);
                 webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                 if (isNil(field.recordId)) onSaveField(option, value);
                 else onEditorSubmitValue(field, option, value);
