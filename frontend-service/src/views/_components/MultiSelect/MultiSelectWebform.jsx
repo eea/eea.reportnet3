@@ -154,7 +154,6 @@ const MultiSelectWebform = props => {
     }
   };
 
-
   const onToggleAll = event => {
     let newValue;
 
@@ -220,14 +219,14 @@ const MultiSelectWebform = props => {
           DomHandler.addClass(panelRef.current.element, 'p-input-overlay-visible');
           DomHandler.removeClass(panelRef.current.element, 'p-input-overlay-hidden');
         }, 1);
-  
+
         alignPanel();
         bindDocumentClickListener();
         setIsPanelVisible(true);
       }
     }
   }, [panelRef, options]);
-  
+
   const hide = () => {
     if (panelRef.current && panelRef.current.element) {
       DomHandler.addClass(panelRef.current.element, 'p-input-overlay-hidden');
@@ -244,7 +243,6 @@ const MultiSelectWebform = props => {
       }, 150);
     }
   };
-  
 
   const alignPanel = () => {
     if (appendTo) {
@@ -306,7 +304,6 @@ const MultiSelectWebform = props => {
 
   const onBlurFunction = event => {
     DomHandler.removeClass(containerRef.current, 'p-focus');
-
     if (onBlur) {
       onBlur(event);
     }
@@ -314,19 +311,31 @@ const MultiSelectWebform = props => {
 
   const bindDocumentClickListener = () => {
     if (!documentClickListener) {
-      documentClickListener = (event) => {
+      documentClickListener = event => {
         if (
-          panelRef.current && 
-          containerRef.current && 
-          !containerRef.current.contains(event.target) && 
+          panelRef.current &&
+          containerRef.current &&
+          !containerRef.current.contains(event.target) &&
           !panelRef.current.element.contains(event.target)
         ) {
+          if (onChange) {
+            onChange({
+              originalEvent: event,
+              value: value,
+              stopPropagation: () => {},
+              preventDefault: () => {},
+              target: {
+                name: name,
+                id: id,
+                value: value
+              }
+            });
+          }
           hide();
         }
-  
         clearClickState();
       };
-  
+
       document.addEventListener('click', documentClickListener);
     }
   };
