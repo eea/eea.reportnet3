@@ -259,7 +259,7 @@ export const WebformField = ({
         : value;
 
     try {
-      if (!isSubmiting && initialFieldValue !== parsedValue) {
+      if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
         await DatasetService.updateFieldWebform(
           datasetId,
           field,
@@ -417,12 +417,14 @@ export const WebformField = ({
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               maxSelectedLabels={10}
-              onChange={event => {
-                onFillField(field, option, event.target.value, isConditional);
-                if (isNil(field.recordId)) onSaveField(option, event.target.value);
-                else onEditorSubmitValue(field, option, event.target.value);
+              onChange={() => {
+                if (isNil(field.recordId)) onSaveField(option, field.value);
+                else onEditorSubmitValue(field, option, field.value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
+              onUpdate={event => {
+                onFillField(field, option, event.target.value, isConditional);
+              }}
               optionLabel="itemType"
               options={linkItemsOptions}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
@@ -464,10 +466,12 @@ export const WebformField = ({
             id={field.fieldId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
-            onChange={event => {
+            onChange={() => {
+              if (isNil(field.recordId)) onSaveField(option, field.value);
+              else onEditorSubmitValue(field, option, field.value);
+            }}
+            onUpdate={event => {
               onFillField(field, option, event.target.value);
-              if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
             }}
             options={
               field.name === 'Objective'
