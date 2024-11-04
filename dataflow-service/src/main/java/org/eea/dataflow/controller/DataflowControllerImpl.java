@@ -636,6 +636,31 @@ public class DataflowControllerImpl implements DataFlowController {
     return result;
   }
 
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/v1/{dataflowId}/isBigDataflow", produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Get dataflow metadata by dataflow id",
+      produces = MediaType.APPLICATION_JSON_VALUE, response = DataFlowVO.class,
+      notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR READ, EDITOR WRITE, NATIONAL COORDINATOR, ADMIN, STEWARD SUPPORT")
+  @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
+  public Boolean isBigDataflow(@ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+    if (dataflowId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+          EEAErrorMessage.DATAFLOW_INCORRECT_ID);
+    }
+    Boolean result = null;
+    try {
+      result = dataflowService.getMetabaseById(dataflowId).getBigData();
+
+    } catch (EEAException e) {
+      LOG.error(e.getMessage());
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve dataflow metadata for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
+    }
+    return result;
+  }
+
   /**
    * Gets the metabase by id legacy.
    *
@@ -1266,7 +1291,7 @@ public class DataflowControllerImpl implements DataFlowController {
   }
 
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
   @PutMapping(value = "/updateDataProviderGroupIdById/{dataflowId}")
   public void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId){
     try{

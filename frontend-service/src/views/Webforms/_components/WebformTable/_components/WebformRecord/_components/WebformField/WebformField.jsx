@@ -34,6 +34,7 @@ import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_com
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformField = ({
+  bigData = false,
   columnsSchema,
   dataProviderId,
   dataflowId,
@@ -49,6 +50,7 @@ export const WebformField = ({
   onUpdatePamsValue,
   pamsRecords,
   record,
+  referencedTableSchemaId,
   tableSchemaId
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -71,7 +73,10 @@ export const WebformField = ({
     sectorAffectedValue: null,
     selectedFieldId: '',
     selectedFieldSchemaId: '',
-    selectedMaxSize: ''
+    selectedMaxSize: '',
+    selectedRecordId: '',
+    selectedFieldName: '',
+    selectedFileName: ''
   });
 
   const {
@@ -83,7 +88,10 @@ export const WebformField = ({
     linkItemsOptions,
     sectorAffectedValue,
     selectedFieldId,
-    selectedFieldSchemaId
+    selectedFieldSchemaId,
+    selectedRecordId,
+    selectedFieldName,
+    selectedFileName
   } = webformFieldState;
 
   const { formatDate, formatDateTime, getMultiselectValues } = WebformRecordUtils;
@@ -101,7 +109,16 @@ export const WebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(dataflowId, datasetId, selectedFieldId, dataProviderId);
+      await DatasetService.deleteAttachment({
+        dataflowId,
+        datasetId,
+        fieldId: selectedFieldId,
+        dataProviderId,
+        tableSchemaName: undefined,
+        fieldName: selectedFieldName,
+        fileName: selectedFileName,
+        recordId: selectedRecordId
+      });
       onFillField(record, selectedFieldSchemaId, '');
       onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
@@ -109,9 +126,18 @@ export const WebformField = ({
     }
   };
 
-  const onFileDownload = async (fileName, fieldId) => {
+  const onFileDownload = async (fileName, fieldId, recordId, fieldName) => {
     try {
-      const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
+      const { data } = await DatasetService.downloadFileData({
+        dataflowId,
+        datasetId,
+        fieldId,
+        providerId: dataProviderId,
+        fileName,
+        recordId,
+        tableSchemaName: undefined,
+        fieldName
+      });
       DownloadFile(data, fileName);
     } catch (error) {
       console.error('WebformField - onFileDownload.', error);
@@ -144,8 +170,6 @@ export const WebformField = ({
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
           async () => {
-            
-            
             const referencedFieldValues = await DatasetService.getReferencedFieldValues(
               datasetId,
               element.fieldSchemaId,
@@ -155,7 +179,7 @@ export const WebformField = ({
                   ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
                   : conditionalField.value
                 : encodeURIComponent(element.value),
-                localDatasetSchemaId,
+              localDatasetSchemaId,
               400
             );
             return referencedFieldValues
@@ -214,7 +238,7 @@ export const WebformField = ({
   //     ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
   //       ? value.join(';')
   //       : value;
-    
+
   //       try {
   //     if (!isSubmiting && initialFieldValue !== parsedValue) {
   //       await DatasetService.updateField(
@@ -252,20 +276,19 @@ export const WebformField = ({
   // };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
-    
     const parsedValue =
-    field.fieldType === 'MULTISELECT_CODELIST' ||
-    ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
-      ? value.join(';')
-      : value;
+      field.fieldType === 'MULTISELECT_CODELIST' ||
+      ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
+        ? value.join(';')
+        : value;
 
     try {
-      if (!isSubmiting && initialFieldValue !== parsedValue) {
+      if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
         await DatasetService.updateFieldWebform(
           datasetId,
           field,
-          value,
-          tableSchemaId
+          parsedValue,
+          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
         if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
           onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
@@ -291,16 +314,16 @@ export const WebformField = ({
     } finally {
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
-
   };
 
-  const onFileDeleteVisible = (fieldId, fieldSchemaId) =>
-    webformFieldDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fieldId, fieldSchemaId } });
+  const onFileDeleteVisible = (fileName, fieldId, fieldSchemaId) => {
+    webformFieldDispatch({ type: 'ON_FILE_DELETE_OPENED', payload: { fileName, fieldId, fieldSchemaId } });
+  };
 
-  const onFileUploadVisible = (fieldId, fieldSchemaId, validExtensions, maxSize) => {
+  const onFileUploadVisible = (fieldName, recordId, fieldId, fieldSchemaId, validExtensions, maxSize) => {
     webformFieldDispatch({
       type: 'ON_FILE_UPLOAD_SET_FIELDS',
-      payload: { fieldId, fieldSchemaId, validExtensions, maxSize }
+      payload: { fieldName, recordId, fieldId, fieldSchemaId, validExtensions, maxSize }
     });
   };
 
@@ -316,10 +339,12 @@ export const WebformField = ({
     .flat()
     .join(', ');
 
-  const infoAttachTooltip = `${resourcesContext.messages['supportedFileAttachmentsTooltip']} ${
-    getAttachExtensions || '*'
-  }
-  ${resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']} ${
+  const infoAttachTooltip = `<span style="font-weight: bold">${
+    resourcesContext.messages['supportedFileAttachmentsTooltip']
+  } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${getAttachExtensions || '*'}</span>
+    <span style="font-weight: bold">${
+      resourcesContext.messages['supportedFileAttachmentsMaxSizeTooltip']
+    } </span><span style="color: var(--success-color-lighter); fontWeight: 600">${
     !isNil(element) && !isNil(element.maxSize) && element.maxSize.toString() !== '0'
       ? `${element.maxSize} ${resourcesContext.messages['MB']}`
       : resourcesContext.messages['maxSizeNotDefined']
@@ -419,12 +444,14 @@ export const WebformField = ({
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
               maxSelectedLabels={10}
-              onChange={event => {
-                onFillField(field, option, event.target.value, isConditional);
-                if (isNil(field.recordId)) onSaveField(option, event.target.value);
-                else onEditorSubmitValue(field, option, event.target.value);
+              onChange={() => {
+                if (isNil(field.recordId)) onSaveField(option, field.value);
+                else onEditorSubmitValue(field, option, field.value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
+              onUpdate={event => {
+                onFillField(field, option, event.target.value, isConditional);
+              }}
               optionLabel="itemType"
               options={linkItemsOptions}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
@@ -466,10 +493,12 @@ export const WebformField = ({
             id={field.fieldId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
-            onChange={event => {
+            onChange={() => {
+              if (isNil(field.recordId)) onSaveField(option, field.value);
+              else onEditorSubmitValue(field, option, field.value);
+            }}
+            onUpdate={event => {
               onFillField(field, option, event.target.value);
-              if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
             }}
             options={
               field.name === 'Objective'
@@ -514,7 +543,14 @@ export const WebformField = ({
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false, field.updatesGroupInfo);
+              else
+                onEditorSubmitValue(
+                  field,
+                  option,
+                  event.target.value,
+                  field.isPrimary || false,
+                  field.updatesGroupInfo
+                );
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onFocus={event => onFocusField(event.target.value)}
@@ -576,7 +612,7 @@ export const WebformField = ({
                 icon="export"
                 iconPos="right"
                 label={field.value}
-                onClick={() => onFileDownload(field.value, field.fieldId)}
+                onClick={() => onFileDownload(field.value, field.fieldId, field.recordId, field.name)}
               />
             )}
             {
@@ -591,6 +627,8 @@ export const WebformField = ({
                 onClick={() => {
                   onToggleDialogVisible(true);
                   onFileUploadVisible(
+                    field.name,
+                    field.recordId,
                     field.fieldId,
                     field.fieldSchemaId,
                     !isNil(colSchema) ? colSchema.validExtensions : [],
@@ -603,7 +641,7 @@ export const WebformField = ({
             <Button
               className="p-button-animated-blink p-button-primary-transparent"
               icon="trash"
-              onClick={() => onFileDeleteVisible(field.fieldId, field.fieldSchemaId)}
+              onClick={() => onFileDeleteVisible(field.value, field.fieldId, field.fieldSchemaId)}
             />
           </div>
         );
@@ -640,12 +678,20 @@ export const WebformField = ({
               ? getUrl(DatasetConfig.uploadAttachment, {
                   dataflowId,
                   datasetId,
-                  fieldId: selectedFieldId
+                  fieldId: selectedFieldId,
+                  tableSchemaName: undefined,
+                  fieldName: selectedFieldName,
+                  recordId: selectedRecordId,
+                  previousFileName: undefined
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
+                  tableSchemaName: undefined,
+                  fieldName: selectedFieldName,
+                  recordId: selectedRecordId,
+                  previousFileName: undefined,
                   providerId: dataProviderId
                 })
           }`}

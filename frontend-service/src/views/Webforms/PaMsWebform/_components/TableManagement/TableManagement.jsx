@@ -256,15 +256,32 @@ export const TableManagement = ({
         ) || configParentTables.includes(!isNil(schemaTable['header']) && schemaTable['header'].toUpperCase())
       );
     });
+
     const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
+
+      let referencedFieldSchemaId;
+
+      /*Gets the fieldSchemaId of the field that has a referencedField with idPk equal to sortFieldSchemaId*/
+      if (bigData) {
+        referencedFieldSchemaId = parentTable?.records[0]?.fields.find(
+          field => field?.referencedField?.idPk === getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id')
+        )?.fieldSchema;
+      }
+
       let data;
+
       if (bigData) {
         data = await DatasetService.getTableDataDL({
           datasetId,
           tableSchemaId: parentTable.tableSchemaId,
           pageSize: 300,
-          fields: sortFieldSchemaId !== '' ? `${sortFieldSchemaId}:${1}` : undefined,
+          fields:
+            sortFieldSchemaId !== ''
+              ? referencedFieldSchemaId
+                ? `${referencedFieldSchemaId}:${1}`
+                : `${sortFieldSchemaId}:${1}`
+              : undefined,
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
         });
       } else {

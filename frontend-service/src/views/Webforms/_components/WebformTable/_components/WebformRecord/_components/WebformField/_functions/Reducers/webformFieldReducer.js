@@ -8,7 +8,8 @@ export const webformFieldReducer = (state, { type, payload }) => {
         ...state,
         isDeleteAttachmentVisible: true,
         selectedFieldId: payload.fieldId,
-        selectedFieldSchemaId: payload.fieldSchemaId
+        selectedFieldSchemaId: payload.fieldSchemaId,
+        selectedFileName: payload.fileName
       };
 
     case 'ON_FILE_UPLOAD_SET_FIELDS':
@@ -17,7 +18,9 @@ export const webformFieldReducer = (state, { type, payload }) => {
         selectedFieldId: payload.fieldId,
         selectedFieldSchemaId: payload.fieldSchemaId,
         selectedValidExtensions: payload.validExtensions,
-        selectedMaxSize: payload.maxSize
+        selectedMaxSize: payload.maxSize,
+        selectedRecordId: payload.recordId,
+        selectedFieldName: payload.fieldName
       };
 
     case 'ON_TOGGLE_DELETE_DIALOG':

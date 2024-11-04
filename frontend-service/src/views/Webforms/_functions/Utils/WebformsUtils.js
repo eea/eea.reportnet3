@@ -127,7 +127,8 @@ const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
               ? `${pamNumber}_${findMaximumIdValue(table.records, SectorObjectivesTable) + 1}`
               : null,
             type: field.type,
-            fieldSchemaId: field.fieldSchema || field.fieldId
+            fieldSchemaId: field.fieldSchema || field.fieldId,
+            name: field.name
           }
         };
       });

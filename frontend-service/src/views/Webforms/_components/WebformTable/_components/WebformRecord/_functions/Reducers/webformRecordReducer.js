@@ -27,7 +27,7 @@ export const webformRecordReducer = (state, { type, payload }) => {
               .map(record =>
                 record.fields
                   .map(field => field.fieldId)
-                  .map(ids => ids.includes(payload.field.fieldId))
+                  .map(ids => ids?.includes(payload.field.fieldId))
                   .filter(id => id === true)
                   .indexOf(true)
               )
@@ -37,7 +37,7 @@ export const webformRecordReducer = (state, { type, payload }) => {
           const indexOfCorrespondentElementsRecords = getIndexInElementsRecordsArr();
           const checkRecordIsNotEmpty = () =>
             !isEmpty(
-              field.elementsRecords[indexOfCorrespondentElementsRecords].elements.filter(
+              field?.elementsRecords[indexOfCorrespondentElementsRecords]?.elements?.filter(
                 field => field.fieldSchemaId === payload.option
               )
             );
