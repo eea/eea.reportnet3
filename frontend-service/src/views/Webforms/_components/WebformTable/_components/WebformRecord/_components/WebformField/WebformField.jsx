@@ -126,17 +126,17 @@ export const WebformField = ({
     }
   };
 
-  const onFileDownload = async (fileName, fieldId) => {
+  const onFileDownload = async (fileName, fieldId, recordId, fieldName) => {
     try {
       const { data } = await DatasetService.downloadFileData({
         dataflowId,
         datasetId,
-        fieldId: selectedFieldId,
+        fieldId,
         providerId: dataProviderId,
         fileName,
-        recordId: selectedRecordId,
+        recordId,
         tableSchemaName: undefined,
-        fieldName: selectedFieldName
+        fieldName
       });
       DownloadFile(data, fileName);
     } catch (error) {
@@ -612,7 +612,7 @@ export const WebformField = ({
                 icon="export"
                 iconPos="right"
                 label={field.value}
-                onClick={() => onFileDownload(field.value, field.fieldId)}
+                onClick={() => onFileDownload(field.value, field.fieldId, field.recordId, field.name)}
               />
             )}
             {
