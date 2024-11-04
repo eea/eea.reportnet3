@@ -126,6 +126,7 @@
     position: absolute;
     z-index: -1;
     & + label {
+      max-width: 100% !important;
       width: 100%;
       padding: 1rem 0;
       display: flex;
