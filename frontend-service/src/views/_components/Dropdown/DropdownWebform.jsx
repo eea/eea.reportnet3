@@ -455,6 +455,7 @@ const DropdownWebform = props => {
   }, [panelRef]);
 
   const hide = () => {
+    clearFilter();
     if (panelRef && panelRef.current) {
       DomHandler.addClass(panelRef.current, 'p-input-overlay-hidden');
       DomHandler.removeClass(panelRef.current, 'p-input-overlay-visible');
@@ -481,8 +482,8 @@ const DropdownWebform = props => {
 
   const bindDocumentClickListener = () => {
     if (!documentClickListener) {
-      documentClickListener = () => {
-        if (!selfClick && !overlayClick) {
+      documentClickListener = event => {
+        if (!selfClick && !overlayClick && !filterInputRef.current.contains(event.target)) {
           hide();
         }
 
@@ -676,6 +677,7 @@ const DropdownWebform = props => {
             autoComplete="off"
             className="p-dropdown-filter p-inputtext p-component"
             onChange={onFilterInputChange}
+            onClick={event => event.stopPropagation()}
             onKeyDown={onFilterInputKeyDown}
             placeholder={filterPlaceholder}
             ref={filterInputRef}
@@ -804,13 +806,15 @@ const DropdownWebform = props => {
       {labelElement}
       {clearIcon}
       {dropdownIcon}
-      <DropdownPanel appendTo={appendTo} filter={filterElement} itemsWrapperRef={itemsWrapperRef}         
+      <DropdownPanel
+        appendTo={appendTo}
+        filter={filterElement}
+        itemsWrapperRef={itemsWrapperRef}
         onClick={panelRefClick}
         panelRefClassName={panelRefClassName}
         panelRefStyle={panelRefStyle}
         ref={panelRef}
         scrollHeight={scrollHeight}>
-
         {items}
       </DropdownPanel>
     </div>
