@@ -113,21 +113,25 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return "";
   }
 
-  @Override
-  public StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO) {
-    List<String> geoJsonHeaders = getHeaders(true, tableSchemaVO);
+  public StringBuilder getHeaders(TableSchemaVO tableSchemaVO) {
+    List<DataType> geoJsonEnums = getGeoJsonEnums();
     StringBuilder result = new StringBuilder();
+    boolean firstColumn = true;
 
-    for (String header : geoJsonHeaders) {
-      result.append(", ").append(FROM_XEX).append("(").append(header).append(") as ").append(header);
+    for (FieldSchemaVO fieldSchemaVO : spatialDataHelper.getFieldSchemas(tableSchemaVO)) {
+      if (firstColumn) {
+        firstColumn = false;
+      } else {
+        result.append(", ");
+      }
+
+      if (geoJsonEnums.contains(fieldSchemaVO.getType())) {
+        result.append(FROM_XEX).append("(").append(fieldSchemaVO.getName()).append(") as ").append(fieldSchemaVO.getName());
+      } else {
+        result.append(fieldSchemaVO.getName());
+      }
     }
     return result;
-  }
-
-  @Override
-  public StringBuilder getSimpleHeaders(TableSchemaVO tableSchemaVO) {
-    List<String> geoJsonHeaders = getHeaders(false, tableSchemaVO);
-    return new StringBuilder(String.join(",", geoJsonHeaders));
   }
 
   private List<String> getHeaders(boolean includeGeoJsonHeaders, TableSchemaVO tableSchemaVO) {

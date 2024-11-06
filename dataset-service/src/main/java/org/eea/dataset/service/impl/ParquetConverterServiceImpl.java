@@ -380,8 +380,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFileName, dataSetSchema, importFileInDremioInfo);
     String createTableQuery;
     if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-      String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s %s FROM " + dremioPathForCsvFile;
-      createTableQuery = String.format(initQuery, spatialDataHandling.getSimpleHeaders(tableSchemaVO), spatialDataHandling.getHeadersConvertedToBinary(tableSchemaVO));
+      String initQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT %s FROM " + dremioPathForCsvFile;
+      createTableQuery = String.format(initQuery, spatialDataHandling.getHeaders(tableSchemaVO));
     } else {
       createTableQuery = "CREATE TABLE " + parquetInnerFolderPath + " AS SELECT * FROM " + dremioPathForCsvFile;
     }
