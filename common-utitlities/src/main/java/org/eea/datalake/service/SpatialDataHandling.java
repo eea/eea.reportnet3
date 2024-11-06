@@ -13,11 +13,9 @@ import java.util.List;
 public interface SpatialDataHandling {
   boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO);
 
-  StringBuilder getHeadersConvertedToBinary(TableSchemaVO tableSchemaVO);
-
   String convertToHEX(String value);
 
-  StringBuilder getSimpleHeaders(TableSchemaVO tableSchemaVO);
+  StringBuilder getHeaders(TableSchemaVO tableSchemaVO);
 
   void decodeSpatialData(List<RecordVO> recordVOS);
 
