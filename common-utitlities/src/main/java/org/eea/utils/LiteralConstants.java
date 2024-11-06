@@ -373,6 +373,9 @@ public final class LiteralConstants {
   /** The Constant XML_TYPE: {@value}. */
   public static final String XML_TYPE = ".xml";
 
+  /** The Constant GML_TYPE: {@value}. */
+  public static final String GML_TYPE = ".gml";
+
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLSX_TYPE = ".xlsx";
 
