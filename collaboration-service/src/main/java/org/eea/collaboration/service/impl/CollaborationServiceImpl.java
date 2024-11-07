@@ -125,9 +125,9 @@ public class CollaborationServiceImpl implements CollaborationService {
     }
 
     Long providerId = messageVO.getProviderId();
-    String content = messageVO.getContent();
+    String messageContent = messageVO.getContent();
 
-    if (providerId == null || content == null || content.isEmpty()) {
+    if (providerId == null || messageContent == null || messageContent.isEmpty()) {
       throw new EEAIllegalArgumentException(EEAErrorMessage.MESSAGING_BAD_REQUEST);
     }
 
@@ -141,12 +141,12 @@ public class CollaborationServiceImpl implements CollaborationService {
 
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
 
-    if (content.length() > maxMessageLength) {
-      content = content.substring(0, maxMessageLength);
+    if (messageContent.length() > maxMessageLength) {
+      messageContent = messageContent.substring(0, maxMessageLength);
     }
 
     Message message = new Message();
-    message.setContent(content);
+    message.setContent(messageContent);
     message.setDataflowId(dataflowId);
     message.setProviderId(providerId);
     message.setDate(new Date());
@@ -161,6 +161,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     // Trigger the notification after message creation
     String eventType = EventType.RECEIVED_MESSAGE.toString();
     collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null, eventType);
+    collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, null, eventType,messageContent);
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
