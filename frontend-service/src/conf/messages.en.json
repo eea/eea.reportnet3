@@ -1245,7 +1245,7 @@
     "readOnlyTable": "Read only table",
     "readPermission": "Read",
     "readWritePermissions": "Read & write",
-    "receivedMessage": "Message received",
+    "receivedMessage": "Message received for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>",
     "record": "Record",
     "recordBlockers": "One or more fields have blockers",
     "recordErrors": "One or more fields have errors",
