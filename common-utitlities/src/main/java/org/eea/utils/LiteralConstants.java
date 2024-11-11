@@ -52,6 +52,12 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASETID = "datasetId";
 
+  /** The Constant TECH_ACCEPT_MESSAGE: {@value}. */
+  public static final String TECH_ACCEPT_MESSAGE = "New Technical acceptance message";
+
+  /** The Constant ATTACHMENT_FILE_RECEIVED: {@value}. */
+  public static final String ATTACHMENT_FILE_RECEIVED = "Attachment File received";
+
   /** The Constant DATASET_ID: {@value}. */
   public static final String SIGNATURE = "signature";
 
