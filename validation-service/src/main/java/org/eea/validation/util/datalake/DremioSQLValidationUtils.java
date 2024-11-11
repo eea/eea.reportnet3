@@ -79,14 +79,13 @@ public class DremioSQLValidationUtils {
         pkMustBeUsed = pkMustBeUsed && null != fkFieldSchema && null != fkFieldSchema.getPkMustBeUsed();
         //FK_MULTIPLE_WRONG
         if(BooleanUtils.isTrue(fkFieldSchema.getPkHasMultipleValues())) {
-            Integer pkNotUsed = 0;
             //PK_QUERY_VALUES
             StringBuilder pkQuery = new StringBuilder();
             pkQuery.append("select ").append(primaryKey).append(" from ").append(pkTablePath);
             List<String> pkValueList = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                 List<String> result = new ArrayList<>();
                 while (rs.next()) {
-                    result.add(rs.getString(primaryKey));
+                    result.add(rs.getString(primaryKey).trim());
                 }
                 return result;
             });
@@ -105,7 +104,10 @@ public class DremioSQLValidationUtils {
             fkQuery.append("select ").append("record_id").append(",").append(foreignKey).append(" from ").append(fkTablePath);
             SqlRowSet fkValues = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkValues.next()) {
-                List<String> recordValues = new ArrayList<>(Arrays.asList(fkValues.getString(foreignKey).split(";")));
+                List<String> recordValues = new ArrayList<>(Arrays.asList(fkValues.getString(foreignKey).split(";")))
+                    .stream()
+                    .map(String::trim)
+                    .collect(Collectors.toList());
                 for(String recordValue: recordValues){
                     if(pkMustBeUsed){
                         //PK_MUST_BE_USED
