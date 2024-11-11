@@ -65,6 +65,7 @@ export const WebformTable = ({
   const { isDataUpdated, webformData } = webformTableState;
 
   const [isSticky, setIsSticky] = useState(false);
+  const [allManualCheck, setAllManualCheck] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -218,6 +219,13 @@ export const WebformTable = ({
 
   const onLoadTableData = async () => {
     setIsLoading(true);
+
+    webform?.elements?.forEach((table)=>{
+      if(table.type==='TABLE'){
+        if(!table.dataAreManuallyEditable) setAllManualCheck(false)
+      }
+    })
+
     try {
       const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
       let data;
@@ -242,7 +250,6 @@ export const WebformTable = ({
           value: selectedTable.pamsId
         });
       }
-
       if (!isNil(data.records)) {
         const tables = getTableElements(webform);
         const tableSchemaIds = tables.map(table => table.tableSchemaId);
@@ -304,6 +311,7 @@ export const WebformTable = ({
   const renderWebformRecord = (record, index) => (
     <WebformRecord
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
+      bigData={bigData}
       calculateSingle={calculateSingle}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
       dataflowId={dataflowId}
@@ -489,7 +497,7 @@ export const WebformTable = ({
       <div className={styles.overlay}>
         <div
           style={
-            isLoadingIceberg
+            (isLoadingIceberg || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
               : !bigData || isIcebergCreated
               ? { opacity: 1 }
