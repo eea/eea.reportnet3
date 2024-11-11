@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.communication.EmailController;
+import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -20,6 +20,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
 
 /**
  * The Class CollaborationServiceHelper.
@@ -53,7 +53,7 @@ public class CollaborationServiceHelper {
 
   /** The email controller zuul. */
   @Autowired
-  private EmailController.EmailControllerZuul emailControllerZuul;
+  private EmailControllerZuul emailControllerZuul;
 
   /** The kafka sender utils. */
   @Autowired
@@ -113,8 +113,7 @@ public class CollaborationServiceHelper {
    * @param custodianUserName the custodian username
    */
   @Async
-  public void emailNewMessages(Long dataflowId, Long providerId, String custodianUserName,
-                               String datasetName, String eventType, String messageContent) {
+  public void emailNewMessages(Long dataflowId, Long providerId, String custodianUserName, String eventType, String messageContent) {
     try {
       Map<String, Set<String>> notificationSets = buildUserAndEmailSets(dataflowId, providerId, custodianUserName);
       Set<String> emailSet = notificationSets.get("emailSet");
@@ -185,13 +184,14 @@ public class CollaborationServiceHelper {
    */
   private void sendMail(Set<String> emailSet, Long dataflowId, String dataflowName, String messageContent) {
     try {
+      String emailText = String.format(
+              LiteralConstants.TECH_ACCEPT_MESSAGE + LiteralConstants.SPACE + dataflowName + " : " + messageContent
+      );
       EmailVO emailVO = new EmailVO();
       emailVO.setBbc(new ArrayList<>(emailSet));
-      emailVO.setSubject("New Technical acceptance message");
-      emailVO.setText("New Technical acceptance message in " + dataflowName + " : " + messageContent);
-
+      emailVO.setSubject(String.format(LiteralConstants.TECH_ACCEPT_MESSAGE));
+      emailVO.setText(emailText);
       emailControllerZuul.sendMessage(emailVO);
-      LOG.info("Sent email notifications to: {}", emailSet);
     } catch (Exception e) {
       LOG_ERROR.error("Failed to send email notifications for dataflowId {}: {}", dataflowId, e.getMessage(), e);
     }

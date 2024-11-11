@@ -28,6 +28,7 @@ import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,7 +162,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     // Trigger the notification after message creation
     String eventType = EventType.RECEIVED_MESSAGE.toString();
     collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null, eventType);
-    collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, null, eventType,messageContent);
+    collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, eventType, messageContent);
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
@@ -228,6 +229,7 @@ public class CollaborationServiceImpl implements CollaborationService {
       String eventType = EventType.RECEIVED_MESSAGE.toString();
       collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null,
           eventType);
+      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null,  eventType, LiteralConstants.ATTACHMENT_FILE_RECEIVED);
 
       LOG.info("Message created: message={}", message);
     } finally {
