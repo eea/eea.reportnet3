@@ -110,7 +110,7 @@ public class DataLakeDataRetrieverUtils {
      */
     public static void buildFieldValueFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
         dataQuery.append(" where (");
-        List<String> headers = fieldIdMap.values().stream().map(FieldSchemaVO::getName).collect(Collectors.toList());
+        List<String> headers = fieldIdMap.values().stream().filter(d -> !spatialDataHandling.getGeoJsonEnums().contains(d.getType())).map(FieldSchemaVO::getName).collect(Collectors.toList());
         LOG.info("headers : {}", headers);
         dataQuery.append("\"").append(headers.get(0)).append("\"").append(" like '%").append(fieldValue).append("%'");
         LOG.info("headers.get(0) : {}", headers.get(0));
