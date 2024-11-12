@@ -1,7 +1,6 @@
 package org.eea.datalake.service;
 
 
-import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -24,10 +23,6 @@ public interface SpatialDataHandling {
   List<DataType> getGeoJsonEnums();
 
   DataType getGeometryType(byte[] byteArray) throws ParseException;
-
-  String fixQueryIncludeSpatialDataForSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
-
-  String fixQueryExcludeSpatialDataFromSearch(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
 
   StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
 

@@ -4,7 +4,6 @@ import cdjd.org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
-import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.DremioValidationMapper;
 import org.eea.dataset.service.DataLakeDataRetriever;
@@ -43,15 +42,13 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
     private final S3Helper s3Helper;
     private final JdbcTemplate dremioJdbcTemplate;
     private final DremioHelperService dremioHelperService;
-    private final SpatialDataHandling spatialDataHandling;
     private final DatasetTableService datasetTableService;
 
-    public DatasetDataRetrieverDL(S3Service s3Service, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DremioHelperService dremioHelperService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService) {
+    public DatasetDataRetrieverDL(S3Service s3Service, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, DremioHelperService dremioHelperService, DatasetTableService datasetTableService) {
         this.s3Service = s3Service;
         this.s3Helper = s3Helper;
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.dremioHelperService = dremioHelperService;
-        this.spatialDataHandling = spatialDataHandling;
         this.datasetTableService = datasetTableService;
     }
 
@@ -125,10 +122,6 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
         int idx = recordsCountQueryString.indexOf("order by");
         if (idx!=-1) {
             recordsCountQueryString = recordsCountQueryString.substring(0, idx-1);
-        }
-        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-            recordsCountQueryString = spatialDataHandling.fixQueryExcludeSpatialDataFromSearch(recordsCountQueryString, true, tableSchemaVO);
-            filteredQuery = new StringBuilder(spatialDataHandling.fixQueryExcludeSpatialDataFromSearch(filteredQuery.toString(), true, tableSchemaVO));
         }
         Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQueryString, Long.class);
         result.setTotalFilteredRecords(totalFilteredRecords);
