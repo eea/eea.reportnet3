@@ -186,7 +186,7 @@ public class FKValidationUtils {
           + " from dataset_%s.field_value field_value\r\n"
           + " where field_value.id_field_schema = '%s') table_aux),\r\n"
           + " fkcrosspk as (select *, (pkas @> fkas) is_contained  from (\r\n"
-          + " select fktable.id,string_to_array(case when fktable.value like %s then fktable.value  when fktable.value like %s then REPLACE(fktable.value, ';', '; ' ) else LOWER(fktable.value) end ,'; ') as fkas,\r\n"
+          + " select fktable.id,string_to_array(LOWER(case when fktable.value like %s then fktable.value  when fktable.value like %s then REPLACE(fktable.value, ';', '; ' ) else LOWER(fktable.value) end) ,'; ') as fkas,\r\n"
           + " (select string_to_array(pk_value,'; ') from pktable ) as pkas\r\n"
           + " from fktable) table_aux2 limit %s offset %s )\r\n"
           + " select fktable.* from fktable inner join fkcrosspk on fkcrosspk.id = fktable.id where is_contained = false\r\n"
