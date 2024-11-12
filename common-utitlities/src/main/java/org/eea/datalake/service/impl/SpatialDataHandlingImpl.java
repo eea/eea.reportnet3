@@ -153,15 +153,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     return DataType.fromValue("");
   }
 
-  private Optional<String> getHeaderName(boolean isGeoJsonHeaders, String headerInput, TableSchemaVO tableSchemaVO) {
-    List<DataType> geoJsonEnums = getGeoJsonEnums();
-
-    return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
-        .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
-        .map(FieldSchemaVO::getName)
-        .filter(name -> name.equalsIgnoreCase(headerInput)).findAny();
-  }
-
   private Optional<String> getHeaderType(boolean isGeoJsonHeaders, String headerInput, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();
 
@@ -201,7 +192,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   public String refactorQuery(String geoJsonValue) {
     if (!geoJsonValue.isEmpty() ) {
       String escValue = spatialDataHelper.escapeJsonString(geoJsonValue);
-      if (spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
+      if (StringUtils.isNotBlank(escValue) && spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
         String hexStr = convertToHEX(escValue);
         return FROM_XEX + "('" + hexStr + "')";
       }
