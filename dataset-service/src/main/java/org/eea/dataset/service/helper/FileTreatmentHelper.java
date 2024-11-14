@@ -2494,7 +2494,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
                     field.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
                     field.setType(fieldSchema.getType());
-                    field.setValue(etlField.getValue());
+                    field.setValue(etlField.getValue() != null ? etlField.getValue() : ""); // if there is null value during import then set it as empty string
                     field.setRecord(recordValue);
                     fieldValues.add(field);
                     idFieldSchemas.add(field.getIdFieldSchema());

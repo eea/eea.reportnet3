@@ -49,7 +49,7 @@ public class DremioNonSQLValidationUtils {
     }
 
     public boolean isBlank(String value){
-        return !StringUtils.isBlank(value);
+        return !StringUtils.isEmpty(value);
     }
 
    public boolean isDateYYYYMMDD(String value) {

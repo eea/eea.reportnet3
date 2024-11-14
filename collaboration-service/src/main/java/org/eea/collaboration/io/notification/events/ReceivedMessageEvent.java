@@ -36,6 +36,7 @@ public class ReceivedMessageEvent implements NotificableEventHandler {
     Map<String, Object> notification = new HashMap<>();
     notification.put("user", notificationVO.getUser());
     notification.put("dataflowId", notificationVO.getDataflowId());
+    notification.put("dataflowName", notificationVO.getDataflowName());
     notification.put("providerId", notificationVO.getProviderId());
     return notification;
   }

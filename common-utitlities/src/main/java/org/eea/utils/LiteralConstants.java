@@ -52,6 +52,12 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASETID = "datasetId";
 
+  /** The Constant TECH_ACCEPT_MESSAGE: {@value}. */
+  public static final String TECH_ACCEPT_MESSAGE = "New Technical acceptance message";
+
+  /** The Constant ATTACHMENT_FILE_RECEIVED: {@value}. */
+  public static final String ATTACHMENT_FILE_RECEIVED = "Attachment File received";
+
   /** The Constant DATASET_ID: {@value}. */
   public static final String SIGNATURE = "signature";
 
@@ -372,6 +378,9 @@ public final class LiteralConstants {
 
   /** The Constant XML_TYPE: {@value}. */
   public static final String XML_TYPE = ".xml";
+
+  /** The Constant GML_TYPE: {@value}. */
+  public static final String GML_TYPE = ".gml";
 
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLSX_TYPE = ".xlsx";
