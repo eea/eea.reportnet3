@@ -2951,23 +2951,11 @@ public class DatasetControllerImpl implements DatasetController {
                                            @RequestParam(value = "providerId", required = false) Long providerId,
                                            @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
-    //if tableSchemaIds is empty, retrieve all table schema ids from the dataset and convert them all.
-    if(tableSchemaIds == null || tableSchemaIds.size() == 0){
-      List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
-      tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
-    }
-    for (String tableSchemaId : tableSchemaIds) {
-      try {
-        convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaId);
-      }
-      catch (ParquetConversionException pce){
-        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} does not need to be converted to iceberg", dataflowId, providerId, datasetId, tableSchemaId);
-      }
-      catch(Exception e){
-        LOG.error("Could not convert parquet tables to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
-                providerId, datasetId, tableSchemaId);
-        throw e;
-      }
+    try {
+      bigDataDatasetService.initiateParquetToIcebergConversion(datasetId, dataflowId, providerId, tableSchemaIds);
+    } catch (Exception e) {
+      LOG.error("Failed to initiate Parquet to Iceberg conversion: {}", e.getMessage());
+      throw e;
     }
   }
 
@@ -2979,23 +2967,10 @@ public class DatasetControllerImpl implements DatasetController {
                                            @RequestParam(value = "providerId", required = false) Long providerId,
                                            @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
-    //if tableSchemaIds is empty, retrieve all table schema ids from the dataset and convert them all.
-    if(tableSchemaIds == null || tableSchemaIds.size() == 0){
-      List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
-      tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
-    }
-    for (String tableSchemaId : tableSchemaIds) {
-      try {
-        convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaId);
-      }
-      catch (ParquetConversionException pce){
-        LOG.error("For dataflowId {}, provider {} and datasetId {} tableSchemaId {} does not need to be converted to parquet", dataflowId, providerId, datasetId, tableSchemaId);
-      }
-      catch(Exception e){
-        LOG.error("Could not convert iceberg tables to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
-                providerId, datasetId, tableSchemaId);
-        throw e;
-      }
+    try {
+      bigDataDatasetService.initiateIcebergToParquetConversion(datasetId, dataflowId, providerId, tableSchemaIds);
+    } catch (Exception e) {
+      LOG.error("Failed to initiate Iceberg to Parquet conversion: {}", e.getMessage());
     }
   }
 
