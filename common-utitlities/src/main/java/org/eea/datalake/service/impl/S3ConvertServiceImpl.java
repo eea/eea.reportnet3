@@ -30,7 +30,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -47,10 +49,13 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     private final S3Helper s3Helper;
     private final SpatialDataHandling spatialDataHandling;
     public static final String DIR_0 = "dir0";
+    private final Set<String> headersToExclude = new HashSet<>();
+
 
     public S3ConvertServiceImpl(SpatialDataHandling spatialDataHandling, S3Helper s3Helper) {
         this.s3Helper = s3Helper;
         this.spatialDataHandling = spatialDataHandling;
+        setHeadersToExclude();
     }
 
     /**  The path export DL */
@@ -132,14 +137,28 @@ public class S3ConvertServiceImpl implements S3ConvertService {
 
                     while ((record = r.read()) != null) {
                         long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
+                        boolean canExcludeHeaders =
+                                datasetTypeEnum.getValue().equalsIgnoreCase(DESIGN.getValue()) ||
+                                datasetTypeEnum.getValue().equalsIgnoreCase(REPORTING.getValue()) ||
+                                datasetTypeEnum.getValue().equalsIgnoreCase(TEST.getValue());
                         if (counter == 0) {
-                            csvWriter.writeNext(record.getSchema().getFields().stream()
-                                .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
-                            counter++;
+                            if (canExcludeHeaders) {
+                                csvWriter.writeNext(record.getSchema().getFields().stream()
+                                    .map(Schema.Field::name).filter(t -> !headersToExclude.contains(t)).toArray(String[]::new), false);
+                            } else {
+                                csvWriter.writeNext(record.getSchema().getFields().stream()
+                                    .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
+                            }
+                          counter++;
                         }
                         String[] columns = new String[(int) size];
                         int index = 0;
-                        var filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                        List<Schema.Field> filteredFields = new ArrayList<>();
+                        if (canExcludeHeaders) {
+                            filteredFields = record.getSchema().getFields().stream().filter( t -> !headersToExclude.contains(t.name())).collect(Collectors.toList());
+                        } else {
+                             filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
+                        }
                         for (Schema.Field field : filteredFields) {
                             Object fieldValue = record.get(field.name());
                             if (fieldValue instanceof ByteBuffer) {
@@ -334,5 +353,11 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         } else {
             return key.split("/")[4].equals(tableName);
         }
+    }
+
+    private void setHeadersToExclude() {
+        headersToExclude.add(DIR_0);
+        headersToExclude.add("record_id");
+        headersToExclude.add("data_provider_code");
     }
 }
