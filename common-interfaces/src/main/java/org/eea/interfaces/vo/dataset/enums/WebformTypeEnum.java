@@ -17,7 +17,10 @@ public enum WebformTypeEnum {
 
 
   /** The tables. */
-  TABLES("TABLES", JavaType.STRING);
+  TABLES("TABLES", JavaType.STRING),
+
+  /** The entity. */
+  ENTITY("ENTITY", JavaType.STRING);
 
   /** The value. */
   private final String value;
