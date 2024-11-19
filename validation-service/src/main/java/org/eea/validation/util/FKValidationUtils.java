@@ -166,8 +166,8 @@ public class FKValidationUtils {
           + " select count(pk_value) from fktable_aux\r\n" + " right join pktable\r\n"
           + " on pk_value = fktable_aux.fkas where fktable_aux.fkas is null ";
 
-  /** The Constant FK_SINGLE_WRONG: {@value}. */
-  private static final String FK_SINGLE_WRONG =
+  /** The Constant FK_MULTI_WRONG: {@value}. */
+  private static final String FK_MULTI_WRONG =
       "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
           + " pktable as (select string_agg(pk_value, '; ') pk_value  from (select distinct field_value.VALUE pk_value\r\n"
           + " from dataset_%s.field_value field_value\r\n"
@@ -179,18 +179,58 @@ public class FKValidationUtils {
           + " select fktable.* from fktable inner join fkcrosspk on fkcrosspk.id = fktable.id where is_contained = false\r\n"
           + " limit %s offset %s ";
 
-  /** The Constant FK_SINGLE_WRONG_IGNORE_CASE_LINK: {@value}. */
-  private static final String FK_SINGLE_WRONG_IGNORE_CASE_LINK =
+  /** The Constant FK_MULTI_WRONG_IGNORE_CASE_LINK: {@value}. */
+  private static final String FK_MULTI_WRONG_IGNORE_CASE_LINK =
       "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
           + " pktable as (select string_agg(pk_value, '; ') pk_value  from (select distinct LOWER(field_value.VALUE) pk_value\r\n"
           + " from dataset_%s.field_value field_value\r\n"
           + " where field_value.id_field_schema = '%s') table_aux),\r\n"
           + " fkcrosspk as (select *, (pkas @> fkas) is_contained  from (\r\n"
-          + " select fktable.id,string_to_array(case when fktable.value like %s then fktable.value  when fktable.value like %s then REPLACE(fktable.value, ';', '; ' ) else LOWER(fktable.value) end ,'; ') as fkas,\r\n"
+          + " select fktable.id,string_to_array(LOWER(case when fktable.value like %s then fktable.value  when fktable.value like %s then REPLACE(fktable.value, ';', '; ' ) else LOWER(fktable.value) end) ,'; ') as fkas,\r\n"
           + " (select string_to_array(pk_value,'; ') from pktable ) as pkas\r\n"
           + " from fktable) table_aux2 limit %s offset %s )\r\n"
           + " select fktable.* from fktable inner join fkcrosspk on fkcrosspk.id = fktable.id where is_contained = false\r\n"
           + " limit %s offset %s ";
+
+  /** The Constant FK_SINGLE_WRONG: {@value}. */
+  private static final String FK_SINGLE_WRONG =
+          "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
+                  + "pktable as (\r\n"
+                  + "    select distinct field_value.VALUE as pk_value\r\n"
+                  + "    from dataset_%s.field_value field_value\r\n"
+                  + "    where field_value.id_field_schema = '%s'\r\n"
+                  + "),\r\n"
+                  + "fkcrosspk as (\r\n"
+                  + "    select fktable.id, \r\n"
+                  + "           case when fktable.value = ANY(array(select pk_value from pktable)) then true else false end as is_contained\r\n"
+                  + "    from fktable\r\n"
+                  + "    limit %s offset %s\r\n"
+                  + ")\r\n"
+                  + "select fktable.*\r\n"
+                  + "from fktable\r\n"
+                  + "inner join fkcrosspk on fkcrosspk.id = fktable.id\r\n"
+                  + "where is_contained = false\r\n"
+                  + "limit %s offset %s";
+
+  /** The Constant FK_SINGLE_WRONG_IGNORE_CASE_LINK: {@value}. */
+  private static final String FK_SINGLE_WRONG_IGNORE_CASE_LINK =
+          "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
+                  + "pktable as (\r\n"
+                  + "    select distinct LOWER(field_value.VALUE) as pk_value\r\n"
+                  + "    from dataset_%s.field_value field_value\r\n"
+                  + "    where field_value.id_field_schema = '%s'\r\n"
+                  + "),\r\n"
+                  + "fkcrosspk as (\r\n"
+                  + "    select fktable.id, \r\n"
+                  + "           case when LOWER(fktable.value) = ANY(array(select pk_value from pktable)) then true else false end as is_contained\r\n"
+                  + "    from fktable\r\n"
+                  + "    limit %s offset %s\r\n"
+                  + ")\r\n"
+                  + "select fktable.*\r\n"
+                  + "from fktable\r\n"
+                  + "inner join fkcrosspk on fkcrosspk.id = fktable.id\r\n"
+                  + "where is_contained = false\r\n"
+                  + "limit %s offset %s";
 
   /**
    * Isfield FK.
@@ -315,15 +355,31 @@ public class FKValidationUtils {
         for (int pkindex = 0; pkindex < totalRecords; pkindex += pkBatchSize) {
           List<FieldValue> fkFields;
           if (fkFieldSchema.getIgnoreCaseInLinks() != null && fkFieldSchema.getIgnoreCaseInLinks()) {
-            fkFields = fieldRepository.queryPKNativeFieldValue(
-                String.format(FK_SINGLE_WRONG_IGNORE_CASE_LINK, datasetIdReference, idFieldSchema, datasetIdRefered,
-                    idFieldSchemaPKString, "'%; %'", "'%;%'", pkBatchSize, pkindex, batchSize,
-                    fkindex));
+            if(fkFieldSchema.getPkHasMultipleValues()) {
+              fkFields = fieldRepository.queryPKNativeFieldValue(
+                      String.format(FK_MULTI_WRONG_IGNORE_CASE_LINK, datasetIdReference, idFieldSchema, datasetIdRefered,
+                              idFieldSchemaPKString, "'%; %'", "'%;%'", pkBatchSize, pkindex, batchSize,
+                              fkindex));
+            }
+            else {
+              fkFields = fieldRepository.queryPKNativeFieldValue(
+                      String.format(FK_SINGLE_WRONG_IGNORE_CASE_LINK, datasetIdReference, idFieldSchema, datasetIdRefered,
+                              idFieldSchemaPKString, pkBatchSize, pkindex, batchSize,
+                              fkindex));
+            }
           } else {
-            fkFields = fieldRepository.queryPKNativeFieldValue(
-                String.format(FK_SINGLE_WRONG, datasetIdReference, idFieldSchema, datasetIdRefered,
-                    idFieldSchemaPKString, "'%; %'", "'%;%'", pkBatchSize, pkindex, batchSize,
-                    fkindex));
+            if(fkFieldSchema.getPkHasMultipleValues()) {
+              fkFields = fieldRepository.queryPKNativeFieldValue(
+                      String.format(FK_MULTI_WRONG, datasetIdReference, idFieldSchema, datasetIdRefered,
+                              idFieldSchemaPKString, "'%; %'", "'%;%'", pkBatchSize, pkindex, batchSize,
+                              fkindex));
+            }
+            else{
+              fkFields = fieldRepository.queryPKNativeFieldValue(
+                      String.format(FK_SINGLE_WRONG, datasetIdReference, idFieldSchema, datasetIdRefered,
+                              idFieldSchemaPKString, pkBatchSize, pkindex, batchSize,
+                              fkindex));
+            }
           }
           if (null != fkFields && !fkFields.isEmpty()) {
             createFieldValueValidationV2(fkFields, pkValidation, errorFields);

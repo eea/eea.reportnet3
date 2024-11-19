@@ -476,7 +476,7 @@ export const WebformField = ({
                 onFillField(field, option, value, isConditional);
                 webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                 if (isNil(field.recordId)) onSaveField(option, value);
-                else onEditorSubmitValue(field, option, value);
+                else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               optionLabel="itemType"

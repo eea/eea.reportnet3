@@ -132,12 +132,12 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             if (!fieldName.equals("")) {
                 query.append(COMMA).append(fieldName);
             }
-
-            createHeaders(datasetSchemaId, query, parameters, fieldName, headerNames, ruleVO.getWhenCondition());
+            Map<String, String> fieldSchemaIdNameMap = new HashMap<>();
+            createHeaders(datasetSchemaId, query, parameters, fieldName, headerNames, ruleVO.getWhenCondition(), fieldSchemaIdNameMap);
 
             query.append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
-            runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver);
+            runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver, fieldSchemaIdNameMap);
         } catch (Exception e1) {
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e1.getMessage());
             throw new DremioValidationException(e1.getMessage());
@@ -166,12 +166,13 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param rs
      * @param dataTableResolver
      * @param validationResolver
+     * @param fieldSchemaIdNameMap
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      * @throws IOException
      */
     private void runRuleAndCreateParquet(boolean createParquetWithSQL, String providerCode, RuleVO ruleVO, String fieldName, String fileName, Map<String, List<String>> headerNames, SqlRowSet rs,
-                                         S3PathResolver dataTableResolver, S3PathResolver validationResolver) throws Exception {
+                                         S3PathResolver dataTableResolver, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap) throws Exception {
         Class<?> cls = Class.forName(RULE_OPERATORS);
         Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
         Object object = factoryMethod.invoke(null, null);
@@ -181,7 +182,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             //if the dataset to validate is of reference type, then the validation path should be changed
             StringBuilder validationQuery = dremioRulesService.getS3RuleFolderQueryBuilder(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), dataTableResolver, validationResolver, ruleVO, fieldName);
             while (rs.next()) {
-                boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
+                boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
                 if (!isValid) {
                     if (count != 0) {
                         validationQuery.append(",'");
@@ -199,7 +200,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             }
         } else {
             Map<String, String> headerMap = dremioRulesService.createValidationParquetHeaderMap(dataTableResolver.getDatasetId(), dataTableResolver.getTableName(), ruleVO, fieldName);
-            createParquetAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver);
+            createParquetAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver, fieldSchemaIdNameMap);
         }
     }
 
@@ -214,14 +215,16 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param rs
      * @param cls
      * @param object
+     * @param validationResolver
+     * @param fieldSchemaIdNameMap
      * @throws Exception
      */
     private void createParquetAndUploadToS3(String fileName, String providerCode, RuleVO ruleVO, String fieldName, Map<String, String> headerMap, Map<String, List<String>> headerNames,
-                                            SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
+                                            SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap) throws Exception {
         if (validationSplitParquet) {
-            createSplitParquetFilesAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver);
+            createSplitParquetFilesAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver, fieldSchemaIdNameMap);
         } else {
-            createParquetFileAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver);
+            createParquetFileAndUploadToS3(fileName, providerCode, ruleVO, fieldName, headerMap, headerNames, rs, cls, object, validationResolver, fieldSchemaIdNameMap);
         }
     }
 
@@ -237,14 +240,15 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param cls
      * @param object
      * @param validationResolver
+     * @param fieldSchemaIdNameMap
      * @throws Exception
      */
     private void createSplitParquetFilesAndUploadToS3(String fileName, String providerCode, RuleVO ruleVO, String fieldName, Map<String, String> headerMap, Map<String, List<String>> headerNames,
-                                                      SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
+                                                      SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap) throws Exception {
         List<String> recordIds = new ArrayList<>();
         Schema schema = getSchema();
         while (rs.next()) {
-            boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
+            boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
             if (!isValid) {
                 recordIds.add(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
             }
@@ -289,10 +293,11 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param cls
      * @param object
      * @param validationResolver
+     * @param fieldSchemaIdNameMap
      * @throws Exception
      */
     private void createParquetFileAndUploadToS3(String fileName, String providerCode, RuleVO ruleVO, String fieldName, Map<String, String> headerMap, Map<String, List<String>> headerNames,
-                                                SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver) throws Exception {
+                                                SqlRowSet rs, Class<?> cls, Object object, S3PathResolver validationResolver, Map<String, String> fieldSchemaIdNameMap) throws Exception {
         Schema schema = getSchema();
         String file = fileName + PARQUET_TYPE;
         String parquetFile = parquetFilePath + file;
@@ -301,7 +306,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 .withCompressionCodec(CompressionCodecName.SNAPPY).withPageSize(4 * 1024).withRowGroupSize(16 * 1024).build()) {
             int parquetRecordCount = 0;
             while (rs.next()) {
-                boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object);
+                boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
                 if (!isValid) {
                     if (parquetRecordCount==0) {
                         parquetRecordCount++;
@@ -362,11 +367,13 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param rs
      * @param cls
      * @param object
+     * @param fieldSchemaIdNameMap
      * @return
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
-    private boolean isRecordValid(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object) throws IllegalAccessException, InvocationTargetException {
+    private boolean isRecordValid(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object, Map<String, String> fieldSchemaIdNameMap)
+            throws IllegalAccessException, InvocationTargetException {
         List<Object> parameters;
         RuleExpressionDTO ruleExpressionDTO = ruleVO.getWhenCondition();
         String ruleMethodName = ruleExpressionDTO.getOperator().getFunctionName();
@@ -375,7 +382,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         Method method = dremioRulesService.getRuleMethodFromClass(ruleMethodName, cls);
         List<Object> internalResults = new ArrayList<>();
         AtomicBoolean record = new AtomicBoolean(false);
-        executeRule(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, nestedExpression, internalResults, record);
+        executeRule(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, nestedExpression, internalResults, record, fieldSchemaIdNameMap);
 
         if (internalResults.size()>0 && nestedExpression.get()) {
             if (internalResults.size() == 1) {
@@ -386,7 +393,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         } else {
             record.set(isRecord(method.getName()));
             parameters = ruleExpressionDTO.getParams();
-            isValid = (Boolean) getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), method.getName(), method, parameters, providerCode);
+            isValid = (Boolean) getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), method.getName(), method, parameters, providerCode, fieldSchemaIdNameMap);
         }
         return isValid;
     }
@@ -436,8 +443,11 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param nestedExpression
      * @param internalResults
      * @param record
+     * @param fieldSchemaIdNameMap
      */
-    private void executeRule(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object, AtomicBoolean nestedExpression, List<Object> internalResults, AtomicBoolean record) {
+    private void executeRule(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object,
+                             AtomicBoolean nestedExpression, List<Object> internalResults, AtomicBoolean record, Map<String, String> fieldSchemaIdNameMap) {
+
         ruleVO.getWhenCondition().getParams().forEach(param -> {
             String functionName;
             List<Object> params = new ArrayList<>();
@@ -447,7 +457,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 ruleExpression.getParams().forEach(p -> {
                     Object result;
                     if (p instanceof RuleExpressionDTO) {
-                        result = getResult(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, record, (RuleExpressionDTO) p);
+                        result = getResult(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, record, (RuleExpressionDTO) p, fieldSchemaIdNameMap);
                         params.add(result);
                     } else {
                         params.add(p);
@@ -457,7 +467,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 record.set(isRecord(functionName));
                 Method md = dremioRulesService.getRuleMethodFromClass(functionName, cls);
                 try {
-                    Object result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), functionName, md, params, providerCode);
+                    Object result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), functionName, md, params, providerCode, fieldSchemaIdNameMap);
                     internalResults.add(result);
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
@@ -465,6 +475,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             } else {
                 internalResults.add(param);
             }
+
         });
     }
 
@@ -476,8 +487,10 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param fieldName
      * @param headerNames
      * @param ruleExpressionDTO
+     * @param fieldSchemaIdNameMap
      */
-    private void createHeaders(String datasetSchemaId, StringBuilder query, List<Object> parameters, String fieldName, Map<String, List<String>> headerNames, RuleExpressionDTO ruleExpressionDTO) {
+    private void createHeaders(String datasetSchemaId, StringBuilder query, List<Object> parameters, String fieldName, Map<String, List<String>> headerNames,
+                               RuleExpressionDTO ruleExpressionDTO, Map<String, String> fieldSchemaIdNameMap) {
         String ruleMethodName = ruleExpressionDTO.getOperator().getFunctionName();
         int idx = ruleMethodName.indexOf(RECORD);
         List<String> hNames = new ArrayList<>();
@@ -489,10 +502,11 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, (String) p);
                 hNames.add(fieldSchema.getName());
                 query.append(COMMA).append(fieldSchema.getName());
+                fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             });
             headerNames.put(ruleMethodName, hNames);
         } else {
-            extractFieldHeaders(ruleExpressionDTO, headerNames, fieldName, datasetSchemaId, query);
+            extractFieldHeaders(ruleExpressionDTO, headerNames, fieldName, datasetSchemaId, query, fieldSchemaIdNameMap);
         }
     }
 
@@ -507,9 +521,11 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param object
      * @param record
      * @param p
+     * @param fieldSchemaIdNameMap
      * @return
      */
-    private Object getResult(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object, AtomicBoolean record, RuleExpressionDTO p) {
+    private Object getResult(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object, AtomicBoolean record,
+                             RuleExpressionDTO p, Map<String, String> fieldSchemaIdNameMap) {
         RuleExpressionDTO ruleExp = p;
         String functionName = ruleExp.getOperator().getFunctionName();
         record.set(isRecord(functionName));
@@ -519,13 +535,13 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             if (!(pm instanceof RuleExpressionDTO)) {
                 values.add(pm);
             } else {
-                Object value = getResult(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, record, (RuleExpressionDTO) pm);
+                Object value = getResult(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, record, (RuleExpressionDTO) pm, fieldSchemaIdNameMap);
                 values.add(value);
             }
         });
         Object result;
         try {
-            result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), functionName, md, values, providerCode);
+            result = getMethodExecutionResult(ruleVO, fieldName, headerNames, rs, object, record.get(), functionName, md, values, providerCode, fieldSchemaIdNameMap);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
@@ -539,15 +555,17 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param fieldName
      * @param datasetSchemaId
      * @param query
+     * @param fieldSchemaIdNameMap
      */
-    private void extractFieldHeaders(RuleExpressionDTO ruleExpressionDTO, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query) {
+    private void extractFieldHeaders(RuleExpressionDTO ruleExpressionDTO, Map<String, List<String>> headerNames, String fieldName,
+                                     String datasetSchemaId, StringBuilder query, Map<String, String> fieldSchemaIdNameMap) {
         List<Object> params= ruleExpressionDTO.getParams();
         params.forEach(p -> {
             if (p instanceof RuleExpressionDTO) {
-                extractFieldHeaders((RuleExpressionDTO) p, headerNames, fieldName, datasetSchemaId, query);
+                extractFieldHeaders((RuleExpressionDTO) p, headerNames, fieldName, datasetSchemaId, query, fieldSchemaIdNameMap);
             } else {
                 if (p instanceof String) {
-                    createHeaderNames((String) p, ruleExpressionDTO.getOperator().getFunctionName(), headerNames, fieldName, datasetSchemaId, query);
+                    createHeaderNames((String) p, ruleExpressionDTO.getOperator().getFunctionName(), headerNames, fieldName, datasetSchemaId, query, fieldSchemaIdNameMap);
                 }
             }
         });
@@ -561,8 +579,9 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param fieldName
      * @param datasetSchemaId
      * @param query
+     * @param fieldSchemaIdNameMap
      */
-    private void createHeaderNames(String parameter, String methodName, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query) {
+    private void createHeaderNames(String parameter, String methodName, Map<String, List<String>> headerNames, String fieldName, String datasetSchemaId, StringBuilder query, Map<String, String> fieldSchemaIdNameMap) {
         parameter = parameter.trim();
         List<String> list = headerNames.get(methodName);
         if (list==null) {
@@ -581,6 +600,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                 }
                 headerNames.put(methodName, list);
                 query.append(COMMA).append(fieldSchema.getName());
+                fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             }
         }
     }
@@ -629,12 +649,13 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
      * @param md
      * @param pm
      * @param providerCode
+     * @param fieldSchemaIdNameMap
      * @return
      * @throws IllegalAccessException
      * @throws InvocationTargetException
      */
     private Object getMethodExecutionResult(RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Object object,
-                                             boolean record, String methodName, Method md, List<Object> pm, String providerCode) throws IllegalAccessException, InvocationTargetException {
+                                             boolean record, String methodName, Method md, List<Object> pm, String providerCode, Map<String, String> fieldSchemaIdNameMap) throws IllegalAccessException, InvocationTargetException {
         Object result = null;
         if (methodName.equals(RECORD_IF_THEN) || methodName.equals(RECORD_AND) || methodName.equals(RECORD_OR) ||
                 methodName.equals(FIELD_AND) || methodName.equals(FIELD_OR)) {
@@ -652,13 +673,23 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         if (pm.size()==1) {
             String fieldValue = "";
             String fieldSchemaId = "";
-            if (fieldName.isEmpty()) {
-                fieldValue = rs.getString(headerNames.get(methodName).get(0));
-            }
             if (ruleVO.getType().equals(EntityTypeEnum.RECORD)) {
                 fieldSchemaId = (String) pm.get(0);
             } else {
                 fieldSchemaId = ruleVO.getReferenceId();
+            }
+            if (fieldName.isEmpty()) {
+                /*
+                The following code is a fix for #280121 Previously when having the same condition multiple times connected with AND/OR
+                e.g. NOT_NULL condition (field1 is NOT_NULL AND field2 is NOT_NULL), we only checked the first field.
+                With the following we use map that contains field schema ids and their names and retrieve the correct field name each time
+                 */
+                if(fieldSchemaIdNameMap != null && fieldSchemaIdNameMap.get(fieldSchemaId) != null){
+                    fieldValue = rs.getString(fieldSchemaIdNameMap.get(fieldSchemaId));
+                }
+                else{
+                    fieldValue = rs.getString(headerNames.get(methodName).get(0));
+                }
             }
             createField(fieldName, rs, fields, recordValue, fieldValue, fieldSchemaId);
             result = md.invoke(object, pm.get(0) instanceof String && ((String) pm.get(0)).equalsIgnoreCase(VALUE) ? rs.getString(fieldName) : pm.get(0));
