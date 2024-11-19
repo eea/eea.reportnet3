@@ -155,6 +155,20 @@ export default class DomHandler {
     return null;
   }
 
+  static findSingleDownKey(element, selector) {
+    if (element) {
+      return element.querySelector(selector).nextElementSibling;
+    }
+    return null;
+  }
+
+  static findSingleUpKey(element, selector) {
+    if (element) {
+      return element.querySelector(selector).previousElementSibling;
+    }
+    return null;
+  }
+
   static getHeight(el) {
     let height = el.offsetHeight;
     let style = getComputedStyle(el);

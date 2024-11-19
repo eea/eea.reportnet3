@@ -17,6 +17,7 @@ import DropdownPanel from './_components/DropdownPanel/DropdownPanel';
 import { DropdownItem } from './_components/DropdownItem';
 import { Spinner } from 'views/_components/Spinner';
 import Tooltip from 'primereact/tooltip';
+import { isNil } from 'lodash';
 
 const DropdownWebform = props => {
   var {
@@ -66,6 +67,7 @@ const DropdownWebform = props => {
   } = props;
 
   const [filterState, setFilterState] = useState(currentValue ? currentValue : '');
+  const [initialValue, setInitialValue] = useState(null);
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [previousSearchChar, setPreviousSearchChar] = useState('');
   const panelRef = useRef(null);
@@ -86,6 +88,12 @@ const DropdownWebform = props => {
     selectedOptionUpdated,
     selfClick;
 
+  useEffect(() => {
+    if (initialValue === null) {
+      setInitialValue(value);
+    }
+  }, [value]);
+
   const onKeyPress = event => {
     if (props.onKeyPress && event.which === 13) {
       props.onKeyPress(event);
@@ -105,6 +113,9 @@ const DropdownWebform = props => {
       DomHandler.hasClass(event.target, 'p-dropdown-clear-icon') ||
       DomHandler.hasClass(event.target, 'p-dropdown-clear-filter-icon');
     if (!overlayClick && !editableInputClick && !clearClick) {
+      selectItem({
+        option: initialValue
+      });
       focusInputRef.current.focus();
 
       if (panelRef.current && panelRef.current.offsetParent) {
@@ -139,42 +150,58 @@ const DropdownWebform = props => {
   };
 
   const onUpKey = event => {
-    if (options) {
-      const selectedItemIndex = findOptionIndex(value);
+    if (!hasFilter()) {
+      let highlightItem = DomHandler.findSingleUpKey(itemsWrapperRef.current, 'li.p-highlight');
 
-      if (selectedItemIndex !== -1) {
-        const prevItem = findPrevVisibleItem(selectedItemIndex);
+      if (!isNil(highlightItem)) DomHandler.scrollInView(itemsWrapperRef.current, highlightItem);
+      if (options) {
+        const selectedItemIndex = findOptionIndex(value);
 
-        if (prevItem) {
-          selectItem({
-            originalEvent: event,
-            option: prevItem
-          });
+        if (selectedItemIndex !== -1) {
+          const prevItem = findPrevVisibleItem(selectedItemIndex);
+
+          if (prevItem) {
+            selectItem({
+              originalEvent: event,
+              option: prevItem,
+              action: 'arrowKeys'
+            });
+          }
         }
       }
-    }
 
-    event.preventDefault();
+      event.preventDefault();
+    }
   };
 
   const onDownKey = event => {
-    if (options) {
-      if (!panelRef.current.offsetParent && event.altKey) {
-        show();
-      } else {
-        let selectedItemIndex = findOptionIndex(value);
-        let nextItem = findNextVisibleItem(selectedItemIndex);
+    if (!hasFilter()) {
+      console.log(itemsWrapperRef.current);
 
-        if (nextItem) {
-          selectItem({
-            originalEvent: event,
-            option: nextItem
-          });
+      let highlightItem = DomHandler.findSingleDownKey(itemsWrapperRef.current, 'li.p-highlight');
+
+      console.log(highlightItem);
+
+      if (!isNil(highlightItem)) DomHandler.scrollInView(itemsWrapperRef.current, highlightItem);
+
+      if (options) {
+        if (!panelRef.current.offsetParent && event.altKey) {
+          show();
+        } else {
+          let selectedItemIndex = findOptionIndex(value);
+          let nextItem = findNextVisibleItem(selectedItemIndex);
+          if (nextItem) {
+            selectItem({
+              originalEvent: event,
+              option: nextItem,
+              action: 'arrowKeys'
+            });
+          }
         }
       }
-    }
 
-    event.preventDefault();
+      event.preventDefault();
+    }
   };
 
   const onInputKeyDown = event => {
@@ -335,6 +362,7 @@ const DropdownWebform = props => {
     const option = event.option;
 
     if (!option.disabled) {
+      setInitialValue(event.option);
       selectItem(event);
       focusInputRef.current.focus();
     }
@@ -365,6 +393,12 @@ const DropdownWebform = props => {
         break;
       //enter
       case 13:
+        setInitialValue(value);
+        selectItem({
+          originalEvent: event,
+          option: value,
+          action: 'enter'
+        });
         hide();
         event.preventDefault();
         break;
@@ -403,17 +437,19 @@ const DropdownWebform = props => {
 
   const selectItem = event => {
     let currentSelectedOption = findOption(value);
-    if (currentSelectedOption !== event.option) {
-      updateEditableLabel(event.option);
+
+    if (currentSelectedOption !== event.option || event.action === 'enter') {
+      updateEditableLabel(event.option ? event.option : initialValue);
       onChange({
         originalEvent: event.originalEvent,
-        value: optionLabel ? event.option : event.option.value,
+        value: optionLabel ? (event.option ? event.option : initialValue) : event.option.value,
         stopPropagation: () => {},
         preventDefault: () => {},
         target: {
           name: name,
           id: id,
-          value: optionLabel ? event.option : event.option.value
+          value: optionLabel ? (event.option ? event.option : initialValue) : event.option.value,
+          action: event.action ? event?.action : null
         }
       });
     }
@@ -739,7 +775,7 @@ const DropdownWebform = props => {
   }, [filter, panelRef]);
 
   useEffect(() => {
-    if (panelRef.current && panelRef.current && panelRef.current.offsetParent) {
+    if (panelRef.current && panelRef.current.offsetParent) {
       let highlightItem = DomHandler.findSingle(panelRef.current, 'li.p-highlight');
       if (highlightItem && panelRef.current.itemsWrapper) {
         DomHandler.scrollInView(panelRef.current.itemsWrapper, highlightItem);
@@ -772,7 +808,8 @@ const DropdownWebform = props => {
     'p-dropdown-clearable': showClear && !disabled
   });
   let selectedOption = findOption(value);
-  let label = selectedOption ? getOptionLabel(selectedOption) : null;
+  let initialSelectedOption = findOption(initialValue);
+  let label = initialSelectedOption ? getOptionLabel(initialSelectedOption) : null;
 
   let hiddenSelect = renderHiddenSelect(selectedOption);
   let keyboardHelper = renderKeyboardHelper(labelProp);
