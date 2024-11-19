@@ -3831,4 +3831,22 @@ public class DatasetServiceImpl implements DatasetService {
     return dataSetMetabaseRepository.findDataProviderIdById(datasetId);
   }
 
+  /**
+   * Saves or updates a statistic
+   * @param statistics the object
+   */
+  @Override
+  public void saveOrUpdateStatistics(Statistics statistics){
+    Optional<Statistics> optionalStatistics = statisticsRepository.findFirstByDatasetAndAndIdTableSchemaAndStatName(statistics.getDataset().getId(), statistics.getIdTableSchema(), statistics.getStatName());
+    if(optionalStatistics.isPresent()){
+      Statistics oldStatistics = optionalStatistics.get();
+      //update the value of the statistics
+      oldStatistics.setValue(statistics.getValue());
+      statisticsRepository.save(oldStatistics);
+    }
+    else{
+      statisticsRepository.save(statistics);
+    }
+  }
+
 }

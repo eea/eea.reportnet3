@@ -3,6 +3,7 @@ package org.eea.dataset.service;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.domain.TableValue;
+import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.model.TruncateDataset;
@@ -712,4 +713,10 @@ public interface DatasetService {
    * @param datasetId
    */
   Long getDataProviderIdById(Long datasetId);
+
+  /**
+   * Saves or updates a statistic
+   * @param statistics the object
+   */
+  void saveOrUpdateStatistics(Statistics statistics);
 }

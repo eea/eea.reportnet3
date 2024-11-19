@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -55,4 +56,5 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
   List<Statistics> findStatisticsByIdDatasetSchema(
       @Param("idDatasetSchema") String idDatasetSchema);
 
+  Optional<Statistics> findFirstByDatasetAndAndIdTableSchemaAndStatName(Long idDataset, String idTableSchema, String statName);
 }

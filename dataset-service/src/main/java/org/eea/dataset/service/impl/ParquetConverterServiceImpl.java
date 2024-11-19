@@ -23,8 +23,11 @@ import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.configuration.util.CsvHeaderMapping;
 import org.eea.dataset.exception.InvalidFileException;
+import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -46,6 +49,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -75,15 +79,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private static final Logger LOG = LoggerFactory.getLogger(ParquetConverterServiceImpl.class);
 
-  @Value("${importPath}")
-  private String importPath;
-
   private final static String MODIFIED_CSV_SUFFIX = "_%s.csv";
   private final static String CSV_EXTENSION = ".csv";
   private final static String PARQUET_EXTENSION = ".parquet";
   private final static String DEFAULT_PARQUET_NAME = "0_0_0.parquet";
-
-  private final static String DEFAULT_TXT_NAME = "0_0_0.txt";
 
   public static final String MEASUREMENTS = "MEASUREMENTS";
 
@@ -110,10 +109,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final SpatialDataHandling spatialDataHandling;
   private final BigDataDatasetService bigDataDatasetService;
   private final S3ConvertService s3ConvertService;
-
+  private DataSetMetabaseMapper dataSetMetabaseMapper;
   private TableSchemaMapper tableSchemaMapper;
-
+  private DatasetService datasetService;
   private JdbcTemplate dremioJdbcTemplate;
+
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
                                      S3ServiceImpl s3Service,
@@ -126,7 +126,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      JdbcTemplate dremioJdbcTemplate,
                                      @Lazy BigDataDatasetService bigDataDatasetService,
                                      S3ConvertService s3ConvertService,
-                                     TableSchemaMapper tableSchemaMapper) {
+                                     TableSchemaMapper tableSchemaMapper,
+                                     DataSetMetabaseMapper dataSetMetabaseMapper,
+                                     @Lazy DatasetService datasetService) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -140,6 +142,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.bigDataDatasetService = bigDataDatasetService;
     this.tableSchemaMapper = tableSchemaMapper;
     this.s3ConvertService = s3ConvertService;
+    this.dataSetMetabaseMapper = dataSetMetabaseMapper;
+    this.datasetService = datasetService;
   }
 
   @Override
@@ -364,6 +368,15 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       handleReferenceDataset(importFileInDremioInfo, s3TablePathResolver);
     }
     LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
+
+    //update totalRecords statistic
+    Statistics statistics = new Statistics();
+    DataSetMetabaseVO dataSetMetabase = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
+    statistics.setDataset(dataSetMetabaseMapper.classToEntity(dataSetMetabase));
+    statistics.setIdTableSchema(tableSchemaVO.getIdTableSchema());
+    statistics.setStatName(TOTAL_RECORDS_IMPORTED);
+    statistics.setValue(numberOfRecordsToBeInserted.toString());
+    datasetService.saveOrUpdateStatistics(statistics);
   }
 
   private TableSchemaVO getTableSchemaVO(String csvFileName, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo) throws EEAException {

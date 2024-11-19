@@ -466,6 +466,9 @@ public final class LiteralConstants {
   /** The Constant SPACE: {@value}. */
   public static final String SPACE = " ";
 
+  /** The Constant TOTAL_RECORDS_IMPORTED: {@value}. */
+  public static final String TOTAL_RECORDS_IMPORTED = "totalRecordsImported";
+
   /**
    * Instantiates a new literal constants.
    */
