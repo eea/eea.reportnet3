@@ -259,10 +259,10 @@ public class ValidationControllerImplTest {
   @Test
   public void getGroupFailedValidationsTest() throws EEAException {
     when(loadValidationsHelper.getListGroupValidations(Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(failedValidationsDatasetVO);
     assertEquals("result not equals to expected", failedValidationsDatasetVO, validationController
-        .getGroupFailedValidationsByIdDataset(1L, 1, 10, "id", false, null, null, "", ""));
+        .getGroupFailedValidationsByIdDataset(1L, 1, 10, null, "id", false, null, null, "", ""));
   }
 
   /**
@@ -274,7 +274,7 @@ public class ValidationControllerImplTest {
   @Test(expected = ResponseStatusException.class)
   public void getGroupFailedValidationsByIdDatasetExceptionTest() throws EEAException {
     try {
-      validationController.getGroupFailedValidationsByIdDataset(null, 1, 10, null, false, null,
+      validationController.getGroupFailedValidationsByIdDataset(null, 1, 10, null, null, false, null,
           null, "", "");
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
@@ -293,9 +293,9 @@ public class ValidationControllerImplTest {
   public void getGroupFailedValidationsByIdDatasetEEAExceptionTest() throws EEAException {
     doThrow(new EEAException()).when(loadValidationsHelper).getListGroupValidations(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
-        Mockito.any());
+        Mockito.any(), Mockito.any());
     assertNull("result is not null", validationController.getGroupFailedValidationsByIdDataset(1L,
-        1, 10, null, false, null, null, "", ""));
+        1, 10, null, null, false, null, null, "", ""));
   }
 
   @Test

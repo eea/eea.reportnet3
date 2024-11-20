@@ -892,7 +892,7 @@ public class ValidationServiceImpl implements ValidationService {
     validations.setIdDataset(datasetId);
 
     List<GroupValidationVO> errors = validationRepository.findGroupRecordsByFilter(datasetId,
-        new ArrayList<>(), new ArrayList<>(), "", "", null, "", false, false);
+        new ArrayList<>(), new ArrayList<>(), "", "", null, null, "", false, false);
 
     getRuleMessage(dataset, errors);
     validations.setErrors(errors);
@@ -913,7 +913,7 @@ public class ValidationServiceImpl implements ValidationService {
     S3PathResolver s3PathResolver = new S3PathResolver(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId()!=null ? dataSetMetabaseVO.getDataProviderId() : 0, dataSetMetabaseVO.getId(), S3_VALIDATION);
     if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
        errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, null, null, "",
-              "", null, "", false, false);
+              "", "", null, "", false, false);
     }
 
     getRuleMessageDL(dataSetMetabaseVO.getDatasetSchema(), errors);

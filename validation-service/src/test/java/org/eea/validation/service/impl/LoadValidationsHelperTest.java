@@ -166,7 +166,7 @@ public class LoadValidationsHelperTest {
   @Test
   public void testGetGroupListValidations() throws Exception {
     when(validationService.getDatasetValuebyId(Mockito.any())).thenReturn(datasetValue);
-    loadValidationsHelper.getListGroupValidations(0L, pageable, null, null, "", "", "typeEntity",
+    loadValidationsHelper.getListGroupValidations(0L, pageable, null, null, "", "", null, "typeEntity",
         false);
     Mockito.verify(validationService, times(1)).getDatasetValuebyId(Mockito.any());
   }

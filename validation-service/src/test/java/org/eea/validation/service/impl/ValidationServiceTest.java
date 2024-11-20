@@ -1034,7 +1034,7 @@ public class ValidationServiceTest {
 
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(validationRepository.findGroupRecordsByFilter(Mockito.anyLong(), Mockito.any(),
-        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+        Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.anyBoolean(), Mockito.anyBoolean())).thenReturn(errorList);
     when(ruleServiceImpl.getActiveRulesSchemaByDatasetId(Mockito.any())).thenReturn(rulesSchemaVO);
 
