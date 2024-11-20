@@ -606,7 +606,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
           @ApiResponse(code = 400, message = EEAErrorMessage.CSV_FILE_ERROR),
           @ApiResponse(code = 400, message = "Error replacing file")
   })
-  public ResponseEntity<byte[]> replaceLeadReportersFile(
+  public ResponseEntity<byte[]> importAndReplaceFileCountryTemplate(
           @PathVariable(value = "dataflowId") Long dataflowId,
           @PathVariable(value = "groupId") Long groupId,
           @RequestParam("file") MultipartFile file) {

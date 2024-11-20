@@ -206,6 +206,19 @@ public interface RepresentativeController {
       @PathVariable(value = "dataflowId") Long dataflowId,
       @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
 
+  /**
+   * Import and Replace file country template.With that controller we can download a country template to import
+   * data with the countries with this group id
+   *
+   * @param dataflowId the dataflow id
+   * @param groupId the group id
+   * @param file the file
+   * @return the response entity
+   */
+  @PutMapping("/import/{dataflowId}/group/{groupId}")
+  ResponseEntity<byte[]> importAndReplaceFileCountryTemplate(
+          @PathVariable(value = "dataflowId") Long dataflowId,
+          @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);
 
   /**
    * Update representative visibility restrictions.
