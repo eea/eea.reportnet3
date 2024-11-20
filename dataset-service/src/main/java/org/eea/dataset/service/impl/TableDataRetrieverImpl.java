@@ -7,7 +7,6 @@ import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
-import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.TableDataRetriever;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -40,7 +39,6 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
   private final DatasetSchemaService datasetSchemaService;
   private final DataFlowController dataFlowController;
   private final DataCollectionController.DataCollectionControllerZuul dataCollectionControllerZuul;
-  private final DatasetService datasetService;
 
   private static final Logger LOG = LoggerFactory.getLogger(TableDataRetrieverImpl.class);
 
@@ -51,7 +49,7 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
     try {
       DataSetMetabase datasetMetabase = getDataSetMetabase(dpDatasetId);
       Long dcDatasetId = dataCollectionControllerZuul.findDataCollectionIdByDatasetSchemaId(datasetMetabase.getDatasetSchema());
-      Long dataProviderCode = datasetService.getDataProviderIdById(dpDatasetId);
+      Long dataProviderCode = dataSetMetabaseRepository.findDataProviderIdById(dpDatasetId);
 
       if (isBigData(datasetMetabase.getDataflowId())) {
         List<S3Object> dcList = getListOfS3Files(dcDatasetId, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH, dataProviderCode);
@@ -70,7 +68,8 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
       LOG.error("Unexpected error! Error while processing data. Message: {}", e.getMessage());
       return new ResponseEntity<>(message, status);
     }
-    return new ResponseEntity<>(new HashMap<>(), HttpStatus.BAD_REQUEST);
+    message = "Please provide the correct data";
+    return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
   }
 
   private DataSetMetabase getDataSetMetabase(Long dpDatasetId) throws EEAException {
