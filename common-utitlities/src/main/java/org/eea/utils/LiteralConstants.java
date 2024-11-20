@@ -469,6 +469,9 @@ public final class LiteralConstants {
   /** The Constant TOTAL_RECORDS_IMPORTED: {@value}. */
   public static final String TOTAL_RECORDS_IMPORTED = "totalRecordsImported";
 
+  /** The Constant LAST_IMPORT_DATE: {@value}. */
+  public static final String LAST_IMPORT_DATE = "lastImportDate";
+
   /**
    * Instantiates a new literal constants.
    */

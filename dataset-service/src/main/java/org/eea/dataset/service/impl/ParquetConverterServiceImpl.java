@@ -47,6 +47,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -369,13 +370,16 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
     LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
 
-    //update totalRecords statistic
+    //update statistics
     Statistics statistics = new Statistics();
     DataSetMetabaseVO dataSetMetabase = datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId());
     statistics.setDataset(dataSetMetabaseMapper.classToEntity(dataSetMetabase));
     statistics.setIdTableSchema(tableSchemaVO.getIdTableSchema());
     statistics.setStatName(TOTAL_RECORDS_IMPORTED);
     statistics.setValue(numberOfRecordsToBeInserted.toString());
+    datasetService.saveOrUpdateStatistics(statistics);
+    statistics.setStatName(LAST_IMPORT_DATE);
+    statistics.setValue(new DateTime().toString());
     datasetService.saveOrUpdateStatistics(statistics);
   }
 
