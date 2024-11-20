@@ -672,8 +672,8 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
       statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
-
-      statisticsRepository.deleteStatsByIdDataset(datasetId);
+      List<String> statisticsToIgnore = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED);
+      statisticsRepository.deleteStatsByIdDatasetIgnoreStatsByName(datasetId, statisticsToIgnore);
       statisticsRepository.flush();
       statisticsRepository.saveAll(statsList);
       LOG.info("Statistics saved to datasetId {}.", datasetId);

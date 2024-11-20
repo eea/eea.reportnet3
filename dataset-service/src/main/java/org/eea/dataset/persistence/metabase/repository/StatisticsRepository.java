@@ -43,8 +43,8 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
    */
   @Modifying
   @Transactional
-  @Query(nativeQuery = true, value = "delete from Statistics where id_Dataset=:idDataset")
-  void deleteStatsByIdDataset(@Param("idDataset") Long idDataset);
+  @Query(nativeQuery = true, value = "delete from Statistics where id_Dataset=:idDataset and statName not in (:statNames)")
+  void deleteStatsByIdDatasetIgnoreStatsByName(@Param("idDataset") Long idDataset, @Param("statNames") List<String> statNames);
 
   /**
    * Find statistics by id dataset schema.
