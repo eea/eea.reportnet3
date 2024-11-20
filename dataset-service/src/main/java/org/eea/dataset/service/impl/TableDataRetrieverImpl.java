@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,10 +52,18 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
       Long dcDatasetId = dataCollectionControllerZuul.findDataCollectionIdByDatasetSchemaId(datasetMetabase.getDatasetSchema());
       Long dataProviderCode = dataSetMetabaseRepository.findDataProviderIdById(dpDatasetId);
 
+      String datasetSchemaId = datasetMetabase.getDatasetSchema();
       if (isBigData(datasetMetabase.getDataflowId())) {
-        List<S3Object> dcList = getListOfS3Files(dcDatasetId, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH, dataProviderCode);
-        List<S3Object> dpList = getListOfS3Files(dpDatasetId, S3_PROVIDER_PATH, dataProviderCode).stream().filter(t -> !t.key().contains("/import")).collect(Collectors.toList());
-        String datasetSchemaId = datasetMetabase.getDatasetSchema();
+        List<S3Object> dcList = getListOfS3Files(dcDatasetId, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH, dataProviderCode)
+            .stream()
+            .sorted(Comparator.comparing(S3Object::lastModified).reversed())
+            .collect(Collectors.toList());
+        List<S3Object> dpList = getListOfS3Files(dpDatasetId, S3_PROVIDER_PATH, dataProviderCode)
+            .stream()
+            .filter(s3Object -> !s3Object.key().endsWith("/"))
+            .filter(s3Object -> getTableNamesFromSchema(datasetSchemaId).contains(getTableNameFromKey(s3Object.key())))
+            .sorted(Comparator.comparing(S3Object::lastModified).reversed())
+            .collect(Collectors.toList());
         return new ResponseEntity<>(compareLists(dcList, dpList, datasetSchemaService.getDataSchemaById(datasetSchemaId)), HttpStatus.OK);
       }
     } catch (EEAException e) {
@@ -85,37 +94,56 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
   }
 
   private HashMap<String, Boolean> compareLists(List<S3Object> dcList, List<S3Object> dpList, DataSetSchemaVO dataSetSchemaVO) {
-    HashMap<String, S3Object> dcTableMap = new HashMap<>();
-    for (S3Object dc : dcList) {
-      String dcTableName = getTableName(dc.key());
-      dcTableMap.put(dcTableName, dc);
+    HashMap<String, Boolean> finalComparisonResult = new HashMap<>();
+    if (dpList.isEmpty() && !dcList.isEmpty()) {
+      dataSetSchemaVO.getTableSchemas().stream().map(TableSchemaVO::getIdTableSchema).forEach(s -> finalComparisonResult.putIfAbsent(s, true));
+      return finalComparisonResult;
     }
 
-    HashMap<String, Boolean> comparisonResult = new HashMap<>();
+    if (dcList.isEmpty() && !dpList.isEmpty()) {
+      dataSetSchemaVO.getTableSchemas().stream().map(TableSchemaVO::getIdTableSchema).forEach(s -> finalComparisonResult.putIfAbsent(s, false));
+      return finalComparisonResult;
+    }
+
+    HashMap<String, S3Object> dcTableMap = new HashMap<>();
+    for (S3Object dc : dcList) {
+      String dcTableName = getTableNameFromKey(dc.key());
+      dcTableMap.putIfAbsent(dcTableName, dc);
+      //there is a table without data
+      if (!dpList.stream().map(s3Object -> getTableNameFromKey(s3Object.key())).collect(Collectors.toList()).contains(dcTableName)) {
+        String tableSchemaId = dataSetSchemaVO.getTableSchemas().stream().filter(tableSchemaVO -> tableSchemaVO.getNameTableSchema().equalsIgnoreCase(dcTableName)).map(TableSchemaVO::getIdTableSchema).findFirst().orElse(null);
+        finalComparisonResult.putIfAbsent(tableSchemaId, true);
+      }
+    }
+
     for (S3Object dp : dpList) {
-      String dpTableName = getTableName(dp.key());
+      String dpTableName = getTableNameFromKey(dp.key());
       S3Object correspondingDc = dcTableMap.get(dpTableName);
 
       if (correspondingDc != null) {
         String tableSchemaId = dataSetSchemaVO.getTableSchemas().stream().filter(tableSchemaVO -> tableSchemaVO.getNameTableSchema().equalsIgnoreCase(dpTableName)).map(TableSchemaVO::getIdTableSchema).findFirst().orElse(null);
         if (dp.lastModified().isAfter(correspondingDc.lastModified())) {
-          comparisonResult.put(tableSchemaId, true);
+          finalComparisonResult.putIfAbsent(tableSchemaId, true);
         } else if (dp.lastModified().isBefore(correspondingDc.lastModified())) {
-          comparisonResult.put(tableSchemaId, false);
+          finalComparisonResult.putIfAbsent(tableSchemaId, false);
         }
       }
     }
 
-    return comparisonResult;
+    return finalComparisonResult;
 
   }
 
-  private String getTableName(String key) {
+  private String getTableNameFromKey(String key) {
     return key.split("/")[4];
   }
 
   private boolean isBigData(Long dataflowId) {
     return dataFlowController.isBigDataflow(dataflowId);
+  }
+
+  private List<String> getTableNamesFromSchema(String datasetSchemaId) {
+    return datasetSchemaService.getDataSchemaById(datasetSchemaId).getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
   }
 
 }
