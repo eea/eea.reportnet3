@@ -591,6 +591,47 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   }
 
   /**
+   * Import and Repacle file country template.With that controller we can download a country template to import
+   * data with the countrys with this group id
+   * @param dataflowId the dataflow id
+   * @param groupId the group id
+   * @param file the file
+   * @return the response entity
+   */
+  @PutMapping("/import/{dataflowId}/group/{groupId}")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @ApiOperation(value = "Replace lead reporters", hidden = true)
+  @ApiResponses(value = {
+          @ApiResponse(code = 400, message = EEAErrorMessage.FILE_EXTENSION),
+          @ApiResponse(code = 400, message = EEAErrorMessage.CSV_FILE_ERROR),
+          @ApiResponse(code = 400, message = "Error replacing file")
+  })
+  public ResponseEntity<byte[]> replaceLeadReportersFile(
+          @PathVariable(value = "dataflowId") Long dataflowId,
+          @PathVariable(value = "groupId") Long groupId,
+          @RequestParam("file") MultipartFile file) {
+
+    try {
+      LOG.info("Replacing lead reporters for dataflowId {} and groupId {}", dataflowId, groupId);
+      byte[] fileResult = representativeService.importAndReplaceLeadReportersFile(dataflowId, groupId, file);
+
+      String fileName = "Dataflow-" + dataflowId + "-Lead-Reporters-Replace-Results.csv";
+      HttpHeaders httpHeaders = new HttpHeaders();
+      httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, ATTACHMENT_FILENAME + fileName);
+
+      return new ResponseEntity<>(fileResult, httpHeaders, HttpStatus.OK);
+    } catch (EEAException | IOException e) {
+      LOG.error("File replace failed for dataflowId {}, fileName={}. Message: {}",
+              dataflowId, file.getOriginalFilename(), e.getMessage());
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORT_LEAD_REPORTERS);
+    } catch (Exception e) {
+      LOG.error("Unexpected error during file replace for dataflowId {} and groupId {}. Message: {}",
+              dataflowId, groupId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
    * Creates the lead reporter.
    *
    * @param representativeId the representative id
