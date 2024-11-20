@@ -11,7 +11,6 @@ import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -124,7 +123,7 @@ public class S3ServiceImpl implements S3Service {
                 }
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, fileName);
                 break;
-            case S3_CURRENT_PATH:
+            case S3_PROVIDER_PATH:
             case S3_SNAPSHOT_FOLDER_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
                 break;
@@ -248,7 +247,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_TABLE_NAME_FOLDER_PATH:
             case S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX:
             case S3_ATTACHMENTS_TABLE_PATH:
-            case S3_CURRENT_PATH:
+            case S3_PROVIDER_PATH:
                 return String.format(path, dataflowFolder, dataProviderFolder, datasetFolder, s3PathResolver.getTableName());
             default:
                 LOG.info("Wrong type value: {}", path);

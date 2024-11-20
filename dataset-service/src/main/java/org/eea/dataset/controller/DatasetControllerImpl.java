@@ -4,7 +4,6 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
 import lombok.SneakyThrows;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -134,6 +133,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   private DatasetTableService datasetTableService;
+
+  @Autowired
+  private TableDataRetriever tableDataRetriever;
 
   /**
    * Gets the data tables values.
@@ -1224,6 +1226,20 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.error("Unexpected error! Error exporting file for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw e;
     }
+  }
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/tablesUpdated")
+  //@PreAuthorize("isAuthenticated()")
+  @ApiOperation(value = "Tables updated since last release", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully result returned"),
+      @ApiResponse(code = 500, message = "Error finding tables"),
+      @ApiResponse(code = 400, message = "Bad request")})
+  public ResponseEntity<?> tablesUpdatedAfterRelease(
+      @ApiParam(type = "Long", value = "Reporting Dataset Id", example = "0") @RequestParam("datasetId") Long datasetId) {
+
+    return tableDataRetriever.getTablesUpdatedAfterRelease(datasetId);
   }
 
   /**

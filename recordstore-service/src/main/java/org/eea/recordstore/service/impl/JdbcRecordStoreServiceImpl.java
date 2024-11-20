@@ -85,8 +85,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.EUDATASET;
-import static org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum.REPORTING;
 import static org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum.COPY_TO_EU_DATASET;
 import static org.eea.kafka.domain.EventType.*;
 import static org.eea.utils.LiteralConstants.*;
@@ -683,7 +681,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
           //Get table name file from S3, save it locally and then upload to DC table name path
           S3PathResolver providerPath = new S3PathResolver(dataflowId, dataProviderId, idDataset);
-          providerPath.setPath(S3_CURRENT_PATH);
+          providerPath.setPath(S3_PROVIDER_PATH);
           LOG.info("Getting tableNameFilenames for path resolver {}", providerPath);
           List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(providerPath);
           tableNameFilenames.stream().filter(path -> !path.key().contains("/import/") && !path.key().contains("/validation/"))

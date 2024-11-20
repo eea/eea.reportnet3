@@ -219,6 +219,9 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
 
+  @GetMapping(value = "/tablesUpdated")
+  ResponseEntity<?> tablesUpdatedAfterRelease(@RequestParam("datasetId") Long datasetId);
+
   /**
    * Export file DL.
    *
