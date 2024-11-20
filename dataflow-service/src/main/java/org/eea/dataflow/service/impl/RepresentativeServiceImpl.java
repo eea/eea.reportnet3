@@ -5,8 +5,12 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -598,6 +602,104 @@ public class RepresentativeServiceImpl implements RepresentativeService {
   }
 
   /**
+   * Imports and replaces lead reporters from a CSV file for a specific dataflow and group.
+   * <p>
+   * This method performs the following operations:
+   * - Parses the uploaded CSV file to extract lead reporter details (country code and email).
+   * - Identifies lead reporters to be retained or removed based on the imported data.
+   * - Updates existing representatives with the imported lead reporters.
+   * - Deletes obsolete lead reporters not present in the import.
+   * - Generates a CSV summary of the operation as a byte array.
+   * </p>
+   *
+   * @param dataflowId the unique identifier of the dataflow to which the lead reporters belong.
+   * @param groupId the unique identifier of the group associated with the data providers.
+   * @param file the CSV file containing the new lead reporters' details.
+   * @return a byte array representing the CSV summary of the operation.
+   * @throws EEAException if there is an error related to the dataflow or business logic.
+   * @throws IOException if there is an issue reading the uploaded file.
+   */
+
+  @Override
+  @Transactional
+  public byte[] importAndReplaceLeadReportersFile(Long dataflowId, Long groupId, MultipartFile file)
+          throws EEAException, IOException {
+
+    StringWriter writer = new StringWriter();
+    try (CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+
+      List<String> headers = new ArrayList<>(Arrays.asList(REPRESENTING, EMAIL, IMPORTED));
+      int nHeaders = headers.size();
+      String content = new String(file.getBytes());
+
+      //Parse File
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      List<String> everyLines = new ArrayList<>(Arrays.asList(content.split("\n")));
+      everyLines.remove(0);
+
+      // Fetch necessary data
+      List<DataProvider> dataProviderList = dataProviderRepository.findAllByDataProviderGroup_id(groupId);
+      Map<String, Set<String>> importedEmailsByCountry = preReadCountryCodesFromFile(everyLines);
+      List<Representative> existingRepresentatives = representativeRepository
+              .findAllByDataflow_Id(dataflowId);
+
+      Set<Long> leadReportersToDelete = identifyLeadReportersToDelete(existingRepresentatives, importedEmailsByCountry);
+
+      List<Representative> representativeList = fillImportLeadReporterResults(
+              everyLines, dataProviderList, nHeaders, csvWriter, dataflowId);
+
+      //Add the imported lead reporters whose email and country code to the repository
+      if (!Collections.isEmpty(representativeList)) {
+        representativeRepository.saveAll(representativeList);
+      }
+
+      // Remove the deleted lead reporters from representatives with matching country codes
+      updateRepresentatives(existingRepresentatives, importedEmailsByCountry);
+
+      //Delete lead reporters by country code
+      for (Long leadReporterId : leadReportersToDelete) {
+          deleteLeadReporter(leadReporterId);
+      }
+    } catch (IOException e) {
+      LOG.error(EEAErrorMessage.CSV_FILE_ERROR, e);
+    } catch (IndexOutOfBoundsException e) {
+      LOG.error(EEAErrorMessage.DATA_FILE_ERROR, e);
+      throw new EEAException(EEAErrorMessage.DATA_FILE_ERROR);
+    } catch (EEAException e) {
+      LOG.error(EEAErrorMessage.DATAFLOW_NOTFOUND, e);
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in importLeadReportersFile for dataflowId {} and groupId {}. Message: {}", dataflowId, groupId, e.getMessage());
+      throw e;
+    }
+
+    // Converts the read buffer to string and write it into the CSV file
+    String csv = writer.getBuffer().toString();
+    return csv.getBytes();
+  }
+
+  /**
+   * @param lines
+   * @return
+   */
+  public Map<String, Set<String>> preReadCountryCodesFromFile(List<String> lines) {
+    Map<String, Set<String>> countryEmailsMap = new HashMap<>();
+
+    for (String line : lines) {
+      String[] dataLine = line.split("[" + delimiter + "]");
+      String countryCode = dataLine[0].replace("\"", "").trim();
+      String email = dataLine[1].replace("\"", "").trim();
+
+      // Add email to the set of emails for the corresponding country
+      countryEmailsMap
+              .computeIfAbsent(countryCode, k -> new HashSet<>())
+              .add(email.toLowerCase()); // Ensure case-insensitivity for email matching
+    }
+    return countryEmailsMap;
+  }
+
+  /**
    * Fill import lead reporter results.
    *
    * @param everyLines the every lines
@@ -798,6 +900,30 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
   }
 
+  /**
+   * @param existingRepresentatives
+   * @param importedEmailsByCountry
+   * @return
+   */
+  private Set<Long> identifyLeadReportersToDelete(
+          List<Representative> existingRepresentatives,
+          Map<String, Set<String>> importedEmailsByCountry
+  ) {
+    Set<Long> leadReportersToDelete = new HashSet<>();
+    for (Representative representative : existingRepresentatives) {
+      String countryCode = representative.getDataProvider().getCode();
+      if (importedEmailsByCountry.containsKey(countryCode)) {
+        Set<String> importedEmails = importedEmailsByCountry.get(countryCode);
+        for (LeadReporter leadReporter : representative.getLeadReporters()) {
+          if (!importedEmails.contains(leadReporter.getEmail().toLowerCase())) {
+            leadReportersToDelete.add(leadReporter.getId());
+          }
+        }
+      }
+    }
+    return leadReportersToDelete;
+  }
+
 
   /**
    * Update representative visibility restrictions.
@@ -811,6 +937,27 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       boolean restrictFromPublic) {
     representativeRepository.updateRepresentativeVisibilityRestrictions(dataflowId, dataProviderId,
         restrictFromPublic);
+  }
+
+  /**
+   * @param existingRepresentatives
+   * @param importedEmailsByCountry
+   */
+  private void updateRepresentatives(
+          List<Representative> existingRepresentatives,
+          Map<String, Set<String>> importedEmailsByCountry
+  ) {
+    for (Representative representative : existingRepresentatives) {
+      String countryCode = representative.getDataProvider().getCode();
+      if (importedEmailsByCountry.containsKey(countryCode)) {
+        Set<String> importedEmails = importedEmailsByCountry.get(countryCode);
+        List<LeadReporter> updatedLeadReporters = representative.getLeadReporters().stream()
+                .filter(leadReporter -> importedEmails.contains(leadReporter.getEmail().toLowerCase()))
+                .collect(Collectors.toList());
+        representative.setLeadReporters(updatedLeadReporters);
+        representativeRepository.save(representative);
+      }
+    }
   }
 
   /**

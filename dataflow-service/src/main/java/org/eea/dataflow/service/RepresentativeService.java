@@ -166,6 +166,19 @@ public interface RepresentativeService {
       throws EEAException, IOException;
 
   /**
+   * Import and Replace lead reporters file.
+   *
+   * @param dataflowId the dataflow id
+   * @param groupId the group id
+   * @param file the file
+   * @return the byte[]
+   * @throws EEAException the EEA exception
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  byte[] importAndReplaceLeadReportersFile(Long dataflowId, Long groupId, MultipartFile file)
+          throws EEAException, IOException;
+
+  /**
    * Creates the lead reporter.
    *
    * @param representativeId the representative id
