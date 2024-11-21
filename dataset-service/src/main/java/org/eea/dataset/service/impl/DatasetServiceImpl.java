@@ -25,10 +25,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.PaMService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.dataset.service.model.TruncateDataset;
@@ -50,6 +47,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.*;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -92,6 +90,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -328,6 +327,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   @Qualifier("dremioJdbcTemplate")
   JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
   /** The import path. */
   @Value("${importPath}")
@@ -3847,6 +3849,31 @@ public class DatasetServiceImpl implements DatasetService {
     else{
       statisticsRepository.save(statistics);
     }
+  }
+
+  @Override
+  public Map<String, ImportStatisticsVO> getImportRelatedStatistics(Long datasetId) throws Exception{
+    Map<String, ImportStatisticsVO> statisticsMap = new HashMap<>();
+    List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(datasetId);
+    if(tables != null){
+      for(TableSchemaIdNameVO table: tables){
+        ImportStatisticsVO importStatistics = new ImportStatisticsVO();
+        List<String> statisticsToRetrieve = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED);
+        List<Statistics> statisticsMetabase = statisticsRepository.findAllByDatasetAndIdTableSchemaAndStatNameIsIn(datasetId, table.getIdTableSchema(), statisticsToRetrieve);
+        for(Statistics stat: statisticsMetabase){
+          if(stat.getStatName().equals(LAST_IMPORT_DATE)){
+            Date importDate = (stat.getValue() != null) ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(stat.getValue()) : null;
+            importStatistics.setLastImportDate(importDate);
+          }
+          else if(stat.getStatName().equals(TOTAL_RECORDS_IMPORTED)){
+            Long numberOfRecordsImported = (stat.getValue() != null) ? Long.valueOf(stat.getValue()) : 0L;
+            importStatistics.setNumberOfRecordsImported(numberOfRecordsImported);
+          }
+        }
+        statisticsMap.put(table.getIdTableSchema(), importStatistics);
+      }
+    }
+    return statisticsMap;
   }
 
 }

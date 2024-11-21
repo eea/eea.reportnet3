@@ -23,7 +23,6 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -719,4 +718,13 @@ public interface DatasetService {
    * @param statistics the object
    */
   void saveOrUpdateStatistics(Statistics statistics);
+
+  /**
+   * Get import date and imported number of records
+   *
+   * @param datasetId the dataset id
+   * @return a hashmap where key is tableSchemaId and value are the statistics
+   *
+   */
+  Map<String, ImportStatisticsVO> getImportRelatedStatistics(Long datasetId) throws Exception;
 }

@@ -43,7 +43,7 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
    */
   @Modifying
   @Transactional
-  @Query(nativeQuery = true, value = "delete from Statistics where id_Dataset=:idDataset and statName not in (:statNames)")
+  @Query(nativeQuery = true, value = "delete from Statistics where id_Dataset=:idDataset and stat_name not in (:statNames)")
   void deleteStatsByIdDatasetIgnoreStatsByName(@Param("idDataset") Long idDataset, @Param("statNames") List<String> statNames);
 
   /**
@@ -56,5 +56,9 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
   List<Statistics> findStatisticsByIdDatasetSchema(
       @Param("idDatasetSchema") String idDatasetSchema);
 
-  Optional<Statistics> findFirstByDatasetAndAndIdTableSchemaAndStatName(Long idDataset, String idTableSchema, String statName);
+  @Query(nativeQuery = true, value = "select * from Statistics where id_Dataset=:idDataset and id_table_schema=:idTableSchema and stat_name=:statName")
+  Optional<Statistics> findFirstByDatasetAndAndIdTableSchemaAndStatName(@Param("idDataset") Long idDataset, @Param("idTableSchema") String idTableSchema, @Param("statName") String statName);
+
+  @Query(nativeQuery = true, value = "select * from Statistics where id_Dataset=:idDataset and id_table_schema=:idTableSchema and stat_name in (:statNames)")
+  List<Statistics> findAllByDatasetAndIdTableSchemaAndStatNameIsIn(@Param("idDataset") Long idDataset, @Param("idTableSchema") String idTableSchema, @Param("statNames") List<String> statName);
 }

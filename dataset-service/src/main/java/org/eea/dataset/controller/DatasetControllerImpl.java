@@ -4,7 +4,6 @@ import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
 import lombok.SneakyThrows;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -3079,6 +3078,26 @@ public class DatasetControllerImpl implements DatasetController {
     }
     catch (Exception e){
       LOG.error("Could not restore prefilled tables for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+      throw e;
+    }
+  }
+
+  /**
+   * Get import date and imported number of records
+   *
+   * @param datasetId the dataset id
+   * @return a hashmap where key is tableSchemaId and value are the statistics
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getImportRelatedStatistics/{datasetId}")
+  public Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception{
+    try{
+      return datasetService.getImportRelatedStatistics(datasetId);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve import statistics for dataset id {} Error {}", datasetId, e.getMessage());
       throw e;
     }
   }
