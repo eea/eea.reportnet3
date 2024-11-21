@@ -975,4 +975,13 @@ public interface DatasetController {
   @PostMapping("/restorePrefilledTables/{datasetId}")
   void restorePrefilledTables(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
 
+  /**
+   * Get import date and imported number of records
+   *
+   * @param datasetId the dataset id
+   * @return a hashmap where key is tableSchemaId and value are the statistics
+   *
+   */
+  @GetMapping("/getImportRelatedStatistics/{datasetId}")
+  Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception;
 }

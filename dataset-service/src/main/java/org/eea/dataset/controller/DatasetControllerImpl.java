@@ -3098,4 +3098,24 @@ public class DatasetControllerImpl implements DatasetController {
       throw e;
     }
   }
+
+  /**
+   * Get import date and imported number of records
+   *
+   * @param datasetId the dataset id
+   * @return a hashmap where key is tableSchemaId and value are the statistics
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getImportRelatedStatistics/{datasetId}")
+  public Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception{
+    try{
+      return datasetService.getImportRelatedStatistics(datasetId);
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve import statistics for dataset id {} Error {}", datasetId, e.getMessage());
+      throw e;
+    }
+  }
 }
