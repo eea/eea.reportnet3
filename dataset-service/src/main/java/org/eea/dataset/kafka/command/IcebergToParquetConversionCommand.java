@@ -8,9 +8,12 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
@@ -28,6 +31,9 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
   @Autowired
   private BigDataDatasetService bigDataDatasetService;
 
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
   @Override
   public EventType getEventType() {
     return EventType.COMMAND_ICEBERG_TO_PARQUET_CONVERSION;
@@ -41,9 +47,16 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
    */
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
+    String user = eeaEventVO.getData().get("user") != null
+        ? String.valueOf(eeaEventVO.getData().get("user"))
+        : SecurityContextHolder.getContext().getAuthentication().getName();
+
+    Long datasetId = null;
+    Long dataflowId = null;
+
     try {
-      Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
-      Long dataflowId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataflowId")));
+      datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
+      dataflowId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataflowId")));
       Long providerId = eeaEventVO.getData().get("providerId") != null
           ? Long.parseLong(String.valueOf(eeaEventVO.getData().get("providerId")))
           : null;
@@ -60,8 +73,34 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
           LOG.error("TableSchemaVO not found for tableSchemaId: {}", tableSchemaId);
         }
       }
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT,
+          null,
+          NotificationVO.builder()
+              .user(user)
+              .dataflowId(dataflowId)
+              .datasetId(datasetId)
+              .providerId(providerId)
+              .build()
+      );
+
+      LOG.info("Successfully completed Iceberg to Parquet conversion for datasetId: {}", datasetId);
+
+
     } catch (Exception e) {
       LOG.error("Error processing Kafka event for converting Iceberg to Parquet: {}", e.getMessage());
+
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT,
+          null,
+          NotificationVO.builder()
+              .user(user)
+              .dataflowId(dataflowId)
+              .datasetId(datasetId)
+              .build()
+      );
+
       throw new EEAException(e.getMessage());
     }
 
