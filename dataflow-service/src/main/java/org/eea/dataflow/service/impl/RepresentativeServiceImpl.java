@@ -676,6 +676,13 @@ public class RepresentativeServiceImpl implements RepresentativeService {
 
     // Converts the read buffer to string and write it into the CSV file
     String csv = writer.getBuffer().toString();
+
+      try {
+        writer.close();
+      } catch (IOException e) {
+        LOG.warn("Failed to close StringWriter", e);
+      }
+      
     return csv.getBytes();
   }
 
