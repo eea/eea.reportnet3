@@ -166,7 +166,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
       }
       TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
-      Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO, dataSetMetabase);
+      Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO);
 
       //update statistics
       updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase);
