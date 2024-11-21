@@ -110,7 +110,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final S3ConvertService s3ConvertService;
   private DataSetMetabaseMapper dataSetMetabaseMapper;
   private TableSchemaMapper tableSchemaMapper;
-  private DatasetService datasetService;
+  private final DatasetService datasetService;
   private JdbcTemplate dremioJdbcTemplate;
 
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
