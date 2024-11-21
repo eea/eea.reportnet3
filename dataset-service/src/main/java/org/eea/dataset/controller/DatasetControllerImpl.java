@@ -1231,7 +1231,7 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @HystrixCommand
   @GetMapping(value = "/tablesUpdated")
-  //@PreAuthorize("isAuthenticated()")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Tables updated since last release", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully result returned"),
       @ApiResponse(code = 500, message = "Error finding tables"),

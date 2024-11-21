@@ -81,18 +81,16 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
     return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
   }
 
-  private DataSetMetabase getDataSetMetabase(Long dpDatasetId) throws EEAException {
-    return dataSetMetabaseRepository.findById(dpDatasetId)
-        .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
-  }
-
-  private List<S3Object> getListOfS3Files(Long datasetId, String path, Long dataProviderCode) {
-    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
-    S3PathResolver s3Path = new S3PathResolver(dataset.getDataflowId(), datasetId, path);
-    s3Path.setDataProviderId(dataProviderCode);
-    return s3Helper.getFilenamesFromTableNames(s3Path);
-  }
-
+  /**
+   * Return the list of tables on the reporting dataset
+   * And the flag that tables needs a release or not.
+   * True if the table needs a release , false if not
+   *
+   * @param dcList          Data collection list
+   * @param dpList          Data provider list
+   * @param dataSetSchemaVO The schema from mongo
+   * @return The list
+   */
   private HashMap<String, Boolean> compareLists(List<S3Object> dcList, List<S3Object> dpList, DataSetSchemaVO dataSetSchemaVO) {
     HashMap<String, Boolean> finalComparisonResult = new HashMap<>();
     if (dpList.isEmpty() && !dcList.isEmpty()) {
@@ -129,9 +127,19 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
         }
       }
     }
-
     return finalComparisonResult;
+  }
 
+  private DataSetMetabase getDataSetMetabase(Long dpDatasetId) throws EEAException {
+    return dataSetMetabaseRepository.findById(dpDatasetId)
+        .orElseThrow(() -> new EEAException(EEAErrorMessage.DATASET_NOTFOUND));
+  }
+
+  private List<S3Object> getListOfS3Files(Long datasetId, String path, Long dataProviderCode) {
+    DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+    S3PathResolver s3Path = new S3PathResolver(dataset.getDataflowId(), datasetId, path);
+    s3Path.setDataProviderId(dataProviderCode);
+    return s3Helper.getFilenamesFromTableNames(s3Path);
   }
 
   private String getTableNameFromKey(String key) {
