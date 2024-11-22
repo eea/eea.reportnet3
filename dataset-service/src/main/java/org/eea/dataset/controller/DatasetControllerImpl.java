@@ -3114,7 +3114,8 @@ public class DatasetControllerImpl implements DatasetController {
   @GetMapping("/getImportRelatedStatistics/{datasetId}")
   public Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception{
     try{
-      return statisticsService.getImportRelatedStatistics(datasetId);
+      List<TableSchemaIdNameVO> tableSchemaIdNameVOList = datasetSchemaService.getTableSchemasIds(datasetId);
+      return statisticsService.getImportRelatedStatistics(datasetId, tableSchemaIdNameVOList);
     }
     catch (Exception e){
       LOG.error("Could not retrieve import statistics for dataset id {} Error {}", datasetId, e.getMessage());
