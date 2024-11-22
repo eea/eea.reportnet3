@@ -28,9 +28,6 @@ public class StatisticsServiceImpl implements StatisticsService {
     @Autowired
     private StatisticsRepository statisticsRepository;
 
-    @Autowired
-    private DatasetSchemaService datasetSchemaService;
-
     /**
      * Saves statistics
      * @param statistics the list of statistics
@@ -59,11 +56,10 @@ public class StatisticsServiceImpl implements StatisticsService {
     }
 
     @Override
-    public Map<String, ImportStatisticsVO> getImportRelatedStatistics(Long datasetId) throws Exception{
+    public Map<String, ImportStatisticsVO> getImportRelatedStatistics(Long datasetId, List<TableSchemaIdNameVO> tableSchemaIdNameVOList) throws Exception{
         Map<String, ImportStatisticsVO> statisticsMap = new HashMap<>();
-        List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(datasetId);
-        if(tables != null){
-            for(TableSchemaIdNameVO table: tables){
+        if(tableSchemaIdNameVOList != null){
+            for(TableSchemaIdNameVO table: tableSchemaIdNameVOList){
                 ImportStatisticsVO importStatistics = new ImportStatisticsVO();
                 List<String> statisticsToRetrieve = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED);
                 List<Statistics> statisticsMetabase = statisticsRepository.findAllByDatasetAndIdTableSchemaAndStatNameIsIn(datasetId, table.getIdTableSchema(), statisticsToRetrieve);
