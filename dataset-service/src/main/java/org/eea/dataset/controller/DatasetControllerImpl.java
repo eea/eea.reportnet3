@@ -134,6 +134,9 @@ public class DatasetControllerImpl implements DatasetController {
   @Autowired
   private DatasetTableService datasetTableService;
 
+  @Autowired
+  private StatisticsService statisticsService;
+
   /**
    * Gets the data tables values.
    *
@@ -3094,7 +3097,7 @@ public class DatasetControllerImpl implements DatasetController {
   @GetMapping("/getImportRelatedStatistics/{datasetId}")
   public Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception{
     try{
-      return datasetService.getImportRelatedStatistics(datasetId);
+      return statisticsService.getImportRelatedStatistics(datasetId);
     }
     catch (Exception e){
       LOG.error("Could not retrieve import statistics for dataset id {} Error {}", datasetId, e.getMessage());

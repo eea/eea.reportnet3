@@ -110,7 +110,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private final S3ConvertService s3ConvertService;
   private DataSetMetabaseMapper dataSetMetabaseMapper;
   private TableSchemaMapper tableSchemaMapper;
-  private final DatasetService datasetService;
+  private final StatisticsService statisticsService;
   private JdbcTemplate dremioJdbcTemplate;
 
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
@@ -127,7 +127,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      S3ConvertService s3ConvertService,
                                      TableSchemaMapper tableSchemaMapper,
                                      DataSetMetabaseMapper dataSetMetabaseMapper,
-                                     @Lazy DatasetService datasetService) {
+                                     StatisticsService statisticsService) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -142,7 +142,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.tableSchemaMapper = tableSchemaMapper;
     this.s3ConvertService = s3ConvertService;
     this.dataSetMetabaseMapper = dataSetMetabaseMapper;
-    this.datasetService = datasetService;
+    this.statisticsService = statisticsService;
   }
 
   @Override
@@ -160,12 +160,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     for (File csvFile : csvFiles) {
       //initialize warning message
       importFileInDremioInfo.setWarningMessage(null);
+      TableSchemaVO tableSchemaVO = null;
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
-        tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
+        tableSchemaVO = datasetSchemaService.getTableSchemaVO(importFileInDremioInfo.getTableSchemaId(), String.valueOf(dataSetSchema.getIdDataSetSchema()));
       } else {
-        tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
+        tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
       }
-      TableSchemaVO tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
       Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO);
 
       //update statistics
@@ -1108,7 +1108,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     totalRecordsImportedStat.setIdTableSchema(tableSchemaId);
     totalRecordsImportedStat.setStatName(TOTAL_RECORDS_IMPORTED);
     totalRecordsImportedStat.setValue(numberOfRecordsToBeInserted);
-    datasetService.saveOrUpdateStatistics(totalRecordsImportedStat);
+    statisticsService.saveOrUpdateStatistics(totalRecordsImportedStat);
 
     Statistics lastImportDateStat = new Statistics();
     lastImportDateStat.setDataset(dataSetMetabase);
@@ -1117,6 +1117,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     lastImportDateStat.setValue(dateFormat.format(new Date()));
-    datasetService.saveOrUpdateStatistics(lastImportDateStat);
+    statisticsService.saveOrUpdateStatistics(lastImportDateStat);
   }
 }

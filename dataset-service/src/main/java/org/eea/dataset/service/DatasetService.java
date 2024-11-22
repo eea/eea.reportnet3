@@ -712,19 +712,4 @@ public interface DatasetService {
    * @param datasetId
    */
   Long getDataProviderIdById(Long datasetId);
-
-  /**
-   * Saves or updates a statistic
-   * @param statistics the object
-   */
-  void saveOrUpdateStatistics(Statistics statistics);
-
-  /**
-   * Get import date and imported number of records
-   *
-   * @param datasetId the dataset id
-   * @return a hashmap where key is tableSchemaId and value are the statistics
-   *
-   */
-  Map<String, ImportStatisticsVO> getImportRelatedStatistics(Long datasetId) throws Exception;
 }
