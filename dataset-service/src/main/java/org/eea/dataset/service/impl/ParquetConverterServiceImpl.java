@@ -54,7 +54,9 @@ import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -485,7 +487,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     List<FileWithRecordNum> modifiedCsvFiles = new ArrayList<>();
     long recordCounter = 0;
 
-    try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
+    Charset detectedCharset = detectEncoding(csvFile.getPath());
+    try (Reader reader = new InputStreamReader(new FileInputStream(csvFile.getPath()), detectedCharset);
          CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
              .setHeader()
              .setSkipHeaderRecord(false)
@@ -493,8 +496,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
              .setIgnoreHeaderCase(true)
              .setIgnoreEmptyLines(false)
              .setTrim(true).build());
-         //BufferedWriter writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
-         //CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
          CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
                  CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
                  CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
@@ -507,17 +508,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         if (recordCounter == 1) {
           String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
           csvWriter.writeNext(headersArray);
-          //csvPrinter.printRecord(typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).collect(Collectors.toList()));
         }
 
         List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType);
         String[] rowArray = row.toArray(new String[0]);
         csvWriter.writeNext(rowArray);
-        //csvPrinter.printRecord(row);
       }
 
       csvWriter.flush();
-      //csvPrinter.flush();
       modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
     } catch (IOException | UncheckedIOException e) {
       handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
@@ -531,6 +529,34 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     return modifiedCsvFiles;
   }
 
+  /**
+   * Detect the encoding of the provided file
+   *
+   * @param filePath The path of the file
+   * @return The current file encoding
+   *
+   * @throws IOException ioException
+   */
+  private Charset detectEncoding(String filePath) throws IOException {
+    try (InputStream input = new FileInputStream(filePath)) {
+      byte[] buffer = new byte[3];
+      input.read(buffer);
+
+      // Check for BOM (Byte Order Mark)
+      if ((buffer[0] & 0xFF) == 0xEF && (buffer[1] & 0xFF) == 0xBB && (buffer[2] & 0xFF) == 0xBF) {
+        return StandardCharsets.UTF_8; // UTF-8 with BOM
+      } else if ((buffer[0] & 0xFF) == 0xFF && (buffer[1] & 0xFF) == 0xFE) {
+        return StandardCharsets.UTF_16LE; // UTF-16 Little Endian
+      } else if ((buffer[0] & 0xFF) == 0xFE && (buffer[1] & 0xFF) == 0xFF) {
+        return StandardCharsets.UTF_16BE; // UTF-16 Big Endian
+      } else {
+        // Fallback: Assume ANSI (Windows-1252)
+        return Charset.forName("windows-1252");
+      }
+    }
+  }
+
+
   private List<FileWithRecordNum> modifyAndSplitCsvFile(File csvFile, DataSetSchema dataSetSchema,
                                                         ImportFileInDremioInfo importFileInDremioInfo, Integer batchSize, DatasetTypeEnum datasetType) throws Exception {
     LOG.info(MEASUREMENTS + " with job {} modifyAndSplitCsvFile started", importFileInDremioInfo);
@@ -541,12 +567,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     long recordCounter = 0;
     boolean fileIsEmpty = true;
 
-    //BufferedWriter writer = null;
-    //CSVPrinter csvPrinter = null;
     CSVWriter csvWriter = null;
     File csvFileWithAddedColumns = null;
 
-    try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()));
+    Charset detectedCharset = detectEncoding(csvFile.getPath());
+    try (Reader reader = new InputStreamReader(new FileInputStream(csvFile.getPath()), detectedCharset);
          CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
              .setHeader()
              .setSkipHeaderRecord(false)
@@ -563,19 +588,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         if (recordCounter == 0) {
           csvFileWithAddedColumns = createNewFilePath(csvFile);
-          //writer = Files.newBufferedWriter(Paths.get(csvFileWithAddedColumns.getPath()));
-          //csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder().setDelimiter(LiteralConstants.COMMA).build());
           csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
                   CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
                   CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
           String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
           csvWriter.writeNext(headersArray);
-          //csvPrinter.printRecord(typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).collect(Collectors.toList()));
-
         }
 
         List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType);
-        //csvPrinter.printRecord(row);
         String[] rowArray = row.toArray(new String[0]);
         csvWriter.writeNext(rowArray);
         row.clear();
@@ -588,12 +608,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
 
         if (recordCounter == batchSize) {
-          //closeResources(writer, csvPrinter);
-          if (csvWriter != null) {
-            csvWriter.flush();
-            csvWriter.close();
-            System.gc();
-          }
+          csvWriter.flush();
+          csvWriter.close();
+          System.gc();
           modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
           recordCounter = 0;
         }
@@ -607,7 +624,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
     } finally {
       if (recordCounter != 0) {
-        //closeResources(writer, csvPrinter);
         if (csvWriter != null) {
           csvWriter.flush();
           csvWriter.close();
