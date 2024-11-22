@@ -47,7 +47,6 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.*;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
-import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -90,7 +89,6 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -195,10 +193,6 @@ public class DatasetServiceImpl implements DatasetService {
   /** The field validation repository. */
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
-
-  /** The statistics repository. */
-  @Autowired
-  private StatisticsRepository statisticsRepository;
 
   /** The schemas repository. */
   @Autowired
@@ -329,7 +323,7 @@ public class DatasetServiceImpl implements DatasetService {
   JdbcTemplate dremioJdbcTemplate;
 
   @Autowired
-  private DatasetSchemaService datasetSchemaService;
+  private StatisticsService statisticsService;
 
   /** The import path. */
   @Value("${importPath}")
@@ -675,9 +669,7 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
       List<String> statisticsToIgnore = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED);
-      statisticsRepository.deleteStatsByIdDatasetIgnoreStatsByName(datasetId, statisticsToIgnore);
-      statisticsRepository.flush();
-      statisticsRepository.saveAll(statsList);
+      statisticsService.deleteOldStatsAndSaveNewOnes(datasetId, statisticsToIgnore, statsList);
       LOG.info("Statistics saved to datasetId {}.", datasetId);
     } else {
       LOG.error("No dataset found to save statistics. DatasetId:{}", datasetId);
@@ -3147,7 +3139,7 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(fillStat(datasetId, null, "datasetErrors", "false"));
 
       TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
-      statisticsRepository.saveAll(statsList);
+      statisticsService.saveStatistics(statsList);
 
       LOG.info("Statistics save to datasetId {}.", datasetId);
       DatasetTypeEnum type = getDatasetType(datasetId);
@@ -3831,49 +3823,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Cacheable(value = "dataProviderId", key = "#datasetId")
   public Long getDataProviderIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataProviderIdById(datasetId);
-  }
-
-  /**
-   * Saves or updates a statistic
-   * @param statistics the object
-   */
-  @Override
-  public void saveOrUpdateStatistics(Statistics statistics){
-    Optional<Statistics> optionalStatistics = statisticsRepository.findFirstByDatasetAndAndIdTableSchemaAndStatName(statistics.getDataset().getId(), statistics.getIdTableSchema(), statistics.getStatName());
-    if(optionalStatistics.isPresent()){
-      Statistics oldStatistics = optionalStatistics.get();
-      //update the value of the statistics
-      oldStatistics.setValue(statistics.getValue());
-      statisticsRepository.save(oldStatistics);
-    }
-    else{
-      statisticsRepository.save(statistics);
-    }
-  }
-
-  @Override
-  public Map<String, ImportStatisticsVO> getImportRelatedStatistics(Long datasetId) throws Exception{
-    Map<String, ImportStatisticsVO> statisticsMap = new HashMap<>();
-    List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(datasetId);
-    if(tables != null){
-      for(TableSchemaIdNameVO table: tables){
-        ImportStatisticsVO importStatistics = new ImportStatisticsVO();
-        List<String> statisticsToRetrieve = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED);
-        List<Statistics> statisticsMetabase = statisticsRepository.findAllByDatasetAndIdTableSchemaAndStatNameIsIn(datasetId, table.getIdTableSchema(), statisticsToRetrieve);
-        for(Statistics stat: statisticsMetabase){
-          if(stat.getStatName().equals(LAST_IMPORT_DATE)){
-            Date importDate = (stat.getValue() != null) ? new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(stat.getValue()) : null;
-            importStatistics.setLastImportDate(importDate);
-          }
-          else if(stat.getStatName().equals(TOTAL_RECORDS_IMPORTED)){
-            Long numberOfRecordsImported = (stat.getValue() != null) ? Long.valueOf(stat.getValue()) : 0L;
-            importStatistics.setNumberOfRecordsImported(numberOfRecordsImported);
-          }
-        }
-        statisticsMap.put(table.getIdTableSchema(), importStatistics);
-      }
-    }
-    return statisticsMap;
   }
 
 }
