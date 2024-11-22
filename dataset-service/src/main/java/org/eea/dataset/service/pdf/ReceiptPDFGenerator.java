@@ -57,14 +57,14 @@ public class ReceiptPDFGenerator {
    * @param receipt the receipt
    * @param out the out
    */
-  public void generatePDF(ReleaseReceiptVO receipt, OutputStream out) {
+  public void generatePDF(ReleaseReceiptVO receipt, OutputStream out, Boolean isManualAcceptance) {
     if (out != null) {
       try (PDDocument document = new PDDocument()) {
         // Create and add an A4 page
         PDPage page = new PDPage(A4);
         document.addPage(page);
 
-        printContentPDF(receipt, document, page);
+        printContentPDF(receipt, document, page, isManualAcceptance);
 
         // Save and close the PDF
         document.save(out);
@@ -88,7 +88,7 @@ public class ReceiptPDFGenerator {
    * @param page the page
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void printContentPDF(ReleaseReceiptVO receipt, PDDocument document, PDPage page)
+  private void printContentPDF(ReleaseReceiptVO receipt, PDDocument document, PDPage page, Boolean isManualAcceptance)
       throws IOException {
 
     float x;
@@ -183,6 +183,23 @@ public class ReceiptPDFGenerator {
     }
     text = "https://rod.eionet.europa.eu/obligations/" + receipt.getObligationId();
     printLinePDF(contentStream, text, font, fontSize, x, y);
+
+    //Print Additional notes text if the dataflow has Manual Acceptance step
+    if (Boolean.TRUE.equals(isManualAcceptance)) {
+      y -= spaceBetweenLines * 2 + fontSize;
+
+      String[] lines = {
+              "Please note this dataflow has a technical acceptance step following delivery. This step",
+              "comprises a review of the automatic validation results at delivery, and a further set of",
+              "manual checks, which will result in a status of technically accepted, or request for",
+              "corrections. The technical acceptance will be undertaken as soon as possible."
+      };
+
+      for (String line : lines) {
+        printLinePDF(contentStream, line, font, fontSize, 133f, y);
+        y -= spaceBetweenLines + fontSize;
+      }
+    }
 
     // Print dataset list
     y -= spaceBetweenLines * 2 + fontSize;
