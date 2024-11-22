@@ -194,7 +194,12 @@ public class FKValidationUtils {
 
   /** The Constant FK_SINGLE_WRONG: {@value}. */
   private static final String FK_SINGLE_WRONG =
-          "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
+          "with fktable as (\r\n"
+                  + "    select * \r\n"
+                  + "    from dataset_%s.field_value fv \r\n"
+                  + "    where ID_FIELD_SCHEMA = '%s' \r\n"
+                  + "    and value IS NOT NULL and value <> ''\r\n"
+                  + "),\r\n"
                   + "pktable as (\r\n"
                   + "    select distinct field_value.VALUE as pk_value\r\n"
                   + "    from dataset_%s.field_value field_value\r\n"
@@ -214,7 +219,12 @@ public class FKValidationUtils {
 
   /** The Constant FK_SINGLE_WRONG_IGNORE_CASE_LINK: {@value}. */
   private static final String FK_SINGLE_WRONG_IGNORE_CASE_LINK =
-          "with fktable as (select * from dataset_%s.field_value fv where ID_FIELD_SCHEMA = '%s'),\r\n"
+          "with fktable as (\r\n"
+                  + "    select * \r\n"
+                  + "    from dataset_%s.field_value fv \r\n"
+                  + "    where ID_FIELD_SCHEMA = '%s' \r\n"
+                  + "    and value IS NOT NULL and value <> ''\r\n"
+                  + "),\r\n"
                   + "pktable as (\r\n"
                   + "    select distinct LOWER(field_value.VALUE) as pk_value\r\n"
                   + "    from dataset_%s.field_value field_value\r\n"
