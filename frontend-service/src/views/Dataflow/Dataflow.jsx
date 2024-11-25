@@ -112,6 +112,7 @@ export const Dataflow = () => {
     isExporting: false,
     isFetchingData: false,
     isImportLeadReportersVisible: false,
+    isImportAndReplaceLeadReportersVisible: false,
     isManageReportersDialogVisible: false,
     isManageRequestersDialogVisible: false,
     isManageRolesDialogVisible: false,
@@ -325,6 +326,13 @@ export const Dataflow = () => {
       icon: 'upload',
       label: resourcesContext.messages['importLeadReporters'],
       tooltip: resourcesContext.messages['importLeadReportersTooltip']
+    },
+    {
+      command: () => manageDialogs('isImportAndReplaceLeadReportersVisible', true),
+      disabled: isEmpty(dataflowState.dataProviderSelected),
+      icon: 'upload',
+      label: resourcesContext.messages['importAndReplaceLeadReporters'],
+      tooltip: resourcesContext.messages['importAndReplaceLeadReportersTooltip']
     }
   ];
 
@@ -936,6 +944,22 @@ export const Dataflow = () => {
       }
     } catch (error) {
       console.error('Dataflow - onUploadLeadReporters.', error);
+      notificationContext.add({ type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' }, true);
+    }
+  };
+
+  const onUploadAndReplaceLeadReporters = event => {
+    manageDialogs('isImportAndReplaceLeadReportersVisible', false);
+    try {
+      if (!isNil(event.xhr) && !isNil(event.xhr.response)) {
+        DownloadFile(
+            event.xhr.response,
+            `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Results.csv`
+        );
+        dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: true });
+      }
+    } catch (error) {
+      console.error('Dataflow - onUploadAndReplaceLeadReporters.', error);
       notificationContext.add({ type: 'IMPORT_DATAFLOW_LEAD_REPORTERS_FAILED_EVENT' }, true);
     }
   };
@@ -1693,6 +1717,26 @@ export const Dataflow = () => {
               dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
             })}`}
           />
+        )}
+
+        {dataflowState.isImportAndReplaceLeadReportersVisible && (
+            <CustomFileUpload
+                accept={getImportExtensions}
+                bigData={dataflowState.data.bigData}
+                chooseLabel={resourcesContext.messages['selectFile']}
+                dialogHeader={`${resourcesContext.messages['importAndReplaceLeadReporters']}`}
+                dialogOnHide={() => manageDialogs('isImportAndReplaceLeadReportersVisible', false)}
+                dialogVisible={dataflowState.isImportAndReplaceLeadReportersVisible}
+                infoTooltip={infoExtensionsTooltip}
+                invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+                isDialog={true}
+                name="file"
+                onUpload={onUploadAndReplaceLeadReporters}
+                url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importAndReplaceFile, {
+                  dataflowId,
+                  dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
+                })}`}
+            />
         )}
 
         {dataflowState.isUserListVisible && (
