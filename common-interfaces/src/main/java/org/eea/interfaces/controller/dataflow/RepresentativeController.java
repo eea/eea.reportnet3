@@ -215,7 +215,7 @@ public interface RepresentativeController {
    * @param file the file
    * @return the response entity
    */
-  @PutMapping("/import/{dataflowId}/group/{groupId}")
+  @PostMapping("/importAndReplace/{dataflowId}/group/{groupId}")
   ResponseEntity<byte[]> importAndReplaceFileCountryTemplate(
           @PathVariable(value = "dataflowId") Long dataflowId,
           @PathVariable(value = "groupId") Long groupId, @RequestParam("file") MultipartFile file);

@@ -13,6 +13,7 @@ export const RepresentativeConfig = {
   getGroupOrganizations: '/representative/dataProvider/organizationGroups',
   getRepresentatives: '/representative/v1/dataflow/{:dataflowId}',
   importFile: '/representative/import/{:dataflowId}/group/{:dataProviderGroupId}',
+  importAndReplaceFile: '/representative/importAndReplace/{:dataflowId}/group/{:dataProviderGroupId}',
   updateDataProviderId: '/representative/update',
   updateLeadReporter: '/representative/leadReporter/update/dataflow/{:dataflowId}',
   updateRestrictFromPublic:

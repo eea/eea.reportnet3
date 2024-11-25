@@ -598,7 +598,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @param file the file
    * @return the response entity
    */
-  @PutMapping("/import/{dataflowId}/group/{groupId}")
+  @PostMapping("/importAndReplace/{dataflowId}/group/{groupId}")
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
   @ApiOperation(value = "Replace lead reporters", hidden = true)
   @ApiResponses(value = {
