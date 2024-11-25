@@ -670,7 +670,7 @@ export const QCList = ({
           label: resourcesContext.messages['creationMode'],
           multiSelectOptions: [
             { type: resourcesContext.messages['automatic'].toUpperCase(), value: true },
-            { type: resourcesContext.messages['manual'].toUpperCase(), value: false }
+            { type: resourcesContext.messages['custom'].toUpperCase(), value: false }
           ]
         },
         {
