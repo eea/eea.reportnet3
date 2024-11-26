@@ -125,6 +125,7 @@ public class S3ServiceImpl implements S3Service {
                 break;
             case S3_PROVIDER_PATH:
             case S3_SNAPSHOT_FOLDER_PATH:
+            case S3_VALIDATION_TABLE_PATH:
                 path = String.format(path, dataflowFolder, dataProviderFolder, datasetFolder);
                 break;
             case S3_VALIDATION_DC_QUERY_PATH:
@@ -132,17 +133,18 @@ public class S3ServiceImpl implements S3Service {
                     s3PathResolver.getValidationId(), dataProviderFolder, fileName);
                 break;
             case S3_VALIDATION_DC_PATH:
-                path = String.format(path, dataflowFolder, dataCollectionFolder,
-                    s3PathResolver.getValidationId(), dataProviderFolder, fileName);
+                path = String.format(path, dataflowFolder, dataCollectionFolder, dataProviderFolder);
                 break;
             case S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH:
                 path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataCollectionFolder,
                     tableName, dataProviderFolder, parquetFolder, fileName);
                 break;
             case S3_TABLE_NAME_DC_PATH:
-            case S3_TABLE_NAME_VALIDATE_DC_PATH:
                 path = String.format(path, dataflowFolder, dataCollectionFolder, tableName,
                     dataProviderFolder, parquetFolder, fileName);
+                break;
+            case S3_TABLE_NAME_VALIDATE_DC_PATH:
+                path = String.format(path, dataflowFolder, dataCollectionFolder, dataProviderFolder, parquetFolder, fileName);
                 break;
             case S3_EXPORT_QUERY_PATH:
                 path = S3_DEFAULT_BUCKET + String.format(path, dataflowFolder, dataCollectionFolder,

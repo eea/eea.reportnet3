@@ -286,7 +286,7 @@ public final class LiteralConstants {
   public static final String S3_TABLE_NAME_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_DC_PATH: {@value}. */
-  public static final String S3_VALIDATION_DC_PATH = "%s/collections/%s/current/validation/%s/%s/%s";
+  public static final String S3_VALIDATION_DC_PATH = "%s/collections/%s/current/validation/%s";
 
   /** The Constant S3_VALIDATION_TABLE_PATH: {@value}. */
   public static final String S3_VALIDATION_TABLE_PATH = "%s/%s/%s/current/validation";
@@ -295,7 +295,7 @@ public final class LiteralConstants {
   public static final String S3_VALIDATION_DC_QUERY_PATH = ".\"%s\".\"collections\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/collections/%s/current/%s_validate/%s/%s";
+  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/collections/%s/current/validation/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = ".\"%s\".\"collections\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
