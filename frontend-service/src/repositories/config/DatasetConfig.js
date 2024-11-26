@@ -66,9 +66,9 @@ export const DatasetConfig = {
   getPresignedUrl:
     '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}',
   getShowValidationErrors:
-    '/validation/listGroupValidations/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
+    '/validation/listGroupValidations/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getShowValidationErrorsDL:
-    '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
+    '/validation/listGroupValidationsDL/{:datasetId}?asc={:asc}&shortCode={:shortCodeFilter}&fieldValueFilter={:fieldValueFilter}&headers={:sortField}&levelErrorsFilter={:levelErrorsFilter}&pageNum={:pageNum}&pageSize={:pageSize}&tableFilter={:tableFilter}&typeEntitiesFilter={:typeEntitiesFilter}',
   getStatistics: '/datasetmetabase/{:datasetId}/loadStatistics',
   restorePrefilledTables: '/dataset/restorePrefilledTables/{:datasetId}?tableSchemaId={:tableSchemaId}',
   updateFieldOrder: '/dataschema/{:datasetId}/fieldSchema/order',
