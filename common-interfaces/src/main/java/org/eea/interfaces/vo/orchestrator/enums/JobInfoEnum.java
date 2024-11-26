@@ -41,8 +41,9 @@ public enum JobInfoEnum {
 
     WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES("Some imports failed because some tables are read only"),
 
-    ERROR_IMPORT_FAILED_READ_ONLY_TABLES("Import failed because the tables are read only");
+    ERROR_IMPORT_FAILED_READ_ONLY_TABLES("Import failed because the tables are read only"),
 
+    WARNING_SOME_IMPORT_MISMATCH_OF_DATA("Some imports have some data rows with more data than the number of columns");
 
 
     /** The value. */

@@ -90,6 +90,10 @@ public enum EventType {
   IMPORT_READ_ONLY_TABLES_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_readOnlyTables_warning_event", true),
 
+  /** The import with read only tables warning event. */
+  IMPORT_MISMATCH_OF_DATA_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "import_mismatch_of_data_warning_event", true),
+
   /** The import reporting failed no headers matching event. */
   IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_no_headers_failed_event", true),

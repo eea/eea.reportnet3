@@ -1455,6 +1455,20 @@
           }
         }
       ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [
+        {
+          "key": "IMPORT_MISMATCH_OF_DATA_WARNING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
+      ]
     }
   ],
   "hiddenNotifications": [
