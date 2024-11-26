@@ -91,15 +91,22 @@ export const ShowValidationsList = memo(
         fieldsTypesFilter
       );
 
-      const nestedOptions = [];
-      filterOptionsInitial[0].nestedOptions.forEach(optionMultiSelect => {
-        nestedOptions.push({
-          ...optionMultiSelect,
-          multiSelectOptions: getValidationsOptionTypes(allTypesFilter, optionMultiSelect.key)
-        });
-      });
-
-      const filterOptions = [{ type: 'MULTI_SELECT', nestedOptions }];
+      const filterOptions = filterOptionsInitial.map(filterOption => ({
+        ...filterOption,
+        nestedOptions: filterOption.nestedOptions.map(option => {
+          if (filterOption.type === 'MULTI_SELECT') {
+            // Handle multi-select options
+            return {
+              ...option,
+              multiSelectOptions: getValidationsOptionTypes(allTypesFilter, option.key),
+            };
+          }
+          // No special handling for INPUT type
+          return {
+            ...option,
+          };
+        }),
+      }));
 
       setFilterOptions(filterOptions);
     }, [levelErrorsTypesFilter, originsTypesFilter, typeEntitiesTypesFilter, fieldsTypesFilter]);
