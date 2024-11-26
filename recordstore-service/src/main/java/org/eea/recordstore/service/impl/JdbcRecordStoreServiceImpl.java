@@ -2251,6 +2251,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 }
               });
 
+      Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
+      deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
+      addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+
       LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
       taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
       LOG.info("Updated task status of task with id {} with idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
@@ -2339,6 +2343,44 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
         lockService.removeLockByCriteria(lockCriteria);
       }
     }
+  }
+
+  private void addNewValidationsToDC(Long datasetId, Long dataflowId, Long providerId, ProcessVO finalProcessVO, Long finalJobId) {
+    S3PathResolver dataCollectionValidationTablePath = new S3PathResolver(dataflowId, providerId, datasetId);
+    dataCollectionValidationTablePath.setPath(S3_TABLE_NAME_VALIDATE_DC_PATH);
+    List<S3Object> validationTableNameFileNames = getListOfS3Files(finalProcessVO.getDatasetId(), dataflowId, jobControllerZuul.findProviderIdById(finalJobId), S3_VALIDATION_TABLE_PATH);
+    validationTableNameFileNames.forEach(s3Object -> {
+
+      String key = s3Object.key();
+      String filename = new File(key).getName();
+      dataCollectionValidationTablePath.setFilename(filename);
+      dataCollectionValidationTablePath.setParquetFolder(key.split("/")[5]);
+      try {
+        LOG.info("Getting validation file from S3 with key : {} and filename : {}", key, filename);
+        File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
+        String tableNameDCPath = s3Service.getS3Path(dataCollectionValidationTablePath);
+        LOG.info("Uploading validation file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
+        s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
+        LOG.info("Uploading validation finished successfully for {}", tableNameDCPath);
+      } catch (IOException e) {
+        LOG.error("Error in getFileFromS3 process for dataflowId {}", dataflowId, e);
+      }
+    });
+  }
+
+  private void deletePreviousValidationsFromDC(Long datasetId, Long dataflowId, Long providerId) {
+    S3PathResolver dataCollectionValidationPath = new S3PathResolver(dataflowId, providerId, datasetId);
+    dataCollectionValidationPath.setPath(S3_VALIDATION_DC_PATH);
+    if (s3Helper.checkTableNameDCProviderFolderExist(dataCollectionValidationPath)) {
+      s3Helper.deleteTableNameDCFolder(dataCollectionValidationPath);
+      LOG.info("Successfully deleted validation files in path: {}", dataCollectionValidationPath);
+    }
+  }
+
+  private List<S3Object> getListOfS3Files(Long datasetId, Long dataflowId, Long dataProviderCode, String path) {
+    S3PathResolver s3Path = new S3PathResolver(dataflowId, dataProviderCode, datasetId);
+    s3Path.setPath(path);
+    return s3Helper.getFilenamesFromTableNames(s3Path);
   }
 
   private void checkAndPromoteFolder(S3PathResolver s3PathResolver, String path) {
