@@ -68,6 +68,35 @@ public interface DataflowRepository
   @Query("DELETE FROM Dataflow d where d.id = :idDataflow")
   void deleteById(@Param("idDataflow") Long idDataflow);
 
+
+  /**
+   * Soft delete dataflow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Modifying
+  @Transactional
+  @CacheEvict(value = "dataflowVO", key = "#dataflowId")
+  @Query(nativeQuery = true,
+          value = "UPDATE dataflow " +
+                  "SET is_deleted = true, deleted_at = NOW() " +
+                  "WHERE id = :dataflowId")
+  void softDelete(@Param("dataflowId") Long dataflowId);
+
+  /**
+   * Reverse soft delete dataflow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Modifying
+  @Transactional
+  @CacheEvict(value = "dataflowVO", key = "#dataflowId")
+  @Query(nativeQuery = true,
+          value = "UPDATE dataflow " +
+                  "SET is_deleted = false, deleted_at = NULL " +
+                  "WHERE id = :dataflowId")
+  void reverseSoftDelete(@Param("dataflowId") Long dataflowId);
+
   /**
    * Find by id in order by status desc creation date desc.
    *

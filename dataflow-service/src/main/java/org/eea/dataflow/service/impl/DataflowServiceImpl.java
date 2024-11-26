@@ -698,6 +698,38 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Soft delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @Override
+  @Transactional
+  public void softDeleteDataFlow(Long dataflowId) throws EEAException {
+    try {
+      dataflowRepository.softDelete(dataflowId);
+    } catch (Exception e) {
+      LOG.info("Performing soft delete for dataflow {} failed. Message: {}", dataflowId, e.getMessage());
+      throw new EEAException(EEAErrorMessage.SOFT_DELETE_DATAFLOW_FAILED);
+    }
+  }
+
+  /**
+   * Reverse soft delete data flow.
+   *
+   * @param idDataflow the id dataflow
+   */
+  @Override
+  @Transactional
+  public void reverseSoftDeleteDataFlow(Long dataflowId) throws EEAException {
+    try {
+      dataflowRepository.reverseSoftDelete(dataflowId);
+    } catch (Exception e) {
+      LOG.info("Reversing soft delete for dataflow {} failed. Message: {}", dataflowId, e.getMessage());
+      throw new EEAException(EEAErrorMessage.SOFT_DELETE_DATAFLOW_FAILED);
+    }
+  }
+
+  /**
    * Update data flow status.
    *
    * @param id the id
