@@ -128,6 +128,10 @@ public interface DataflowService {
    */
   void deleteDataFlow(Long idDataflow);
 
+  void softDeleteDataFlow(Long dataflowId) throws EEAException;
+
+  void reverseSoftDeleteDataFlow(Long dataflowId) throws EEAException;
+
   /**
    * Update data flow.
    *
