@@ -50,6 +50,7 @@ export const ShowValidationsList = memo(
     const [columns, setColumns] = useState([]);
     const [fetchedData, setFetchedData] = useState([]);
     const [fieldsTypesFilter, setFieldsTypesFilter] = useState([]);
+    const [shortCodeFilter, setShortCodeFilter] = useState('');
     const [fieldValueFilter, setFieldValueFilter] = useState([]);
     const [firstRow, setFirstRow] = useState(0);
     const [isFilteredLevelErrors, setIsFilteredLevelErrors] = useState(false);
@@ -90,15 +91,22 @@ export const ShowValidationsList = memo(
         fieldsTypesFilter
       );
 
-      const nestedOptions = [];
-      filterOptionsInitial[0].nestedOptions.forEach(optionMultiSelect => {
-        nestedOptions.push({
-          ...optionMultiSelect,
-          multiSelectOptions: getValidationsOptionTypes(allTypesFilter, optionMultiSelect.key)
-        });
-      });
-
-      const filterOptions = [{ type: 'MULTI_SELECT', nestedOptions }];
+      const filterOptions = filterOptionsInitial.map(filterOption => ({
+        ...filterOption,
+        nestedOptions: filterOption.nestedOptions.map(option => {
+          if (filterOption.type === 'MULTI_SELECT') {
+            // Handle multi-select options
+            return {
+              ...option,
+              multiSelectOptions: getValidationsOptionTypes(allTypesFilter, option.key),
+            };
+          }
+          // No special handling for INPUT type
+          return {
+            ...option,
+          };
+        }),
+      }));
 
       setFilterOptions(filterOptions);
     }, [levelErrorsTypesFilter, originsTypesFilter, typeEntitiesTypesFilter, fieldsTypesFilter]);
@@ -198,6 +206,7 @@ export const ShowValidationsList = memo(
             sortOrder,
             firstRow,
             numberRows,
+            shortCodeFilter,
             fieldValueFilter,
             levelErrorsFilter,
             typeEntitiesFilter,
@@ -292,6 +301,7 @@ export const ShowValidationsList = memo(
         sortOrder,
         event.first,
         event.rows,
+        shortCodeFilter,
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
@@ -305,6 +315,7 @@ export const ShowValidationsList = memo(
       numberRows,
       sortField,
       sortOrder,
+      shortCodeFilter,
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
@@ -324,6 +335,7 @@ export const ShowValidationsList = memo(
             numberRows,
             sortField,
             sortOrder,
+            shortCodeFilter,
             fieldValueFilter,
             levelErrorsFilter,
             typeEntitiesFilter,
@@ -336,6 +348,7 @@ export const ShowValidationsList = memo(
             numberRows,
             sortField,
             sortOrder,
+            shortCodeFilter,
             fieldValueFilter,
             levelErrorsFilter,
             typeEntitiesFilter,
@@ -435,6 +448,7 @@ export const ShowValidationsList = memo(
       const filterData = await getFilterBy();
 
       setFirstRow(0);
+      setShortCodeFilter(filterData.shortCodeFilter);
       setFieldValueFilter(filterData.fieldSchemaName);
       setLevelErrorsFilter(filterData.levelError);
       setTypeEntitiesFilter(filterData.entityType);
@@ -445,6 +459,7 @@ export const ShowValidationsList = memo(
         numberRows,
         sortField,
         sortOrder,
+        filterData.shortCodeFilter,
         filterData.fieldSchemaName,
         filterData.levelError,
         filterData.entityType,
@@ -477,6 +492,7 @@ export const ShowValidationsList = memo(
         event.sortOrder,
         firstRow,
         numberRows,
+        shortCodeFilter,
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
@@ -489,6 +505,7 @@ export const ShowValidationsList = memo(
       sortOrder,
       firstRow,
       numberRows,
+      shortCodeFilter,
       fieldValueFilter,
       levelErrorsFilter,
       typeEntitiesFilter,
@@ -500,6 +517,7 @@ export const ShowValidationsList = memo(
         numberRows,
         sortField,
         sortOrder,
+        shortCodeFilter,
         fieldValueFilter,
         levelErrorsFilter,
         typeEntitiesFilter,
@@ -566,6 +584,7 @@ export const ShowValidationsList = memo(
     );
 
     const resetFilters = () => {
+      setShortCodeFilter('');
       setTablesFilter([]);
       setTypeEntitiesFilter([]);
       setLevelErrorsFilter([]);
@@ -576,6 +595,15 @@ export const ShowValidationsList = memo(
     };
 
     const filterOptionsInitial = [
+      {
+        type: 'INPUT',
+        nestedOptions: [
+          {
+            key: 'shortCodeFilter',
+            label: resourcesContext.messages['shortCodeFilter'],
+          }
+        ]
+      },
       {
         type: 'MULTI_SELECT',
         nestedOptions: [
