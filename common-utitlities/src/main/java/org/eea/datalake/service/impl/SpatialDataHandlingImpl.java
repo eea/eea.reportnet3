@@ -68,7 +68,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         return HexString;
       }
     } catch (ParseException | IOException e) {
-      LOG.error("Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed", e);
+      LOG.error("Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed, with message: {}", e.getMessage());
     }
     return spatialDataHelper.bytesToHex(new byte[0]);
   }
@@ -82,7 +82,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
           try {
             fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
           } catch (IOException | ParseException e) {
-            LOG.error("Invalid byteArray!! Tried to decode from binary but failed", e);
+            LOG.error("Invalid byteArray!! Tried to decode from binary but failed, with message: {}", e.getMessage());
           }
         });
   }
@@ -104,7 +104,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         }
       }
     } catch (ParseException e) {
-      LOG.error("Invalid byteArray!! Tried to decode from binary but failed", e);
+      LOG.error("Invalid byteArray!! Tried to decode from binary but failed, with message: {}", e.getMessage());
     }
     return "";
   }
