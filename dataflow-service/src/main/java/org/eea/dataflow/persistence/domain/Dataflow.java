@@ -121,6 +121,15 @@ public class Dataflow {
   @Column(name = "BIG_DATA")
   private Boolean bigData;
 
+  /** Soft deleted. */
+  @Column(name = "IS_DELETED")
+  private Boolean deleted;
+
+
+  /** The date of the soft deletion. */
+  @Column(name = "DELETED_AT")
+  private Date deletedAt;
+
   /**
    * Equals.
    *
