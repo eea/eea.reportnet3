@@ -55,8 +55,8 @@ public class ReceiptPDFGeneratorTest {
     receipt.setObligationId(1);
     receipt.setObligationTitle("");
     ReceiptPDFGenerator spyClass = Mockito.spy(receiptPDFGenerator);
-    spyClass.generatePDF(receipt, out);
-    Mockito.verify(spyClass, times(1)).generatePDF(Mockito.any(), Mockito.any());
+    spyClass.generatePDF(receipt, out, Boolean.FALSE);
+    Mockito.verify(spyClass, times(1)).generatePDF(Mockito.any(), Mockito.any(), Mockito.any(Boolean.class));
   }
 
 }

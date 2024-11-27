@@ -968,6 +968,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     ReleaseReceiptVO receipt = new ReleaseReceiptVO();
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
+
+    //if is manual acceptance a text note is added to final receipt
+    boolean isManualAcceptance = Boolean.TRUE.equals(dataflow.isManualAcceptance());
+
     receipt.setIdDataflow(dataflowId);
     receipt.setDataflowName(dataflow.getName());
     receipt.setObligationId(dataflow.getObligation().getObligationId());
@@ -1004,7 +1008,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     }
 
-    receiptPDFGenerator.generatePDF(receipt, out);
+    receiptPDFGenerator.generatePDF(receipt, out, isManualAcceptance);
   }
 
   /**
