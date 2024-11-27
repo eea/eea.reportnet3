@@ -807,6 +807,7 @@
     "importLeadReportersTooltip": "Import lead reporters from a CSV file (result file is downloaded afterwards)",
     "importAndReplaceLeadReporters": "Import and replace lead reporters",
     "importAndReplaceLeadReportersTooltip": "Import and replace lead reporters from a CSV file (result file is downloaded afterwards)",
+    "importMismatchOfDataWarningEvent": "Imported record has more data than the number of columns",
     "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
     "importEmptyFilesWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: empty files were provided.",
     "importEmptyFilesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all import files were empty.",

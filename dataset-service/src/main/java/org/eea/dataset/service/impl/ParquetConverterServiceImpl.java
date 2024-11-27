@@ -152,33 +152,40 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     int numberOfFailedImportsForWrongNumberOfRecords = 0;
     int numberOfFailedImportsForOnlyReadOnlyFields = 0;
     int numberOfFailedImportsForReadOnlyTables = 0;
+    int numberOfImportsForMismatchOfData = 0;
     if(importFileInDremioInfo.getReplaceData()) {
       deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()));
     }
+    List<String> warningMessages = new ArrayList<>();
+    //initialize warning message
+    importFileInDremioInfo.setWarningMessages(warningMessages);
     for (File csvFile : csvFiles) {
-      //initialize warning message
-      importFileInDremioInfo.setWarningMessage(null);
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
         tableSchemaName = fileCommonUtils.getTableName(importFileInDremioInfo.getTableSchemaId(), dataSetSchema);
       } else {
         tableSchemaName = csvFile.getName().replace(CSV_EXTENSION, "");
       }
       convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaName);
-      if (StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessage())) {
-        if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))) {
-          numberOfEmptyFiles++;
-        }
-        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
-          numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace++;
-        }
-        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
-          numberOfFailedImportsForWrongNumberOfRecords++;
-        }
-        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
-          numberOfFailedImportsForOnlyReadOnlyFields++;
-        }
-        else if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
-          numberOfFailedImportsForReadOnlyTables++;
+      if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty()) {
+        for(String warningMessage : importFileInDremioInfo.getWarningMessages()) {
+          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))) {
+            numberOfEmptyFiles++;
+          }
+          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+            numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace++;
+          }
+          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+            numberOfFailedImportsForWrongNumberOfRecords++;
+          }
+          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
+            numberOfFailedImportsForOnlyReadOnlyFields++;
+          }
+          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
+            numberOfFailedImportsForReadOnlyTables++;
+          }
+          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null))){
+            numberOfImportsForMismatchOfData++;
+          }
         }
       }
     }
@@ -186,52 +193,37 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     //check if all imports failed and an error (instead of a warning) must be thrown
     if (numberOfEmptyFiles != 0) {
       if (numberOfEmptyFiles == csvFiles.size()) {
-        importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES);
-      } else {
-        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
       }
     }
     if (numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace != 0) {
       if (numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace == csvFiles.size()) {
         //all imports failed and an error (instead of a warning) must be thrown
-        importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA);
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA);
-      } else {
-        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
       }
     }
 
     if (numberOfFailedImportsForWrongNumberOfRecords != 0) {
       if (numberOfFailedImportsForWrongNumberOfRecords == csvFiles.size()) {
         //all imports failed and an error (instead of a warning) must be thrown
-        importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS);
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS);
-      } else {
-        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null));
       }
     }
 
     if (numberOfFailedImportsForOnlyReadOnlyFields != 0) {
       if (numberOfFailedImportsForOnlyReadOnlyFields == csvFiles.size()) {
-        importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS);
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS);
-      } else {
-        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
       }
     }
 
     if (numberOfFailedImportsForReadOnlyTables != 0) {
       if (numberOfFailedImportsForReadOnlyTables == csvFiles.size()) {
-        importFileInDremioInfo.setWarningMessage(null);
         importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES);
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES);
-      } else {
-        importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
       }
     }
   }
@@ -252,12 +244,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     //path in s3 for the folder that contains the stored csv files
     String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
     if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchemaVO.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchemaVO::getReadOnly)) {
-      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
+      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
       return;
     }
 
     if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) {
-      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
+      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
       return;
     }
 
@@ -290,10 +282,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
 
     if (csvFilesWithAddedColumns == null) {
-      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
+      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
       return;
-    } else {
-      importFileInDremioInfo.setWarningMessage(null);
     }
 
     Long numberOfRecordsToBeInserted = csvFilesWithAddedColumns.stream().mapToLong(FileWithRecordNum::getNumberOfRecords).sum();
@@ -508,6 +498,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         if (recordCounter == 1) {
           String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
           csvWriter.writeNext(headersArray);
+        }
+
+        //compare with the number of headers, minus the record_id and data_provider_code header
+        if (csvRecord.size() > typeMapping.getExpectedHeaders().size()-2) {
+          importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
         }
 
         List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType);
@@ -936,11 +931,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
 
     if(importFileInDremioInfo.getReplaceData() == false){
-      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
+      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null));
       return false;
     }
     if(numberOfExistingRecords != numberOfRecordsToBeInserted){
-      importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null));
+      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null));
       LOG.info("For job {} for fixed number of records table, existing records are {} and records to be inserted are {}", importFileInDremioInfo, numberOfExistingRecords, numberOfRecordsToBeInserted);
       return false;
     }
@@ -993,6 +988,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         if(recordCounter == 1){
           continue;
         }
+
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
         StringBuilder whereStatementBuilder = new StringBuilder().append(" WHERE ");
 
