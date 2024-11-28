@@ -1235,7 +1235,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 insertQueryBuilder.append(", ").append(field.getName()).append(" ");
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
                     String fieldValue = (field.getValue() != null) ? field.getValue() : "";
-                    String refactoredValue = spatialDataHandling.refactorQuery(fieldValue);
+                    String refactoredValue = spatialDataHandling.refactorQuery(fieldValue, i);
                     insertQueryValuesBuilder.append(", ").append(refactoredValue).append(" ");
                 } else {
                     String fieldValue = "";
@@ -1287,7 +1287,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(record.getId()).append("'");
             if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-                updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
+                updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
             }
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
@@ -1309,7 +1309,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
         updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(recordId).append("'");
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-            updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
+            updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
         }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);

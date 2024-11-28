@@ -52,7 +52,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public String convertToHEX(String value) {
+  public String convertToHEX(String value, long lineNumber) {
     try {
       if (!value.isBlank()) {
         Geometry geometry = geoJsonReader.read(value);
@@ -68,7 +68,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         return HexString;
       }
     } catch (ParseException | IOException e) {
-      LOG.error("Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed, with message: {}", e.getMessage());
+      LOG.error("SpatialDataHandlingImpl.convertToHEX() Invalid GeoJson!! Tried to convert the geoJson , to HEX but failed at line {}, with message: {}", lineNumber, e.getMessage());
     }
     return spatialDataHelper.bytesToHex(new byte[0]);
   }
@@ -82,7 +82,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
           try {
             fieldVO.setValue(decodeSpatialData(fieldVO.getByteArrayValue()));
           } catch (IOException | ParseException e) {
-            LOG.error("Invalid byteArray!! Tried to decode from binary but failed, with message: {}", e.getMessage());
+            LOG.error("SpatialDataHandlingImpl.decodeSpatialData() Invalid byteArray!! Tried to decode from binary but failed, with message: {}", e.getMessage());
           }
         });
   }
@@ -104,7 +104,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         }
       }
     } catch (ParseException e) {
-      LOG.error("Invalid byteArray!! Tried to decode from binary but failed, with message: {}", e.getMessage());
+      LOG.error("SpatialDataHandlingImpl.decodeSpatialData() Invalid byteArray!! Tried to decode from binary but failed, with message: {}", e.getMessage());
     }
     return "";
   }
@@ -162,7 +162,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
+  public StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO, long lineNumber) {
     String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
@@ -177,7 +177,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
         String escValue = spatialDataHelper.escapeJsonString(value);
         if (StringUtils.isNotBlank(escValue) && spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
-          String hexStr = convertToHEX(escValue);
+          String hexStr = convertToHEX(escValue, lineNumber);
           String binaryStr = FROM_XEX + "('" + hexStr + "')";
           int valueStart = matcher.start(3);
           int valueEnd = matcher.end(3);
@@ -189,11 +189,11 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public String refactorQuery(String geoJsonValue) {
+  public String refactorQuery(String geoJsonValue, long lineNumber) {
     if (!geoJsonValue.isEmpty() ) {
       String escValue = spatialDataHelper.escapeJsonString(geoJsonValue);
       if (StringUtils.isNotBlank(escValue) && spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
-        String hexStr = convertToHEX(escValue);
+        String hexStr = convertToHEX(escValue, lineNumber);
         return FROM_XEX + "('" + hexStr + "')";
       }
     }
