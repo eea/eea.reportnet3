@@ -15,4 +15,5 @@ public interface SpatialDataHelper {
   List<DataType> getGeoJsonEnums();
   String extractSRID(String value) throws IOException;
   boolean coordinatesAreNotEmpty(String value);
+  boolean isValidJSON(String str);
 }

@@ -54,7 +54,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   @Override
   public String convertToHEX(String value, long lineNumber) {
     try {
-      if (!value.isBlank()) {
+      if (!value.isBlank() && spatialDataHelper.isValidJSON(value)) {
         Geometry geometry = geoJsonReader.read(value);
         String srid = spatialDataHelper.extractSRID(value);
         if (!srid.isBlank()) {
