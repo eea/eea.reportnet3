@@ -12,7 +12,7 @@ import java.util.List;
 public interface SpatialDataHandling {
   boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO);
 
-  String convertToHEX(String value);
+  String convertToHEX(String value, long lineNumber);
 
   StringBuilder getHeaders(TableSchemaVO tableSchemaVO);
 
@@ -24,7 +24,7 @@ public interface SpatialDataHandling {
 
   DataType getGeometryType(byte[] byteArray) throws ParseException;
 
-  StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO);
+  StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO, long lineNumber);
 
-  String refactorQuery(String geoJsonValue);
+  String refactorQuery(String geoJsonValue, long lineNumber);
 }
