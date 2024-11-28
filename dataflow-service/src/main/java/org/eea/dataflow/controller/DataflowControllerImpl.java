@@ -787,7 +787,7 @@ public class DataflowControllerImpl implements DataFlowController {
             && dataflowData.getType() == TypeDataflowEnum.BUSINESS) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
               "Can't delete a Dataflow without being an admin user.");
-    } else if (Boolean.TRUE.equals(dataflowData.getDeleted())) {
+    } else if (Boolean.TRUE.equals(dataflowData.isDeleted())) {
       LOG.info("Dataflow with id {} is already marked for deletion.", dataflowId);
       throw new ResponseStatusException(HttpStatus.CONFLICT,
               "Dataflow is already marked for deletion.");
@@ -832,8 +832,7 @@ public class DataflowControllerImpl implements DataFlowController {
       LOG.error("Unexpected error! Could not retrieve dataflow information for dataflowId {} Message: {}", dataflowId, e.getMessage());
       throw e;
     }
-   if ( dataflowData.getDeleted() == null
-           || Boolean.FALSE.equals(dataflowData.getDeleted())) {
+   if ( Boolean.FALSE.equals(dataflowData.isDeleted())) {
       LOG.info("Dataflow with id {} is not marked for deletion.", dataflowId);
       throw new ResponseStatusException(HttpStatus.CONFLICT,
               "Dataflow is not marked for deletion.");
