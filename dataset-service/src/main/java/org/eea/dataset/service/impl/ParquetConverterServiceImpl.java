@@ -1,6 +1,8 @@
 package org.eea.dataset.service.impl;
 
 import com.opencsv.CSVWriter;
+import java.util.HashSet;
+import java.util.Set;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -156,7 +158,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     if(importFileInDremioInfo.getReplaceData()) {
       deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()));
     }
-    List<String> warningMessages = new ArrayList<>();
+    Set<String> warningMessages = new HashSet<>();
     //initialize warning message
     importFileInDremioInfo.setWarningMessages(warningMessages);
     for (File csvFile : csvFiles) {
