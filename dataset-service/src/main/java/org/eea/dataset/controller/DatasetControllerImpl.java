@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.service.*;
@@ -375,7 +376,15 @@ public class DatasetControllerImpl implements DatasetController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
           }
         }
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, file, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO);
+
+        HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
+        if (file != null) {
+          helperMultipartFileMapper.setBytes(file.getBytes());
+          helperMultipartFileMapper.setInputStream(file.getInputStream());
+          helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
+          helperMultipartFileMapper.setFileNull(false);
+        }
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;

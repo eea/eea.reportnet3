@@ -13,7 +13,7 @@ import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.dataset.persistence.data.domain.FieldValue;
+import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -64,6 +64,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
@@ -166,11 +167,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     @Override
+    @Async
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                              MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId,
-                              String fmeJobId, DataFlowVO dataflowVO) throws Exception {
+                              Boolean replace, Long integrationId, String delimiter, Long jobId,
+                              String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception {
         String filePathInS3 = null;
-        String fileName = (file != null) ? file.getOriginalFilename() : null;
+        String fileName = helperMultipartFileMapper.getOriginalFilename();
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
         File s3File = null;
@@ -217,7 +219,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
 
-            if(file == null){
+            if(helperMultipartFileMapper.isFileNull()){
                 if(StringUtils.isBlank(filePathInS3)){
                     throw new EEAException("Empty file and file path");
                 }
@@ -260,7 +262,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             LOG.info("Importing file to s3 {}", importFileInDremioInfo);
-            importDatasetDataToDremio(importFileInDremioInfo, file, s3File);
+            importDatasetDataToDremio(importFileInDremioInfo, s3File, helperMultipartFileMapper);
             //the fme job for the first iteration should not be finished yet
             if(integrationId == null) {
                 finishImportProcess(importFileInDremioInfo);
@@ -292,7 +294,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
-    private void importDatasetDataToDremio(ImportFileInDremioInfo importFileInDremioInfo, MultipartFile fileFromApi, File fileFromS3) throws Exception {
+    private void importDatasetDataToDremio(ImportFileInDremioInfo importFileInDremioInfo, File fileFromS3, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception {
 
         if (importFileInDremioInfo.getDelimiter() != null && importFileInDremioInfo.getDelimiter().length() > 1) {
             LOG.error("Error when importing file data to s3 {}. The size of the delimiter cannot be greater than 1", importFileInDremioInfo);
@@ -342,10 +344,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (importFileInDremioInfo.getProviderId() != null) {
             datasetService.createLockWithSignature(LockSignature.RELEASE_SNAPSHOTS, mapCriteria, SecurityContextHolder.getContext().getAuthentication().getName());
         }
-        handleZipFile(importFileInDremioInfo, fileFromApi, fileFromS3, schema);
+        handleZipFile(importFileInDremioInfo, fileFromS3, schema, helperMultipartFileMapper);
     }
 
-    private void handleZipFile(ImportFileInDremioInfo importFileInDremioInfo, MultipartFile fileFromApi, File fileFromS3, DataSetSchema schema) throws Exception {
+    private void handleZipFile(ImportFileInDremioInfo importFileInDremioInfo, File fileFromS3, DataSetSchema schema, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception {
         Boolean processWasUpdated = processControllerZuul.updateProcess(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(),
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.IMPORT, importFileInDremioInfo.getProcessId(),
                 SecurityContextHolder.getContext().getAuthentication().getName(), 0, null);
@@ -366,8 +368,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         List<File> filesToImport = null;
-        if (fileFromApi != null) {
-            filesToImport = storeImportFiles(fileFromApi, importFileInDremioInfo, integrationVO, mimeType);
+        if (!helperMultipartFileMapper.isFileNull()) {
+            filesToImport = storeImportFiles(importFileInDremioInfo, integrationVO, mimeType, helperMultipartFileMapper);
         } else {
             filesToImport = handleAlreadyStoredImportFiles(fileFromS3, importFileInDremioInfo, integrationVO, mimeType);
         }
@@ -450,7 +452,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     }
 
-    private List<File> storeImportFiles(MultipartFile fileFromApi, ImportFileInDremioInfo importFileInDremioInfo, IntegrationVO integrationVO, String multipartFileMimeType) throws Exception {
+    private List<File> storeImportFiles(ImportFileInDremioInfo importFileInDremioInfo, IntegrationVO integrationVO, String multipartFileMimeType, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception {
         List<File> files = new ArrayList<>();
 
         // Prepare the folder where files will be stored
@@ -463,10 +465,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         //store zip file
         File storedMultipartFile = new File(saveLocationPath + "/" + importFileInDremioInfo.getFileName());
         try (OutputStream os = new FileOutputStream(storedMultipartFile)) {
-            os.write(fileFromApi.getBytes());
+            os.write(helperMultipartFileMapper.getBytes());
         }
 
-        try (InputStream input = fileFromApi.getInputStream()) {
+        try (InputStream input = helperMultipartFileMapper.getInputStream()) {
 
             if (integrationVO == null && multipartFileMimeType.equalsIgnoreCase("zip")) {
                 try (ZipInputStream zip = new ZipInputStream(input)) {
@@ -504,7 +506,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     throw e;
                 }
             } else {
-                File file = new File(folder, fileFromApi.getOriginalFilename());
+                File file = new File(folder, helperMultipartFileMapper.getOriginalFilename());
 
                 // Store the file in the persistence volume
                 try (FileOutputStream output = new FileOutputStream(file)) {
