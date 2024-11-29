@@ -85,7 +85,7 @@ public class DataFlowVO extends GenericDataflowVO implements Serializable {
   private Boolean bigData;
 
   /** Soft delete. */
-  private boolean deleted = false;
+  private boolean isDeleted;
 
   /** When was this dataflow soft deleted. */
   private Date deletedAt;

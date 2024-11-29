@@ -123,7 +123,7 @@ public class Dataflow {
 
   /** Soft deleted. */
   @Column(name = "IS_DELETED")
-  private boolean deleted = false;
+  private boolean isDeleted;
 
   /** The date of the soft deletion. */
   @Column(name = "DELETED_AT")
