@@ -15,6 +15,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { userReducer } from 'views/_functions/Reducers/userReducer';
 
 import { SystemNotificationService } from 'services/SystemNotificationService';
+import {config} from "../../../conf";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -42,7 +43,9 @@ const userSettingsDefaultState = {
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
   const [userState, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
-
+  const isAdmin = (permissions) => {
+      return permissions.includes(config.permissions.roles.ADMIN.key);
+  };
   const onLoadSystemNotifications = async () => {
     const unparsedNotifications = await SystemNotificationService.all();
     unparsedNotifications.forEach(notification => {
@@ -63,10 +66,12 @@ export const UserProvider = ({ children }) => {
         },
 
         hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
-          if (isNil(userState.contextRoles)) {
-            return false;
-          }
-
+            if (isAdmin) {
+                return true;
+            }
+            if (isNil(userState.contextRoles)) {
+                return false;
+            }
           return allowedPermissions.some(allowedPermission => {
             if (isNil(entityID)) {
               return userState.contextRoles.some(role => role.startsWith(entity) && role.endsWith(allowedPermission));
