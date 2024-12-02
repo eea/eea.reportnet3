@@ -12,7 +12,7 @@ import styles from './TableWebform.module.scss';
 import { Button } from 'views/_components/Button';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
-import { WebformTable } from 'views/Webforms/_components/WebformTable';
+import { PaMsWebformTable } from '../_components/PaMsWebformTable';
 
 import { tableWebformReducer } from './_functions/Reducers/tableWebformReducer';
 
@@ -84,7 +84,7 @@ export const TableWebform = ({
     const visibleTitle = keys(pickBy(tableWebformState.isVisible))[0];
     const visibleContent = tableWebformState.data.filter(table => table.name === visibleTitle)[0];
     return (
-      <WebformTable
+      <PaMsWebformTable
         bigData={bigData}
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}

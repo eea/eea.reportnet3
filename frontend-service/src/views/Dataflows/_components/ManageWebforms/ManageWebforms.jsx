@@ -44,12 +44,14 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const fileRef = useRef(null);
 
   const dropdownOptions = [
+    { name: resourcesContext.messages['entitiesLabel'], value: 'ENTITIES' },
     { name: resourcesContext.messages['pamsLabel'], value: 'PAMS' },
     { name: resourcesContext.messages['qaLabel'], value: 'QA' },
     { name: resourcesContext.messages['tables'], value: 'TABLES' }
   ];
 
   const typesKeyValues = {
+    ENTITIES: resourcesContext.messages['entitiesLabel'],
     PAMS: resourcesContext.messages['pamsLabel'],
     QA: resourcesContext.messages['qaLabel'],
     TABLES: resourcesContext.messages['tables']

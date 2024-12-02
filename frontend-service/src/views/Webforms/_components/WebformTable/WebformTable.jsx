@@ -28,27 +28,26 @@ export const WebformTable = ({
   dataflowId,
   datasetId,
   datasetSchemaId,
+  entitiesRecords,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
-  isGroup,
   isIcebergCreated,
   isLoadingIceberg,
   isRefresh,
   isReporting,
   onTabChange,
-  onUpdatePamsValue,
-  onUpdateSinglesList,
-  pamsRecords,
-  selectedTable = { fieldSchemaId: null, pamsId: undefined, recordId: null, tableName: null },
+  onUpdateEntitiesValue,
+  rootPkFieldId,
+  rootTableName,
+  selectedTable = { fieldSchemaId: null, rootTableId: undefined, recordId: null, tableName: null },
   setIsLoading = () => {},
   webform,
   webformType
 }) => {
   const {
     onParseWebformRecords,
-    parseNewTableRecord,
-    parseNewTableRecordTable,
-    parseOtherObjectivesRecord,
-    parseRecordsValidations
+    parseRecordsValidations,
+    parseNewEntitiesTableRecord,
+    parseNewEntityTableRecordTable
   } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
@@ -87,29 +86,15 @@ export const WebformTable = ({
     };
   }, []);
 
-  // const checkIsIcebergCreated = async tableId => {
-  //   setIsLoadingIceberg(true);
-  //   let { data } = await DatasetService.getIsIcebergTableCreated({
-  //     datasetId,
-  //     tableSchemaId: tableId
-  //   });
-  //   setIsIcebergCreated(data);
-  //   setIsLoadingIceberg(false);
-  // };
-
   useEffect(() => {
     webformTableDispatch({ type: 'INITIAL_LOAD', payload: { webformData: { ...webform } } });
   }, [webform]);
-
-  // useEffect(() => {
-  //   checkIsIcebergCreated(webformData.tableSchemaId);
-  // }, [webformData]);
 
   useEffect(() => {
     if (!isNil(webform) && isNil(webform.tableSchemaId)) isLoading(false);
 
     if (!isNil(webform) && webform.tableSchemaId) {
-      if (webformType === 'PAMS' && !isNil(selectedTable.pamsId)) {
+      if (webformType === 'ENTITIES' && !isNil(selectedTable.rootTableId)) {
         isLoading(true);
         onLoadTableData();
       } else if (webformType === 'TABLES') {
@@ -117,7 +102,7 @@ export const WebformTable = ({
         onLoadTableData();
       }
     }
-  }, [isRefresh, onTabChange, selectedTable.pamsId, webform]);
+  }, [isRefresh, onTabChange, selectedTable.rootTableId, webform]);
 
   useEffect(() => {
     if (isDataUpdated !== 0) {
@@ -156,30 +141,16 @@ export const WebformTable = ({
     let newEmptyRecord;
 
     if (!isEmpty(webformData.elementsRecords)) {
-      if (webformType === 'PAMS') {
-        let sectorObjectivesTable;
-        const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(element => {
-          if (TextUtils.areEquals(element.name, 'SectorObjectives')) {
-            sectorObjectivesTable = element;
-          }
-          return element.tableSchemaId === tableSchemaId;
-        })[0];
-
-        newEmptyRecord = TextUtils.areEquals(filteredTable.name, 'OtherObjectives')
-          ? parseOtherObjectivesRecord(filteredTable, sectorObjectivesTable, selectedTable.pamsId, filteredRecordId)
-          : parseNewTableRecord(filteredTable, selectedTable.pamsId, sectorObjectivesTable);
-      } else {
-        if (!mainTable) {
-          const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(
-            element => element.tableSchemaId === tableSchemaId
-          )[0];
-          newEmptyRecord = parseNewTableRecordTable(filteredTable);
-        }
+      if (!mainTable) {
+        const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(
+          element => element.tableSchemaId === tableSchemaId
+        )[0];
+        newEmptyRecord = parseNewEntitiesTableRecord(filteredTable, selectedTable.rootTableId, rootPkFieldId);
       }
     }
 
     if (mainTable) {
-      newEmptyRecord = parseNewTableRecordTable(webformData);
+      newEmptyRecord = parseNewEntityTableRecordTable(webformData, selectedTable.rootTableId, rootPkFieldId);
     }
 
     if (!isEmpty(newEmptyRecord)) {
@@ -220,14 +191,14 @@ export const WebformTable = ({
   const onLoadTableData = async () => {
     setIsLoading(true);
 
-    webform?.elements?.forEach((table)=>{
-      if(table.type==='TABLE'){
-        if(!table.dataAreManuallyEditable) setAllManualCheck(false)
+    webform?.elements?.forEach(table => {
+      if (table.type === 'TABLE') {
+        if (!table.dataAreManuallyEditable) setAllManualCheck(false);
       }
-    })
+    });
 
     try {
-      const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId);
+      const { fieldSchema, fieldId } = getFieldSchemaId([webform], webform.tableSchemaId, rootPkFieldId, rootTableName);
       let data;
       if (bigData) {
         data = await DatasetService.getTableDataDL({
@@ -237,7 +208,7 @@ export const WebformTable = ({
           pageSize: 300,
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
           fieldSchemaId: fieldSchema || fieldId,
-          value: selectedTable.pamsId
+          value: selectedTable.rootTableId
         });
       } else {
         data = await DatasetService.getTableData({
@@ -247,7 +218,7 @@ export const WebformTable = ({
           pageSize: 300,
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
           fieldSchemaId: fieldSchema || fieldId,
-          value: selectedTable.pamsId
+          value: selectedTable.rootTableId
         });
       }
       if (!isNil(data.records)) {
@@ -258,14 +229,14 @@ export const WebformTable = ({
 
         for (let index = 0; index < tableSchemaIds.length; index++) {
           const tableSchemaId = tableSchemaIds[index];
-          const { fieldSchema, fieldId } = getFieldSchemaId(tables, tableSchemaId);
+          const { fieldSchema, fieldId } = getFieldSchemaId(tables, tableSchemaId, rootPkFieldId, rootTableName);
           if (bigData) {
             tableData[tableSchemaId] = await DatasetService.getTableDataDL({
               datasetId,
               tableSchemaId,
               levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
               fieldSchemaId: fieldSchema || fieldId,
-              value: selectedTable.pamsId
+              value: selectedTable.rootTableId
             });
           } else {
             tableData[tableSchemaId] = await DatasetService.getTableData({
@@ -273,7 +244,7 @@ export const WebformTable = ({
               tableSchemaId,
               levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
               fieldSchemaId: fieldSchema || fieldId,
-              value: selectedTable.pamsId
+              value: selectedTable.rootTableId
             });
           }
         }
@@ -318,27 +289,26 @@ export const WebformTable = ({
       dataProviderId={dataProviderId}
       datasetId={datasetId}
       datasetSchemaId={datasetSchemaId}
+      entitiesRecords={entitiesRecords}
       hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
       isAddingMultiple={webformTableState.isAddingMultiple}
       isFixedNumber={webformData.fixedNumber || webformData.tableSchemaFixedNumber || null}
-      isGroup={isGroup}
       isReporting={isReporting}
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
-      onUpdatePamsValue={onUpdatePamsValue}
-      onUpdateSinglesList={onUpdateSinglesList}
-      pamsRecords={pamsRecords}
+      onUpdateEntitiesValue={onUpdateEntitiesValue}
       record={record}
+      rootPkFieldId={rootPkFieldId}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
       webformType={webformType}
     />
   );
 
-  const renderTableWebformRecords = isMultiple => {
+  const renderWebform = isMultiple => {
     const { elementsRecords } = webformData;
 
     if (!isMultiple) {
@@ -349,21 +319,6 @@ export const WebformTable = ({
       } else {
         return renderWebformRecord(elementsRecords[0], null);
       }
-    }
-  };
-
-  const renderPaMsWebformRecords = () => {
-    return renderWebformRecord(webformData.elementsRecords[0], null);
-  };
-
-  const renderWebform = isMultiple => {
-    switch (webformType) {
-      case 'TABLES':
-        return renderTableWebformRecords(isMultiple);
-      case 'PAMS':
-        return renderPaMsWebformRecords();
-      default:
-        return <div />;
     }
   };
 
@@ -390,65 +345,6 @@ export const WebformTable = ({
       );
     }
   }
-
-  // const convertHelper = () => {
-  //   isLoading(true);
-  //   setIsLoadingIceberg(true);
-  //   let tableArray = webformData?.elements?.filter(el => el?.type === 'TABLE');
-  //   let tableSchemaIds = [];
-  //   if (tableArray?.length < 1) {
-  //     tableSchemaIds[0] = webformData?.tableSchemaId;
-  //   } else {
-  //     tableSchemaIds = tableArray.map(record => record.tableSchemaId);
-  //   }
-
-  //   convertTables(encodeURIComponent(tableSchemaIds));
-  // };
-
-  // const convertTables = async tableIds => {
-  //   try {
-  //     if (isIcebergCreated) {
-  //       if (dataProviderId) {
-  //         await DatasetService.convertIcebergsToParquets({
-  //           datasetId,
-  //           dataflowId,
-  //           providerId: dataProviderId,
-  //           tableSchemaIds: tableIds
-  //         });
-  //         setIsIcebergCreated(false)
-  //       } else {
-  //         await DatasetService.convertIcebergsToParquets({
-  //           datasetId,
-  //           dataflowId,
-  //           tableSchemaIds: tableIds
-  //         });
-  //         setIsIcebergCreated(false)
-  //       }
-  //     } else {
-  //       if (dataProviderId) {
-  //         await DatasetService.convertParquetsToIcebergs({
-  //           datasetId,
-  //           dataflowId,
-  //           providerId: dataProviderId,
-  //           tableSchemaIds: tableIds
-  //         });
-  //         setIsIcebergCreated(true)
-  //       } else {
-  //         await DatasetService.convertParquetsToIcebergs({
-  //           datasetId,
-  //           dataflowId,
-  //           tableSchemaIds: tableIds
-  //         });
-  //         setIsIcebergCreated(true)
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('ActionsToolbar - convertTable.', error);
-  //     notificationContext.add({ type: 'CONVERT_TABLE_ERROR' }, true);
-  //   }
-  //   setIsLoadingIceberg(false);
-  //   isLoading(false);
-  // };
 
   return (
     <div className={styles.contentWrap}>
@@ -497,7 +393,7 @@ export const WebformTable = ({
       <div className={styles.overlay}>
         <div
           style={
-            (bigData && (isLoadingIceberg || !allManualCheck))
+            isLoadingIceberg || !allManualCheck
               ? { opacity: 0.5, pointerEvents: 'none' }
               : !bigData || isIcebergCreated
               ? { opacity: 1 }

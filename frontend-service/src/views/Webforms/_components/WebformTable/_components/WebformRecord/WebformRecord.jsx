@@ -65,20 +65,19 @@ export const WebformRecord = ({
   dataProviderId,
   datasetId,
   datasetSchemaId,
+  entitiesRecords,
   hasFields,
   isAddingMultiple,
   isFixedNumber = true,
-  isGroup,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
   onRefresh,
   onTabChange,
-  onUpdatePamsValue,
-  onUpdateSinglesList,
-  pamsRecords,
+  onUpdateEntitiesValue,
   record,
   referencedTableSchemaId,
+  rootPkFieldId,
   tableId,
   tableName,
   webformType
@@ -152,7 +151,7 @@ export const WebformRecord = ({
   };
 
   const onToggleFieldVisibility = (dependency, fields = []) => {
-    if (!isNil(isGroup) && isGroup()) return true;
+    // if (!isNil(isGroup) && isGroup()) return true;
     if (isNil(dependency)) return true;
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, dependency.field))
@@ -165,51 +164,19 @@ export const WebformRecord = ({
   };
 
   const checkAddButtonVisibility = el => {
-    if (isNil(isGroup)) {
-      return true;
-    } else {
-      if (isGroup() && !isNil(el.hasCalculatedFields)) {
-        return false;
-      } else {
-        return true;
-      }
-    }
+    return true;
   };
 
   const checkCalculatedFieldVisibility = el => {
-    if (isNil(isGroup)) {
-      return false;
-    } else {
-      if (isGroup() && el.calculatedWhenGroup && !el.hideWhenCalculated) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+    return false;
   };
 
   const checkCalculatedTableVisibility = el => {
-    if (isNil(isGroup)) {
-      return false;
-    } else {
-      if (isGroup() && !isNil(el.hasCalculatedFields)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
+    return false;
   };
 
   const checkLabelVisibility = el => {
-    if (isNil(isGroup)) {
-      return true;
-    } else {
-      if ((isGroup() && el.hideWhenCalculated) || (!isGroup() && el.hideWhenSingle)) {
-        return false;
-      } else {
-        return true;
-      }
-    }
+    return true;
   };
 
   const handleDialogs = (dialog, value) => {
@@ -248,6 +215,7 @@ export const WebformRecord = ({
           const elementWidth = (100 - elementGap) / elementCount;
           fieldStyle.width = elementWidth;
         }
+
         return (
           checkLabelVisibility(element) &&
           !isFieldVisible &&
@@ -281,6 +249,7 @@ export const WebformRecord = ({
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
+                      entitiesRecords={entitiesRecords}
                       isConditional={
                         !isNil(webformRecordState.record) &&
                         webformRecordState.record.elements.filter(
@@ -292,11 +261,10 @@ export const WebformRecord = ({
                       isConditionalChanged={isConditionalChanged}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
-                      onUpdatePamsValue={onUpdatePamsValue}
-                      onUpdateSinglesList={onUpdateSinglesList}
-                      pamsRecords={pamsRecords}
+                      onUpdateEntitiesValue={onUpdateEntitiesValue}
                       record={record}
                       referencedTableSchemaId={referencedTableSchemaId}
+                      rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
                     />
                   )}
@@ -399,19 +367,18 @@ export const WebformRecord = ({
                         dataProviderId={dataProviderId}
                         datasetId={datasetId}
                         datasetSchemaId={datasetSchemaId}
+                        entitiesRecords={entitiesRecords}
                         isAddingMultiple={isAddingMultiple}
-                        isGroup={isGroup}
                         key={i}
                         multipleRecords={element.multipleRecords}
                         newRecord={webformRecordState.newRecord}
                         onAddMultipleWebform={onAddMultipleWebform}
                         onRefresh={onRefresh}
                         onTabChange={onTabChange}
-                        onUpdatePamsValue={onUpdatePamsValue}
-                        onUpdateSinglesList={onUpdateSinglesList}
-                        pamsRecords={pamsRecords}
+                        onUpdateEntitiesValue={onUpdateEntitiesValue}
                         record={record}
                         referencedTableSchemaId={element?.tableSchemaId}
+                        rootPkFieldId={rootPkFieldId}
                         tableId={tableId}
                         tableName={element.title}
                       />
@@ -495,14 +462,14 @@ export const WebformRecord = ({
     switch (webformType) {
       case 'TABLES':
         return renderTableWebformErrorMessages(content);
-      case 'PAMS':
-        return renderWebformPaMsErrorMessages(content);
+      case 'ENTITIES':
+        return renderWebformEntitiesErrorMessages(content);
       default:
         return [];
     }
   };
 
-  const renderWebformPaMsErrorMessages = content => {
+  const renderWebformEntitiesErrorMessages = content => {
     const errorMessages = [];
 
     if (isEmpty(record)) {

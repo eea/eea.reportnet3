@@ -141,6 +141,54 @@ const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
   }
 };
 
+const parseNewEntitiesTableRecord = (table, entityNumber, rootPkFieldId) => {
+  if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
+    let fields;
+
+    if (!isUndefined(table)) {
+      fields = table.records[0].fields.map(field => {
+        return {
+          fieldData: {
+            [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field?.referencedField?.idPk, rootPkFieldId)
+              ? entityNumber
+              : null,
+            type: field.type,
+            fieldSchemaId: field.fieldSchema || field.fieldId,
+            name: field.name
+          }
+        };
+      });
+    }
+
+    const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
+
+    obj.datasetPartitionId = null;
+    return obj;
+  }
+};
+
+const parseNewEntityTableRecordTable = (table, entityNumber, rootPkFieldId) => {
+  if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
+    const fields = table.records[0].fields.map(field => {
+      return {
+        fieldData: {
+          [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field?.referencedField?.idPk, rootPkFieldId)
+            ? entityNumber
+            : null,
+          type: field.type,
+          name: field.name,
+          fieldSchemaId: field.fieldSchema || field.fieldId
+        }
+      };
+    });
+
+    const obj = { dataRow: fields, recordSchemaId: table.recordSchemaId };
+
+    obj.datasetPartitionId = null;
+    return obj;
+  }
+};
+
 const parseNewTableRecordTable = table => {
   if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     const fields = table.records[0].fields.map(field => {
@@ -328,6 +376,18 @@ const parsePamsRecords = records =>
     return data;
   });
 
+const parseEntitiesRecords = records =>
+  records.map(record => {
+    const { recordId, recordSchemaId } = record;
+    let data = {};
+
+    record.elements.forEach(
+      element => (data = { ...data, [element.name]: element.value, recordId: recordId, recordSchemaId: recordSchemaId })
+    );
+
+    return data;
+  });
+
 const parseRecordsValidations = (records = []) => {
   if (isNil(records)) return [];
 
@@ -374,5 +434,8 @@ export const WebformsUtils = {
   parseOtherObjectivesRecord,
   parsePamsRecords,
   parseRecordsValidations,
-  parseRecordValidations
+  parseRecordValidations,
+  parseEntitiesRecords,
+  parseNewEntitiesTableRecord,
+  parseNewEntityTableRecordTable
 };

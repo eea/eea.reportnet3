@@ -15,7 +15,7 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'views/_components/DataTable';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
-import { WebformTable } from 'views/Webforms/_components/WebformTable';
+import { PaMsWebformTable } from 'views/Webforms/_components/PaMsWebformTable';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
@@ -268,7 +268,7 @@ export const WebformView = ({
     const visibleContent = data.filter(table => table.name === visibleTitle && table.isVisible)[0];
 
     return (
-      <WebformTable
+      <PaMsWebformTable
         bigData={bigData}
         calculateSingle={calculateSingle}
         dataflowId={dataflowId}
