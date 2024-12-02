@@ -350,6 +350,23 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
+  useEffect(() => {
+    const conversionToParquetCompleted = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT');
+    const conversionToIcebergCompleted = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT');
+    const conversionToParquetFailed = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT');
+    const conversionToIcebergFailed = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT');
+    if (
+      conversionToParquetCompleted ||
+      conversionToIcebergCompleted ||
+      conversionToParquetFailed ||
+      conversionToIcebergFailed
+    ) {
+      setIsLoadingIceberg(false);
+    }
+  }, [notificationContext.hidden]);
+
+  const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
+
   const convertHelper = async () => {
     setIsLoadingIceberg(true);
     if (isIcebergCreated) {
@@ -380,7 +397,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       }
     }
     setIsIcebergCreated(!isIcebergCreated);
-    setIsLoadingIceberg(false);
   };
 
   const onGetIcebergTables = async () => {
