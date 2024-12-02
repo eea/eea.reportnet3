@@ -240,6 +240,9 @@ export const DatasetRepository = {
   getIsEdited: async ({ datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsEdited, { datasetId }) }),
 
+  getTableImportedMetadata: async ({ datasetId }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getTableImportedMetadata, { datasetId }) }),
+
   getPresignedUrl: async ({
     datasetId,
     dataflowId,

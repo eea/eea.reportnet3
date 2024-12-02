@@ -14,6 +14,7 @@ export const DatasetConfig = {
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
   getIsEdited: '/dataset/tablesUpdated/?datasetId={:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
+  getTableImportedMetadata: '/dataset/getImportRelatedStatistics/{:datasetId}',
   getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',
