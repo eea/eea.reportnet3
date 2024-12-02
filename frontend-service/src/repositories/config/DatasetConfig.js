@@ -13,6 +13,7 @@ export const DatasetConfig = {
   getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
+  getTableImportedMetadata: '/dataset/getImportRelatedStatistics/{:datasetId}',
   getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:
     '/dataset/TableValueDataset/{:datasetId}?fieldSchemaId={:fieldSchemaId}&fieldValue={:value}&idTableSchema={:tableSchemaId}&pageNum={:pageNum}&pageSize={:pageSize}&fields={:fields}&levelError={:levelError}&idRules={:idRules}',

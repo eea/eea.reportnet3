@@ -149,6 +149,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
+  const [tableImportedMetadata, setTableImportedMetadata] = useState({});
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -200,6 +201,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   useEffect(() => {
     if (!isUndefined(metadata)) {
       onLoadDatasetSchema();
+      if (
+        metadata?.dataset?.datasetType === 'DESIGN' ||
+        metadata?.dataset?.datasetType === 'REFERENCE' ||
+        metadata?.dataset?.datasetType === 'REPORTING' ||
+        metadata?.dataset?.datasetType === 'TEST'
+      ) {
+        getTableImportedMetadata();
+      }
     }
   }, [metadata]);
 
@@ -349,6 +358,17 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeUrl();
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
+
+
+  const getTableImportedMetadata = async () => {
+    try {
+      const res = await DatasetService.getTableImportedMetadata({ datasetId });
+      setTableImportedMetadata(res.data);
+    } catch (error) {
+      console.error('Dataset - getWebformList.', error);
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+    }
+  }
 
   const convertHelper = async () => {
     setIsLoadingIceberg(true);
@@ -1281,6 +1301,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
         selectedShortCode={dataViewerOptions.selectedShortCode}
         selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+        tableImportedMetadata={tableImportedMetadata}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
         tableSchemaId={dataViewerOptions.tableSchemaId}

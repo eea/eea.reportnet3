@@ -8,6 +8,7 @@ import uniqueId from 'lodash/uniqueId';
 
 import styles from './Tab.module.scss';
 
+import dayjs from 'dayjs';
 import { config } from 'conf';
 
 import classNames from 'classnames';
@@ -76,6 +77,7 @@ export const Tab = ({
   scrollTo,
   selected,
   tableSchemaId,
+  tableImportedMetadata,
   toPrefill = false,
   totalTabs,
   viewType
@@ -208,6 +210,8 @@ export const Tab = ({
         {renderFixedNumber()}
         {renderNotEmpty()}
         {renderNumberOfFiedls()}
+        { !!tableImportedMetadata?.lastImportDate && <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportDate']}: ${dayjs(tableImportedMetadata.lastImportDate).format('DD-MM-YYYY HH:mm')}`}</p> }
+        { !!tableImportedMetadata?.numberOfRecordsImported && <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfRecordsImported']}: ${tableImportedMetadata.numberOfRecordsImported}`}</p> }
       </div>
     );
   };

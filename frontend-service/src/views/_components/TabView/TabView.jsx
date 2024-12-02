@@ -48,6 +48,7 @@ export const TabView = ({
   style = null,
   tabs,
   tableSchemaId,
+  tableImportedMetadata = {},
   totalTabs,
   viewType
 }) => {
@@ -264,6 +265,7 @@ export const TabView = ({
           rightIconTooltip={tab.props.rightIconTooltip}
           scrollTo={scrollTo}
           selected={selected}
+          tableImportedMetadata={tableImportedMetadata[tab.key]}
           tableSchemaId={tab.props.tableSchemaId}
           toPrefill={tab.props.toPrefill}
           totalTabs={totalTabs}

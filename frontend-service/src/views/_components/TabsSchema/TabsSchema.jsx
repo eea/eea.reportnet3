@@ -45,7 +45,8 @@ export const TabsSchema = ({
   showWriteButtons = true,
   tables,
   tableSchemaColumns,
-  tableSchemaId
+  tableSchemaId,
+  tableImportedMetadata
 }) => {
   const resourcesContext = useContext(ResourcesContext);
 
@@ -144,7 +145,9 @@ export const TabsSchema = ({
       }
       name="TabsSchema"
       onTabChange={onTabChange}
-      tableSchemaId={tableSchemaId}>
+      tableImportedMetadata={tableImportedMetadata}
+      tableSchemaId={tableSchemaId}
+      >
       {tabs}
     </TabView>
   );
