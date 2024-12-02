@@ -82,7 +82,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("checkAccessSuperUser('DATAFLOW',#dataflowId) OR checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR') OR hasAnyRole('ADMIN')")
+  @PreAuthorize("checkAccessSuperUser('DATAFLOW',#dataflowId) OR hasAnyRole('ADMIN') OR checkApiKey(#dataflowId,null,#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_OBSERVER','DATAFLOW_STEWARD_SUPPORT','DATAFLOW_LEAD_REPORTER','DATAFLOW_REPORTER_WRITE','DATAFLOW_REPORTER_READ','DATAFLOW_CUSTODIAN','DATAFLOW_EDITOR_WRITE','DATAFLOW_EDITOR_READ','DATAFLOW_NATIONAL_COORDINATOR')")
   @ApiOperation(value = "Find reporting dataset id by dataflow id", hidden = true)
   public List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(@ApiParam(type = "Long",
           value = "dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
@@ -151,7 +151,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @Override
   @HystrixCommand
   @GetMapping(value = "/{datasetId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId)")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "find dataset metabase", hidden = true)
   public DataSetMetabaseVO findExternalDatasetMetabaseById(@ApiParam(type = "Long",
           value = "dataset Id", example = "0") @PathVariable("datasetId") Long datasetId) {
