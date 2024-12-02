@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.eea.utils.LiteralConstants.LAST_IMPORT_DATE;
-import static org.eea.utils.LiteralConstants.TOTAL_RECORDS_IMPORTED;
+import static org.eea.utils.LiteralConstants.*;
 
 @Service("statisticsService")
 public class StatisticsServiceImpl implements StatisticsService {
@@ -61,7 +60,7 @@ public class StatisticsServiceImpl implements StatisticsService {
         if(tableSchemaIdNameVOList != null){
             for(TableSchemaIdNameVO table: tableSchemaIdNameVOList){
                 ImportStatisticsVO importStatistics = new ImportStatisticsVO();
-                List<String> statisticsToRetrieve = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED);
+                List<String> statisticsToRetrieve = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED, LAST_IMPORT_FILE_EXTENSION);
                 List<Statistics> statisticsMetabase = statisticsRepository.findAllByDatasetAndIdTableSchemaAndStatNameIsIn(datasetId, table.getIdTableSchema(), statisticsToRetrieve);
                 for(Statistics stat: statisticsMetabase){
                     if(stat.getStatName().equals(LAST_IMPORT_DATE)){
@@ -71,6 +70,10 @@ public class StatisticsServiceImpl implements StatisticsService {
                     else if(stat.getStatName().equals(TOTAL_RECORDS_IMPORTED)){
                         Long numberOfRecordsImported = (stat.getValue() != null) ? Long.valueOf(stat.getValue()) : 0L;
                         importStatistics.setNumberOfRecordsImported(numberOfRecordsImported);
+                    }
+                    else if(stat.getStatName().equals(LAST_IMPORT_FILE_EXTENSION)){
+                        String fileExtension = stat.getValue();
+                        importStatistics.setFileExtension(fileExtension);
                     }
                 }
                 statisticsMap.put(table.getIdTableSchema(), importStatistics);

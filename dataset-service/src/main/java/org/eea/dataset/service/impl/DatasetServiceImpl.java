@@ -668,7 +668,7 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
       statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
-      List<String> statisticsToIgnore = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED);
+      List<String> statisticsToIgnore = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED, LAST_IMPORT_FILE_EXTENSION);
       statisticsService.deleteOldStatsAndSaveNewOnes(datasetId, statisticsToIgnore, statsList);
       LOG.info("Statistics saved to datasetId {}.", datasetId);
     } else {

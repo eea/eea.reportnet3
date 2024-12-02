@@ -147,12 +147,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   @Override
   public void convertCsvFilesToParquetFiles(ImportFileInDremioInfo importFileInDremioInfo, List<File> csvFiles, DataSetSchema dataSetSchema) throws Exception {
-    String tableSchemaName;
     int numberOfEmptyFiles = 0;
     int numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace = 0;
     int numberOfFailedImportsForWrongNumberOfRecords = 0;
     int numberOfFailedImportsForOnlyReadOnlyFields = 0;
     int numberOfFailedImportsForReadOnlyTables = 0;
+    String fileExtension = StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId()) ? CSV : ZIP;
     DataSetMetabase dataSetMetabase = dataSetMetabaseMapper.classToEntity(datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId()));
     if(importFileInDremioInfo.getReplaceData()) {
       deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()));
@@ -169,7 +169,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO);
 
       //update statistics
-      updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase);
+
+      updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase, fileExtension);
 
       if (StringUtils.isNotBlank(importFileInDremioInfo.getWarningMessage())) {
         if (importFileInDremioInfo.getWarningMessage().equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))) {
@@ -1102,7 +1103,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
   }
 
-  private void updateImportStatistics(String tableSchemaId, String numberOfRecordsToBeInserted, DataSetMetabase dataSetMetabase){
+  private void updateImportStatistics(String tableSchemaId, String numberOfRecordsToBeInserted, DataSetMetabase dataSetMetabase, String fileExtension){
     Statistics totalRecordsImportedStat = new Statistics();
     totalRecordsImportedStat.setDataset(dataSetMetabase);
     totalRecordsImportedStat.setIdTableSchema(tableSchemaId);
@@ -1118,5 +1119,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
     lastImportDateStat.setValue(dateFormat.format(new Date()));
     statisticsService.saveOrUpdateStatistics(lastImportDateStat);
+
+    Statistics lastImportFileExtensionStat = new Statistics();
+    lastImportFileExtensionStat.setDataset(dataSetMetabase);
+    lastImportFileExtensionStat.setIdTableSchema(tableSchemaId);
+    lastImportFileExtensionStat.setStatName(LAST_IMPORT_FILE_EXTENSION);
+    lastImportFileExtensionStat.setValue(fileExtension);
+    statisticsService.saveOrUpdateStatistics(lastImportFileExtensionStat);
   }
 }
