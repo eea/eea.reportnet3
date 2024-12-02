@@ -165,12 +165,10 @@ export const DataflowHelp = () => {
           Promise.all(datasetSchemas).then(completed => {
             completed.forEach(datasetSchema => {
               if (isNil(datasetSchema.datasetId)) {
-                let dataset = data.datasets.find(
-                    dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
-                );
+                let dataset = data.datasets.find(dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId);
                 if (isNil(dataset)) {
                   dataset = data.referenceDatasets.find(
-                      dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
+                    dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
                   );
                 }
 

@@ -1,0 +1,1 @@
+export { PaMsWebformRecord } from './PaMsWebformRecord';

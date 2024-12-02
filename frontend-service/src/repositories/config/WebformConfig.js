@@ -1,5 +1,6 @@
 export const WebformConfig = {
   create: '/webform/webformConfig/',
+  createEntityRecord: '/dataset/{:datasetId}/insertRecordsMultiTable',
   createPamsRecords: '/dataset/{:datasetId}/insertRecordsMultiTable',
   delete: '/webform/webformConfig/{:id}',
   download: '/webform/webformConfig/{:id}',

@@ -182,7 +182,6 @@ export const TableManagement = ({
         parentTablesWithData,
         schemaTables
       );
-
       tableManagementDispatch({
         type: 'INITIAL_LOAD',
         payload: {
@@ -203,7 +202,12 @@ export const TableManagement = ({
     const deleteCascade = true;
 
     try {
-      await DatasetService.deleteRecord(datasetId, selectedRecord.recordId, deleteCascade);
+      await DatasetService.deleteRecord({
+        datasetId,
+        selectedRecordId: selectedRecord.recordId,
+        tableId: '67446f2fde7f500001a3236e',
+        updateInCascade: deleteCascade
+      });
       onRefresh();
     } catch (error) {
       if (error.response.status === 423) {
@@ -303,13 +307,12 @@ export const TableManagement = ({
 
   const onSaveRecord = async record => {
     const updateInCascade = true;
-
     record.dataRow = record.dataRow.filter(
       field => !['datasetPartitionId', 'id'].includes(Object.keys(field.fieldData)[0])
     );
     try {
       tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
-      await DatasetService.updateRecord(datasetId, record, updateInCascade);
+      await DatasetService.updateRecord({ datasetId, record, updateInCascade });
     } catch (error) {
       console.error('TableManagement - onSaveRecord.', error);
       const {
@@ -505,9 +508,9 @@ export const TableManagement = ({
         autoLayout={true}
         className={styles.table}
         loading={loading}
-        onRowClick={event =>
-          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } })
-        }
+        onRowClick={event => {
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: { selectedRecord: event.data } });
+        }}
         summary={resourcesContext.messages['webformPaMsTitle']}
         value={tableManagementState.records}>
         {renderTableColumns()}

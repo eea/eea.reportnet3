@@ -176,11 +176,7 @@ const DropdownWebform = props => {
 
   const onDownKey = event => {
     if (!hasFilter()) {
-      console.log(itemsWrapperRef.current);
-
       let highlightItem = DomHandler.findSingleDownKey(itemsWrapperRef.current, 'li.p-highlight');
-
-      console.log(highlightItem);
 
       if (!isNil(highlightItem)) DomHandler.scrollInView(itemsWrapperRef.current, highlightItem);
 

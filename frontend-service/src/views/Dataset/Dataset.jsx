@@ -276,7 +276,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (!isNil(webformData)) {
-      setIsReportingWebform(webformData?.type === 'PAMS');
+      setIsReportingWebform(webformData?.type === 'PAMS' || webformData?.type === 'ENTITIES');
     }
   }, [webformData]);
 
