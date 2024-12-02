@@ -1188,6 +1188,45 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
+    public void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds)
+        throws EEAException {
+        if (tableSchemaIds == null || tableSchemaIds.isEmpty()) {
+            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+            tableSchemaIds = tableSchemas.stream()
+                .map(TableSchemaIdNameVO::getIdTableSchema)
+                .collect(Collectors.toList());
+        }
+
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("datasetId", datasetId);
+        eventData.put("dataflowId", dataflowId);
+        eventData.put("providerId", providerId);
+        eventData.put("tableSchemaIds", tableSchemaIds);
+
+        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_PARQUET_TO_ICEBERG_CONVERSION, eventData);
+
+        LOG.info("Triggered Kafka event for Parquet to Iceberg conversion for datasetId: {}, dataflowId: {}", datasetId, dataflowId);
+    }
+
+    @Override
+    public void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds) throws Exception {
+        if (tableSchemaIds == null || tableSchemaIds.isEmpty()) {
+            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
+            tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
+        }
+
+        Map<String, Object> eventData = Map.of(
+            "datasetId", datasetId,
+            "dataflowId", dataflowId,
+            "providerId", providerId,
+            "tableSchemaIds", tableSchemaIds
+        );
+
+        kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_ICEBERG_TO_PARQUET_CONVERSION, eventData);
+        LOG.info("Kafka event sent for batch Iceberg to Parquet conversion for datasetId: {}", datasetId);
+    }
+
+    @Override
     public void insertRecords(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, List<RecordVO> records) throws Exception{
 
         if(records.size() == 0){

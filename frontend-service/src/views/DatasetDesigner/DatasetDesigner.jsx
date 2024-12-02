@@ -830,6 +830,28 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       notification => notification.key === 'DELETE_DATASET_SCHEMA_COMPLETED_EVENT'
     );
 
+    const conversionToParquetStarted = notificationContext.toShow.some(
+      notification => notification.key === 'COMMAND_ICEBERG_TO_PARQUET_CONVERSION'
+    );
+
+    const conversionToIcebergStarted = notificationContext.toShow.some(
+      notification => notification.key === 'COMMAND_PARQUET_TO_ICEBERG_CONVERSION'
+    );
+    const conversionToParquetCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT'
+    );
+
+    const conversionToIcebergCompleted = notificationContext.toShow.some(
+      notification => notification.key === 'PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT'
+    );
+    const conversionToParquetFailed = notificationContext.toShow.some(
+      notification => notification.key === 'ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT'
+    );
+
+    const conversionToIcebergFailed = notificationContext.toShow.some(
+      notification => notification.key === 'PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT'
+    );
+
     if (isImportDataCompleted || isRestoreSnapshotDataCompleted || isDeletedDataCompleted) {
       onHighlightRefresh(true);
       designerDispatch({
@@ -842,7 +864,45 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     if (isImportFieldSchemaCompleted) {
       window.location.reload();
     }
+
+    if (!isLoadingIceberg && (conversionToParquetStarted || conversionToIcebergStarted)) {
+      setIsLoadingIceberg(true);
+    }
+
+    if (
+      conversionToParquetCompleted ||
+      conversionToIcebergCompleted ||
+      conversionToParquetFailed ||
+      conversionToIcebergFailed
+    ) {
+      setIsLoadingIceberg(false);
+    }
   }, [notificationContext]);
+
+  useEffect(() => {
+    if (isLoadingIceberg) {
+      const conversionToParquetCompleted = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT');
+      const conversionToIcebergCompleted = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT');
+      const conversionToParquetFailed = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT');
+      const conversionToIcebergFailed = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT');
+      if (
+        conversionToParquetCompleted ||
+        conversionToIcebergCompleted ||
+        conversionToParquetFailed ||
+        conversionToIcebergFailed
+      ) {
+        setIsLoadingIceberg(false);
+      }
+    } else {
+      const conversionToParquetStarted = findHiddenNotification('COMMAND_ICEBERG_TO_PARQUET_CONVERSION');
+      const conversionToIcebergStarted = findHiddenNotification('COMMAND_PARQUET_TO_ICEBERG_CONVERSION');
+      if (conversionToParquetStarted || conversionToIcebergStarted) {
+        setIsLoadingIceberg(true);
+      }
+    }
+  }, [notificationContext.hidden]);
+
+  const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
@@ -1232,14 +1292,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const convertHelper = async () => {
-    setIsLoadingIceberg(true);
     if (isIcebergCreated) {
       await DatasetService.convertIcebergsToParquets({ dataflowId, datasetId });
     } else {
       await DatasetService.convertParquetsToIcebergs({ dataflowId, datasetId });
     }
     setIsIcebergCreated(!isIcebergCreated);
-    setIsLoadingIceberg(false);
   };
 
   const renderDialogFooterCloseBtn = modalType => (
