@@ -54,15 +54,16 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
 
       String datasetSchemaId = datasetMetabase.getDatasetSchema();
       if (isBigData(datasetMetabase.getDataflowId())) {
+        List<String> tableNamesFromSchema = getTableNamesFromSchema(datasetSchemaId);
         List<S3Object> dcList = getListOfS3Files(dcDatasetId, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH, dataProviderCode)
             .stream()
-            .filter(s3Object -> getTableNamesFromSchema(datasetSchemaId).contains(getTableNameFromKey(s3Object.key())))
+            .filter(s3Object -> tableNamesFromSchema.contains(getTableNameFromKey(s3Object.key())))
             .sorted(Comparator.comparing(S3Object::lastModified).reversed())
             .collect(Collectors.toList());
         List<S3Object> dpList = getListOfS3Files(dpDatasetId, S3_PROVIDER_PATH, dataProviderCode)
             .stream()
             .filter(s3Object -> !s3Object.key().endsWith("/"))
-            .filter(s3Object -> getTableNamesFromSchema(datasetSchemaId).contains(getTableNameFromKey(s3Object.key())))
+            .filter(s3Object -> tableNamesFromSchema.contains(getTableNameFromKey(s3Object.key())))
             .sorted(Comparator.comparing(S3Object::lastModified).reversed())
             .collect(Collectors.toList());
         return new ResponseEntity<>(compareLists(dcList, dpList, datasetSchemaService.getDataSchemaById(datasetSchemaId)), HttpStatus.OK);
