@@ -165,6 +165,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     if (refreshType === 'editedTables') {
       getEditedTables();
     }
+    else if (refreshType === 'tableImportedMetadata') {
+      getTableImportedMetadata();
+    }
   }
 
   useBreadCrumbs({
@@ -181,6 +184,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   useEffect(() => {
     getMetadata();
     getEditedTables();
+    getTableImportedMetadata();
     if (isEmpty(webformOptions)) {
       getWebformList();
     }
@@ -209,14 +213,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   useEffect(() => {
     if (!isUndefined(metadata)) {
       onLoadDatasetSchema();
-      if (
-        metadata?.dataset?.datasetType === 'DESIGN' ||
-        metadata?.dataset?.datasetType === 'REFERENCE' ||
-        metadata?.dataset?.datasetType === 'REPORTING' ||
-        metadata?.dataset?.datasetType === 'TEST'
-      ) {
-        getTableImportedMetadata();
-      }
     }
   }, [metadata]);
 
@@ -396,14 +392,20 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }
 
-
   const getTableImportedMetadata = async () => {
-    try {
-      const res = await DatasetService.getTableImportedMetadata({ datasetId });
-      setTableImportedMetadata(res.data);
-    } catch (error) {
-      console.error('Dataset - getWebformList.', error);
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+    if (
+      metadata?.dataset?.datasetType === 'DESIGN' ||
+      metadata?.dataset?.datasetType === 'REFERENCE' ||
+      metadata?.dataset?.datasetType === 'REPORTING' ||
+      metadata?.dataset?.datasetType === 'TEST'
+    ) {
+      try {
+        const res = await DatasetService.getTableImportedMetadata({datasetId});
+        setTableImportedMetadata(res.data);
+      } catch (error) {
+        console.error('Dataset - getWebformList.', error);
+        notificationContext.add({type: 'LOADING_WEBFORM_OPTIONS_ERROR'}, true);
+      }
     }
   }
 
@@ -1190,6 +1192,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       true
     );
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
+    onRefreshMetadata("tableImportedMetadata");
   };
 
   const renderImportOtherSystemsFooter = (

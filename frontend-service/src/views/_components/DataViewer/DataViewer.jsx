@@ -584,6 +584,7 @@ export const DataViewer = ({
   const onAttach = async value => {
     RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, `${value.files[0].name}`);
     setIsAttachFileVisible(false);
+    onRefreshMetadata("tableImportedMetadata");
   };
 
   const onCancelRowEdit = () => {
