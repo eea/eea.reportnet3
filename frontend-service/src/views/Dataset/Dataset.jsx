@@ -160,6 +160,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   bigDataRef.current = metadata?.dataflow.bigData;
 
+  function onRefreshMetadata(refreshType) {
+    if (refreshType === 'editedTables') {
+      getEditedTables();
+    }
+  }
+
   useBreadCrumbs({
     currentPage: getCurrentPage(),
     dataflowId,
@@ -353,12 +359,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
   const getEditedTables = async () => {
-    try {
-      const res = await DatasetService.getIsEdited({ datasetId });
-      setEditedTables(res.data);
-    } catch (error) {
-      console.error('Dataset - getWebformList.', error);
-      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+    if (metadata?.dataset?.datasetType === 'REPORTING') {
+      try {
+        const res = await DatasetService.getIsEdited({ datasetId });
+        setEditedTables(res.data);
+      } catch (error) {
+        console.error('Dataset - getWebformList.', error);
+        notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+      }
     }
   }
 
@@ -1287,6 +1295,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         levelErrorTypes={levelErrorTypes}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
+        onRefreshMetadata={onRefreshMetadata}
         onRestoreData={onRestoreData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
         reporting={true}

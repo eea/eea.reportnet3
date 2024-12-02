@@ -80,6 +80,7 @@ export const DataViewer = ({
   onHideSelectGroupedValidation,
   onIsTableDataLoading,
   onLoadTableData,
+  onRefreshMetadata,
   onRestoreData,
   reporting,
   selectedRuleId,
@@ -877,6 +878,7 @@ export const DataViewer = ({
   };
 
   const onRefresh = () => {
+    onRefreshMetadata("editedTables");
     bigData
       ? onFetchData(
           sort.sortField,
