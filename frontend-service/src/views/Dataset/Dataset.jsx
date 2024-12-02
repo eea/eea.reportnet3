@@ -149,6 +149,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [validationsVisible, setValidationsVisible] = useState(false);
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
+  const [editedTables, setEditedTables] = useState({});
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -172,6 +173,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     getMetadata();
+    getEditedTables();
     if (isEmpty(webformOptions)) {
       getWebformList();
     }
@@ -349,6 +351,16 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeUrl();
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
+
+  const getEditedTables = async () => {
+    try {
+      const res = await DatasetService.getIsEdited({ datasetId });
+      setEditedTables(res.data);
+    } catch (error) {
+      console.error('Dataset - getWebformList.', error);
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+    }
+  }
 
   const convertHelper = async () => {
     setIsLoadingIceberg(true);
@@ -1263,7 +1275,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         dataProviderId={metadata?.dataset.dataProviderId}
         datasetSchemaId={metadata?.dataset.datasetSchemaId}
         datasetType={metadata?.dataset.datasetType}
+        editedTables={editedTables}
         hasWritePermissions={hasWritePermissions}
+        isDatasetReleased={isDatasetReleased}
         isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
         isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
         isIcebergCreated={isIcebergCreated}

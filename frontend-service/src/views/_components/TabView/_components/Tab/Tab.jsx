@@ -75,6 +75,7 @@ export const Tab = ({
   rightIconTooltip,
   scrollTo,
   selected,
+  showEditIcon = false,
   tableSchemaId,
   toPrefill = false,
   totalTabs,
@@ -638,6 +639,15 @@ export const Tab = ({
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
+          {showEditIcon && <>
+            <span data-for={`${id}-edit-tooltip`} data-tip>
+              <FontAwesomeIcon className={styles.tabIconEdit} icon={AwesomeIcons('edit')}/>
+            </span>
+            <ReactTooltip border={true} effect="solid" id={`${id}-edit-tooltip`} place="top">
+              {resourcesContext.messages['editedTable']}
+            </ReactTooltip>
+          </>
+          }
           {renderRightSpan()}
           {renderRightSpanTooltip()}
           {bigData && !manualEdit && !viewType?.design && designMode && !addTab && !editingHeader && (

@@ -12,6 +12,7 @@ export const DatasetConfig = {
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
   getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
+  getIsEdited: '/dataset/tablesUpdated/?datasetId={:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
   getMetadata: '/datasetmetabase/{:datasetId}',
   getTableData:

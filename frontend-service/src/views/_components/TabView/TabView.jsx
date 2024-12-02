@@ -25,10 +25,12 @@ export const TabView = ({
   children,
   className = null,
   designMode = false,
+  editedTables = {},
   hasQueryString = true,
   maxLength,
   name,
   initialTabIndexDrag,
+  isDatasetReleased,
   isErrorDialogVisible,
   isDataflowOpen,
   isDesignDatasetEditorRead,
@@ -264,6 +266,7 @@ export const TabView = ({
           rightIconTooltip={tab.props.rightIconTooltip}
           scrollTo={scrollTo}
           selected={selected}
+          showEditIcon={isDatasetReleased && editedTables[tab.key]}
           tableSchemaId={tab.props.tableSchemaId}
           toPrefill={tab.props.toPrefill}
           totalTabs={totalTabs}
