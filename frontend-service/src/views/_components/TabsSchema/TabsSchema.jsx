@@ -36,6 +36,7 @@ export const TabsSchema = ({
   levelErrorTypes,
   onHideSelectGroupedValidation,
   onLoadTableData,
+  onRefreshMetadata,
   onRestoreData,
   onTabChange,
   reporting,
@@ -102,6 +103,7 @@ export const TabsSchema = ({
                   levelErrorTypes={levelErrorTypes}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
                   onLoadTableData={onLoadTableData}
+                  onRefreshMetadata={onRefreshMetadata}
                   onRestoreData={onRestoreData}
                   reporting={reporting}
                   selectedRuleId={selectedRuleId}
