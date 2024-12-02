@@ -189,10 +189,10 @@ public class ReceiptPDFGenerator {
       y -= spaceBetweenLines * 2 + fontSize;
 
       String[] lines = {
-              "Please note this dataflow has a technical acceptance step following delivery. This step",
-              "comprises a review of the automatic validation results at delivery, and a further set of",
-              "manual checks, which will result in a status of technically accepted, or request for",
-              "corrections. The technical acceptance will be undertaken as soon as possible."
+              "This dataflow has a technical acceptance phase following the national data submission.",
+              "During the technical acceptance phase, the results of the automatic validation will be",
+              "reviewed and the national data submission will be assessed, which will result in a status",
+              "of 'technically accepted' or 'correction requested'."
       };
 
       for (String line : lines) {
