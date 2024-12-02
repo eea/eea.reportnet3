@@ -399,6 +399,9 @@ public final class LiteralConstants {
   /** The Constant ZIP_TYPE: {@value}. */
   public static final String ZIP = "zip";
 
+  /** The Constant CSV: {@value}. */
+  public static final String CSV = "csv";
+
   /** The Constant VALIDATION_LEVEL: {@value}. */
   public static final String VALIDATION_LEVEL = "validation_level";
 
@@ -470,6 +473,9 @@ public final class LiteralConstants {
 
   /** The Constant LAST_IMPORT_DATE: {@value}. */
   public static final String LAST_IMPORT_DATE = "lastImportDate";
+
+  /** The Constant LAST_IMPORT_FILE_EXTENSION: {@value}. */
+  public static final String LAST_IMPORT_FILE_EXTENSION = "lastImportFileExtension";
 
   /**
    * Instantiates a new literal constants.

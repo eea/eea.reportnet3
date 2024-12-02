@@ -15,4 +15,7 @@ public class ImportStatisticsVO {
 
     /** The number of records imported. */
     private Long numberOfRecordsImported;
+
+    /** zip or csv. */
+    private String fileExtension;
 }
