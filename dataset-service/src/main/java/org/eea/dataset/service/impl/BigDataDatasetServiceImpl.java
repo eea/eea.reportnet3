@@ -1213,12 +1213,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
         }
 
-        Map<String, Object> eventData = Map.of(
-            "datasetId", datasetId,
-            "dataflowId", dataflowId,
-            "providerId", providerId,
-            "tableSchemaIds", tableSchemaIds
-        );
+        Map<String, Object> eventData = new HashMap<>();
+        eventData.put("datasetId", datasetId);
+        eventData.put("dataflowId", dataflowId);
+        eventData.put("providerId", providerId);
+        eventData.put("tableSchemaIds", tableSchemaIds);
 
         kafkaSenderUtils.releaseKafkaEvent(EventType.COMMAND_ICEBERG_TO_PARQUET_CONVERSION, eventData);
         LOG.info("Kafka event sent for batch Iceberg to Parquet conversion for datasetId: {}", datasetId);
