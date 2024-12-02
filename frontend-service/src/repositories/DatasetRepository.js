@@ -237,6 +237,9 @@ export const DatasetRepository = {
   getIsAvailableForManualEditing: async ({ datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsAvailableForManualEditing, { datasetId }) }),
 
+  getIsEdited: async ({ datasetId }) =>
+    await HTTPRequester.get({ url: getUrl(DatasetConfig.getIsEdited, { datasetId }) }),
+
   getPresignedUrl: async ({
     datasetId,
     dataflowId,

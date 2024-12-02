@@ -274,6 +274,10 @@ export const DatasetService = {
     return await DatasetRepository.getIsAvailableForManualEditing({ datasetId });
   },
 
+  getIsEdited: async ({ datasetId }) => {
+    return await DatasetRepository.getIsEdited({ datasetId });
+  },
+
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
 

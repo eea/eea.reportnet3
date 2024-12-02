@@ -557,6 +557,7 @@
     "editWebformConfigurationError": "Error updating webform configuration",
     "editWebLink": "Edit web link",
     "editWebLinkError": "Error editing web link",
+    "editedTable": "Has been edited",
     "eea": "European Environment Agency",
     "eeaCountries": "EEA Member countries",
     "email": "Email",

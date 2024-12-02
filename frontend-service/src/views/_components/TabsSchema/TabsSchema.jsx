@@ -21,8 +21,10 @@ export const TabsSchema = ({
   dataProviderId,
   datasetSchemaId,
   datasetType,
+  editedTables,
   hasCountryCode,
   hasWritePermissions = false,
+  isDatasetReleased,
   isExportable = true,
   isFilterable,
   isGroupedValidationDeleted,
@@ -142,6 +144,8 @@ export const TabsSchema = ({
             )
           : 0
       }
+      editedTables={editedTables}
+      isDatasetReleased={isDatasetReleased}
       name="TabsSchema"
       onTabChange={onTabChange}
       tableSchemaId={tableSchemaId}>
