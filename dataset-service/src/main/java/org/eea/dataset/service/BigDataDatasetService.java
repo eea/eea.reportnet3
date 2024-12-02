@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.AttachmentDLVO;
 import org.eea.interfaces.vo.dataset.DatasetTableVO;
@@ -26,7 +27,7 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaId the table schema id
-     * @param file the file
+     * @param helperMultipartFileMapper the file
      * @param replace the replace
      * @param integrationId the integration id
      * @param delimiter the delimiter
@@ -36,7 +37,7 @@ public interface BigDataDatasetService {
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO) throws Exception;
+                       Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception;
 
     /**
      * Generate s3 presigned Url for import
