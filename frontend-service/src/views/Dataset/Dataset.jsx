@@ -179,7 +179,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     getMetadata();
-    getEditedTables();
     if (isEmpty(webformOptions)) {
       getWebformList();
     }
@@ -208,6 +207,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   useEffect(() => {
     if (!isUndefined(metadata)) {
       onLoadDatasetSchema();
+      getEditedTables();
     }
   }, [metadata]);
 
