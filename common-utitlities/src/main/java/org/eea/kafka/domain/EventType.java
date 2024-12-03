@@ -690,9 +690,25 @@ public enum EventType {
       "national_coordinator_another_process_in_progress_event", true),
 
   EMAIL_NOT_FOUND_ERROR(LiteralConstants.DATA_REPORTING_TOPIC,
-      "email_not_found_error_event", true);
+      "email_not_found_error_event", true),
 
+  COMMAND_ICEBERG_TO_PARQUET_CONVERSION(LiteralConstants.COMMAND_TOPIC,
+      "iceberg_to_parquet_conversion_event", false),
 
+  COMMAND_PARQUET_TO_ICEBERG_CONVERSION(LiteralConstants.COMMAND_TOPIC,
+      "parquet_to_iceberg_conversion_event", false),
+
+  ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "iceberg_to_parquet_conversion_completed_event", true),
+
+  ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "iceberg_to_parquet_conversion_failed_event", true),
+
+  PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "parquet_to_iceberg_conversion_completed_event", true),
+
+  PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "parquet_to_iceberg_conversion_failed_event", true);
 
   /** The topic. */
   private String topic;
