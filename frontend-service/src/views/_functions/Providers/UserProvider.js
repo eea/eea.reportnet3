@@ -43,9 +43,6 @@ const userSettingsDefaultState = {
 export const UserProvider = ({ children }) => {
   const notificationContext = useContext(NotificationContext);
   const [userState, userDispatcher] = useReducer(userReducer, userSettingsDefaultState);
-  const isAdmin = (permissions) => {
-      return permissions.includes(config.permissions.roles.ADMIN.key);
-  };
   const onLoadSystemNotifications = async () => {
     const unparsedNotifications = await SystemNotificationService.all();
     unparsedNotifications.forEach(notification => {
@@ -66,6 +63,7 @@ export const UserProvider = ({ children }) => {
         },
 
         hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
+            const isAdmin = allowedPermissions.some(permission => userState.accessRole?.includes(config.permissions.roles.ADMIN.key))
             if (isAdmin) {
                 return true;
             }
