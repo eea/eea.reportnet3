@@ -213,6 +213,7 @@ export const Tab = ({
         {renderNumberOfFiedls()}
         { !!tableImportedMetadata?.lastImportDate && <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportDate']}: ${dayjs(tableImportedMetadata.lastImportDate).format('DD-MM-YYYY HH:mm')}`}</p> }
         { !!tableImportedMetadata?.numberOfRecordsImported && <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfRecordsImported']}: ${tableImportedMetadata.numberOfRecordsImported}`}</p> }
+        { !!tableImportedMetadata?.fileExtension && <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportFileExtension']}: ${tableImportedMetadata.fileExtension}`}</p> }
       </div>
     );
   };
