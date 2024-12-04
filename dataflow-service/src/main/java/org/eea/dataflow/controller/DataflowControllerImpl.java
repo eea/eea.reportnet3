@@ -1402,7 +1402,7 @@ public class DataflowControllerImpl implements DataFlowController {
   }
 
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "/updateDataProviderGroupIdById/{dataflowId}")
   public void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId){
     try{
