@@ -161,15 +161,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   bigDataRef.current = metadata?.dataflow.bigData;
 
-  function onRefreshMetadata(refreshType) {
-    if (refreshType === 'editedTables') {
-      getEditedTables();
-    }
-    else if (refreshType === 'tableImportedMetadata') {
-      getTableImportedMetadata();
-    }
-  }
-
   useBreadCrumbs({
     currentPage: getCurrentPage(),
     dataflowId,
@@ -381,7 +372,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
 
   const getEditedTables = async () => {
-    if (metadata?.dataset?.datasetType === 'REPORTING') {
+    if (metadata?.dataset?.datasetType === 'REPORTING' && metadata?.dataflow?.bigData) {
       try {
         const res = await DatasetService.getIsEdited({ datasetId });
         setEditedTables(res.data);
@@ -393,6 +384,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }
 
   const getTableImportedMetadata = async () => {
+    if (!metadata?.dataflow?.bigData) return;
     if (
       metadata?.dataset?.datasetType === 'DESIGN' ||
       metadata?.dataset?.datasetType === 'REFERENCE' ||
@@ -1192,7 +1184,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       true
     );
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
-    onRefreshMetadata("tableImportedMetadata");
   };
 
   const renderImportOtherSystemsFooter = (
@@ -1261,6 +1252,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       notificationContext.add({ type: 'UNLOCK_DATASET_ERROR' }, true);
     }
   };
+
+  function handleRefresh() {
+    onLoadDatasetSchema();
+    getEditedTables();
+    getTableImportedMetadata();
+  }
 
   const renderDialogFooterCloseBtn = () => (
     <Button
@@ -1334,7 +1331,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         levelErrorTypes={levelErrorTypes}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
-        onRefreshMetadata={onRefreshMetadata}
         onRestoreData={onRestoreData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
         reporting={true}
@@ -1519,7 +1515,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               } p-button-animated-blink dataset-refresh-help-step`}
               icon="refresh"
               label={resourcesContext.messages['refresh']}
-              onClick={onLoadDatasetSchema}
+              onClick={handleRefresh}
             />
             {metadata?.dataflow.bigData && (
               <Button

@@ -80,7 +80,6 @@ export const DataViewer = ({
   onHideSelectGroupedValidation,
   onIsTableDataLoading,
   onLoadTableData,
-  onRefreshMetadata,
   onRestoreData,
   reporting,
   selectedRuleId,
@@ -584,7 +583,6 @@ export const DataViewer = ({
   const onAttach = async value => {
     RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, `${value.files[0].name}`);
     setIsAttachFileVisible(false);
-    onRefreshMetadata("tableImportedMetadata");
   };
 
   const onCancelRowEdit = () => {
@@ -879,7 +877,6 @@ export const DataViewer = ({
   };
 
   const onRefresh = () => {
-    onRefreshMetadata("editedTables");
     bigData
       ? onFetchData(
           sort.sortField,

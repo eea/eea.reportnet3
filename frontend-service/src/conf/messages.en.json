@@ -879,6 +879,7 @@
     "label": "Label",
     "language": "Language",
     "lastImportDate": "Last import date",
+    "lastImportFileExtension": "Last import file extension",
     "latitude": "Latitude",
     "ldvManufacturers": "LDV manufacturers OBFCM",
     "leftBarReportingDataflowsButton": "Referencing dataflows",

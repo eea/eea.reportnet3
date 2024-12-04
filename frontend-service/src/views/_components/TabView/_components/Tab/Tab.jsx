@@ -213,6 +213,7 @@ export const Tab = ({
         {renderNumberOfFiedls()}
         { !!tableImportedMetadata?.lastImportDate && <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportDate']}: ${dayjs(tableImportedMetadata.lastImportDate).format('DD-MM-YYYY HH:mm')}`}</p> }
         { !!tableImportedMetadata?.numberOfRecordsImported && <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfRecordsImported']}: ${tableImportedMetadata.numberOfRecordsImported}`}</p> }
+        { !!tableImportedMetadata?.fileExtension && <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportFileExtension']}: ${tableImportedMetadata.fileExtension}`}</p> }
       </div>
     );
   };
@@ -647,7 +648,7 @@ export const Tab = ({
             <span data-for={`${id}-edit-tooltip`} data-tip>
               <FontAwesomeIcon className={styles.tabIconEdit} icon={AwesomeIcons('edit')}/>
             </span>
-            <ReactTooltip border={true} effect="solid" id={`${id}-edit-tooltip`} place="top">
+            <ReactTooltip className={styles.tabEditTooltip} border={true} effect="solid" id={`${id}-edit-tooltip`} place="top">
               {resourcesContext.messages['editedTable']}
             </ReactTooltip>
           </>
