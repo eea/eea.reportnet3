@@ -502,8 +502,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           csvWriter.writeNext(headersArray);
         }
 
-        //compare with the number of headers, minus the record_id and data_provider_code header
-        if (csvRecord.size() > typeMapping.getExpectedHeaders().size()) {
+        //compare with the number of headers
+        if (csvRecord.size() > csvParser.getHeaderMap().size()) {
           importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
         }
 
