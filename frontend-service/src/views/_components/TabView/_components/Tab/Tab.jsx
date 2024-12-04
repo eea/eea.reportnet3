@@ -31,58 +31,58 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import TooltipButtonRed from 'views/_components/TooltipButton/TooltipButtonRed';
 
 export const Tab = ({
-  addTab,
-  ariaControls,
-  bigData = false,
-  checkEditingTabs,
-  className,
-  closeIcon,
-  description = '',
-  designMode = false,
-  divScrollTabsRef,
-  disabled = false,
-  editable = false,
-  fixedNumber = false,
-  hasInfoTooltip = false,
-  hasPKReferenced = false,
-  header,
-  headerStyle,
-  id,
-  isDataflowOpen,
-  isDesignDatasetEditorRead,
-  index,
-  initialTabIndexDrag,
-  isNavigationHidden,
-  leftIcon,
-  manualEdit,
-  maxLength,
-  newTab,
-  notEmpty = true,
-  numberOfFields,
-  onTabBlur,
-  onTabAddCancel,
-  onTabDeleteClick,
-  onTabDragAndDrop,
-  onTabDragAndDropStart,
-  onTabEditingHeader,
-  onTabHasErrors,
-  onTabHeaderClick,
-  onTabMouseWheel,
-  onTabNameError,
-  onTabNameLengthWarning,
-  readOnly = false,
-  rightIcon,
-  rightIconClass = '',
-  rightIconTooltip,
-  scrollTo,
-  selected,
-  showEditIcon = false,
-  tableSchemaId,
-  tableImportedMetadata,
-  toPrefill = false,
-  totalTabs,
-  viewType
-}) => {
+                      addTab,
+                      ariaControls,
+                      bigData = false,
+                      checkEditingTabs,
+                      className,
+                      closeIcon,
+                      description = '',
+                      designMode = false,
+                      divScrollTabsRef,
+                      disabled = false,
+                      editable = false,
+                      fixedNumber = false,
+                      hasInfoTooltip = false,
+                      hasPKReferenced = false,
+                      header,
+                      headerStyle,
+                      id,
+                      isDataflowOpen,
+                      isDesignDatasetEditorRead,
+                      index,
+                      initialTabIndexDrag,
+                      isNavigationHidden,
+                      leftIcon,
+                      manualEdit,
+                      maxLength,
+                      newTab,
+                      notEmpty = true,
+                      numberOfFields,
+                      onTabBlur,
+                      onTabAddCancel,
+                      onTabDeleteClick,
+                      onTabDragAndDrop,
+                      onTabDragAndDropStart,
+                      onTabEditingHeader,
+                      onTabHasErrors,
+                      onTabHeaderClick,
+                      onTabMouseWheel,
+                      onTabNameError,
+                      onTabNameLengthWarning,
+                      readOnly = false,
+                      rightIcon,
+                      rightIconClass = '',
+                      rightIconTooltip,
+                      scrollTo,
+                      selected,
+                      showEditIcon = false,
+                      tableSchemaId,
+                      tableImportedMetadata,
+                      toPrefill = false,
+                      totalTabs,
+                      viewType
+                    }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
   const [hasErrors, setHasErrors] = useState(false);
@@ -479,6 +479,17 @@ export const Tab = ({
       if (notEmpty) {
         values.push({ field: resourcesContext.messages['notEmpty'], key: 'notEmpty', value: notEmpty });
       }
+      if (!!tableImportedMetadata?.lastImportDate) {
+        values.push({ field: resourcesContext.messages['lastImportDate'], key: 'lastImportDate', value: `${dayjs(tableImportedMetadata.lastImportDate).format('DD-MM-YYYY HH:mm')}`})
+      }
+      if (!!tableImportedMetadata?.numberOfRecordsImported) {
+        values.push({ field: resourcesContext.messages['numberOfRecordsImported'], key: 'numberOfRecordsImported', value: `${tableImportedMetadata.numberOfRecordsImported}`})
+      }
+      if (!!tableImportedMetadata?.fileExtension) {
+        values.push({ field: resourcesContext.messages['lastImportFileExtension'], key: 'lastImportFileExtension', value: `${tableImportedMetadata.fileExtension}`})
+      }
+
+
 
       return (
         <Dialog
