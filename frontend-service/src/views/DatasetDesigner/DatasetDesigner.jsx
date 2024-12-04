@@ -289,7 +289,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         leftSideBarContext.removeHelpSteps();
       }
     }
-  }, [userContext, designerState.areLoadingSchemas, designerState.areUpdatingTables]);feat
+  }, [userContext, designerState.areLoadingSchemas, designerState.areUpdatingTables]);
 
   useEffect(() => {
     if (designerState.validationListDialogVisible) {
