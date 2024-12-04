@@ -1412,7 +1412,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export schemas", hidden = true)
   public ResponseEntity<byte[]> exportSchemas(@ApiParam(type = "Long", value = "Dataflow Id",
@@ -1491,7 +1491,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/{datasetSchemaId}/exportFieldSchemas",
           produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export table definition by table schema id",
@@ -1642,7 +1642,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE', 'REFERENCEDATASET_LEAD_REPORTER')")
+  @PreAuthorize("secondLevelAuthorizeWithApiKey(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE', 'DATASET_LEAD_REPORTER', 'DATASET_REPORTER_READ', 'DATASET_REPORTER_WRITE', 'REFERENCEDATASET_LEAD_REPORTER') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/v1/dataset/{datasetId}/exportFieldSchemas",
           produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Export dataset definition by dataset id",
