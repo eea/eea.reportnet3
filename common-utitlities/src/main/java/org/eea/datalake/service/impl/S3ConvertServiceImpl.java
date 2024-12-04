@@ -139,8 +139,13 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                     GenericRecord record;
 
                     while ((record = r.read()) != null) {
-                        long size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
                         boolean canExcludeHeaders = canExcludeHeaders(datasetTypeEnum);
+                        long size;
+                        if (canExcludeHeaders) {
+                            size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t ->  !headersToExclude.contains(t)).count();
+                        } else {
+                            size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
+                        }
                         if (counter == 0) {
                             if (canExcludeHeaders) {
                                 csvWriter.writeNext(record.getSchema().getFields().stream()
