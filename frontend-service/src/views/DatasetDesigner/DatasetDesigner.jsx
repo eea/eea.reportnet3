@@ -1231,6 +1231,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
+  function handleRefresh() {
+    onLoadSchema();
+    getTableImportedMetadata();
+  }
+
   const validateQcRules = async () => {
     setSqlValidationRunning(true);
     try {
@@ -2014,7 +2019,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 disabled={isDesignDatasetEditorRead}
                 icon="refresh"
                 label={resourcesContext.messages['refresh']}
-                onClick={onLoadSchema}
+                onClick={handleRefresh}
               />
             </div>
           </Toolbar>
