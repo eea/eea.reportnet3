@@ -59,7 +59,6 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.MalformedInputException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -481,7 +480,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     long recordCounter = 0;
 
     String detectedCharset = detectEncoding(csvFile.getPath());
-    try (Reader reader = new InputStreamReader(new FileInputStream(csvFile.getPath()), detectedCharset);
+    try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()), Charset.forName(detectedCharset));
          CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
              .setHeader()
              .setSkipHeaderRecord(false)
@@ -554,7 +553,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     File csvFileWithAddedColumns = null;
 
     String detectedCharset = detectEncoding(csvFile.getPath());
-    try (Reader reader = new InputStreamReader(new FileInputStream(csvFile.getPath()), detectedCharset);
+    try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()), Charset.forName(detectedCharset));
          CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
              .setHeader()
              .setSkipHeaderRecord(false)
