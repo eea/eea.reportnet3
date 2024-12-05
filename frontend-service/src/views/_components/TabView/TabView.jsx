@@ -184,6 +184,7 @@ export const TabView = ({
   };
 
   const isSelected = index => {
+
     if (designMode) {
       if (
         activeIdx !== TabsUtils.getIndexByTableProperty(QuerystringUtils.getUrlParamValue('tab'), tabs, 'tableSchemaId')
@@ -268,7 +269,7 @@ export const TabView = ({
           scrollTo={scrollTo}
           selected={selected}
           showEditIcon={isDatasetReleased && editedTables[tab.key]}
-          tableImportedMetadata={tableImportedMetadata[QuerystringUtils.getUrlParamValue('tab')]}
+          tableImportedMetadata={designMode ? tableImportedMetadata[tab.props.tableSchemaId] : tableImportedMetadata[tab.key]}
           tableSchemaId={tab.props.tableSchemaId}
           toPrefill={tab.props.toPrefill}
           totalTabs={totalTabs}
