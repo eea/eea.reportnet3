@@ -79,6 +79,8 @@ const parseDataflowDTO = dataflowDTO => {
     dataProviderGroupId: dataflowDTO.dataProviderGroupId,
     dataProviderGroupName: dataflowDTO.dataProviderGroupName,
     datasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.reportingDatasets),
+    deleted: dataflowDTO.deleted,
+    deletedAt: dataflowDTO.deletedAt,
     description: dataflowDTO.description,
     designDatasets: DatasetUtils.parseDatasetListDTO(dataflowDTO.designDatasets),
     documents: DocumentUtils.parseDocumentListDTO(dataflowDTO.documents),
@@ -221,7 +223,8 @@ const parseRequestFilterBy = filterBy => {
       if (
         TextUtils.areEquals(key, 'userRole') ||
         TextUtils.areEquals(key, 'status') ||
-        TextUtils.areEquals(key, 'pinned')
+        TextUtils.areEquals(key, 'pinned') ||
+        TextUtils.areEquals(key, 'is_deleted')
       ) {
         results[replacements[key] || key] = filterBy[key]?.value;
       }

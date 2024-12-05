@@ -40,6 +40,7 @@ export const ManageDataflow = ({
   obligation,
   onCreateDataflow,
   onEditDataflow,
+  onUpdateSoftDelete,
   resetDeliveryDate,
   resetObligations,
   setCheckedObligation,
@@ -103,22 +104,56 @@ export const ManageDataflow = ({
     manageDialogs(dialogName, false);
   };
 
+  const afterSoft = (deleted, dialog) => {
+    manageDialogs(dialog, false);
+    onUpdateSoftDelete(deleted);
+    onHideDataflowDialog();
+  }
+
+  const handleDeleteError = error => {
+    if (error.response.status === 423) {
+      notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
+    } else {
+      console.error('ManageDataflow - onDeleteDataflow.', error);
+      notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } }, true);
+    }
+    setIsDeleting(false);
+  }
+
   const onDeleteDataflow = async () => {
     setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
     } catch (error) {
-      if (error.response.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
-      } else {
-        console.error('ManageDataflow - onDeleteDataflow.', error);
-        notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } }, true);
-      }
-      setIsDeleting(false);
+      handleDeleteError(error);
     } finally {
       userContext.setCurrentDataflowType(undefined);
     }
   };
+
+  const onSoftDeleteDataflow = async () => {
+    if (state.data.deleted) return;
+    setIsDeleting(true);
+    try {
+      await DataflowService.softDelete(dataflowId);
+    } catch (error) {
+      handleDeleteError(error);
+    } finally {
+      afterSoft(true, 'isSoftDeleteDialogVisible');
+    }
+  };
+
+  const onReverseSoftDelete = async () => {
+    if (!state.data.deleted) return;
+    setIsDeleting(true);
+    try {
+      await DataflowService.reverseSoftDelete(dataflowId);
+    } catch (error) {
+      handleDeleteError(error);
+    } finally {
+      afterSoft(false, 'isReverseSoftDeleteDialogVisible');
+    }
+  }
 
   const onLoadData = ({ name, description, providerGroup }) =>
     reportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description, providerGroup } });
@@ -252,6 +287,26 @@ export const ManageDataflow = ({
       <Fragment>
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
+          {
+            (!state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
+              <Button
+                className="p-button-danger p-button-animated-blink"
+                icon="trash"
+                label={resourcesContext.messages['softDeleteDataflowButton']}
+                onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
+              />
+            )
+          }
+          {
+            (state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
+              <Button
+                className="p-button-danger p-button-animated-blink"
+                icon="trash"
+                label={resourcesContext.messages['reverseSoftDeleteDataflowButton']}
+                onClick={() => manageDialogs('isReverseSoftDeleteDialogVisible', true)}
+              />
+            )
+          }
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>
@@ -344,6 +399,72 @@ export const ManageDataflow = ({
             id={'deleteDataflow'}
             maxLength={config.INPUT_MAX_LENGTH}
             name={resourcesContext.messages['deleteDataflowButton']}
+            onChange={event => onDeleteInputChange(event.target.value)}
+            ref={deleteInputRef}
+            value={reportingDataflowState.deleteInput}
+          />
+        </ConfirmDialog>
+      )}
+
+      {state.isSoftDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          disabledConfirm={
+            !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
+          }
+          header={resourcesContext.messages['delete'].toUpperCase()}
+          iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onSoftDeleteDataflow}
+          onHide={() => manageDialogs('isSoftDeleteDialogVisible', false)}
+          visible={state.isSoftDeleteDialogVisible}>
+          <p>{resourcesContext.messages['softDeleteDataflow']}</p>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['markDeletedDataflowConfirm'], {
+                dataflowName: state.name
+              })
+            }}></p>
+          <InputText
+            autoFocus={true}
+            className={styles.inputText}
+            id={'softDeleteDataflow'}
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resourcesContext.messages['softDeleteDataflowButton']}
+            onChange={event => onDeleteInputChange(event.target.value)}
+            ref={deleteInputRef}
+            value={reportingDataflowState.deleteInput}
+          />
+        </ConfirmDialog>
+      )}
+
+      {state.isReverseSoftDeleteDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          disabledConfirm={
+            !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
+          }
+          header={resourcesContext.messages['delete'].toUpperCase()}
+          iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onReverseSoftDelete}
+          onHide={() => manageDialogs('isReverseSoftDeleteDialogVisible', false)}
+          visible={state.isReverseSoftDeleteDialogVisible}>
+          <p>{resourcesContext.messages['reverseSoftDeleteDataflow']}</p>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['markDeletedDataflowConfirm'], {
+                dataflowName: state.name
+              })
+            }}></p>
+          <InputText
+            autoFocus={true}
+            className={styles.inputText}
+            id={'reverseSoftDeleteDataflow'}
+            maxLength={config.INPUT_MAX_LENGTH}
+            name={resourcesContext.messages['reverseSoftDeleteDataflowConfirm']}
             onChange={event => onDeleteInputChange(event.target.value)}
             ref={deleteInputRef}
             value={reportingDataflowState.deleteInput}

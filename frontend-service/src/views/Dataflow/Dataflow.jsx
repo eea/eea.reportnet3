@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import {Fragment, useContext, useEffect, useReducer, useRef} from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import dayjs from 'dayjs';
@@ -659,6 +659,8 @@ export const Dataflow = () => {
       notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
     }
   };
+
+  const onUpdateSoftDelete = deleted => dataflowDispatch({ type: 'ON_UPDATE_SOFT_DELETE', payload: deleted });
 
   const manageRoleDialogFooter = (
     <Fragment>
@@ -1743,6 +1745,7 @@ export const Dataflow = () => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onUpdateSoftDelete={onUpdateSoftDelete}
             resetDeliveryDate={resetDeliveryDate}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}

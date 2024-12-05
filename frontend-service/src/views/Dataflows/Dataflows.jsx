@@ -790,6 +790,23 @@ export const Dataflows = () => {
       });
     }
 
+    filters.push({
+      isSortable: false,
+      key: 'is_deleted',
+      type: 'DROPDOWN',
+      label: resourcesContext.messages['isMarkedDeleted'],
+      dropdownOptions: [
+        { label: "YES", value: true },
+        { label: "NO", value: false }
+      ],
+    })
+
+    // filters.push({
+    //   key: 'is_deleted',
+    //   type: 'CHECKBOX',
+    //   label: resourcesContext.messages['isMarkedDeleted'],
+    // })
+
     return filters;
   };
 
@@ -827,6 +844,16 @@ export const Dataflows = () => {
         }
       ],
       type: 'DROPDOWN'
+    },
+    {
+      isSortable: false,
+      key: 'is_deleted',
+      type: 'DROPDOWN',
+      label: resourcesContext.messages['isMarkedDeleted'],
+      dropdownOptions: [
+        { label: "YES", value: true },
+        { label: "NO", value: false }
+      ],
     }
   ];
 
