@@ -44,6 +44,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
+import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -487,7 +488,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     List<FileWithRecordNum> modifiedCsvFiles = new ArrayList<>();
     long recordCounter = 0;
 
-    Charset detectedCharset = detectEncoding(csvFile.getPath());
+    String detectedCharset = detectEncoding(csvFile.getPath());
     try (Reader reader = new InputStreamReader(new FileInputStream(csvFile.getPath()), detectedCharset);
          CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
              .setHeader()
@@ -537,23 +538,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
    *
    * @throws IOException ioException
    */
-  private Charset detectEncoding(String filePath) throws IOException {
-    try (InputStream input = new FileInputStream(filePath)) {
-      byte[] buffer = new byte[3];
-      input.read(buffer);
-
-      // Check for BOM (Byte Order Mark)
-      if ((buffer[0] & 0xFF) == 0xEF && (buffer[1] & 0xFF) == 0xBB && (buffer[2] & 0xFF) == 0xBF) {
-        return StandardCharsets.UTF_8; // UTF-8 with BOM
-      } else if ((buffer[0] & 0xFF) == 0xFF && (buffer[1] & 0xFF) == 0xFE) {
-        return StandardCharsets.UTF_16LE; // UTF-16 Little Endian
-      } else if ((buffer[0] & 0xFF) == 0xFE && (buffer[1] & 0xFF) == 0xFF) {
-        return StandardCharsets.UTF_16BE; // UTF-16 Big Endian
-      } else {
-        // Fallback: Assume ANSI (Windows-1252)
-        return Charset.forName("windows-1252");
-      }
-    }
+  private String detectEncoding(String filePath) throws IOException {
+    return UniversalDetector.detectCharset(new File(filePath));
   }
 
 
@@ -570,7 +556,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     CSVWriter csvWriter = null;
     File csvFileWithAddedColumns = null;
 
-    Charset detectedCharset = detectEncoding(csvFile.getPath());
+    String detectedCharset = detectEncoding(csvFile.getPath());
     try (Reader reader = new InputStreamReader(new FileInputStream(csvFile.getPath()), detectedCharset);
          CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
              .setHeader()
