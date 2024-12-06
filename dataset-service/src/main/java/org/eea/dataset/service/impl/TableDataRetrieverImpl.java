@@ -2,7 +2,6 @@ package org.eea.dataset.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.eea.datalake.service.S3Helper;
-import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -40,7 +39,6 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
   private final DatasetSchemaService datasetSchemaService;
   private final DataFlowController dataFlowController;
   private final DataCollectionController.DataCollectionControllerZuul dataCollectionControllerZuul;
-  private final S3Service s3Service;
 
   private static final Logger LOG = LoggerFactory.getLogger(TableDataRetrieverImpl.class);
 
@@ -52,7 +50,7 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
       DataSetMetabase datasetMetabase = getDataSetMetabase(dpDatasetId);
       Long dcDatasetId = dataCollectionControllerZuul.findDataCollectionIdByDatasetSchemaId(datasetMetabase.getDatasetSchema());
       Long dataProviderCode = dataSetMetabaseRepository.findDataProviderIdById(dpDatasetId);
-      String dpFolderName = s3Service.formatFolderName(dataProviderCode, S3_DATA_PROVIDER_PATTERN);
+      String dpFolderName = s3Helper.getS3Service().formatFolderName(dataProviderCode, S3_DATA_PROVIDER_PATTERN);
       String datasetSchemaId = datasetMetabase.getDatasetSchema();
       if (isBigData(datasetMetabase.getDataflowId())) {
         List<String> tableNamesFromSchema = getTableNamesFromSchema(datasetSchemaId);
