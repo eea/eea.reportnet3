@@ -1320,15 +1320,13 @@ export const Dataflow = () => {
   if (dataflowState.isPageLoading || isNil(dataflowState.data)) return layout(<Spinner />);
 
   const getSubtitle = () => {
-    let subtitle = '';
+    let subtitle;
     if (parseInt(representativeId) === 0) {
       subtitle = dataflowState.data.name;
     } else {
       if (isInsideACountry && !isNil(country) && country.length > 0) {
-        return dataflowState.data.bigData
-          ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-              name: dataflowState.data.name
-            })
+        subtitle = dataflowState.data.bigData
+          ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowState.data.name })
           : dataflowState.data.name;
       } else {
         subtitle = dataflowState.data.bigData

@@ -22,11 +22,15 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import dayjs from "dayjs";
+import {TextUtils} from "../../repositories/_utils/TextUtils";
+import {UserContext} from "../_functions/Contexts/UserContext";
 
 export const DataflowDashboards = () => {
   const navigate = useNavigate();
   const { dataflowId } = useParams();
 
+  const userContext = useContext(UserContext);
   const leftSideBarContext = useContext(LeftSideBarContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -49,7 +53,14 @@ export const DataflowDashboards = () => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
       setDataflowType(data.type);
-      setDataflowName(data.name);
+      setDataflowName(() => {
+        let dataflowName = data.name;
+        if (data.deleted) {
+          const deletedAt = dayjs(data.deletedAt).format(userContext.userProps.dateFormat);
+          dataflowName += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+        }
+        return dataflowName;
+      });
       setIsLoading(false);
     } catch (error) {
       console.error('DataflowDashboards - getDataflowDetails.', error);

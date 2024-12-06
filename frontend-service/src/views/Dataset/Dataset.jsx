@@ -157,7 +157,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
   let bigDataRef = useRef();
-console.log("Dataset")
+
   bigDataRef.current = metadata?.dataflow.bigData;
 
   useBreadCrumbs({
