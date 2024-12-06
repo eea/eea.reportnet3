@@ -384,7 +384,7 @@ export const ManageReferenceDataflow = ({
           />
         </ConfirmDialog>
       )}
-      {metadata.isSoftDeleteDialogVisible && (
+      {metadata?.isSoftDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name) || isDeleting}
@@ -414,7 +414,7 @@ export const ManageReferenceDataflow = ({
           />
         </ConfirmDialog>
       )}
-      {metadata.isReverseSoftDeleteDialogVisible && (
+      {metadata?.isReverseSoftDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, metadata.name) || isDeleting}
