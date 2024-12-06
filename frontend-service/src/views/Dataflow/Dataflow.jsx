@@ -1320,8 +1320,9 @@ export const Dataflow = () => {
   if (dataflowState.isPageLoading || isNil(dataflowState.data)) return layout(<Spinner />);
 
   const getSubtitle = () => {
+    let subtitle = '';
     if (parseInt(representativeId) === 0) {
-      return dataflowState.data.name;
+      subtitle = dataflowState.data.name;
     } else {
       if (isInsideACountry && !isNil(country) && country.length > 0) {
         return dataflowState.data.bigData ? (
@@ -1335,11 +1336,18 @@ export const Dataflow = () => {
           dataflowState.data.name
         );
       } else {
-        return dataflowState.data.bigData
+        subtitle = dataflowState.data.bigData
           ? resourcesContext.messages['bigDataDataflow']
           : resourcesContext.messages['dataflow'];
       }
     }
+
+    if (dataflowState.data.deleted) {
+      const deletedAt = dayjs(dataflowState.data.deletedAt).format('YYYY-MM-DD');
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
   };
 
   const getTitle = () => {

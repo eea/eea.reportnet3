@@ -606,6 +606,8 @@ export const Dataflows = () => {
     const parsedDataflows = DataflowsUtils.parseDataflows(dataflows, userContext.userProps.pinnedDataflows);
     const orderedPinned = parsedDataflows.map(el => el.pinned === 'pinned');
 
+    console.log(orderedPinned);
+
     setPinnedSeparatorIndex(orderedPinned.lastIndexOf(true));
     setData(parsedDataflows);
     dataflowsDispatch({

@@ -12,6 +12,8 @@ const parseDataflows = (data, pinnedDataflows) => {
     bigData: dataflow.bigData,
     creationDate: dataflow.creationDate,
     description: dataflow.description,
+    deleted: dataflow.deleted,
+    deletedAt: dataflow.deletedAt,
     expirationDate: dataflow.expirationDate,
     legalInstrument: dataflow.obligation?.legalInstrument?.alias,
     name: dataflow.name,

@@ -445,7 +445,7 @@ export const ManageDataflow = ({
           disabledConfirm={
             !TextUtils.areEquals(reportingDataflowState.deleteInput, state.name) || reportingDataflowState.isDeleting
           }
-          header={resourcesContext.messages['delete'].toUpperCase()}
+          header={resourcesContext.messages['restore'].toUpperCase()}
           iconConfirm={reportingDataflowState.isDeleting && 'spinnerAnimate'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
