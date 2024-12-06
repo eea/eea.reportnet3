@@ -2,6 +2,7 @@ package org.eea.dataset.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
@@ -27,8 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.eea.utils.LiteralConstants.S3_PROVIDER_PATH;
-import static org.eea.utils.LiteralConstants.S3_TABLE_NAME_ROOT_DC_FOLDER_PATH;
+import static org.eea.utils.LiteralConstants.*;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +40,7 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
   private final DatasetSchemaService datasetSchemaService;
   private final DataFlowController dataFlowController;
   private final DataCollectionController.DataCollectionControllerZuul dataCollectionControllerZuul;
+  private final S3Service s3Service;
 
   private static final Logger LOG = LoggerFactory.getLogger(TableDataRetrieverImpl.class);
 
@@ -51,13 +52,14 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
       DataSetMetabase datasetMetabase = getDataSetMetabase(dpDatasetId);
       Long dcDatasetId = dataCollectionControllerZuul.findDataCollectionIdByDatasetSchemaId(datasetMetabase.getDatasetSchema());
       Long dataProviderCode = dataSetMetabaseRepository.findDataProviderIdById(dpDatasetId);
-
+      String dpFolderName = s3Service.formatFolderName(dataProviderCode, S3_DATA_PROVIDER_PATTERN);
       String datasetSchemaId = datasetMetabase.getDatasetSchema();
       if (isBigData(datasetMetabase.getDataflowId())) {
         List<String> tableNamesFromSchema = getTableNamesFromSchema(datasetSchemaId);
         List<S3Object> dcList = getListOfS3Files(dcDatasetId, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH, dataProviderCode)
             .stream()
             .filter(s3Object -> tableNamesFromSchema.contains(getTableNameFromKey(s3Object.key())))
+            .filter(s3Object -> providerFolderNameExists(s3Object.key(), dpFolderName))
             .sorted(Comparator.comparing(S3Object::lastModified).reversed())
             .collect(Collectors.toList());
         List<S3Object> dpList = getListOfS3Files(dpDatasetId, S3_PROVIDER_PATH, dataProviderCode)
@@ -159,6 +161,10 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
 
   private String getTableNameFromKey(String key) {
     return key.split("/")[4];
+  }
+
+  private boolean providerFolderNameExists(String key, String providerFolder) {
+    return key.split("/")[5].equalsIgnoreCase(providerFolder);
   }
 
   private boolean isBigData(Long dataflowId) {
