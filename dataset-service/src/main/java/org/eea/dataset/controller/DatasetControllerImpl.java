@@ -1242,6 +1242,19 @@ public class DatasetControllerImpl implements DatasetController {
     return tableDataRetriever.getTablesUpdatedAfterRelease(datasetId);
   }
 
+
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/datasetsUpdated")
+  @ApiOperation(value = "Datasets updated since last release")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully result returned"),
+      @ApiResponse(code = 500, message = "Error finding tables"),
+      @ApiResponse(code = 400, message = "Bad request")})
+  public ResponseEntity<?> datasetsUpdatedAfterRelease(Long datasetId) {
+
+    return tableDataRetriever.checkDatasetEditedAfterRelease(datasetId);
+  }
+
   /**
    * Export file through integration.
    *

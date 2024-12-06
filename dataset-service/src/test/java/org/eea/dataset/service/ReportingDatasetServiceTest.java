@@ -17,7 +17,9 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.impl.ReportingDatasetServiceImpl;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -29,6 +31,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 /**
  * The Class ReportingDatasetServiceTest.
@@ -64,12 +68,19 @@ public class ReportingDatasetServiceTest {
   @Mock
   private RepresentativeControllerZuul representativeControllerZuul;
 
+  @Mock
+  private DatasetController.DataSetControllerZuul dataSetControllerZuul;
+
+  @Mock
+  private DataFlowController dataFlowController;
+
   /**
    * Inits the mocks.
    */
   @Before
   public void initMocks() {
     MockitoAnnotations.openMocks(this);
+    when(dataFlowController.isBigDataflow(Mockito.any())).thenReturn(Boolean.TRUE);
   }
 
   /**
@@ -109,6 +120,7 @@ public class ReportingDatasetServiceTest {
     ReportingDataset reporting = new ReportingDataset();
     reporting.setId(1L);
     snap.setReportingDataset(reporting);
+    when(dataSetControllerZuul.datasetsUpdatedAfterRelease(Mockito.anyLong())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
     when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
     when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);

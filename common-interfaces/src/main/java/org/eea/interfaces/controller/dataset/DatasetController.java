@@ -222,6 +222,9 @@ public interface DatasetController {
   @GetMapping(value = "/tablesUpdated")
   ResponseEntity<?> tablesUpdatedAfterRelease(@RequestParam("datasetId") Long datasetId);
 
+  @GetMapping(value = "/private/datasetsUpdated")
+  ResponseEntity<?> datasetsUpdatedAfterRelease(@RequestParam("datasetId") Long datasetId);
+
   /**
    * Export file DL.
    *
