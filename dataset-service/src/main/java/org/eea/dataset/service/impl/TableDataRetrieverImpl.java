@@ -83,6 +83,19 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
     return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
   }
 
+  @Override
+  public ResponseEntity<?> checkDatasetEditedAfterRelease(Long datasetId) {
+    String message;
+    HttpStatus status;
+    ResponseEntity<?> result = getTablesUpdatedAfterRelease(datasetId);
+    if (result != null && result.getStatusCode() == HttpStatus.OK && result.getBody() != null) {
+      status = HttpStatus.OK;
+      return new ResponseEntity<>(checkIfAnyTableHasChanges(result.getBody()), status);
+    }
+    message = "Please provide the correct data";
+    return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
+  }
+
   /**
    * Return the list of tables on the reporting dataset
    * And the flag that tables needs a release or not.
@@ -100,7 +113,7 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
       return finalComparisonResult;
     }
 
-    if (dcList.isEmpty() && !dpList.isEmpty()) {
+    if (dcList.isEmpty()) {
       dataSetSchemaVO.getTableSchemas().stream().map(TableSchemaVO::getIdTableSchema).forEach(s -> finalComparisonResult.putIfAbsent(s, false));
       return finalComparisonResult;
     }
@@ -156,4 +169,9 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
     return datasetSchemaService.getDataSchemaById(datasetSchemaId).getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
   }
 
+  private boolean checkIfAnyTableHasChanges(Object hashMap) {
+      return ((HashMap<String, Boolean>) hashMap).values()
+          .stream()
+          .anyMatch(Boolean::booleanValue);
+  }
 }

@@ -150,7 +150,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [webformData, setWebformData] = useState(null);
   const [webformOptions, setWebformOptions] = useState([]);
   const [editedTables, setEditedTables] = useState({});
-  const [tableImportedMetadata, setTableImportedMetadata] = useState({});
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -160,6 +159,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   let bigDataRef = useRef();
 
   bigDataRef.current = metadata?.dataflow.bigData;
+
+  function onRefreshMetadata(refreshType) {
+    if (refreshType === 'editedTables') {
+      getEditedTables();
+    }
+  }
 
   useBreadCrumbs({
     currentPage: getCurrentPage(),
@@ -203,7 +208,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     if (!isUndefined(metadata)) {
       onLoadDatasetSchema();
       getEditedTables();
-      getTableImportedMetadata();
     }
   }, [metadata]);
 
@@ -280,7 +284,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (!isNil(webformData)) {
-      setIsReportingWebform(webformData?.type === 'PAMS' || webformData?.type === 'ENTITIES');
+      setIsReportingWebform(webformData?.type === 'PAMS');
     }
   }, [webformData]);
 
@@ -354,49 +358,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
-  useEffect(() => {
-    const conversionToParquetCompleted = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT');
-    const conversionToIcebergCompleted = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT');
-    const conversionToParquetFailed = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT');
-    const conversionToIcebergFailed = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT');
-    if (
-      conversionToParquetCompleted ||
-      conversionToIcebergCompleted ||
-      conversionToParquetFailed ||
-      conversionToIcebergFailed
-    ) {
-      setIsLoadingIceberg(false);
-    }
-  }, [notificationContext.hidden]);
-
-  const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
-
   const getEditedTables = async () => {
-    if (metadata?.dataset?.datasetType === 'REPORTING' && metadata?.dataflow?.bigData) {
+    if (metadata?.dataset?.datasetType === 'REPORTING') {
       try {
         const res = await DatasetService.getIsEdited({ datasetId });
         setEditedTables(res.data);
       } catch (error) {
         console.error('Dataset - getWebformList.', error);
         notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
-      }
-    }
-  }
-
-  const getTableImportedMetadata = async () => {
-    if (!metadata?.dataflow?.bigData) return;
-    if (
-      metadata?.dataset?.datasetType === 'DESIGN' ||
-      metadata?.dataset?.datasetType === 'REFERENCE' ||
-      metadata?.dataset?.datasetType === 'REPORTING' ||
-      metadata?.dataset?.datasetType === 'TEST'
-    ) {
-      try {
-        const res = await DatasetService.getTableImportedMetadata({datasetId});
-        setTableImportedMetadata(res.data);
-      } catch (error) {
-        console.error('Dataset - getWebformList.', error);
-        notificationContext.add({type: 'LOADING_WEBFORM_OPTIONS_ERROR'}, true);
       }
     }
   }
@@ -431,6 +400,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       }
     }
     setIsIcebergCreated(!isIcebergCreated);
+    setIsLoadingIceberg(false);
   };
 
   const onGetIcebergTables = async () => {
@@ -1253,12 +1223,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   };
 
-  function handleRefresh() {
-    onLoadDatasetSchema();
-    getEditedTables();
-    getTableImportedMetadata();
-  }
-
   const renderDialogFooterCloseBtn = () => (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -1331,6 +1295,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         levelErrorTypes={levelErrorTypes}
         onHideSelectGroupedValidation={onHideSelectGroupedValidation}
         onLoadTableData={onLoadTableData}
+        onRefreshMetadata={onRefreshMetadata}
         onRestoreData={onRestoreData}
         onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
         reporting={true}
@@ -1339,7 +1304,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
         selectedShortCode={dataViewerOptions.selectedShortCode}
         selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
-        tableImportedMetadata={tableImportedMetadata}
         tables={tableSchema}
         tableSchemaColumns={tableSchemaColumns}
         tableSchemaId={dataViewerOptions.tableSchemaId}
@@ -1515,7 +1479,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
               } p-button-animated-blink dataset-refresh-help-step`}
               icon="refresh"
               label={resourcesContext.messages['refresh']}
-              onClick={handleRefresh}
+              onClick={onLoadDatasetSchema}
             />
             {metadata?.dataflow.bigData && (
               <Button
