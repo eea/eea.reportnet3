@@ -1325,16 +1325,11 @@ export const Dataflow = () => {
       subtitle = dataflowState.data.name;
     } else {
       if (isInsideACountry && !isNil(country) && country.length > 0) {
-        return dataflowState.data.bigData ? (
-          <p
-            dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                name: dataflowState.data.name
-              })
-            }}></p>
-        ) : (
-          dataflowState.data.name
-        );
+        return dataflowState.data.bigData
+          ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+              name: dataflowState.data.name
+            })
+          : dataflowState.data.name;
       } else {
         subtitle = dataflowState.data.bigData
           ? resourcesContext.messages['bigDataDataflow']

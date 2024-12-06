@@ -56,6 +56,7 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'vi
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import dayjs from "dayjs";
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
@@ -156,7 +157,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
   let bigDataRef = useRef();
-
+console.log("Dataset")
   bigDataRef.current = metadata?.dataflow.bigData;
 
   useBreadCrumbs({
@@ -1203,6 +1204,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   };
 
+  const getSubtitle = () => {
+    let subtitle = metadata?.dataflow.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+        name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
+      })
+      : `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`;
+
+    if (metadata?.dataflow.deleted) {
+      const deletedAt = dayjs(metadata?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
+  };
+
   const renderDialogFooterCloseBtn = () => (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -1314,20 +1330,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         icon={isReferenceDatasetReferenceDataflow ? 'howTo' : 'dataset'}
         iconSize={isReferenceDatasetReferenceDataflow ? '4rem' : '3.5rem'}
         insideTitle={`${datasetInsideTitle()}`}
-        subtitle={
-          metadata?.dataflow.bigData ? (
-            <p
-              dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                  name: `${metadata?.dataflow.name} - ${
-                    isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
-                  }`
-                })
-              }}></p>
-          ) : (
-            `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
-          )
-        }
+        subtitle={getSubtitle()}
         title={datasetSchemaName}
       />
       <div className={styles.ButtonsBar}>
