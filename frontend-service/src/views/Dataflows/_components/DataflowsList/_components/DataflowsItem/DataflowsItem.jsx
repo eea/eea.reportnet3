@@ -28,11 +28,8 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
   const [isPinning, setIsPinning] = useState(false);
   const [isPinShowed, setIsPinShowed] = useState(false);
 
-  const deletedAt = itemContent.deletedAt ? dayjs(itemContent.deletedAt).format('YYYY-MM-DD') : null;
+  const deletedAt = itemContent.deletedAt ? dayjs(itemContent.deletedAt).format(userContext.userProps.dateFormat) : null;
   const deletedAtLabel = deletedAt ? TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt }) : null;
-
-  console.log(itemContent)
-  console.log(itemContent.deleted, deletedAt, deletedAtLabel)
 
   useEffect(() => {
     setIsPinned(itemContent.pinned === 'pinned');
@@ -169,7 +166,7 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
             : itemContent.name
           }
           {
-            itemContent.deleted && ` (${deletedAtLabel})`
+            deletedAtLabel && ` (${deletedAtLabel})`
           }
         </h3>
         <p>{itemContent.description}</p>

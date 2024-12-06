@@ -1343,7 +1343,7 @@ export const Dataflow = () => {
     }
 
     if (dataflowState.data.deleted) {
-      const deletedAt = dayjs(dataflowState.data.deletedAt).format('YYYY-MM-DD');
+      const deletedAt = dayjs(dataflowState.data.deletedAt).format(userContext.userProps.dateFormat);
       subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
     }
 
@@ -1779,6 +1779,7 @@ export const Dataflow = () => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onUpdateSoftDelete={onUpdateSoftDelete}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}
             state={dataflowState}
@@ -1797,15 +1798,19 @@ export const Dataflow = () => {
             obligation={obligation}
             onEditDataflow={onEditDataflow}
             onLoadReportingDataflow={onLoadReportingDataflow}
+            onUpdateSoftDelete={onUpdateSoftDelete}
             resetObligations={resetObligations}
             state={{
               name: dataflowState.name,
               description: dataflowState.description,
+              deleted: dataflowState.data.deleted,
               status: dataflowState.status,
               fmeUserId: dataflowState.data.fmeUserId,
               fmeUserName: dataflowState.data.fmeUserName,
               dataProviderGroupId: dataflowState.data.dataProviderGroupId,
-              dataProviderGroupName: dataflowState.data.dataProviderGroupName
+              dataProviderGroupName: dataflowState.data.dataProviderGroupName,
+              isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
+              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
             }}
           />
         )}
