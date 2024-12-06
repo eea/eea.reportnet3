@@ -247,7 +247,7 @@ export const ManageReferenceDataflow = ({
         )}
         {renderDeleteDataflowButton()}
         {
-          !metadata.deleted && (
+          metadata && !metadata.deleted && (
             <Button
               className="p-button-danger p-button-animated-blink"
               icon="trash"
@@ -257,7 +257,7 @@ export const ManageReferenceDataflow = ({
           )
         }
         {
-          metadata.deleted && (
+          metadata && metadata.deleted && (
             <Button
               className="p-button-danger p-button-animated-blink"
               icon="trash"
