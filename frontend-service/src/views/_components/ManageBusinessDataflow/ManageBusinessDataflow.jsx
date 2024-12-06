@@ -339,7 +339,7 @@ export const ManageBusinessDataflow = ({
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
           {
-            (!state.deleted && isEditing && isDesign && isAdmin) && (
+            state && (!state.deleted && isEditing && isDesign && isAdmin) && (
               <Button
                 className="p-button-danger p-button-animated-blink"
                 icon="trash"
@@ -349,7 +349,7 @@ export const ManageBusinessDataflow = ({
             )
           }
           {
-            (state.deleted && isEditing && isDesign && isAdmin) && (
+            state && (state.deleted && isEditing && isDesign && isAdmin) && (
               <Button
                 className="p-button-danger p-button-animated-blink"
                 icon="trash"
@@ -539,7 +539,7 @@ export const ManageBusinessDataflow = ({
         </ConfirmDialog>
       )}
 
-      {state.isSoftDeleteDialogVisible && (
+      {state?.isSoftDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, state.name) || isDeleting}
@@ -569,7 +569,7 @@ export const ManageBusinessDataflow = ({
           />
         </ConfirmDialog>
       )}
-      {state.isReverseSoftDeleteDialogVisible && (
+      {state?.isReverseSoftDeleteDialogVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           disabledConfirm={!TextUtils.areEquals(deleteInput, state.name) || isDeleting}
