@@ -288,7 +288,7 @@ export const ManageDataflow = ({
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
           {
-            (!state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
+            state.data && (!state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
               <Button
                 className="p-button-danger p-button-animated-blink"
                 icon="trash"
@@ -298,7 +298,7 @@ export const ManageDataflow = ({
             )
           }
           {
-            (state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
+            state.data && (state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
               <Button
                 className="p-button-danger p-button-animated-blink"
                 icon="trash"
