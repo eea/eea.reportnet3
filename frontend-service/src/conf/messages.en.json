@@ -769,6 +769,8 @@
     "groupId": "Group id",
     "groupOfCompaniesDisabledTooltip": "There are assigned representatives already",
     "groupValidationsError": "Failed group validation at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "hasUpdatesAfterReleaseDataflowTooltip" : "One or more datasets for this provider have been updated after release",
+    "hasUpdatesAfterReleaseDatasetTooltip" : "Dataset has been updated after release",
     "hdvManufacturers": "HDV manufacturers",
     "help": "Help",
     "historicReleases": "Historic releases",
