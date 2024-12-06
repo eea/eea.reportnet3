@@ -471,6 +471,13 @@ public final class LiteralConstants {
   /** The Constant LAST_IMPORT_DATE: {@value}. */
   public static final String LAST_IMPORT_DATE = "lastImportDate";
 
+  /** The Constant IS_DELETED_FILTER: {@value}. */
+  public static final String IS_DELETED_FILTER = "is_deleted";
+
+  /** The Constant FALSE_VALUE: {@value}. */
+  public static final String FALSE_VALUE = "false_value";
+
+
   /**
    * Instantiates a new literal constants.
    */

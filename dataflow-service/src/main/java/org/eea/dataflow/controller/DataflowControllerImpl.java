@@ -67,6 +67,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import static org.eea.utils.LiteralConstants.FALSE_VALUE;
+import static org.eea.utils.LiteralConstants.IS_DELETED_FILTER;
+
 /**
  * The Class DataflowControllerImpl.
  */
@@ -230,6 +233,9 @@ public class DataflowControllerImpl implements DataFlowController {
             ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails())
                     .get(AuthenticationDetails.USER_ID);
     try {
+      if(filters.size() == 0 || filters.get(IS_DELETED_FILTER) == null){
+        filters.put(IS_DELETED_FILTER, FALSE_VALUE);
+      }
       dataflows = dataflowService.getDataflows(userId, TypeDataflowEnum.REPORTING, filters,
               orderHeader, asc, pageSize, pageNum);
     } catch (EEAException e) {
