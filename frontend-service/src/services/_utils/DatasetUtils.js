@@ -34,7 +34,8 @@ const parseDatasetDTO = datasetDTO => {
     releaseDate: datasetDTO.dateReleased > 0 ? releaseDate.format('YYYY-MM-DD HH:mm') : '-',
     restrictFromPublic: datasetDTO.restrictFromPublic,
     status: datasetDTO.status,
-    updatable: datasetDTO.updatable
+    updatable: datasetDTO.updatable,
+    hasUpdatesAfterRelease: datasetDTO.hasUpdatesAfterRelease,
   });
 };
 

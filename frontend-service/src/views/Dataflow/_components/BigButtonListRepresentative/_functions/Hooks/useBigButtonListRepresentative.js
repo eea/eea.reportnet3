@@ -165,6 +165,8 @@ const useBigButtonListRepresentative = ({
         handleRedirect: () => {
           handleRedirect(getUrl(routes.DATASET, { dataflowId: dataflowState.id, datasetId: dataset.datasetId }, true));
         },
+        hasUpdatesAfterRelease: dataset.hasUpdatesAfterRelease,
+        hasUpdatesAfterReleaseTooltip: dataset.hasUpdatesAfterRelease && resourcesContext.messages['hasUpdatesAfterReleaseDatasetTooltip'],
         helpClassName: 'dataflow-dataset-container-help-step',
         infoStatus: dataset.isReleased,
         infoStatusIcon: true,
