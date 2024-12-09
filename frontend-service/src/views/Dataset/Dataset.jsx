@@ -1389,20 +1389,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             icon={isReferenceDatasetReferenceDataflow ? 'howTo' : 'dataset'}
             iconSize={isReferenceDatasetReferenceDataflow ? '4rem' : '3.5rem'}
             insideTitle={`${datasetInsideTitle()}`}
-            subtitle={
-              metadata?.dataflow.bigData ? (
-                  <p
-                      dangerouslySetInnerHTML={{
-                        __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                          name: `${metadata?.dataflow.name} - ${
-                              isTestDataset ? resourcesContext.messages['testDataset'] : datasetName
-                          }`
-                        })
-                      }}></p>
-              ) : (
-                  `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
-              )
-            }
+            subtitle={getSubtitle()}
             title={datasetSchemaName}
         />
         <div className={styles.ButtonsBar}>
