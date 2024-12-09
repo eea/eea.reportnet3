@@ -7,6 +7,8 @@ export class Dataflow {
     dataProviderGroupId,
     dataProviderGroupName,
     datasets,
+    deleted,
+    deletedAt,
     description,
     designDatasets,
     documents,
@@ -38,6 +40,8 @@ export class Dataflow {
     this.dataProviderGroupId = dataProviderGroupId;
     this.dataProviderGroupName = dataProviderGroupName;
     this.datasets = datasets;
+    this.deleted = deleted;
+    this.deletedAt = deletedAt;
     this.description = description;
     this.designDatasets = designDatasets;
     this.documents = documents;

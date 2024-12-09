@@ -7,6 +7,8 @@ export const DataflowConfig = {
     '/dataschema/createEmptyDatasetSchema?dataflowId={:dataflowId}&datasetSchemaName={:datasetSchemaName}',
   createUpdate: '/dataflow',
   delete: '/dataflow/{:dataflowId}',
+  softDelete: '/dataflow/{:dataflowId}/soft-delete',
+  reverseSoftDelete: '/dataflow/{:dataflowId}/reverse-soft-delete',
   downloadAllSchemasInfo: '/dataflow/downloadSchemaInformation/{:dataflowId}?fileName={:fileName}',
   downloadPublicAllSchemasInfoFile: '/dataflow/downloadPublicSchemaInformation/{:dataflowId}',
   downloadUsersListFile: '/user/downloadUsersByCountry/{:dataflowId}/?fileName={:fileName}',

@@ -56,6 +56,7 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'vi
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import dayjs from "dayjs";
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
@@ -1258,6 +1259,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     getEditedTables();
     getTableImportedMetadata();
   }
+
+  const getSubtitle = () => {
+    let subtitle = metadata?.dataflow.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+        name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
+      })
+      : `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`;
+
+    if (metadata?.dataflow.deleted) {
+      const deletedAt = dayjs(metadata?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
+  };
 
   const renderDialogFooterCloseBtn = () => (
       <Button

@@ -68,6 +68,7 @@ import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import dayjs from "dayjs";
 
 export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { dataflowId, datasetId } = useParams();
@@ -1288,6 +1289,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     setIsIcebergCreated(!isIcebergCreated);
   };
 
+  const getSubtitle = () => {
+    let subtitle = designerState.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: designerState.dataflowName })
+      : designerState.dataflowName;
+
+    if (designerState.metaData?.dataflow?.deleted) {
+      const deletedAt = dayjs(designerState.metaData?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
+  };
+
   const renderDialogFooterCloseBtn = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -1693,18 +1707,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
-          subtitle={
-            designerState.bigData ? (
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                    name: designerState.dataflowName
-                  })
-                }}></p>
-            ) : (
-              designerState.dataflowName
-            )
-          }
+          subtitle={getSubtitle()}
           title={`${resourcesContext.messages['datasetSchema']}: ${designerState.datasetSchemaName}`}
         />
         <h4 className={styles.descriptionLabel}>

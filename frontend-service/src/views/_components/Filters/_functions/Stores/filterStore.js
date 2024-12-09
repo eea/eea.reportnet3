@@ -43,5 +43,5 @@ export const isFilteredStore = atomFamily({
 
 export const filterByCustomFilterStore = atomFamily({
   key: 'filterByCustomFilterStore',
-  default: {}
+  default: { is_deleted: { value: false } }
 });

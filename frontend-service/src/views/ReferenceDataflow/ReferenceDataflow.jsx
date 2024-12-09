@@ -43,6 +43,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import dayjs from "dayjs";
 
 export const ReferenceDataflow = () => {
   const navigate = useNavigate();
@@ -141,6 +142,8 @@ export const ReferenceDataflow = () => {
   const onEditDataflow = (name, description) => {
     dataflowDispatch({ type: 'ON_EDIT_DATAFLOW', payload: { description, name, isExportDialogVisible: false } });
   };
+
+  const onUpdateSoftDelete = deleted => dataflowDispatch({ type: 'ON_UPDATE_SOFT_DELETE', payload: deleted });
 
   const onConfirmExport = async () => {
     try {
@@ -362,6 +365,21 @@ export const ReferenceDataflow = () => {
     }
   };
 
+  const getSubtitle = () => {
+    let subtitle = dataflowState.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+          name: resourcesContext.messages['referenceDataflowCrumbLabel']
+        })
+      : resourcesContext.messages['referenceDataflowCrumbLabel']
+
+    if (dataflowState.data.deleted) {
+      const deletedAt = dayjs(dataflowState.data.deletedAt).format('YYYY-MM-DD');
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
+  }
+
   if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) {
     return layout(<Spinner />);
   }
@@ -372,18 +390,7 @@ export const ReferenceDataflow = () => {
         <Title
           icon="clone"
           iconSize="4rem"
-          subtitle={
-            dataflowState.bigData ? (
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                    name: resourcesContext.messages['referenceDataflowCrumbLabel']
-                  })
-                }}></p>
-            ) : (
-              resourcesContext.messages['referenceDataflowCrumbLabel']
-            )
-          }
+          subtitle={getSubtitle()}
           title={dataflowState.name}
         />
       </div>
@@ -425,8 +432,16 @@ export const ReferenceDataflow = () => {
           isEditing={true}
           isVisible={dataflowState.isEditDialogVisible}
           manageDialogs={manageDialogs}
-          metadata={{ name: dataflowState.name, description: dataflowState.description, status: dataflowState.status }}
+          metadata={{
+            name: dataflowState.name,
+            description: dataflowState.description,
+            status: dataflowState.status,
+            deleted: dataflowState.data.deleted,
+            isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
+            isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
+        }}
           onEditDataflow={onEditDataflow}
+          onUpdateSoftDelete={onUpdateSoftDelete}
         />
       )}
 

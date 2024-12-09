@@ -66,6 +66,9 @@ export const DataflowRepository = {
 
   delete: async dataflowId => await HTTPRequester.delete({ url: getUrl(DataflowConfig.delete, { dataflowId }) }),
 
+  softDelete: async dataflowId => await HTTPRequester.update({ url: getUrl(DataflowConfig.softDelete, { dataflowId }) }),
+  reverseSoftDelete: async dataflowId => await HTTPRequester.update({ url: getUrl(DataflowConfig.reverseSoftDelete, { dataflowId }) }),
+
   exportSchemas: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
 

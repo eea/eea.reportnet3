@@ -4,6 +4,8 @@ export class BusinessDataflow {
     creationDate,
     dataCollections,
     datasets,
+    deleted,
+    deletedAt,
     description,
     designDatasets,
     documents,
@@ -28,6 +30,8 @@ export class BusinessDataflow {
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.datasets = datasets;
+    this.deleted = deleted;
+    this.deletedAt = deletedAt;
     this.description = description;
     this.designDatasets = designDatasets;
     this.documents = documents;
