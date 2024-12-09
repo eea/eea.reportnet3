@@ -801,12 +801,6 @@ export const Dataflows = () => {
       ],
     })
 
-    // filters.push({
-    //   key: 'is_deleted',
-    //   type: 'CHECKBOX',
-    //   label: resourcesContext.messages['isMarkedDeleted'],
-    // })
-
     return filters;
   };
 

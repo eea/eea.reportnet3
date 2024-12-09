@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import isNil from 'lodash/isNil';
 
 import styles from './DropdownFilter.module.scss';
@@ -27,6 +28,12 @@ export const DropdownFilter = ({
     option,
     recoilId
   });
+
+  useEffect(() => {
+    if (!filterBy[option.key] && option.key === 'id_deleted') {
+      onFilter(option.dropdownOptions[1]);
+    }
+  }, [filterBy]);
 
   const renderTemplate = (template, type) => {
     if (template === 'LevelError') {
@@ -72,7 +79,7 @@ export const DropdownFilter = ({
         panelClassName={panelClassName}
         showClear={true}
         showFilterClear={true}
-        value={filterBy[option.key]}
+        value={option.key === 'is_deleted' && !filterBy[option.key] ? option.dropdownOptions[1] : filterBy[option.key]}
       />
     </div>
   );
