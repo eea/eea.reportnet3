@@ -30,7 +30,7 @@ export const DropdownFilter = ({
   });
 
   useEffect(() => {
-    if (!filterBy[option.key] && option.key === 'id_deleted') {
+    if (!filterBy[option.key] && option.key === 'is_deleted') {
       onFilter(option.dropdownOptions[1]);
     }
   }, [filterBy]);
