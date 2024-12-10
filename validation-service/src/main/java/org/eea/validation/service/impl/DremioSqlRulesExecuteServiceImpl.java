@@ -122,7 +122,13 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> recordIds = new ArrayList<>();
 
-            if (!s3Helper.checkFolderExist(dataTableResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            String query = String.format(
+                "SELECT COUNT(*) AS myRowCount FROM %s ",
+                tablePath
+            );
+            long rowCount = dremioHelperService.executeSqlStatementGetRowCount(query);
+
+            if (rowCount == 0) {
                 if (ruleMethodName.equals(IS_TABLE_EMPTY)) {
                     recordIds.add(TABLE_EMPTY);
                 } else {

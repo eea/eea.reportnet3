@@ -23,7 +23,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -267,33 +273,67 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public String executeSqlStatementPost(String sqlStatement){
-        DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
-        String result = null;
-        try {
-            result = dremioApiController.sqlQueryString(token, dremioSqlRequestBody);
-        } catch (FeignException e) {
-            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
-                token = this.getAuthToken();
-                result = dremioApiController.sqlQueryString(token, dremioSqlRequestBody);
-            } else {
-                LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
-                throw e;
-            }
-        }
+    public LinkedHashMap<String, Object> executeSqlStatementGet(String sqlStatement) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
+        DremioSqlRequestBody requestBody = new DremioSqlRequestBody(sqlStatement);
+        String result;
+        DremioApiJob dremioApiJob;
+
         try {
-            DremioApiJob dremioApiJob = objectMapper.readValue(result, DremioApiJob.class);
-            Object results = dremioApiController.sqlApiResults(token, dremioApiJob.getId());
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonParseException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            // Execute SQL query and get job ID
+            result = executeWithTokenRefresh(() -> dremioApiController.sqlQueryString(token, requestBody));
+            dremioApiJob = objectMapper.readValue(result, DremioApiJob.class);
+
+            // Fetch results using the job ID
+            return executeWithTokenRefresh(
+                () -> (LinkedHashMap<String, Object>) dremioApiController.sqlApiResults(token, dremioApiJob.getId())
+            );
+
+        } catch (FeignException | IOException e) {
+            LOG.error("Failed to execute SQL statement: {}", sqlStatement, e);
+            throw e;
         }
-        return result;
     }
+
+    @Override
+    public long executeSqlStatementGetRowCount(String sqlStatement) throws Exception {
+        try {
+            // Extract and return the row count
+            List<LinkedHashMap<String,Object>> rows =  (List<LinkedHashMap<String,Object>>)executeSqlStatementGet(sqlStatement).get("rows");
+
+            return rows.stream()
+                .filter(Objects::nonNull)
+                .map(linkedHashMap -> {
+                    int numOfRows = (int) linkedHashMap.get("myRowCount");
+                    return Long.valueOf(numOfRows);
+                })
+                .findFirst()
+                .orElse(0L);
+        } catch (FeignException | IOException e) {
+            LOG.error("Failed to execute SQL statement: {}", sqlStatement, e);
+            throw e;
+        }
+    }
+
+    private <T> T executeWithTokenRefresh(Callable<T> operation) throws Exception {
+        try {
+            return operation.call();
+        } catch (FeignException e) {
+            if (e.status() == HttpStatus.UNAUTHORIZED.value() || e.status() == HttpStatus.BAD_REQUEST.value()) {
+                token = getAuthToken();
+                try {
+                    return operation.call();
+                } catch (Exception ex) {
+                    LOG.error("Retry failed after token refresh.", ex);
+                    throw ex;
+                }
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new IOException("Execution error", e);
+        }
+    }
+
 
     @Override
     public void checkIfDremioProcessFinishedSuccessfully(String query, String processId, Long optionalTimeoutMs) throws Exception {
