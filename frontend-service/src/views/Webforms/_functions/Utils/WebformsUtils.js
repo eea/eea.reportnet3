@@ -141,16 +141,31 @@ const parseNewTableRecord = (table, pamNumber, SectorObjectivesTable) => {
   }
 };
 
-const parseNewEntitiesTableRecord = (table, entityNumber, rootPkFieldId) => {
+const parseNewEntitiesTableRecord = (
+  table,
+  entityNumber,
+  rootPkFieldId,
+  primaryFkFieldId,
+  primaryFkValue,
+  fkFields
+) => {
   if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
     let fields;
 
     if (!isUndefined(table)) {
       fields = table.records[0].fields.map(field => {
+        let fkFieldValue;
+        if (fkFields) {
+          fkFieldValue = fkFields.filter(fkField => TextUtils.areEquals(fkField.fieldName, field.name))[0]?.value;
+        }
         return {
           fieldData: {
             [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field?.referencedField?.idPk, rootPkFieldId)
               ? entityNumber
+              : TextUtils.areEquals(field?.referencedField?.idPk, primaryFkFieldId)
+              ? primaryFkValue
+              : fkFieldValue
+              ? fkFieldValue
               : null,
             type: field.type,
             fieldSchemaId: field.fieldSchema || field.fieldId,
@@ -240,7 +255,7 @@ const parseOtherObjectivesRecord = (table, parentTable, pamsId, filteredRecordId
   }
 };
 
-const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
+const onParseWebformRecords = (records, webform, tableData, totalRecords, rootTableName, rootPkFieldId) => {
   return records.map(record => {
     const { fields } = record;
     const { elements } = webform;
@@ -249,7 +264,6 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
 
     for (let index = 0; index < elements.length; index++) {
       const element = elements[index];
-
       if (element.type === 'FIELD') {
         result.push({
           fieldType: 'EMPTY',
@@ -276,13 +290,32 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords) => {
           elementsRecords: onParseWebformRecords(records, { elements: element.elements }, tableData, totalRecords)
         });
       } else {
+        let referencePkId;
+        let referencePkValue;
+        let primaryFkId;
+
+        if (rootTableName && element.tableSchemaName !== rootTableName) {
+          referencePkId = element.records[0].fields.filter(
+            field => !isEmpty(field.referencedField) && field?.referencedField?.idPk !== rootPkFieldId
+          )[0]?.referencedField?.idPk;
+
+          referencePkValue = record.fields.filter(field => field.fieldSchemaId === referencePkId)[0].value;
+
+          primaryFkId = element.records[0].fields.filter(
+            field => !isEmpty(field.referencedField) && field?.referencedField?.idPk !== rootPkFieldId
+          )[0]?.fieldSchema;
+        }
+
         if (tableData[element.tableSchemaId]) {
-          const tableElementsRecords = onParseWebformRecords(
-            tableData[element.tableSchemaId].records,
-            element,
-            tableData,
-            totalRecords
-          );
+          const filteredTableArray =
+            rootTableName && element.tableSchemaName !== rootTableName
+              ? tableData[element.tableSchemaId].records.filter(record =>
+                  record.fields.some(field => field.fieldSchemaId === primaryFkId && field.value === referencePkValue)
+                )
+              : tableData[element.tableSchemaId].records;
+
+          const tableElementsRecords = onParseWebformRecords(filteredTableArray, element, tableData, totalRecords);
+
           result.push({ ...element, elementsRecords: tableElementsRecords });
         } else {
           result.push({ ...element, tableNotCreated: true, elementsRecords: [] });

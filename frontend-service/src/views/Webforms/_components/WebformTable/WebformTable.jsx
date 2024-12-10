@@ -132,7 +132,7 @@ export const WebformTable = ({
 
   const isLoading = value => webformTableDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const onAddMultipleWebform = async (tableSchemaId, filteredRecordId = null, mainTable = false) => {
+  const onAddMultipleWebform = async (tableSchemaId, primaryFkValue, mainTable = false, fkFields) => {
     webformTableDispatch({
       type: 'SET_IS_ADDING_MULTIPLE',
       payload: { isAddingMultiple: true, addingOnTableSchemaId: tableSchemaId }
@@ -145,7 +145,19 @@ export const WebformTable = ({
         const filteredTable = getTableElements(webformData.elementsRecords[0]).filter(
           element => element.tableSchemaId === tableSchemaId
         )[0];
-        newEmptyRecord = parseNewEntitiesTableRecord(filteredTable, selectedTable.rootTableId, rootPkFieldId);
+
+        const primaryFkFieldId = filteredTable.records[0].fields.filter(
+          field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+        )[0]?.referencedField?.idPk;
+
+        newEmptyRecord = parseNewEntitiesTableRecord(
+          filteredTable,
+          selectedTable.rootTableId,
+          rootPkFieldId,
+          primaryFkFieldId,
+          primaryFkValue,
+          fkFields
+        );
       }
     }
 
@@ -248,7 +260,14 @@ export const WebformTable = ({
             });
           }
         }
-        const records = onParseWebformRecords(data.records, webform, tableData, data.totalRecords);
+        const records = onParseWebformRecords(
+          data.records,
+          webform,
+          tableData,
+          data.totalRecords,
+          rootTableName,
+          rootPkFieldId
+        );
 
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
@@ -379,14 +398,6 @@ export const WebformTable = ({
                 : webformData.name}
               {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
             </div>
-            {/* <Button
-              helpClassName={isIcebergCreated && 'p-button-reverse'}
-              icon={isIcebergCreated ? 'unlock' : 'lock'}
-              label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
-              className={styles.openWebformButton}
-              onClick={() => convertHelper()}
-              isLoading={isLoadingIceberg}
-            /> */}
           </h3>
         </div>
       )}
