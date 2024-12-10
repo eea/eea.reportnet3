@@ -73,7 +73,10 @@ export const EntitiesWebform = ({
   useEffect(() => {
     if (!isEmpty(entitiesWebformState.data)) {
       onLoadEntitiesData();
-      entitiesWebformDispatch({ type: 'HAS_ERRORS', payload: { value: hasErrors(entitiesWebformState.data) } });
+      entitiesWebformDispatch({
+        type: 'HAS_ERRORS',
+        payload: { value: hasErrors(entitiesWebformState.data, rootPkFieldId) }
+      });
     }
   }, [entitiesWebformState.data, isDataUpdated]);
 
@@ -383,7 +386,7 @@ export const EntitiesWebform = ({
   };
 
   const renderErrorMessages = () => {
-    const missingElements = checkErrors(entitiesWebformState.data);
+    const missingElements = checkErrors(entitiesWebformState.data, rootPkFieldId);
 
     return (
       <Fragment>

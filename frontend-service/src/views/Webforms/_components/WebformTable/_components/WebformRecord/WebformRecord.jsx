@@ -107,13 +107,13 @@ export const WebformRecord = ({
 
   const onDeleteMultipleWebform = async () => {
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
-    let updateInCascade = webformRecordState.record?.elements?.some(element => element.deleteInCascade);
+
     try {
       await DatasetService.deleteRecord({
         datasetId,
         selectedRecordId,
         tableId,
-        updateInCascade
+        updateInCascade: true
       });
       onRefresh();
       handleDialogs('deleteRow', false);
