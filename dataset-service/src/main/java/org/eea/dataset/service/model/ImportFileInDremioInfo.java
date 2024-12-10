@@ -1,5 +1,7 @@
 package org.eea.dataset.service.model;
 
+import java.util.List;
+import java.util.Set;
 import lombok.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 
@@ -21,7 +23,7 @@ public class ImportFileInDremioInfo {
     private Long integrationId;
     private String delimiter;
     private String errorMessage;
-    private String warningMessage;
+    private Set<String> warningMessages;
     private String dataProviderCode;
     private Boolean updateReferenceFolder;
 

@@ -62,6 +62,6 @@ public interface ValidationRepositoryPaginated {
    */
   List<GroupValidationVO> findGroupRecordsByFilter(Long datasetId,
       List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
-      String tableFilter, String fieldValueFilter, Pageable pageable, String headerField,
+      String tableFilter, String fieldValueFilter, String shortCode, Pageable pageable, String headerField,
       Boolean asc, boolean paged);
 }

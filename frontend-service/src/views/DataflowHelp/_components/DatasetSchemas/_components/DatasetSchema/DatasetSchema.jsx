@@ -166,7 +166,7 @@ export const DatasetSchema = ({
           ],
           automatic: [
             { label: resourcesContext.messages['ruleAutomatic'], value: true },
-            { label: resourcesContext.messages['manual'], value: false }
+            { label: resourcesContext.messages['custom'], value: false }
           ],
           enabled: [
             { label: resourcesContext.messages['qcEnabled'], value: true },

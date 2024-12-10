@@ -147,7 +147,7 @@ public class LoadValidationsHelper {
    */
   public FailedValidationsDatasetVO getListGroupValidations(@DatasetId Long datasetId,
       Pageable pageable, List<ErrorTypeEnum> levelErrorsFilter,
-      List<EntityTypeEnum> typeEntitiesFilter, String tableFilter, String fieldValueFilter,
+      List<EntityTypeEnum> typeEntitiesFilter, String tableFilter, String fieldValueFilter, String shortCode,
       String headerField, Boolean asc) throws EEAException {
 
     DatasetValue dataset = validationService.getDatasetValuebyId(datasetId);
@@ -158,7 +158,7 @@ public class LoadValidationsHelper {
 
     List<GroupValidationVO> errors =
         validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
-            typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, true);
+            typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, pageable, headerField, asc, true);
     validationService.getRuleMessage(dataset, errors);
 
     validation.setErrors(errors);
@@ -168,7 +168,7 @@ public class LoadValidationsHelper {
 
     validation.setTotalFilteredRecords(
         Long.valueOf(validationRepository.findGroupRecordsByFilter(datasetId, levelErrorsFilter,
-            typeEntitiesFilter, tableFilter, fieldValueFilter, pageable, headerField, asc, false)
+            typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, pageable, headerField, asc, false)
             .size()));
     LOG.info(
         "Total validations founded in datasetId {}: {}. Now in page {}, {} validation errors by page",

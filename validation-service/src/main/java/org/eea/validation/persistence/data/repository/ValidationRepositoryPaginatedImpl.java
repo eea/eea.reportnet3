@@ -105,7 +105,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
   @Override
   public List<GroupValidationVO> findGroupRecordsByFilter(Long datasetId,
       List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
-      String tableFilter, String fieldValueFilter, Pageable pageable, String headerField,
+      String tableFilter, String fieldValueFilter, String shortCode, Pageable pageable, String headerField,
       Boolean asc, boolean paged) {
     Session session = (Session) entityManager.getDelegate();
     String basicQuery = String.format("select * from("
@@ -115,6 +115,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
         + "select v.id_rule as idRule, v.level_error as levelError, v.type_entity as typeEntity, v.table_name as tableName, v.short_code as shortCode, v.field_name as fieldName, v.message, count(*) as numberOfRecords from dataset_%s.Validation v"
         + "  where v.id is not null and type_entity not in ('RECORD', 'FIELD') group by v.level_error, v.id_rule, v.type_entity, v.table_name, v.short_code, v.field_name, v.message"
         + " ) tableaux where idRule is not null ", datasetId, datasetId);
+    String shortCodeFilter = shortCodeFilter(shortCode);
     String partLevelError = levelErrorFilter(levelErrorsFilter);
     String partTypeEntities = typeEntities(typeEntitiesFilter);
     String partTableFilter = originFilter(tableFilter, TABLE);
@@ -123,7 +124,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     String page =
         paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";
 
-    String finalQuery = basicQuery + partLevelError + partTypeEntities + partTableFilter
+    String finalQuery = basicQuery + shortCodeFilter + partLevelError + partTypeEntities + partTableFilter
         + partFieldFilter + orderPart + page;
 
     return session.doReturningWork(new ReturningWork<List<GroupValidationVO>>() {
@@ -220,6 +221,14 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
     if (null != typeEntitiesFilter && !typeEntitiesFilter.isEmpty()) {
       stringBuilder.append(" and typeEntity in ")
           .append(validationHelper.composeListQuery(validationHelper.removeSpacesEnum(typeEntitiesFilter.toString())));
+    }
+    return stringBuilder.toString();
+  }
+
+  private String shortCodeFilter(String shortCode) {
+    StringBuilder stringBuilder = new StringBuilder();
+    if (shortCode != null) {
+      stringBuilder.append(" and shortCode like '%" + shortCode + "%' ");
     }
     return stringBuilder.toString();
   }

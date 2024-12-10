@@ -107,7 +107,7 @@ public class ValidationRepositoryPaginatedImplTest {
   public void findGroupRecordsByFilterTest() {
     Mockito.when(entityManager.getDelegate()).thenReturn(session);
     assertNull(validationRepositoryPaginatedImpl.findGroupRecordsByFilter(1L, levelErrorsFilter,
-        typeEntityEnum, "Characterisation,SeasionalPeriod", "", pageable, "message", true, true));
+        typeEntityEnum, "Characterisation,SeasionalPeriod", "", null, pageable, "message", true, true));
   }
 
 

@@ -356,6 +356,8 @@ public class ValidationControllerImpl implements ValidationController {
       @ApiParam(value = "How many records are going to be shown per page.", example = "10",
           defaultValue = "20", required = false) @RequestParam(value = "pageSize",
               defaultValue = "20", required = false) Integer pageSize,
+      @ApiParam(value = "Filter parameter of short code.", example = "MTZ-2", required = false)
+          @RequestParam(value = "shortCode", required = false) String shortCode,
       @ApiParam(value = "The headers used in the retrieval process") @RequestParam(
           value = "headers", required = false) String headers,
       @ApiParam(value = "Are the validations going to be ordered in ascending order?",
@@ -391,7 +393,7 @@ public class ValidationControllerImpl implements ValidationController {
     }
     try {
       validations = loadValidationsHelper.getListGroupValidations(datasetId, pageable,
-          levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
+          levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, headers, asc);
     } catch (EEAException e) {
       LOG.error(e.getMessage());
     } catch (Exception e) {
@@ -419,6 +421,8 @@ public class ValidationControllerImpl implements ValidationController {
                   defaultValue = "20", required = false) Integer pageSize,
           @ApiParam(value = "The headers used in the retrieval process") @RequestParam(
                   value = "headers", required = false) String headers,
+          @ApiParam(value = "Filter parameter of short code.", example = "MTZ-2",
+                  required = false) @RequestParam(value = "shortCode", required = false) String shortCode,
           @ApiParam(value = "Are the validations going to be ordered in ascending order?",
                   example = "false",
                   defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
@@ -452,7 +456,7 @@ public class ValidationControllerImpl implements ValidationController {
     }
     try {
       validations = loadValidationsHelperDL.getListGroupValidationsDL(datasetId, pageable,
-              levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, headers, asc);
+              levelErrorsFilter, typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, headers, asc);
     } catch (EEAException e) {
       LOG.error(e.getMessage());
     } catch (Exception e) {
