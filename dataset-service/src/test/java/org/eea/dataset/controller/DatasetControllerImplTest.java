@@ -1520,7 +1520,7 @@ public class DatasetControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test
-  public void insertRecordsMultiTable() throws EEAException {
+  public void insertRecordsMultiTable() throws Exception {
     datasetControllerImpl.insertRecordsMultiTable(1L, new ArrayList<TableVO>());
     Mockito.verify(updateRecordHelper, times(1)).executeMultiCreateProcess(Mockito.anyLong(),
         Mockito.any());
@@ -1532,7 +1532,7 @@ public class DatasetControllerImplTest {
    * @throws EEAException the EEA exception
    */
   @Test(expected = ResponseStatusException.class)
-  public void insertRecordsMultiTableExceptionTest() throws EEAException {
+  public void insertRecordsMultiTableExceptionTest() throws Exception {
     Mockito.doThrow(EEAException.class).when(updateRecordHelper)
         .executeMultiCreateProcess(Mockito.anyLong(), Mockito.any());
     try {

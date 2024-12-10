@@ -52,7 +52,8 @@ const parseEntityFields = (fields, entityId, rootPkFieldId) =>
   fields.map(field => ({
     id: null,
     idFieldSchema: field.fieldId || field.fieldSchema,
-    value: getEntityFieldValue(field, entityId, rootPkFieldId)
+    value: getEntityFieldValue(field, entityId, rootPkFieldId),
+    name: field.name
   }));
 
 const getEntityFieldValue = (field, entityId, rootPkFieldId) => {
