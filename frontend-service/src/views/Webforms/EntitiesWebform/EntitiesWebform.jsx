@@ -1,7 +1,6 @@
 import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import capitalize from 'lodash/capitalize';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
@@ -43,7 +42,7 @@ export const EntitiesWebform = ({
   state,
   tables = []
 }) => {
-  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors, parseListOfSingleEntities } = EntitiesWebformUtils;
+  const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = EntitiesWebformUtils;
   const { datasetSchema, datasetStatistics } = state;
   const { onParseWebformData, onParseWebformRecords, parseNewEntitiesTableRecord, parseEntitiesRecords } =
     WebformsUtils;
@@ -142,7 +141,6 @@ export const EntitiesWebform = ({
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
         });
       }
-
       return onParseWebformRecords(data.records, entitiesWebformState.data[0], {}, data.totalRecords) || [];
     }
 
@@ -151,12 +149,21 @@ export const EntitiesWebform = ({
 
   const onAddEntitiesRecord = async () => {
     setIsAddingEntityRecord(true);
-    const filteredTables = datasetSchema.tables.filter(table => table.tableSchemaNotEmpty);
+    /*Filters the Root table and the tables that have only foreign keys linked
+    to the Root table primary key*/
+    const filteredTables = datasetSchema.tables.filter(
+      table =>
+        table.tableSchemaNotEmpty &&
+        (table.tableSchemaName === rootTableName ||
+          !table.records[0].fields.some(
+            field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+          ))
+    );
+
     const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
 
     try {
       const entitiesTableRecords = await getEntitiesTableRecords(tableSchemaId);
-
       await WebformService.addEntityRecord(
         datasetId,
         filteredTables,
@@ -334,6 +341,7 @@ export const EntitiesWebform = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          datasetSchema={datasetSchema}
           datasetSchemaId={datasetSchema.datasetSchemaId}
           entitiesRecords={entitiesRecords}
           getFieldSchemaId={getFieldSchemaId}
