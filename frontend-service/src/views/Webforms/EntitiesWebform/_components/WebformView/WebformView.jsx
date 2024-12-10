@@ -19,8 +19,6 @@ import { WebformTable } from 'views/Webforms/_components/WebformTable';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
-import { WebformService } from 'services/WebformService';
-
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
@@ -33,6 +31,7 @@ export const WebformView = ({
   dataProviderId,
   dataflowId,
   datasetId,
+  datasetSchema,
   datasetSchemaId,
   getFieldSchemaId,
   isAddingRootTableId = false,
@@ -259,6 +258,7 @@ export const WebformView = ({
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}
         datasetId={datasetId}
+        datasetSchema={datasetSchema}
         datasetSchemaId={datasetSchemaId}
         entitiesRecords={entitiesRecords}
         getFieldSchemaId={getFieldSchemaId}
