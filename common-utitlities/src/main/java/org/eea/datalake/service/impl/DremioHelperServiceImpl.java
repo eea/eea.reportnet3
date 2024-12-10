@@ -326,8 +326,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
     @Override
     public long getRowCount(String tablePath) throws Exception {
+        String headerName = "myRowCount";
         String query = String.format(
-            "SELECT COUNT(*) AS myRowCount FROM %s ",
+            "SELECT COUNT(*) AS %s FROM %s ",
+            headerName,
             tablePath
         );
         try {
@@ -336,10 +338,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
             return rows.stream()
                 .filter(Objects::nonNull)
-                .map(linkedHashMap -> {
-                    int numOfRows = (int) linkedHashMap.get("myRowCount");
-                    return Long.valueOf(numOfRows);
-                })
+                .map(linkedHashMap -> Long.valueOf((Integer) linkedHashMap.get(headerName)))
                 .findFirst()
                 .orElse(0L);
         } catch (FeignException | IOException e) {
