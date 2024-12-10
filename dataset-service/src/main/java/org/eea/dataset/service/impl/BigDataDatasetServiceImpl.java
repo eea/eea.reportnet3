@@ -1747,4 +1747,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         return availableTables;
     }
+
+    @Override
+    public void insertRecordsInMultipleTables(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords) throws Exception {
+        for (TableVO tableVO : tableRecords) {
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableVO.getIdTableSchema(), dataSetMetabaseVO.getDatasetSchema());
+            insertRecords(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), dataSetMetabaseVO.getId(),
+                    tableSchemaVO.getNameTableSchema(), tableVO.getRecords());
+        }
+    }
 }

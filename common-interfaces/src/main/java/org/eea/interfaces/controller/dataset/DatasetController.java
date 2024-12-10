@@ -594,7 +594,7 @@ public interface DatasetController {
    */
   @PostMapping("/{datasetId}/insertRecordsMultiTable")
   void insertRecordsMultiTable(@PathVariable("datasetId") Long datasetId,
-      @RequestBody List<TableVO> tableRecords);
+      @RequestBody List<TableVO> tableRecords) throws Exception;
 
 
   /**
