@@ -37,7 +37,7 @@ const getTypeList = (records = []) => {
   };
 };
 
-const checkErrors = data => {
+const checkErrors = (data, rootPkFieldId) => {
   if (isEmpty(data)) return {};
 
   let errors = {};
@@ -60,7 +60,7 @@ const checkErrors = data => {
 
   restTables.forEach(table => {
     const fk = table.records
-      ? table.records[0].fields.filter(field => field?.referencedField?.idPk === '6735f26a1289870001433ce6')
+      ? table.records[0].fields.filter(field => field?.referencedField?.idPk === rootPkFieldId)
       : [];
 
     errors = {
@@ -83,7 +83,7 @@ const getSingleRecordOption = singleRecord => {
   return `${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
 };
 
-const hasErrors = data => {
+const hasErrors = (data, rootPkFieldId) => {
   const errors = [];
 
   const rootTable = data.filter(table => table.isRootTable === true);
@@ -99,7 +99,7 @@ const hasErrors = data => {
 
   restTables.forEach(table => {
     const fk = table.records
-      ? table.records[0].fields.filter(field => field?.referencedField?.idPk === '6735f26a1289870001433ce6')
+      ? table.records[0].fields.filter(field => field?.referencedField?.idPk === rootPkFieldId)
       : [];
     errors.push(!isEmpty(fk) ? !fk[0].hasOwnProperty('fieldId') : true, !table.hasOwnProperty('tableSchemaId'));
   });
