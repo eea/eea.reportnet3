@@ -122,12 +122,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> recordIds = new ArrayList<>();
 
-            String query = String.format(
-                "SELECT COUNT(*) AS myRowCount FROM %s ",
-                tablePath
-            );
-            long rowCount = dremioHelperService.executeSqlStatementGetRowCount(query);
-
+            long rowCount = dremioHelperService.getRowCount(tablePath);
             if (rowCount == 0) {
                 if (ruleMethodName.equals(IS_TABLE_EMPTY)) {
                     recordIds.add(TABLE_EMPTY);
