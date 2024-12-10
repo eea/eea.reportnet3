@@ -1521,6 +1521,10 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void insertRecordsMultiTable() throws Exception {
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    dataSetMetabaseVO.setDataflowId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
+    Mockito.when(dataFlowControllerZuul.isBigDataflow(any())).thenReturn(false);
     datasetControllerImpl.insertRecordsMultiTable(1L, new ArrayList<TableVO>());
     Mockito.verify(updateRecordHelper, times(1)).executeMultiCreateProcess(Mockito.anyLong(),
         Mockito.any());
@@ -1533,6 +1537,10 @@ public class DatasetControllerImplTest {
    */
   @Test(expected = ResponseStatusException.class)
   public void insertRecordsMultiTableExceptionTest() throws Exception {
+    DataSetMetabaseVO dataSetMetabaseVO = new DataSetMetabaseVO();
+    dataSetMetabaseVO.setDataflowId(1L);
+    Mockito.when(datasetMetabaseService.findDatasetMetabase(1L)).thenReturn(dataSetMetabaseVO);
+    Mockito.when(dataFlowControllerZuul.isBigDataflow(any())).thenReturn(false);
     Mockito.doThrow(EEAException.class).when(updateRecordHelper)
         .executeMultiCreateProcess(Mockito.anyLong(), Mockito.any());
     try {
