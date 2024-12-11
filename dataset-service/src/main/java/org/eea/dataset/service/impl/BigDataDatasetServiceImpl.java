@@ -1,12 +1,14 @@
 package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
@@ -14,9 +16,12 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
+import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -37,6 +42,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -132,6 +138,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DataFlowControllerZuul dataFlowControllerZuul;
+
+    /** The pk catalogue repository. */
+    @Autowired
+    private PkCatalogueRepository pkCatalogueRepository;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
@@ -1358,23 +1368,32 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception{
-        providerId = providerId != null ? providerId : 0L;
+    public void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception{
+        if(deleteCascadePK){
+            //we need to remove all records in sub tables that are linked to the record
+            deleteLinkedRecordsWithCascade(dataflowId, providerId, datasetId, tableSchemaVO, recordIds);
+        }
+
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), UUID.randomUUID().toString(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
+        // Join items with single quotes and commas
+        String recordIdsForQuery = recordIds.stream().map(id -> "'" + id + "'").collect(Collectors.joining(", "));
+
         //check if we need to remove attachments
         List<FieldSchemaVO> fields = tableSchemaVO.getRecordSchema().getFieldSchema();
         for(FieldSchemaVO field: fields){
             if(field.getType() == DataType.ATTACHMENT){
                 //get fileName
-                String getFileNameQuery = "SELECT " + field.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'";
+                String getFileNameQuery = "SELECT " + field.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " in (" + recordIdsForQuery + ")";
                 String getFileNameResult = dremioJdbcTemplate.queryForObject(getFileNameQuery, String.class);
                 if(StringUtils.isNotBlank(getFileNameResult)){
-                    removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), field.getName(), FilenameUtils.getExtension(getFileNameResult), recordId);
+                    for(String recordId: recordIds) {
+                        removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), field.getName(), FilenameUtils.getExtension(getFileNameResult), recordId);
+                    }
                 }
             }
         }
@@ -1385,8 +1404,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if(numberOfRecords != 1) {
             //we can remove the entry
             //create delete query for the record
-            StringBuilder deleteQueryBuilder = new StringBuilder().append("DELETE FROM" + icebergTablePath + " ");
-            deleteQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'");
+            StringBuilder deleteQueryBuilder = new StringBuilder().append("DELETE FROM " + icebergTablePath + " ");
+            deleteQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " in (" + recordIdsForQuery + ")");
             String processId = dremioHelperService.executeSqlStatement(deleteQueryBuilder.toString());
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(deleteQueryBuilder.toString(), processId, 2000L);
 
@@ -1404,7 +1423,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
             }
         }
-        //todo handle deleteCascadePK
     }
 
     private void removeAttachmentFromS3(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, String fieldName, String extension, String recordId){
@@ -1755,5 +1773,65 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             insertRecords(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), dataSetMetabaseVO.getId(),
                     tableSchemaVO.getNameTableSchema(), tableVO.getRecords());
         }
+    }
+
+    private void deleteLinkedRecordsWithCascade(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds) throws Exception{
+        // Get the first referenced field
+        FieldSchemaVO fieldSchemaPK;
+        Optional<FieldSchemaVO> optionalFieldReferenced = tableSchemaVO.getRecordSchema().getFieldSchema().stream().filter(field -> Boolean.TRUE.equals(field.getPkReferenced())).findFirst();
+        if (optionalFieldReferenced.isPresent()){
+            fieldSchemaPK = optionalFieldReferenced.get();
+        }
+        else{
+            return;
+        }
+
+        //get value of field fieldSchemaPK
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(),  tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        for(String recordId: recordIds) {
+
+            String getFieldValue =  "SELECT " + fieldSchemaPK.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'";
+            String fieldValue = dremioJdbcTemplate.queryForObject(getFieldValue, String.class);
+
+            //get field references from pkCatalogue
+            PkCatalogueSchema pkCatalogueSchema = pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaPK.getId()));
+            if (pkCatalogueSchema == null || pkCatalogueSchema.getReferenced() == null) {
+                return;
+            }
+            Map<FieldSchemaVO, TableSchemaVO> fieldSchemaAndTableSchemaMapping = new HashMap<>();
+            List<String> referencedFieldSchemaIds = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString).collect(Collectors.toList());
+            for (String referencedFieldSchemaId : referencedFieldSchemaIds) {
+                DataSetSchemaVO dataSetSchemaVO = datasetSchemaService.getDataSchemaByDatasetId(false, datasetId);
+                for (TableSchemaVO tableInDataset : dataSetSchemaVO.getTableSchemas()) {
+
+                    Optional<FieldSchemaVO> matchingSchema = tableInDataset.getRecordSchema().getFieldSchema().stream()
+                            .filter(field -> referencedFieldSchemaId.equals(field.getId())).findFirst();
+                    if (matchingSchema.isEmpty()) {
+                        continue;
+                    }
+                    //found the correct table that is related to referencedFieldSchemaId
+                    fieldSchemaAndTableSchemaMapping.put(matchingSchema.get(), tableInDataset);
+                }
+            }
+
+            //for each reference field we need to find the records associated with the parent table's value in the reference field and delete them
+            for (Map.Entry<FieldSchemaVO, TableSchemaVO> entry : fieldSchemaAndTableSchemaMapping.entrySet()) {
+                S3PathResolver s3IcebergSubTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, entry.getValue().getNameTableSchema(), entry.getValue().getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+                s3IcebergSubTablePathResolver.setIsIcebergTable(true);
+
+                String icebergSubTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergSubTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                String getRecordIdsQuery = "SELECT " + PARQUET_RECORD_ID_COLUMN_HEADER + " FROM " + icebergSubTablePath + " WHERE " + entry.getKey().getName() + " = '" + fieldValue + "'";
+                List<String> subTableRecordIds = dremioJdbcTemplate.queryForList(getRecordIdsQuery, String.class);
+                if(subTableRecordIds != null && subTableRecordIds.size() > 0) {
+                    deleteRecord(dataflowId, providerId, datasetId, entry.getValue(), subTableRecordIds, true);
+                }
+            }
+        }
+
     }
 }

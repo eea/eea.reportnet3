@@ -9,10 +9,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 import java.util.List;
 
 public interface BigDataDatasetService {
@@ -209,11 +206,11 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param datasetId the dataset id
      * @param tableSchemaVO the tableSchemaVO
-     * @param recordId the record id to be removed
+     * @param recordIds the record ids to be removed
      * @param deleteCascadePK the deleteCascadePK
      *
      */
-    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception;
+    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception;
 
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 
