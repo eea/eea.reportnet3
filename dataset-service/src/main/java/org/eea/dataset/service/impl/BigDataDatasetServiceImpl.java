@@ -13,7 +13,6 @@ import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -1203,10 +1202,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderCode + "'" : dataProviderCode;
         }
 
+        deleteIcebergTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver);
+
         //check if table exists and if not create it
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaName)) {
             //table does not exist, so we need to create it first
-            StringBuilder createIcebergTable = new StringBuilder("CREATE TABLE " + icebergTablePath + " (");
+            StringBuilder createIcebergTable = new StringBuilder("CREATE TABLE IF NOT EXISTS " + icebergTablePath + " (");
             createIcebergTable.append(PARQUET_RECORD_ID_COLUMN_HEADER + " VARCHAR , " + PARQUET_PROVIDER_CODE_COLUMN_HEADER + " VARCHAR ");
 
             for(int i=0; i< records.get(0).getFields().size(); i++){
@@ -1260,6 +1261,23 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
     }
 
+    /**
+     * Deletes iceberg table if empty to cover the case that the user has added or removed columns (has changed the schema)
+     *
+     * @param tableSchemaName The table schema name
+     * @param s3IcebergTablePathResolver The table path
+     * @throws Exception exception
+     */
+    private void deleteIcebergTableIfEmpty(String tableSchemaName, S3PathResolver s3IcebergTablePathResolver) throws Exception {
+        String tablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            long rowCount = dremioHelperService.getRowCount(tablePath);
+            if (rowCount == 0) {
+                dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaName);
+                s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+            }
+        }
+    }
 
 
     @Override
