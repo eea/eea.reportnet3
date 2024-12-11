@@ -690,7 +690,8 @@ public class DatasetControllerImpl implements DatasetController {
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-          bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, recordId, deleteCascadePK);
+          providerId = providerId != null ? providerId : 0L;
+          bigDataDatasetService.deleteRecord(dataflowId, providerId, datasetId, tableSchemaVO, new ArrayList<>(Arrays.asList(recordId)), deleteCascadePK);
         }
         else{
           throw new Exception("The table data are not manually editable or the iceberg table has not been created");
