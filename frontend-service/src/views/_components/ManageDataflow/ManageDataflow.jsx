@@ -40,6 +40,7 @@ export const ManageDataflow = ({
   obligation,
   onCreateDataflow,
   onEditDataflow,
+  onLoadReportingDataflow,
   onUpdateSoftDelete,
   resetDeliveryDate,
   resetObligations,
@@ -108,7 +109,7 @@ export const ManageDataflow = ({
     manageDialogs(dialog, false);
     onUpdateSoftDelete(deleted);
     onHideDataflowDialog();
-  }
+  };
 
   const handleDeleteError = error => {
     if (error.response.status === 423) {
@@ -118,7 +119,7 @@ export const ManageDataflow = ({
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } }, true);
     }
     setIsDeleting(false);
-  }
+  };
 
   const onDeleteDataflow = async () => {
     setIsDeleting(true);
@@ -136,6 +137,7 @@ export const ManageDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.softDelete(dataflowId);
+      onLoadReportingDataflow();
     } catch (error) {
       handleDeleteError(error);
     } finally {
@@ -153,7 +155,7 @@ export const ManageDataflow = ({
     } finally {
       afterSoft(false, 'isReverseSoftDeleteDialogVisible');
     }
-  }
+  };
 
   const onLoadData = ({ name, description, providerGroup }) =>
     reportingDataflowDispatch({ type: 'ON_LOAD_DATA', payload: { name, description, providerGroup } });
@@ -287,26 +289,22 @@ export const ManageDataflow = ({
       <Fragment>
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
-          {
-            state.data && (!state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
-              <Button
-                className="p-button-danger p-button-animated-blink"
-                icon="trash"
-                label={resourcesContext.messages['softDeleteDataflowButton']}
-                onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
-              />
-            )
-          }
-          {
-            state.data && (state.data.deleted && isEditing && (isCustodian || isAdmin)) && (
-              <Button
-                className="p-button-danger p-button-animated-blink"
-                icon="trash"
-                label={resourcesContext.messages['reverseSoftDeleteDataflowButton']}
-                onClick={() => manageDialogs('isReverseSoftDeleteDialogVisible', true)}
-              />
-            )
-          }
+          {state.data && !state.data.deleted && isEditing && (isCustodian || isAdmin) && (
+            <Button
+              className="p-button-danger p-button-animated-blink"
+              icon="trash"
+              label={resourcesContext.messages['softDeleteDataflowButton']}
+              onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
+            />
+          )}
+          {state.data && state.data.deleted && isEditing && (isCustodian || isAdmin) && (
+            <Button
+              className="p-button-danger p-button-animated-blink"
+              icon="trash"
+              label={resourcesContext.messages['reverseSoftDeleteDataflowButton']}
+              onClick={() => manageDialogs('isReverseSoftDeleteDialogVisible', true)}
+            />
+          )}
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>

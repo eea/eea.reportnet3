@@ -43,7 +43,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 import { ManageReferenceDataflow } from 'views/_components/ManageReferenceDataflow';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
 export const ReferenceDataflow = () => {
   const navigate = useNavigate();
@@ -370,7 +370,7 @@ export const ReferenceDataflow = () => {
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
           name: resourcesContext.messages['referenceDataflowCrumbLabel']
         })
-      : resourcesContext.messages['referenceDataflowCrumbLabel']
+      : resourcesContext.messages['referenceDataflowCrumbLabel'];
 
     if (dataflowState.data.deleted) {
       const deletedAt = dayjs(dataflowState.data.deletedAt).format('YYYY-MM-DD');
@@ -378,7 +378,7 @@ export const ReferenceDataflow = () => {
     }
 
     return subtitle;
-  }
+  };
 
   if (dataflowState.requestStatus === 'pending' || dataflowState.isLoading) {
     return layout(<Spinner />);
@@ -387,12 +387,7 @@ export const ReferenceDataflow = () => {
   return layout(
     <div className="rep-row">
       <div className="rep-col-12 rep-col-sm-12">
-        <Title
-          icon="clone"
-          iconSize="4rem"
-          subtitle={getSubtitle()}
-          title={dataflowState.name}
-        />
+        <Title icon="clone" iconSize="4rem" subtitle={getSubtitle()} title={dataflowState.name} />
       </div>
       <div className="rep-col-12 rep-col-sm-12">
         <BigButtonListReference
@@ -438,9 +433,10 @@ export const ReferenceDataflow = () => {
             status: dataflowState.status,
             deleted: dataflowState.data.deleted,
             isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
-            isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
-        }}
+            isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible
+          }}
           onEditDataflow={onEditDataflow}
+          onLoadReferenceDataflow={onLoadReferenceDataflow}
           onUpdateSoftDelete={onUpdateSoftDelete}
         />
       )}

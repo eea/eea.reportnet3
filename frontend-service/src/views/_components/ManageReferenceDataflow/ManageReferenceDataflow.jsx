@@ -38,6 +38,7 @@ export const ManageReferenceDataflow = ({
   metadata,
   onCreateDataflow,
   onEditDataflow,
+  onLoadReferenceDataflow,
   onUpdateSoftDelete
 }) => {
   const dialogName = isEditing ? 'isEditDialogVisible' : 'isReferencedDataflowDialogVisible';
@@ -131,20 +132,20 @@ export const ManageReferenceDataflow = ({
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } }, true);
     }
     setIsDeleting(false);
-  }
+  };
 
   const afterSoft = (deleted, dialog) => {
     manageDialogs(dialog, false);
     onUpdateSoftDelete(deleted);
-    manageDialogs(dialogName, false)
-  }
+    manageDialogs(dialogName, false);
+  };
 
   const onDeleteDataflow = async () => {
     setIsDeleting(true);
     try {
       await DataflowService.delete(dataflowId);
     } catch (error) {
-      handleDeleteError()
+      handleDeleteError();
     } finally {
       userContext.setCurrentDataflowType(undefined);
     }
@@ -155,6 +156,7 @@ export const ManageReferenceDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.softDelete(dataflowId);
+      onLoadReferenceDataflow();
     } catch (error) {
       handleDeleteError(error);
     } finally {
@@ -172,7 +174,7 @@ export const ManageReferenceDataflow = ({
     } finally {
       afterSoft(false, 'isReverseSoftDeleteDialogVisible');
     }
-  }
+  };
 
   const onManageReferenceDataflow = async () => {
     if (checkErrors()) return;
@@ -246,26 +248,22 @@ export const ManageReferenceDataflow = ({
           </div>
         )}
         {renderDeleteDataflowButton()}
-        {
-          metadata && !metadata.deleted && (
-            <Button
-              className="p-button-danger p-button-animated-blink"
-              icon="trash"
-              label={resourcesContext.messages['softDeleteDataflowButton']}
-              onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
-            />
-          )
-        }
-        {
-          metadata && metadata.deleted && (
-            <Button
-              className="p-button-danger p-button-animated-blink"
-              icon="trash"
-              label={resourcesContext.messages['reverseSoftDeleteDataflowButton']}
-              onClick={() => manageDialogs('isReverseSoftDeleteDialogVisible', true)}
-            />
-          )
-        }
+        {metadata && !metadata.deleted && (
+          <Button
+            className="p-button-danger p-button-animated-blink"
+            icon="trash"
+            label={resourcesContext.messages['softDeleteDataflowButton']}
+            onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
+          />
+        )}
+        {metadata && metadata.deleted && (
+          <Button
+            className="p-button-danger p-button-animated-blink"
+            icon="trash"
+            label={resourcesContext.messages['reverseSoftDeleteDataflowButton']}
+            onClick={() => manageDialogs('isReverseSoftDeleteDialogVisible', true)}
+          />
+        )}
       </div>
       <div className="p-toolbar-group-left">
         {!isEditing && (

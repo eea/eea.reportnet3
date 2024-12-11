@@ -176,7 +176,7 @@ export const ManageBusinessDataflow = ({
     manageDialogs(dialog, false);
     onUpdateSoftDelete(deleted);
     onHideDataflowDialog();
-  }
+  };
 
   const handleDeleteError = error => {
     if (error.response.status === 423) {
@@ -186,7 +186,7 @@ export const ManageBusinessDataflow = ({
       notificationContext.add({ type: 'DATAFLOW_DELETE_BY_ID_ERROR', content: { dataflowId } }, true);
     }
     setIsDeleting(false);
-  }
+  };
 
   const onDeleteDataflow = async () => {
     setIsDeleting(true);
@@ -204,6 +204,7 @@ export const ManageBusinessDataflow = ({
     setIsDeleting(true);
     try {
       await DataflowService.softDelete(dataflowId);
+      onLoadReportingDataflow();
     } catch (error) {
       handleDeleteError(error);
     } finally {
@@ -221,7 +222,7 @@ export const ManageBusinessDataflow = ({
     } finally {
       afterSoft(false, 'isReverseSoftDeleteDialogVisible');
     }
-  }
+  };
 
   const onManageBusinessDataflow = async () => {
     if (checkErrors()) return;
@@ -338,26 +339,22 @@ export const ManageBusinessDataflow = ({
       <Fragment>
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
-          {
-            state && (!state.deleted && isEditing && isDesign && isAdmin) && (
-              <Button
-                className="p-button-danger p-button-animated-blink"
-                icon="trash"
-                label={resourcesContext.messages['softDeleteDataflowButton']}
-                onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
-              />
-            )
-          }
-          {
-            state && (state.deleted && isEditing && isDesign && isAdmin) && (
-              <Button
-                className="p-button-danger p-button-animated-blink"
-                icon="trash"
-                label={resourcesContext.messages['reverseSoftDeleteDataflowButton']}
-                onClick={() => manageDialogs('isReverseSoftDeleteDialogVisible', true)}
-              />
-            )
-          }
+          {state && !state.deleted && isEditing && isDesign && isAdmin && (
+            <Button
+              className="p-button-danger p-button-animated-blink"
+              icon="trash"
+              label={resourcesContext.messages['softDeleteDataflowButton']}
+              onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
+            />
+          )}
+          {state && state.deleted && isEditing && isDesign && isAdmin && (
+            <Button
+              className="p-button-danger p-button-animated-blink"
+              icon="trash"
+              label={resourcesContext.messages['reverseSoftDeleteDataflowButton']}
+              onClick={() => manageDialogs('isReverseSoftDeleteDialogVisible', true)}
+            />
+          )}
           {renderCheckBoxPinned()}
         </div>
         <div className="p-toolbar-group-left">{renderBigDataStorage()}</div>

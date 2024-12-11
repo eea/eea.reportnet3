@@ -1,4 +1,4 @@
-import {Fragment, useContext, useEffect, useReducer, useRef} from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import dayjs from 'dayjs';
@@ -660,7 +660,9 @@ export const Dataflow = () => {
     }
   };
 
-  const onUpdateSoftDelete = deleted => dataflowDispatch({ type: 'ON_UPDATE_SOFT_DELETE', payload: deleted });
+  const onUpdateSoftDelete = deleted => {
+    dataflowDispatch({ type: 'ON_UPDATE_SOFT_DELETE', payload: deleted });
+  };
 
   const manageRoleDialogFooter = (
     <Fragment>
@@ -1746,6 +1748,7 @@ export const Dataflow = () => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onLoadReportingDataflow={onLoadReportingDataflow}
             onUpdateSoftDelete={onUpdateSoftDelete}
             resetDeliveryDate={resetDeliveryDate}
             resetObligations={resetObligations}
@@ -1772,6 +1775,7 @@ export const Dataflow = () => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onLoadReportingDataflow={onLoadReportingDataflow}
             onUpdateSoftDelete={onUpdateSoftDelete}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}
@@ -1803,7 +1807,7 @@ export const Dataflow = () => {
               dataProviderGroupId: dataflowState.data.dataProviderGroupId,
               dataProviderGroupName: dataflowState.data.dataProviderGroupName,
               isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
-              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible,
+              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible
             }}
           />
         )}
