@@ -53,7 +53,7 @@ export const Footer = () => {
           </a>
         </div>
         <div className={styles.helpDesk}>
-          <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>
+          <a href="mailto:ServiceDesk@eea.europa.eu">ServiceDesk@eea.europa.eu</a>
         </div>
       </div>
     </div>

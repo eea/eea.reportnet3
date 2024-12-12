@@ -192,7 +192,7 @@ export const PrivacyStatement = () => {
               <p>
                 You can receive a copy of your personal data that has been submitted to the Reportnet 3 platform by
                 sending an email to the Reportnet Helpdesk (
-                <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>).
+                <a href="mailto:ServiceDesk@eea.europa.eu">ServiceDesk@eea.europa.eu</a>).
               </p>
             </section>
             <section id="gdprSiteUsage">
@@ -228,7 +228,7 @@ export const PrivacyStatement = () => {
               <p>
                 Additionally, you always have the right to get your account deleted from the Reportnet 3 Directory by
                 sending an email to the Reportnet Helpdesk (
-                <a href="mailto:helpdesk@reportnet.europa.eu">helpdesk@reportnet.europa.eu</a>).
+                <a href="mailto:ServiceDesk@eea.europa.eu">ServiceDesk@eea.europa.eu</a>).
               </p>
             </section>
             <section id="gdprHowSecure">
