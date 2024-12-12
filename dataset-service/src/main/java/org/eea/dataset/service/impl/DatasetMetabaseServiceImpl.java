@@ -341,7 +341,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     // Send message to providers and custodian
     Optional<DesignDataset> designDataset =
         designDatasetRepository.findFirstByDatasetSchema(datasetMetabase.getDatasetSchema());
-    collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message, SecurityContextHolder.getContext().getAuthentication().getName(), null);
+    boolean sendEmail=false;
+    collaborationControllerZuul.createMessage(datasetStatusMessageVO.getDataflowId(), message, SecurityContextHolder.getContext().getAuthentication().getName(), null, sendEmail);
     collaborationControllerZuul.notifyNewMessages(datasetStatusMessageVO.getDataflowId(),
         datasetMetabase.getDataProviderId(), SecurityContextHolder.getContext().getAuthentication().getName(), datasetMetabase.getId(), datasetMetabase.getStatus(),
         designDataset.isPresent() ? designDataset.get().getDataSetName() : null,
