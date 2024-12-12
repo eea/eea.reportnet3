@@ -589,6 +589,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           csvWriter.writeNext(headersArray);
         }
 
+        if (csvRecord.size() > csvParser.getHeaderMap().size()) {
+          importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
+        }
+
         List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter);
         String[] rowArray = row.toArray(new String[0]);
         csvWriter.writeNext(rowArray);
