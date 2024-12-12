@@ -137,8 +137,8 @@ export const LegalNotice = () => {
               <p>
                 Content in the Reportnet platform can be explicitly restricted from public view by the data provider.
                 Only authorised users may access restricted content in the Reportnet platform. Contact{' '}
-                <a href="mailto:helpdesk@reportnet.europa.eu" rel="noopener noreferrer" target="_blank">
-                  helpdesk@reportnet.europa.eu
+                <a href="mailto:ServiceDesk@eea.europa.eu" rel="noopener noreferrer" target="_blank">
+                  ServiceDesk@eea.europa.eu
                 </a>{' '}
                 if you are an authorised user and require technical assistance.
               </p>
