@@ -44,6 +44,7 @@ export const WebformField = ({
   entitiesRecords,
   isConditional,
   isConditionalChanged,
+  isSubTableCreated,
   newRecord,
   onFillField,
   onSaveField,
@@ -490,7 +491,7 @@ export const WebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
-            disabled={field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
+            disabled={isSubTableCreated || field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
             hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
