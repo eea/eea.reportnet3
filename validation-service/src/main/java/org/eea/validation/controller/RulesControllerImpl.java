@@ -102,7 +102,7 @@ public class RulesControllerImpl implements RulesController {
     try {
       String userName = SecurityContextHolder.getContext().getAuthentication().getName();
       boolean checkNoSQL = true;
-      rulesService.validateAllRules(datasetId, checkNoSQL, userName);
+      rulesService.validateAllRulesAsync(datasetId, checkNoSQL, userName);
     } catch (Exception e) {
       LOG.error("Error validating QC's for datasetId: {}, user: {}, message: {}",
               datasetId, SecurityContextHolder.getContext().getAuthentication().getName(), e.getMessage());

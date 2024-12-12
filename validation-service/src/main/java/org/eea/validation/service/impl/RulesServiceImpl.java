@@ -327,6 +327,12 @@ public class RulesServiceImpl implements RulesService {
     }
   }
 
+  @Override
+  @Async
+  public void validateAllRulesAsync(Long datasetId, boolean checkNoSQL, String user) {
+    validateAllRules(datasetId, checkNoSQL, user);
+  }
+
   /**
    * Gets the rules schema by dataset id.
    *
