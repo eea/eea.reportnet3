@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -815,8 +816,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     LOG.info("The user invoking DataSetSnaphotControllerImpl.createReleaseSnapshots for dataflowId {} and dataProviderId {} with jobId {} is {}",
             dataflowId, dataProviderId, jobId, user);
 
-    List<DataSetMetabaseVO> datasets = dataSetMetabaseControllerZuul.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
-    for(DataSetMetabaseVO dataset: datasets){
+    List<ReportingDatasetVO> datasets = dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowIdAndProviderId(dataflowId, dataProviderId);
+    for(ReportingDatasetVO dataset: datasets){
       List<TableSchemaIdNameVO> tables = datasetSchemaService.getTableSchemasIds(dataset.getId());
       String datasetSchemaId = dataset.getDatasetSchema();
       for(TableSchemaIdNameVO table: tables){
