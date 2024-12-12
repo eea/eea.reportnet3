@@ -42,7 +42,7 @@ export const isFilteredStore = atomFamily({
 });
 
 export const filterByDataflowsCustomFilterStore = atomFamily({
-  key: 'filterByDataflowsCustomFilterStore',
+  key: 'filterByCustomFilterStore',
   default: { is_deleted: { value: false } }
 });
 
