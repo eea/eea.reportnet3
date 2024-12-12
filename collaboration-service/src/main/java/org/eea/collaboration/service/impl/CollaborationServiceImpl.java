@@ -118,11 +118,15 @@ public class CollaborationServiceImpl implements CollaborationService {
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
    */
   @Override
-  public MessageVO createMessage(Long dataflowId, MessageVO messageVO, String user, Long jobId)
+  public MessageVO createMessage(Long dataflowId, MessageVO messageVO, String user, Long jobId, Boolean emailNotification)
       throws EEAForbiddenException, EEAIllegalArgumentException {
 
     if(user == null){
       user = SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
+    if (emailNotification == null) {
+      emailNotification = true;
     }
 
     Long providerId = messageVO.getProviderId();
@@ -162,7 +166,8 @@ public class CollaborationServiceImpl implements CollaborationService {
     // Trigger the notification after message creation
     String eventType = EventType.RECEIVED_MESSAGE.toString();
     collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null, eventType);
-    collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, eventType, messageContent);
+    if (emailNotification){
+      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, eventType, messageContent);}
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);

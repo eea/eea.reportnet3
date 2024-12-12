@@ -26,7 +26,7 @@ public interface CollaborationService {
    * @throws EEAIllegalArgumentException the EEA illegal argument exception
    * @throws EEAForbiddenException the EEA forbidden exception
    */
-  MessageVO createMessage(Long dataflowId, MessageVO messageVO, String user, Long jobId)
+  MessageVO createMessage(Long dataflowId, MessageVO messageVO, String user, Long jobId, Boolean sendEmailNotification)
       throws EEAIllegalArgumentException, EEAForbiddenException;
 
   /**
