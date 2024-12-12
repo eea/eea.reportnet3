@@ -77,6 +77,7 @@ export const WebformRecord = ({
   record,
   referencedTableSchemaId,
   rootPkFieldId,
+  rootTableName,
   tableId,
   tableName,
   webformType
@@ -139,6 +140,38 @@ export const WebformRecord = ({
 
   const onFillField = (field, option, value, conditional) => {
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value, conditional } });
+  };
+
+  const getCreatedSubTable = (record, element) => {
+    const subTableCreated =
+      !isNil(record) &&
+      record.elements.filter(
+        col => col.name !== rootTableName && (col.type === 'TABLE') & !isEmpty(col.elementsRecords)
+      ).length > 0;
+
+    let subTablesList;
+    let isSubTableFk;
+
+    if (subTableCreated) {
+      subTablesList =
+        !isNil(record) &&
+        record.elements.filter(
+          col => col.name !== rootTableName && (col.type === 'TABLE') & !isEmpty(col.elementsRecords)
+        );
+
+      const subTablesFkNamesList = subTablesList.map(subTable => {
+        const namesList = subTable.elements
+          .filter(col => col.type === 'FIELD' && col.dependency)
+          .map(field => (field = { name: field.dependency.referenceField }));
+
+        return (subTable = namesList);
+      });
+
+      isSubTableFk = subTablesFkNamesList.some(subTable =>
+        subTable.some(fieldName => fieldName.name === element.name || element.isPrimary === true)
+      );
+    }
+    return isSubTableFk;
   };
 
   const onSaveField = async () => {
@@ -237,6 +270,7 @@ export const WebformRecord = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       onUpdateEntitiesValue={onUpdateEntitiesValue}
@@ -375,6 +409,7 @@ export const WebformRecord = ({
                     record={record}
                     referencedTableSchemaId={element?.tableSchemaId}
                     rootPkFieldId={rootPkFieldId}
+                    rootTableName={rootTableName}
                     tableId={tableId}
                     tableName={element.title}
                   />

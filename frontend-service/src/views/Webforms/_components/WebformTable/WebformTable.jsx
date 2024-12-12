@@ -321,6 +321,7 @@ export const WebformTable = ({
       onUpdateEntitiesValue={onUpdateEntitiesValue}
       record={record}
       rootPkFieldId={rootPkFieldId}
+      rootTableName={rootTableName}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
       webformType={webformType}
