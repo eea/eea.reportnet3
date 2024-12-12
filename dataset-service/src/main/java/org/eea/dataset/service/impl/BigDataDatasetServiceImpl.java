@@ -246,8 +246,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 providerCode = dataProviderVO.getCode();
             }
 
-            if(StringUtils.isNotBlank(fmeJobId)){
-                //retrieve the replace data value from the job
+            if (StringUtils.isNotBlank(fmeJobId) && job!= null && job.getParameters().get("replace") != null) {
+                //retrieve replace data value from the job
                 replace = (Boolean) job.getParameters().get("replace");
             }
 
