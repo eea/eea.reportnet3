@@ -28,6 +28,9 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
   const [isPinning, setIsPinning] = useState(false);
   const [isPinShowed, setIsPinShowed] = useState(false);
 
+  const deletedAt = itemContent.deletedAt ? dayjs(itemContent.deletedAt).format(userContext.userProps.dateFormat) : null;
+  const deletedAtLabel = deletedAt ? TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt }) : null;
+
   useEffect(() => {
     setIsPinned(itemContent.pinned === 'pinned');
   }, [itemContent, isPinning]);
@@ -158,16 +161,13 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
 
       <div className={`${styles.text}`}>
         <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
-          {itemContent.bigData ? (
-            <p
-              dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                  name: itemContent.name
-                })
-              }}></p>
-          ) : (
-            itemContent.name
-          )}
+          {itemContent.bigData
+            ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: itemContent.name })
+            : itemContent.name
+          }
+          {
+            deletedAtLabel && ` (${deletedAtLabel})`
+          }
         </h3>
         <p>{itemContent.description}</p>
         {renderTooltipDescription()}

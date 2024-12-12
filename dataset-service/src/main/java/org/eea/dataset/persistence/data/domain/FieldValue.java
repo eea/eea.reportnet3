@@ -89,6 +89,9 @@ public class FieldValue {
   @Transient
   private ErrorTypeEnum levelError;
 
+  @Transient
+  private String referenceFieldSchemaId;
+
   /**
    * Hash code.
    *

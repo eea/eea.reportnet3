@@ -4,6 +4,8 @@ export class ReferenceDataflow {
     creationDate,
     dataCollections,
     datasets,
+    deleted,
+    deletedAt,
     description,
     designDatasets,
     expirationDate,
@@ -25,6 +27,8 @@ export class ReferenceDataflow {
     this.creationDate = creationDate;
     this.dataCollections = dataCollections;
     this.datasets = datasets;
+    this.deleted = deleted;
+    this.deletedAt = deletedAt;
     this.description = description;
     this.designDatasets = designDatasets;
     this.expirationDate = expirationDate;

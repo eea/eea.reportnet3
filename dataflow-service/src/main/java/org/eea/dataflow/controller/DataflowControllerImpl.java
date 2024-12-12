@@ -739,6 +739,117 @@ public class DataflowControllerImpl implements DataFlowController {
   }
 
   /**
+   * Soft delete dataflow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR (hasRole('ADMIN'))")
+  @PutMapping("/{dataflowId}/soft-delete")
+  @ApiOperation(value = "Soft delete a dataflow by marking it as 'to be deleted'", hidden = true)
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  @HystrixCommand
+  public void softDeleteDataFlow(
+          @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+
+    LOG.info("Initiating soft delete for dataflow with id {}", dataflowId);
+
+    DataFlowVO dataflowData = null;
+    try {
+      dataflowData = dataflowService.getMetabaseById(dataflowId);
+    } catch (EEAException e) {
+      LOG.error(String.format(
+              "Couldn't retrieve the dataflow information with the provided dataflowId %s",
+              dataflowId));
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve dataflow information for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
+    }
+    ThreadPropertiesManager.setVariable("user",
+            SecurityContextHolder.getContext().getAuthentication().getName());
+    Map<String, Object> importDatasetData = new HashMap<>();
+    importDatasetData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_SCHEMAS.getValue());
+    importDatasetData.put(LiteralConstants.DATAFLOWID, dataflowId);
+    LockVO importLockVO = lockService.findByCriteria(importDatasetData);
+
+    Map<String, Object> copyDatasetSchema = new HashMap<>();
+    copyDatasetSchema.put(LiteralConstants.SIGNATURE, LockSignature.COPY_DATASET_SCHEMA.getValue());
+    copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, dataflowId);
+    LockVO cloneLockVO = lockService.findByCriteria(copyDatasetSchema);
+
+    if (importLockVO != null) {
+      throw new ResponseStatusException(HttpStatus.LOCKED,
+              "Dataflow is locked because import is in progress.");
+    } else if (cloneLockVO != null) {
+      throw new ResponseStatusException(HttpStatus.LOCKED,
+              "Dataflow is locked because clone is in progress.");
+    } else if (!dataflowService.isAdmin() && dataflowData != null
+            && dataflowData.getType() == TypeDataflowEnum.BUSINESS) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              "Can't delete a Dataflow without being an admin user.");
+    } else if (Boolean.TRUE.equals(dataflowData.isDeleted())) {
+      LOG.info("Dataflow with id {} is already marked for deletion.", dataflowId);
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "Dataflow is already marked for deletion.");
+    } else {
+      try{
+
+        // Perform the soft delete
+        LOG.info("Performing soft deletion for dataflow with id {}", dataflowId);
+        dataflowService.softDeleteDataFlow(dataflowId);
+        dataflowData = dataflowService.getMetabaseById(dataflowId); //fetch again dataflow to log the deleted date
+        LOG.info("Dataflow with id {} successfully marked for deletion. Deleted date: {}", dataflowId, dataflowData.getDeletedAt());
+      } catch (Exception e){
+        LOG.error("Unexpected error! Could not perform soft delete for dataflow with id {} Message: {}", dataflowId, e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Reverse the soft delete.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR (hasRole('ADMIN'))")
+  @PutMapping("/{dataflowId}/reverse-soft-delete")
+  @ApiOperation(value = "Reverse soft delete a dataflow", hidden = true)
+  @ApiResponse(code = 500, message = "Internal Server Error")
+  @HystrixCommand
+  public void reverseSoftDeleteDataFlow(
+          @ApiParam(value = "Dataflow Id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+
+    LOG.info("Initiating reverse soft delete for dataflow with id {}", dataflowId);
+
+    DataFlowVO dataflowData = null;
+    try {
+      dataflowData = dataflowService.getMetabaseById(dataflowId);
+    } catch (EEAException e) {
+      LOG.error(String.format(
+              "Couldn't retrieve the dataflow information with the provided dataflowId %s",
+              dataflowId));
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve dataflow information for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
+    }
+   if ( Boolean.FALSE.equals(dataflowData.isDeleted())) {
+      LOG.info("Dataflow with id {} is not marked for deletion.", dataflowId);
+      throw new ResponseStatusException(HttpStatus.CONFLICT,
+              "Dataflow is not marked for deletion.");
+    } else {
+      try{
+
+        // Reverse the soft delete
+        LOG.info("Reversing soft deletion for dataflow with id {}", dataflowId);
+        dataflowService.reverseSoftDeleteDataFlow(dataflowId);
+        LOG.info("Soft delete successfully reverted for dataflow with id: {}", dataflowId);
+      } catch (Exception e){
+        LOG.error("Unexpected error! Could not reverse soft delete for dataflow with id {} Message: {}", dataflowId, e.getMessage());
+      }
+    }
+  }
+
+  /**
    * Update data flow status.
    *
    * @param dataflowId the dataflow id
@@ -1291,7 +1402,7 @@ public class DataflowControllerImpl implements DataFlowController {
   }
 
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR hasAnyRole('ADMIN')")
   @PutMapping(value = "/updateDataProviderGroupIdById/{dataflowId}")
   public void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId){
     try{

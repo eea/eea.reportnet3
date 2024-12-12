@@ -20,7 +20,7 @@ public enum WebformTypeEnum {
   TABLES("TABLES", JavaType.STRING),
 
   /** The entity. */
-  ENTITY("ENTITY", JavaType.STRING);
+  ENTITIES("ENTITIES", JavaType.STRING);
 
   /** The value. */
   private final String value;

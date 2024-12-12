@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,8 +43,8 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
    */
   @Modifying
   @Transactional
-  @Query(nativeQuery = true, value = "delete from Statistics where id_Dataset=:idDataset")
-  void deleteStatsByIdDataset(@Param("idDataset") Long idDataset);
+  @Query(nativeQuery = true, value = "delete from Statistics where id_Dataset=:idDataset and stat_name not in (:statNames)")
+  void deleteStatsByIdDatasetIgnoreStatsByName(@Param("idDataset") Long idDataset, @Param("statNames") List<String> statNames);
 
   /**
    * Find statistics by id dataset schema.
@@ -55,4 +56,9 @@ public interface StatisticsRepository extends JpaRepository<Statistics, Long> {
   List<Statistics> findStatisticsByIdDatasetSchema(
       @Param("idDatasetSchema") String idDatasetSchema);
 
+  @Query(nativeQuery = true, value = "select * from Statistics where id_Dataset=:idDataset and id_table_schema=:idTableSchema and stat_name=:statName")
+  Optional<Statistics> findFirstByDatasetAndAndIdTableSchemaAndStatName(@Param("idDataset") Long idDataset, @Param("idTableSchema") String idTableSchema, @Param("statName") String statName);
+
+  @Query(nativeQuery = true, value = "select * from Statistics where id_Dataset=:idDataset and id_table_schema=:idTableSchema and stat_name in (:statNames)")
+  List<Statistics> findAllByDatasetAndIdTableSchemaAndStatNameIsIn(@Param("idDataset") Long idDataset, @Param("idTableSchema") String idTableSchema, @Param("statNames") List<String> statName);
 }

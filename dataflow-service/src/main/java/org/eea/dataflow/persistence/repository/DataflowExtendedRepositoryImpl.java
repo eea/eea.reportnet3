@@ -128,6 +128,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   /** The Constant HAS_DATASETS. */
   private static final String HAS_DATASETS = " r.has_datasets = TRUE ";
 
+  /** The Constant IS_DELETED. */
+  private static final String IS_DELETED = " %s = :%s ";
+
   /** The Constant AND. */
   private static final String AND = " and ";
 
@@ -505,6 +508,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
   private void setFilters(StringBuilder stringQuery, String key, String value, boolean hasPinned)
       throws EEAException {
     switch (key) {
+      case "is_deleted":
+        stringQuery.append(String.format(IS_DELETED, "is_deleted", key));
+        break;
       case "creation_date_from":
         stringQuery.append(String.format(DATE_FROM, "creation_date", key));
         break;
@@ -585,6 +591,9 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
         break;
       case "pinned":
         query.setParameter("pinnedFilter", Boolean.valueOf(value));
+        break;
+      case "is_deleted":
+        query.setParameter("is_deleted", Boolean.valueOf(value));
         break;
       default:
         query.setParameter(key, "%" + value + "%");

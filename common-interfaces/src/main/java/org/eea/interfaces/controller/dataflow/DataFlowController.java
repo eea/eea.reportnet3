@@ -232,6 +232,22 @@ public interface DataFlowController {
   void deleteDataFlow(@PathVariable("dataflowId") Long dataflowId);
 
   /**
+   * Soft delete data flow by marking it as "to be deleted".
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PutMapping("/{dataflowId}/soft-delete")
+  void softDeleteDataFlow(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
+   * Revert soft delete dataflow.
+   *
+   * @param dataflowId the dataflow id
+   */
+  @PutMapping("/{dataflowId}/reverse-soft-delete")
+  void reverseSoftDeleteDataFlow(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
    * Update data flow status.
    *
    * @param dataflowId the dataflow id

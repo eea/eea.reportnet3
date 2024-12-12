@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -1129,17 +1130,19 @@ public class RepresentativeServiceImpl implements RepresentativeService {
    * @return the country code NC
    */
   private String getCountryCodeNC() {
-    Collection<String> authorities = SecurityContextHolder.getContext().getAuthentication()
-        .getAuthorities().stream().map(authority -> ((GrantedAuthority) authority).getAuthority())
-        .collect(Collectors.toList());
-    String countryCode = null;
-    for (String auth : authorities) {
-      if (null != auth && auth.contains(ROLE_PROVIDER)) {
-        String[] roleSplit = auth.split(REGEX);
-        countryCode = roleSplit[1];
-        break;
-      }
-    }
+    // by filtering when mapping we reduce the iteration times.
+    String countryCode = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+            .map(authority -> ((GrantedAuthority) authority).getAuthority())
+            .filter(auth -> auth != null && auth.contains(ROLE_PROVIDER))
+            .map(auth -> {
+              LOG.info("auth: {}", auth);
+              String[] roleSplit = auth.split(REGEX);
+              return roleSplit.length > 1 ? roleSplit[1] : null; // split result should be valid
+            })
+            .filter(Objects::nonNull) // nulls are filtered out
+            .findFirst()
+            .orElse(null);
+
     return countryCode;
   }
 

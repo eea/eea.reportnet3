@@ -1,20 +1,15 @@
 package org.eea.dataset.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.AttachmentDLVO;
-import org.eea.interfaces.vo.dataset.DatasetTableVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 import java.util.List;
 
 public interface BigDataDatasetService {
@@ -26,7 +21,7 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaId the table schema id
-     * @param file the file
+     * @param helperMultipartFileMapper the file
      * @param replace the replace
      * @param integrationId the integration id
      * @param delimiter the delimiter
@@ -36,7 +31,7 @@ public interface BigDataDatasetService {
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       MultipartFile file, Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO) throws Exception;
+                       Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception;
 
     /**
      * Generate s3 presigned Url for import
@@ -145,6 +140,28 @@ public interface BigDataDatasetService {
     void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception;
 
     /**
+     * Convert Iceberg To Parquet Table
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the tableSchema Ids
+     *
+     */
+    void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds) throws Exception;
+
+    /**
+     * Convert Iceberg To Parquet Table
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the tableSchema Ids
+     *
+     */
+    void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds) throws Exception;
+
+    /**
      * Insert records manually
      *
      * @param dataflowId the dataflow id
@@ -189,11 +206,11 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param datasetId the dataset id
      * @param tableSchemaVO the tableSchemaVO
-     * @param recordId the record id to be removed
+     * @param recordIds the record ids to be removed
      * @param deleteCascadePK the deleteCascadePK
      *
      */
-    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception;
+    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception;
 
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 
@@ -203,4 +220,13 @@ public interface BigDataDatasetService {
                                      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) throws EEAException;
 
     List<TableSchemaIdNameVO> getAvailableForManualEditingTables(Long datasetId) throws EEAException;
+
+    /**
+     * Inserts records in multiple tables
+     *
+     * @param dataSetMetabaseVO the dataset
+     * @param tableRecords the table records
+     *
+     */
+    void insertRecordsInMultipleTables(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords) throws Exception;
 }

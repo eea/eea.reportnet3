@@ -219,6 +219,12 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
       @RequestParam("mimeType") String mimeType, @RequestBody ExportFilterVO exportFilterVO);
 
+  @GetMapping(value = "/tablesUpdated")
+  ResponseEntity<?> tablesUpdatedAfterRelease(@RequestParam("datasetId") Long datasetId);
+
+  @GetMapping(value = "/private/datasetsUpdated")
+  ResponseEntity<?> datasetsUpdatedAfterRelease(@RequestParam("datasetId") Long datasetId);
+
   /**
    * Export file DL.
    *
@@ -591,7 +597,7 @@ public interface DatasetController {
    */
   @PostMapping("/{datasetId}/insertRecordsMultiTable")
   void insertRecordsMultiTable(@PathVariable("datasetId") Long datasetId,
-      @RequestBody List<TableVO> tableRecords);
+      @RequestBody List<TableVO> tableRecords) throws Exception;
 
 
   /**
@@ -972,4 +978,13 @@ public interface DatasetController {
   @PostMapping("/restorePrefilledTables/{datasetId}")
   void restorePrefilledTables(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) throws Exception;
 
+  /**
+   * Get import date and imported number of records
+   *
+   * @param datasetId the dataset id
+   * @return a hashmap where key is tableSchemaId and value are the statistics
+   *
+   */
+  @GetMapping("/getImportRelatedStatistics/{datasetId}")
+  Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception;
 }
