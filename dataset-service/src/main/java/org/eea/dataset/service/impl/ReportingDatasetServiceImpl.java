@@ -18,7 +18,9 @@ import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepositor
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -27,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +72,12 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
 
+  @Autowired
+  private DatasetController.DataSetControllerZuul dataSetControllerZuul;
+
+  @Autowired
+  private DataFlowController dataFlowController;
+
 
   /**
    * Gets the data set id by dataflow id.
@@ -85,6 +94,10 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
 
     // Check if dataset is released
     isReleased(datasetsVO);
+
+    if (Boolean.TRUE.equals(dataFlowController.isBigDataflow(idFlow))) {
+      hasUpdatesAfterRelease(datasetsVO);
+    }
 
     getDatasetSchemaNames(datasetsVO);
 
@@ -162,6 +175,22 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
           dataset.setNameDatasetSchema(design.getDataSetName());
         }
       }));
+    }
+  }
+
+  /**
+   * Checks if dataset has updates after last release
+   *
+   * @param datasetsVO The datasetVO object
+   */
+  private void hasUpdatesAfterRelease(List<ReportingDatasetVO> datasetsVO) {
+    if (datasetsVO != null && !datasetsVO.isEmpty()) {
+      for (ReportingDatasetVO dataset : datasetsVO) {
+        var response = dataSetControllerZuul.datasetsUpdatedAfterRelease(dataset.getId());
+        if (response.getStatusCode().equals(HttpStatus.OK)) {
+          dataset.setHasUpdatesAfterRelease((Boolean) response.getBody());
+        }
+      }
     }
   }
 

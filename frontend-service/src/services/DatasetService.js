@@ -274,6 +274,14 @@ export const DatasetService = {
     return await DatasetRepository.getIsAvailableForManualEditing({ datasetId });
   },
 
+  getIsEdited: async ({ datasetId }) => {
+    return await DatasetRepository.getIsEdited({ datasetId });
+  },
+
+  getTableImportedMetadata: async ({ datasetId }) => {
+    return await DatasetRepository.getTableImportedMetadata({ datasetId });
+  },
+
   getMetadata: async datasetId => {
     const datasetTableDataDTO = await DatasetRepository.getMetadata(datasetId);
 
@@ -576,6 +584,7 @@ export const DatasetService = {
           fieldSchemaId: DataTableFieldDTO.idFieldSchema,
           name: DataTableFieldDTO.name,
           recordId: dataTableRecordDTO.idRecordSchema,
+          referencedField: DataTableFieldDTO.referenceFieldSchemaId,
           type: DataTableFieldDTO.type,
           value: DatasetUtils.parseValue({
             type: DataTableFieldDTO.type,

@@ -39,7 +39,7 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
     @Autowired
     private TaskRepository taskRepository;
 
-    private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
+    private static final Logger LOG = LoggerFactory.getLogger(FinalizeCsvFileImportToDatasetCommand.class);
 
 
     /**
@@ -69,7 +69,7 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
         Optional<Task> task = this.taskRepository.findById(taskId);
 
         if (this.shouldAbortCommandExecutionIfCSVImportTasksLeftInProgress(processId, taskId)) {
-            LOG_ERROR.error("Process with ID:" + processId + " has Tasks in Progress Status. Command: " + EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET + " will abort execution");
+            LOG.error("Process with ID:" + processId + " has Tasks in Progress Status. Command: " + EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET + " will abort execution");
             //return status of task in_queue
             if (task.isPresent()) {
                 taskRepository.updateStatus(ProcessStatusEnum.IN_QUEUE.toString(), task.get().getId());
@@ -95,7 +95,7 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
             }
 
         } catch (Exception e) {
-            LOG_ERROR.error("RN3-Import file task failed: fileName={}, idTableSchema={},  taskId={}", fileName,
+            LOG.error("RN3-Import file task failed: fileName={}, idTableSchema={},  taskId={}", fileName,
                     idTableSchema, taskId, e);
             fileTreatmentHelper.updateTask(taskId, ProcessStatusEnum.CANCELED, new Date());
         }

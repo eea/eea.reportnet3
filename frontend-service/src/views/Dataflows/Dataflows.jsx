@@ -28,7 +28,7 @@ import { ReportingObligations } from 'views/_components/ReportingObligations';
 import { UserList } from 'views/_components/UserList';
 
 import { Filters } from 'views/_components/Filters';
-import { filterByCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
+import { filterByDataflowsCustomFilterStore } from 'views/_components/Filters/_functions/Stores/filterStore';
 
 import { ControlStatuses } from './_components/ControlStatuses';
 import { DataflowsList } from './_components/DataflowsList';
@@ -167,7 +167,7 @@ export const Dataflows = () => {
 
   const { tabId } = DataflowsUtils.getActiveTab(tabMenuItems, activeIndex);
 
-  const filterBy = useRecoilValue(filterByCustomFilterStore(tabId));
+  const filterBy = useRecoilValue(filterByDataflowsCustomFilterStore(tabId));
 
   const { resetFilterState: resetControlStatusesFilterState } = useApplyFilters('controlStatuses');
   const { resetFilterState: resetJobsStatusesFilterState } = useApplyFilters('jobsStatuses');
@@ -790,6 +790,17 @@ export const Dataflows = () => {
       });
     }
 
+    filters.push({
+      isSortable: false,
+      key: 'is_deleted',
+      type: 'DROPDOWN',
+      label: resourcesContext.messages['isMarkedDeleted'],
+      dropdownOptions: [
+        { label: 'YES', value: true },
+        { label: 'NO', value: false }
+      ]
+    });
+
     return filters;
   };
 
@@ -827,6 +838,16 @@ export const Dataflows = () => {
         }
       ],
       type: 'DROPDOWN'
+    },
+    {
+      isSortable: false,
+      key: 'is_deleted',
+      type: 'DROPDOWN',
+      label: resourcesContext.messages['isMarkedDeleted'],
+      dropdownOptions: [
+        { label: 'YES', value: true },
+        { label: 'NO', value: false }
+      ]
     }
   ];
 

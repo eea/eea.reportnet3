@@ -8,6 +8,8 @@ const parseReferenceDataflowDTO = referenceDataflowDTO =>
     bigData: referenceDataflowDTO.bigData,
     creationDate: referenceDataflowDTO.creationDate,
     datasets: DatasetUtils.parseDatasetListDTO(referenceDataflowDTO.reportingDatasets),
+    deleted: referenceDataflowDTO.deleted,
+    deletedAt: referenceDataflowDTO.deletedAt,
     description: referenceDataflowDTO.description,
     designDatasets: DatasetUtils.parseDatasetListDTO(referenceDataflowDTO.designDatasets),
     id: referenceDataflowDTO.id,

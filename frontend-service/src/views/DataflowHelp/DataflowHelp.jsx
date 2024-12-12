@@ -34,6 +34,8 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import dayjs from "dayjs";
+import {TextUtils} from "../../repositories/_utils/TextUtils";
 
 export const DataflowHelp = () => {
   const navigate = useNavigate();
@@ -125,7 +127,14 @@ export const DataflowHelp = () => {
   const getDataflowName = async () => {
     try {
       const data = await DataflowService.getDetails(dataflowId);
-      setDataflowName(data.name);
+      setDataflowName(() => {
+        let dataflowName = data.name;
+        if (data.deleted) {
+          const deletedAt = dayjs(data.deletedAt).format(userContext.userProps.dateFormat);
+          dataflowName += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+        }
+        return dataflowName;
+      });
     } catch (error) {
       console.error('DataflowHelp - getDataflowName.', error);
       notificationContext.add({ type: 'DATAFLOW_DETAILS_ERROR', content: {} }, true);
@@ -165,12 +174,10 @@ export const DataflowHelp = () => {
           Promise.all(datasetSchemas).then(completed => {
             completed.forEach(datasetSchema => {
               if (isNil(datasetSchema.datasetId)) {
-                let dataset = data.datasets.find(
-                    dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
-                );
+                let dataset = data.datasets.find(dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId);
                 if (isNil(dataset)) {
                   dataset = data.referenceDatasets.find(
-                      dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
+                    dataset => dataset.datasetSchemaId === datasetSchema.datasetSchemaId
                   );
                 }
 

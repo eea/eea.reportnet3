@@ -17,6 +17,8 @@ const parseBusinessDataflowDTO = businessDataflowDTO => {
     creationDate:
       businessDataflowDTO.creationDate > 0 ? dayjs(businessDataflowDTO.creationDate).format('YYYY-MM-DD') : '-',
     description: businessDataflowDTO.description,
+    deleted: businessDataflowDTO.deleted,
+    deletedAt: businessDataflowDTO.deletedAt,
     expirationDate:
       businessDataflowDTO.deadlineDate > 0 ? dayjs(businessDataflowDTO.deadlineDate).utc().format('YYYY-MM-DD') : '-',
     id: businessDataflowDTO.id,

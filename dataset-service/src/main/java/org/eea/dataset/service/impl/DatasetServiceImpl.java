@@ -25,10 +25,7 @@ import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
-import org.eea.dataset.service.DatasetMetabaseService;
-import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.DatasetSnapshotService;
-import org.eea.dataset.service.PaMService;
+import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.PostgresBulkImporter;
 import org.eea.dataset.service.model.TruncateDataset;
@@ -197,10 +194,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private FieldValidationRepository fieldValidationRepository;
 
-  /** The statistics repository. */
-  @Autowired
-  private StatisticsRepository statisticsRepository;
-
   /** The schemas repository. */
   @Autowired
   private SchemasRepository schemasRepository;
@@ -328,6 +321,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   @Qualifier("dremioJdbcTemplate")
   JdbcTemplate dremioJdbcTemplate;
+
+  @Autowired
+  private StatisticsService statisticsService;
 
   /** The import path. */
   @Value("${importPath}")
@@ -672,10 +668,8 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(fillStat(datasetId, null, "nameDataSetSchema", datasetMb.getDataSetName()));
       statsList.add(fillStat(datasetId, null, "datasetErrors", datasetErrors.toString()));
 
-
-      statisticsRepository.deleteStatsByIdDataset(datasetId);
-      statisticsRepository.flush();
-      statisticsRepository.saveAll(statsList);
+      List<String> statisticsToIgnore = Arrays.asList(LAST_IMPORT_DATE, TOTAL_RECORDS_IMPORTED, LAST_IMPORT_FILE_EXTENSION);
+      statisticsService.deleteOldStatsAndSaveNewOnes(datasetId, statisticsToIgnore, statsList);
       LOG.info("Statistics saved to datasetId {}.", datasetId);
     } else {
       LOG.error("No dataset found to save statistics. DatasetId:{}", datasetId);
@@ -3145,7 +3139,7 @@ public class DatasetServiceImpl implements DatasetService {
       statsList.add(fillStat(datasetId, null, "datasetErrors", "false"));
 
       TenantResolver.setTenantName(String.format(DATASET_ID, datasetId));
-      statisticsRepository.saveAll(statsList);
+      statisticsService.saveStatistics(statsList);
 
       LOG.info("Statistics save to datasetId {}.", datasetId);
       DatasetTypeEnum type = getDatasetType(datasetId);

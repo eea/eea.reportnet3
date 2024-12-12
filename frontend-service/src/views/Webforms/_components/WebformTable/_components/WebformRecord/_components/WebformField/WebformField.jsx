@@ -41,16 +41,16 @@ export const WebformField = ({
   datasetId,
   datasetSchemaId,
   element,
+  entitiesRecords,
   isConditional,
   isConditionalChanged,
   newRecord,
   onFillField,
   onSaveField,
-  onUpdateSinglesList,
-  onUpdatePamsValue,
-  pamsRecords,
+  onUpdateEntitiesValue,
   record,
   referencedTableSchemaId,
+  rootPkFieldId,
   tableSchemaId
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -231,50 +231,6 @@ export const WebformField = ({
     }
   };
 
-  // const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
-  //   webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
-  //   const parsedValue =
-  //     field.fieldType === 'MULTISELECT_CODELIST' ||
-  //     ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
-  //       ? value.join(';')
-  //       : value;
-
-  //       try {
-  //     if (!isSubmiting && initialFieldValue !== parsedValue) {
-  //       await DatasetService.updateField(
-  //         datasetId,
-  //         option,
-  //         field.fieldId,
-  //         field.fieldType,
-  //         parsedValue,
-  //         updateInCascade
-  //       );
-  //       if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
-  //         onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
-  //       }
-
-  //       if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
-  //         onUpdateSinglesList();
-  //       }
-  //     }
-  //   } catch (error) {
-  //     if (error.response.status === 423) {
-  //       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
-  //     } else {
-  //       if (field.fieldType !== 'DATETIME') {
-  //         console.error('WebformField - onEditorSubmitValue.', error);
-  //         if (updateInCascade) {
-  //           notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
-  //         } else {
-  //           notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
-  //         }
-  //       }
-  //     }
-  //   } finally {
-  //     webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
-  //   }
-  // };
-
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' ||
@@ -290,12 +246,8 @@ export const WebformField = ({
           parsedValue,
           bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
-        if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
-          onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
-        }
-
-        if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
-          onUpdateSinglesList();
+        if (!isNil(onUpdateEntitiesValue) && (updateInCascade || updatesGroupInfo)) {
+          onUpdateEntitiesValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
         }
       }
     } catch (error) {
@@ -360,7 +312,7 @@ export const WebformField = ({
   };
 
   const renderSinglePamsTemplate = option => {
-    const pams = pamsRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
+    const pams = entitiesRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
 
     if (!isNil(pams)) {
       return `#${option.label} - ${pams.elements.find(element => TextUtils.areEquals(element.name, 'Title')).value}`;
@@ -538,6 +490,7 @@ export const WebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
+            disabled={field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
             hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}

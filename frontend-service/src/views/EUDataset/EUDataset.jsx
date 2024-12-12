@@ -37,6 +37,7 @@ import { CurrentPage } from 'views/_functions/Utils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isNil } from 'lodash';
+import dayjs from "dayjs";
 
 export const EUDataset = () => {
   const navigate = useNavigate();
@@ -359,6 +360,19 @@ export const EUDataset = () => {
     false
   );
 
+  const getSubtitle = () => {
+    let subtitle = euDatasetState.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowName })
+      : dataflowName
+
+    if (euDatasetState?.metaData?.dataflow.deleted) {
+      const deletedAt = dayjs(euDatasetState?.metaData?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
+  };
+
   const renderDialogFooterCloseBtn = modalType => (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -401,18 +415,7 @@ export const EUDataset = () => {
       <Title
         icon="euDataset"
         iconSize="3.5rem"
-        subtitle={
-          euDatasetState.bigData ? (
-            <p
-              dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                  name: dataflowName
-                })
-              }}></p>
-          ) : (
-            dataflowName
-          )
-        }
+        subtitle={getSubtitle()}
         title={datasetName}
       />
       <div className={styles.ButtonsBar}>

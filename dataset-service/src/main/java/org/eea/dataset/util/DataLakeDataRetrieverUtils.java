@@ -190,7 +190,7 @@ public class DataLakeDataRetrieverUtils {
     }
 
     public static List<RecordVO> getRecordVOS(String datasetSchema , TableSchemaVO tableSchemaVO, StringBuilder dataQuery) {
-        DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling);
+        DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling, schemasRepository);
         recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchema).setTableSchemaId(tableSchemaVO.getIdTableSchema());
         List<RecordVO> recordVOS = dremioJdbcTemplate.query(dataQuery.toString(), recordMapper);
         spatialDataHandling.decodeSpatialData(recordVOS);

@@ -248,6 +248,9 @@ export const DataflowService = {
 
   delete: async dataflowId => await DataflowRepository.delete(dataflowId),
 
+  softDelete: async dataflowId => await DataflowRepository.softDelete(dataflowId),
+  reverseSoftDelete: async dataflowId => await DataflowRepository.reverseSoftDelete(dataflowId),
+
   exportSchemas: async dataflowId => await DataflowRepository.exportSchemas(dataflowId),
 
   getSchemas: async dataflowId => {

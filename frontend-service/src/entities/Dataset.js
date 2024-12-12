@@ -11,6 +11,7 @@ export class Dataset {
     datasetType,
     errors,
     hasErrors,
+    hasUpdatesAfterRelease,
     isReleased,
     isReleasing,
     isValid = false,
@@ -41,6 +42,7 @@ export class Dataset {
     this.datasetType = datasetType;
     this.errors = errors;
     this.hasErrors = hasErrors;
+    this.hasUpdatesAfterRelease = hasUpdatesAfterRelease;
     this.isReleased = isReleased;
     this.isReleasing = isReleasing;
     this.isValid = isValid;

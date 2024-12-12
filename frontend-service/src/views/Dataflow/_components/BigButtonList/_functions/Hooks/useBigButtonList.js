@@ -372,7 +372,17 @@ const useBigButtonList = ({
         technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true
       };
-    });
+    })
+      .map(provider => {
+        const hasUpdatesAfterRelease = datasets
+          .filter(dataset => dataset.dataProviderId === provider.dataProviderId)
+          .some(dataset => dataset.hasUpdatesAfterRelease)
+        return ({
+          ...provider,
+          hasUpdatesAfterRelease,
+          hasUpdatesAfterReleaseTooltip: hasUpdatesAfterRelease && resourcesContext.messages['hasUpdatesAfterReleaseDataflowTooltip'],
+        })
+      });
   };
 
   const groupByRepresentativeModels = buildGroupByRepresentativeModels(dataflowState?.data?.datasets);

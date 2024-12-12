@@ -6,6 +6,9 @@ export const WebformRepository = {
   addPamsRecords: async (datasetId, pamsRecord) =>
     await HTTPRequester.post({ url: getUrl(WebformConfig.createPamsRecords, { datasetId }), data: pamsRecord }),
 
+  addEntityRecord: async (datasetId, entityRecord) =>
+    await HTTPRequester.post({ url: getUrl(WebformConfig.createEntityRecord, { datasetId }), data: entityRecord }),
+
   create: async webformConfiguration =>
     await HTTPRequester.post({
       url: getUrl(WebformConfig.create),

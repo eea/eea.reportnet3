@@ -8,17 +8,23 @@ import styles from './ReferencedDataflowItem.module.scss';
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
+import dayjs from "dayjs";
 
 export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }) => {
+  const userContext = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [isPinned, setIsPinned] = useState(dataflow.pinned === 'pinned');
   const [isPinning, setIsPinning] = useState(false);
   const [isPinShowed, setIsPinShowed] = useState(false);
+
+  const deletedAt = dataflow.deletedAt ? dayjs(dataflow.deletedAt).format(userContext.userProps.dateFormat) : null;
+  const deletedAtLabel = deletedAt ? TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt }) : null;
 
   useEffect(() => {
     setIsPinned(dataflow.pinned === 'pinned');
@@ -58,16 +64,13 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
         <h3 className={`${styles.title}`}>
-          {dataflow.bigData ? (
-            <p
-              dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                  name: dataflow.name
-                })
-              }}></p>
-          ) : (
-            dataflow.name
-          )}
+          {dataflow.bigData
+            ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflow.name })
+            : dataflow.name
+          }
+          {
+            deletedAtLabel && ` (${deletedAtLabel})`
+          }
         </h3>
         <p>{dataflow.description}</p>
       </div>

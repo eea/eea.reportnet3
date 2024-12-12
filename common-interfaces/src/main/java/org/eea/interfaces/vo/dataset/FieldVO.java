@@ -57,6 +57,8 @@ public class FieldVO implements Serializable {
 
   private String name;
 
+  private String referenceFieldSchemaId;
+
   /**
    * Hash code.
    *

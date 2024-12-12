@@ -150,6 +150,9 @@ export const dataflowDataReducer = (state, { type, payload }) => {
     case 'RELEASE_IS_CREATING':
       return { ...state, isReleaseCreating: payload.value };
 
+    case 'ON_UPDATE_SOFT_DELETE':
+      return { ...state, data: { ...state.data, deleted: payload } };
+
     default:
       return state;
   }

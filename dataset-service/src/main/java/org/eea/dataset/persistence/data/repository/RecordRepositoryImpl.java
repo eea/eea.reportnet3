@@ -468,7 +468,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
-    return sanitizeRecords(query.getResultList());
+    return sanitizeRecords(query.getResultList(), null);
   }
 
 
@@ -664,7 +664,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public File findAndGenerateETLJsonDL(Long datasetId, String tableSchemaId, Integer limit,
       Integer offset, String filterValue, String columnName, String dataProviderCodes,
-      File jsonFile) throws EEAException, SQLException, IOException {
+      File jsonFile) throws EEAException, IOException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
@@ -982,7 +982,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw, Long datasetId)
       throws IOException, EEAException {
 
-    DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling);
+    DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling, schemasRepository);
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
@@ -1185,15 +1185,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
 
     List<RecordVO> recordVOs = null;
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
     if (null == sortFields) {
       // Query without order.
       List<RecordValue> a = query.getResultList();
-      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
+      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a, datasetSchemaId));
       result.setRecords(recordVOs);
     } else {
       // Query with order.
       List<Object[]> a = query.getResultList();
-      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
+      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a, datasetSchemaId));
     }
     LOG.info(
         "Filtering the table in dataset {} by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
@@ -1258,28 +1259,40 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Sanitize ordered records.
    *
    * @param queryResults the query results
+   * @param datasetSchemaId the dataset schema id
    * @return the list
    */
-  private List<RecordValue> sanitizeOrderedRecords(List<Object[]> queryResults) {
+  private List<RecordValue> sanitizeOrderedRecords(List<Object[]> queryResults, String datasetSchemaId) {
     // First: Copy sortCriteria into de records variables
     List<RecordValue> records = queryResults.stream()
         .map(resultRecord -> (RecordValue) resultRecord[0]).collect(Collectors.toList());
-    return sanitizeRecords(records);
+    return sanitizeRecords(records, datasetSchemaId);
   }
 
   /**
    * Sanitize records.
    *
    * @param records the records
+   * @param datasetSchemaId the dataset schema id
    * @return the list
    */
-  private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
+  private List<RecordValue> sanitizeRecords(List<RecordValue> records, String datasetSchemaId) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     Set<String> processedRecords = new HashSet<>();
     for (RecordValue recordValue : records) {
       if (!processedRecords.contains(recordValue.getId())) {
         processedRecords.add(recordValue.getId());
-        recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
+        for(FieldValue fieldValue: recordValue.getFields()){
+          fieldValue.setFieldValidations(null);
+
+          //set up reference field schema id if exists
+          if(datasetSchemaId != null && StringUtils.isNotBlank(fieldValue.getIdFieldSchema())) {
+            Document documentField = schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
+            Document referenced = (documentField != null) ? (Document) documentField.get(LiteralConstants.REFERENCED_FIELD) : null;
+            String idPk = (referenced != null) ? referenced.get("idPk").toString() : null;
+            fieldValue.setReferenceFieldSchemaId(idPk);
+          }
+        }
         sanitizedRecords.add(recordValue);
       }
     }

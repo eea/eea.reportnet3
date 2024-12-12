@@ -1,0 +1,1 @@
+export { PaMsWebformTable } from './PaMsWebformTable';

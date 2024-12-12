@@ -668,6 +668,10 @@ export const Dataflow = () => {
     }
   };
 
+  const onUpdateSoftDelete = deleted => {
+    dataflowDispatch({ type: 'ON_UPDATE_SOFT_DELETE', payload: deleted });
+  };
+
   const manageRoleDialogFooter = (
     <Fragment>
       <Button
@@ -1342,26 +1346,27 @@ export const Dataflow = () => {
   if (dataflowState.isPageLoading || isNil(dataflowState.data)) return layout(<Spinner />);
 
   const getSubtitle = () => {
+    let subtitle;
     if (parseInt(representativeId) === 0) {
-      return dataflowState.data.name;
+      subtitle = dataflowState.data.name;
     } else {
       if (isInsideACountry && !isNil(country) && country.length > 0) {
-        return dataflowState.data.bigData ? (
-          <p
-            dangerouslySetInnerHTML={{
-              __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                name: dataflowState.data.name
-              })
-            }}></p>
-        ) : (
-          dataflowState.data.name
-        );
+        subtitle = dataflowState.data.bigData
+          ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowState.data.name })
+          : dataflowState.data.name;
       } else {
-        return dataflowState.data.bigData
+        subtitle = dataflowState.data.bigData
           ? resourcesContext.messages['bigDataDataflow']
           : resourcesContext.messages['dataflow'];
       }
     }
+
+    if (dataflowState.data.deleted) {
+      const deletedAt = dayjs(dataflowState.data.deletedAt).format(userContext.userProps.dateFormat);
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
   };
 
   const getTitle = () => {
@@ -1787,6 +1792,8 @@ export const Dataflow = () => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onLoadReportingDataflow={onLoadReportingDataflow}
+            onUpdateSoftDelete={onUpdateSoftDelete}
             resetDeliveryDate={resetDeliveryDate}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}
@@ -1812,6 +1819,8 @@ export const Dataflow = () => {
             manageDialogs={manageDialogs}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
+            onLoadReportingDataflow={onLoadReportingDataflow}
+            onUpdateSoftDelete={onUpdateSoftDelete}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}
             state={dataflowState}
@@ -1830,15 +1839,19 @@ export const Dataflow = () => {
             obligation={obligation}
             onEditDataflow={onEditDataflow}
             onLoadReportingDataflow={onLoadReportingDataflow}
+            onUpdateSoftDelete={onUpdateSoftDelete}
             resetObligations={resetObligations}
             state={{
               name: dataflowState.name,
               description: dataflowState.description,
+              deleted: dataflowState.data.deleted,
               status: dataflowState.status,
               fmeUserId: dataflowState.data.fmeUserId,
               fmeUserName: dataflowState.data.fmeUserName,
               dataProviderGroupId: dataflowState.data.dataProviderGroupId,
-              dataProviderGroupName: dataflowState.data.dataProviderGroupName
+              dataProviderGroupName: dataflowState.data.dataProviderGroupName,
+              isSoftDeleteDialogVisible: dataflowState.isSoftDeleteDialogVisible,
+              isReverseSoftDeleteDialogVisible: dataflowState.isReverseSoftDeleteDialogVisible
             }}
           />
         )}

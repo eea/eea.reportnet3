@@ -68,6 +68,7 @@ import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import dayjs from "dayjs";
 
 export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { dataflowId, datasetId } = useParams();
@@ -95,6 +96,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const [isIcebergCreated, setIsIcebergCreated] = useState(false);
   const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
   const [noEditableCheck, setNoEditableCheck] = useState(false);
+  const [tableImportedMetadata, setTableImportedMetadata] = useState({});
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -354,6 +356,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   }, [notificationContext.hidden]);
 
+  useEffect(() => {
+    if (!isUndefined(designerState.metaData)) {
+      getTableImportedMetadata();
+    }
+  }, [designerState.metaData]);
+
   const onGetIcebergTables = async () => {
     const icebergTables = await DataflowService.getIcebergTables({ dataflowId, datasetId });
     setIsIcebergCreated(!isEmpty(icebergTables?.data));
@@ -447,6 +455,24 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       payload: { exportList: internalExtensionsList.concat(externalIntegrationsNames) }
     });
   };
+
+  const getTableImportedMetadata = async () => {
+    if (!designerState.metaData?.dataflow?.bigData) return;
+    if (
+      designerState.metaData?.dataset?.datasetType === 'DESIGN' ||
+      designerState.metaData?.dataset?.datasetType === 'REFERENCE' ||
+      designerState.metaData?.dataset?.datasetType === 'REPORTING' ||
+      designerState.metaData?.dataset?.datasetType === 'TEST'
+    ) {
+      try {
+        const res = await DatasetService.getTableImportedMetadata({datasetId});
+        setTableImportedMetadata(res.data);
+      } catch (error) {
+        console.error('Dataset - getWebformList.', error);
+        notificationContext.add({type: 'LOADING_WEBFORM_OPTIONS_ERROR'}, true);
+      }
+    }
+  }
 
   const getImportList = () => {
     const internalExtensionsList = config.importTypes.importDatasetTypes.map(type => {
@@ -1163,6 +1189,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   };
 
+  function handleRefresh() {
+    onLoadSchema();
+    getTableImportedMetadata();
+  }
+
   const validateQcRules = async () => {
     setSqlValidationRunning(true);
     try {
@@ -1256,6 +1287,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       await DatasetService.convertParquetsToIcebergs({ dataflowId, datasetId });
     }
     setIsIcebergCreated(!isIcebergCreated);
+  };
+
+  const getSubtitle = () => {
+    let subtitle = designerState.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: designerState.dataflowName })
+      : designerState.dataflowName;
+
+    if (designerState.metaData?.dataflow?.deleted) {
+      const deletedAt = dayjs(designerState.metaData?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
   };
 
   const renderDialogFooterCloseBtn = modalType => (
@@ -1663,18 +1707,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           ariaLabelledBy={designerState.datasetSchemaName}
           icon="pencilRuler"
           iconSize="3.4rem"
-          subtitle={
-            designerState.bigData ? (
-              <p
-                dangerouslySetInnerHTML={{
-                  __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                    name: designerState.dataflowName
-                  })
-                }}></p>
-            ) : (
-              designerState.dataflowName
-            )
-          }
+          subtitle={getSubtitle()}
           title={`${resourcesContext.messages['datasetSchema']}: ${designerState.datasetSchemaName}`}
         />
         <h4 className={styles.descriptionLabel}>
@@ -1947,7 +1980,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 disabled={isDesignDatasetEditorRead}
                 icon="refresh"
                 label={resourcesContext.messages['refresh']}
-                onClick={onLoadSchema}
+                onClick={handleRefresh}
               />
             </div>
           </Toolbar>
@@ -2001,6 +2034,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               })
             }
             setNoEditableCheck={setNoEditableCheck}
+            tableImportedMetadata={tableImportedMetadata}
             tableSchemaId={dataViewerOptions.tableSchemaId}
             viewType={designerState.viewType}
           />

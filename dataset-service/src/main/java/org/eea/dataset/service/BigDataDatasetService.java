@@ -3,19 +3,13 @@ package org.eea.dataset.service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.vo.dataset.AttachmentDLVO;
-import org.eea.interfaces.vo.dataset.DatasetTableVO;
-import org.eea.interfaces.vo.dataset.FieldVO;
-import org.eea.interfaces.vo.dataset.RecordVO;
+import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 import java.util.List;
 
 public interface BigDataDatasetService {
@@ -212,11 +206,11 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param datasetId the dataset id
      * @param tableSchemaVO the tableSchemaVO
-     * @param recordId the record id to be removed
+     * @param recordIds the record ids to be removed
      * @param deleteCascadePK the deleteCascadePK
      *
      */
-    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception;
+    void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception;
 
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 
@@ -226,4 +220,13 @@ public interface BigDataDatasetService {
                                      String fieldSchemaId, String conditionalValue, String searchValue, Integer resultsNumber) throws EEAException;
 
     List<TableSchemaIdNameVO> getAvailableForManualEditingTables(Long datasetId) throws EEAException;
+
+    /**
+     * Inserts records in multiple tables
+     *
+     * @param dataSetMetabaseVO the dataset
+     * @param tableRecords the table records
+     *
+     */
+    void insertRecordsInMultipleTables(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords) throws Exception;
 }
