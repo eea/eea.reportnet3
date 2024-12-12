@@ -2,6 +2,7 @@ package org.eea.datalake.service.impl;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -112,6 +113,15 @@ public class S3HelperImpl implements S3Helper {
         String finalKey = key;
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_NAME : S3_DEFAULT_BUCKET_NAME;
         return s3Client.listObjects(b -> b.bucket(bucketName).prefix(finalKey)).contents().size() > 0;
+    }
+
+    @Override
+    public void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver, DremioHelperService dremioHelperService) throws Exception {
+        String tablePath = getS3Service().getTableAsFolderQueryPath(tablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.getRowCount(tablePath) == 0) {
+            dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
+            deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        }
     }
 
     /**
