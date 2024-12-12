@@ -424,6 +424,21 @@ public class ValidationHelper implements DisposableBean {
    */
   private void createTablesIfNotExist(DataSetSchema schema, DataSetMetabaseVO dataset) throws EEAException {
     for (TableSchema t : schema.getTableSchemas()) {
+      S3PathResolver s3TablePathResolver = new S3PathResolver(
+          dataset.getDataflowId(),
+          dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
+          dataset.getId(),
+          t.getNameTableSchema(),
+          t.getNameTableSchema(),
+          S3_TABLE_NAME_FOLDER_PATH
+      );
+
+      try {
+        deleteTableIfEmpty(t.getNameTableSchema(), s3TablePathResolver);
+      } catch (Exception e) {
+        throw new EEAException("ValidationHelper. Error while trying to delete parquet table");
+      }
+
       List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema();
 
       FieldSchema recordIdSchema = new FieldSchema();
@@ -445,15 +460,6 @@ public class ValidationHelper implements DisposableBean {
           })
           .collect(Collectors.joining(", "));
 
-      S3PathResolver s3TablePathResolver = new S3PathResolver(
-          dataset.getDataflowId(),
-          dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
-          dataset.getId(),
-          t.getNameTableSchema(),
-          t.getNameTableSchema(),
-          S3_TABLE_NAME_FOLDER_PATH
-      );
-
       try {
         String tablePath = s3Helper.getS3Service().getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
@@ -469,6 +475,24 @@ public class ValidationHelper implements DisposableBean {
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(query, id, null);
       } catch (Exception e) {
         throw new EEAException(e.getMessage());
+      }
+    }
+  }
+
+  /**
+   * Deletes parquet table if empty to cover the case that the user has added or removed columns (has changed the schema)
+   *
+   * @param tableSchemaName The table schema name
+   * @param tablePathResolver The table path
+   * @throws Exception exception
+   */
+  private void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver) throws Exception {
+    String tablePath = s3Helper.getS3Service().getTableAsFolderQueryPath(tablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+    if (s3Helper.checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+      long rowCount = dremioHelperService.getRowCount(tablePath);
+      if (rowCount == 0) {
+        dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
+        s3Helper.deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
       }
     }
   }
