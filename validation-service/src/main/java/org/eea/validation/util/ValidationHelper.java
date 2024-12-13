@@ -473,6 +473,7 @@ public class ValidationHelper implements DisposableBean {
         // Execute the query
         String id = dremioHelperService.executeSqlStatement(query);
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(query, id, null);
+        dremioHelperService.refreshTableMetadataAndPromote(null, tablePath, s3TablePathResolver, t.getNameTableSchema());
       } catch (Exception e) {
         throw new EEAException(e.getMessage());
       }
