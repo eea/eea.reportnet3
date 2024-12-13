@@ -1263,7 +1263,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderCode + "'" : dataProviderCode;
         }
 
-        deleteIcebergTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver);
+        s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
 
         //check if table exists and if not create it
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaName)) {
@@ -1319,24 +1319,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             String finalInsertQuery = insertQueryBuilder + insertQueryValuesBuilder.toString();
             String processId = dremioHelperService.executeSqlStatement(finalInsertQuery);
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId, 2000L);
-        }
-    }
-
-    /**
-     * Deletes iceberg table if empty to cover the case that the user has added or removed columns (has changed the schema)
-     *
-     * @param tableSchemaName The table schema name
-     * @param s3IcebergTablePathResolver The table path
-     * @throws Exception exception
-     */
-    private void deleteIcebergTableIfEmpty(String tableSchemaName, S3PathResolver s3IcebergTablePathResolver) throws Exception {
-        String tablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-            long rowCount = dremioHelperService.getRowCount(tablePath);
-            if (rowCount == 0) {
-                dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaName);
-                s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
-            }
         }
     }
 

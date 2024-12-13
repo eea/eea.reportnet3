@@ -434,7 +434,7 @@ public class ValidationHelper implements DisposableBean {
       );
 
       try {
-        deleteTableIfEmpty(t.getNameTableSchema(), s3TablePathResolver);
+        s3Helper.deleteTableIfEmpty(t.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
       } catch (Exception e) {
         throw new EEAException("ValidationHelper. Error while trying to delete parquet table");
       }
