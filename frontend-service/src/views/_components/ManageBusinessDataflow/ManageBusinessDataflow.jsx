@@ -339,7 +339,7 @@ export const ManageBusinessDataflow = ({
       <Fragment>
         <div className="p-toolbar-group-left">
           {renderDeleteDataflowButton()}
-          {state && !state.deleted && isEditing && isDesign && isAdmin && (
+          {state && !state.deleted && (
             <Button
               className="p-button-danger p-button-animated-blink"
               icon="trash"
@@ -347,7 +347,7 @@ export const ManageBusinessDataflow = ({
               onClick={() => manageDialogs('isSoftDeleteDialogVisible', true)}
             />
           )}
-          {state && state.deleted && isEditing && isDesign && isAdmin && (
+          {state && state.deleted && (
             <Button
               className="p-button-danger p-button-animated-blink"
               icon="trash"
