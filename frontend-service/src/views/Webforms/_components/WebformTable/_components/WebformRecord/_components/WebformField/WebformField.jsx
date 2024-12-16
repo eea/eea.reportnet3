@@ -519,7 +519,7 @@ export const WebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
-              id={field.fieldId}
+              id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
