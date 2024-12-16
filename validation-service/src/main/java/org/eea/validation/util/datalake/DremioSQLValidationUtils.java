@@ -261,7 +261,8 @@ public class DremioSQLValidationUtils {
 
             //FK_QUERY_VALUES
             StringBuilder fkQuery = new StringBuilder();
-            fkQuery.append("select ").append("record_id").append(",").append(optionalFk).append(",").append(foreignKey).append(" from ").append(fkTablePath);
+            fkQuery.append("select ").append("record_id").append(",").append(optionalFk).append(",").append(foreignKey).append(" from ").append(fkTablePath)
+                    .append(" where ").append(foreignKey).append(" is not NULL and ").append(foreignKey).append(" != ''");
             SqlRowSet fkWithOptionalRS = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkWithOptionalRS.next()) {
                 if (pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk))!=null) {
