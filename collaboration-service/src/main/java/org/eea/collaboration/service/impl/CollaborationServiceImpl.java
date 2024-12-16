@@ -150,11 +150,13 @@ public class CollaborationServiceImpl implements CollaborationService {
       messageContent = messageContent.substring(0, maxMessageLength);
     }
 
+    Date messageCreateDate = new Date();
+
     Message message = new Message();
     message.setContent(messageContent);
     message.setDataflowId(dataflowId);
     message.setProviderId(providerId);
-    message.setDate(new Date());
+    message.setDate(messageCreateDate);
     message.setRead(false);
     message.setUserName(user);
     message.setDirection(direction);
@@ -167,7 +169,7 @@ public class CollaborationServiceImpl implements CollaborationService {
     String eventType = EventType.RECEIVED_MESSAGE.toString();
     collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null, eventType);
     if (emailNotification){
-      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, eventType, messageContent);}
+      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, eventType, messageContent, messageCreateDate);}
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);
@@ -197,13 +199,14 @@ public class CollaborationServiceImpl implements CollaborationService {
     String userName = SecurityContextHolder.getContext().getAuthentication().getName();
     boolean direction = authorizeAndGetDirection(dataflowId, providerId);
     MessageVO messageVO = new MessageVO();
+    Date messageCreateDate = new Date();
 
     try {
       Message message = new Message();
       message.setContent(fileName);
       message.setDataflowId(dataflowId);
       message.setProviderId(providerId);
-      message.setDate(new Date());
+      message.setDate(messageCreateDate);
       message.setRead(false);
       message.setUserName(userName);
       message.setDirection(direction);
@@ -234,7 +237,7 @@ public class CollaborationServiceImpl implements CollaborationService {
       String eventType = EventType.RECEIVED_MESSAGE.toString();
       collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null,
           eventType);
-      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null,  eventType, LiteralConstants.ATTACHMENT_FILE_RECEIVED);
+      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null,  eventType, LiteralConstants.ATTACHMENT_FILE_RECEIVED, messageCreateDate);
 
       LOG.info("Message created: message={}", message);
     } finally {
