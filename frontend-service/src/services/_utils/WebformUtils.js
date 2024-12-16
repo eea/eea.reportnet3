@@ -57,7 +57,7 @@ const parseEntityFields = (fields, entityId, rootPkFieldId) =>
   }));
 
 const getEntityFieldValue = (field, entityId, rootPkFieldId) => {
-  if (TextUtils.areEquals(field.fieldId, rootPkFieldId) || TextUtils.areEquals(field.fieldSchema, rootPkFieldId)) {
+  if (TextUtils.areEquals(field.fieldId || field.fieldSchema, rootPkFieldId)) {
     return entityId;
   } else if (TextUtils.areEquals(field?.referencedField?.idPk, rootPkFieldId)) {
     return entityId;
