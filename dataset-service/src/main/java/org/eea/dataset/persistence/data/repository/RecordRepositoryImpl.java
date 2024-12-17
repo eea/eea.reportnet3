@@ -1156,11 +1156,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
       Long datasetId, SortField... sortFields) {
 
-    // Query without order or with it
-    Query query = entityManager.createQuery(
-        null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition"
+
+    String formatedQuery =
+        null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition, rv.id"
             : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
-                directionQueryBuilder.toString().substring(1)));
+            directionQueryBuilder.substring(1));
+    // Query without order or with it
+    Query query = entityManager.createQuery(formatedQuery);
 
 
     query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
@@ -1188,7 +1190,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     if (null == sortFields) {
       // Query without order.
       List<RecordValue> a = query.getResultList();
+      if (a == null || a.isEmpty()) {
+        LOG.error("Before mapping, no records found in dataset {}", datasetId);
+      }
       recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
+      if (recordVOs.isEmpty()) {
+        LOG.error("After mapping, no records found. The Query is: {}. FirstResult is : {}, Max results are {}, IdTableSchema is {}", formatedQuery, query.getFirstResult(), query.getMaxResults(), idTableSchema);
+      }
       result.setRecords(recordVOs);
     } else {
       // Query with order.
@@ -1279,7 +1287,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     for (RecordValue recordValue : records) {
       if (!processedRecords.contains(recordValue.getId())) {
         processedRecords.add(recordValue.getId());
-        recordValue.getFields().stream().forEach(field -> field.setFieldValidations(null));
+        recordValue.getFields().forEach(field -> field.setFieldValidations(null));
         sanitizedRecords.add(recordValue);
       }
     }
