@@ -1544,8 +1544,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 //refresh the metadata
                 dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
+                LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
             }
-            LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
         }
     }
 
