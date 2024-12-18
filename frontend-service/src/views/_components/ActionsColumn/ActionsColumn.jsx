@@ -9,12 +9,15 @@ import { Button } from 'views/_components/Button';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const ActionsColumn = ({
+  bigData,
+  isIcebergCreated,
   disabledButtons,
   hideDeletion = false,
   hideEdition = false,
   isDeletingDocument,
   isDeletingDatasetData,
   isUpdating,
+  isWebform = false,
   onCloneClick,
   onDeleteClick,
   onEditClick,
@@ -36,6 +39,7 @@ export const ActionsColumn = ({
               : 'p-button-animated-blink'
           }`}
           disabled={
+            (isWebform && bigData) ||
             (rowDeletingId === rowDataId && isDeletingDocument) ||
             (rowUpdatingId === rowDataId && isUpdating) ||
             disabledButtons
@@ -79,6 +83,7 @@ export const ActionsColumn = ({
               : 'p-button-animated-blink'
           }`}
           disabled={
+            (isWebform && bigData && !isIcebergCreated) ||
             isDeletingDocument ||
             isDeletingDatasetData ||
             (rowUpdatingId === rowDataId && isUpdating) ||

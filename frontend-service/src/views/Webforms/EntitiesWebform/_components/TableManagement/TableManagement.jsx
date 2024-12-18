@@ -36,6 +36,7 @@ export const TableManagement = ({
   dataflowId,
   datasetId,
   isAddingRootTableId = false,
+  isIcebergCreated,
   loading,
   onAddTableRecord,
   onRefresh,
@@ -358,7 +359,7 @@ export const TableManagement = ({
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <Button
           className="p-button-secondary"
-          disabled={!hasTable || isSaving}
+          disabled={(bigData && !isIcebergCreated) || !hasTable || isSaving}
           icon={hasRecord ? 'edit' : 'add'}
           label={
             hasRecord
@@ -427,6 +428,9 @@ export const TableManagement = ({
 
   const renderActionsTemplate = () => (
     <ActionsColumn
+      bigData={bigData}
+      isIcebergCreated={isIcebergCreated}
+      isWebform={true}
       onDeleteClick={() => manageDialogs('delete', true)}
       onEditClick={() => manageDialogs('manageRows', true)}
     />
