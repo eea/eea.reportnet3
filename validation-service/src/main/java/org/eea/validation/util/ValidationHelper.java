@@ -480,24 +480,6 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-  /**
-   * Deletes parquet table if empty to cover the case that the user has added or removed columns (has changed the schema)
-   *
-   * @param tableSchemaName The table schema name
-   * @param tablePathResolver The table path
-   * @throws Exception exception
-   */
-  private void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver) throws Exception {
-    String tablePath = s3Helper.getS3Service().getTableAsFolderQueryPath(tablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-    if (s3Helper.checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-      long rowCount = dremioHelperService.getRowCount(tablePath);
-      if (rowCount == 0) {
-        dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
-        s3Helper.deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
-      }
-    }
-  }
-
   private boolean isDremioSqlRuleMethod(String whenCondition) {
     return dremioSqlRuleMethods.stream().anyMatch(method -> whenCondition.contains(method));
   }

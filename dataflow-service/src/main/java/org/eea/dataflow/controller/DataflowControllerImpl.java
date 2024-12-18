@@ -783,11 +783,7 @@ public class DataflowControllerImpl implements DataFlowController {
     } else if (cloneLockVO != null) {
       throw new ResponseStatusException(HttpStatus.LOCKED,
               "Dataflow is locked because clone is in progress.");
-    } else if (!dataflowService.isAdmin() && dataflowData != null
-            && dataflowData.getType() == TypeDataflowEnum.BUSINESS) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              "Can't delete a Dataflow without being an admin user.");
-    } else if (Boolean.TRUE.equals(dataflowData.isDeleted())) {
+    }  else if (Boolean.TRUE.equals(dataflowData.isDeleted())) {
       LOG.info("Dataflow with id {} is already marked for deletion.", dataflowId);
       throw new ResponseStatusException(HttpStatus.CONFLICT,
               "Dataflow is already marked for deletion.");

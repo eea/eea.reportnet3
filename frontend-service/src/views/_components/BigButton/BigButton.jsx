@@ -238,7 +238,7 @@ export const BigButton = ({
             data-for={uniqName}
             data-tip
             icon={AwesomeIcons('edit')}
-            style={{ position: 'absolute', top: '5px', left: '2px', fontSize: '1.2rem' }}
+            style={{ position: 'absolute', bottom: '10px', left: '2px', fontSize: '1rem' }}
           />
           {
             hasUpdatesAfterReleaseTooltip && (

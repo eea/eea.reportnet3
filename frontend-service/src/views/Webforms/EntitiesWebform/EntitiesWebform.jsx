@@ -370,6 +370,7 @@ export const EntitiesWebform = ({
         dataflowId={dataflowId}
         datasetId={datasetId}
         isAddingRootTableId={entitiesWebformState.isAddingEntityRecord}
+        isIcebergCreated={isIcebergCreated}
         loading={isLoading}
         onAddTableRecord={onAddTableRecord}
         onRefresh={onUpdateData}
@@ -441,12 +442,14 @@ export const EntitiesWebform = ({
                   }`}
                   key={uniqueId()}
                   onClick={() => {
-                    entitiesWebformDispatch({
-                      type: 'ON_REFRESH',
-                      payload: { value: !entitiesWebformState.isRefresh }
-                    });
-                    onSelectRecord(items.recordId, items.id);
-                    onToggleView('details');
+                    if (!(bigData && !isIcebergCreated)) {
+                      entitiesWebformDispatch({
+                        type: 'ON_REFRESH',
+                        payload: { value: !entitiesWebformState.isRefresh }
+                      });
+                      onSelectRecord(items.recordId, items.id);
+                      onToggleView('details');
+                    }
                   }}>
                   {items.id || '-'}
                 </span>
@@ -455,7 +458,7 @@ export const EntitiesWebform = ({
             <div className={styles.addButtonWrapper}>
               <Button
                 className={styles.addButton}
-                disabled={entitiesWebformState.isAddingEntityRecord || isReleasing}
+                disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
                 icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
                 label={resourcesContext.messages['addEntity']}
                 onClick={() => onAddEntitiesRecord(list)}

@@ -1544,8 +1544,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 //refresh the metadata
                 dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
+                LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
             }
-            LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
         }
     }
 
@@ -1836,6 +1836,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 String icebergSubTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergSubTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
+                if (!s3HelperPrivate.checkFolderExist(s3IcebergSubTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) ||
+                        !dremioHelperService.checkFolderPromoted(s3IcebergSubTablePathResolver, entry.getValue().getNameTableSchema())){
+                    continue;
+                }
                 String getRecordIdsQuery = "SELECT " + PARQUET_RECORD_ID_COLUMN_HEADER + " FROM " + icebergSubTablePath + " WHERE " + entry.getKey().getName() + " = '" + fieldValue + "'";
                 List<String> subTableRecordIds = dremioJdbcTemplate.queryForList(getRecordIdsQuery, String.class);
                 if(subTableRecordIds != null && subTableRecordIds.size() > 0) {

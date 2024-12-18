@@ -77,6 +77,8 @@ export const WebformRecord = ({
   record,
   referencedTableSchemaId,
   rootPkFieldId,
+  rootTableName,
+  selectedTableId,
   tableId,
   tableName,
   webformType
@@ -112,7 +114,7 @@ export const WebformRecord = ({
       await DatasetService.deleteRecord({
         datasetId,
         selectedRecordId,
-        tableId,
+        tableId: selectedTableId ? selectedTableId : tableId,
         updateInCascade: true
       });
       onRefresh();
@@ -141,6 +143,38 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value, conditional } });
   };
 
+  const getCreatedSubTable = (record, element) => {
+    const subTableCreated =
+      !isNil(record) &&
+      record.elements.filter(
+        col => col.name !== rootTableName && (col.type === 'TABLE') & !isEmpty(col.elementsRecords)
+      ).length > 0;
+
+    let subTablesList;
+    let isSubTableFk;
+
+    if (subTableCreated) {
+      subTablesList =
+        !isNil(record) &&
+        record.elements.filter(
+          col => col.name !== rootTableName && (col.type === 'TABLE') & !isEmpty(col.elementsRecords)
+        );
+
+      const subTablesFkNamesList = subTablesList.map(subTable => {
+        const namesList = subTable.elements
+          .filter(col => col.type === 'FIELD' && col.referenceParentField)
+          .map(field => (field = { name: field.referenceParentField }));
+
+        return (subTable = namesList);
+      });
+
+      isSubTableFk = subTablesFkNamesList.some(subTable =>
+        subTable.some(fieldName => fieldName.name === element.name || element.isPrimary === true)
+      );
+    }
+    return isSubTableFk;
+  };
+
   const onSaveField = async () => {
     try {
       await DatasetService.createRecord(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
@@ -149,15 +183,15 @@ export const WebformRecord = ({
     }
   };
 
-  const onToggleFieldVisibility = (dependency, fields = []) => {
-    if (isNil(dependency)) return true;
+  const onToggleFieldVisibility = (referenceParentField, fields = []) => {
+    if (isNil(referenceParentField)) return true;
     const filteredDependency = fields
-      .filter(field => TextUtils.areEquals(field.name, dependency.referenceField))
+      .filter(field => TextUtils.areEquals(field.name, referenceParentField))
       .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split('; ')));
-    //Check
+
     return filteredDependency
       .flat()
-      .map(field => dependency.referenceField.includes(field))
+      .map(field => referenceParentField.includes(field))
       .includes(true);
   };
 
@@ -199,8 +233,8 @@ export const WebformRecord = ({
 
         return (
           !isFieldVisible &&
-          onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={element.fieldId} style={fieldStyle}>
+          onToggleFieldVisibility(element.referenceParentField, elements, element) && (
+            <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -237,6 +271,7 @@ export const WebformRecord = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       onUpdateEntitiesValue={onUpdateEntitiesValue}
@@ -286,19 +321,20 @@ export const WebformRecord = ({
           field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
         )[0]?.referencedField?.idPk;
 
-        const referencePkValue = record.fields.find(
-          field => field.fieldId === referencePkFieldId || field.fieldSchemaId === referencePkFieldId
+        const referencePkValue = record.elements.find(
+          elementField =>
+            elementField.fieldSchema === referencePkFieldId || elementField.fieldSchemaId === referencePkFieldId
         )?.value;
 
         const fkFields = element?.elements
-          .filter(element => !isNil(element.dependency))
+          .filter(element => !isNil(element.referenceParentField))
           .map(
             field =>
               (field = {
                 fieldName: field.name,
-                referenceFieldName: field?.dependency?.referenceField,
+                referenceFieldName: field?.referenceParentField,
                 value: record.elements.filter(element =>
-                  TextUtils.areEquals(field?.dependency?.referenceField, element.name)
+                  TextUtils.areEquals(field?.referenceParentField, element.name)
                 )[0].value
               })
           );
@@ -309,7 +345,7 @@ export const WebformRecord = ({
 
         return (
           !isSubTableVisible &&
-          onToggleFieldVisibility(element.dependency, elements, element) && (
+          onToggleFieldVisibility(element.referenceParentField, elements, element) && (
             <div
               className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}
               key={element.recordSchemaId}>
@@ -375,6 +411,8 @@ export const WebformRecord = ({
                     record={record}
                     referencedTableSchemaId={element?.tableSchemaId}
                     rootPkFieldId={rootPkFieldId}
+                    rootTableName={rootTableName}
+                    selectedTableId={element.tableSchemaId}
                     tableId={tableId}
                     tableName={element.title}
                   />

@@ -44,6 +44,7 @@ export const WebformField = ({
   entitiesRecords,
   isConditional,
   isConditionalChanged,
+  isSubTableCreated,
   newRecord,
   onFillField,
   onSaveField,
@@ -246,9 +247,6 @@ export const WebformField = ({
           parsedValue,
           bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
-        if (!isNil(onUpdateEntitiesValue) && (updateInCascade || updatesGroupInfo)) {
-          onUpdateEntitiesValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
-        }
       }
     } catch (error) {
       if (error.response.status === 423) {
@@ -490,7 +488,7 @@ export const WebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
-            disabled={field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
+            disabled={isSubTableCreated || field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
             hasMaxCharCounter
             id={field.fieldId}
             keyfilter={RecordUtils.getFilter(type)}
@@ -518,7 +516,7 @@ export const WebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
-              id={field.fieldId}
+              id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);

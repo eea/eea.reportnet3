@@ -599,7 +599,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @return the response entity
    */
   @PostMapping("/importAndReplace/{dataflowId}/group/{groupId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Replace lead reporters", hidden = true)
   @ApiResponses(value = {
           @ApiResponse(code = 400, message = EEAErrorMessage.FILE_EXTENSION),
