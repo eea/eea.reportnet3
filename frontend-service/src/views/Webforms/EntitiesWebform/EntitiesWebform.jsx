@@ -455,7 +455,7 @@ export const EntitiesWebform = ({
             <div className={styles.addButtonWrapper}>
               <Button
                 className={styles.addButton}
-                disabled={entitiesWebformState.isAddingEntityRecord || isReleasing}
+                disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
                 icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
                 label={resourcesContext.messages['addEntity']}
                 onClick={() => onAddEntitiesRecord(list)}

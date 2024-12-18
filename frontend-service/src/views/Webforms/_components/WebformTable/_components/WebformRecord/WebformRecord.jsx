@@ -321,8 +321,9 @@ export const WebformRecord = ({
           field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
         )[0]?.referencedField?.idPk;
 
-        const referencePkValue = record.fields.find(
-          field => field.fieldId === referencePkFieldId || field.fieldSchemaId === referencePkFieldId
+        const referencePkValue = record.elements.find(
+          elementField =>
+            elementField.fieldSchema === referencePkFieldId || elementField.fieldSchemaId === referencePkFieldId
         )?.value;
 
         const fkFields = element?.elements

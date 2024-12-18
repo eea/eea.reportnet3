@@ -247,9 +247,6 @@ export const WebformField = ({
           parsedValue,
           bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
-        if (!isNil(onUpdateEntitiesValue) && (updateInCascade || updatesGroupInfo)) {
-          onUpdateEntitiesValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
-        }
       }
     } catch (error) {
       if (error.response.status === 423) {
