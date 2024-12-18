@@ -19,7 +19,8 @@ const parsePamFields = (fields, pamId, type) =>
     id: null,
     idFieldSchema: field.fieldId || field.fieldSchema,
     type: field.type,
-    value: getPamFieldValue(field.name, pamId, type)
+    value: getPamFieldValue(field.name, pamId, type),
+    name: field.name
   }));
 
 const getPamFieldValue = (fieldName, pamId, type) => {
