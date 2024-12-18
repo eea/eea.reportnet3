@@ -213,7 +213,7 @@ export const PaMsWebformTable = ({
 
     webform?.elements?.forEach(table => {
       if (table.type === 'TABLE') {
-        if (!table.dataAreManuallyEditable) setAllManualCheck(false);
+        if (bigData && !table.dataAreManuallyEditable) setAllManualCheck(false);
       }
     });
 
@@ -415,14 +415,6 @@ export const PaMsWebformTable = ({
                 : webformData.name}
               {validationsTemplate(parseRecordsValidations(webformData.elementsRecords)[0])}
             </div>
-            {/* <Button
-              helpClassName={isIcebergCreated && 'p-button-reverse'}
-              icon={isIcebergCreated ? 'unlock' : 'lock'}
-              label={isIcebergCreated ? 'Close Webform' : 'Open Webform'}
-              className={styles.openWebformButton}
-              onClick={() => convertHelper()}
-              isLoading={isLoadingIceberg}
-            /> */}
           </h3>
         </div>
       )}

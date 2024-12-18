@@ -79,6 +79,7 @@ export const PaMsWebformRecord = ({
   pamsRecords,
   record,
   referencedTableSchemaId,
+  selectedTableId,
   tableId,
   tableName,
   webformType
@@ -114,7 +115,7 @@ export const PaMsWebformRecord = ({
       await DatasetService.deleteRecord({
         datasetId,
         selectedRecordId,
-        tableId,
+        tableId: selectedTableId ? selectedTableId : tableId,
         updateInCascade
       });
       onRefresh();
@@ -412,6 +413,7 @@ export const PaMsWebformRecord = ({
                         pamsRecords={pamsRecords}
                         record={record}
                         referencedTableSchemaId={element?.tableSchemaId}
+                        selectedTableId={element.tableSchemaId}
                         tableId={tableId}
                         tableName={element.title}
                       />
