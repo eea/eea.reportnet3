@@ -1535,8 +1535,23 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
                 }
 
+                if (!s3HelperPrivate.checkFolderExist(s3DesignTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3DesignTablePathResolver, tableSchemaName)) {
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(
+                        EventType.PREFILLED_TABLE_HAS_NO_DATA_ERROR,
+                        null,
+                        NotificationVO.builder()
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                            .dataflowId(designDataSetMetabaseVO.getDataflowId())
+                            .datasetId(designDatasetId)
+                            .tableSchemaId(tableSchemaId).build()
+                    );
+
+                    String exceptionMsg = "Table marked as prefilled has no data";
+                    throw new Exception(exceptionMsg);
+                }
 
                 String queryToCreatePrefilledTable = "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
+
                 String processId = dremioHelperService.executeSqlStatement(queryToCreatePrefilledTable);
                 dremioHelperService.checkIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId, null);
 

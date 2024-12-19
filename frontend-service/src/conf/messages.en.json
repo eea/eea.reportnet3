@@ -1211,6 +1211,7 @@
     "pkValuesMustBeUsed": "All PK values must be used on link",
     "plusFileSize": "Increase maximum file size",
     "prefilled": "Prefilled",
+    "prefilledTableHasNoDataError": "Table marked as prefilled has no data",
     "preview": "View data",
     "previewNotification": "Preview",
     "previewNotificationMessage": "Launch notification to preview it",
