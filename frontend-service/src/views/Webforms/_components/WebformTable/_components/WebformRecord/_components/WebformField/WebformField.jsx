@@ -490,7 +490,7 @@ export const WebformField = ({
             characterCounterStyles={{ marginBottom: 0 }}
             disabled={isSubTableCreated || field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
             hasMaxCharCounter
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);

@@ -231,50 +231,6 @@ export const PaMsWebformField = ({
     }
   };
 
-  // const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
-  //   pamsWebformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: true });
-  //   const parsedValue =
-  //     field.fieldType === 'MULTISELECT_CODELIST' ||
-  //     ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
-  //       ? value.join(';')
-  //       : value;
-
-  //       try {
-  //     if (!isSubmiting && initialFieldValue !== parsedValue) {
-  //       await DatasetService.updateField(
-  //         datasetId,
-  //         option,
-  //         field.fieldId,
-  //         field.fieldType,
-  //         parsedValue,
-  //         updateInCascade
-  //       );
-  //       if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
-  //         onUpdatePamsValue(field.recordId, field.value, field.fieldId, updatesGroupInfo);
-  //       }
-
-  //       if (!isNil(onUpdateSinglesList) && field.updatesSingleListData) {
-  //         onUpdateSinglesList();
-  //       }
-  //     }
-  //   } catch (error) {
-  //     if (error.response.status === 423) {
-  //       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
-  //     } else {
-  //       if (field.fieldType !== 'DATETIME') {
-  //         console.error('PaMsWebformField - onEditorSubmitValue.', error);
-  //         if (updateInCascade) {
-  //           notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_IN_CASCADE_BY_ID_ERROR' }, true);
-  //         } else {
-  //           notificationContext.add({ type: 'UPDATE_WEBFORM_FIELD_BY_ID_ERROR' }, true);
-  //         }
-  //       }
-  //     }
-  //   } finally {
-  //     pamsWebformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
-  //   }
-  // };
-
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' ||
@@ -384,7 +340,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
@@ -410,7 +366,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={e => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
@@ -490,7 +446,7 @@ export const PaMsWebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
             onChange={() => {
@@ -516,7 +472,7 @@ export const PaMsWebformField = ({
         return (
           <DropdownWebform
             appendTo={document.body}
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             onChange={event => {
               onFillField(field, option, event.target.value);
               pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value: event.target.value } });
@@ -539,7 +495,7 @@ export const PaMsWebformField = ({
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
             hasMaxCharCounter
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -565,7 +521,7 @@ export const PaMsWebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
-              id={field.fieldId}
+              id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
@@ -612,7 +568,9 @@ export const PaMsWebformField = ({
                 icon="export"
                 iconPos="right"
                 label={field.value}
-                onClick={() => onFileDownload(field.value, field.fieldId, field.recordId, field.name)}
+                onClick={() =>
+                  onFileDownload(field.value, field.fieldId || field.fieldSchemaId, field.recordId, field.name)
+                }
               />
             )}
             {
