@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -16,7 +15,6 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
-import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -1702,6 +1700,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
         }
+        removeDuplicateValues(fieldsVO);
         return fieldsVO;
     }
 
@@ -1766,6 +1765,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         LOG.info("Query to execute in links: {}", selectQuery);
         return dremioJdbcTemplate.queryForList(selectQuery);
     }
+
+    private void removeDuplicateValues(List<FieldVO> fieldsVO) {
+        HashSet<String> seen = new HashSet<>();
+        fieldsVO.removeIf(e -> !seen.add(e.getValue()));
+    }
+
 
     @Override
     public List<TableSchemaIdNameVO> getAvailableForManualEditingTables(Long datasetId) throws EEAException {
