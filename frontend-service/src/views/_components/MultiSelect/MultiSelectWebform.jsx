@@ -14,7 +14,6 @@ import Tooltip from 'primereact/tooltip';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
 import MultiSelectUtils from './_functions/MultiSelectUtils';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
-import { useOnClickOutside } from 'views/_functions/Hooks/useOnClickOutside';
 
 const MultiSelectWebform = props => {
   var {
