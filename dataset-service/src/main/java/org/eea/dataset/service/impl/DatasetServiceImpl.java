@@ -1279,7 +1279,7 @@ public class DatasetServiceImpl implements DatasetService {
       if (referenced.get("labelId") != null) {
         labelSchemaId = referenced.get("labelId").toString();
       } else {
-        // In case there's no label selected, the label will the the same as the Pk
+        // In case there's no label selected, the label will be the same as the Pk
         labelSchemaId = idPk;
       }
       if (referenced.get("linkedConditionalFieldId") != null) {

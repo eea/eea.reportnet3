@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -16,7 +15,6 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
-import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
@@ -1640,15 +1638,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String referenceTableSchemaName = referenceTableSchema.get(NAME_TABLE_SCHEMA).toString();
         String referenceFieldName = referenceFieldSchema.get(HEADER_NAME).toString();
 
-        String labelFieldName = null;
-        String newLabelField = null;
+        String conditionalFieldName = null;
         if (StringUtils.isNotBlank(conditionalSchemaId)) {
             Document referenceFieldSchema1 = schemasRepository.findFieldSchema(referenceDatasetSchemaId, conditionalSchemaId);
-            newLabelField = referenceFieldSchema1.get(HEADER_NAME).toString();
-        } else {
-            labelFieldName = referenceFieldName;
+            conditionalFieldName = referenceFieldSchema1.get(HEADER_NAME).toString();
         }
 
+        String labelFieldName = referenceFieldName;
         if(!labelSchemaId.equals(idPk)){
             Document labelFieldSchema = schemasRepository.findFieldSchema(referenceDatasetSchemaId, labelSchemaId);
             labelFieldName = labelFieldSchema.get(HEADER_NAME).toString();
@@ -1657,7 +1653,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         try {
             //retrieve the value and label from dremio.
             List<Map<String, Object>> linkValues = getLinkValuesWithLabelsFromReferencedDataset(referenceDatasetId, referenceTableSchemaId, referenceTableSchemaName,
-                referenceFieldName, labelFieldName, conditionalValue, dataType, searchValue, newLabelField);
+                referenceFieldName, labelFieldName, conditionalValue, dataType, searchValue, conditionalFieldName);
 
             for (Map<String, Object> row : linkValues) {
                 FieldVO field = new FieldVO();
@@ -1696,12 +1692,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
         }
+        removeDuplicateValues(fieldsVO);
         return fieldsVO;
     }
 
     private List<Map<String, Object>> getLinkValuesWithLabelsFromReferencedDataset(Long datasetId, String tableSchemaId, String tableName,
                                                                                    String fieldName, String labelFieldName, String conditionalValue,
-                                                                                   DataType dataType, String searchValue, String newLabelField){
+                                                                                   DataType dataType, String searchValue, String conditionalFieldName){
         DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         Long dataflowId = dataSetMetabaseVO.getDataflowId();
         long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
@@ -1720,9 +1717,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         }
 
-        String referenceLabel = newLabelField != null && !dataType.equals(DataType.NUMBER_INTEGER) ? newLabelField : labelFieldName;
-
-        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + referenceLabel + "\" as " + LABEL
+        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + labelFieldName + "\" as " + LABEL
             + " FROM " + tablePathInDremio +
             " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
 
@@ -1736,7 +1731,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         if (labelFieldName == null && conditionalValue.isBlank()
-            || (StringUtils.isNotBlank(labelFieldName) && StringUtils.isNotBlank(fieldName) && StringUtils.isNotBlank(newLabelField) && conditionalValue.isBlank())) {
+            || (StringUtils.isNotBlank(labelFieldName) && StringUtils.isNotBlank(fieldName) && StringUtils.isNotBlank(conditionalFieldName) && conditionalValue.isBlank())) {
             conditionalValue = "null";
         }
         if (StringUtils.isNotBlank(conditionalValue)) {
@@ -1749,8 +1744,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 .map(value -> "'" + value + "'")
                 .collect(Collectors.joining(", "));
 
-            String refValue = newLabelField != null ? newLabelField : VALUE;
-            String refLabel = newLabelField != null ? newLabelField : LABEL;
+            String refValue = conditionalFieldName != null ? conditionalFieldName : VALUE;
+            String refLabel = conditionalFieldName != null ? conditionalFieldName : LABEL;
             if (dataType.equals(DataType.NUMBER_INTEGER)) {
                 selectQuery = selectQuery + " AND " + refValue + " IN (" + valuesList + ")";
                 selectQuery = selectQuery + " ORDER BY " + refValue;
@@ -1762,6 +1757,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         LOG.info("Query to execute in links: {}", selectQuery);
         return dremioJdbcTemplate.queryForList(selectQuery);
     }
+
+    private void removeDuplicateValues(List<FieldVO> fieldsVO) {
+        HashSet<String> seen = new HashSet<>();
+        fieldsVO.removeIf(e -> !seen.add(e.getValue()));
+    }
+
 
     @Override
     public List<TableSchemaIdNameVO> getAvailableForManualEditingTables(Long datasetId) throws EEAException {

@@ -63,7 +63,7 @@ const parseTableSchemaColumns = (schemaTables, records) => {
           columns.push({
             codelistItems: field['codelistItems'],
             description: field['description'],
-            field: field['fieldId'],
+            field: field['fieldId'] || field['fieldSchema'],
             header: field['name'],
             pk: field['pk'],
             maxSize: field['maxSize'],
