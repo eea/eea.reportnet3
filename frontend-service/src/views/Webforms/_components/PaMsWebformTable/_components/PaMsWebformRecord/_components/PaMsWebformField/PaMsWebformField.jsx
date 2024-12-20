@@ -472,16 +472,25 @@ export const PaMsWebformField = ({
         return (
           <DropdownWebform
             appendTo={document.body}
+            disabled={isLoadingData}
+            filter={true}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={isLoadingData}
             onChange={event => {
-              onFillField(field, option, event.target.value);
-              pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value: event.target.value } });
-              if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
+              const value =
+                typeof event.target.value === 'object' && !Array.isArray(event.target.value)
+                  ? event.target.value.value
+                  : event.target.value;
+              onFillField(field, option, value, isConditional);
+              pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+              if (isNil(field.recordId)) onSaveField(option, value);
+              else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
             }}
-            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
+            onFilterInputChangeBackend={filter => onFilter(filter, field)}
+            optionLabel={'itemType'}
+            options={field.codelistItems.map(codelist => ({ itemType: codelist, value: codelist }))}
             showFilterClear={true}
-            value={field.value}
+            value={{ itemType: field.value, value: field.value }}
           />
         );
       case 'TEXT':
