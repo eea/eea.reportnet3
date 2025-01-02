@@ -9,13 +9,13 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * The Interface DataflowService.
@@ -203,6 +203,21 @@ public interface DataflowService {
    * @return the user roles
    */
   List<DataflowUserRoleVO> getUserRoles(Long dataProviderId, List<DataFlowVO> dataflowList);
+
+  /**
+   * Gets the dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param header the header
+   * @param asc the asc
+   * @param page the page
+   * @param pageSize the page size
+   * @param filters the filters
+   * @return the public dataflows by country
+   * @throws EEAException the EEA exception
+   */
+  PaginatedDataflowPerCountryVO getDataflowsByCountry(String countryCode, String header, boolean asc,
+                                                      int page, int pageSize, Map<String, String> filters) throws EEAException;
 
   /**
    * Gets the public dataflows by country.

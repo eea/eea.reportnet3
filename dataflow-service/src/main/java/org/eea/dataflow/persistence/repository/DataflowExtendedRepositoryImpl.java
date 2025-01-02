@@ -278,6 +278,41 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     return query.getResultList();
   }
 
+
+  /**
+   * Find paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param pageable the pageable
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Dataflow> findAllPaginatedByCountry(String obligationJson, Pageable pageable,
+      Map<String, String> filters, String orderHeader, boolean asc, String countryCode)
+      throws EEAException {
+
+    StringBuilder sb = new StringBuilder();
+    constructDataflowsQuery(sb, orderHeader, asc, filters, true);
+    Query query = entityManager.createNativeQuery(sb.toString(), Dataflow.class);
+    setParameters(obligationJson, false, filters, query, null, null, null);
+
+    query.setParameter(COUNTRY_CODE, countryCode);
+
+    if (null != pageable) {
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+
+    }
+
+
+    return query.getResultList();
+  }
+
   /**
    * Count by country.
    *
@@ -290,12 +325,66 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    * @throws EEAException the EEA exception
    */
   @Override
-  public Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
+  public Long countByCountryPublicDataflows(String obligationJson, Map<String, String> filters, String orderHeader,
+                                            boolean asc, String countryCode) throws EEAException {
+
+    Query query = buildCountByCountryQuery(obligationJson, filters, orderHeader, asc, countryCode);
+    query.setParameter("public", Boolean.TRUE);
+
+    return Long.valueOf(query.getResultList().get(0).toString());
+  }
+
+  /**
+   * Count by country.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Long countByCountryAllDataflows(String obligationJson, Map<String, String> filters, String orderHeader,
+                                         boolean asc, String countryCode) throws EEAException {
+    Query query = buildCountByCountryQuery(obligationJson, filters, orderHeader, asc, countryCode);
+
+    return Long.valueOf(query.getResultList().get(0).toString());
+  }
+
+  private Query buildCountByCountryQuery(String obligationJson, Map<String, String> filters, String orderHeader,
+                                         boolean asc, String countryCode) throws EEAException {
+    StringBuilder sb = new StringBuilder();
+    sb.append(" with tableAux as (");
+    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, false);
+    sb.append(") select count(*) from tableAux");
+
+    Query query = entityManager.createNativeQuery(sb.toString());
+    query.setParameter("aux", obligationJson);
+    query.setParameter(COUNTRY_CODE, countryCode);
+
+    return query;
+  }
+
+  /**
+   * Count by country.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Long countAllDataflowsByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
       boolean asc, String countryCode) throws EEAException {
 
     StringBuilder sb = new StringBuilder();
     sb.append(" with tableAux as (");
-    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, false);
+    constructDataflowsQuery(sb, orderHeader, asc, filters, false);
     sb.append(") select count(*) from tableAux");
 
     Query query = entityManager.createNativeQuery(sb.toString());
@@ -320,11 +409,41 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
    */
   @Override
   public Long countByCountryFiltered(String obligationJson, Map<String, String> filters,
+      String orderHeader, boolean asc, String countryCode, boolean isPublic) throws EEAException {
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(" with tableAux as (");
+    if (isPublic) constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
+    if (!isPublic) constructDataflowsQuery(sb, orderHeader, asc, filters, true);
+    sb.append(") select count(*) from tableAux");
+
+    Query query = entityManager.createNativeQuery(sb.toString());
+
+    setParameters(obligationJson, isPublic, filters, query, null, null, null);
+
+    query.setParameter(COUNTRY_CODE, countryCode);
+
+    return Long.valueOf(query.getResultList().get(0).toString());
+  }
+
+  /**
+   * Count all dataflows by country filtered.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public Long countAllDataflowsByCountryFiltered(String obligationJson, Map<String, String> filters,
       String orderHeader, boolean asc, String countryCode) throws EEAException {
 
     StringBuilder sb = new StringBuilder();
     sb.append(" with tableAux as (");
-    constructPublicDataflowsQuery(sb, orderHeader, asc, filters, true);
+    constructDataflowsQuery(sb, orderHeader, asc, filters, true);
 
     sb.append(") select count(*) from tableAux");
 
@@ -651,6 +770,44 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     sb.append(QUERY_JSON_COUNTRY);
     sb.append(" where " + HAS_DATASETS);
     sb.append(AND + DATAFLOW_PUBLIC);
+    sb.append(AND + COUNTRY_CODE_CONDITION);
+
+    if (MapUtils.isNotEmpty(filters) && applyFilters) {
+      for (String key : filters.keySet()) {
+        addAnd(sb, addAnd);
+        setFilters(sb, key, filters.get(key), Boolean.FALSE);
+      }
+    }
+
+    if (StringUtils.isNotBlank(orderHeader)) {
+      if ("status".equals(orderHeader)) {
+        sb.append(String.format(ORDER_BY, orderHeader + (asc ? ASC : DESC), " ,releasable "));
+      } else {
+        orderHeader = orderHeader.equals("delivery_date") ? DATE_RELEASED : orderHeader;
+        sb.append(String.format(ORDER_BY, orderHeader, asc ? ASC : DESC));
+      }
+    } else {
+      sb.append(" order by status, creation_date desc ");
+    }
+  }
+
+  /**
+   * Construct dataflows query.
+   *
+   * @param sb the sb
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param filters the filters
+   * @param applyFilters the apply filters
+   * @throws EEAException the EEA exception
+   */
+  private void constructDataflowsQuery(StringBuilder sb, String orderHeader, boolean asc,
+      Map<String, String> filters, boolean applyFilters) throws EEAException {
+
+    boolean addAnd = true;
+
+    sb.append(QUERY_JSON_COUNTRY);
+    sb.append(" where " + HAS_DATASETS);
     sb.append(AND + COUNTRY_CODE_CONDITION);
 
     if (MapUtils.isNotEmpty(filters) && applyFilters) {

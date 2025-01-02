@@ -6,7 +6,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -1033,6 +1032,16 @@ public class UserManagementControllerImpl implements UserManagementController {
     return userNationalCoordinatorService.getNationalCoordinators();
 
   }
+
+  @Override
+  @PreAuthorize("hasRole('ADMIN')")
+  @ApiOperation(value = "Get list of national coordinators", hidden = true)
+  @GetMapping("/nationalCoordinator/{countryCode}")
+  public List<UserNationalCoordinatorVO> getUserNationalCoordinatorFilterByCountryCode(
+          @PathVariable("countryCode") String countryCode
+  ) {
+    return userNationalCoordinatorService.getNationalCoordinators(countryCode);
+  };
 
 
   /**

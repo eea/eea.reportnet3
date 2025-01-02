@@ -6,6 +6,7 @@ import feign.FeignException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang.StringUtils;
+import org.eea.dataflow.mapper.DataflowInternalMapper;
 import org.eea.dataflow.mapper.DataflowMapper;
 import org.eea.dataflow.mapper.DataflowNoContentMapper;
 import org.eea.dataflow.mapper.DataflowPrivateMapper;
@@ -30,6 +31,7 @@ import org.eea.dataflow.service.DataflowService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollectionControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -44,9 +46,11 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
+import org.eea.interfaces.vo.dataflow.DataflowInternalVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -54,6 +58,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
+import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
@@ -61,6 +66,7 @@ import org.eea.interfaces.vo.rod.ObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
+import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
@@ -164,6 +170,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowMapper dataflowMapper;
 
+  /** The dataflow mapper. */
+  @Autowired
+  private DataflowInternalMapper dataflowInternalMapper;
+
   /** The dataflow no content mapper. */
   @Autowired
   private DataflowNoContentMapper dataflowNoContentMapper;
@@ -207,6 +217,12 @@ public class DataflowServiceImpl implements DataflowService {
   /** The representative mapper. */
   @Autowired
   private RepresentativeMapper representativeMapper;
+
+  /**
+   * The representative controller zuul.
+   */
+  @Autowired
+  private RepresentativeController.RepresentativeControllerZuul representativeControllerZuul;
 
 
   /**
@@ -787,6 +803,80 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
+  public PaginatedDataflowPerCountryVO getDataflowsByCountry(String countryCode, String header,
+                                                             boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
+
+    try {
+      Pageable pageable = PageRequest.of(page, pageSize);
+      List<ObligationVO> obligations = obligationControllerZull
+              .findOpenedObligations(null, null, null, null, null).getObligations();
+      ObjectMapper objectMapper = new ObjectMapper();
+
+      String obligationJson = objectMapper.writeValueAsString(obligations);
+
+      List<Dataflow> dataflows = dataflowRepository.findAllPaginatedByCountry(obligationJson,
+              pageable, filters, header, asc, countryCode);
+
+      List<DataflowInternalVO> dataflowsVOList =
+              dataflowInternalMapper.entityListToClass(dataflows);
+
+      List<UserNationalCoordinatorVO> nationalCoordinators =
+              userManagementControllerZull.getUserNationalCoordinatorFilterByCountryCode(countryCode);
+
+      for (DataflowInternalVO dataflowVO : dataflowsVOList) {
+        // SET REPRESENTATIVES
+        dataflowVO.setRepresentatives(
+                representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowVO.getId())
+        );
+        // SET OBLIGATIONS
+        for (ObligationVO obligation : obligations) {
+          if (dataflowVO.getObligation().getObligationId()
+                  .equals(obligation.getObligationId())) {
+            dataflowVO.setObligation(obligation);
+          }
+        }
+      }
+
+      List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
+      setReportingsAllDataflows(dataflowsVOList, providerId);
+
+      dataflowsVOList.stream().forEach(dataflow -> {
+        dataflow.setReferenceDatasets(referenceDatasetControllerZuul
+                .findReferenceDatasetByDataflowId(dataflow.getId()));
+      });
+
+      PaginatedDataflowPerCountryVO dataflowPaginated = new PaginatedDataflowPerCountryVO();
+
+      dataflowPaginated.setNationalCoordinators(nationalCoordinators);
+      dataflowPaginated.setDataflows(dataflowsVOList);
+      dataflowPaginated.setTotalRecords(
+              dataflowRepository.countByCountryPublicDataflows(obligationJson, filters, header, asc, countryCode));
+      dataflowPaginated.setFilteredRecords(dataflowRepository
+              .countByCountryFiltered(obligationJson, filters, header, asc, countryCode, false));
+
+//      LOG.info("Obligations count: {}", obligations.size(), obligationJson);
+//      LOG.info("Dataflows count: {}, Dataflows: {}", dataflows.size(), dataflows);
+//      LOG.info("DataflowsVO count: {}, DataflowsVO: {}", dataflowsVOList.size(), dataflowsVOList);
+
+      return dataflowPaginated;
+    } catch (JsonProcessingException e) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR, e);
+    }
+  }
+
+  /**
+   * Gets the public dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param header the header
+   * @param asc the asc
+   * @param page the page
+   * @param pageSize the page size
+   * @param filters the filters
+   * @return the public dataflows by country
+   * @throws EEAException the EEA exception
+   */
+  @Override
   public PaginatedDataflowVO getPublicDataflowsByCountry(String countryCode, String header,
       boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
 
@@ -826,9 +916,9 @@ public class DataflowServiceImpl implements DataflowService {
 
       dataflowPublicPaginated.setDataflows(publicDataflowsVOList);
       dataflowPublicPaginated.setTotalRecords(
-          dataflowRepository.countByCountry(obligationJson, filters, header, asc, countryCode));
+          dataflowRepository.countByCountryPublicDataflows(obligationJson, filters, header, asc, countryCode));
       dataflowPublicPaginated.setFilteredRecords(dataflowRepository
-          .countByCountryFiltered(obligationJson, filters, header, asc, countryCode));
+          .countByCountryFiltered(obligationJson, filters, header, asc, countryCode, true));
 
       return dataflowPublicPaginated;
 
@@ -1092,6 +1182,32 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Sets the reportings.
+   *
+   * @param dataflowList the dataflow public list
+   * @param providerId the provider id
+   */
+  private void setReportingsAllDataflows(List<DataflowInternalVO> dataflowList,
+      List<DataProviderVO> providerId) {
+    dataflowList.stream().forEach(dataflow -> {
+      findObligationDataflow(dataflow);
+      dataflow.setReportingDatasets(new ArrayList<>());
+      List<ReportingDatasetVO> reportings =
+          datasetMetabaseControllerZuul.findReportingDataSetByDataflowId(dataflow.getId());
+      if (!reportings.isEmpty()) {
+        for (DataProviderVO dataProviderVO : providerId) {
+          List<ReportingDatasetVO> reportingsProvider =
+              reportings.stream().filter(r -> r.getDataProviderId().equals(dataProviderVO.getId()))
+                  .collect(Collectors.toList());
+          if (CollectionUtils.isNotEmpty(reportingsProvider)) {
+            dataflow.getReportingDatasets().addAll(reportingsProvider);
+          }
+        }
+      }
+    });
+  }
+
+  /**
    * Find obligation public dataflow.
    *
    * @param dataflowPublicVO the dataflow public VO
@@ -1106,6 +1222,24 @@ public class DataflowServiceImpl implements DataflowService {
     } catch (FeignException e) {
       LOG.error("Error retrieving obligation for dataflow id {} due to reason {}",
           dataflowPublicVO.getId(), e.getMessage(), e);
+    }
+  }
+
+  /**
+   * Find obligation dataflow.
+   *
+   * @param dataflowPublicVO the dataflow public VO
+   */
+  private void findObligationDataflow(DataFlowVO dataflowVO) {
+    try {
+      if (dataflowVO.getObligation() != null
+          && dataflowVO.getObligation().getObligationId() != null) {
+        dataflowVO.setObligation(obligationControllerZull
+            .findObligationById(dataflowVO.getObligation().getObligationId()));
+      }
+    } catch (FeignException e) {
+      LOG.error("Error retrieving obligation for dataflow id {} due to reason {}",
+              dataflowVO.getId(), e.getMessage(), e);
     }
   }
 

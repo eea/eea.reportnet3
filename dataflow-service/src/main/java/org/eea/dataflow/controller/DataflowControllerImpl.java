@@ -29,6 +29,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -829,6 +830,50 @@ public class DataflowControllerImpl implements DataFlowController {
     }
   }
 
+  /**
+   * Gets all dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param sortField the sort field
+   * @param asc the asc
+   * @param filters the filters
+   * @return all dataflows by country
+   */
+  @Override
+  @PostMapping("/internal/country/{countryCode}")
+  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+  @ApiOperation(value = "Gets all the dataflow that use a specific Country Code with the reporters",
+          hidden = false)
+  public PaginatedDataflowPerCountryVO getDataflowsByCountry(
+          @ApiParam(value = "Country Code",
+                  example = "AL") @PathVariable("countryCode") String countryCode,
+          @ApiParam(value = "pageNum: page number to show", example = "0",
+                  defaultValue = "0") @RequestParam(value = "pageNum", defaultValue = "0",
+                  required = false) Integer pageNum,
+          @ApiParam(value = "pageSize: specifies the maximum number of records per page",
+                  example = "10", defaultValue = "10") @RequestParam(value = "pageSize",
+                  defaultValue = "10", required = false) Integer pageSize,
+          @ApiParam(
+                  value = "sortField: specifies the field which should be used to sort the data retrieved",
+                  example = "name") @RequestParam(value = "sortField", required = false) String sortField,
+          @ApiParam(value = "asc: is the sorting order ascending or descending?", example = "false",
+                  defaultValue = "true") @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+          @RequestBody(required = false) Map<String, String> filters) {
+
+    try {
+      return dataflowService.getDataflowsByCountry(countryCode, sortField, asc, pageNum,
+              pageSize, filters);
+    } catch (EEAException e) {
+      LOG.error("There was an error retrieving the dataflows for the country: {}",
+              countryCode);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATAFLOW_GET_ERROR);
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve dataflows for countryCode {} Message: {}", countryCode, e.getMessage());
+      throw e;
+    }
+  }
   /**
    * Gets the public dataflows by country.
    *

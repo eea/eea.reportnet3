@@ -562,6 +562,27 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   }
 
   /**
+   * Find reporting data set  by dataflow id.
+   *
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/private/reporting/dataflow/{id}",
+          produces = MediaType.APPLICATION_JSON_VALUE)
+  @ApiOperation(value = "Find reporting dataset public by dataflow Id", hidden = true)
+  public List<ReportingDatasetVO> findReportingDataSetByDataflowId(@ApiParam(
+          type = "Long", value = "Dataflow Id", example = "0") @PathVariable("id") Long dataflowId) {
+    try {
+      return reportingDatasetService.getDataSetByDataflow(dataflowId);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error retrieving reporting dataset public for dataflowId {} Message: {}", dataflowId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
    * Find reporting data set public by dataflow id and provider id.
    *
    * @param dataflowId the dataflow id

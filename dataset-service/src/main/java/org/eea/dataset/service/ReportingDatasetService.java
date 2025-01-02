@@ -41,6 +41,14 @@ public interface ReportingDatasetService {
    */
   List<ReportingDatasetPublicVO> getDataSetPublicByDataflow(Long dataflowId);
 
+  /**
+   * Gets the data set id by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data set id public by dataflow
+   */
+  List<ReportingDatasetVO> getDataSetByDataflow(Long dataflowId);
+
 
 
   /**
