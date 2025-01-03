@@ -1138,15 +1138,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
 
+        s3TablePathResolver.setPath(parquetTableQueryPathConstant);
+        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
+
+        //if table does not exist or has 0 records do not do anything
         if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, parquetTableS3PathConstant) ||
-                !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema())) {
+                !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema()) || dremioHelperService.getRowCount(parquetTablePath) == 0) {
             //parquet table does not exist and no iceberg table should be created
             datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             return;
         }
 
-        s3TablePathResolver.setPath(parquetTableQueryPathConstant);
-        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
         dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
 
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
@@ -1178,10 +1180,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
 
+        //if table does not exist or has 0 records do not do anything
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) ||
-                !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())) {
+                !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema()) || dremioHelperService.getRowCount(icebergTablePath) == 0) {
             //iceberg table does not exist and no parquet table should be created
             datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
+            if(s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) && dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())
+                && dremioHelperService.getRowCount(icebergTablePath) == 0){
+                //remove iceberg table
+                dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
+                LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
+                //remove folders that contain the previous parquet files because data will be replaced
+                if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
+                    s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
+                }
+            }
             return;
         }
 
