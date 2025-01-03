@@ -391,9 +391,10 @@ public interface RulesController {
    * Export QCCSV.
    *
    * @param datasetId the dataset id
+   * @return the download url
    */
   @PostMapping(value = "/exportQC/{datasetId}")
-  void exportQCCSV(@PathVariable("datasetId") Long datasetId);
+  String exportQCCSV(@PathVariable("datasetId") Long datasetId) throws Exception;
 
 
   /**
@@ -401,11 +402,11 @@ public interface RulesController {
    *
    * @param datasetId the dataset id
    * @param fileName the file name
+   * @param processId the processId
    * @param response the response
    */
   @GetMapping("/downloadQC/{datasetId}")
-  void downloadQCCSV(@PathVariable Long datasetId, @RequestParam String fileName,
-      HttpServletResponse response);
+  void downloadQCCSV(@PathVariable Long datasetId, @RequestParam String fileName, @RequestParam(required = false) String processId, HttpServletResponse response);
 
   /**
    * Run SQL rule with limited results.
