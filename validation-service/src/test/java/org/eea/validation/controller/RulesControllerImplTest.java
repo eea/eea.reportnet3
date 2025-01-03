@@ -40,6 +40,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -884,7 +885,7 @@ public class RulesControllerImplTest {
     try {
       Mockito.doThrow(IOException.class).when(rulesService).downloadQCCSV(Mockito.anyLong(),
           Mockito.any());
-      rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null, null);
+      rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null, new MockHttpServletResponse());
     } catch (IOException e) {
       assertNotNull(e);
       throw e;
