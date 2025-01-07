@@ -401,6 +401,14 @@ public interface UserManagementController {
   @GetMapping("/nationalCoordinator")
   List<UserNationalCoordinatorVO> getUserNationalCoordinator();
 
+  /**
+   * Gets the user national coordinator filtered by country.
+   *
+   * @return the user national coordinator
+   */
+  @GetMapping("/nationalCoordinator/{countryCode}")
+  List<UserNationalCoordinatorVO> getUserNationalCoordinatorFilterByCountryCode(@PathVariable String countryCode);
+
 
   /**
    * Delete national coordinator.

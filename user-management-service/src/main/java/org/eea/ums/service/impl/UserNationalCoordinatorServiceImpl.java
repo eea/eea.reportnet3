@@ -81,8 +81,14 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
    */
   @Override
   public List<UserNationalCoordinatorVO> getNationalCoordinators() {
+    return getNationalCoordinators(null);
+  }
+
+  public List<UserNationalCoordinatorVO> getNationalCoordinators(String countryCode) {
+    String nationalCoordinator = "Provider-%-NATIONAL_COORDINATOR";
+    if (countryCode != null) nationalCoordinator.replace("%", countryCode);
     GroupInfo[] groupInfo =
-        keycloakConnectorService.getGroupsWithSearch("Provider-%-NATIONAL_COORDINATOR");
+        keycloakConnectorService.getGroupsWithSearch(nationalCoordinator);
     List<UserNationalCoordinatorVO> usersNC = new ArrayList<>();
     if (groupInfo != null && groupInfo.length != 0) {
       for (int i = 0; i < groupInfo.length; i++) {

@@ -119,6 +119,18 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     return reportings;
   }
 
+  /**
+   * Gets the data set public by dataflow.
+   *
+   * @param dataflowId the dataflow id
+   * @return the data set public by dataflow
+   */
+  @Override
+  public List<ReportingDatasetVO> getDataSetByDataflow(Long dataflowId) {
+    List<ReportingDatasetVO> reportings = getDataSetIdByDataflowId(dataflowId);
+    return reportings;
+  }
+
 
   /**
    * Gets the data set public by dataflow.
