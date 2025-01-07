@@ -67,6 +67,7 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -1164,8 +1165,10 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             directionQueryBuilder.substring(1));
     // Query without order or with it
     Query query = entityManager.createQuery(formatedQuery);
-
-
+    query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+    query.setMaxResults(pageable.getPageSize());
+    query.setHint("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
+    query.setHint("javax.persistence.query.timeout", 75000);
     query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
     if (null != idRules && !idRules.isEmpty()) {
       query.setParameter(RULE_ID_LIST, idRules);
@@ -1183,8 +1186,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     else if (null == fieldSchema && StringUtils.isNotBlank(fieldValue)) {
       query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
     }
-    query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-    query.setMaxResults(pageable.getPageSize());
 
     List<RecordVO> recordVOs;
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
@@ -1207,6 +1208,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema,
         pageable.getPageSize(), pageable.getPageNumber());
     result.setRecords(recordVOs);
+    entityManager.flush();
   }
 
   private List<RecordValue> reRunTheQueryIfEmpty(Long datasetId, Boolean isExport, List<RecordValue> a, Query query) {
