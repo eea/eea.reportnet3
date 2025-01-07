@@ -2120,7 +2120,7 @@ public class DatasetServiceImpl implements DatasetService {
 
     result = recordRepository.findByTableValueWithOrder(datasetId, idTableSchema,
         Arrays.asList(levelError), pageable, idRules != null ? Arrays.asList(idRules) : null,
-        fieldSchema, fieldValue, newFields);
+        fieldSchema, fieldValue, false ,newFields);
     return result;
   }
 

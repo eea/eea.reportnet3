@@ -3,6 +3,7 @@ package org.eea.dataset.persistence.data.repository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.bson.Document;
@@ -395,7 +396,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public TableVO findByTableValueWithOrder(Long datasetId, String idTableSchema,
       List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
-      String fieldSchema, String fieldValue, SortField... sortFields) {
+      String fieldSchema, String fieldValue, Boolean isExport ,SortField... sortFields) {
 
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
@@ -420,7 +421,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           datasetId);
 
       queryOrder(idTableSchema, pageable, sortQueryBuilder, directionQueryBuilder, result, filter,
-          errorList, idRules, fieldSchema, fieldValue, datasetId, sortFields);
+          errorList, idRules, fieldSchema, fieldValue, datasetId, isExport ,sortFields);
     }
     return result;
   }
@@ -1154,7 +1155,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private void queryOrder(String idTableSchema, Pageable pageable, StringBuilder sortQueryBuilder,
       StringBuilder directionQueryBuilder, TableVO result, String filter,
       List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
-      Long datasetId, SortField... sortFields) {
+      Long datasetId, Boolean isExport, SortField... sortFields) {
 
 
     String formatedQuery =
@@ -1185,16 +1186,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
     query.setMaxResults(pageable.getPageSize());
 
-    List<RecordVO> recordVOs = null;
+    List<RecordVO> recordVOs;
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
     if (null == sortFields) {
       // Query without order.
       List<RecordValue> a = query.getResultList();
-      if (a == null || a.isEmpty()) {
-        LOG.error("Before mapping, no records found in dataset {}", datasetId);
-      }
+      a = reRunTheQueryIfEmpty(datasetId, isExport, a, query);
       recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
-      if (recordVOs.isEmpty()) {
+      if (BooleanUtils.isTrue(isExport) && recordVOs.isEmpty()) {
         LOG.error("After mapping, no records found. The Query is: {}. FirstResult is : {}, Max results are {}, IdTableSchema is {}", formatedQuery, query.getFirstResult(), query.getMaxResults(), idTableSchema);
       }
       result.setRecords(recordVOs);
@@ -1208,6 +1207,19 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema,
         pageable.getPageSize(), pageable.getPageNumber());
     result.setRecords(recordVOs);
+  }
+
+  private List<RecordValue> reRunTheQueryIfEmpty(Long datasetId, Boolean isExport, List<RecordValue> a, Query query) {
+    if (BooleanUtils.isTrue(isExport) && (a == null || a.isEmpty())) {
+      LOG.error("Before mapping, no records found in dataset {}", datasetId);
+      try {
+        Thread.sleep(2000);
+        a = query.getResultList();
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return a;
   }
 
   /**

@@ -39,7 +39,7 @@ public interface RecordExtendedQueriesRepository {
    */
   TableVO findByTableValueWithOrder(Long datasetId, String idTableSchema,
       List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
-      String fieldSchema, String fieldValue, SortField... sortFields);
+      String fieldSchema, String fieldValue, Boolean isExport, SortField... sortFields);
 
 
 

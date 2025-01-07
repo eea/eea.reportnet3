@@ -594,7 +594,7 @@ public class FileCommonUtils {
             ErrorTypeEnum.ERROR, ErrorTypeEnum.BLOCKER)
         : levelErrorList;
     return recordRepository.findByTableValueWithOrder(datasetId, idTableSchema, levelErrorList,
-        pageable, idRulesList, null, fieldValue, null).getRecords();
+        pageable, idRulesList, null, fieldValue, true ,null).getRecords();
   }
 
   /**
