@@ -2118,9 +2118,11 @@ public class DatasetServiceImpl implements DatasetService {
       newFields = sortFieldsArray.stream().toArray(SortField[]::new);
     }
 
+    ExportFilterVO filters = new ExportFilterVO();
+    filters.setFieldValue(fieldValue);
     result = recordRepository.findByTableValueWithOrder(datasetId, idTableSchema,
         Arrays.asList(levelError), pageable, idRules != null ? Arrays.asList(idRules) : null,
-        fieldSchema, fieldValue, false ,newFields);
+        fieldSchema, filters, false ,newFields);
     return result;
   }
 

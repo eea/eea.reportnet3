@@ -384,15 +384,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param pageable the pageable
    * @param idRules the id rules
    * @param fieldSchema the field schema
-   * @param fieldValue the field value
+   * @param filters the filters value
    * @param sortFields the sort fields
    * @return the table VO
    */
   @Override
   public TableVO findByTableValueWithOrder(Long datasetId, String idTableSchema,
       List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
-      String fieldSchema, String fieldValue, Boolean isExport ,SortField... sortFields) {
+      String fieldSchema, ExportFilterVO filters, Boolean isExport ,SortField... sortFields) {
 
+    String fieldValue = filters.getFieldValue();
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
@@ -416,7 +417,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           datasetId);
 
       queryOrder(idTableSchema, pageable, sortQueryBuilder, directionQueryBuilder, result, filter,
-          errorList, idRules, fieldSchema, fieldValue, datasetId, isExport ,sortFields);
+          errorList, idRules, fieldSchema, filters, datasetId, isExport ,sortFields);
     }
     return result;
   }
@@ -1143,24 +1144,24 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param errorList the error list
    * @param idRules the id rules
    * @param fieldSchema the field schema
-   * @param fieldValue the field value
+   * @param filters the filters value
    * @param datasetId the dataset id
    * @param sortFields the sort fields
    */
   private void queryOrder(String idTableSchema, Pageable pageable, StringBuilder sortQueryBuilder,
       StringBuilder directionQueryBuilder, TableVO result, String filter,
-      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
+      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, ExportFilterVO filters,
       Long datasetId, Boolean isExport, SortField... sortFields) {
 
     if (Boolean.TRUE.equals(isExport)) {
       int pageNumber = pageable.getPageNumber() + 1;
       int pageSize = pageable.getPageSize();
 
-      ExportFilterVO filters = new ExportFilterVO();
       List<RecordValue> recordValues = fileCommon.getRecordValuesPaginated(datasetId, idTableSchema, PageRequest.of(pageNumber, pageSize), filters );
       List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(recordValues));
       result.setRecords(recordVOs);
     } else {
+      String fieldValue = filters.getFieldValue();
       String formatedQuery =
           null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition, rv.id"
               : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
