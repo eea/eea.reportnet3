@@ -59,6 +59,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.UncategorizedSQLException;
@@ -67,7 +68,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -158,7 +158,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private FileCommonUtils fileCommon;
 
   @Autowired
-  SpatialDataHandling spatialDataHandling;
+  private SpatialDataHandling spatialDataHandling;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -187,12 +187,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   @Value("${spring.datasource.driverClassName}")
   private String connectionDriver;
-
-  /**
-   * The path export DL.
-   */
-  @Value("${exportDLPath}")
-  private String exportDLPath;
 
   /** The Constant WHERE_ID_TABLE_SCHEMA: {@value}. */
   private static final String WHERE_ID_TABLE_SCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
@@ -1158,70 +1152,61 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
       Long datasetId, Boolean isExport, SortField... sortFields) {
 
+    if (Boolean.TRUE.equals(isExport)) {
+      int pageNumber = pageable.getPageNumber() + 1;
+      int pageSize = pageable.getPageSize();
 
-    String formatedQuery =
-        null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition, rv.id"
-            : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
-            directionQueryBuilder.substring(1));
-    // Query without order or with it
-    Query query = entityManager.createQuery(formatedQuery);
-    query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-    query.setMaxResults(pageable.getPageSize());
-    query.setHint("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
-    query.setHint("javax.persistence.query.timeout", 75000);
-    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
-    if (null != idRules && !idRules.isEmpty()) {
-      query.setParameter(RULE_ID_LIST, idRules);
-      query.setParameter(RULE_ID_LIST, idRules);
-    }
-    if (!filter.isEmpty() && !errorList.isEmpty()) {
-      query.setParameter(ERROR_LIST, errorList);
-      query.setParameter(ERROR_LIST, errorList);
-    }
-    if (null != fieldSchema && StringUtils.isNotBlank(fieldValue)) {
-      query.setParameter(FIELD_SCHEMA, fieldSchema);
-      query.setParameter(FIELD_VALUE, fieldValue);
-    }
-    // Searches in the table occurrences where any column value matches fieldValue
-    else if (null == fieldSchema && StringUtils.isNotBlank(fieldValue)) {
-      query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
-    }
-
-    List<RecordVO> recordVOs;
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    if (null == sortFields) {
-      // Query without order.
-      List<RecordValue> a = query.getResultList();
-      a = reRunTheQueryIfEmpty(datasetId, isExport, a, query);
-      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
-      if (BooleanUtils.isTrue(isExport) && recordVOs.isEmpty()) {
-        LOG.error("After mapping, no records found. The Query is: {}. FirstResult is : {}, Max results are {}, IdTableSchema is {}", formatedQuery, query.getFirstResult(), query.getMaxResults(), idTableSchema);
-      }
+      ExportFilterVO filters = new ExportFilterVO();
+      List<RecordValue> recordValues = fileCommon.getRecordValuesPaginated(datasetId, idTableSchema, PageRequest.of(pageNumber, pageSize), filters );
+      List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(recordValues));
       result.setRecords(recordVOs);
     } else {
-      // Query with order.
-      List<Object[]> a = query.getResultList();
-      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
-    }
-    LOG.info(
-        "Filtering the table in dataset {} by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
-        datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema,
-        pageable.getPageSize(), pageable.getPageNumber());
-    result.setRecords(recordVOs);
-    entityManager.flush();
-  }
-
-  private List<RecordValue> reRunTheQueryIfEmpty(Long datasetId, Boolean isExport, List<RecordValue> a, Query query) {
-    if (BooleanUtils.isTrue(isExport) && (a == null || a.isEmpty())) {
-      LOG.error("Before mapping, no records found in dataset {}", datasetId);
-      try {
-        Thread.sleep(2000);
-        a = query.getResultList();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
+      String formatedQuery =
+          null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition, rv.id"
+              : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
+              directionQueryBuilder.substring(1));
+      // Query without order or with it
+      Query query = entityManager.createQuery(formatedQuery);
+      query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+      query.setMaxResults(pageable.getPageSize());
+      query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+      if (null != idRules && !idRules.isEmpty()) {
+        query.setParameter(RULE_ID_LIST, idRules);
+        query.setParameter(RULE_ID_LIST, idRules);
       }
+      if (!filter.isEmpty() && !errorList.isEmpty()) {
+        query.setParameter(ERROR_LIST, errorList);
+        query.setParameter(ERROR_LIST, errorList);
+      }
+      if (null != fieldSchema && StringUtils.isNotBlank(fieldValue)) {
+        query.setParameter(FIELD_SCHEMA, fieldSchema);
+        query.setParameter(FIELD_VALUE, fieldValue);
+      }
+      // Searches in the table occurrences where any column value matches fieldValue
+      else if (null == fieldSchema && StringUtils.isNotBlank(fieldValue)) {
+        query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
+      }
+
+      List<RecordVO> recordVOs;
+      TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+      if (null == sortFields) {
+        // Query without order.
+        List<RecordValue> a = query.getResultList();
+        recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
+        if (BooleanUtils.isTrue(isExport) && recordVOs.isEmpty()) {
+          LOG.error("After mapping, no records found. The Query is: {}. FirstResult is : {}, Max results are {}, IdTableSchema is {}", formatedQuery, query.getFirstResult(), query.getMaxResults(), idTableSchema);
+        }
+      } else {
+        // Query with order.
+        List<Object[]> a = query.getResultList();
+        recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
+      }
+      LOG.info(
+          "Filtering the table in dataset {} by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
+          datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema,
+          pageable.getPageSize(), pageable.getPageNumber());
+      result.setRecords(recordVOs);
     }
-    return a;
   }
 
   /**
