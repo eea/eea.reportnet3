@@ -214,6 +214,7 @@ public class FMEControllerImpl implements FMEController {
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam("fileName") String fileName) {
 
+    LOG.info("Downloading exported fme file {} for datasetId {} and providerId {}", fileName, datasetId, providerId);
     StreamingResponseBody stream = out -> {
       InputStream is = fmeCommunicationService.receiveFile(datasetId, providerId, fileName);
       try {
