@@ -148,6 +148,10 @@ public enum EventType {
   EXTERNAL_IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_import_design_failed_event", true),
 
+  DREMIO_ENDPOINT_ERROR_RESPONSE(LiteralConstants.DATA_REPORTING_TOPIC,
+          "dremio_endpoint_error_response", true),
+
+
   /** The external export reporting completed event. */
   EXTERNAL_EXPORT_REPORTING_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "external_export_reporting_completed_event", true),
