@@ -803,6 +803,9 @@ public final class EEAErrorMessage {
   /** The Constant REVERSE_SOFT_DELETE_DATAFLOW_FAILED */
   public static final String REVERSE_SOFT_DELETE_DATAFLOW_FAILED = "Reverse soft delete failed";
 
+  /** The Constant RELEASE_RECEIPT_NOTFOUND: {@value}. */
+  public static final String RELEASE_RECEIPT_NOTFOUND = "Release Receipt not found";
+
 
 
   /**
