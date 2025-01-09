@@ -121,14 +121,17 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         result.append(", ");
       }
 
+      String fieldName = "\"" + fieldSchemaVO.getName() + "\""; // Wrap field names in double quotes
+
       if (geoJsonEnums.contains(fieldSchemaVO.getType())) {
-        result.append(FROM_XEX).append("(").append(fieldSchemaVO.getName()).append(") as ").append(fieldSchemaVO.getName());
+        result.append(FROM_XEX).append("(").append(fieldName).append(") AS ").append(fieldName);
       } else {
-        result.append(fieldSchemaVO.getName());
+        result.append(fieldName);
       }
     }
     return result;
   }
+
 
   private List<String> getHeaders(boolean includeGeoJsonHeaders, TableSchemaVO tableSchemaVO) {
     List<DataType> geoJsonEnums = getGeoJsonEnums();

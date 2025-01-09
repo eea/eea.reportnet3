@@ -456,7 +456,8 @@ public class ValidationHelper implements DisposableBean {
       String columnDefinitions = fieldSchemas.stream()
           .map(field -> {
             String type = spatialDataHandling.getGeoJsonEnums().contains(field.getType()) ? " VARBINARY " : " VARCHAR ";
-            return field.getHeaderName() + " " + type;
+            // Wrap field header names in double quotes to avoid issues with reserved keywords or special characters
+            return "\"" + field.getHeaderName() + "\" " + type;
           })
           .collect(Collectors.joining(", "));
 
