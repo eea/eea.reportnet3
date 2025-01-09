@@ -16,7 +16,7 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.util.IOUtils;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptInfoVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -57,7 +57,7 @@ public class ReceiptPDFGenerator {
    * @param receipt the receipt
    * @param out the out
    */
-  public void generatePDF(ReleaseReceiptVO receipt, OutputStream out, Boolean isManualAcceptance) {
+  public void generatePDF(ReleaseReceiptInfoVO receipt, OutputStream out, Boolean isManualAcceptance) {
     if (out != null) {
       try (PDDocument document = new PDDocument()) {
         // Create and add an A4 page
@@ -88,7 +88,7 @@ public class ReceiptPDFGenerator {
    * @param page the page
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  private void printContentPDF(ReleaseReceiptVO receipt, PDDocument document, PDPage page, Boolean isManualAcceptance)
+  private void printContentPDF(ReleaseReceiptInfoVO receipt, PDDocument document, PDPage page, Boolean isManualAcceptance)
       throws IOException {
 
     float x;

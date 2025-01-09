@@ -13,7 +13,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class ReleaseReceiptVO implements Serializable {
+public class ReleaseReceiptInfoVO implements Serializable {
 
   /** The Constant serialVersionUID. */
   private static final long serialVersionUID = -1860518284289153708L;

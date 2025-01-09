@@ -50,7 +50,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
-import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptInfoVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -966,7 +966,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
 
-    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
+    ReleaseReceiptInfoVO receipt = new ReleaseReceiptInfoVO();
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
 
     //if is manual acceptance a text note is added to final receipt
