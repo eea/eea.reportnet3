@@ -246,9 +246,6 @@ export const PaMsWebformField = ({
           parsedValue,
           bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
         );
-        if (!isNil(onUpdatePamsValue) && (updateInCascade || updatesGroupInfo)) {
-          onUpdatePamsValue(field?.recordId, field?.value, field?.fieldId, updatesGroupInfo);
-        }
 
         if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
