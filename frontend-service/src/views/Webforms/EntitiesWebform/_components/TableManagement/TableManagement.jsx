@@ -59,6 +59,7 @@ export const TableManagement = ({
 
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     initialSelectedRecord: {},
+    isDeletingRow: false,
     isDialogVisible: { delete: false, manageRows: false },
     isLoading: true,
     isSaving: false,
@@ -205,6 +206,7 @@ export const TableManagement = ({
   const setIsLoading = value => tableManagementDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onDeleteRow = async () => {
+    tableManagementDispatch({ type: 'DELETE_ROW', payload: true });
     try {
       await DatasetService.deleteRecord({
         datasetId,
@@ -231,6 +233,7 @@ export const TableManagement = ({
         );
       }
     } finally {
+      tableManagementDispatch({ type: 'DELETE_ROW', payload: false });
       manageDialogs('delete', false);
     }
   };
@@ -537,6 +540,7 @@ export const TableManagement = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           header={resourcesContext.messages['deleteTabHeader']}
+          iconConfirm={tableManagementState.isDeletingRow ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onDeleteRow}
