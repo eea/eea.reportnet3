@@ -2209,6 +2209,10 @@ public class FileTreatmentHelper implements DisposableBean {
             // make the zip
             if (includeZip) {
                 nameFile = nameDataset + ".zip";
+                if(nameFile.contains("/")){
+                    //replace slash
+                    nameFile = nameFile.replaceAll("/", "_");
+                }
                 // we create the file.zip
                 File fileWriteZip = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
 
@@ -2287,6 +2291,10 @@ public class FileTreatmentHelper implements DisposableBean {
                     mimeType = FileTypeEnum.XLSX.getValue();
                 }
                 nameFile = nameDataset + "." + mimeType;
+                if(nameFile.contains("/")){
+                    //replace slash
+                    nameFile = nameFile.replaceAll("/", "_");
+                }
                 File fileWrite = new File(new File(pathPublicFile, "dataset-" + datasetId), nameFile);
                 try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
                     for (Entry<String, byte[]> entry : files.entrySet()) {
