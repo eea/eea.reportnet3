@@ -122,14 +122,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> recordIds = new ArrayList<>();
 
-            //TODO: TO check if file exists is needed
             long rowCount = dremioHelperService.getRowCount(tablePath);
             if (rowCount == 0) {
-                if (ruleMethodName.equals(IS_TABLE_EMPTY)) {
-                    recordIds.add(TABLE_EMPTY);
-                } else {
-                    return;
-                }
+                recordIds.add(TABLE_EMPTY);
             }
 
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
@@ -141,7 +136,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
             List<Map<String, Object>> customQueryResultSet = new ArrayList<>();
-            if (!ruleMethodName.equals(IS_TABLE_EMPTY)) {
+            if (!ruleMethodName.equals(IS_TABLE_EMPTY) && rowCount > 0) {
                 Class<?> cls = Class.forName(DREMIO_SQL_VALIDATION_UTILS);
                 Field[] fields = cls.getDeclaredFields();
                 Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
