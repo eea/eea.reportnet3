@@ -4,6 +4,8 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.vo.dremio.DremioDirectoryItemsResponse;
 import org.eea.interfaces.vo.dremio.DremioJobStatusResponse;
 
+import java.util.LinkedHashMap;
+
 public interface DremioHelperService {
 
     String getAuthToken();
@@ -24,11 +26,13 @@ public interface DremioHelperService {
 
     DremioJobStatusResponse pollForJobStatus(String id);
 
-    String executeSqlStatementPost(String sqlStatement);
+    LinkedHashMap<String, Object> executeSqlStatementGet(String sqlStatement) throws Exception;
 
     void checkIfDremioProcessFinishedSuccessfully(String query, String processId, Long optionalTimeoutMs) throws Exception;
 
     void refreshTableMetadataAndPromote(Long jobId, String tablePath, S3PathResolver s3PathResolver, String tableName) throws Exception;
+
+    long getRowCount(String tablePath) throws Exception;
 
     void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception;
 }

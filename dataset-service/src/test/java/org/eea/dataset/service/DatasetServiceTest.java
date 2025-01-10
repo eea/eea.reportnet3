@@ -61,7 +61,6 @@ import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.StatisticsRepository;
 import org.eea.dataset.persistence.metabase.repository.TestDatasetRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
@@ -269,7 +268,7 @@ DatasetServiceTest {
 
   /** The statistics repository. */
   @Mock
-  private StatisticsRepository statisticsRepository;
+  private StatisticsService statisticsService;
 
   /** The dataset metabase service. */
   @Mock
@@ -1646,9 +1645,7 @@ DatasetServiceTest {
     when(datasetRepository.findById(Mockito.any())).thenReturn(Optional.of(datasetValue));
     when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(schema);
     when(dataSetMetabaseRepository.findById(Mockito.any())).thenReturn(Optional.of(dsMetabase));
-
     datasetService.saveStatistics(1L, false);
-    Mockito.verify(statisticsRepository, times(1)).saveAll(Mockito.any());
   }
 
   /**
@@ -3115,7 +3112,7 @@ DatasetServiceTest {
     attachment.setContent(expectedResult);
 
     datasetService.initializeDataset(1L, "5cf0e9b3b793310e9ceca190");
-    Mockito.verify(statisticsRepository, times(1)).saveAll(Mockito.any());
+    Mockito.verify(statisticsService, times(1)).saveStatistics(Mockito.any());
 
   }
 

@@ -83,7 +83,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @LockMethod
   @HystrixCommand
   @PostMapping("/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Create one Representative", response = Long.class, hidden = true)
   public Long createRepresentative(
       @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
@@ -113,7 +113,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @LockMethod
   @HystrixCommand
   @PostMapping("/provider/create")
-  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Creates a single provider", response = DataProviderVO.class, hidden = true)
   public void createProvider(
       @ApiParam(type = "Object", value = "Data Provider Object") @RequestBody DataProviderVO dataProviderVO) throws Exception {
@@ -469,7 +469,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @GetMapping(value = "/export/{dataflowId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @ApiOperation(value = "Exports the file containing the info of Lead reporters",
       response = ResponseEntity.class, hidden = true)
@@ -541,7 +541,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    */
   @Override
   @HystrixCommand
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Import file lead reporters", hidden = true)
   @PostMapping("/import/{dataflowId}/group/{groupId}")
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.FILE_EXTENSION),
@@ -599,7 +599,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @return the response entity
    */
   @PostMapping("/importAndReplace/{dataflowId}/group/{groupId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Replace lead reporters", hidden = true)
   @ApiResponses(value = {
           @ApiResponse(code = 400, message = EEAErrorMessage.FILE_EXTENSION),
@@ -643,7 +643,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @HystrixCommand
   @PostMapping("/{representativeId}/leadReporter/dataflow/{dataflowId}")
   @LockMethod
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Create one Lead reporter", response = Long.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 400, message = EEAErrorMessage.USER_NOTFOUND),
       @ApiResponse(code = 400, message = EEAErrorMessage.NOT_EMAIL),
@@ -692,7 +692,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
   @Override
   @HystrixCommand
   @PutMapping("/leadReporter/update/dataflow/{dataflowId}")
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(value = "Updates a Lead reporter", response = Long.class, hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 403, message = "LeadReporter not allowed"),
       @ApiResponse(code = 400, message = "Invalid email"),
@@ -767,7 +767,7 @@ public class RepresentativeControllerImpl implements RepresentativeController {
    * @param dataflowId the dataflow id
    */
   @Override
-  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT')")
+  @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN','DATAFLOW_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
   @ApiOperation(
       value = "Validates all lead reporters, checking wether they are registered in the system or not",
       hidden = true)

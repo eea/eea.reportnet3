@@ -4,7 +4,9 @@
       { "label": "5", "value": 5 },
       { "label": "10", "value": 10 },
       { "label": "20", "value": 20 },
-      { "label": "100", "value": 100 }
+      { "label": "100", "value": 100 },
+      { "label": "500", "value": 500 },
+      { "label": "1000", "value": 1000 }
     ],
     "defaultBasemapLayer": [
       { "label": "Topographic", "value": "Topographic" },

@@ -1,10 +1,14 @@
 package org.eea.dataset.mapper;
 
+import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.eea.datalake.service.SpatialDataHandling;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.interfaces.vo.dataset.FieldVO;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.RecordSchemaVO;
+import org.eea.utils.LiteralConstants;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 
@@ -24,8 +28,11 @@ public class DremioRecordMapper implements RowMapper<RecordVO> {
 
     private final SpatialDataHandling spatialDataHandling;
 
-    public DremioRecordMapper(SpatialDataHandling spatialDataHandling) {
+    private static SchemasRepository schemasRepository;
+
+    public DremioRecordMapper(SpatialDataHandling spatialDataHandling, SchemasRepository schemasRepository) {
         this.spatialDataHandling = spatialDataHandling;
+        this.schemasRepository = schemasRepository;
     }
 
     @Override
@@ -51,6 +58,16 @@ public class DremioRecordMapper implements RowMapper<RecordVO> {
             field.setValue(value);
             field.setByteArrayValue(byteArrayValue);
             field.setName(fieldSchemaVO.getName());
+
+            //set up reference field schema id if exists
+            if(datasetSchemaId != null && StringUtils.isNotBlank(fieldSchemaVO.getId())) {
+                Document documentField = schemasRepository.findFieldSchema(datasetSchemaId, fieldSchemaVO.getId());
+                Document referenced = (documentField != null) ? (Document) documentField.get(LiteralConstants.REFERENCED_FIELD) : null;
+                String idPk = (referenced != null) ? referenced.get("idPk").toString() : null;
+                field.setReferenceFieldSchemaId(idPk);
+            }
+
+
             fields.add(field);
         }
         recordVO.setFields(fields);

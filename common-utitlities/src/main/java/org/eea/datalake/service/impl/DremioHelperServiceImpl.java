@@ -1,7 +1,5 @@
 package org.eea.datalake.service.impl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.apache.commons.lang3.BooleanUtils;
@@ -10,6 +8,7 @@ import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dremio.controller.DremioApiController;
 import org.eea.interfaces.vo.dremio.*;
 
@@ -23,7 +22,11 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -115,7 +118,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         } else if (S3_DATAFLOW_REFERENCE_FOLDER_PATH.equals(s3PathResolver.getPath())) {
             directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_REFERENCE_FOLDER_PATH);
         } else {
-            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_CURRENT_PATH);
+            directoryPath = bucketName + "/" + s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_PROVIDER_PATH);
         }
         DremioDirectoryItemsResponse directoryItems = null;
         try {
@@ -267,33 +270,102 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     }
 
     @Override
-    public String executeSqlStatementPost(String sqlStatement){
-        DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
-        String result = null;
+    public LinkedHashMap<String, Object> executeSqlStatementGet(String sqlStatement) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        DremioSqlRequestBody requestBody = new DremioSqlRequestBody(sqlStatement);
+        String result;
+        DremioApiJob dremioApiJob;
+
         try {
-            result = dremioApiController.sqlQueryString(token, dremioSqlRequestBody);
-        } catch (FeignException e) {
-            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
-                token = this.getAuthToken();
-                result = dremioApiController.sqlQueryString(token, dremioSqlRequestBody);
-            } else {
-                LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
-                throw e;
+            // Execute SQL query and get job ID
+            result = executeWithTokenRefresh(() -> dremioApiController.sqlQueryString(token, requestBody));
+            dremioApiJob = objectMapper.readValue(result, DremioApiJob.class);
+
+            LinkedHashMap<String, Object> results = getResults(dremioApiJob);
+            if (results == null) {
+                throw new EEAException("Failed to fetch results within retry limit.");
+            }
+
+            return results;
+
+        } catch (FeignException | IOException e) {
+            LOG.error("Failed to execute SQL statement: {}", sqlStatement, e);
+            throw new EEAException("Failed to execute SQL statement");
+        }
+    }
+
+    private LinkedHashMap<String, Object> getResults(DremioApiJob dremioApiJob) throws InterruptedException, EEAException {
+        int retryCount = 0;
+        int maxRetries = 5;
+        int pollIntervalMillis = 2000;
+        LinkedHashMap<String, Object> results = null;
+
+        while (results == null && retryCount < maxRetries) {
+            try {
+                Thread.sleep(pollIntervalMillis);
+                results = (LinkedHashMap<String, Object>) dremioApiController.sqlApiResults(token, dremioApiJob.getId());
+            } catch (FeignException e) {
+                if (e.status() == HttpStatus.ACCEPTED.value()) { // 202 Accepted indicates results are not ready
+                    LOG.info("Results not ready, retrying...");
+                    retryCount++;
+                } else if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
+                    token = getAuthToken();
+                    try {
+                        results = (LinkedHashMap<String, Object>) dremioApiController.sqlApiResults(token, dremioApiJob.getId());
+                    } catch (Exception ex) {
+                        LOG.error("Retry failed after token refresh.", ex);
+                        throw new EEAException("Retry failed after token refresh.");
+                    }
+                } else {
+                    throw new EEAException("Failed to fetch results within retry limit.");
+                }
             }
         }
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            DremioApiJob dremioApiJob = objectMapper.readValue(result, DremioApiJob.class);
-            Object results = dremioApiController.sqlApiResults(token, dremioApiJob.getId());
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonParseException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return result;
+        return results;
     }
+
+    @Override
+    public long getRowCount(String tablePath) throws Exception {
+        String headerName = "myRowCount";
+        String query = String.format(
+            "SELECT COUNT(*) AS %s FROM %s ",
+            headerName,
+            tablePath
+        );
+        try {
+            // Extract and return the row count
+            List<LinkedHashMap<String,Object>> rows =  (List<LinkedHashMap<String,Object>>) executeSqlStatementGet(query).get("rows");
+
+            return rows.stream()
+                .filter(Objects::nonNull)
+                .map(linkedHashMap -> Long.valueOf((Integer) linkedHashMap.get(headerName)))
+                .findFirst()
+                .orElse(0L);
+        } catch (FeignException | IOException e) {
+            LOG.error("Failed to execute SQL statement: {}", query, e);
+            throw new EEAException("Failed to execute SQL statement.");
+        }
+    }
+
+    private <T> T executeWithTokenRefresh(Callable<T> operation) throws Exception {
+        try {
+            return operation.call();
+        } catch (FeignException e) {
+            if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
+                token = getAuthToken();
+                try {
+                    return operation.call();
+                } catch (Exception ex) {
+                    LOG.error("Retry failed after token refresh.", ex);
+                    throw ex;
+                }
+            }
+            throw e;
+        } catch (Exception e) {
+            throw new IOException("Execution error", e);
+        }
+    }
+
 
     @Override
     public void checkIfDremioProcessFinishedSuccessfully(String query, String processId, Long optionalTimeoutMs) throws Exception {

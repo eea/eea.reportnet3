@@ -241,7 +241,14 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
       });
 
       setTotalRecords(unparsedNotifications.totalRecords);
-      setNotifications(notificationsArray);
+
+      const filteredNotifications = notificationsArray.filter(
+        notification =>
+          notification.key !== 'ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT' &&
+          notification.key !== 'PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT'
+      );
+
+      setNotifications(filteredNotifications);
     } catch (error) {
       console.error('NotificationsList - onLoadNotifications.', error);
     } finally {

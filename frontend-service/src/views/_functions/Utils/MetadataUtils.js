@@ -9,6 +9,8 @@ const getMetadata = async ({ dataflowId, datasetId }) => {
     metadata.dataflow = {
       bigData: dataflowMetadata.bigData,
       dataflowId,
+      deleted: dataflowMetadata.deleted,
+      deletedAt: dataflowMetadata.deletedAt,
       name: dataflowMetadata.name || '',
       description: dataflowMetadata.description || '',
       type: dataflowMetadata.type,

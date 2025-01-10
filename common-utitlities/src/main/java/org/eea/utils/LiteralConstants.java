@@ -1,7 +1,5 @@
 package org.eea.utils;
 
-import org.springframework.beans.factory.annotation.Value;
-
 /**
  * The Class LiteralConstants.
  */
@@ -216,6 +214,7 @@ public final class LiteralConstants {
 
   /** The Constant S3_PROVIDER_IMPORT_PATH: {@value}. */
   public static final String S3_PROVIDER_IMPORT_PATH = "%s/%s/%s/current/provider_import/%s";
+  public static final String S3_PROVIDER_ROOT_PATH = "%s/%s/%s/current";
 
   /** The Constant S3_ATTACHMENTS_TABLE_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_TABLE_PATH = "%s/%s/%s/current/attachments/%s";
@@ -280,14 +279,14 @@ public final class LiteralConstants {
   /** The Constant S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX: {@value}. */
   public static final String S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX = "%s/%s/%s/current/%s/";
 
-  /** The Constant S3_CURRENT_PATH: {@value}. */
-  public static final String S3_CURRENT_PATH = "%s/%s/%s/current";
+  /** The Constant S3_PROVIDER_PATH: {@value}. */
+  public static final String S3_PROVIDER_PATH = "%s/%s/%s/current";
 
   /** The Constant S3_TABLE_NAME_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_QUERY_PATH = ".\"%s\".\"%s\".\"%s\".\"current\".\"%s\".\"%s\"";
 
   /** The Constant S3_VALIDATION_DC_PATH: {@value}. */
-  public static final String S3_VALIDATION_DC_PATH = "%s/collections/%s/current/validation/%s/%s/%s";
+  public static final String S3_VALIDATION_DC_PATH = "%s/collections/%s/current/validation/%s";
 
   /** The Constant S3_VALIDATION_TABLE_PATH: {@value}. */
   public static final String S3_VALIDATION_TABLE_PATH = "%s/%s/%s/current/validation";
@@ -296,7 +295,7 @@ public final class LiteralConstants {
   public static final String S3_VALIDATION_DC_QUERY_PATH = ".\"%s\".\"collections\".\"%s\".\"current\".\"validation\".\"%s\".\"%s\".\"%s\"";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_PATH: {@value}. */
-  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/collections/%s/current/%s_validate/%s/%s";
+  public static final String S3_TABLE_NAME_VALIDATE_DC_PATH = "%s/collections/%s/current/validation/%s/%s/%s";
 
   /** The Constant S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH: {@value}. */
   public static final String S3_TABLE_NAME_VALIDATE_DC_QUERY_PATH = ".\"%s\".\"collections\".\"%s\".\"current\".\"%s_validate\".\"%s\".\"%s\"";
@@ -400,6 +399,9 @@ public final class LiteralConstants {
   /** The Constant ZIP_TYPE: {@value}. */
   public static final String ZIP = "zip";
 
+  /** The Constant CSV: {@value}. */
+  public static final String CSV = "csv";
+
   /** The Constant VALIDATION_LEVEL: {@value}. */
   public static final String VALIDATION_LEVEL = "validation_level";
 
@@ -465,6 +467,15 @@ public final class LiteralConstants {
 
   /** The Constant SPACE: {@value}. */
   public static final String SPACE = " ";
+
+  /** The Constant TOTAL_RECORDS_IMPORTED: {@value}. */
+  public static final String TOTAL_RECORDS_IMPORTED = "totalRecordsImported";
+
+  /** The Constant LAST_IMPORT_DATE: {@value}. */
+  public static final String LAST_IMPORT_DATE = "lastImportDate";
+
+  /** The Constant LAST_IMPORT_FILE_EXTENSION: {@value}. */
+  public static final String LAST_IMPORT_FILE_EXTENSION = "lastImportFileExtension";
 
   /**
    * Instantiates a new literal constants.

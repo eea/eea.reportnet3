@@ -34,10 +34,10 @@ import { useBreadCrumbs } from 'views/_functions/Hooks/useBreadCrumbs';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
-import { CurrentPage } from 'views/_functions/Utils';
-import { MetadataUtils } from 'views/_functions/Utils';
+import { CurrentPage, MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isNil } from 'lodash';
+import dayjs from "dayjs";
 
 export const DataCollection = () => {
   const navigate = useNavigate();
@@ -300,6 +300,19 @@ export const DataCollection = () => {
     setLoading(false);
   };
 
+  const getSubtitle = () => {
+    let subtitle = metadata?.dataflow.bigData
+      ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowName })
+      : dataflowName
+
+    if (metadata?.dataflow.deleted) {
+      const deletedAt = dayjs(metadata?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
+      subtitle += ` (${TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })})`;
+    }
+
+    return subtitle;
+  };
+
   const onRenderTabsSchema = (
     <TabsSchema
       bigData={metadata?.dataflow.bigData}
@@ -351,18 +364,7 @@ export const DataCollection = () => {
       <Title
         icon="dataCollection"
         iconSize="3.5rem"
-        subtitle={
-          metadata?.dataflow.bigData ? (
-            <p
-              dangerouslySetInnerHTML={{
-                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-                  name: dataflowName
-                })
-              }}></p>
-          ) : (
-            dataflowName
-          )
-        }
+        subtitle={getSubtitle()}
         title={dataCollectionName}
       />
       <div className={styles.ButtonsBar}>

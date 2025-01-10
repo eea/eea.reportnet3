@@ -59,26 +59,26 @@ const checkShowRequired = (element, elements) => {
 export const WebformRecord = ({
   addingOnTableSchemaId,
   bigData,
-  calculateSingle,
   columnsSchema,
   dataflowId,
   dataProviderId,
   datasetId,
   datasetSchemaId,
+  entitiesRecords,
   hasFields,
   isAddingMultiple,
   isFixedNumber = true,
-  isGroup,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
   onRefresh,
   onTabChange,
-  onUpdatePamsValue,
-  onUpdateSinglesList,
-  pamsRecords,
+  onUpdateEntitiesValue,
   record,
   referencedTableSchemaId,
+  rootPkFieldId,
+  rootTableName,
+  selectedTableId,
   tableId,
   tableName,
   webformType
@@ -109,13 +109,13 @@ export const WebformRecord = ({
 
   const onDeleteMultipleWebform = async () => {
     webformRecordDispatch({ type: 'SET_IS_DELETING', payload: { isDeleting: true } });
-    let updateInCascade = webformRecordState.record?.elements?.some(element => element.deleteInCascade);
+
     try {
       await DatasetService.deleteRecord({
         datasetId,
         selectedRecordId,
-        tableId,
-        updateInCascade
+        tableId: selectedTableId ? selectedTableId : tableId,
+        updateInCascade: true
       });
       onRefresh();
       handleDialogs('deleteRow', false);
@@ -143,6 +143,38 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'ON_FILL_FIELD', payload: { field, option, value, conditional } });
   };
 
+  const getCreatedSubTable = (record, element) => {
+    const subTableCreated =
+      !isNil(record) &&
+      record.elements.filter(
+        col => col.name !== rootTableName && (col.type === 'TABLE') & !isEmpty(col.elementsRecords)
+      ).length > 0;
+
+    let subTablesList;
+    let isSubTableFk;
+
+    if (subTableCreated) {
+      subTablesList =
+        !isNil(record) &&
+        record.elements.filter(
+          col => col.name !== rootTableName && (col.type === 'TABLE') & !isEmpty(col.elementsRecords)
+        );
+
+      const subTablesFkNamesList = subTablesList.map(subTable => {
+        const namesList = subTable.elements
+          .filter(col => col.type === 'FIELD' && col.referenceParentField)
+          .map(field => (field = { name: field.referenceParentField }));
+
+        return (subTable = namesList);
+      });
+
+      isSubTableFk = subTablesFkNamesList.some(subTable =>
+        subTable.some(fieldName => fieldName.name === element.name || element.isPrimary === true)
+      );
+    }
+    return isSubTableFk;
+  };
+
   const onSaveField = async () => {
     try {
       await DatasetService.createRecord(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
@@ -151,65 +183,16 @@ export const WebformRecord = ({
     }
   };
 
-  const onToggleFieldVisibility = (dependency, fields = []) => {
-    if (!isNil(isGroup) && isGroup()) return true;
-    if (isNil(dependency)) return true;
+  const onToggleFieldVisibility = (referenceParentField, fields = []) => {
+    if (isNil(referenceParentField)) return true;
     const filteredDependency = fields
-      .filter(field => TextUtils.areEquals(field.name, dependency.field))
+      .filter(field => TextUtils.areEquals(field.name, referenceParentField))
       .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split('; ')));
 
     return filteredDependency
       .flat()
-      .map(field => dependency.value.includes(field))
+      .map(field => referenceParentField.includes(field))
       .includes(true);
-  };
-
-  const checkAddButtonVisibility = el => {
-    if (isNil(isGroup)) {
-      return true;
-    } else {
-      if (isGroup() && !isNil(el.hasCalculatedFields)) {
-        return false;
-      } else {
-        return true;
-      }
-    }
-  };
-
-  const checkCalculatedFieldVisibility = el => {
-    if (isNil(isGroup)) {
-      return false;
-    } else {
-      if (isGroup() && el.calculatedWhenGroup && !el.hideWhenCalculated) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  };
-
-  const checkCalculatedTableVisibility = el => {
-    if (isNil(isGroup)) {
-      return false;
-    } else {
-      if (isGroup() && !isNil(el.hasCalculatedFields)) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  };
-
-  const checkLabelVisibility = el => {
-    if (isNil(isGroup)) {
-      return true;
-    } else {
-      if ((isGroup() && el.hideWhenCalculated) || (!isGroup() && el.hideWhenSingle)) {
-        return false;
-      } else {
-        return true;
-      }
-    }
   };
 
   const handleDialogs = (dialog, value) => {
@@ -222,7 +205,6 @@ export const WebformRecord = ({
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
         const isSubTable = () => element.elementsRecords.length > 1;
-
         if (isSubTable()) {
           return (
             <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
@@ -248,11 +230,11 @@ export const WebformRecord = ({
           const elementWidth = (100 - elementGap) / elementCount;
           fieldStyle.width = elementWidth;
         }
+
         return (
-          checkLabelVisibility(element) &&
           !isFieldVisible &&
-          onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={element.fieldId} style={fieldStyle}>
+          onToggleFieldVisibility(element.referenceParentField, elements, element) && (
+            <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
                 <label>
                   {element.title}
@@ -270,9 +252,7 @@ export const WebformRecord = ({
               )}
               <div className={styles.fieldWrapper}>
                 <div className={styles.template}>
-                  {checkCalculatedFieldVisibility(element) ? (
-                    calculateSingle(element)
-                  ) : (
+                  {
                     <WebformField
                       bigData={bigData}
                       columnsSchema={columnsSchema}
@@ -281,6 +261,7 @@ export const WebformRecord = ({
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
+                      entitiesRecords={entitiesRecords}
                       isConditional={
                         !isNil(webformRecordState.record) &&
                         webformRecordState.record.elements.filter(
@@ -290,16 +271,16 @@ export const WebformRecord = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
-                      onUpdatePamsValue={onUpdatePamsValue}
-                      onUpdateSinglesList={onUpdateSinglesList}
-                      pamsRecords={pamsRecords}
+                      onUpdateEntitiesValue={onUpdateEntitiesValue}
                       record={record}
                       referencedTableSchemaId={referencedTableSchemaId}
+                      rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
                     />
-                  )}
+                  }
                 </div>
                 {element.validations &&
                   uniqBy(element.validations, element => {
@@ -318,27 +299,53 @@ export const WebformRecord = ({
         );
       } else if (element.type === 'LABEL') {
         return (
-          checkLabelVisibility(element) && (
-            <div key={uniqueId(element.title)}>
-              {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
-              {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
-              {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
-              {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
-              {element.tooltip && isNil(element.customType) && (
-                <Button
-                  className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
-                  icon="infoCircle"
-                  tooltip={element.tooltip}
-                  tooltipOptions={{ position: 'top' }}
-                />
-              )}
-            </div>
-          )
+          <div key={uniqueId(element.title)}>
+            {element.level === 2 && <h2 className={styles[`label${element.level}`]}>{element.title}</h2>}
+            {element.level === 3 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+            {element.level === 4 && <h3 className={styles[`label${element.level}`]}>{element.title}</h3>}
+            {<span style={{ color: 'var(--errors)' }}>{element.showRequiredCharacter ? ' *' : ''}</span>}
+            {element.tooltip && isNil(element.customType) && (
+              <Button
+                className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                icon="infoCircle"
+                tooltip={element.tooltip}
+                tooltipOptions={{ position: 'top' }}
+              />
+            )}
+          </div>
         );
       } else {
+        let fkHasEmptyValues = false;
+
+        const referencePkFieldId = element.records[0].fields.filter(
+          field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+        )[0]?.referencedField?.idPk;
+
+        const referencePkValue = record.elements.find(
+          elementField =>
+            elementField.fieldSchema === referencePkFieldId || elementField.fieldSchemaId === referencePkFieldId
+        )?.value;
+
+        const fkFields = element?.elements
+          .filter(element => !isNil(element.referenceParentField))
+          .map(
+            field =>
+              (field = {
+                fieldName: field.name,
+                referenceFieldName: field?.referenceParentField,
+                value: record.elements.filter(element =>
+                  TextUtils.areEquals(field?.referenceParentField, element.name)
+                )[0].value
+              })
+          );
+
+        if (!isEmpty(fkFields)) {
+          fkHasEmptyValues = fkFields.some(field => isEmpty(field.value));
+        }
+
         return (
           !isSubTableVisible &&
-          onToggleFieldVisibility(element.dependency, elements, element) && (
+          onToggleFieldVisibility(element.referenceParentField, elements, element) && (
             <div
               className={element.showInsideParentTable ? styles.showInsideParentTable : styles.subTable}
               key={element.recordSchemaId}>
@@ -352,23 +359,19 @@ export const WebformRecord = ({
                     )}
                   </h3>
 
-                  {checkAddButtonVisibility(element) && element.multipleRecords && (
+                  {element.multipleRecords && (
                     <Button
-                      disabled={addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple}
+                      disabled={
+                        fkHasEmptyValues ||
+                        isEmpty(referencePkValue) ||
+                        (addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple)
+                      }
                       icon={
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
                       }
                       label={resourcesContext.messages['addRecord']}
                       onClick={() => {
-                        let filteredRecordId = null;
-                        if (TextUtils.areEquals(element.name, 'OtherObjectives')) {
-                          const filteredTable = elements.filter(element =>
-                            TextUtils.areEquals(element.name, 'SectorAffected')
-                          );
-
-                          if (!isEmpty(filteredTable)) filteredRecordId = filteredTable[0].recordId;
-                        }
-                        onAddMultipleWebform(element.tableSchemaId, filteredRecordId);
+                        onAddMultipleWebform(element.tableSchemaId, referencePkValue, false, fkFields);
                       }}
                     />
                   )}
@@ -386,59 +389,40 @@ export const WebformRecord = ({
                 />
               )}
 
-              {checkCalculatedTableVisibility(element)
-                ? calculateSingle(element)
-                : filterRecords(element, elements).map((record, i) => {
-                    return (
-                      <WebformRecord
-                        addingOnTableSchemaId={addingOnTableSchemaId}
-                        bigData={bigData}
-                        calculateSingle={calculateSingle}
-                        columnsSchema={columnsSchema}
-                        dataflowId={dataflowId}
-                        dataProviderId={dataProviderId}
-                        datasetId={datasetId}
-                        datasetSchemaId={datasetSchemaId}
-                        isAddingMultiple={isAddingMultiple}
-                        isGroup={isGroup}
-                        key={i}
-                        multipleRecords={element.multipleRecords}
-                        newRecord={webformRecordState.newRecord}
-                        onAddMultipleWebform={onAddMultipleWebform}
-                        onRefresh={onRefresh}
-                        onTabChange={onTabChange}
-                        onUpdatePamsValue={onUpdatePamsValue}
-                        onUpdateSinglesList={onUpdateSinglesList}
-                        pamsRecords={pamsRecords}
-                        record={record}
-                        referencedTableSchemaId={element?.tableSchemaId}
-                        tableId={tableId}
-                        tableName={element.title}
-                      />
-                    );
-                  })}
+              {element.elementsRecords.map((record, i) => {
+                return (
+                  <WebformRecord
+                    addingOnTableSchemaId={addingOnTableSchemaId}
+                    bigData={bigData}
+                    columnsSchema={columnsSchema}
+                    dataflowId={dataflowId}
+                    dataProviderId={dataProviderId}
+                    datasetId={datasetId}
+                    datasetSchemaId={datasetSchemaId}
+                    entitiesRecords={entitiesRecords}
+                    isAddingMultiple={isAddingMultiple}
+                    key={i}
+                    multipleRecords={element.multipleRecords}
+                    newRecord={webformRecordState.newRecord}
+                    onAddMultipleWebform={onAddMultipleWebform}
+                    onRefresh={onRefresh}
+                    onTabChange={onTabChange}
+                    onUpdateEntitiesValue={onUpdateEntitiesValue}
+                    record={record}
+                    referencedTableSchemaId={element?.tableSchemaId}
+                    rootPkFieldId={rootPkFieldId}
+                    rootTableName={rootTableName}
+                    selectedTableId={element.tableSchemaId}
+                    tableId={tableId}
+                    tableName={element.title}
+                  />
+                );
+              })}
             </div>
           )
         );
       }
     });
-  };
-
-  const filterRecords = (element, elements) => {
-    if (!TextUtils.areEquals(element.name, 'OtherObjectives')) {
-      return element.elementsRecords;
-    }
-    const filteredIdField = elements.filter(element => TextUtils.areEquals(element.name, 'Id_SectorObjectives'))[0];
-    const filteredIdSchema = element.elements.filter(element =>
-      TextUtils.areEquals(element.name, 'Fk_SectorObjectives')
-    )[0];
-
-    const filtered = element.elementsRecords.filter(
-      record =>
-        record.fields.filter(field => field.fieldSchemaId === filteredIdSchema.fieldSchema)[0].value ===
-        filteredIdField.value
-    );
-    return filtered;
   };
 
   const validationsTemplate = recordData => {
@@ -495,14 +479,14 @@ export const WebformRecord = ({
     switch (webformType) {
       case 'TABLES':
         return renderTableWebformErrorMessages(content);
-      case 'PAMS':
-        return renderWebformPaMsErrorMessages(content);
+      case 'ENTITIES':
+        return renderWebformEntitiesErrorMessages(content);
       default:
         return [];
     }
   };
 
-  const renderWebformPaMsErrorMessages = content => {
+  const renderWebformEntitiesErrorMessages = content => {
     const errorMessages = [];
 
     if (isEmpty(record)) {

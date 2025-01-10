@@ -56,6 +56,9 @@ export const dataflowReducer = (state, { type, payload }) => {
     case 'SET_IS_LOADING':
       return { ...state, isLoading: payload.isLoading };
 
+    case 'ON_UPDATE_SOFT_DELETE':
+      return { ...state, data: { ...state.data, deleted: payload } };
+
     default: {
       throw new Error(`Unhandled action type: ${type}`);
     }

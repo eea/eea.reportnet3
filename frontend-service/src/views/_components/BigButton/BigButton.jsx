@@ -31,6 +31,8 @@ export const BigButton = ({
   dataProviderId,
   enabled = true,
   handleRedirect = () => {},
+  hasUpdatesAfterRelease = false,
+  hasUpdatesAfterReleaseTooltip,
   helpClassName,
   index,
   infoStatus,
@@ -226,6 +228,30 @@ export const BigButton = ({
     );
   };
 
+  const renderHasUpdatesAfterReleaseTooltip = () => {
+    if (hasUpdatesAfterRelease) {
+      const uniqName = uniqueId('hasUpdatesAfterReleaseTooltip');
+      return (
+        <Fragment>
+          <FontAwesomeIcon
+            className={styles.notClickableIcon}
+            data-for={uniqName}
+            data-tip
+            icon={AwesomeIcons('edit')}
+            style={{ position: 'absolute', bottom: '10px', left: '2px', fontSize: '1rem' }}
+          />
+          {
+            hasUpdatesAfterReleaseTooltip && (
+              <ReactTooltip border={true} effect="solid" id={uniqName} place="top">
+                {hasUpdatesAfterReleaseTooltip}
+              </ReactTooltip>
+            )
+          }
+        </Fragment>
+      )
+    }
+  }
+
   const renderInfoStatusIcon = () => {
     if (infoStatus) {
       if (infoStatusIcon) {
@@ -335,6 +361,7 @@ export const BigButton = ({
         <span data-for={caption} data-tip onClick={() => handleRedirect()} onMouseDown={event => onWheelClick(event)}>
           <FontAwesomeIcon className={styles[buttonIconClass]} icon={AwesomeIcons(buttonIcon)} role="presentation" />
         </span>
+        {renderHasUpdatesAfterReleaseTooltip()}
         {renderDropDownModel()}
         {renderInfoStatusIcon()}
         {renderRestrictFromPublicIcon()}

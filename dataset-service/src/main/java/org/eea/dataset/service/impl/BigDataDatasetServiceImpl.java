@@ -7,6 +7,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
@@ -17,6 +18,8 @@ import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -37,6 +40,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -132,6 +136,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DataFlowControllerZuul dataFlowControllerZuul;
+
+    /** The pk catalogue repository. */
+    @Autowired
+    private PkCatalogueRepository pkCatalogueRepository;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
@@ -1130,15 +1138,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
 
+        s3TablePathResolver.setPath(parquetTableQueryPathConstant);
+        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
+
+        //if table does not exist or has 0 records do not do anything
         if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, parquetTableS3PathConstant) ||
-                !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema())) {
+                !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema()) || dremioHelperService.getRowCount(parquetTablePath) == 0) {
             //parquet table does not exist and no iceberg table should be created
             datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
             return;
         }
 
-        s3TablePathResolver.setPath(parquetTableQueryPathConstant);
-        String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
         dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
 
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
@@ -1170,10 +1180,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
 
+        //if table does not exist or has 0 records do not do anything
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) ||
-                !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())) {
+                !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema()) || dremioHelperService.getRowCount(icebergTablePath) == 0) {
             //iceberg table does not exist and no parquet table should be created
             datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
+            if(s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) && dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())
+                && dremioHelperService.getRowCount(icebergTablePath) == 0){
+                //remove iceberg table
+                dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
+                LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
+                //remove folders that contain the previous parquet files because data will be replaced
+                if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
+                    s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
+                }
+            }
             return;
         }
 
@@ -1253,10 +1274,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderCode + "'" : dataProviderCode;
         }
 
+        s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
+
         //check if table exists and if not create it
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaName)) {
             //table does not exist, so we need to create it first
-            StringBuilder createIcebergTable = new StringBuilder("CREATE TABLE " + icebergTablePath + " (");
+            StringBuilder createIcebergTable = new StringBuilder("CREATE TABLE IF NOT EXISTS " + icebergTablePath + " (");
             createIcebergTable.append(PARQUET_RECORD_ID_COLUMN_HEADER + " VARCHAR , " + PARQUET_PROVIDER_CODE_COLUMN_HEADER + " VARCHAR ");
 
             for(int i=0; i< records.get(0).getFields().size(); i++){
@@ -1285,7 +1308,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 insertQueryBuilder.append(", ").append(field.getName()).append(" ");
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
                     String fieldValue = (field.getValue() != null) ? field.getValue() : "";
-                    String refactoredValue = spatialDataHandling.refactorQuery(fieldValue);
+                    String refactoredValue = spatialDataHandling.refactorQuery(fieldValue, i);
                     insertQueryValuesBuilder.append(", ").append(refactoredValue).append(" ");
                 } else {
                     String fieldValue = "";
@@ -1309,7 +1332,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId, 2000L);
         }
     }
-
 
 
     @Override
@@ -1337,7 +1359,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(record.getId()).append("'");
             if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-                updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
+                updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
             }
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
@@ -1359,7 +1381,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
         updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(recordId).append("'");
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-            updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO);
+            updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
         }
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
@@ -1368,23 +1390,32 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, String recordId, boolean deleteCascadePK) throws Exception{
-        providerId = providerId != null ? providerId : 0L;
+    public void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception{
+        if(deleteCascadePK){
+            //we need to remove all records in sub tables that are linked to the record
+            deleteLinkedRecordsWithCascade(dataflowId, providerId, datasetId, tableSchemaVO, recordIds);
+        }
+
         S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), UUID.randomUUID().toString(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
+        // Join items with single quotes and commas
+        String recordIdsForQuery = recordIds.stream().map(id -> "'" + id + "'").collect(Collectors.joining(", "));
+
         //check if we need to remove attachments
         List<FieldSchemaVO> fields = tableSchemaVO.getRecordSchema().getFieldSchema();
         for(FieldSchemaVO field: fields){
             if(field.getType() == DataType.ATTACHMENT){
                 //get fileName
-                String getFileNameQuery = "SELECT " + field.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'";
+                String getFileNameQuery = "SELECT " + field.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " in (" + recordIdsForQuery + ")";
                 String getFileNameResult = dremioJdbcTemplate.queryForObject(getFileNameQuery, String.class);
                 if(StringUtils.isNotBlank(getFileNameResult)){
-                    removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), field.getName(), FilenameUtils.getExtension(getFileNameResult), recordId);
+                    for(String recordId: recordIds) {
+                        removeAttachmentFromS3(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), field.getName(), FilenameUtils.getExtension(getFileNameResult), recordId);
+                    }
                 }
             }
         }
@@ -1395,8 +1426,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if(numberOfRecords != 1) {
             //we can remove the entry
             //create delete query for the record
-            StringBuilder deleteQueryBuilder = new StringBuilder().append("DELETE FROM" + icebergTablePath + " ");
-            deleteQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'");
+            StringBuilder deleteQueryBuilder = new StringBuilder().append("DELETE FROM " + icebergTablePath + " ");
+            deleteQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " in (" + recordIdsForQuery + ")");
             String processId = dremioHelperService.executeSqlStatement(deleteQueryBuilder.toString());
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(deleteQueryBuilder.toString(), processId, 2000L);
 
@@ -1414,7 +1445,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH);
             }
         }
-        //todo handle deleteCascadePK
     }
 
     private void removeAttachmentFromS3(Long dataflowId, Long providerId, Long datasetId, String tableSchemaName, String fieldName, String extension, String recordId){
@@ -1525,8 +1555,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 //refresh the metadata
                 dremioHelperService.refreshTableMetadataAndPromote(null, dremioNewTableQueryPath, s3NewTablePathResolver, tableSchemaName);
+                LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
             }
-            LOG.info("Created prefilled data for datasetId {} and table {} from designDatasetId {} ", datasetIdForCreation, tableSchemaVO.getNameTableSchema(), designDatasetId);
         }
     }
 
@@ -1621,15 +1651,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String referenceTableSchemaName = referenceTableSchema.get(NAME_TABLE_SCHEMA).toString();
         String referenceFieldName = referenceFieldSchema.get(HEADER_NAME).toString();
 
-        String labelFieldName = null;
-        String newLabelField = null;
+        String conditionalFieldName = null;
         if (StringUtils.isNotBlank(conditionalSchemaId)) {
             Document referenceFieldSchema1 = schemasRepository.findFieldSchema(referenceDatasetSchemaId, conditionalSchemaId);
-            newLabelField = referenceFieldSchema1.get(HEADER_NAME).toString();
-        } else {
-            labelFieldName = referenceFieldName;
+            conditionalFieldName = referenceFieldSchema1.get(HEADER_NAME).toString();
         }
 
+        String labelFieldName = referenceFieldName;
         if(!labelSchemaId.equals(idPk)){
             Document labelFieldSchema = schemasRepository.findFieldSchema(referenceDatasetSchemaId, labelSchemaId);
             labelFieldName = labelFieldSchema.get(HEADER_NAME).toString();
@@ -1638,7 +1666,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         try {
             //retrieve the value and label from dremio.
             List<Map<String, Object>> linkValues = getLinkValuesWithLabelsFromReferencedDataset(referenceDatasetId, referenceTableSchemaId, referenceTableSchemaName,
-                referenceFieldName, labelFieldName, conditionalValue, dataType, searchValue, newLabelField);
+                referenceFieldName, labelFieldName, conditionalValue, dataType, searchValue, conditionalFieldName);
 
             for (Map<String, Object> row : linkValues) {
                 FieldVO field = new FieldVO();
@@ -1677,12 +1705,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
         }
+        removeDuplicateValues(fieldsVO);
         return fieldsVO;
     }
 
     private List<Map<String, Object>> getLinkValuesWithLabelsFromReferencedDataset(Long datasetId, String tableSchemaId, String tableName,
                                                                                    String fieldName, String labelFieldName, String conditionalValue,
-                                                                                   DataType dataType, String searchValue, String newLabelField){
+                                                                                   DataType dataType, String searchValue, String conditionalFieldName){
         DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         Long dataflowId = dataSetMetabaseVO.getDataflowId();
         long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
@@ -1701,9 +1730,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         }
 
-        String referenceLabel = newLabelField != null && !dataType.equals(DataType.NUMBER_INTEGER) ? newLabelField : labelFieldName;
-
-        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + referenceLabel + "\" as " + LABEL
+        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + labelFieldName + "\" as " + LABEL
             + " FROM " + tablePathInDremio +
             " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
 
@@ -1717,7 +1744,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         if (labelFieldName == null && conditionalValue.isBlank()
-            || (StringUtils.isNotBlank(labelFieldName) && StringUtils.isNotBlank(fieldName) && StringUtils.isNotBlank(newLabelField) && conditionalValue.isBlank())) {
+            || (StringUtils.isNotBlank(labelFieldName) && StringUtils.isNotBlank(fieldName) && StringUtils.isNotBlank(conditionalFieldName) && conditionalValue.isBlank())) {
             conditionalValue = "null";
         }
         if (StringUtils.isNotBlank(conditionalValue)) {
@@ -1730,8 +1757,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 .map(value -> "'" + value + "'")
                 .collect(Collectors.joining(", "));
 
-            String refValue = newLabelField != null ? newLabelField : VALUE;
-            String refLabel = newLabelField != null ? newLabelField : LABEL;
+            String refValue = conditionalFieldName != null ? conditionalFieldName : VALUE;
+            String refLabel = conditionalFieldName != null ? conditionalFieldName : LABEL;
             if (dataType.equals(DataType.NUMBER_INTEGER)) {
                 selectQuery = selectQuery + " AND " + refValue + " IN (" + valuesList + ")";
                 selectQuery = selectQuery + " ORDER BY " + refValue;
@@ -1743,6 +1770,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         LOG.info("Query to execute in links: {}", selectQuery);
         return dremioJdbcTemplate.queryForList(selectQuery);
     }
+
+    private void removeDuplicateValues(List<FieldVO> fieldsVO) {
+        HashSet<String> seen = new HashSet<>();
+        fieldsVO.removeIf(e -> !seen.add(e.getValue()));
+    }
+
 
     @Override
     public List<TableSchemaIdNameVO> getAvailableForManualEditingTables(Long datasetId) throws EEAException {
@@ -1756,5 +1789,78 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         return availableTables;
+    }
+
+    @Override
+    public void insertRecordsInMultipleTables(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords) throws Exception {
+        for (TableVO tableVO : tableRecords) {
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableVO.getIdTableSchema(), dataSetMetabaseVO.getDatasetSchema());
+            insertRecords(dataSetMetabaseVO.getDataflowId(), dataSetMetabaseVO.getDataProviderId(), dataSetMetabaseVO.getId(),
+                    tableSchemaVO.getNameTableSchema(), tableVO.getRecords());
+        }
+    }
+
+    private void deleteLinkedRecordsWithCascade(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds) throws Exception{
+        // Get the first referenced field
+        FieldSchemaVO fieldSchemaPK;
+        Optional<FieldSchemaVO> optionalFieldReferenced = tableSchemaVO.getRecordSchema().getFieldSchema().stream().filter(field -> Boolean.TRUE.equals(field.getPkReferenced())).findFirst();
+        if (optionalFieldReferenced.isPresent()){
+            fieldSchemaPK = optionalFieldReferenced.get();
+        }
+        else{
+            return;
+        }
+
+        //get value of field fieldSchemaPK
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(),  tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+
+        String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+        for(String recordId: recordIds) {
+
+            String getFieldValue =  "SELECT " + fieldSchemaPK.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'";
+            String fieldValue = dremioJdbcTemplate.queryForObject(getFieldValue, String.class);
+
+            //get field references from pkCatalogue
+            PkCatalogueSchema pkCatalogueSchema = pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaPK.getId()));
+            if (pkCatalogueSchema == null || pkCatalogueSchema.getReferenced() == null) {
+                return;
+            }
+            Map<FieldSchemaVO, TableSchemaVO> fieldSchemaAndTableSchemaMapping = new HashMap<>();
+            List<String> referencedFieldSchemaIds = pkCatalogueSchema.getReferenced().stream().map(ObjectId::toString).collect(Collectors.toList());
+            for (String referencedFieldSchemaId : referencedFieldSchemaIds) {
+                DataSetSchemaVO dataSetSchemaVO = datasetSchemaService.getDataSchemaByDatasetId(false, datasetId);
+                for (TableSchemaVO tableInDataset : dataSetSchemaVO.getTableSchemas()) {
+
+                    Optional<FieldSchemaVO> matchingSchema = tableInDataset.getRecordSchema().getFieldSchema().stream()
+                            .filter(field -> referencedFieldSchemaId.equals(field.getId())).findFirst();
+                    if (matchingSchema.isEmpty()) {
+                        continue;
+                    }
+                    //found the correct table that is related to referencedFieldSchemaId
+                    fieldSchemaAndTableSchemaMapping.put(matchingSchema.get(), tableInDataset);
+                }
+            }
+
+            //for each reference field we need to find the records associated with the parent table's value in the reference field and delete them
+            for (Map.Entry<FieldSchemaVO, TableSchemaVO> entry : fieldSchemaAndTableSchemaMapping.entrySet()) {
+                S3PathResolver s3IcebergSubTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, entry.getValue().getNameTableSchema(), entry.getValue().getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+                s3IcebergSubTablePathResolver.setIsIcebergTable(true);
+
+                String icebergSubTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergSubTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                if (!s3HelperPrivate.checkFolderExist(s3IcebergSubTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) ||
+                        !dremioHelperService.checkFolderPromoted(s3IcebergSubTablePathResolver, entry.getValue().getNameTableSchema())){
+                    continue;
+                }
+                String getRecordIdsQuery = "SELECT " + PARQUET_RECORD_ID_COLUMN_HEADER + " FROM " + icebergSubTablePath + " WHERE " + entry.getKey().getName() + " = '" + fieldValue + "'";
+                List<String> subTableRecordIds = dremioJdbcTemplate.queryForList(getRecordIdsQuery, String.class);
+                if(subTableRecordIds != null && subTableRecordIds.size() > 0) {
+                    deleteRecord(dataflowId, providerId, datasetId, entry.getValue(), subTableRecordIds, true);
+                }
+            }
+        }
+
     }
 }

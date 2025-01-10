@@ -1,7 +1,7 @@
 package org.eea.orchestrator.service;
 
-import org.eea.interfaces.vo.orchestrator.JobsHistoryVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
+import org.eea.interfaces.vo.orchestrator.JobsHistoryVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.springframework.data.domain.Pageable;

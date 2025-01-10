@@ -794,8 +794,16 @@ public final class EEAErrorMessage {
   /** The Constant FILE_EXPORT_ERROR_MESSAGE */
   public static final String FILE_EXPORT_ERROR_MESSAGE = "Error exporting file";
 
-  /** The Constant FILE_EXPORT_ERROR_MESSAGE */
+  /** The Constant AT_LEAST_ONE_FILTER_SHOULD_BE_ACTIVE */
   public static final String AT_LEAST_ONE_FILTER_SHOULD_BE_ACTIVE = "At least one filter should be active";
+
+  /** The Constant SOFT_DELETE_DATAFLOW_FAILED */
+  public static final String SOFT_DELETE_DATAFLOW_FAILED = "Couldn't perform soft delete.";
+
+  /** The Constant REVERSE_SOFT_DELETE_DATAFLOW_FAILED */
+  public static final String REVERSE_SOFT_DELETE_DATAFLOW_FAILED = "Reverse soft delete failed";
+
+
 
   /**
    * Instantiates a new EEA error message.

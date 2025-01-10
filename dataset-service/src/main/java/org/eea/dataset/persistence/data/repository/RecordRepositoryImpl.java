@@ -59,6 +59,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.json.GsonJsonParser;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.UncategorizedSQLException;
@@ -67,7 +68,6 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.CacheRetrieveMode;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -158,7 +158,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private FileCommonUtils fileCommon;
 
   @Autowired
-  SpatialDataHandling spatialDataHandling;
+  private SpatialDataHandling spatialDataHandling;
 
   /** The dataflow controller zuul. */
   @Autowired
@@ -187,12 +187,6 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    */
   @Value("${spring.datasource.driverClassName}")
   private String connectionDriver;
-
-  /**
-   * The path export DL.
-   */
-  @Value("${exportDLPath}")
-  private String exportDLPath;
 
   /** The Constant WHERE_ID_TABLE_SCHEMA: {@value}. */
   private static final String WHERE_ID_TABLE_SCHEMA = "WHERE tv.idTableSchema = :idTableSchema ";
@@ -390,15 +384,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param pageable the pageable
    * @param idRules the id rules
    * @param fieldSchema the field schema
-   * @param fieldValue the field value
+   * @param filters the filters value
    * @param sortFields the sort fields
    * @return the table VO
    */
   @Override
   public TableVO findByTableValueWithOrder(Long datasetId, String idTableSchema,
       List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRules,
-      String fieldSchema, String fieldValue, Boolean isExport ,SortField... sortFields) {
+      String fieldSchema, ExportFilterVO filters, Boolean isExport ,SortField... sortFields) {
 
+    String fieldValue = filters.getFieldValue();
     StringBuilder sortQueryBuilder = new StringBuilder();
     StringBuilder directionQueryBuilder = new StringBuilder();
     int criteriaNumber = 0;
@@ -422,7 +417,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           datasetId);
 
       queryOrder(idTableSchema, pageable, sortQueryBuilder, directionQueryBuilder, result, filter,
-          errorList, idRules, fieldSchema, fieldValue, datasetId, isExport ,sortFields);
+          errorList, idRules, fieldSchema, filters, datasetId, isExport ,sortFields);
     }
     return result;
   }
@@ -470,7 +465,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
       query.setMaxResults(pageable.getPageSize());
     }
-    return sanitizeRecords(query.getResultList());
+    return sanitizeRecords(query.getResultList(), null);
   }
 
 
@@ -666,7 +661,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   @Override
   public File findAndGenerateETLJsonDL(Long datasetId, String tableSchemaId, Integer limit,
       Integer offset, String filterValue, String columnName, String dataProviderCodes,
-      File jsonFile) throws EEAException, SQLException, IOException {
+      File jsonFile) throws EEAException, IOException {
     checkSql(filterValue);
     checkSql(columnName);
     String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
@@ -984,7 +979,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw, Long datasetId)
       throws IOException, EEAException {
 
-    DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling);
+    DremioRecordMapper recordMapper = new DremioRecordMapper(spatialDataHandling, schemasRepository);
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
     String datasetSchemaId = dataset.getDatasetSchema();
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
@@ -1149,79 +1144,71 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @param errorList the error list
    * @param idRules the id rules
    * @param fieldSchema the field schema
-   * @param fieldValue the field value
+   * @param filters the filters value
    * @param datasetId the dataset id
    * @param sortFields the sort fields
    */
   private void queryOrder(String idTableSchema, Pageable pageable, StringBuilder sortQueryBuilder,
       StringBuilder directionQueryBuilder, TableVO result, String filter,
-      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, String fieldValue,
+      List<ErrorTypeEnum> errorList, List<String> idRules, String fieldSchema, ExportFilterVO filters,
       Long datasetId, Boolean isExport, SortField... sortFields) {
+      String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
 
+      if (Boolean.TRUE.equals(isExport)) {
+        int pageNumber = pageable.getPageNumber() + 1;
+        int pageSize = pageable.getPageSize();
 
-    String formatedQuery =
-        null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition, rv.id"
-            : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
-            directionQueryBuilder.substring(1));
-    // Query without order or with it
-    Query query = entityManager.createQuery(formatedQuery);
-    query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
-    query.setMaxResults(pageable.getPageSize());
-    query.setHint("javax.persistence.cache.retrieveMode", CacheRetrieveMode.BYPASS);
-    query.setHint("javax.persistence.query.timeout", 75000);
-    query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
-    if (null != idRules && !idRules.isEmpty()) {
-      query.setParameter(RULE_ID_LIST, idRules);
-      query.setParameter(RULE_ID_LIST, idRules);
-    }
-    if (!filter.isEmpty() && !errorList.isEmpty()) {
-      query.setParameter(ERROR_LIST, errorList);
-      query.setParameter(ERROR_LIST, errorList);
-    }
-    if (null != fieldSchema && StringUtils.isNotBlank(fieldValue)) {
-      query.setParameter(FIELD_SCHEMA, fieldSchema);
-      query.setParameter(FIELD_VALUE, fieldValue);
-    }
-    // Searches in the table occurrences where any column value matches fieldValue
-    else if (null == fieldSchema && StringUtils.isNotBlank(fieldValue)) {
-      query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
-    }
+        List<RecordValue> recordValues = fileCommon.getRecordValuesPaginated(datasetId, idTableSchema, PageRequest.of(pageNumber, pageSize), filters );
+        List<RecordVO> recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(recordValues, datasetSchemaId));
+        result.setRecords(recordVOs);
+      } else {
+        String fieldValue = filters.getFieldValue();
+        String formatedQuery =
+            null == sortFields ? MASTER_QUERY_NO_ORDER + filter + " order by rv.dataPosition, rv.id"
+                : String.format(MASTER_QUERY + filter + FINAL_MASTER_QUERY, sortQueryBuilder.toString(),
+                directionQueryBuilder.substring(1));
+        // Query without order or with it
+        Query query = entityManager.createQuery(formatedQuery);
+        query.setFirstResult(pageable.getPageSize() * pageable.getPageNumber());
+        query.setMaxResults(pageable.getPageSize());
+        query.setParameter(ID_TABLE_SCHEMA, idTableSchema);
+        if (null != idRules && !idRules.isEmpty()) {
+          query.setParameter(RULE_ID_LIST, idRules);
+          query.setParameter(RULE_ID_LIST, idRules);
+        }
+        if (!filter.isEmpty() && !errorList.isEmpty()) {
+          query.setParameter(ERROR_LIST, errorList);
+          query.setParameter(ERROR_LIST, errorList);
+        }
+        if (null != fieldSchema && StringUtils.isNotBlank(fieldValue)) {
+          query.setParameter(FIELD_SCHEMA, fieldSchema);
+          query.setParameter(FIELD_VALUE, fieldValue);
+        }
+        // Searches in the table occurrences where any column value matches fieldValue
+        else if (null == fieldSchema && StringUtils.isNotBlank(fieldValue)) {
+          query.setParameter(FIELD_VALUE, "%" + escapeSpecialCharacters(fieldValue) + "%");
+        }
 
-    List<RecordVO> recordVOs;
-    TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
-    if (null == sortFields) {
-      // Query without order.
-      List<RecordValue> a = query.getResultList();
-      a = reRunTheQueryIfEmpty(datasetId, isExport, a, query);
-      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a));
-      if (BooleanUtils.isTrue(isExport) && recordVOs.isEmpty()) {
-        LOG.error("After mapping, no records found. The Query is: {}. FirstResult is : {}, Max results are {}, IdTableSchema is {}", formatedQuery, query.getFirstResult(), query.getMaxResults(), idTableSchema);
+        List<RecordVO> recordVOs;
+        TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, datasetId));
+      if (null == sortFields) {
+        // Query without order.
+        List<RecordValue> a = query.getResultList();
+        recordVOs = recordNoValidationMapper.entityListToClass(sanitizeRecords(a, datasetSchemaId));
+          if (BooleanUtils.isTrue(isExport) && recordVOs.isEmpty()) {
+            LOG.error("After mapping, no records found. The Query is: {}. FirstResult is : {}, Max results are {}, IdTableSchema is {}", formatedQuery, query.getFirstResult(), query.getMaxResults(), idTableSchema);
+          }
+        } else {
+          // Query with order.
+          List<Object[]> a = query.getResultList();
+          recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a, datasetSchemaId));
+        }
+        LOG.info(
+            "Filtering the table in dataset {} by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
+            datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema,
+            pageable.getPageSize(), pageable.getPageNumber());
+        result.setRecords(recordVOs);
       }
-      result.setRecords(recordVOs);
-    } else {
-      // Query with order.
-      List<Object[]> a = query.getResultList();
-      recordVOs = recordNoValidationMapper.entityListToClass(sanitizeOrderedRecords(a));
-    }
-    LOG.info(
-        "Filtering the table in dataset {} by fieldValue as : %{}%, by idTableSchema as {}, by idRules as {}, by errorList as {}, by fieldSchema as {}, with PageSize {} and PageNumber {}",
-        datasetId, fieldValue, idTableSchema, idRules, errorList, fieldSchema,
-        pageable.getPageSize(), pageable.getPageNumber());
-    result.setRecords(recordVOs);
-    entityManager.flush();
-  }
-
-  private List<RecordValue> reRunTheQueryIfEmpty(Long datasetId, Boolean isExport, List<RecordValue> a, Query query) {
-    if (BooleanUtils.isTrue(isExport) && (a == null || a.isEmpty())) {
-      LOG.error("Before mapping, no records found in dataset {}", datasetId);
-      try {
-        Thread.sleep(2000);
-        a = query.getResultList();
-      } catch (InterruptedException e) {
-        throw new RuntimeException(e);
-      }
-    }
-    return a;
   }
 
   /**
@@ -1280,28 +1267,40 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * Sanitize ordered records.
    *
    * @param queryResults the query results
+   * @param datasetSchemaId the dataset schema id
    * @return the list
    */
-  private List<RecordValue> sanitizeOrderedRecords(List<Object[]> queryResults) {
+  private List<RecordValue> sanitizeOrderedRecords(List<Object[]> queryResults, String datasetSchemaId) {
     // First: Copy sortCriteria into de records variables
     List<RecordValue> records = queryResults.stream()
         .map(resultRecord -> (RecordValue) resultRecord[0]).collect(Collectors.toList());
-    return sanitizeRecords(records);
+    return sanitizeRecords(records, datasetSchemaId);
   }
 
   /**
    * Sanitize records.
    *
    * @param records the records
+   * @param datasetSchemaId the dataset schema id
    * @return the list
    */
-  private List<RecordValue> sanitizeRecords(List<RecordValue> records) {
+  private List<RecordValue> sanitizeRecords(List<RecordValue> records, String datasetSchemaId) {
     List<RecordValue> sanitizedRecords = new ArrayList<>();
     Set<String> processedRecords = new HashSet<>();
     for (RecordValue recordValue : records) {
       if (!processedRecords.contains(recordValue.getId())) {
         processedRecords.add(recordValue.getId());
-        recordValue.getFields().forEach(field -> field.setFieldValidations(null));
+        for(FieldValue fieldValue: recordValue.getFields()){
+          fieldValue.setFieldValidations(null);
+
+          //set up reference field schema id if exists
+          if(datasetSchemaId != null && StringUtils.isNotBlank(fieldValue.getIdFieldSchema())) {
+            Document documentField = schemasRepository.findFieldSchema(datasetSchemaId, fieldValue.getIdFieldSchema());
+            Document referenced = (documentField != null) ? (Document) documentField.get(LiteralConstants.REFERENCED_FIELD) : null;
+            String idPk = (referenced != null) ? referenced.get("idPk").toString() : null;
+            fieldValue.setReferenceFieldSchemaId(idPk);
+          }
+        }
         sanitizedRecords.add(recordValue);
       }
     }

@@ -19,7 +19,8 @@ const parsePamFields = (fields, pamId, type) =>
     id: null,
     idFieldSchema: field.fieldId || field.fieldSchema,
     type: field.type,
-    value: getPamFieldValue(field.name, pamId, type)
+    value: getPamFieldValue(field.name, pamId, type),
+    name: field.name
   }));
 
 const getPamFieldValue = (fieldName, pamId, type) => {
@@ -36,9 +37,40 @@ const getPamFieldValue = (fieldName, pamId, type) => {
   }
 };
 
+const parseEntityTables = (tables, entityId, rootPkFieldId) =>
+  tables.map(table => ({
+    idTableSchema: table.tableSchemaId,
+    records: [
+      {
+        fields: parseEntityFields(!isEmpty(table.records) ? table.records[0].fields : [], entityId, rootPkFieldId),
+        id: null,
+        idRecordSchema: !isEmpty(table.records) ? table.records[0].recordSchemaId : null
+      }
+    ]
+  }));
+
+const parseEntityFields = (fields, entityId, rootPkFieldId) =>
+  fields.map(field => ({
+    id: null,
+    idFieldSchema: field.fieldId || field.fieldSchema,
+    value: getEntityFieldValue(field, entityId, rootPkFieldId),
+    name: field.name
+  }));
+
+const getEntityFieldValue = (field, entityId, rootPkFieldId) => {
+  if (TextUtils.areEquals(field.fieldId || field.fieldSchema, rootPkFieldId)) {
+    return entityId;
+  } else if (TextUtils.areEquals(field?.referencedField?.idPk, rootPkFieldId)) {
+    return entityId;
+  } else {
+    return null;
+  }
+};
+
 const parseWebformListDTO = webformsDTO => webformsDTO.map(webform => ({ ...webform, name: webform.label }));
 
 export const WebformUtils = {
+  parseEntityTables,
   parsePamTables,
   parseWebformListDTO
 };

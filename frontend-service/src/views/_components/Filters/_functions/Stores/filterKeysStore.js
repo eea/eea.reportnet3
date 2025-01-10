@@ -17,7 +17,7 @@ export const filterByKeyDateStore = atomFamily({
 
 export const filterByKeyDropdownStore = atomFamily({
   key: 'filterByKeyDropdownStore',
-  default: { keys: [], nestedKey: null }
+  default: { keys: ['is_deleted'], nestedKey: null }
 });
 
 export const filterByKeyInputStore = atomFamily({

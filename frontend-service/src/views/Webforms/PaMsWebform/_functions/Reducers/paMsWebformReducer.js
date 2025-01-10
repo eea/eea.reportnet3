@@ -65,7 +65,6 @@ export const paMsWebformReducer = (state, { type, payload }) => {
           }
         });
       });
-
       inmTableList.group.sort((a, b) => a.id - b.id);
       inmTableList.single.sort((a, b) => a.id - b.id);
 

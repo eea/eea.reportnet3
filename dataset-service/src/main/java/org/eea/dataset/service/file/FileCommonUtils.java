@@ -587,14 +587,13 @@ public class FileCommonUtils {
    */
   @Transactional
   public List<RecordVO> exportFileWithFilters(Long datasetId, String idTableSchema,
-      List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRulesList,
-      String fieldValue) {
+      List<ErrorTypeEnum> levelErrorList, Pageable pageable, List<String> idRulesList, ExportFilterVO filters) {
     levelErrorList = levelErrorList.isEmpty()
         ? List.of(ErrorTypeEnum.CORRECT, ErrorTypeEnum.INFO, ErrorTypeEnum.WARNING,
             ErrorTypeEnum.ERROR, ErrorTypeEnum.BLOCKER)
         : levelErrorList;
     return recordRepository.findByTableValueWithOrder(datasetId, idTableSchema, levelErrorList,
-        pageable, idRulesList, null, fieldValue, true ,null).getRecords();
+        pageable, idRulesList, null, filters, true ,null).getRecords();
   }
 
   /**

@@ -94,4 +94,15 @@ public class SpatialDataHelperImpl implements SpatialDataHelper {
     JSONArray coordinates = geometry.getJSONArray("coordinates");
     return !coordinates.isEmpty();
   }
+
+  @Override
+  public boolean isValidJSON(String str) {
+    ObjectMapper mapper = new ObjectMapper();
+    try {
+      mapper.readTree(str);
+      return true;
+    } catch (Exception e) {
+      return false;
+    }
+  }
 }
