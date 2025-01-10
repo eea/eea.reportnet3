@@ -806,6 +806,13 @@ public final class EEAErrorMessage {
   /** The Constant RELEASE_RECEIPT_NOTFOUND: {@value}. */
   public static final String RELEASE_RECEIPT_NOTFOUND = "Release Receipt not found";
 
+  /** The Constant CREATING_RELEASE_RECEIPT: {@value}. */
+  public static final String CREATING_RELEASE_RECEIPT =
+          "An unknown error happened while creating a release receipt.";
+
+  /** The Constant UPDATING_RELEASE_RECEIPT: {@value}. */
+  public static final String UPDATING_RELEASE_RECEIPT =
+          "An unknown error happened while updating a release receipt.";
 
 
   /**

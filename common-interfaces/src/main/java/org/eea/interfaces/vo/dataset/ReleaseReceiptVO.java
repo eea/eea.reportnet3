@@ -17,7 +17,7 @@ public class ReleaseReceiptVO implements Serializable {
     private Long id;
 
     /** The custom text for the release receipt. */
-    private String userCustomText;
+    private String note;
 
     /** The ID of the dataflow associated with the release receipt. */
     private Long dataflowId;
@@ -32,12 +32,12 @@ public class ReleaseReceiptVO implements Serializable {
      * Instantiates a new ReleaseReceiptTextVO with parameters.
      *
      * @param id the ID of the release receipt
-     * @param userCustomText the custom text for the release receipt
+     * @param note the custom text for the release receipt
      * @param dataflowId the ID of the associated dataflow
      */
-    public ReleaseReceiptVO(Long id, String userCustomText, Long dataflowId) {
+    public ReleaseReceiptVO(Long id, String note, Long dataflowId) {
         this.id = id;
-        this.userCustomText = userCustomText;
+        this.note = note;
         this.dataflowId = dataflowId;
     }
 

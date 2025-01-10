@@ -27,18 +27,28 @@ public class ReleaseReceipt {
     @Column(name = "DATAFLOW_ID", nullable = false)
     private Long dataflowId;
 
-    @Column(name = "USER_CUSTOM_TEXT")
-    private String userCustomText;
+    @Column(name = "NOTE")
+    private String note;
 
     @Column(name = "UPDATED_AT", nullable = false)
     private LocalDateTime updatedAt;
 
+    @PrePersist
+    public void onCreate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
     @Transient
     private String additionalMetadata;
 
-    public ReleaseReceipt(Long dataflowId, String userCustomText, LocalDateTime updatedAt, String userEmail) {
+    public ReleaseReceipt(Long dataflowId, String note, LocalDateTime updatedAt, String userEmail) {
         this.dataflowId = dataflowId;
-        this.userCustomText = userCustomText;
+        this.note = note;
         this.updatedAt = updatedAt;
     }
 }
