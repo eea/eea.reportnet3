@@ -1763,7 +1763,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             conditionalValue = "null";
         }
         if (StringUtils.isNotBlank(conditionalValue)) {
-            String[] values = Arrays.stream(conditionalValue.split("[,;]"))
+            //Removed comma from regex split due to #282448
+            String[] values = Arrays.stream(conditionalValue.split("[;]"))
                 .map(String::trim)
                 .filter(value -> !value.isEmpty())
                 .toArray(String[]::new);
