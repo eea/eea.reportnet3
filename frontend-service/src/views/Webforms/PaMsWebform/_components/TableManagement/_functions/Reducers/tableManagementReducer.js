@@ -2,6 +2,9 @@ import cloneDeep from 'lodash/cloneDeep';
 
 export const tableManagementReducer = (state, { type, payload }) => {
   switch (type) {
+    case 'DELETE_ROW':
+      return { ...state, isDeletingRow: payload };
+
     case 'EDIT_SELECTED_RECORD':
       return { ...state, selectedRecord: payload };
 
