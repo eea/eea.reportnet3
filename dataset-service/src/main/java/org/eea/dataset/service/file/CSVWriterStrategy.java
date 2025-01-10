@@ -212,7 +212,7 @@ public class CSVWriterStrategy implements WriterStrategy {
     for (int numPage = 0; numPage < totalPages; numPage++) {
       var records = fileCommon.exportFileWithFilters(datasetId, idTableSchema,
           levelErrorList, PageRequest.of(numPage, batchSize), idRulesList,
-          filters.getFieldValue());
+          filters);
 
       LOG.info("recordsSize:{}, numPage: {}, totalRecords: {}, totalPages: {}", records.size(), numPage, totalRecords, totalPages);
       for (RecordVO recordVO : records) {
