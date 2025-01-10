@@ -514,7 +514,10 @@ export const PaMsWebformField = ({
                   field.updatesGroupInfo
                 );
             }}
-            onChange={event => onFillField(field, option, event.target.value)}
+            onChange={event => {
+              const editedField = { ...field, value: event.target.value };
+              onFillField(editedField, option, event.target.value);
+            }}
             onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
             ref={inputRef}

@@ -16,44 +16,64 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
       ] = payload.value;
 
       const inmRecord = { ...state.record };
+
       const filteredRecord = inmRecord.elements.filter(field => {
         if (field.type === 'BLOCK') {
-          field.elementsRecords.filter(record =>
-            record.fields.filter(field => field.fieldId === state.record.recordId)
+          return field.elements.filter(
+            fieldRecord => (fieldRecord.fieldId || fieldRecord.fieldSchema) === payload.option
           );
+          // field.elementsRecords.filter(record =>
+          //   record.fields.filter(field => field.fieldId === state.record.recordId)
+          // );
 
-          const getIndexInElementsRecordsArr = () => {
-            return field.elementsRecords
-              .map(record =>
-                record.fields
-                  .map(field => field.fieldId)
-                  .map(ids => ids?.includes(payload.field.fieldId))
-                  .filter(id => id === true)
-                  .indexOf(true)
-              )
-              .indexOf(0);
-          };
+          // const getIndexInElementsRecordsArr = () => {
+          //   return field.elementsRecords
+          //     .map(record =>
+          //       record.fields
+          //         .map(field => field.fieldId)
+          //         .map(ids => ids?.includes(payload.field.fieldId))
+          //         .filter(id => id === true)
+          //         .indexOf(true)
+          //     )
+          //     .indexOf(0);
+          // };
 
-          const indexOfCorrespondentElementsRecords = getIndexInElementsRecordsArr();
-          const checkRecordIsNotEmpty = () =>
-            !isEmpty(
-              field?.elementsRecords[indexOfCorrespondentElementsRecords]?.elements?.filter(
-                field => field.fieldSchemaId === payload.option
-              )
-            );
+          // const indexOfCorrespondentElementsRecords = getIndexInElementsRecordsArr();
+          // const checkRecordIsNotEmpty = () =>
+          //   !isEmpty(
+          //     field?.elementsRecords[indexOfCorrespondentElementsRecords]?.elements?.filter(
+          //       field => field.fieldSchemaId === payload.option
+          //     )
+          //   );
 
-          if (checkRecordIsNotEmpty()) {
-            field.elementsRecords[indexOfCorrespondentElementsRecords].elements.filter(
-              field => field.fieldSchemaId === payload.option
-            )[0].value = payload.value;
-          }
+          // if (checkRecordIsNotEmpty()) {
+          //   field.elementsRecords[indexOfCorrespondentElementsRecords].elements.filter(
+          //     field => field.fieldSchemaId === payload.option
+          //   )[0].value = payload.value;
+          // }
         }
 
         return field.fieldSchemaId === payload.option;
       });
 
-      if (!isEmpty(filteredRecord))
-        inmRecord.elements.filter(field => field.fieldSchemaId === payload.option)[0].value = payload.value;
+      if (!isEmpty(filteredRecord)) {
+        if (!isEmpty(inmRecord.elements.filter(field => field.fieldSchemaId === payload.option))) {
+          inmRecord.elements.filter(field => field.fieldSchemaId === payload.option)[0].value = payload.value;
+        } else {
+          inmRecord.elements
+            .find(field => {
+              if (field.type === 'BLOCK') {
+                return field.elements.find(
+                  blockField => (blockField.fieldId || blockField.fieldSchema) === payload.option
+                );
+              }
+              return undefined;
+            })
+            .elementsRecords[0].elements.find(
+              blockElement => (blockElement.fieldId || blockElement.fieldSchema) === payload.option
+            ).value = payload.value;
+        }
+      }
 
       return {
         ...state,
