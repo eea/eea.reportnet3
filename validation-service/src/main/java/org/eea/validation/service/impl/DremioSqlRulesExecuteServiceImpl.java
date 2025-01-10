@@ -123,7 +123,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             List<String> recordIds = new ArrayList<>();
 
             long rowCount = dremioHelperService.getRowCount(tablePath);
-            if (rowCount == 0) {
+            if (rowCount == 0 && ruleMethodName.equals(IS_TABLE_EMPTY)) {
                 recordIds.add(TABLE_EMPTY);
             }
 
@@ -136,7 +136,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
             List<Map<String, Object>> customQueryResultSet = new ArrayList<>();
-            if (!ruleMethodName.equals(IS_TABLE_EMPTY) && rowCount > 0) {
+            if (!ruleMethodName.equals(IS_TABLE_EMPTY)) {
                 Class<?> cls = Class.forName(DREMIO_SQL_VALIDATION_UTILS);
                 Field[] fields = cls.getDeclaredFields();
                 Method factoryMethod = cls.getDeclaredMethod(GET_INSTANCE);
@@ -157,6 +157,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 }
 
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
+                if (rowCount == 0 && ruleVO.getDescription().contains(TABLE_EMPTY)) {
+                    recordIds.add(TABLE_EMPTY);
+                }
             }
 
             if (!recordIds.isEmpty()) {
