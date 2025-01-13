@@ -16,6 +16,12 @@ public interface UserNationalCoordinatorService {
    * @return the national coordinators
    */
   List<UserNationalCoordinatorVO> getNationalCoordinators();
+  /**
+   * Gets the national coordinators.
+   *
+   * @return the national coordinators
+   */
+  List<UserNationalCoordinatorVO> getNationalCoordinators(String CountryCode);
 
   /**
    * Creates the national coordinator.

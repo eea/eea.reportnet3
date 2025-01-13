@@ -193,6 +193,7 @@ export const FieldsDesigner = ({
     fieldId,
     maxSize,
     pk,
+    ignoreCaseInLinks,
     pkHasMultipleValues,
     pkMustBeUsed,
     name,
@@ -210,6 +211,7 @@ export const FieldsDesigner = ({
       fieldId,
       maxSize,
       pk,
+      ignoreCaseInLinks,
       pkHasMultipleValues,
       pkMustBeUsed,
       name,
@@ -239,6 +241,7 @@ export const FieldsDesigner = ({
     description,
     id,
     isLinkChange,
+    ignoreCaseInLinks,
     maxSize,
     pk,
     pkHasMultipleValues,
@@ -257,6 +260,7 @@ export const FieldsDesigner = ({
       inmFields[fieldIndex].codelistItems = codelistItems;
       inmFields[fieldIndex].description = description;
       inmFields[fieldIndex].fieldType = type;
+      inmFields[fieldIndex].ignoreCaseInLinks = ignoreCaseInLinks;
       inmFields[fieldIndex].maxSize = maxSize;
       inmFields[fieldIndex].name = name;
       inmFields[fieldIndex].pk = pk;
@@ -492,6 +496,7 @@ export const FieldsDesigner = ({
             header: field['name'],
             maxSize: field['maxSize'],
             pk: field['pk'],
+            ignoreCaseInLinks: field['ignoreCaseInLinks'],
             pkHasMultipleValues: field['pkHasMultipleValues'],
             readOnly: field['readOnly'],
             recordId: field['recordId'],

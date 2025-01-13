@@ -34,6 +34,16 @@ public interface RulesService {
    */
   void validateAllRules(Long datasetId, boolean checkNoSQL, String user);
 
+
+  /**
+   * Validates all rules Async
+   *
+   * @param datasetId the dataset id
+   * @param checkNoSQL wether to check sql statements or not
+   * @param user the user that is validating
+   */
+  void validateAllRulesAsync(Long datasetId, boolean checkNoSQL, String user);
+
   /**
    * Creates the empty rules schema.
    *

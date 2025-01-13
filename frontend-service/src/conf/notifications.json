@@ -444,6 +444,13 @@
           }
         },
         {
+          "key": "PREFILLED_TABLE_HAS_NO_DATA_ERROR",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
+          }
+        },
+        {
           "key": "USER_SERVICE_OLD_LOGIN_ERROR"
         },
         {

@@ -81,6 +81,22 @@ public interface DataflowExtendedRepository {
       throws EEAException;
 
   /**
+   * Find all paginated by country.
+   *
+   * @param obligationJson the obligation json
+   * @param pageable the pageable
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the list
+   * @throws EEAException the EEA exception
+   */
+  List<Dataflow> findAllPaginatedByCountry(String obligationJson, Pageable pageable,
+      Map<String, String> filters, String orderHeader, boolean asc, String countryCode)
+      throws EEAException;
+
+  /**
    * Count by country.
    *
    * @param obligationJson the obligation json
@@ -91,7 +107,36 @@ public interface DataflowExtendedRepository {
    * @return the long
    * @throws EEAException the EEA exception
    */
-  Long countByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
+  Long countByCountryPublicDataflows(String obligationJson, Map<String, String> filters, String orderHeader,
+                                     boolean asc, String countryCode) throws EEAException;
+
+
+  /**
+   * Count by country.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long countByCountryAllDataflows(String obligationJson, Map<String, String> filters, String orderHeader,
+                                     boolean asc, String countryCode) throws EEAException;
+
+  /**
+   * Count all dataflows by country.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long countAllDataflowsByCountry(String obligationJson, Map<String, String> filters, String orderHeader,
       boolean asc, String countryCode) throws EEAException;
 
   /**
@@ -106,6 +151,20 @@ public interface DataflowExtendedRepository {
    * @throws EEAException the EEA exception
    */
   Long countByCountryFiltered(String obligationJson, Map<String, String> filters,
+      String orderHeader, boolean asc, String countryCode, boolean isPublic) throws EEAException;
+
+  /**
+   * Count all dataflows by country filtered.
+   *
+   * @param obligationJson the obligation json
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param countryCode the country code
+   * @return the long
+   * @throws EEAException the EEA exception
+   */
+  Long countAllDataflowsByCountryFiltered(String obligationJson, Map<String, String> filters,
       String orderHeader, boolean asc, String countryCode) throws EEAException;
 
 

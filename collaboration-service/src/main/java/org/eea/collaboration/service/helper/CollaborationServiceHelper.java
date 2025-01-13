@@ -1,7 +1,11 @@
 package org.eea.collaboration.service.helper;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,8 +15,10 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.EmailController.EmailControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.communication.EmailVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.ResourceGroupEnum;
@@ -58,6 +64,9 @@ public class CollaborationServiceHelper {
   /** The kafka sender utils. */
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   private static final Logger LOG = LoggerFactory.getLogger(CollaborationServiceHelper.class);
 
@@ -113,13 +122,14 @@ public class CollaborationServiceHelper {
    * @param custodianUserName the custodian username
    */
   @Async
-  public void emailNewMessages(Long dataflowId, Long providerId, String custodianUserName, String eventType, String messageContent) {
+  public void emailNewMessages(Long dataflowId, Long providerId, String custodianUserName, String eventType, String messageContent, Date messageCreateDate) {
     try {
       Map<String, Set<String>> notificationSets = buildUserAndEmailSets(dataflowId, providerId, custodianUserName);
       Set<String> emailSet = notificationSets.get("emailSet");
-
+      DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
+      String providerLabel = dataProviderVO.getLabel();
       String dataflowName = dataFlowControllerZuul.getMetabaseById(dataflowId).getName();
-      sendMail(emailSet, dataflowId, dataflowName, messageContent);
+      sendMail(emailSet, providerLabel, dataflowId, dataflowName, messageContent, messageCreateDate);
     } catch (Exception e) {
       LOG_ERROR.error("Error in emailNewMessages for dataflowId {} and eventType {}: {}", dataflowId, eventType, e.getMessage(), e);
     }
@@ -182,14 +192,17 @@ public class CollaborationServiceHelper {
    * @param dataflowId the dataflow ID
    * @param dataflowName the dataflow name
    */
-  private void sendMail(Set<String> emailSet, Long dataflowId, String dataflowName, String messageContent) {
+  private void sendMail(Set<String> emailSet, String providerLabel, Long dataflowId, String dataflowName, String messageContent, Date messageCreateDate) {
     try {
+      ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of("CET"));
+      DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+      String cetFormattedDate = cetTime.format(cetFormatter);
       String emailText = String.format(
-              LiteralConstants.TECH_ACCEPT_MESSAGE + LiteralConstants.SPACE + dataflowName + " : " + messageContent
-      );
+              LiteralConstants.TECH_ACCEPT_MESSAGE , dataflowName, cetFormattedDate, messageContent);
+
       EmailVO emailVO = new EmailVO();
       emailVO.setBbc(new ArrayList<>(emailSet));
-      emailVO.setSubject(String.format(LiteralConstants.TECH_ACCEPT_MESSAGE));
+      emailVO.setSubject(String.format(LiteralConstants.TECH_ACCEPT_MESSAGE_SUBJECT , providerLabel, dataflowName));
       emailVO.setText(emailText);
       emailControllerZuul.sendMessage(emailVO);
     } catch (Exception e) {

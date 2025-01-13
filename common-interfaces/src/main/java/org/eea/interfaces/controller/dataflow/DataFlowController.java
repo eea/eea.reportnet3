@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -314,6 +315,25 @@ public interface DataFlowController {
    * @return the public dataflows by country
    */
   @PostMapping("/public/country/{countryCode}")
+  PaginatedDataflowPerCountryVO getDataflowsByCountry(@PathVariable("countryCode") String countryCode,
+      @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+      @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+      @RequestParam(value = "sortField", required = false) String sortField,
+      @RequestParam(value = "asc", defaultValue = "true") boolean asc,
+      @RequestBody(required = false) Map<String, String> filters);
+
+  /**
+   * Gets all dataflows by country.
+   *
+   * @param countryCode the country code
+   * @param pageNum the page num
+   * @param pageSize the page size
+   * @param sortField the sort field
+   * @param asc the asc
+   * @param filters the filters
+   * @return the public dataflows by country
+   */
+  @PostMapping("/country/{countryCode}")
   PaginatedDataflowVO getPublicDataflowsByCountry(@PathVariable("countryCode") String countryCode,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
