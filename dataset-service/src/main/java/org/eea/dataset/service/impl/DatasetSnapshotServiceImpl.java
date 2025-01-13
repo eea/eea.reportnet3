@@ -21,6 +21,7 @@ import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.ReleaseReceiptService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
@@ -41,6 +42,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReleaseReceiptVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -181,6 +183,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The release receipt service. */
+  @Autowired
+  private ReleaseReceiptService releaseReceiptService;
 
   /** The representative controller zuul. */
   @Autowired
@@ -966,22 +972,31 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
 
-    ReleaseReceiptInfoVO receipt = new ReleaseReceiptInfoVO();
+    ReleaseReceiptInfoVO receiptInfo = new ReleaseReceiptInfoVO();
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
 
-    //if is manual acceptance a text note is added to final receipt
+    ReleaseReceiptVO releaseReceipt = new ReleaseReceiptVO();
+      try {
+        releaseReceipt = releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
+      } catch (EEAException e) {
+        LOG.error("Cannot get release receipt for dataflow id {}. Message {}",
+                dataflowId, e.getMessage(), e);
+      }
+
+      //if is manual acceptance a text note is added to final receipt
     boolean isManualAcceptance = Boolean.TRUE.equals(dataflow.isManualAcceptance());
 
-    receipt.setIdDataflow(dataflowId);
-    receipt.setDataflowName(dataflow.getName());
-    receipt.setObligationId(dataflow.getObligation().getObligationId());
-    receipt.setObligationTitle(dataflow.getObligation().getOblTitle());
-    receipt.setDatasets(dataflow.getReportingDatasets().stream()
+    receiptInfo.setIdDataflow(dataflowId);
+    receiptInfo.setDataflowName(dataflow.getName());
+    receiptInfo.setNote(releaseReceipt.getNote());
+    receiptInfo.setObligationId(dataflow.getObligation().getObligationId());
+    receiptInfo.setObligationTitle(dataflow.getObligation().getOblTitle());
+    receiptInfo.setDatasets(dataflow.getReportingDatasets().stream()
             .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
             .collect(Collectors.toList()));
 
-    if (!receipt.getDatasets().isEmpty()) {
-      receipt.setProviderAssignation(receipt.getDatasets().get(0).getDataSetName());
+    if (!receiptInfo.getDatasets().isEmpty()) {
+      receiptInfo.setProviderAssignation(receiptInfo.getDatasets().get(0).getDataSetName());
     }
 
     List<RepresentativeVO> representatives =
@@ -989,12 +1004,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
                     .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
 
     UserRepresentationVO user = userManagementControllerZull.getUserByUserId();
-    receipt.setEmail(user.getEmail());
+    receiptInfo.setEmail(user.getEmail());
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);
 
-      receipt.setProviderEmail(user.getEmail());
+      receiptInfo.setProviderEmail(user.getEmail());
 
       // Check if it's needed to update the status of the button (i.e I only want to download the
       // receipt twice, but no state is changed)
@@ -1008,7 +1023,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     }
 
-    receiptPDFGenerator.generatePDF(receipt, out, isManualAcceptance);
+    receiptPDFGenerator.generatePDF(receiptInfo, out, isManualAcceptance);
   }
 
   /**

@@ -27,6 +27,9 @@ public class ReleaseReceiptInfoVO implements Serializable {
   /** The datasets. */
   private List<ReportingDatasetVO> datasets;
 
+  /** The note. */
+  private String note;
+
   /** The provider email. */
   private String providerEmail;
 

@@ -184,20 +184,26 @@ public class ReceiptPDFGenerator {
     text = "https://rod.eionet.europa.eu/obligations/" + receipt.getObligationId();
     printLinePDF(contentStream, text, font, fontSize, x, y);
 
-    //Print Additional notes text if the dataflow has Manual Acceptance step
+// Print Additional notes text if the dataflow has Manual Acceptance step
     if (Boolean.TRUE.equals(isManualAcceptance)) {
       y -= spaceBetweenLines * 2 + fontSize;
 
-      String[] lines = {
-              "This dataflow has a technical acceptance phase following the national data submission.",
-              "During the technical acceptance phase, the results of the automatic validation will be",
-              "reviewed and the national data submission will be assessed, which will result in a status",
-              "of 'technically accepted' or 'correction requested'."
-      };
+      String[] lines;
+      if (receipt.getNote() != null && !receipt.getNote().isEmpty()) {
+          lines = splitInDifferentLinesByLineCharacterLength(receipt.getNote(),81);
+      } else {
+        // Default message if NO note exists
+        lines = new String[]{
+                "This dataflow has a technical acceptance phase following the national data submission.",
+                "During the technical acceptance phase, the results of the automatic validation will be",
+                "reviewed and the national data submission will be assessed, which will result in a status",
+                "of 'technically accepted' or 'correction requested'."
+        };
+      }
 
       for (String line : lines) {
         printLinePDF(contentStream, line, font, fontSize, 133f, y);
-        y -= spaceBetweenLines + fontSize;
+        y -= spaceBetweenLines + fontSize; // Move down for the next line
       }
     }
 
@@ -335,5 +341,39 @@ public class ReceiptPDFGenerator {
     }
 
     return cutIndex;
+  }
+
+  /**
+   * Splits the text into lines of a specified maximum number of characters.
+   *
+   * @param input            the input text to be split
+   * @param maxLineLength the maximum number of characters per line
+   * @return an array of lines
+   */
+  private String[] splitInDifferentLinesByLineCharacterLength(String input, int maxLineLength) {
+    // Split the input text into words
+    String[] words = input.split(" ");
+    StringBuilder currentLine = new StringBuilder();
+    List<String> lines = new ArrayList<>();
+
+    for (String word : words) {
+      // If the current line plus this word exceeds the max length, add the current line to the list and start a new one
+      if (currentLine.length() + word.length() + 1 > maxLineLength) {
+        lines.add(currentLine.toString());
+        currentLine.setLength(0); // Reset the StringBuilder for the next line
+      }
+      // Add the word to the current line
+      if (currentLine.length() > 0) {
+        currentLine.append(" "); // Add space before the word if not the first word
+      }
+      currentLine.append(word);
+    }
+
+    // Add any remaining text in currentLine to the list
+    if (currentLine.length() > 0) {
+      lines.add(currentLine.toString());
+    }
+
+    return lines.toArray(new String[0]);
   }
 }
