@@ -678,6 +678,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES.equals(importFileInDremioInfo.getErrorMessage())){
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLES, null);
                 eventType = EventType.IMPORT_READ_ONLY_TABLES_ERROR_EVENT;
+            } else if(EEAErrorMessage.DREMIO_ENDPOINT_ERROR_RESPONSE.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_DREMIO_ENDPOINT_RESPONSE, null);
+                eventType = EventType.DREMIO_ENDPOINT_ERROR_RESPONSE;
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)

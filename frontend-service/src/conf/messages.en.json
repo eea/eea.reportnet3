@@ -829,6 +829,7 @@
     "importOnlyReadOnlyFieldsErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have have only read only fields.",
     "importOnlyReadOnlyFieldsWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have only read only fields.",
     "importReadOnlyTablesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables are read only.",
+    "dremioEndpointErrorResponse": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: did not receive response from dremio. Please try again.",
     "importReadOnlyTablesWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables are read only.",
     "importOperationManageIntegration": "Import",
     "importPreviousData": "Other custom imports",

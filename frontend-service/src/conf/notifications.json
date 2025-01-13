@@ -56,6 +56,13 @@
           }
         },
         {
+          "key": "DREMIO_ENDPOINT_ERROR_RESPONSE",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "IMPORT_READ_ONLY_TABLES_ERROR_EVENT",
           "navigateTo": {
             "section": "DATASET",
