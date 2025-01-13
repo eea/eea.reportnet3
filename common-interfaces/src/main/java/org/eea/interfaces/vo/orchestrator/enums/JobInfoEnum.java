@@ -45,7 +45,9 @@ public enum JobInfoEnum {
 
     WARNING_SOME_IMPORT_MISMATCH_OF_DATA("Some imports have some data rows with more data than the number of columns"),
 
-    ERROR_DREMIO_ENDPOINT_RESPONSE("Could not retrieve information from Dremio endpoints");
+    ERROR_DREMIO_ENDPOINT_RESPONSE("Could not retrieve information from Dremio endpoints"),
+
+    ERROR_ICEBERG_TABLE_EXISTS("The job failed because there is an iceberg table in the dataset");
 
 
     /** The value. */
