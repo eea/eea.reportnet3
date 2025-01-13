@@ -309,13 +309,16 @@ public interface RulesService {
       throws EEAException;
 
   /**
-   * Export QCCSV.
+   * Export data validation CSV file.
    *
    * @param datasetId the dataset id
+   * @param folderName the folder name
+   * @param fileNameWithExtension the filename
+   * @param processUUID the process id
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
-  void exportQCCSV(@DatasetId Long datasetId) throws EEAException, IOException;
+  void exportQCCSV(@DatasetId Long datasetId, String folderName, String fileNameWithExtension, String processUUID) throws Exception;
 
   /**
    * Download QCCSV.

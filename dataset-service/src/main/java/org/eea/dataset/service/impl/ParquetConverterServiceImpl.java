@@ -1,5 +1,6 @@
 package org.eea.dataset.service.impl;
 
+import com.dremio.jdbc.impl.DremioExceptionMapper;
 import com.opencsv.CSVWriter;
 import java.util.HashSet;
 import java.util.Set;
@@ -38,6 +39,7 @@ import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.FileWithRecordNum;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
+import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
@@ -243,133 +245,140 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   //returns the number of records that were inserted for a table
   private Long convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, TableSchemaVO tableSchemaVO) throws Exception {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
-    DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
-    //create a new csv file that contains records ids and data provider code as extra information
-    List<FileWithRecordNum> csvFilesWithAddedColumns;
-    String tableSchemaName = tableSchemaVO.getNameTableSchema();
+    Long numberOfRecordsToBeInserted = 0L;
+    try {
+      DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
+      //create a new csv file that contains records ids and data provider code as extra information
+      List<FileWithRecordNum> csvFilesWithAddedColumns;
+      String tableSchemaName = tableSchemaVO.getNameTableSchema();
 
-    S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
-    S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+      S3PathResolver s3ImportPathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_IMPORT_FILE_PATH);
+      S3PathResolver s3TablePathResolver = constructS3PathResolver(importFileInDremioInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
 
-    //path in dremio for the folder in current that represents the table of the dataset
-    String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
-    //path in s3 for the folder that contains the stored csv files
-    String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
-    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchemaVO.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchemaVO::getReadOnly)) {
-      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
-      return 0L;
-    }
-
-    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) {
-      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
-      return 0L;
-    }
-
-    Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
-    if(!DatasetTypeEnum.DESIGN.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()){
-      //convert old table to iceberg
-      Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
-      bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
-      S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
-      s3IcebergTablePathResolver.setIsIcebergTable(true);
-      try {
-        Long numberOfRecordsUpdated = updatePrefilledDataBasedOnReadOnlyData(importFileInDremioInfo, csvFile, s3IcebergTablePathResolver, dataSetSchema, tableSchemaVO);
-        return numberOfRecordsUpdated;
-      }
-      finally {
-        //after all updates convert iceberg to parquet
-        bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
-      }
-    }
-
-
-    if (convertParquetWithCustomWay) {
-      csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
-    } else {
-      if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, spatialDataBatchSize, datasetType);//
-      } else {
-        csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, datasetType);
-      }
-    }
-
-    if (csvFilesWithAddedColumns == null) {
-      importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
-      return 0L;
-    }
-
-    Long numberOfRecordsToBeInserted = csvFilesWithAddedColumns.stream().mapToLong(FileWithRecordNum::getNumberOfRecords).sum();
-
-    if (!DatasetTypeEnum.DESIGN.equals(datasetType) && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
-      DesignDataset designDataset = datasetMetabaseService.getDesignDatasetByDataflowIdAndDatasetSchemaId(importFileInDremioInfo.getDataflowId(), String.valueOf(dataSetSchema.getIdDataSetSchema()));
-      ImportFileInDremioInfo designImportInfo = new ImportFileInDremioInfo(importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDataflowId(), 0L, designDataset.getId());
-      S3PathResolver s3DesignTablePathResolver = constructS3PathResolver(designImportInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
-      //path in dremio for the folder in current that represents the table of the design dataset
-      String designTableQueryPath = getImportQueryPathForFolder(designImportInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
-      //remove data for table
-      TableSchema tableSchema = tableSchemaMapper.classToEntity(tableSchemaVO);
-      deleteTableDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()), tableSchema, datasetType, true);
-      if(!canImportForFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted, designTableQueryPath, s3DesignTablePathResolver)){
-        if(importFileInDremioInfo.getReplaceData()){
-          //restore old data from design dataset
-          bigDataDatasetService.createPrefilledTables(designDataset.getId(), String.valueOf(dataSetSchema.getIdDataSetSchema()), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getProviderId(), String.valueOf(tableSchemaVO.getIdTableSchema()));
-        }
+      //path in dremio for the folder in current that represents the table of the dataset
+      String dremioPathForParquetFolder = getImportQueryPathForFolder(importFileInDremioInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+      //path in s3 for the folder that contains the stored csv files
+      String s3PathForCsvFolder = s3Service.getTableAsFolderQueryPath(s3ImportPathResolver, S3_IMPORT_TABLE_NAME_FOLDER_PATH);
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && tableSchemaVO.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchemaVO::getReadOnly)) {
+        importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null));
         return 0L;
       }
-    }
 
-    boolean needToDemoteTable = true;
-    s3Helper.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver, dremioHelperService);
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && BooleanUtils.isTrue(tableSchemaVO.getReadOnly())) {
+        importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null));
+        return 0L;
+      }
 
-
-    for (FileWithRecordNum entry : csvFilesWithAddedColumns) {
-      File csvFileWithAddedColumns = entry.getFile();
-      String csvFileName = csvFileWithAddedColumns.getName().replace(CSV_EXTENSION, "");
-
-      //path in s3 for the stored csv file
-      String s3PathForModifiedCsv = getImportPathForCsv(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName);
-
-      //path in dremio for the stored csv file
-      String dremioPathForCsvFile = getImportQueryPathForFolder(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName, LiteralConstants.S3_IMPORT_CSV_FILE_QUERY_PATH);
-      //path in dremio for the folder that contains the created parquet file
-      String parquetInnerFolderPath = dremioPathForParquetFolder + ".\"" + csvFileName + "\"";
-
-      //upload csv file
-      uploadCsvFileAndPromoteIt(s3ImportPathResolver, tableSchemaName, s3PathForModifiedCsv, csvFileWithAddedColumns.getPath(), csvFileWithAddedColumns.getName(), dremioPathForCsvFile);
-
-      if (needToDemoteTable) {
-        //demote table folder
-        if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-          dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
-          needToDemoteTable = false;
+      Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()) {
+        //convert old table to iceberg
+        Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
+        bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        s3IcebergTablePathResolver.setIsIcebergTable(true);
+        try {
+          Long numberOfRecordsUpdated = updatePrefilledDataBasedOnReadOnlyData(importFileInDremioInfo, csvFile, s3IcebergTablePathResolver, dataSetSchema, tableSchemaVO);
+          return numberOfRecordsUpdated;
+        } finally {
+          //after all updates convert iceberg to parquet
+          bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
         }
       }
 
-      //create parquet file
-      if (convertParquetWithCustomWay) {
-        LOG.info("For import job {} the conversion of the csv to parquet will use the custom implementation", importFileInDremioInfo);
-        String parquetFilePathInReportNet = csvFileWithAddedColumns.getPath().replace(CSV_EXTENSION, PARQUET_EXTENSION);
-        convertCsvToParquetCustom(csvFileWithAddedColumns, parquetFilePathInReportNet, importFileInDremioInfo);
-        //upload parquet file
-        String parquetFileName = csvFileName + "/" + DEFAULT_PARQUET_NAME;
-        String importPathForParquet = getImportS3PathForParquet(importFileInDremioInfo, parquetFileName, tableSchemaName);
-        s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
-      } else {
-        LOG.info("For import job {} " +
-            "the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
-        String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile, csvFile.getName(), dataSetSchema);
-        String processId = dremioHelperService.executeSqlStatement(createTableQuery);
-        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(createTableQuery, processId, null);
-      }
-    }
-    //refresh the metadata
-    dremioHelperService.refreshTableMetadataAndPromote(importFileInDremioInfo.getJobId(), dremioPathForParquetFolder, s3TablePathResolver, tableSchemaName);
 
-    if (importFileInDremioInfo.getUpdateReferenceFolder()) {
-      LOG.info("For job {} the REFERENCE dataset files must be copied to reference folder", importFileInDremioInfo);
-      handleReferenceDataset(importFileInDremioInfo, s3TablePathResolver);
+      if (convertParquetWithCustomWay) {
+        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
+      } else {
+        if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
+          csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, spatialDataBatchSize, datasetType);
+        } else {
+          csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, datasetType);
+        }
+      }
+
+      if (csvFilesWithAddedColumns == null) {
+        importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null));
+        return 0L;
+      }
+
+      numberOfRecordsToBeInserted = csvFilesWithAddedColumns.stream().mapToLong(FileWithRecordNum::getNumberOfRecords).sum();
+
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
+        DesignDataset designDataset = datasetMetabaseService.getDesignDatasetByDataflowIdAndDatasetSchemaId(importFileInDremioInfo.getDataflowId(), String.valueOf(dataSetSchema.getIdDataSetSchema()));
+        ImportFileInDremioInfo designImportInfo = new ImportFileInDremioInfo(importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDataflowId(), 0L, designDataset.getId());
+        S3PathResolver s3DesignTablePathResolver = constructS3PathResolver(designImportInfo, tableSchemaName, tableSchemaName, S3_TABLE_NAME_FOLDER_PATH);
+        //path in dremio for the folder in current that represents the table of the design dataset
+        String designTableQueryPath = getImportQueryPathForFolder(designImportInfo, tableSchemaName, tableSchemaName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+        //remove data for table
+        TableSchema tableSchema = tableSchemaMapper.classToEntity(tableSchemaVO);
+        deleteTableDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()), tableSchema, datasetType, true);
+        if (!canImportForFixedNumberOfRecords(importFileInDremioInfo, numberOfRecordsToBeInserted, designTableQueryPath, s3DesignTablePathResolver)) {
+          if (importFileInDremioInfo.getReplaceData()) {
+            //restore old data from design dataset
+            bigDataDatasetService.createPrefilledTables(designDataset.getId(), String.valueOf(dataSetSchema.getIdDataSetSchema()), importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getProviderId(), String.valueOf(tableSchemaVO.getIdTableSchema()));
+          }
+          return 0L;
+        }
+      }
+
+      boolean needToDemoteTable = true;
+      s3Helper.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver, dremioHelperService);
+
+
+      for (FileWithRecordNum entry : csvFilesWithAddedColumns) {
+        File csvFileWithAddedColumns = entry.getFile();
+        String csvFileName = csvFileWithAddedColumns.getName().replace(CSV_EXTENSION, "");
+
+        //path in s3 for the stored csv file
+        String s3PathForModifiedCsv = getImportPathForCsv(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName);
+
+        //path in dremio for the stored csv file
+        String dremioPathForCsvFile = getImportQueryPathForFolder(importFileInDremioInfo, csvFileWithAddedColumns.getName(), tableSchemaName, LiteralConstants.S3_IMPORT_CSV_FILE_QUERY_PATH);
+        //path in dremio for the folder that contains the created parquet file
+        String parquetInnerFolderPath = dremioPathForParquetFolder + ".\"" + csvFileName + "\"";
+
+        //upload csv file
+        uploadCsvFileAndPromoteIt(s3ImportPathResolver, tableSchemaName, s3PathForModifiedCsv, csvFileWithAddedColumns.getPath(), csvFileWithAddedColumns.getName(), dremioPathForCsvFile);
+
+        if (needToDemoteTable) {
+          //demote table folder
+          if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
+            needToDemoteTable = false;
+          }
+        }
+
+        //create parquet file
+        if (convertParquetWithCustomWay) {
+          LOG.info("For import job {} the conversion of the csv to parquet will use the custom implementation", importFileInDremioInfo);
+          String parquetFilePathInReportNet = csvFileWithAddedColumns.getPath().replace(CSV_EXTENSION, PARQUET_EXTENSION);
+          convertCsvToParquetCustom(csvFileWithAddedColumns, parquetFilePathInReportNet, importFileInDremioInfo);
+          //upload parquet file
+          String parquetFileName = csvFileName + "/" + DEFAULT_PARQUET_NAME;
+          String importPathForParquet = getImportS3PathForParquet(importFileInDremioInfo, parquetFileName, tableSchemaName);
+          s3Helper.uploadFileToBucket(importPathForParquet, parquetFilePathInReportNet);
+        } else {
+          LOG.info("For import job {} " +
+                  "the conversion of the csv to parquet will use a dremio query", importFileInDremioInfo);
+          String createTableQuery = getTableQuery(importFileInDremioInfo, parquetInnerFolderPath, dremioPathForCsvFile, csvFile.getName(), dataSetSchema);
+          String processId = dremioHelperService.executeSqlStatement(createTableQuery);
+          dremioHelperService.checkIfDremioProcessFinishedSuccessfully(createTableQuery, processId, null);
+        }
+      }
+      //refresh the metadata
+      dremioHelperService.refreshTableMetadataAndPromote(importFileInDremioInfo.getJobId(), dremioPathForParquetFolder, s3TablePathResolver, tableSchemaName);
+
+      if (importFileInDremioInfo.getUpdateReferenceFolder()) {
+        LOG.info("For job {} the REFERENCE dataset files must be copied to reference folder", importFileInDremioInfo);
+        handleReferenceDataset(importFileInDremioInfo, s3TablePathResolver);
+      }
+      LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
     }
-    LOG.info("For job {} the import for table {} has been completed", importFileInDremioInfo, tableSchemaName);
+    catch (DremioApiException dae){
+      LOG.error("Error during import for job {} Error: {}", importFileInDremioInfo, dae.getMessage());
+      importFileInDremioInfo.setErrorMessage(EEAErrorMessage.DREMIO_ENDPOINT_ERROR_RESPONSE);
+      throw new Exception(EEAErrorMessage.DREMIO_ENDPOINT_ERROR_RESPONSE);
+    }
 
     return numberOfRecordsToBeInserted;
   }

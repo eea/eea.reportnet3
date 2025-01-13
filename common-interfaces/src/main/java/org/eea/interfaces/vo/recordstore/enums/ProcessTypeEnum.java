@@ -26,7 +26,9 @@ public enum ProcessTypeEnum {
 
   COPY_REFERENCE_DATASET("COPY_REFERENCE_DATASET"),
 
-  FILE_EXPORT("FILE_EXPORT");
+  FILE_EXPORT("FILE_EXPORT"),
+
+  EXPORT_QC("EXPORT_QC");
 
   /** The value. */
   private final String value;

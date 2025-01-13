@@ -1,14 +1,14 @@
 package org.eea.exception;
 
 /**
- * The Class EEAException.
+ * The Class DremioValidationException.
  */
 public class DremioValidationException extends Exception {
 
   private static final long serialVersionUID = 1266830579241817268L;
 
   /**
-   * Instantiates a new EEA exception.
+   * Instantiates a new Dremio Validation exception.
    *
    * @param message the message
    * @param cause the cause
@@ -18,7 +18,7 @@ public class DremioValidationException extends Exception {
   }
 
   /**
-   * Instantiates a new EEA exception.
+   * Instantiates a new Dremio Validation exception.
    *
    * @param message the message
    */
@@ -27,14 +27,14 @@ public class DremioValidationException extends Exception {
   }
 
   /**
-   * Instantiates a new EEA exception.
+   * Instantiates a new Dremio Validation exception.
    */
   public DremioValidationException() {
     super();
   }
 
   /**
-   * Instantiates a new EEA exception.
+   * Instantiates a new Dremio Validation exception.
    *
    * @param cause the cause
    */
