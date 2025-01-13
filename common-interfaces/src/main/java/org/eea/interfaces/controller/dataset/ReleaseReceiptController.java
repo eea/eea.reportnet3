@@ -1,10 +1,17 @@
 package org.eea.interfaces.controller.dataset;
 
 import org.eea.interfaces.vo.dataset.ReleaseReceiptVO;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 public interface ReleaseReceiptController {
+
+    /** The Interface ReleaseReceiptControllerZuul. */
+    @FeignClient(value = "dataset", contextId = "release-receipts", path = "/release-receipts")
+    interface ReleaseReceiptControllerZuul extends ReleaseReceiptController {
+
+    }
 
     /**
      * Create a new ReleaseReceipt.
