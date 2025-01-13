@@ -40,6 +40,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -717,18 +718,18 @@ public class RulesControllerImplTest {
   }
 
   @Test
-  public void exportQCCSVTest() throws EEAException, IOException {
+  public void exportQCCSVTest() throws Exception {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
     rulesControllerImpl.exportQCCSV(1L);
-    Mockito.verify(rulesService, times(1)).exportQCCSV(Mockito.anyLong());
+    Mockito.verify(rulesService, times(1)).exportQCCSV(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
   }
 
   @Test
-  public void exportQCCSVExceptionTest() throws EEAException, IOException {
+  public void exportQCCSVExceptionTest() throws Exception {
     Mockito.doNothing().when(notificationControllerZuul)
         .createUserNotificationPrivate(Mockito.anyString(), Mockito.any());
-    Mockito.doThrow(EEAException.class).when(rulesService).exportQCCSV(Mockito.anyLong());
+    Mockito.doThrow(EEAException.class).when(rulesService).exportQCCSV(Mockito.anyLong(), Mockito.anyString(), Mockito.anyString(), Mockito.anyString());
     rulesControllerImpl.exportQCCSV(1L);
   }
 
@@ -884,7 +885,7 @@ public class RulesControllerImplTest {
     try {
       Mockito.doThrow(IOException.class).when(rulesService).downloadQCCSV(Mockito.anyLong(),
           Mockito.any());
-      rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null);
+      rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null, new MockHttpServletResponse());
     } catch (IOException e) {
       assertNotNull(e);
       throw e;
@@ -906,7 +907,7 @@ public class RulesControllerImplTest {
     Mockito.when(httpServletResponse.getOutputStream()).thenReturn(outputStream);
     Mockito.doNothing().when(outputStream).close();
 
-    rulesControllerImpl.downloadQCCSV(1L, "FILENAME", httpServletResponse);
+    rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null, httpServletResponse);
     Mockito.verify(outputStream, times(1)).close();
   }
 }

@@ -4,21 +4,28 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
@@ -27,6 +34,8 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.SqlRuleVO;
+import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.thread.ThreadPropertiesManager;
 import org.eea.validation.exception.EEAForbiddenSQLCommandException;
 import org.eea.validation.exception.EEAInvalidSQLException;
@@ -88,6 +97,9 @@ public class RulesControllerImpl implements RulesController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  @Autowired
+  private ProcessControllerZuul processControllerZuul;
 
   @Override
   @PostMapping(value = "/validateAllRules", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -913,22 +925,31 @@ public class RulesControllerImpl implements RulesController {
    * Export QCCSV.
    *
    * @param datasetId the dataset id
+   * @return the download url
    */
   @Override
   @HystrixCommand
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_REQUESTER','DATASCHEMA_CUSTODIAN','DATASET_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR (hasAnyRole('DATA_CUSTODIAN','DATA_STEWARD') AND checkAccessReferenceEntity('DATASET',#datasetId))")
   @PostMapping(value = "/exportQC/{datasetId}")
   @ApiOperation(value = "Exports all the QCs into a CSV file", hidden = true)
-  public void exportQCCSV(@ApiParam(value = "Dataset id used in the export process.",
-          example = "10") @PathVariable("datasetId") Long datasetId) {
+  public String exportQCCSV(@ApiParam(value = "Dataset id used in the export process.",
+          example = "10") @PathVariable("datasetId") Long datasetId) throws Exception {
     LOG.info("Export dataset QC from datasetId {}, with type .csv", datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_QC_RULES_START",
             userNotificationContentVO);
-
+    String downloadUrl = "";
     try {
-      rulesService.exportQCCSV(datasetId);
+      String processUUID = UUID.randomUUID().toString();
+      // Sets the validation file name and it's root directory
+      String folderName = "dataset-" + datasetId + "-QCS";
+      String composedFileName = folderName + "-"
+              + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss"));
+      String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
+      rulesService.exportQCCSV(datasetId, folderName, fileNameWithExtension, processUUID);
+      downloadUrl = "/rules/downloadQC/" + datasetId + "?fileName=" + fileNameWithExtension + "&processId=" + processUUID;
+
     } catch (EEAException | IOException e) {
       LOG.error("Error exporting QCS from the dataset {}.  Message: {}", datasetId,
               e.getMessage());
@@ -936,6 +957,7 @@ public class RulesControllerImpl implements RulesController {
       LOG.error("Unexpected error! Error exporting qc to csv for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
     }
+    return downloadUrl;
   }
 
   /**
@@ -951,18 +973,35 @@ public class RulesControllerImpl implements RulesController {
   @ApiOperation(value = "Download the generated CSV file containing the QCs", hidden = true)
   @ApiResponse(code = 404, message = "Couldn't find a file with the specified name.")
   public void downloadQCCSV(
-          @ApiParam(value = "Dataset id used in the export process.",
-                  example = "10") @PathVariable Long datasetId,
-          @ApiParam(value = "The filename the export process assigned to the QC Export file.",
-                  example = "dataset-10-QCS-yyyy-MM-dd HH.mm.ss") @RequestParam String fileName,
+          @ApiParam(value = "Dataset id used in the export process.", example = "10") @PathVariable Long datasetId,
+          @ApiParam(value = "The filename the export process assigned to the QC Export file.", example = "dataset-10-QCS-yyyy-MM-dd HH.mm.ss") @RequestParam String fileName,
+          @ApiParam(value = "The processId.", example = "6ef6f4da-b796-4851-a14b-8d41733db16d") @RequestParam(required = false) String processId,
           HttpServletResponse response) {
     try {
-      LOG.info("Downloading file generated when exporting QC Rules. DatasetId {}. Filename {}",
-              datasetId, fileName);
-      File file = rulesService.downloadQCCSV(datasetId, fileName);
-      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      LOG.info("Downloading file generated when exporting QC Rules. DatasetId {}. Filename {} processId {}",
+              datasetId, fileName, processId);
 
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
       OutputStream out = response.getOutputStream();
+
+      if(StringUtils.isNotBlank(processId)) {
+        ProcessVO processVO = processControllerZuul.findById(processId);
+        if (processVO.getStatus().equals(ProcessStatusEnum.IN_PROGRESS.toString()) || processVO.getStatus().equals(ProcessStatusEnum.CANCELED.toString())){
+          String responseMessage;
+          if (processVO.getStatus().equals(ProcessStatusEnum.IN_PROGRESS.toString())){
+            responseMessage = "Export QC file for dataset with ID " + datasetId + " is not ready. Please try again later.";
+          }
+          else{
+            responseMessage = "Something went wrong when exporting QCs for dataset with ID " + datasetId;
+          }
+          out.write(responseMessage.getBytes(StandardCharsets.UTF_8));
+          out.close();
+          return;
+        }
+      }
+
+      File file = rulesService.downloadQCCSV(datasetId, fileName);
+
       FileInputStream in = new FileInputStream(file);
       // copy from in to out
       IOUtils.copyLarge(in, out);
