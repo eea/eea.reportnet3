@@ -122,14 +122,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> recordIds = new ArrayList<>();
 
-            //TODO: TO check if file exists is needed
             long rowCount = dremioHelperService.getRowCount(tablePath);
-            if (rowCount == 0) {
-                if (ruleMethodName.equals(IS_TABLE_EMPTY)) {
-                    recordIds.add(TABLE_EMPTY);
-                } else {
-                    return;
-                }
+            if (rowCount == 0 && ruleMethodName.equals(IS_TABLE_EMPTY)) {
+                recordIds.add(TABLE_EMPTY);
             }
 
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
@@ -162,6 +157,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 }
 
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
+                if (rowCount == 0 && ruleVO.getDescription().contains(TABLE_EMPTY)) {
+                    recordIds.add(TABLE_EMPTY);
+                }
             }
 
             if (!recordIds.isEmpty()) {
