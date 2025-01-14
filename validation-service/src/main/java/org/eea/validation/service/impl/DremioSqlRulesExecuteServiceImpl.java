@@ -80,6 +80,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
     private static final String IS_TABLE_EMPTY = "isTableEmpty";
     private static final String TABLE_EMPTY = "tableEmpty";
+    private static final String LOCK = "_lock_";
     private static final String AS_MESSAGE = " as message";
     private static final String COMMA_RECORD_ID = ",record_id";
     private static final String DOUBLE_QUOTATION_MARK = ",\'\'";
@@ -157,7 +158,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 }
 
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
-                if (rowCount == 0 && ruleVO.getDescription().contains(TABLE_EMPTY)) {
+                if (rowCount == 0 && ruleVO.getShortCode().toLowerCase().contains(LOCK.toLowerCase())) {
                     recordIds.add(TABLE_EMPTY);
                 }
             }
