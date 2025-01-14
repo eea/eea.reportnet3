@@ -338,6 +338,8 @@ public class ValidationControllerImpl implements ValidationController {
    * Gets the group failed validations by id dataset.
    *
    * @param datasetId the dataset id
+   * @param dataflowId
+   * @param providerId
    * @param pageNum the page num
    * @param pageSize the page size
    * @param headers the headers
@@ -350,13 +352,17 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN')")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
   @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
       hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
       @ApiParam(value = "Dataset id used in the retrieval process",
           example = "1") @PathVariable("id") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow id",
+              example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id",
+              example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(value = "Page number the filtering starts in.", example = "0", defaultValue = "0",
           required = false) @RequestParam(value = "pageNum", defaultValue = "0",
               required = false) Integer pageNum,
@@ -413,13 +419,17 @@ public class ValidationControllerImpl implements ValidationController {
 
   @Override
   @GetMapping(value = "listGroupValidationsDL/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN')")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
   @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
           hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public FailedValidationsDatasetVO getGroupFailedValidationsByIdDatasetDL(
           @ApiParam(value = "Dataset id used in the retrieval process",
                   example = "1") @PathVariable("id") Long datasetId,
+          @ApiParam(type = "Long", value = "Dataflow id",
+                  example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+          @ApiParam(type = "Long", value = "Provider id",
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
           @ApiParam(value = "Page number the filtering starts in.", example = "0", defaultValue = "0",
                   required = false) @RequestParam(value = "pageNum", defaultValue = "0",
                   required = false) Integer pageNum,
