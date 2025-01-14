@@ -3,7 +3,9 @@ package org.eea.dataset.service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.*;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
@@ -229,4 +231,18 @@ public interface BigDataDatasetService {
      *
      */
     void insertRecordsInMultipleTables(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords) throws Exception;
+
+    /**
+     * Get released dataset data info DL
+     *
+     * @param collectionDatasetId the collection dataset id
+     * @param reportingDatasetId the reporting dataset id
+     * @param dataflowId the dataflow id
+     * @param dataProviderVO the data provider object
+     * @param tableSchemaId the table schema id
+     * @param datasetType the dataset type
+     * @return a ReleasedDatasetDataInfoVO object
+     *
+     */
+    ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(Long collectionDatasetId, Long reportingDatasetId, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
 }

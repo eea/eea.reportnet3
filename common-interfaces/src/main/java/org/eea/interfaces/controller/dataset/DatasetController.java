@@ -987,4 +987,17 @@ public interface DatasetController {
    */
   @GetMapping("/getImportRelatedStatistics/{datasetId}")
   Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception;
+
+  /**
+   * Get released dataset data info
+   *
+   * @param collectionDatasetId the dataset id
+   * @param providerCode the provider code
+   * @param tableSchemaId the table schema id
+   * @return a ReleasedDatasetDataInfoVO object
+   *
+   */
+  @GetMapping("/getReleasedDatasetDataInfo")
+  ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode,
+                                                       @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
 }

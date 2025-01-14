@@ -21,10 +21,12 @@ import org.eea.exception.EEAException;
 import org.eea.exception.ParquetConversionException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -140,6 +142,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   private StatisticsService statisticsService;
+
+  @Autowired
+  public RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Gets the data tables values.
@@ -3125,5 +3130,40 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.error("Could not retrieve import statistics for dataset id {} Error {}", datasetId, e.getMessage());
       throw e;
     }
+  }
+
+  /**
+   * Get released dataset data info
+   *
+   * @param collectionDatasetId the dataset id
+   * @param providerCode the provider code
+   * @param tableSchemaId the table schema id
+   * @return a ReleasedDatasetDataInfoVO object
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getReleasedDatasetDataInfo")
+  public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode, @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception{
+    ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO;
+    try{
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(collectionDatasetId);
+      DatasetTypeEnum datasetType = datasetService.getDatasetType(collectionDatasetId);
+      Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataSetMetabaseVO.getDataflowId());
+      DataProviderVO providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(providerCode, dataProviderGroupId);
+      Long reportingDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(dataSetMetabaseVO.getDatasetSchema(), providerVO.getId());
+
+      if(dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId())){
+        releasedDatasetDataInfoVO = bigDataDatasetService.getReleasedDatasetDataInfoDL(collectionDatasetId, reportingDatasetId, dataSetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+      }
+      else{
+        releasedDatasetDataInfoVO = datasetService.getReleasedDatasetDataInfo(collectionDatasetId, reportingDatasetId, dataSetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve release dataset data info for collectionDatasetId {}, provider code {} and tableSchemaId {}", collectionDatasetId, providerCode, tableSchemaId);
+      throw e;
+    }
+    return releasedDatasetDataInfoVO;
   }
 }

@@ -3827,4 +3827,20 @@ public class DatasetServiceImpl implements DatasetService {
     return dataSetMetabaseRepository.findDataProviderIdById(datasetId);
   }
 
+  @Override
+  public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(Long collectionDatasetId, Long reportingDatasetId, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception{
+    ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO = new ReleasedDatasetDataInfoVO();
+    //todo
+    //go to reporting dataset with dataset id table
+    //do count and store it
+
+    //go to collection dataset based on dataset id and table and provider code
+    //do count and store it
+    //if i dont find data here released= false
+    // else release = true
+
+    //not sure if I can find if the data has been modified since release for citus
+    return releasedDatasetDataInfoVO;
+  }
+
 }

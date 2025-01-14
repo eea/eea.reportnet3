@@ -8,6 +8,7 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -23,6 +24,8 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.multitenancy.DatasetId;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.File;
 import java.io.IOException;
@@ -712,4 +715,18 @@ public interface DatasetService {
    * @param datasetId
    */
   Long getDataProviderIdById(Long datasetId);
+
+  /**
+   * Get released dataset data info
+   *
+   * @param collectionDatasetId the collection dataset id
+   * @param reportingDatasetId the reporting dataset id
+   * @param dataflowId the dataflow id
+   * @param dataProviderVO the data provider object
+   * @param tableSchemaId the table schema id
+   * @param datasetType the dataset type
+   * @return a ReleasedDatasetDataInfoVO object
+   *
+   */
+  ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(Long collectionDatasetId, Long reportingDatasetId, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
 }

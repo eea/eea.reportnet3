@@ -1932,4 +1932,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
     }
+
+    @Override
+    public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(Long collectionDatasetId, Long reportingDatasetId, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception{
+        ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO = new ReleasedDatasetDataInfoVO();
+        //todo
+        //go to reporting dataset with dataset id, dataflow id, provider id and table
+        //do count and store it
+
+        //go to collection based on dataset type, dataset id, dataflow id, table and provider id
+        //do count and store it
+        //if i dont find data here released= false
+        // else release = true
+
+        //call has updates after release and store result
+        return releasedDatasetDataInfoVO;
+    }
 }
