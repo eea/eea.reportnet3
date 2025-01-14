@@ -46,6 +46,7 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
+import org.eea.dataset.service.ReleaseReceiptService;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -53,6 +54,7 @@ import org.eea.interfaces.controller.collaboration.CollaborationController.Colla
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
+import org.eea.interfaces.controller.dataset.ReleaseReceiptController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -64,6 +66,7 @@ import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReleaseReceiptVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -83,6 +86,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -113,6 +117,10 @@ public class DatasetSnapshotServiceTest {
   /** The lock service. */
   @Mock
   private LockService lockService;
+
+  /** The release receipt service. */
+  @Mock
+  private ReleaseReceiptService releaseReceiptService;
 
   /** The snapshot repository. */
   @Mock
@@ -793,7 +801,7 @@ public class DatasetSnapshotServiceTest {
    * Creates the recepit PDF.
    */
   @Test
-  public void createRecepitPDFTest() {
+  public void createRecepitPDFTest() throws EEAException {
     Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
@@ -814,6 +822,8 @@ public class DatasetSnapshotServiceTest {
     representative.setLeadReporters(leadReportersVO);
     representative.setReceiptDownloaded(true);
     representative.setReceiptOutdated(true);
+    // Mock ReleaseReceiptVO
+    ReleaseReceiptVO releaseReceiptVO = new ReleaseReceiptVO(1L, "Test Note", 1L);
     datasets.add(dataset);
     representatives.add(representative);
     obligationVO.setObligationId(1);
@@ -823,6 +833,8 @@ public class DatasetSnapshotServiceTest {
     dataflowVO.setObligation(obligationVO);
     Mockito.when(dataflowControllerZuul.findById(Mockito.any(), Mockito.any()))
         .thenReturn(dataflowVO);
+
+    Mockito.when(releaseReceiptService.getReleaseReceiptByDataflowId(Mockito.any())).thenReturn(releaseReceiptVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
     Mockito.when(userManagementControllerZull.getUserByUserId()).thenReturn(userRepresentationVO);
