@@ -976,12 +976,14 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
 
     ReleaseReceiptVO releaseReceipt = new ReleaseReceiptVO();
-      try {
-        releaseReceipt = releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
-      } catch (EEAException e) {
-        LOG.error("Cannot get release receipt for dataflow id {}. Message {}",
-                dataflowId, e.getMessage(), e);
-      }
+    try {
+      releaseReceipt = releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
+    } catch (EEAException e) {
+      LOG.error("Cannot get release receipt for dataflow id {}. Message {}",
+              dataflowId, e.getMessage(), e);
+      // Set the note to an empty string if the receipt is not found
+      releaseReceipt.setNote("");
+    }
 
       //if is manual acceptance a text note is added to final receipt
     boolean isManualAcceptance = Boolean.TRUE.equals(dataflow.isManualAcceptance());

@@ -8,6 +8,7 @@ import org.eea.dataset.persistence.metabase.domain.ReleaseReceipt;
 import org.eea.dataset.persistence.metabase.repository.ReleaseReceiptRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 
 @Service
@@ -17,12 +18,14 @@ public class ReleaseReceiptServiceImpl implements ReleaseReceiptService {
     private ReleaseReceiptRepository releaseReceiptRepository;
 
     @Override
-    public ReleaseReceiptVO saveOrUpdateReleaseReceipt(ReleaseReceiptVO releaseReceiptVO) throws EEAException {
-        ReleaseReceipt existingReceipt = releaseReceiptRepository.findByDataflowId(releaseReceiptVO.getDataflowId());
-        if (existingReceipt != null) {
-            existingReceipt.setNote(releaseReceiptVO.getNote());
-            releaseReceiptRepository.save(existingReceipt);
-            return mapToVO(existingReceipt);
+    public ReleaseReceiptVO saveOrUpdateReleaseReceipt(ReleaseReceiptVO releaseReceiptVO) {
+        Optional<ReleaseReceipt> existingReceipt = releaseReceiptRepository.findByDataflowId(releaseReceiptVO.getDataflowId());
+
+        if (existingReceipt.isPresent()) {
+            ReleaseReceipt receipt = existingReceipt.get();
+            receipt.setNote(releaseReceiptVO.getNote());
+            releaseReceiptRepository.save(receipt);
+            return mapToVO(receipt);
         } else {
             ReleaseReceipt releaseReceipt = new ReleaseReceipt();
             releaseReceipt.setDataflowId(releaseReceiptVO.getDataflowId());
@@ -32,6 +35,7 @@ public class ReleaseReceiptServiceImpl implements ReleaseReceiptService {
         }
     }
 
+
     @Override
     public ReleaseReceiptVO getReleaseReceipt(Long id) throws EEAException {
         if (id == null || id <= 0) {
@@ -39,19 +43,16 @@ public class ReleaseReceiptServiceImpl implements ReleaseReceiptService {
         }
 
         ReleaseReceipt releaseReceipt = releaseReceiptRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ReleaseReceipt not found for ID: " + id));
-        if (releaseReceipt == null) {
-            throw new EEAException(EEAErrorMessage.RELEASE_RECEIPT_NOTFOUND);
-        }
+                .orElseThrow(() -> new EEAException(EEAErrorMessage.RELEASE_RECEIPT_NOTFOUND));
+
         return mapToVO(releaseReceipt);
     }
 
+
     @Override
     public ReleaseReceiptVO getReleaseReceiptByDataflowId(Long dataflowId) throws EEAException {
-        ReleaseReceipt releaseReceipt = releaseReceiptRepository.findByDataflowId(dataflowId);
-        if (releaseReceipt == null) {
-            throw new EEAException(EEAErrorMessage.RELEASE_RECEIPT_NOTFOUND);
-        }
+        ReleaseReceipt releaseReceipt = releaseReceiptRepository.findByDataflowId(dataflowId)
+            .orElseThrow(() -> new EEAException(EEAErrorMessage.RELEASE_RECEIPT_NOTFOUND));
         return mapToVO(releaseReceipt);
     }
 
