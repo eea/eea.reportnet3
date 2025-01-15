@@ -45,7 +45,9 @@ public enum JobInfoEnum {
 
     WARNING_SOME_IMPORT_MISMATCH_OF_DATA("Some imports have some data rows with more data than the number of columns"),
 
-    ERROR_DREMIO_ENDPOINT_RESPONSE("Could not retrieve information from Dremio endpoints");
+    ERROR_DREMIO_ENDPOINT_RESPONSE("Could not retrieve information from Dremio endpoints"),
+
+    ERROR_COULD_NOT_UPLOAD_FILE_TO_PUBLIC_S3("Could not upload file to public s3");
 
 
     /** The value. */

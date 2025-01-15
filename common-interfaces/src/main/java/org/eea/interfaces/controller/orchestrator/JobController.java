@@ -299,6 +299,16 @@ public interface JobController {
      */
     @GetMapping(value = "/getJobStatusByJobId/{jobId}")
     JobStatusEnum getJobStatusByJobId(@PathVariable("jobId") Long jobId);
+
+    /**
+     * fails stuck queued import job
+     *
+     * @param jobId the job id
+     * @param error the error
+     * @return
+     */
+    @PostMapping(value = "/handleStuckImportJob/{jobId}")
+    void handleStuckImportJob(@PathVariable("jobId") Long jobId, @RequestBody String error) throws Exception;
 }
 
 

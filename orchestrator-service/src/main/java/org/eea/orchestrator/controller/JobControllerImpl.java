@@ -795,6 +795,32 @@ public class JobControllerImpl implements JobController {
             throw e;
         }
     }
+
+    /**
+     * fails stuck queued import job
+     *
+     * @param jobId the job id
+     * @param error the error
+     * @return
+     */
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping(value = "/handleStuckImportJob/{jobId}")
+    public void handleStuckImportJob(@PathVariable("jobId") Long jobId, @RequestBody String error) throws Exception {
+        try{
+            LOG.info("Import job {} is stuck in status QUEUED with error: {}", jobId, error);
+            JobVO job = findJobById(jobId);
+            if(!job.getJobStatus().equals(JobStatusEnum.QUEUED) || !job.getJobType().equals(JobTypeEnum.IMPORT)){
+                throw new Exception("Wrong type or status of job");
+            }
+            updateJobStatus(jobId, JobStatusEnum.FAILED);
+            updateJobInfo(jobId, JobInfoEnum.ERROR_COULD_NOT_UPLOAD_FILE_TO_PUBLIC_S3, null);
+        }
+        catch (Exception e){
+            LOG.error("Could not handle stuck import job with id {} and error {} ", jobId, error);
+            throw e;
+        }
+    }
 }
 
 
