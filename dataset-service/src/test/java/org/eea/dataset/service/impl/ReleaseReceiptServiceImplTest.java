@@ -39,7 +39,7 @@ public class ReleaseReceiptServiceImplTest {
         inputVO.setDataflowId(dataflowId);
         inputVO.setNote("Updated Note");
 
-        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(existingReceipt);
+        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(Optional.of(existingReceipt));
 
         ReleaseReceiptVO result = releaseReceiptService.saveOrUpdateReleaseReceipt(inputVO);
 
@@ -56,8 +56,7 @@ public class ReleaseReceiptServiceImplTest {
         inputVO.setDataflowId(dataflowId);
         inputVO.setNote("New Note");
 
-        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(null);
-
+        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(Optional.empty());
         ReleaseReceiptVO result = releaseReceiptService.saveOrUpdateReleaseReceipt(inputVO);
 
         Assert.assertNotNull(result);
@@ -105,7 +104,7 @@ public class ReleaseReceiptServiceImplTest {
         releaseReceipt.setDataflowId(dataflowId);
         releaseReceipt.setNote("Test Note");
 
-        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(releaseReceipt);
+        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(Optional.of(releaseReceipt));
 
         ReleaseReceiptVO result = releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
 
@@ -118,8 +117,7 @@ public class ReleaseReceiptServiceImplTest {
     public void testGetReleaseReceiptByDataflowId_NotFound() throws EEAException {
         Long dataflowId = 1L;
 
-        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(null);
-
+        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(Optional.empty());
         releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
     }
 }
