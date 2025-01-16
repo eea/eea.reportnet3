@@ -135,7 +135,7 @@ export const ManageDataflow = ({
   const getTextToReceipt = async () => {
     try {
       const res = await DatasetService.getAddUserText(dataflowId);
-      setAddUserText(res.data);
+      setAddUserText(res.data.note);
     } catch (error) {
       console.error('Dataset - getWebformList.', error);
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
