@@ -511,7 +511,7 @@ public class ValidationHelper implements DisposableBean {
   }
 
   private S3PathResolver getImportS3PathForParquet(DataSetMetabaseVO dataset, TableSchema tableSchema, String parquetFilename) {
-    S3PathResolver s3PathResolver =  new S3PathResolver(dataset.getDataflowId(), 0L, dataset.getId(), tableSchema.getNameTableSchema(), parquetFilename, S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH);
+    S3PathResolver s3PathResolver =  new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L, dataset.getId(), tableSchema.getNameTableSchema(), parquetFilename, S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH);
     s3PathResolver.setParquetFolder(parquetFilename+ UUID.randomUUID());
     return s3PathResolver;
   }
