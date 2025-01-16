@@ -593,6 +593,15 @@ export const Dataflow = () => {
     onLoadReportingDataflow();
   };
 
+  const onUpdateAddUserText = async note => {
+    try {
+      await DatasetService.updateAddUserText(dataflowState.id, note);
+    } catch (error) {
+      console.error('DatasetDesigner - onUpdateDescription.', error);
+    }
+  };
+
+
   const resetObligations = () => {
     setCheckedObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
     setObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
@@ -1025,6 +1034,7 @@ export const Dataflow = () => {
     }
   };
 
+
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
   const onOpenReleaseConfirmDialog = () => manageDialogs('isReleaseDialogVisible', true);
@@ -1311,6 +1321,7 @@ export const Dataflow = () => {
           onSaveName={onSaveName}
           onShowManageReportersDialog={onShowManageReportersDialog}
           onUpdateData={setIsDataUpdated}
+          onUpdateAddUserText={onUpdateAddUserText}
           setIsCopyDataCollectionToEUDatasetLoading={setIsCopyDataCollectionToEUDatasetLoading}
           setIsExportEUDatasetLoading={setIsExportEUDatasetLoading}
           setIsReceiptLoading={setIsReceiptLoading}
@@ -1790,10 +1801,12 @@ export const Dataflow = () => {
             isEditing={true}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
+            manualAcceptance={dataflowState.data.manualAcceptance}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
             onLoadReportingDataflow={onLoadReportingDataflow}
             onUpdateSoftDelete={onUpdateSoftDelete}
+            onUpdateAddUserText={onUpdateAddUserText}
             resetDeliveryDate={resetDeliveryDate}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}
