@@ -890,7 +890,7 @@ export const BigButtonList = ({
               />
               <CharacterCounter
                 currentLength={addUserText.length}
-                maxLength={config.DESCRIPTION_MAX_LENGTH}
+                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
                 style={{ position: 'relative', right: '0px', top: '5px' }}
               />
               <div className={styles.addUserTextButtonWrapper}>
