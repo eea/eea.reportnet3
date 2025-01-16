@@ -360,7 +360,7 @@ export const DatasetRepository = {
     }),
 
   getAddUserText: async (dataflowId) =>
-    await HTTPRequester.update({
+    await HTTPRequester.get({
       url: getUrl(DatasetConfig.getAddUserText, { dataflowId }),
     }),
 
