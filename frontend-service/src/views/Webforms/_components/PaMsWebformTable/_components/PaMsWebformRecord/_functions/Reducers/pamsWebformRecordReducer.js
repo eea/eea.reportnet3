@@ -20,7 +20,10 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
       const filteredRecord = inmRecord.elements.filter(field => {
         if (field.type === 'BLOCK') {
           return field.elements.filter(
-            fieldRecord => (fieldRecord.fieldId || fieldRecord.fieldSchema) === payload.option
+            fieldRecord =>
+              fieldRecord.fieldId === payload.option ||
+              fieldRecord.fieldSchema === payload.option ||
+              fieldRecord.fieldSchemaId === payload.option
           );
           // field.elementsRecords.filter(record =>
           //   record.fields.filter(field => field.fieldId === state.record.recordId)
@@ -58,7 +61,12 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
 
       if (!isEmpty(filteredRecord)) {
         if (!isEmpty(inmRecord.elements.filter(field => field.fieldSchemaId === payload.option))) {
-          inmRecord.elements.filter(field => field.fieldSchemaId === payload.option)[0].value = payload.value;
+          inmRecord.elements.filter(
+            field =>
+              field.fieldId === payload.option ||
+              field.fieldSchema === payload.option ||
+              field.fieldSchemaId === payload.option
+          )[0].value = payload.value;
         } else {
           inmRecord.elements
             .find(field => {
@@ -70,7 +78,10 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
               return undefined;
             })
             .elementsRecords[0].elements.find(
-              blockElement => (blockElement.fieldId || blockElement.fieldSchema) === payload.option
+              blockElement =>
+                blockElement.fieldId === payload.option ||
+                blockElement.fieldSchema === payload.option ||
+                blockElement.fieldSchemaId === payload.option
             ).value = payload.value;
         }
       }
