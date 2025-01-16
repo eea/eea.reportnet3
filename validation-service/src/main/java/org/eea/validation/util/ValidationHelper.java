@@ -4,7 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.hadoop.fs.Path;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
@@ -142,6 +148,9 @@ public class ValidationHelper implements DisposableBean {
   /** The priority days. */
   @Value("${validation.priority.days}")
   private String priorityDays;
+
+  @Value("${parquet.file.path}")
+  private String parquetFilePath;
 
   /** The period days. */
   private List<Long> periodDays;
@@ -423,23 +432,24 @@ public class ValidationHelper implements DisposableBean {
    * @throws EEAException exception
    */
   private void createTablesIfNotExist(DataSetSchema schema, DataSetMetabaseVO dataset) throws EEAException {
-    for (TableSchema t : schema.getTableSchemas()) {
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
       S3PathResolver s3TablePathResolver = new S3PathResolver(
           dataset.getDataflowId(),
           dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
           dataset.getId(),
-          t.getNameTableSchema(),
-          t.getNameTableSchema(),
-          S3_TABLE_NAME_FOLDER_PATH
+          tableSchema.getNameTableSchema(),
+          tableSchema.getNameTableSchema(),
+          S3_TABLE_AS_FOLDER_QUERY_PATH
       );
 
       try {
-        s3Helper.deleteTableIfEmpty(t.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
+        s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
       } catch (Exception e) {
+        LOG.error("ValidationHelper. Error while trying to delete parquet table for dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
         throw new EEAException("ValidationHelper. Error while trying to delete parquet table");
       }
 
-      List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema();
+      List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
 
       FieldSchema recordIdSchema = new FieldSchema();
       recordIdSchema.setHeaderName("record_id");
@@ -452,28 +462,44 @@ public class ValidationHelper implements DisposableBean {
       fieldSchemas.add(0, providerCodeSchema);
       fieldSchemas.add(0, recordIdSchema);
 
-      // Map field schemas to column definitions
-      String columnDefinitions = fieldSchemas.stream()
-          .map(field -> {
-            String type = spatialDataHandling.getGeoJsonEnums().contains(field.getType()) ? " VARBINARY " : " VARCHAR ";
-            return field.getHeaderName() + " " + type;
-          })
-          .collect(Collectors.joining(", "));
-
       try {
-        String tablePath = s3Helper.getS3Service().getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        List<Schema.Field> fields = new ArrayList<>();
+        fieldSchemas
+            .forEach(field -> {
+              if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
+                fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
+              } else {
+                fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
+              }
+            });
 
-        // Construct the CREATE TABLE query
-        String query = String.format(
-            "CREATE TABLE IF NOT EXISTS %s (%s)",
-            tablePath,
-            columnDefinitions
-        );
+        Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
 
-        // Execute the query
-        String id = dremioHelperService.executeSqlStatement(query);
-        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(query, id, null);
-        dremioHelperService.refreshTableMetadataAndPromote(null, tablePath, s3TablePathResolver, t.getNameTableSchema());
+        String file = "0_0_0.parquet";
+        String parquetFile = parquetFilePath + file;
+        try {
+          dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+          try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
+              .<GenericRecord>builder(new Path(parquetFile))
+              .withSchema(schema1)
+              .withCompressionCodec(CompressionCodecName.SNAPPY)
+              .withPageSize(4 * 1024)
+              .withRowGroupSize(16 * 1024)
+              .build()) {
+          } catch (Exception e1) {
+            LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
+            throw e1;
+          }
+
+          S3PathResolver s3PathResolver = getImportS3PathForParquet(dataset, tableSchema, file);
+          String pathToS3ForImport =  s3Helper.getS3Service().getS3Path(s3PathResolver);
+          String tablePath1 = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+          s3Helper.uploadFileToBucket(pathToS3ForImport, parquetFile);
+          dremioHelperService.refreshTableMetadataAndPromote(null, tablePath1, s3PathResolver, tableSchema.getNameTableSchema());
+        } finally {
+          dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+        }
       } catch (Exception e) {
         throw new EEAException(e.getMessage());
       }
@@ -482,6 +508,12 @@ public class ValidationHelper implements DisposableBean {
 
   private boolean isDremioSqlRuleMethod(String whenCondition) {
     return dremioSqlRuleMethods.stream().anyMatch(method -> whenCondition.contains(method));
+  }
+
+  private S3PathResolver getImportS3PathForParquet(DataSetMetabaseVO dataset, TableSchema tableSchema, String parquetFilename) {
+    S3PathResolver s3PathResolver =  new S3PathResolver(dataset.getDataflowId(), 0L, dataset.getId(), tableSchema.getNameTableSchema(), parquetFilename, S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH);
+    s3PathResolver.setParquetFolder(parquetFilename+ UUID.randomUUID());
+    return s3PathResolver;
   }
 
   /**
