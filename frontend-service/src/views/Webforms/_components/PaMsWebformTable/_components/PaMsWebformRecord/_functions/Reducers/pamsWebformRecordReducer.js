@@ -77,7 +77,8 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
               }
               return undefined;
             })
-            .elementsRecords[0].elements.find(
+            .elementsRecords.find(elementRecord => elementRecord.recordId === payload.field.recordId)
+            .elements.find(
               blockElement =>
                 blockElement.fieldId === payload.option ||
                 blockElement.fieldSchema === payload.option ||
