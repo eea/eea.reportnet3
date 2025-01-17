@@ -21,6 +21,7 @@ import theme from './theme.config.json';
 import validations from './validation.config.json';
 
 export const config = {
+  TEXT_TO_RECEIPT_MAX_LENGTH: 1000,
   MB_SIZE: 1024 * 1024,
   MAX_FILE_EXTENSION_LENGTH: 10,
   MAX_FILE_SIZE: 100000000,

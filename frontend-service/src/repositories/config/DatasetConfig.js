@@ -65,6 +65,7 @@ export const DatasetConfig = {
     '/dataschema/v1/{:datasetSchemaId}/importFieldSchemas?datasetId={:datasetId}&tableSchemaId={:tableSchemaId}',
   importTableFileWithS3:
     '/dataset/v2/importFileData/{:datasetId}?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&jobId={:jobId}',
+  getAddUserText: '/release-receipts/dataflow/{:dataflowId}',
   getPresignedUrl:
     '/dataset/{:datasetId}/generateImportPresignedUrl?dataflowId={:dataflowId}&providerId={:providerId}&tableSchemaId={:tableSchemaId}&replace={:replace}&integrationId={:integrationId}&delimiter={:delimiter}&fileName={:fileName}',
   getShowValidationErrors:
@@ -80,6 +81,7 @@ export const DatasetConfig = {
   updateDatasetNameDesign: '/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}',
   updateDatasetFeedbackStatus: '/datasetmetabase/updateDatasetStatus',
   updateDatasetDesign: '/dataschema/{:datasetId}/datasetSchema',
+  updateAddUserText: '/release-receipts',
   updateFieldDesign: '/dataschema/{:datasetId}/fieldSchema',
   updateReferenceDatasetStatus: '/referenceDataset/{:datasetId}?updatable={:updatable}',
   updateField:

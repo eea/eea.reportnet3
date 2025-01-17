@@ -1,5 +1,14 @@
 @import '_styles/mixins';
 
+.addUserTextButtonWrapper{
+  margin-top:1rem;
+}
+
+.addUserTextLabel{
+  margin-bottom:0.5rem;
+  display:block;
+}
+
 .titleBar {
   display: flex;
   border-bottom: 1px solid var(--c-gray-25);

@@ -359,6 +359,11 @@ export const DatasetRepository = {
       data: { id: tableSchemaId, position }
     }),
 
+  getAddUserText: async (dataflowId) =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getAddUserText, { dataflowId }),
+    }),
+
   getSchema: async datasetId => {
     const response = await HTTPRequester.get({ url: getUrl(DatasetConfig.getSchema, { datasetId }) });
     return response;
@@ -445,6 +450,12 @@ export const DatasetRepository = {
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDatasetDesign, { datasetId }),
       data: datasetSchema
+    }),
+
+  updateAddUserText: async (note) =>
+    await HTTPRequester.update({
+      url: DatasetConfig.updateAddUserText,
+      data:note
     }),
 
   updateField: async (datasetId, recordId, tableSchemaId, datasetTableRecords, updateInCascade = false) =>
