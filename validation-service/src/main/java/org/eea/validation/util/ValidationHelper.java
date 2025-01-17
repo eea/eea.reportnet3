@@ -444,64 +444,68 @@ public class ValidationHelper implements DisposableBean {
 
       try {
         s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
+        boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
+        if (!folderExists) {
+
+          List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
+
+          FieldSchema recordIdSchema = new FieldSchema();
+          recordIdSchema.setHeaderName("record_id");
+          recordIdSchema.setType(DataType.TEXT);
+
+          FieldSchema providerCodeSchema = new FieldSchema();
+          providerCodeSchema.setHeaderName("data_provider_code");
+          providerCodeSchema.setType(DataType.TEXT);
+
+          fieldSchemas.add(0, providerCodeSchema);
+          fieldSchemas.add(0, recordIdSchema);
+
+          try {
+            List<Schema.Field> fields = new ArrayList<>();
+            fieldSchemas
+                .forEach(field -> {
+                  if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
+                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
+                  } else {
+                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
+                  }
+                });
+
+            Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
+
+            String file = "0_0_0.parquet";
+            String parquetFile = parquetFilePath + file;
+            try {
+              dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+              try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
+                  .<GenericRecord>builder(new Path(parquetFile))
+                  .withSchema(schema1)
+                  .withCompressionCodec(CompressionCodecName.SNAPPY)
+                  .withPageSize(4 * 1024)
+                  .withRowGroupSize(16 * 1024)
+                  .build()) {
+              } catch (Exception e1) {
+                LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
+                throw e1;
+              }
+
+              S3PathResolver s3PathResolver = getImportS3PathForParquet(dataset, tableSchema, file);
+              String pathToS3ForImport = s3Helper.getS3Service().getS3Path(s3PathResolver);
+              String tablePath1 = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+              s3Helper.uploadFileToBucket(pathToS3ForImport, parquetFile);
+              dremioHelperService.refreshTableMetadataAndPromote(null, tablePath1, s3PathResolver, tableSchema.getNameTableSchema());
+            } finally {
+              dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+            }
+          } catch (Exception e) {
+            throw new EEAException(e.getMessage());
+          }
+        }
+
       } catch (Exception e) {
         LOG.error("ValidationHelper. Error while trying to delete parquet table for dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
         throw new EEAException("ValidationHelper. Error while trying to delete parquet table");
-      }
-
-      List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
-
-      FieldSchema recordIdSchema = new FieldSchema();
-      recordIdSchema.setHeaderName("record_id");
-      recordIdSchema.setType(DataType.TEXT);
-
-      FieldSchema providerCodeSchema = new FieldSchema();
-      providerCodeSchema.setHeaderName("data_provider_code");
-      providerCodeSchema.setType(DataType.TEXT);
-
-      fieldSchemas.add(0, providerCodeSchema);
-      fieldSchemas.add(0, recordIdSchema);
-
-      try {
-        List<Schema.Field> fields = new ArrayList<>();
-        fieldSchemas
-            .forEach(field -> {
-              if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
-                fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
-              } else {
-                fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
-              }
-            });
-
-        Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
-
-        String file = "0_0_0.parquet";
-        String parquetFile = parquetFilePath + file;
-        try {
-          dremioHelperService.deleteFileFromR3IfExists(parquetFile);
-          try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
-              .<GenericRecord>builder(new Path(parquetFile))
-              .withSchema(schema1)
-              .withCompressionCodec(CompressionCodecName.SNAPPY)
-              .withPageSize(4 * 1024)
-              .withRowGroupSize(16 * 1024)
-              .build()) {
-          } catch (Exception e1) {
-            LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
-            throw e1;
-          }
-
-          S3PathResolver s3PathResolver = getImportS3PathForParquet(dataset, tableSchema, file);
-          String pathToS3ForImport =  s3Helper.getS3Service().getS3Path(s3PathResolver);
-          String tablePath1 = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-
-          s3Helper.uploadFileToBucket(pathToS3ForImport, parquetFile);
-          dremioHelperService.refreshTableMetadataAndPromote(null, tablePath1, s3PathResolver, tableSchema.getNameTableSchema());
-        } finally {
-          dremioHelperService.deleteFileFromR3IfExists(parquetFile);
-        }
-      } catch (Exception e) {
-        throw new EEAException(e.getMessage());
       }
     }
   }
