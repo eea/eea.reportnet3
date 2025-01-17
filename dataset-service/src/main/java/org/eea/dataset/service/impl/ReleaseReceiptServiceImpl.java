@@ -56,6 +56,16 @@ public class ReleaseReceiptServiceImpl implements ReleaseReceiptService {
         return mapToVO(releaseReceipt);
     }
 
+    @Override
+    public void deleteReleaseReceiptByDataflowId(Long dataflowId) throws EEAException {
+        if (dataflowId == null || dataflowId <= 0) {
+            throw new EEAException("Invalid dataflow ID: " + dataflowId);
+        }
+
+        releaseReceiptRepository.deleteByDataflowId(dataflowId);
+    }
+
+
     private ReleaseReceiptVO mapToVO(ReleaseReceipt releaseReceipt) {
         ReleaseReceiptVO releaseReceiptVO = new ReleaseReceiptVO();
         releaseReceiptVO.setId(releaseReceipt.getId());

@@ -141,4 +141,30 @@ public class ReleaseReceiptControllerImpl implements ReleaseReceiptController {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred.");
         }
     }
+
+
+    /**
+     * Delete a ReleaseReceipt by Dataflow ID.
+     *
+     * @param dataflowId the Dataflow ID
+     * @return ResponseEntity with HTTP status
+     */
+    @DeleteMapping("/dataflow/{dataflowId}")
+    public ResponseEntity<Void> deleteReleaseReceiptByDataflowId(@PathVariable("dataflowId") Long dataflowId) {
+        if (dataflowId == null || dataflowId <= 0) {
+            LOG.error("Invalid dataflowId: {}", dataflowId);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid dataflowId: " + dataflowId);
+        }
+
+        try {
+            releaseReceiptService.deleteReleaseReceiptByDataflowId(dataflowId);
+            return ResponseEntity.noContent().build();
+        } catch (EEAException e) {
+            LOG.error("Error deleting release receipt for dataflowId {}: {}", dataflowId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Release receipt not found for dataflowId: " + dataflowId);
+        } catch (Exception e) {
+            LOG.error("Unexpected error while deleting release receipt for dataflowId {}: {}", dataflowId, e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred.");
+        }
+    }
 }

@@ -30,4 +30,11 @@ public interface ReleaseReceiptService {
      */
     ReleaseReceiptVO getReleaseReceiptByDataflowId(Long dataflowId) throws EEAException;
 
+    /**
+     * Deletes the ReleaseReceipt for a specific Dataflow ID.
+     *
+     * @param dataflowId the ID of the Dataflow
+     */
+    void deleteReleaseReceiptByDataflowId(Long dataflowId) throws EEAException;
+
 }
