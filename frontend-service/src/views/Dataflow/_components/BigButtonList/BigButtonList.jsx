@@ -611,6 +611,7 @@ export const BigButtonList = ({
           inputId={`technicalAcceptance${value}`}
           onChange={event => onChangeRadioButton(event.target.value)}
           value={value}
+          {...(value === 'No' && (addUserText !== '' || addUserTexthappened) ? { disabled: true } : null)}
         />
         <label className={styles.label} htmlFor={`technicalAcceptance${value}`}>
           {value}

@@ -76,6 +76,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
         className={className}
         focusOnShow={true}
         footer={footer}
+        disabledCancel={disabledCancel}
         header={header}
         onHide={onHide}
         style={
