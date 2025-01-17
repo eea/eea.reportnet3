@@ -405,6 +405,8 @@ export const ManageDataflow = ({
                 <InputTextarea
                   className={`class`}
                   collapsedHeight={75}
+                  hasMaxCharCounter={true}
+                  maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
                   id="createDataCollectionText"
                   key="createDataCollectionText"
                   onBlur={e => setAddUserText(e.target.value)}

@@ -84,6 +84,7 @@ export const BigButtonList = ({
 
   const [addUserText, setAddUserText] = useState('');
   const [addInitialUserText, setAddInitialUserText] = useState('');
+  const [addUserTexthappened, setAddUserTexthappened] = useState(false);
   const [cloneDataflow, setCloneDataflow] = useState({});
   const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
@@ -856,6 +857,7 @@ export const BigButtonList = ({
       {isConfirmCollectionDialog && (
         <ConfirmDialog
           disabledConfirm={isNil(isManualTechnicalAcceptance)}
+          disabledCancel={addUserText !== '' || addUserTexthappened}
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
@@ -877,6 +879,8 @@ export const BigButtonList = ({
               <InputTextarea
                 className={`addUserTextArea`}
                 collapsedHeight={75}
+                hasMaxCharCounter={true}
+                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
                 id="createUserTextToReceipt"
                 key="createUserTextToReceipt"
                 onBlur={e => setAddUserText(e.target.value)}
@@ -898,7 +902,10 @@ export const BigButtonList = ({
                 className="p-button-text p-c "
                 icon="check"
                 label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
-                onClick={() => onUpdateAddUserText(addUserText)}
+                onClick={() => {
+                  onUpdateAddUserText(addUserText);
+                  setAddUserTexthappened(true);
+                }}
               />
               </div>
             </>
