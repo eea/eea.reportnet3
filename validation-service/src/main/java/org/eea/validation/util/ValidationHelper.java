@@ -4,23 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
-import org.apache.avro.Schema;
-import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.hadoop.fs.Path;
-import org.apache.parquet.avro.AvroParquetWriter;
-import org.apache.parquet.hadoop.ParquetWriter;
-import org.apache.parquet.hadoop.metadata.CompressionCodecName;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
-import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
@@ -29,7 +22,6 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -133,14 +125,6 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
-  /** The task released tax. */
-  @Value("${validation.tasks.release.tax}")
-  private int taskReleasedTax;
-
-  /** The initial tax. */
-  @Value("${validation.tasks.initial.tax}")
-  private int initialTax;
-
   /** The max running tasks. */
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
@@ -148,9 +132,6 @@ public class ValidationHelper implements DisposableBean {
   /** The priority days. */
   @Value("${validation.priority.days}")
   private String priorityDays;
-
-  @Value("${parquet.file.path}")
-  private String parquetFilePath;
 
   /** The period days. */
   private List<Long> periodDays;
@@ -194,6 +175,9 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
 
+  @Autowired
+  private DatasetController.DataSetControllerZuul dataSetControllerZuul;
+
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
 
@@ -202,16 +186,10 @@ public class ValidationHelper implements DisposableBean {
   private TaskMapper taskMapper;
 
   @Autowired
-  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-
-  @Autowired
   private S3Helper s3Helper;
 
   @Autowired
   private DremioHelperService dremioHelperService;
-
-  @Autowired
-  private SpatialDataHandling spatialDataHandling;
 
 
   /**
@@ -376,9 +354,13 @@ public class ValidationHelper implements DisposableBean {
         s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
-      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-      createTablesIfNotExist(schema, dataset);
+      try {
+        dataSetControllerZuul.createEmptyTables(dataset.getId());
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
 
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       List<Rule> rules = rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
       for (Rule rule : rules) {
         TableSchema tableSchema = null;
@@ -424,100 +406,8 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-  /**
-   * Create the tables on Dremio if not exists
-   *
-   * @param schema The schema object from Mongo
-   * @param dataset The dataset object from Metabase
-   * @throws EEAException exception
-   */
-  private void createTablesIfNotExist(DataSetSchema schema, DataSetMetabaseVO dataset) throws EEAException {
-    for (TableSchema tableSchema : schema.getTableSchemas()) {
-      S3PathResolver s3TablePathResolver = new S3PathResolver(
-          dataset.getDataflowId(),
-          dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
-          dataset.getId(),
-          tableSchema.getNameTableSchema(),
-          tableSchema.getNameTableSchema(),
-          S3_TABLE_AS_FOLDER_QUERY_PATH
-      );
-
-      try {
-        s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
-        boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
-        if (!folderExists) {
-
-          List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
-
-          FieldSchema recordIdSchema = new FieldSchema();
-          recordIdSchema.setHeaderName("record_id");
-          recordIdSchema.setType(DataType.TEXT);
-
-          FieldSchema providerCodeSchema = new FieldSchema();
-          providerCodeSchema.setHeaderName("data_provider_code");
-          providerCodeSchema.setType(DataType.TEXT);
-
-          fieldSchemas.add(0, providerCodeSchema);
-          fieldSchemas.add(0, recordIdSchema);
-
-          try {
-            List<Schema.Field> fields = new ArrayList<>();
-            fieldSchemas
-                .forEach(field -> {
-                  if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
-                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
-                  } else {
-                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
-                  }
-                });
-
-            Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
-
-            String file = "0_0_0.parquet";
-            String parquetFile = parquetFilePath + file;
-            try {
-              dremioHelperService.deleteFileFromR3IfExists(parquetFile);
-              try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
-                  .<GenericRecord>builder(new Path(parquetFile))
-                  .withSchema(schema1)
-                  .withCompressionCodec(CompressionCodecName.SNAPPY)
-                  .withPageSize(4 * 1024)
-                  .withRowGroupSize(16 * 1024)
-                  .build()) {
-              } catch (Exception e1) {
-                LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
-                throw e1;
-              }
-
-              S3PathResolver s3PathResolver = getImportS3PathForParquet(dataset, tableSchema, file);
-              String pathToS3ForImport = s3Helper.getS3Service().getS3Path(s3PathResolver);
-              String tablePath1 = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-
-              s3Helper.uploadFileToBucket(pathToS3ForImport, parquetFile);
-              dremioHelperService.refreshTableMetadataAndPromote(null, tablePath1, s3PathResolver, tableSchema.getNameTableSchema());
-            } finally {
-              dremioHelperService.deleteFileFromR3IfExists(parquetFile);
-            }
-          } catch (Exception e) {
-            throw new EEAException(e.getMessage());
-          }
-        }
-
-      } catch (Exception e) {
-        LOG.error("ValidationHelper. Error while trying to delete parquet table for dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
-        throw new EEAException("ValidationHelper. Error while trying to delete parquet table");
-      }
-    }
-  }
-
   private boolean isDremioSqlRuleMethod(String whenCondition) {
     return dremioSqlRuleMethods.stream().anyMatch(method -> whenCondition.contains(method));
-  }
-
-  private S3PathResolver getImportS3PathForParquet(DataSetMetabaseVO dataset, TableSchema tableSchema, String parquetFilename) {
-    S3PathResolver s3PathResolver =  new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L, dataset.getId(), tableSchema.getNameTableSchema(), parquetFilename, S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH);
-    s3PathResolver.setParquetFolder(parquetFilename+ UUID.randomUUID());
-    return s3PathResolver;
   }
 
   /**

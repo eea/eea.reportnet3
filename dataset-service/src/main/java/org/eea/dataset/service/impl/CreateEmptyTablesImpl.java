@@ -1,0 +1,187 @@
+package org.eea.dataset.service.impl;
+
+import lombok.RequiredArgsConstructor;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.hadoop.fs.Path;
+import org.apache.parquet.avro.AvroParquetWriter;
+import org.apache.parquet.hadoop.ParquetWriter;
+import org.apache.parquet.hadoop.metadata.CompressionCodecName;
+import org.bson.types.ObjectId;
+import org.eea.datalake.service.DremioHelperService;
+import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.SpatialDataHandling;
+import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
+import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.service.CreateEmptyTables;
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DataType;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.*;
+
+@Service
+@RequiredArgsConstructor
+public class CreateEmptyTablesImpl implements CreateEmptyTables {
+
+  private final S3Helper s3Helper;
+  private final DremioHelperService dremioHelperService;
+  private final SpatialDataHandling spatialDataHandling;
+  private final SchemasRepository schemasRepository;
+  private final DatasetMetabaseController.DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+  private final DatasetMetabaseService datasetMetabaseService;
+
+  private static final Logger LOG = LoggerFactory.getLogger(CreateEmptyTablesImpl.class);
+
+  @Value("${parquet.file.path}")
+  private String parquetFilePath;
+
+  @Override
+  public void runCreationForAllDatasets(Long datasetId) {
+    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    List<DataSetMetabaseVO> allDatasets = datasetMetabaseService.getDataSetIdByDataflowId(dataset.getDataflowId());
+
+    List<DataSetMetabaseVO> reportingDatasets = datasetMetabaseService.getDatasetsByDataflowIdAndProviderId(dataset.getDataflowId(), dataset.getDataProviderId())
+        .stream()
+        .filter(dataSetMetabaseVO -> dataSetMetabaseVO.getDatasetTypeEnum().equals(dataset.getDatasetTypeEnum()))
+        .collect(Collectors.toList());
+
+    List<DataSetMetabaseVO> refDatasets = allDatasets
+        .stream()
+        .filter(dataSetMetabaseVO -> dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE))
+        .collect(Collectors.toList());
+    reportingDatasets.addAll(refDatasets);
+
+    reportingDatasets.forEach(dataSetMetabaseVO -> {
+      try {
+        runCreationForOneDataset(dataSetMetabaseVO);
+      } catch (EEAException e) {
+        throw new RuntimeException(e.getMessage());
+      }
+    });
+  }
+
+  @Override
+  public void runCreationForOneDataset(DataSetMetabaseVO dataset) throws EEAException {
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+
+    for (TableSchema tableSchema : schema.getTableSchemas()) {
+      S3PathResolver s3TablePathResolver = new S3PathResolver(
+          dataset.getDataflowId(),
+          dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
+          dataset.getId(),
+          tableSchema.getNameTableSchema(),
+          tableSchema.getNameTableSchema(),
+          getRightPath(dataset, true)
+      );
+
+      try {
+        s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
+        boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, getRightPath(dataset, false));
+        if (!folderExists) {
+
+          List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
+
+          FieldSchema recordIdSchema = new FieldSchema();
+          recordIdSchema.setHeaderName("record_id");
+          recordIdSchema.setType(DataType.TEXT);
+
+          FieldSchema providerCodeSchema = new FieldSchema();
+          providerCodeSchema.setHeaderName("data_provider_code");
+          providerCodeSchema.setType(DataType.TEXT);
+
+          fieldSchemas.add(0, providerCodeSchema);
+          fieldSchemas.add(0, recordIdSchema);
+
+          try {
+            List<Schema.Field> fields = new ArrayList<>();
+            fieldSchemas
+                .forEach(field -> {
+                  if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
+                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
+                  } else {
+                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
+                  }
+                });
+
+            regenerateTables(dataset, tableSchema, fields);
+          } catch (Exception e) {
+            throw new EEAException(e.getMessage());
+          }
+        }
+
+      } catch (Exception e) {
+        LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
+        throw new EEAException("Something went wrong, trying to create empty tables ");
+      }
+    }
+  }
+
+  private void regenerateTables(DataSetMetabaseVO dataset, TableSchema tableSchema, List<Schema.Field> fields) throws Exception {
+    Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
+    String file = "0_0_0.parquet";
+    String parquetFile = parquetFilePath + file;
+    try {
+      dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+      try (ParquetWriter<GenericRecord> writer = AvroParquetWriter
+          .<GenericRecord>builder(new Path(parquetFile))
+          .withSchema(schema1)
+          .withCompressionCodec(CompressionCodecName.SNAPPY)
+          .withPageSize(4 * 1024)
+          .withRowGroupSize(16 * 1024)
+          .build()) {
+      } catch (Exception e1) {
+        LOG.error("Error creating parquet file {},{}", parquetFile, e1.getMessage());
+        throw new EEAException(e1.getMessage());
+      }
+
+      S3PathResolver s3PathResolver = getImportS3PathForParquet(dataset, tableSchema, file);
+      String pathToS3ForImport = s3Helper.getS3Service().getS3Path(s3PathResolver);
+      String tablePath1 = s3Helper.getS3Service().getTableAsFolderQueryPath(s3PathResolver, getRightPath(dataset, true));
+
+      s3Helper.uploadFileToBucket(pathToS3ForImport, parquetFile);
+      dremioHelperService.refreshTableMetadataAndPromote(null, tablePath1, s3PathResolver, tableSchema.getNameTableSchema());
+    } catch (Exception ex) {
+      LOG.error(ex.getMessage());
+    } finally {
+      dremioHelperService.deleteFileFromR3IfExists(parquetFile);
+    }
+  }
+
+  private S3PathResolver getImportS3PathForParquet(DataSetMetabaseVO dataset, TableSchema tableSchema, String parquetFilename) {
+    S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L, dataset.getId(), tableSchema.getNameTableSchema(), parquetFilename, getImportPathForParquet(dataset));
+    s3PathResolver.setParquetFolder(tableSchema.getNameTableSchema() + "_" + UUID.randomUUID());
+    return s3PathResolver;
+  }
+
+  private String getRightPath(DataSetMetabaseVO dataset, boolean isQueryPath) {
+    if (Objects.requireNonNull(dataset.getDatasetTypeEnum()) == DatasetTypeEnum.REFERENCE) {
+      return isQueryPath ? S3_DATAFLOW_REFERENCE_QUERY_PATH : S3_DATAFLOW_REFERENCE_FOLDER_PATH;
+    }
+    return isQueryPath ? S3_TABLE_AS_FOLDER_QUERY_PATH : S3_TABLE_NAME_FOLDER_PATH;
+  }
+
+  private String getImportPathForParquet(DataSetMetabaseVO dataset) {
+    if (Objects.requireNonNull(dataset.getDatasetTypeEnum()) == DatasetTypeEnum.REFERENCE) {
+      return S3_DATAFLOW_REFERENCE_FOLDER_PATH;
+    }
+    return S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH;
+  }
+
+}

@@ -69,7 +69,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * The Class DatasetControllerImpl.
@@ -140,6 +139,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   private StatisticsService statisticsService;
+
+  @Autowired
+  private CreateEmptyTables createEmptyTables;
 
   /**
    * Gets the data tables values.
@@ -3125,5 +3127,11 @@ public class DatasetControllerImpl implements DatasetController {
       LOG.error("Could not retrieve import statistics for dataset id {} Error {}", datasetId, e.getMessage());
       throw e;
     }
+  }
+
+  @Override
+  @PostMapping("/private/createEmptyTables/{datasetId}")
+  public void createEmptyTables(@PathVariable("datasetId") Long datasetId) throws Exception {
+    createEmptyTables.runCreationForAllDatasets(datasetId);
   }
 }
