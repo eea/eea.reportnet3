@@ -1282,6 +1282,7 @@
     "releaseBlockersFailedEvent": "You can't release data with <strong>blocker</strong> errors. Please check it and try again.",
     "releaseButtonTooltip": "Reporting is closed for this dataflow - if necessary, contact helpdesk for information about resubmission",
     "releaseCompletedEvent": "<strong>{:dataProviderName}</strong> released <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> successfully",
+    "release": "Release",
     "released": "Released",
     "releaseDashboard": "Release status dashboard",
     "releaseDataCollection": "Release to data collection",
