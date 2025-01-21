@@ -15,7 +15,10 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioValidationException;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
@@ -60,6 +63,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     private final DremioHelperService dremioHelperService;
     private final ValidationHelper validationHelper;
     private final SpatialDataHandling spatialDataHandling;
+    private final DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
 
     private static final String DREMIO_NON_SQL_VALIDATION_UTILS = "org.eea.validation.util.datalake.DremioNonSQLValidationUtils";
     private static final String VALIDATION_DROOLS_UTILS = "org.eea.validation.util.ValidationDroolsUtils";
@@ -79,7 +83,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
     @Autowired
     public DremioNonSqlRulesExecuteServiceImpl(@Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate, S3Service s3Service, RulesService rulesService,
                                                DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioRulesService dremioRulesService, S3Helper s3Helper,
-                                               DremioHelperService dremioHelperService, ValidationHelper validationHelper, SpatialDataHandling spatialDataHandling) {
+                                               DremioHelperService dremioHelperService, ValidationHelper validationHelper, SpatialDataHandling spatialDataHandling, DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul) {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.s3Service = s3Service;
         this.rulesService = rulesService;
@@ -89,6 +93,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         this.s3Helper = s3Helper;
         this.validationHelper = validationHelper;
         this.spatialDataHandling = spatialDataHandling;
+        this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
     }
 
     @Override
@@ -97,7 +102,15 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
-            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            String path;
+            if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
+                path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
+            } else {
+                path = S3_TABLE_AS_FOLDER_QUERY_PATH;
+            }
+            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
+
             long rowCount = dremioHelperService.getRowCount(tablePath);
             if (rowCount == 0) {
                 return;
@@ -130,7 +143,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
-            query.append("select record_id,").append(fieldName != null ? fieldName : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+            query.append("select record_id,").append(fieldName != null ? fieldName : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
             Method method = null;

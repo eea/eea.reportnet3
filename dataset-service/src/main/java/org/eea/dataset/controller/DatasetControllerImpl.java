@@ -3130,8 +3130,8 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   @Override
-  @PostMapping("/private/createEmptyTables/{datasetId}")
-  public void createEmptyTables(@PathVariable("datasetId") Long datasetId) throws Exception {
-    createEmptyTables.runCreationForAllDatasets(datasetId);
+  @PostMapping("/private/createEmptyTables")
+  public void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception {
+    createEmptyTables.runCreationForOneDataset(datasetMetabaseVO);
   }
 }

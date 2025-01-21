@@ -716,4 +716,10 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
               EEAErrorMessage.UPDATING_DATASET_STATUS);
     }
   }
+
+  @Override
+  @GetMapping(value = "/private/getAllDatasetsByDataflowId/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public List<DataSetMetabaseVO> getAllDatasetsByDataflowId(@PathVariable Long dataflowId) {
+    return datasetMetabaseService.getDataSetIdByDataflowId(dataflowId);
+  }
 }

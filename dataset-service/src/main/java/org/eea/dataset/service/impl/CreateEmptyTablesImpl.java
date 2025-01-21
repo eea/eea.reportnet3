@@ -19,7 +19,6 @@ import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.CreateEmptyTables;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAException;
-import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -44,7 +43,6 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private final DremioHelperService dremioHelperService;
   private final SpatialDataHandling spatialDataHandling;
   private final SchemasRepository schemasRepository;
-  private final DatasetMetabaseController.DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
   private final DatasetMetabaseService datasetMetabaseService;
 
   private static final Logger LOG = LoggerFactory.getLogger(CreateEmptyTablesImpl.class);
@@ -53,22 +51,23 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private String parquetFilePath;
 
   @Override
-  public void runCreationForAllDatasets(Long datasetId) {
-    DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+  public void runCreationForAllDatasets(DataSetMetabaseVO dataset) {
+
     List<DataSetMetabaseVO> allDatasets = datasetMetabaseService.getDataSetIdByDataflowId(dataset.getDataflowId());
-
-    List<DataSetMetabaseVO> reportingDatasets = datasetMetabaseService.getDatasetsByDataflowIdAndProviderId(dataset.getDataflowId(), dataset.getDataProviderId())
-        .stream()
-        .filter(dataSetMetabaseVO -> dataSetMetabaseVO.getDatasetTypeEnum().equals(dataset.getDatasetTypeEnum()))
+    List<DataSetMetabaseVO> combinedDatasets = allDatasets.stream()
+        .filter(dataSetMetabaseVO ->
+            // Include datasets that match reportingDatasets criteria
+            (dataSetMetabaseVO.getDatasetTypeEnum().equals(dataset.getDatasetTypeEnum())
+                && dataSetMetabaseVO.getDataflowId().equals(dataset.getDataflowId())
+                && (dataSetMetabaseVO.getDataProviderId() == null
+                || dataSetMetabaseVO.getDataProviderId().equals(dataset.getDataProviderId()))
+            )
+                // OR include datasets that match refDatasets criteria
+                || dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)
+        )
         .collect(Collectors.toList());
 
-    List<DataSetMetabaseVO> refDatasets = allDatasets
-        .stream()
-        .filter(dataSetMetabaseVO -> dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE))
-        .collect(Collectors.toList());
-    reportingDatasets.addAll(refDatasets);
-
-    reportingDatasets.forEach(dataSetMetabaseVO -> {
+    combinedDatasets.forEach(dataSetMetabaseVO -> {
       try {
         runCreationForOneDataset(dataSetMetabaseVO);
       } catch (EEAException e) {

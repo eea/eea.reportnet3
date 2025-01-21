@@ -23,6 +23,7 @@ import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -354,11 +355,14 @@ public class ValidationHelper implements DisposableBean {
         s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
-      try {
-        dataSetControllerZuul.createEmptyTables(dataset.getId());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
+      List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
+      combinedDatasets.forEach(dataSetMetabaseVO -> {
+        try {
+          dataSetControllerZuul.createEmptyTables(dataSetMetabaseVO);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      });
 
       DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       List<Rule> rules = rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
@@ -404,6 +408,22 @@ public class ValidationHelper implements DisposableBean {
         addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EMPTY_RULE, value);
       }
     }
+  }
+
+  private List<DataSetMetabaseVO> getCombinedDatasets(DataSetMetabaseVO dataset) {
+    List<DataSetMetabaseVO> allDatasets = datasetMetabaseControllerZuul.getAllDatasetsByDataflowId(dataset.getDataflowId());
+    return allDatasets.stream()
+        .filter(dataSetMetabaseVO ->
+            // Include datasets that match reportingDatasets criteria
+            (dataSetMetabaseVO.getDatasetTypeEnum().equals(dataset.getDatasetTypeEnum())
+                && dataSetMetabaseVO.getDataflowId().equals(dataset.getDataflowId())
+                && (dataSetMetabaseVO.getDataProviderId() == null
+                || dataSetMetabaseVO.getDataProviderId().equals(dataset.getDataProviderId()))
+            )
+                // OR include datasets that match refDatasets criteria
+                || dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)
+        )
+        .collect(Collectors.toList());
   }
 
   private boolean isDremioSqlRuleMethod(String whenCondition) {

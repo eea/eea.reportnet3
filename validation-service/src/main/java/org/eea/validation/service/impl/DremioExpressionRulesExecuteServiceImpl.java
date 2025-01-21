@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -111,15 +112,21 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
-
-            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            String path;
+            if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
+                path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
+            } else {
+                path = S3_TABLE_AS_FOLDER_QUERY_PATH;
+            }
+            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
             long rowCount = dremioHelperService.getRowCount(tablePath);
             if (rowCount == 0) {
                 return;
             }
 
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
-            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+
             String providerCode = getProviderCode(dataset);
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
@@ -137,7 +144,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             Map<String, String> fieldSchemaIdNameMap = new HashMap<>();
             createHeaders(datasetSchemaId, query, parameters, fieldName, headerNames, ruleVO.getWhenCondition(), fieldSchemaIdNameMap);
 
-            query.append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+            query.append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
             runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver, fieldSchemaIdNameMap);
         } catch (Exception e1) {

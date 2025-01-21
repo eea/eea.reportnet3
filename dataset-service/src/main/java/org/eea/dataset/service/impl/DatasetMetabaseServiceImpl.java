@@ -1192,22 +1192,8 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
    */
   @Override
   public List<DataSetMetabaseVO> getDatasetsByDataflowIdAndProviderId(Long dataflowId, Long providerId) {
-    // Fetch datasets from repository
-    List<DataSetMetabase> datasets = dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, providerId);
-
-    // Return an empty list if no datasets found
-    if (datasets == null || datasets.isEmpty()) {
-      return Collections.emptyList();
-    }
-
-    // Transform the datasets into VO using streams
-    return datasets.stream()
-        .map(dataset -> {
-          DataSetMetabaseVO metabaseVO = dataSetMetabaseMapper.entityToClass(dataset);
-          metabaseVO.setDatasetTypeEnum(getDatasetType(dataset.getId()));
-          return metabaseVO;
-        })
-        .collect(Collectors.toList());
+    return dataSetMetabaseMapper
+        .entityListToClass(dataSetMetabaseRepository.findByDataflowIdAndDataProviderId(dataflowId, providerId));
   }
 
   @Override
