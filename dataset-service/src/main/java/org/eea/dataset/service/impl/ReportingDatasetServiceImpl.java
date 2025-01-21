@@ -3,9 +3,7 @@ package org.eea.dataset.service.impl;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.mapper.ReportingDatasetPublicMapper;
@@ -195,7 +193,7 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    *
    * @param datasetsVO The datasetVO object
    */
-  private void hasUpdatesAfterRelease(List<ReportingDatasetVO> datasetsVO) {
+  public void hasUpdatesAfterRelease(List<ReportingDatasetVO> datasetsVO) {
     if (datasetsVO != null && !datasetsVO.isEmpty()) {
       for (ReportingDatasetVO dataset : datasetsVO) {
         var response = dataSetControllerZuul.datasetsUpdatedAfterRelease(dataset.getId());
@@ -322,6 +320,27 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
         .entityListToClass(reportingDatasetRepository.findByDataflowIdIn(dataflowIds));
   }
 
+  /**
+   * Gets the data set id by id.
+   *
+   * @param datasetId
+   * @return the dataset
+   */
+  @Override
+  public ReportingDatasetVO getReportingDatasetById(Long datasetId) {
+    Optional<ReportingDataset> dataset = reportingDatasetRepository.findById(datasetId);
+    if(dataset.isEmpty()){
+      return null;
+    }
+
+    ReportingDatasetVO datasetVO = reportingDatasetMapper.entityToClass(dataset.get());
+
+    // Check if dataset is released
+    List<ReportingDatasetVO> datasetsVO = Arrays.asList(datasetVO);
+    isReleased(datasetsVO);
+
+    return datasetVO;
+  }
 
 
   /**

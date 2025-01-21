@@ -1,6 +1,8 @@
 package org.eea.dataset.persistence.metabase.repository;
 
 import java.util.List;
+import java.util.Optional;
+
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.springframework.data.repository.CrudRepository;
 
@@ -26,7 +28,6 @@ public interface ReportingDatasetRepository extends CrudRepository<ReportingData
    * @return the list
    */
   List<ReportingDataset> findByDatasetSchema(String schemaId);
-
 
   /**
    * Find first by dataflow id and data provider id order by id asc.

@@ -3147,17 +3147,19 @@ public class DatasetControllerImpl implements DatasetController {
   public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode, @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception{
     ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO;
     try{
-      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(collectionDatasetId);
+      DataSetMetabaseVO collectionDatasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(collectionDatasetId);
       DatasetTypeEnum datasetType = datasetService.getDatasetType(collectionDatasetId);
-      Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataSetMetabaseVO.getDataflowId());
+      Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(collectionDatasetMetabaseVO.getDataflowId());
       DataProviderVO providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(providerCode, dataProviderGroupId);
-      Long reportingDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(dataSetMetabaseVO.getDatasetSchema(), providerVO.getId());
+      Long reportingDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(collectionDatasetMetabaseVO.getDatasetSchema(), providerVO.getId());
+      DataSetMetabaseVO reportingDatasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(reportingDatasetId);
 
-      if(dataFlowControllerZuul.isBigDataflow(dataSetMetabaseVO.getDataflowId())){
-        releasedDatasetDataInfoVO = bigDataDatasetService.getReleasedDatasetDataInfoDL(collectionDatasetId, reportingDatasetId, dataSetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+      if(dataFlowControllerZuul.isBigDataflow(reportingDatasetMetabaseVO.getDataflowId())){
+        releasedDatasetDataInfoVO = bigDataDatasetService.getReleasedDatasetDataInfoDL(collectionDatasetMetabaseVO, reportingDatasetMetabaseVO, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
       }
       else{
-        releasedDatasetDataInfoVO = datasetService.getReleasedDatasetDataInfo(collectionDatasetId, reportingDatasetId, dataSetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+        //todo
+        releasedDatasetDataInfoVO = datasetService.getReleasedDatasetDataInfo(collectionDatasetId, reportingDatasetId, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
       }
     }
     catch (Exception e){

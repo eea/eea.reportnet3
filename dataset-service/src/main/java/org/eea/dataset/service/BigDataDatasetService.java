@@ -235,8 +235,8 @@ public interface BigDataDatasetService {
     /**
      * Get released dataset data info DL
      *
-     * @param collectionDatasetId the collection dataset id
-     * @param reportingDatasetId the reporting dataset id
+     * @param collectionDataset the collection dataset
+     * @param reportingDataset the reporting dataset
      * @param dataflowId the dataflow id
      * @param dataProviderVO the data provider object
      * @param tableSchemaId the table schema id
@@ -244,5 +244,6 @@ public interface BigDataDatasetService {
      * @return a ReleasedDatasetDataInfoVO object
      *
      */
-    ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(Long collectionDatasetId, Long reportingDatasetId, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
+    ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(DataSetMetabaseVO collectionDataset, DataSetMetabaseVO reportingDataset, Long dataflowId,
+                                                           DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
 }
