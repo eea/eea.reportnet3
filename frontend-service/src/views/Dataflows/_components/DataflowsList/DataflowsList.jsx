@@ -1,4 +1,4 @@
-import { Fragment, useContext } from 'react';
+import { Fragment, useContext, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 
@@ -11,6 +11,7 @@ import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
+import {Button} from "../../../_components/Button";
 
 export const DataflowsList = ({
   className,
@@ -24,6 +25,8 @@ export const DataflowsList = ({
   visibleTab
 }) => {
   const resourcesContext = useContext(ResourcesContext);
+
+  const [isCompressed, setIsCompressed] = useState(false);
 
   const isFilteredByPinned = () =>
     data.filter(dataflow => dataflow.pinned === 'pinned').length === data.length ||
@@ -39,11 +42,12 @@ export const DataflowsList = ({
             isAdmin={isAdmin}
             isCustodian={isCustodian}
             itemContent={dataflow}
+            isCompressed={isCompressed}
             reorderDataflows={reorderDataflows}
           />
         );
       case config.dataflowType.REFERENCE.key:
-        return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} />;
+        return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} isCompressed={isCompressed} />;
       default:
         break;
     }
@@ -83,5 +87,17 @@ export const DataflowsList = ({
     ));
   };
 
-  return <div className={`${styles.wrap} ${className}`}>{renderContent()}</div>;
+  return (
+    <>
+      <Button
+        className="p-button-primary"
+        icon={'list'}
+        label={isCompressed ? resourcesContext.messages['maximizeList'] : resourcesContext.messages['minimizeList']}
+        onClick={() => setIsCompressed(!isCompressed)}
+      />
+      <div className={`${styles.wrap} ${className}`}>
+        {renderContent()}
+      </div>
+    </>
+  );
 };

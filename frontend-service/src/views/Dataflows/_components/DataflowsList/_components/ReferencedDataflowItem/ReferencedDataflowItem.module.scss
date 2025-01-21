@@ -244,3 +244,16 @@
     }
   }
 }
+
+.compressedList{
+  height:150px;
+  div[class*='_text_'] p{
+    display:none!important;
+  }
+  div[class*='_container_']{
+    height:150px!important;
+  }
+  div[class*='_status_']{
+    justify-content: center;
+  }
+}
