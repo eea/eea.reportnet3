@@ -50,11 +50,14 @@ public final class LiteralConstants {
   /** The Constant DATASET_ID: {@value}. */
   public static final String DATASETID = "datasetId";
 
+  /** The Constant TECH_ACCEPT_MESSAGE_SUBJECT: {@value}. */
+  public static final String TECH_ACCEPT_MESSAGE_SUBJECT = "%s technical feedback for %s";
+
   /** The Constant TECH_ACCEPT_MESSAGE: {@value}. */
-  public static final String TECH_ACCEPT_MESSAGE = "New Technical acceptance message";
+  public static final String TECH_ACCEPT_MESSAGE = "New technical feedback message in Reportnet 3 for %s on %s : %s ";
 
   /** The Constant ATTACHMENT_FILE_RECEIVED: {@value}. */
-  public static final String ATTACHMENT_FILE_RECEIVED = "Attachment File received";
+  public static final String ATTACHMENT_FILE_RECEIVED = "Attachment File received - Please log on to Reportnet 3 to access any attachments.";
 
   /** The Constant DATASET_ID: {@value}. */
   public static final String SIGNATURE = "signature";

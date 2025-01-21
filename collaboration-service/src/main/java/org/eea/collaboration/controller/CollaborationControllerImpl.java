@@ -92,9 +92,9 @@ public class CollaborationControllerImpl implements CollaborationController {
   public MessageVO createMessage(
           @ApiParam(value = "Dataflow Id you're assigning the message to",
                   example = "0") @PathVariable("dataflowId") Long dataflowId, @ApiParam(value = "Message Object") @RequestBody MessageVO messageVO,
-          @ApiParam(value = "user") @RequestParam(required = false) String user, @ApiParam(value = "jobId") @RequestParam(required = false) Long jobId) {
+          @ApiParam(value = "user") @RequestParam(required = false) String user, @ApiParam(value = "jobId") @RequestParam(required = false) Long jobId, @ApiParam(value = "emailNotification") @RequestParam(required = false) Boolean emailNotification){
     try {
-      return collaborationService.createMessage(dataflowId, messageVO, user, jobId);
+      return collaborationService.createMessage(dataflowId, messageVO, user, jobId, emailNotification);
     } catch (EEAIllegalArgumentException e) {
       LOG.error("Error creating message because of missing data: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

@@ -213,6 +213,7 @@ export const LinkSelector = ({
               linkedTableLabel: !isNil(pkLinkedTableLabel) ? pkLinkedTableLabel.fieldSchemaId : '',
               masterTableConditional: !isNil(pkMasterTableConditional) ? pkMasterTableConditional.fieldSchemaId : '',
               pkHasMultipleValues,
+              ignoreCaseInLinks,
               pkMustBeUsed
             });
           }
@@ -558,6 +559,7 @@ export const LinkSelector = ({
               link,
               pkMustBeUsed,
               pkHasMultipleValues,
+              ignoreCaseInLinks,
               linkedTableLabel: pkLinkedTableLabel?.fieldSchemaId,
               linkedTableConditional: pkLinkedTableConditional?.fieldSchemaId,
               masterTableConditional: pkMasterTableConditional?.fieldSchemaId

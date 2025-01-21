@@ -1,11 +1,17 @@
 package org.eea.collaboration.service.helper;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.utils.LiteralConstants;
 import java.util.Set;
 
@@ -14,8 +20,11 @@ import org.eea.interfaces.controller.communication.EmailController.EmailControll
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+
 import org.eea.interfaces.vo.communication.EmailVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -27,9 +36,9 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -49,6 +58,9 @@ public class CollaborationServiceHelperTest {
 
   @Mock
   private EmailControllerZuul emailControllerZuul;
+
+  @Mock
+  private RepresentativeControllerZuul representativeControllerZuul;
 
   @Mock
   private UserManagementControllerZull userManagementControllerZull;
@@ -128,6 +140,11 @@ public class CollaborationServiceHelperTest {
     // Given
     String messageContent = "New message text";
 
+    Date messageCreateDate = new Date();
+    ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of("CET"));
+    DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    String cetFormattedDate = cetTime.format(cetFormatter);
+
     // Mock the user for the group
     UserRepresentationVO user = new UserRepresentationVO();
     user.setUsername("provider");
@@ -138,6 +155,9 @@ public class CollaborationServiceHelperTest {
     // Mock the datasetIds for the dataflow
     List<Long> datasetIds = new ArrayList<>();
     datasetIds.add(1L);
+
+    //Mock Provider label
+    String providerLabel = "Austria";
 
     // Mock authorities
     Collection<SimpleGrantedAuthority> authorities = new HashSet<>();
@@ -163,22 +183,31 @@ public class CollaborationServiceHelperTest {
     Mockito.when(dataflowControllerZuul.getMetabaseById(Mockito.anyLong()))
             .thenReturn(mockDataflow);
 
+
     // Expected email text format
     String emailText = String.format(
-            LiteralConstants.TECH_ACCEPT_MESSAGE + LiteralConstants.SPACE + mockDataflow.getName() + " : " + messageContent
+            LiteralConstants.TECH_ACCEPT_MESSAGE , mockDataflow.getName(), cetFormattedDate, messageContent
+    );
+
+    String emailSubject = String.format(
+            LiteralConstants.TECH_ACCEPT_MESSAGE_SUBJECT  , providerLabel, mockDataflow.getName()
     );
 
     // Mock the EmailController's sendMessage method (no actual sending)
     Mockito.doNothing().when(emailControllerZuul).sendMessage(Mockito.any(EmailVO.class));
 
+    DataProviderVO mockDataProvider = new DataProviderVO();
+    mockDataProvider.setLabel("Austria");
+    Mockito.when(representativeControllerZuul.findDataProviderById(Mockito.anyLong())).thenReturn(mockDataProvider);
+
     // When
-    collaborationServiceHelper.emailNewMessages(1L, 1L, null, EventType.RECEIVED_MESSAGE.toString(), messageContent);
+    collaborationServiceHelper.emailNewMessages(1L, 1L, null, EventType.RECEIVED_MESSAGE.toString(), messageContent, messageCreateDate);
 
     // Then
     Mockito.verify(emailControllerZuul, Mockito.times(1)).sendMessage(Mockito.argThat(email ->
             // Verifying that Bbc (emailSet) contains the correct email address
             email.getBbc().contains("user1@example.com") &&  // Check that the emailSet is correctly included
-                    email.getSubject().equals(LiteralConstants.TECH_ACCEPT_MESSAGE) &&
+                    email.getSubject().equals(emailSubject) &&
                     email.getText().equals(emailText)
     ));
   }

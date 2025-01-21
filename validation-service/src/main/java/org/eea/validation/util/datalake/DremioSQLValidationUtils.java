@@ -101,7 +101,8 @@ public class DremioSQLValidationUtils {
             }
             //FK_QUERY_VALUES
             StringBuilder fkQuery = new StringBuilder();
-            fkQuery.append("select ").append("record_id").append(",").append(foreignKey).append(" from ").append(fkTablePath);
+            fkQuery.append("select ").append("record_id").append(",").append(foreignKey).append(" from ").append(fkTablePath)
+                    .append(" where ").append(foreignKey).append(" is not NULL and ").append(foreignKey).append(" != ''");
             SqlRowSet fkValues = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkValues.next()) {
                 List<String> recordValues = new ArrayList<>(Arrays.asList(fkValues.getString(foreignKey).split(";")))
@@ -156,7 +157,8 @@ public class DremioSQLValidationUtils {
                     }
                 }
                 else{
-                    query.append("select fk.record_id from ").append(fkTablePath).append(" fk where LOWER(fk.").append(foreignKey).append(") not in (select LOWER(pk.").append(primaryKey)
+                    query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(foreignKey).append(" is not NULL and fk.")
+                            .append(foreignKey).append(" != '' and LOWER(fk.").append(foreignKey).append(") not in (select LOWER(pk.").append(primaryKey)
                             .append(") from ").append(pkTablePath).append(" pk)");
                     recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 }
@@ -225,7 +227,8 @@ public class DremioSQLValidationUtils {
                     query.append(" fk.").append(foreignKey).append("=pk.").append(primaryKey);
                 }
                 query.append(" and ").append("fk.").append(optionalFk).append("=").append("pk.").append(optionalPk)
-                        .append(" where pk.").append(primaryKey).append(" is null or pk.").append(optionalPk).append(" is null");
+                        .append(" where (pk.").append(primaryKey).append(" is null or pk.").append(optionalPk).append(" is null)")
+                        .append("and fk.").append(foreignKey).append(" is not NULL and fk.").append(foreignKey).append(" != ''");
                 recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
             }
         } else {
@@ -258,7 +261,8 @@ public class DremioSQLValidationUtils {
 
             //FK_QUERY_VALUES
             StringBuilder fkQuery = new StringBuilder();
-            fkQuery.append("select ").append("record_id").append(",").append(optionalFk).append(",").append(foreignKey).append(" from ").append(fkTablePath);
+            fkQuery.append("select ").append("record_id").append(",").append(optionalFk).append(",").append(foreignKey).append(" from ").append(fkTablePath)
+                    .append(" where ").append(foreignKey).append(" is not NULL and ").append(foreignKey).append(" != ''");
             SqlRowSet fkWithOptionalRS = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkWithOptionalRS.next()) {
                 if (pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk))!=null) {

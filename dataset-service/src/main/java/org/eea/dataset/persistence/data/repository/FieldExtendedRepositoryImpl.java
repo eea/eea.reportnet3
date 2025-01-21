@@ -324,7 +324,8 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
         stmt.setString(4, searchValue);
         stmt.setString(5, searchValue);
         if (StringUtils.isNotBlank(conditionalSchemaId)) {
-          String[] values = Arrays.stream(conditionalValue.split("[,;]"))
+          //Removed comma from regex split due to #282448
+          String[] values = Arrays.stream(conditionalValue.split("[;]"))
               .map(String::trim)
               .toArray(String[]::new);
           Array array = conn.createArrayOf("VARCHAR", values);

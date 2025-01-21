@@ -708,7 +708,10 @@ public enum EventType {
       "parquet_to_iceberg_conversion_completed_event", true),
 
   PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-      "parquet_to_iceberg_conversion_failed_event", true);
+      "parquet_to_iceberg_conversion_failed_event", true),
+
+  PREFILLED_TABLE_HAS_NO_DATA_ERROR(LiteralConstants.DATA_REPORTING_TOPIC,
+      "prefilled_table_has_no_data_error", true);
 
   /** The topic. */
   private String topic;

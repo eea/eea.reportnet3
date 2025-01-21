@@ -80,6 +80,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private static final Logger LOG = LoggerFactory.getLogger(DremioSqlRulesExecuteServiceImpl.class);
     private static final String IS_TABLE_EMPTY = "isTableEmpty";
     private static final String TABLE_EMPTY = "tableEmpty";
+    private static final String LOCK = "_lock_";
     private static final String AS_MESSAGE = " as message";
     private static final String COMMA_RECORD_ID = ",record_id";
     private static final String DOUBLE_QUOTATION_MARK = ",\'\'";
@@ -122,14 +123,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             String ruleMethodName = ruleVO.getWhenConditionMethod().substring(0, startIndex);
             List<String> recordIds = new ArrayList<>();
 
-            //TODO: TO check if file exists is needed
             long rowCount = dremioHelperService.getRowCount(tablePath);
-            if (rowCount == 0) {
-                if (ruleMethodName.equals(IS_TABLE_EMPTY)) {
-                    recordIds.add(TABLE_EMPTY);
-                } else {
-                    return;
-                }
+            if (rowCount == 0 && ruleMethodName.equals(IS_TABLE_EMPTY)) {
+                recordIds.add(TABLE_EMPTY);
             }
 
             List<String> parameters = dremioRulesService.processRuleMethodParameters(ruleVO, startIndex, endIndex);
@@ -162,6 +158,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 }
 
                 recordIds = getRecordIds(dataTableResolver, tableSchemaId, tablePath, ruleVO, parameters, fieldName, object, method);
+                if (rowCount == 0 && ruleVO.getShortCode().toLowerCase().contains(LOCK.toLowerCase())) {
+                    recordIds.add(TABLE_EMPTY);
+                }
             }
 
             if (!recordIds.isEmpty()) {
