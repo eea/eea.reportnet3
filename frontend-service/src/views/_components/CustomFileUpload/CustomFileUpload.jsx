@@ -27,6 +27,8 @@ import { DatasetService } from 'services/DatasetService';
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
+import { MetadataUtils } from 'views/_functions/Utils';
+
 import { customFileUploadReducer } from './_functions/Reducers/customFileUploadReducer';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -40,6 +42,7 @@ export const CustomFileUpload = ({
   className = null,
   dataflowId,
   datasetId,
+  datasetName,
   dialogClassName = null,
   dialogHeader = null,
   dialogOnHide = null,
@@ -55,11 +58,13 @@ export const CustomFileUpload = ({
   invalidFileSizeMessageSummary = '{0}= Invalid file size, ',
   invalidNumberOfFilesMessageSummary = 'You can only upload {0} {1}.',
   isDialog = false,
+  isDesignDataset = false,
   isImportDatasetDesignerSchema = false,
   maxFileSize = null,
   mode = 'advanced',
   multiple = false,
   name = null,
+  onChangeImportDialogVisibility = null,
   onClear = null,
   onError = null,
   onSelect = null,
@@ -74,6 +79,7 @@ export const CustomFileUpload = ({
   replaceCheckDisabled = false,
   s3 = false,
   style = null,
+  tableName,
   tableSchemaId,
   timeoutBeforeClose = false,
   uploadLabel = 'Upload',
@@ -323,6 +329,11 @@ export const CustomFileUpload = ({
           if (onError) {
             onError({ xhr: xhr, files: _files.current });
           }
+
+          if (bigData && s3) {
+            onHandleStuckImportJob(xhr);
+            onChangeImportDialogVisibility();
+          }
         }
         clear();
       }
@@ -471,20 +482,65 @@ export const CustomFileUpload = ({
     );
   };
 
+  const onHandleStuckImportJob = async xhr => {
+    const error = `Status: ${xhr.status}, Status text: ${xhr.statusText}, Response: ${xhr.response}, Response text: ${xhr.responseText}`;
+
+    let tableDatasetName;
+    if (tableSchemaId) {
+      const data = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      tableDatasetName = data?.dataset?.name;
+    }
+
+    try {
+      await DatasetService.handleStuckImportJob(jobId, error);
+      if (isDesignDataset) {
+        notificationContext.add(
+          {
+            type: 'IMPORT_DESIGN_DATASET_ERROR',
+            content: {
+              dataflowId,
+              datasetId,
+              datasetName: datasetName ? datasetName : tableDatasetName
+            }
+          },
+          true
+        );
+      } else {
+        notificationContext.add(
+          {
+            type: 'IMPORT_REPORTING_DATASET_ERROR',
+            content: {
+              dataflowId,
+              datasetId,
+              datasetName: datasetName ? datasetName : tableDatasetName
+            }
+          },
+          true
+        );
+      }
+    } catch (error) {
+      console.error('CustomFileUpload - onHandleStuckImportJob.', error);
+    }
+  };
+
   const onGetPresignedUrl = async () => {
     const fileName = state?.files[0].name;
-    const data = await DatasetService.getPresignedUrl({
-      datasetId,
-      dataflowId,
-      providerId: !isNil(providerId) ? providerId : undefined,
-      tableSchemaId,
-      replace: state.replace,
-      integrationId,
-      delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
-      fileName
-    });
-    setJobId(data?.jobId);
-    setPresignedUrl(data?.presignedUrl);
+    try {
+      const data = await DatasetService.getPresignedUrl({
+        datasetId,
+        dataflowId,
+        providerId: !isNil(providerId) ? providerId : undefined,
+        tableSchemaId,
+        replace: state.replace,
+        integrationId,
+        delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
+        fileName
+      });
+      setJobId(data?.jobId);
+      setPresignedUrl(data?.presignedUrl);
+    } catch (error) {
+      console.error('CustomFileUpload - onGetPresignedUrl.', error);
+    }
   };
 
   const renderFiles = () => {

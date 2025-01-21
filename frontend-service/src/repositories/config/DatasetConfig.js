@@ -78,6 +78,7 @@ export const DatasetConfig = {
   updateTableOrder: '/dataschema/{:datasetId}/tableSchema/order',
   getReferencedFieldValues:
     '/dataset/{:datasetId}/datasetSchemaId/{:datasetSchemaId}/fieldSchemaId/{:fieldSchemaId}/getFieldsValuesReferenced?searchValue={:searchToken}&conditionalValue={:conditionalValue}&resultsNumber={:resultsNumber}',
+  handleStuckImportJob: '/orchestrator/jobs/handleStuckImportJob/{:jobId}',
   updateDatasetNameDesign: '/datasetmetabase/updateDatasetName?datasetId={:datasetId}&datasetName={:datasetSchemaName}',
   updateDatasetFeedbackStatus: '/datasetmetabase/updateDatasetStatus',
   updateDatasetDesign: '/dataschema/{:datasetId}/datasetSchema',

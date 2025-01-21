@@ -347,6 +347,12 @@ export const DatasetRepository = {
     });
   },
 
+  handleStuckImportJob: async (jobId, error) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.handleStuckImportJob, { jobId }),
+      data: { error }
+    }),
+
   updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateFieldOrder, { datasetId, position }),

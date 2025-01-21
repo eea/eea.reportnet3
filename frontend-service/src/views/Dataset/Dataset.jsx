@@ -56,7 +56,7 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'vi
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
@@ -213,7 +213,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setDataViewerOptions({
         ...dataViewerOptions,
         tableSchemaId:
-            QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : tableSchema[0].id
+          QuerystringUtils.getUrlParamValue('tab') !== '' ? QuerystringUtils.getUrlParamValue('tab') : tableSchema[0].id
       });
     }
   }, [tableSchema]);
@@ -232,26 +232,26 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           setHasWritePermissions(false);
         } else {
           const isReporterDataset = userContext.hasPermission(
-              [config.permissions.roles.LEAD_REPORTER.key, config.permissions.roles.REPORTER_WRITE.key],
-              `${config.permissions.prefixes.DATASET}${datasetId}`
+            [config.permissions.roles.LEAD_REPORTER.key, config.permissions.roles.REPORTER_WRITE.key],
+            `${config.permissions.prefixes.DATASET}${datasetId}`
           );
           setHasWritePermissions(isReporterDataset);
         }
       } else if (isTestDataset) {
         const hasWritePermissionsTestDataset = userContext.hasPermission(
-            [
-              config.permissions.roles.CUSTODIAN.key,
-              config.permissions.roles.STEWARD.key,
-              config.permissions.roles.STEWARD_SUPPORT.key
-            ],
-            `${config.permissions.prefixes.TESTDATASET}${datasetId}`
+          [
+            config.permissions.roles.CUSTODIAN.key,
+            config.permissions.roles.STEWARD.key,
+            config.permissions.roles.STEWARD_SUPPORT.key
+          ],
+          `${config.permissions.prefixes.TESTDATASET}${datasetId}`
         );
         setHasWritePermissions(hasWritePermissionsTestDataset);
       } else if (isReferenceDataset) {
         const isCustodianInReferenceDataset = userContext.hasContextAccessPermission(
-            config.permissions.prefixes.REFERENCEDATASET,
-            datasetId,
-            [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
+          config.permissions.prefixes.REFERENCEDATASET,
+          datasetId,
+          [config.permissions.roles.CUSTODIAN.key, config.permissions.roles.STEWARD.key]
         );
         setHasWritePermissions(isCustodianInReferenceDataset && isDatasetUpdatable);
 
@@ -293,7 +293,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     setExportButtonsList(
-        isEmpty(externalOperationsList.export) ? internalExtensions : internalExtensions.concat(externalIntegrationsNames)
+      isEmpty(externalOperationsList.export) ? internalExtensions : internalExtensions.concat(externalIntegrationsNames)
     );
   }, [datasetName, externalOperationsList.export]);
 
@@ -361,10 +361,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     const conversionToParquetFailed = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT');
     const conversionToIcebergFailed = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT');
     if (
-        conversionToParquetCompleted ||
-        conversionToIcebergCompleted ||
-        conversionToParquetFailed ||
-        conversionToIcebergFailed
+      conversionToParquetCompleted ||
+      conversionToIcebergCompleted ||
+      conversionToParquetFailed ||
+      conversionToIcebergFailed
     ) {
       setIsLoadingIceberg(false);
     }
@@ -382,25 +382,25 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
       }
     }
-  }
+  };
 
   const getTableImportedMetadata = async () => {
     if (!metadata?.dataflow?.bigData) return;
     if (
-        metadata?.dataset?.datasetType === 'DESIGN' ||
-        metadata?.dataset?.datasetType === 'REFERENCE' ||
-        metadata?.dataset?.datasetType === 'REPORTING' ||
-        metadata?.dataset?.datasetType === 'TEST'
+      metadata?.dataset?.datasetType === 'DESIGN' ||
+      metadata?.dataset?.datasetType === 'REFERENCE' ||
+      metadata?.dataset?.datasetType === 'REPORTING' ||
+      metadata?.dataset?.datasetType === 'TEST'
     ) {
       try {
-        const res = await DatasetService.getTableImportedMetadata({datasetId});
+        const res = await DatasetService.getTableImportedMetadata({ datasetId });
         setTableImportedMetadata(res.data);
       } catch (error) {
         console.error('Dataset - getWebformList.', error);
-        notificationContext.add({type: 'LOADING_WEBFORM_OPTIONS_ERROR'}, true);
+        notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
       }
     }
-  }
+  };
 
   const convertHelper = async () => {
     setIsLoadingIceberg(true);
@@ -448,15 +448,15 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const changeUrl = () => {
     window.history.replaceState(
-        null,
-        null,
-        `?tab=${
-            dataViewerOptions.tableSchemaId !== ''
-                ? dataViewerOptions.tableSchemaId
-                : !isEmpty(tableSchema)
-                    ? tableSchema[0].id
-                    : ''
-        }${!isNil(webformData?.name) ? `&view=${selectedView}` : ''}`
+      null,
+      null,
+      `?tab=${
+        dataViewerOptions.tableSchemaId !== ''
+          ? dataViewerOptions.tableSchemaId
+          : !isEmpty(tableSchema)
+          ? tableSchema[0].id
+          : ''
+      }${!isNil(webformData?.name) ? `&view=${selectedView}` : ''}`
     );
   };
 
@@ -494,7 +494,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   });
 
   const importFromFile = !isEmpty(externalOperationsList.import)
-      ? [
+    ? [
         {
           label: resourcesContext.messages['customImports'],
           items: externalOperationsList.import.map(type => {
@@ -510,10 +510,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           })
         }
       ]
-      : [];
+    : [];
 
   const importFromOtherSystems = !isEmpty(externalOperationsList.importOtherSystems)
-      ? [
+    ? [
         {
           label: resourcesContext.messages['importPreviousData'],
           items: externalOperationsList.importOtherSystems.map(importOtherSystem => ({
@@ -526,31 +526,31 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           }))
         }
       ]
-      : [];
+    : [];
 
   const internalExtensions = config.exportTypes.exportDatasetTypes
-      .map(type => {
-        const extensionsTypes = !isNil(type.code) && type.code.split('+');
+    .map(type => {
+      const extensionsTypes = !isNil(type.code) && type.code.split('+');
 
-        if (bigDataRef?.current) {
-          if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
-            return {
-              command: () => onExportDataInternalExtension(type.code),
-              icon: extensionsTypes[0],
-              label: resourcesContext.messages[type.key]
-            };
-          } else {
-            return null;
-          }
-        } else {
+      if (bigDataRef?.current) {
+        if (extensionsTypes?.includes('zip') && extensionsTypes?.includes('csv')) {
           return {
             command: () => onExportDataInternalExtension(type.code),
             icon: extensionsTypes[0],
             label: resourcesContext.messages[type.key]
           };
+        } else {
+          return null;
         }
-      })
-      .filter(item => item !== null);
+      } else {
+        return {
+          command: () => onExportDataInternalExtension(type.code),
+          icon: extensionsTypes[0],
+          label: resourcesContext.messages[type.key]
+        };
+      }
+    })
+    .filter(item => item !== null);
 
   const externalIntegrationsNames = [
     {
@@ -578,8 +578,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const getFileExtensions = async () => {
     try {
       const allExtensions = await IntegrationService.getAllExtensionsOperations(
-          dataflowId,
-          metadata.dataset.datasetSchemaId
+        dataflowId,
+        metadata.dataset.datasetSchemaId
       );
       setExternalOperationsList(ExtensionUtils.groupOperations('operation', allExtensions));
     } catch (error) {
@@ -617,11 +617,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           dataset: { name: datasetName }
         } = metadata;
         notificationContext.add(
-            {
-              type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
-              content: { dataflowId, datasetId, dataflowName, datasetName }
-            },
-            true
+          {
+            type: 'DATASET_SERVICE_DELETE_DATA_BY_ID_ERROR',
+            content: { dataflowId, datasetId, dataflowName, datasetName }
+          },
+          true
         );
       }
     }
@@ -633,18 +633,18 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     try {
       await DatasetService.validate(datasetId);
       notificationContext.add(
-          {
-            type: 'VALIDATE_DATA_INIT',
-            content: {
-              customContent: { origin: datasetName },
-              dataflowId,
-              dataflowName: metadata.dataflow.name,
-              datasetId,
-              datasetName: datasetSchemaName,
-              type: 'REPORTING'
-            }
-          },
-          true
+        {
+          type: 'VALIDATE_DATA_INIT',
+          content: {
+            customContent: { origin: datasetName },
+            dataflowId,
+            dataflowName: metadata.dataflow.name,
+            datasetId,
+            datasetName: datasetSchemaName,
+            type: 'REPORTING'
+          }
+        },
+        true
       );
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: true });
     } catch (error) {
@@ -653,17 +653,17 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       } else {
         console.error('Dataset - onConfirmValidate.', error);
         notificationContext.add(
-            {
-              type: 'VALIDATE_REPORTING_DATA_ERROR',
-              content: {
-                customContent: { origin: datasetName },
-                dataflowId,
-                dataflowName: metadata.dataflow.name,
-                datasetId,
-                datasetName: datasetSchemaName
-              }
-            },
-            true
+          {
+            type: 'VALIDATE_REPORTING_DATA_ERROR',
+            content: {
+              customContent: { origin: datasetName },
+              dataflowId,
+              dataflowName: metadata.dataflow.name,
+              datasetId,
+              datasetName: datasetSchemaName
+            }
+          },
+          true
         );
       }
     }
@@ -677,24 +677,24 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const onImportDatasetError = async ({ xhr }) => {
     if (xhr.status === 400) {
       notificationContext.add(
-          {
-            type: 'IMPORT_REPORTING_BAD_REQUEST_ERROR',
-            content: { dataflowId, datasetId, datasetName: datasetSchemaName }
-          },
-          true
+        {
+          type: 'IMPORT_REPORTING_BAD_REQUEST_ERROR',
+          content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+        },
+        true
       );
     }
     if (xhr.status === 423) {
       notificationContext.add(
-          {
-            type: 'GENERIC_BLOCKED_ERROR',
-            content: {
-              dataflowId,
-              datasetId,
-              datasetName: datasetSchemaName
-            }
-          },
-          true
+        {
+          type: 'GENERIC_BLOCKED_ERROR',
+          content: {
+            dataflowId,
+            datasetId,
+            datasetName: datasetSchemaName
+          }
+        },
+        true
       );
     }
   };
@@ -718,14 +718,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       } else {
         console.error('Dataset - onImportOtherSystems.', error);
         notificationContext.add(
-            {
-              type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
-              content: {
-                dataflowName: metadata.dataflow.name,
-                datasetName: datasetName
-              }
-            },
-            true
+          {
+            type: 'EXTERNAL_IMPORT_REPORTING_FROM_OTHER_SYSTEM_FAILED_EVENT',
+            content: {
+              dataflowName: metadata.dataflow.name,
+              datasetName: datasetName
+            }
+          },
+          true
         );
       }
     }
@@ -733,7 +733,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     const isNotification = notificationContext.toShow.find(
-        notification => notification.key === 'VALIDATION_FINISHED_EVENT'
+      notification => notification.key === 'VALIDATION_FINISHED_EVENT'
     );
     if (isNotification && isNotification.content.datasetId?.toString() === datasetId.toString()) {
       onHighlightRefresh(true);
@@ -741,37 +741,37 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
 
     const validationFinishedWithError = notificationContext.toShow.find(
-        notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'
+      notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'
     );
     if (
-        validationFinishedWithError &&
-        validationFinishedWithError.content.datasetId?.toString() === datasetId.toString()
+      validationFinishedWithError &&
+      validationFinishedWithError.content.datasetId?.toString() === datasetId.toString()
     ) {
       onHighlightRefresh(true);
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: true });
     }
 
     const isImportDataCompleted = notificationContext.toShow.find(
-        notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
+      notification => notification.key === 'IMPORT_REPORTING_COMPLETED_EVENT'
     );
 
     const isRestoreSnapshotDataCompleted = notificationContext.toShow.some(
-        notification => notification.key === 'RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT'
+      notification => notification.key === 'RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT'
     );
 
     const isDeletedDataCompleted = notificationContext.toShow.find(
-        notification => notification.key === 'DELETE_DATASET_DATA_COMPLETED_EVENT'
+      notification => notification.key === 'DELETE_DATASET_DATA_COMPLETED_EVENT'
     );
 
     const isDeletedTableDataCompleted = notificationContext.toShow.find(
-        notification => notification.key === 'DELETE_TABLE_COMPLETED_EVENT'
+      notification => notification.key === 'DELETE_TABLE_COMPLETED_EVENT'
     );
 
     if (
-        (isImportDataCompleted && isImportDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
-        (isDeletedDataCompleted && isDeletedDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
-        (isDeletedTableDataCompleted &&
-            isDeletedTableDataCompleted.content?.datasetId.toString() === datasetId.toString())
+      (isImportDataCompleted && isImportDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
+      (isDeletedDataCompleted && isDeletedDataCompleted.content?.datasetId.toString() === datasetId.toString()) ||
+      (isDeletedTableDataCompleted &&
+        isDeletedTableDataCompleted.content?.datasetId.toString() === datasetId.toString())
     ) {
       onHighlightRefresh(true);
     }
@@ -784,31 +784,31 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const onHighlightRefresh = value => setIsRefreshHighlighted(value);
 
   useCheckNotifications(
-      [
-        'CALL_FME_PROCESS_FAILED_EVENT',
-        'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
-        'DOWNLOAD_FME_FILE_ERROR',
-        'EXPORT_DATA_BY_ID_ERROR',
-        'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
-        'EXPORT_DATASET_FILE_DOWNLOAD',
-        'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD',
-        'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
-        'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
-      ],
-      actionsContext.changeExportDatasetState,
-      false
+    [
+      'CALL_FME_PROCESS_FAILED_EVENT',
+      'DOWNLOAD_EXPORT_DATASET_FILE_ERROR',
+      'DOWNLOAD_FME_FILE_ERROR',
+      'EXPORT_DATA_BY_ID_ERROR',
+      'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXPORT_DATASET_FILE_DOWNLOAD',
+      'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD',
+      'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
+      'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR'
+    ],
+    actionsContext.changeExportDatasetState,
+    false
   );
 
   useCheckNotifications(
-      ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
-      setIsDownloadingQCRules,
-      false
+    ['AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE', 'DOWNLOAD_QC_RULES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
+    setIsDownloadingQCRules,
+    false
   );
 
   useCheckNotifications(
-      ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
-      setIsDownloadingValidations,
-      false
+    ['AUTOMATICALLY_DOWNLOAD_VALIDATIONS_FILE', 'DOWNLOAD_VALIDATIONS_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
+    setIsDownloadingValidations,
+    false
   );
 
   const onLoadTableData = hasData => {
@@ -822,14 +822,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     } = metadata;
 
     notificationContext.add(
-        {
-          type: exportNotification,
-          content: {
-            dataflowName: dataflowName,
-            datasetName: datasetName
-          }
-        },
-        true
+      {
+        type: exportNotification,
+        content: {
+          dataflowName: dataflowName,
+          datasetName: datasetName
+        }
+      },
+      true
     );
   };
 
@@ -842,11 +842,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     } catch (error) {
       console.error('Dataset - onExportDataExternalIntegration.', error);
       notificationContext.add(
-          {
-            type: 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
-            content: { dataflowId, datasetId, datasetName: datasetSchemaName }
-          },
-          true
+        {
+          type: 'EXTERNAL_EXPORT_REPORTING_FAILED_EVENT',
+          content: { dataflowId, datasetId, datasetName: datasetSchemaName }
+        },
+        true
       );
     }
   };
@@ -907,11 +907,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         dataset: { name: datasetName }
       } = metadata;
       notificationContext.add(
-          {
-            type: 'REPORTING_ERROR',
-            content: { dataflowId, datasetId, dataflowName, datasetName }
-          },
-          true
+        {
+          type: 'REPORTING_ERROR',
+          content: { dataflowId, datasetId, dataflowName, datasetName }
+        },
+        true
       );
       if (!isUndefined(error.response) && (error.response.status === 401 || error.response.status === 403)) {
         navigate(getUrl(routes.DATAFLOWS));
@@ -922,14 +922,14 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   useCheckNotifications(
-      [
-        'RELEASE_COMPLETED_EVENT',
-        'RELEASE_PROVIDER_COMPLETED_EVENT',
-        'RELEASE_FAILED_EVENT',
-        'RELEASE_BLOCKED_EVENT',
-        'RELEASE_BLOCKERS_FAILED_EVENT'
-      ],
-      onLoadDataflow
+    [
+      'RELEASE_COMPLETED_EVENT',
+      'RELEASE_PROVIDER_COMPLETED_EVENT',
+      'RELEASE_FAILED_EVENT',
+      'RELEASE_BLOCKED_EVENT',
+      'RELEASE_BLOCKERS_FAILED_EVENT'
+    ],
+    onLoadDataflow
   );
 
   const getDataSchema = async () => {
@@ -980,54 +980,54 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setIsLoading(true);
       const datasetSchema = await getDataSchema();
       const datasetStatistics = await getStatisticsById(
-          datasetId,
-          datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
+        datasetId,
+        datasetSchema.tables.map(tableSchema => tableSchema.tableSchemaName)
       );
       setDatasetStatisticsInState({ ...datasetStatistics });
       setDatasetName(datasetStatistics.datasetSchemaName);
       const tableSchemaList = [];
       setTableSchema(
-          datasetSchema.tables.map(tableSchema => {
-            tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
-            return {
-              dataAreManuallyEditable: tableSchema.dataAreManuallyEditable,
-              description: tableSchema.description || tableSchema.tableSchemaDescription,
-              id: tableSchema.tableSchemaId,
-              name: tableSchema.tableSchemaName,
-              notEmpty: tableSchema.notEmpty,
-              hasInfoTooltip: true,
-              hasErrors: {
-                ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]
-              }.hasErrors,
-              fixedNumber: tableSchema.tableSchemaFixedNumber,
-              numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
-              readOnly: tableSchema.tableSchemaReadOnly,
-              toPrefill: tableSchema.tableSchemaToPrefill
-            };
-          })
+        datasetSchema.tables.map(tableSchema => {
+          tableSchemaList.push({ name: tableSchema.tableSchemaName, id: tableSchema.tableSchemaId });
+          return {
+            dataAreManuallyEditable: tableSchema.dataAreManuallyEditable,
+            description: tableSchema.description || tableSchema.tableSchemaDescription,
+            id: tableSchema.tableSchemaId,
+            name: tableSchema.tableSchemaName,
+            notEmpty: tableSchema.notEmpty,
+            hasInfoTooltip: true,
+            hasErrors: {
+              ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]
+            }.hasErrors,
+            fixedNumber: tableSchema.tableSchemaFixedNumber,
+            numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
+            readOnly: tableSchema.tableSchemaReadOnly,
+            toPrefill: tableSchema.tableSchemaToPrefill
+          };
+        })
       );
       setSchemaTables(tableSchemaList);
       setTableSchemaColumns(
-          datasetSchema.tables.map(table => {
-            return table.records[0].fields.map(field => {
-              return {
-                codelistItems: field['codelistItems'],
-                description: field['description'],
-                field: field['fieldId'],
-                header: field['name'],
-                pk: field['pk'],
-                maxSize: field['maxSize'],
-                pkHasMultipleValues: field['pkHasMultipleValues'],
-                readOnly: field['readOnly'],
-                recordId: field['recordId'],
-                referencedField: field['referencedField'],
-                required: field['required'],
-                table: table['tableSchemaName'],
-                type: field['type'],
-                validExtensions: field['validExtensions']
-              };
-            });
-          })
+        datasetSchema.tables.map(table => {
+          return table.records[0].fields.map(field => {
+            return {
+              codelistItems: field['codelistItems'],
+              description: field['description'],
+              field: field['fieldId'],
+              header: field['name'],
+              pk: field['pk'],
+              maxSize: field['maxSize'],
+              pkHasMultipleValues: field['pkHasMultipleValues'],
+              readOnly: field['readOnly'],
+              recordId: field['recordId'],
+              referencedField: field['referencedField'],
+              required: field['required'],
+              table: table['tableSchemaName'],
+              type: field['type'],
+              validExtensions: field['validExtensions']
+            };
+          });
+        })
       );
 
       setDatasetHasErrors(datasetStatistics.datasetErrors);
@@ -1057,22 +1057,22 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onHideSelectGroupedValidation = () =>
-      setDataViewerOptions({
-        ...dataViewerOptions,
-        isGroupedValidationDeleted: true,
-        isGroupedValidationSelected: false,
-        selectedRuleMessage: '',
-        selectedRuleLevelError: '',
-        selectedRuleId: '',
-        selectedShortCode: ''
-      });
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      isGroupedValidationDeleted: true,
+      isGroupedValidationSelected: false,
+      selectedRuleMessage: '',
+      selectedRuleLevelError: '',
+      selectedRuleId: '',
+      selectedShortCode: ''
+    });
 
   const onSelectValidation = (
-      tableSchemaId,
-      selectedRuleId = '',
-      selectedShortCode = '',
-      selectedRuleMessage = '',
-      selectedRuleLevelError = ''
+    tableSchemaId,
+    selectedRuleId = '',
+    selectedShortCode = '',
+    selectedRuleMessage = '',
+    selectedRuleLevelError = ''
   ) => {
     setDataViewerOptions({
       ...dataViewerOptions,
@@ -1094,10 +1094,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onTabChange = table =>
-      setDataViewerOptions({
-        ...dataViewerOptions,
-        tableSchemaId: table.tableSchemaId
-      });
+    setDataViewerOptions({
+      ...dataViewerOptions,
+      tableSchemaId: table.tableSchemaId
+    });
 
   const onDownloadQCRules = async () => {
     setIsDownloadingQCRules(true);
@@ -1133,29 +1133,29 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const validationListFooter = (
-      <Fragment>
-        <Button
-            className="p-button-secondary p-button-animated-blink"
-            disabled={isDownloadingQCRules}
-            icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
-            label={resourcesContext.messages['downloadQCsButtonLabel']}
-            onClick={() => onDownloadQCRules()}
-            style={{ float: 'left' }}
-        />
-        <Button
-            className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-            icon="cancel"
-            label={resourcesContext.messages['close']}
-            onClick={() => onSetVisible(setValidationListDialogVisible, false)}
-        />
-      </Fragment>
+    <Fragment>
+      <Button
+        className="p-button-secondary p-button-animated-blink"
+        disabled={isDownloadingQCRules}
+        icon={isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
+        label={resourcesContext.messages['downloadQCsButtonLabel']}
+        onClick={() => onDownloadQCRules()}
+        style={{ float: 'left' }}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon="cancel"
+        label={resourcesContext.messages['close']}
+        onClick={() => onSetVisible(setValidationListDialogVisible, false)}
+      />
+    </Fragment>
   );
 
   const layout = children => {
     return (
-        <MainLayout bigData={metadata?.dataflow.bigData}>
-          <div className="rep-container">{children}</div>
-        </MainLayout>
+      <MainLayout bigData={metadata?.dataflow.bigData}>
+        <div className="rep-container">{children}</div>
+      </MainLayout>
     );
   };
 
@@ -1170,38 +1170,38 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     } = metadata;
 
     notificationContext.add(
-        {
-          type: 'DATASET_DATA_LOADING_INIT',
-          content: {
-            customContent: {
-              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-              datasetLoading: resourcesContext.messages['datasetLoading']
-            },
-            dataflowName,
-            datasetName
-          }
-        },
-        true
+      {
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          customContent: {
+            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+            datasetLoading: resourcesContext.messages['datasetLoading']
+          },
+          dataflowName,
+          datasetName
+        }
+      },
+      true
     );
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
   const renderImportOtherSystemsFooter = (
-      <Fragment>
-        <Button
-            className="p-button-animated-blink"
-            icon="check"
-            label={resourcesContext.messages['import']}
-            onClick={onImportOtherSystems}
-        />
-        <Button
-            className="p-button-secondary button-right-aligned"
-            icon="cancel"
-            label={resourcesContext.messages['cancel']}
-            onClick={cleanImportOtherSystemsDialog}
-        />
-      </Fragment>
+    <Fragment>
+      <Button
+        className="p-button-animated-blink"
+        icon="check"
+        label={resourcesContext.messages['import']}
+        onClick={onImportOtherSystems}
+      />
+      <Button
+        className="p-button-secondary button-right-aligned"
+        icon="cancel"
+        label={resourcesContext.messages['cancel']}
+        onClick={cleanImportOtherSystemsDialog}
+      />
+    </Fragment>
   );
 
   const renderSwitchView = () => {
@@ -1212,18 +1212,20 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       ];
 
       return (
-          <div className={styles.switchDivInput}>
-            <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
-              <TabularSwitch
-                  elements={viewModes}
-                  onChange={switchView => setSelectedView(switchView)}
-                  value={selectedView}
-              />
-            </div>
+        <div className={styles.switchDivInput}>
+          <div className={`${styles.switchDiv} datasetSchema-switchDesignToData-help-step`}>
+            <TabularSwitch
+              elements={viewModes}
+              onChange={switchView => setSelectedView(switchView)}
+              value={selectedView}
+            />
           </div>
+        </div>
       );
     }
   };
+
+  const onChangeImportDialogVisibility = isVisible => setIsImportDatasetDialogVisible(isVisible);
 
   const onDownloadValidations = async () => {
     setIsDownloadingValidations(true);
@@ -1263,8 +1265,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const getSubtitle = () => {
     let subtitle = metadata?.dataflow.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
-        name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
-      })
+          name: `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`
+        })
       : `${metadata?.dataflow.name} - ${isTestDataset ? resourcesContext.messages['testDataset'] : datasetName}`;
 
     if (metadata?.dataflow.deleted) {
@@ -1276,90 +1278,90 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const renderDialogFooterCloseBtn = () => (
-      <Button
-          className="p-button-secondary p-button-animated-blink"
-          icon="cancel"
-          label={resourcesContext.messages['close']}
-          onClick={() => {
-            setIsDatasetsInfoDialogVisible(false);
-            resetDatasetInfoFiltersState();
-            resetUserListFiltersState();
-          }}
-      />
+    <Button
+      className="p-button-secondary p-button-animated-blink"
+      icon="cancel"
+      label={resourcesContext.messages['close']}
+      onClick={() => {
+        setIsDatasetsInfoDialogVisible(false);
+        resetDatasetInfoFiltersState();
+        resetUserListFiltersState();
+      }}
+    />
   );
 
   const renderValidationsFooter = (
-      <div className={styles.validationsFooter}>
-        <Button
-            className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-            disabled={isDownloadingValidations}
-            icon={isDownloadingValidations ? 'spinnerAnimate' : 'export'}
-            label={resourcesContext.messages['downloadValidationsButtonLabel']}
-            onClick={onDownloadValidations}
-        />
-        <Button
-            className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-            icon="cancel"
-            label={resourcesContext.messages['close']}
-            onClick={() => setValidationsVisible(false)}
-        />
-      </div>
+    <div className={styles.validationsFooter}>
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        disabled={isDownloadingValidations}
+        icon={isDownloadingValidations ? 'spinnerAnimate' : 'export'}
+        label={resourcesContext.messages['downloadValidationsButtonLabel']}
+        onClick={onDownloadValidations}
+      />
+      <Button
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
+        icon="cancel"
+        label={resourcesContext.messages['close']}
+        onClick={() => setValidationsVisible(false)}
+      />
+    </div>
   );
 
   const renderTableWebformView = () => {
     if (selectedView === 'webform') {
       return (
-          <Webforms
-              bigData={metadata?.dataflow.bigData}
-              dataflowId={dataflowId}
-              dataProviderId={metadata?.dataset.dataProviderId}
-              datasetId={datasetId}
-              isIcebergCreated={isIcebergCreated}
-              isLoadingIceberg={isLoadingIceberg}
-              isReleasing={dataset.isReleasing}
-              isReporting
-              options={webformOptions}
-              state={{
-                datasetSchema: { tables: datasetSchemaAllTables },
-                schemaTables,
-                datasetStatistics: datasetStatisticsInState
-              }}
-              webform={webformData}
-          />
+        <Webforms
+          bigData={metadata?.dataflow.bigData}
+          dataflowId={dataflowId}
+          dataProviderId={metadata?.dataset.dataProviderId}
+          datasetId={datasetId}
+          isIcebergCreated={isIcebergCreated}
+          isLoadingIceberg={isLoadingIceberg}
+          isReleasing={dataset.isReleasing}
+          isReporting
+          options={webformOptions}
+          state={{
+            datasetSchema: { tables: datasetSchemaAllTables },
+            schemaTables,
+            datasetStatistics: datasetStatisticsInState
+          }}
+          webform={webformData}
+        />
       );
     }
 
     return (
-        <TabsSchema
-            bigData={metadata?.dataflow.bigData}
-            dataProviderId={metadata?.dataset.dataProviderId}
-            datasetSchemaId={metadata?.dataset.datasetSchemaId}
-            datasetType={metadata?.dataset.datasetType}
-            editedTables={editedTables}
-            hasWritePermissions={hasWritePermissions}
-            isDatasetReleased={isDatasetReleased}
-            isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
-            isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
-            isIcebergCreated={isIcebergCreated}
-            isReferenceDataset={isReferenceDataset}
-            isReportingWebform={isReportingWebform}
-            isTableDataRestorationInProgress={isTableDataRestorationInProgress}
-            levelErrorTypes={levelErrorTypes}
-            onHideSelectGroupedValidation={onHideSelectGroupedValidation}
-            onLoadTableData={onLoadTableData}
-            onRestoreData={onRestoreData}
-            onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
-            reporting={true}
-            selectedRuleId={dataViewerOptions.selectedRuleId}
-            selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
-            selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
-            selectedShortCode={dataViewerOptions.selectedShortCode}
-            selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
-            tableImportedMetadata={tableImportedMetadata}
-            tables={tableSchema}
-            tableSchemaColumns={tableSchemaColumns}
-            tableSchemaId={dataViewerOptions.tableSchemaId}
-        />
+      <TabsSchema
+        bigData={metadata?.dataflow.bigData}
+        dataProviderId={metadata?.dataset.dataProviderId}
+        datasetSchemaId={metadata?.dataset.datasetSchemaId}
+        datasetType={metadata?.dataset.datasetType}
+        editedTables={editedTables}
+        hasWritePermissions={hasWritePermissions}
+        isDatasetReleased={isDatasetReleased}
+        isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}
+        isGroupedValidationSelected={dataViewerOptions.isGroupedValidationSelected}
+        isIcebergCreated={isIcebergCreated}
+        isReferenceDataset={isReferenceDataset}
+        isReportingWebform={isReportingWebform}
+        isTableDataRestorationInProgress={isTableDataRestorationInProgress}
+        levelErrorTypes={levelErrorTypes}
+        onHideSelectGroupedValidation={onHideSelectGroupedValidation}
+        onLoadTableData={onLoadTableData}
+        onRestoreData={onRestoreData}
+        onTabChange={tableSchemaId => onTabChange(tableSchemaId)}
+        reporting={true}
+        selectedRuleId={dataViewerOptions.selectedRuleId}
+        selectedRuleLevelError={dataViewerOptions.selectedRuleLevelError}
+        selectedRuleMessage={dataViewerOptions.selectedRuleMessage}
+        selectedShortCode={dataViewerOptions.selectedShortCode}
+        selectedTableSchemaId={dataViewerOptions.selectedTableSchemaId}
+        tableImportedMetadata={tableImportedMetadata}
+        tables={tableSchema}
+        tableSchemaColumns={tableSchemaColumns}
+        tableSchemaId={dataViewerOptions.tableSchemaId}
+      />
     );
   };
 
@@ -1369,340 +1371,342 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   if (isLoadingIceberg)
     return layout(
-        <div style={{ top: 0, margin: '1rem' }}>
-          <Spinner style={{ top: 0, margin: '1rem' }} />
-          <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
-            {resourcesContext.messages['tablesAreBeingConverted']}
-          </p>
-        </div>
+      <div style={{ top: 0, margin: '1rem' }}>
+        <Spinner style={{ top: 0, margin: '1rem' }} />
+        <p style={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', margin: 0 }}>
+          {resourcesContext.messages['tablesAreBeingConverted']}
+        </p>
+      </div>
     );
 
   return layout(
-      <SnapshotContext.Provider
-          value={{
-            isSnapshotsBarVisible: isSnapshotsBarVisible,
-            setIsSnapshotsBarVisible: setIsSnapshotsBarVisible,
-            snapshotDispatch: snapshotDispatch,
-            snapshotState: snapshotState
-          }}>
-        <Title
-            icon={isReferenceDatasetReferenceDataflow ? 'howTo' : 'dataset'}
-            iconSize={isReferenceDatasetReferenceDataflow ? '4rem' : '3.5rem'}
-            insideTitle={`${datasetInsideTitle()}`}
-            subtitle={getSubtitle()}
-            title={datasetSchemaName}
-        />
-        <div className={styles.ButtonsBar}>
-          <Toolbar>
-            <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
-              {hasWritePermissions && (
-                  <Fragment>
-                    <Button
-                        className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
-                            !hasWritePermissions ? null : 'p-button-animated-blink'
-                        }`}
-                        disabled={
-                            isIcebergCreated ||
-                            !hasWritePermissions ||
-                            isTableDataRestorationInProgress ||
-                            actionsContext.isInProgress
-                        }
-                        icon={
-                          actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
-                        }
-                        label={
-                          actionsContext.isInProgress && actionsContext.importDatasetProcessing
-                              ? resourcesContext.messages['importInProgress']
-                              : resourcesContext.messages['importDataset']
-                        }
-                        onClick={event => importMenuRef.current.show(event)}
-                    />
-                    <Menu
-                        className={styles.menuWrapper}
-                        id="importDataSetMenu"
-                        model={importButtonsList}
-                        popup={true}
-                        ref={importMenuRef}
-                    />
-                  </Fragment>
-              )}
-              <Button
-                  className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
+    <SnapshotContext.Provider
+      value={{
+        isSnapshotsBarVisible: isSnapshotsBarVisible,
+        setIsSnapshotsBarVisible: setIsSnapshotsBarVisible,
+        snapshotDispatch: snapshotDispatch,
+        snapshotState: snapshotState
+      }}>
+      <Title
+        icon={isReferenceDatasetReferenceDataflow ? 'howTo' : 'dataset'}
+        iconSize={isReferenceDatasetReferenceDataflow ? '4rem' : '3.5rem'}
+        insideTitle={`${datasetInsideTitle()}`}
+        subtitle={getSubtitle()}
+        title={datasetSchemaName}
+      />
+      <div className={styles.ButtonsBar}>
+        <Toolbar>
+          <div className="p-toolbar-group-left datasetSchema-buttonsbar-dataset-data-help-step">
+            {hasWritePermissions && (
+              <Fragment>
+                <Button
+                  className={`p-button-rounded p-button-secondary datasetSchema-buttonsbar-dataset-data-help-step ${
+                    !hasWritePermissions ? null : 'p-button-animated-blink'
+                  }`}
                   disabled={
-                      (hasWritePermissions && isIcebergCreated) ||
-                      isTableDataRestorationInProgress ||
-                      actionsContext.isInProgress
-                  }
-                  icon={actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
-                  id="buttonExportDataset"
-                  label={
-                    actionsContext.isInProgress && actionsContext.exportDatasetProcessing
-                        ? resourcesContext.messages['exportInProgress']
-                        : resourcesContext.messages['exportDataset']
-                  }
-                  onClick={event => exportMenuRef.current.show(event)}
-              />
-              <Menu
-                  className={styles.menuWrapper}
-                  id="exportDataSetMenu"
-                  model={exportButtonsList}
-                  popup={true}
-                  ref={exportMenuRef}
-              />
-              <DatasetDeleteDataDialog
-                  disabled={
-                      isIcebergCreated ||
-                      !hasWritePermissions ||
-                      isTableDataRestorationInProgress ||
-                      actionsContext.isInProgress
-                  }
-                  icon={actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
-                  label={
-                    actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
-                        ? resourcesContext.messages['deleteInProgress']
-                        : resourcesContext.messages['deleteDatasetData']
-                  }
-                  onConfirmDelete={onConfirmDelete}
-              />
-            </div>
-            <div className="p-toolbar-group-right">
-              <DatasetValidateDialog
-                  disabled={
-                      isIcebergCreated ||
-                      !hasWritePermissions ||
-                      isTableDataRestorationInProgress ||
-                      actionsContext.isInProgress
+                    isIcebergCreated ||
+                    !hasWritePermissions ||
+                    isTableDataRestorationInProgress ||
+                    actionsContext.isInProgress
                   }
                   icon={
-                    actionsContext.isInProgress && actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'
+                    actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
                   }
                   label={
-                    actionsContext.isInProgress && actionsContext.validateDatasetProcessing
-                        ? resourcesContext.messages['validationInProgress']
-                        : resourcesContext.messages['validate']
+                    actionsContext.isInProgress && actionsContext.importDatasetProcessing
+                      ? resourcesContext.messages['importInProgress']
+                      : resourcesContext.messages['importDataset']
                   }
-                  onConfirmValidate={onConfirmValidate}
-              />
-              <Button
-                  className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
-                  icon="warning"
-                  iconClasses={datasetHasErrors ? 'warning' : ''}
-                  label={resourcesContext.messages['showValidations']}
-                  onClick={() => onSetVisible(setValidationsVisible, true)}
-              />
-              <Button
-                  className={
-                    'p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step'
-                  }
-                  icon="horizontalSliders"
-                  label={resourcesContext.messages['qcRules']}
-                  onClick={() => onSetVisible(setValidationListDialogVisible, true)}
-              />
-              <DatasetDashboardDialog
-                  disabled={!datasetHasData}
-                  levelErrorTypes={levelErrorTypes}
-                  tableSchemas={schemaTables.map(table => table.name)}
-              />
-              <Button
-                  className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
-                      !hasWritePermissions ? null : 'p-button-animated-blink'
-                  }`}
-                  disabled={!hasWritePermissions}
-                  icon="camera"
-                  label={resourcesContext.messages['snapshots']}
-                  onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
-              />
-              <Button
-                  className={`p-button-rounded p-button-${
-                      isRefreshHighlighted ? 'primary' : 'secondary-transparent'
-                  } p-button-animated-blink dataset-refresh-help-step`}
-                  icon="refresh"
-                  label={resourcesContext.messages['refresh']}
-                  onClick={handleRefresh}
-              />
-              {metadata?.dataflow.bigData && (
-                  <Button
-                      className={styles.openWebformButton}
-                      disabled={!hasWritePermissions || isLoadingIceberg || noEditableCheck}
-                      helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
-                      icon={!isIcebergCreated ? 'lock' : 'unlock'}
-                      isLoading={isLoadingIceberg}
-                      key={isIcebergCreated}
-                      label={
-                        !isIcebergCreated ? resourcesContext.messages['enableEdit'] : resourcesContext.messages['disableEdit']
-                      }
-                      onClick={() => convertHelper()}
-                  />
-              )}
-            </div>
-          </Toolbar>
-        </div>
-        <div className={styles.progressSwitchWrapper}>{renderSwitchView()}</div>
-        {renderTableWebformView()}
-        {validationsVisible && (
-            <Dialog
-                className={styles.paginatorValidationViewer}
-                footer={renderValidationsFooter}
-                header={resourcesContext.messages['titleValidations']}
-                onHide={() => onSetVisible(setValidationsVisible, false)}
-                style={{ width: '90%' }}
-                visible={validationsVisible}>
-              <ShowValidationsList
-                  bigData={metadata?.dataflow.bigData}
-                  dataflowId={dataflowId}
-                  datasetId={datasetId}
-                  datasetName={datasetName}
-                  datasetSchemaId={metadata?.dataset.datasetSchemaId}
-                  hasWritePermissions={hasWritePermissions}
-                  isWebformView={selectedView === 'webform'}
-                  levelErrorTypes={levelErrorTypes}
-                  onSelectValidation={onSelectValidation}
-                  reporting={true}
-                  schemaTables={schemaTables}
-                  switchToTabularData={() => setSelectedView('tabularData')}
-                  tables={datasetSchemaAllTables}
-                  visible={validationsVisible}
-              />
-            </Dialog>
-        )}
-        {validationListDialogVisible && (
-            <Dialog
-                footer={validationListFooter}
-                header={resourcesContext.messages['qcRules']}
-                onHide={() => onSetVisible(setValidationListDialogVisible, false)}
-                style={{ width: '90%' }}
-                visible={validationListDialogVisible}>
-              <QCList
-                  dataflowId={dataflowId}
-                  dataset={{ datasetId: datasetId, name: datasetSchemaName }}
-                  datasetSchemaAllTables={datasetSchemaAllTables}
-                  datasetSchemaId={metadata?.dataset.datasetSchemaId}
-              />
-            </Dialog>
-        )}
-        {isImportDatasetDialogVisible && (
-            <CustomFileUpload
-                accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
-                bigData={metadata?.dataflow.bigData}
-                chooseLabel={resourcesContext.messages['selectFile']}
-                className={styles.FileUpload}
-                dataflowId={dataflowId}
-                datasetId={datasetId}
-                dialogHeader={selectedCustomImportIntegration.name}
-                dialogOnHide={() => {
-                  setIsImportDatasetDialogVisible(false);
-                  setSelectedCustomImportIntegration({ id: null, name: null });
-                }}
-                dialogVisible={isImportDatasetDialogVisible}
-                infoTooltip={`${
-                    resourcesContext.messages['supportedFileExtensionsTooltip']
-                } ${DatasetUtils.getValidExtensions({
-                  isTooltip: true,
-                  validExtensions: importSelectedIntegrationExtension
-                })}`}
-                integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
-                invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
-                isDialog={true}
-                name="file"
-                onError={onImportDatasetError}
-                onUpload={onUpload}
-                providerId={metadata?.dataset.dataProviderId}
-                replaceCheck={true}
-                s3={metadata?.dataflow.bigData ? true : false}
-                timeoutBeforeClose={true}
-                url={`${window.env.REACT_APP_BACKEND}${
-                    isNil(selectedCustomImportIntegration.id)
-                        ? getUrl(DatasetConfig.importFileDatasetUpd, {
-                          datasetId: datasetId,
-                          dataflowId: dataflowId,
-                          delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
-                        })
-                        : getUrl(DatasetConfig.importFileDatasetExternal, {
-                          datasetId: datasetId,
-                          integrationId: selectedCustomImportIntegration.id
-                        })
-                }`}
-            />
-        )}
-        {isImportOtherSystemsDialogVisible && (
-            <Dialog
-                className={styles.Dialog}
-                footer={renderImportOtherSystemsFooter}
-                header={selectedCustomImportIntegration.name}
-                onHide={() => {
-                  cleanImportOtherSystemsDialog();
-                  setSelectedCustomImportIntegration({ id: null, name: null });
-                }}
-                visible={isImportOtherSystemsDialogVisible}>
-              <div
-                  className={styles.text}
-                  dangerouslySetInnerHTML={{
-                    __html: TextUtils.parseText(resourcesContext.messages['importPreviousDataConfirm'], {
-                      importName: selectedCustomImportIntegration.name
-                    })
-                  }}></div>
-              <div className={styles.checkboxWrapper}>
-                <Checkbox
-                    checked={replaceData}
-                    id="replaceCheckbox"
-                    inputId="replaceCheckbox"
-                    onChange={() => setReplaceData(!replaceData)}
-                    role="checkbox"
+                  onClick={event => importMenuRef.current.show(event)}
                 />
-                <label htmlFor="replaceCheckbox">
+                <Menu
+                  className={styles.menuWrapper}
+                  id="importDataSetMenu"
+                  model={importButtonsList}
+                  popup={true}
+                  ref={importMenuRef}
+                />
+              </Fragment>
+            )}
+            <Button
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-export-dataset-help-step"
+              disabled={
+                (hasWritePermissions && isIcebergCreated) ||
+                isTableDataRestorationInProgress ||
+                actionsContext.isInProgress
+              }
+              icon={actionsContext.isInProgress && actionsContext.exportDatasetProcessing ? 'spinnerAnimate' : 'export'}
+              id="buttonExportDataset"
+              label={
+                actionsContext.isInProgress && actionsContext.exportDatasetProcessing
+                  ? resourcesContext.messages['exportInProgress']
+                  : resourcesContext.messages['exportDataset']
+              }
+              onClick={event => exportMenuRef.current.show(event)}
+            />
+            <Menu
+              className={styles.menuWrapper}
+              id="exportDataSetMenu"
+              model={exportButtonsList}
+              popup={true}
+              ref={exportMenuRef}
+            />
+            <DatasetDeleteDataDialog
+              disabled={
+                isIcebergCreated ||
+                !hasWritePermissions ||
+                isTableDataRestorationInProgress ||
+                actionsContext.isInProgress
+              }
+              icon={actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'}
+              label={
+                actionsContext.isInProgress && actionsContext.deleteDatasetProcessing
+                  ? resourcesContext.messages['deleteInProgress']
+                  : resourcesContext.messages['deleteDatasetData']
+              }
+              onConfirmDelete={onConfirmDelete}
+            />
+          </div>
+          <div className="p-toolbar-group-right">
+            <DatasetValidateDialog
+              disabled={
+                isIcebergCreated ||
+                !hasWritePermissions ||
+                isTableDataRestorationInProgress ||
+                actionsContext.isInProgress
+              }
+              icon={
+                actionsContext.isInProgress && actionsContext.validateDatasetProcessing ? 'spinnerAnimate' : 'validate'
+              }
+              label={
+                actionsContext.isInProgress && actionsContext.validateDatasetProcessing
+                  ? resourcesContext.messages['validationInProgress']
+                  : resourcesContext.messages['validate']
+              }
+              onConfirmValidate={onConfirmValidate}
+            />
+            <Button
+              className="p-button-rounded p-button-secondary-transparent dataset-showValidations-help-step p-button-animated-blink"
+              icon="warning"
+              iconClasses={datasetHasErrors ? 'warning' : ''}
+              label={resourcesContext.messages['showValidations']}
+              onClick={() => onSetVisible(setValidationsVisible, true)}
+            />
+            <Button
+              className={
+                'p-button-rounded p-button-secondary-transparent p-button-animated-blink datasetSchema-qcRules-help-step'
+              }
+              icon="horizontalSliders"
+              label={resourcesContext.messages['qcRules']}
+              onClick={() => onSetVisible(setValidationListDialogVisible, true)}
+            />
+            <DatasetDashboardDialog
+              disabled={!datasetHasData}
+              levelErrorTypes={levelErrorTypes}
+              tableSchemas={schemaTables.map(table => table.name)}
+            />
+            <Button
+              className={`p-button-rounded p-button-secondary-transparent datasetSchema-manageCopies-help-step ${
+                !hasWritePermissions ? null : 'p-button-animated-blink'
+              }`}
+              disabled={!hasWritePermissions}
+              icon="camera"
+              label={resourcesContext.messages['snapshots']}
+              onClick={() => setIsSnapshotsBarVisible(!isSnapshotsBarVisible)}
+            />
+            <Button
+              className={`p-button-rounded p-button-${
+                isRefreshHighlighted ? 'primary' : 'secondary-transparent'
+              } p-button-animated-blink dataset-refresh-help-step`}
+              icon="refresh"
+              label={resourcesContext.messages['refresh']}
+              onClick={handleRefresh}
+            />
+            {metadata?.dataflow.bigData && (
+              <Button
+                className={styles.openWebformButton}
+                disabled={!hasWritePermissions || isLoadingIceberg || noEditableCheck}
+                helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
+                icon={!isIcebergCreated ? 'lock' : 'unlock'}
+                isLoading={isLoadingIceberg}
+                key={isIcebergCreated}
+                label={
+                  !isIcebergCreated ? resourcesContext.messages['enableEdit'] : resourcesContext.messages['disableEdit']
+                }
+                onClick={() => convertHelper()}
+              />
+            )}
+          </div>
+        </Toolbar>
+      </div>
+      <div className={styles.progressSwitchWrapper}>{renderSwitchView()}</div>
+      {renderTableWebformView()}
+      {validationsVisible && (
+        <Dialog
+          className={styles.paginatorValidationViewer}
+          footer={renderValidationsFooter}
+          header={resourcesContext.messages['titleValidations']}
+          onHide={() => onSetVisible(setValidationsVisible, false)}
+          style={{ width: '90%' }}
+          visible={validationsVisible}>
+          <ShowValidationsList
+            bigData={metadata?.dataflow.bigData}
+            dataflowId={dataflowId}
+            datasetId={datasetId}
+            datasetName={datasetName}
+            datasetSchemaId={metadata?.dataset.datasetSchemaId}
+            hasWritePermissions={hasWritePermissions}
+            isWebformView={selectedView === 'webform'}
+            levelErrorTypes={levelErrorTypes}
+            onSelectValidation={onSelectValidation}
+            reporting={true}
+            schemaTables={schemaTables}
+            switchToTabularData={() => setSelectedView('tabularData')}
+            tables={datasetSchemaAllTables}
+            visible={validationsVisible}
+          />
+        </Dialog>
+      )}
+      {validationListDialogVisible && (
+        <Dialog
+          footer={validationListFooter}
+          header={resourcesContext.messages['qcRules']}
+          onHide={() => onSetVisible(setValidationListDialogVisible, false)}
+          style={{ width: '90%' }}
+          visible={validationListDialogVisible}>
+          <QCList
+            dataflowId={dataflowId}
+            dataset={{ datasetId: datasetId, name: datasetSchemaName }}
+            datasetSchemaAllTables={datasetSchemaAllTables}
+            datasetSchemaId={metadata?.dataset.datasetSchemaId}
+          />
+        </Dialog>
+      )}
+      {isImportDatasetDialogVisible && (
+        <CustomFileUpload
+          accept={DatasetUtils.getValidExtensions({ validExtensions: importSelectedIntegrationExtension })}
+          bigData={metadata?.dataflow.bigData}
+          chooseLabel={resourcesContext.messages['selectFile']}
+          className={styles.FileUpload}
+          dataflowId={dataflowId}
+          datasetId={datasetId}
+          datasetName={datasetName}
+          dialogHeader={selectedCustomImportIntegration.name}
+          dialogOnHide={() => {
+            setIsImportDatasetDialogVisible(false);
+            setSelectedCustomImportIntegration({ id: null, name: null });
+          }}
+          dialogVisible={isImportDatasetDialogVisible}
+          infoTooltip={`${
+            resourcesContext.messages['supportedFileExtensionsTooltip']
+          } ${DatasetUtils.getValidExtensions({
+            isTooltip: true,
+            validExtensions: importSelectedIntegrationExtension
+          })}`}
+          integrationId={selectedCustomImportIntegration.id ? selectedCustomImportIntegration.id : undefined}
+          invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+          isDialog={true}
+          name="file"
+          onChangeImportDialogVisibility={onChangeImportDialogVisibility}
+          onError={onImportDatasetError}
+          onUpload={onUpload}
+          providerId={metadata?.dataset.dataProviderId}
+          replaceCheck={true}
+          s3={metadata?.dataflow.bigData ? true : false}
+          timeoutBeforeClose={true}
+          url={`${window.env.REACT_APP_BACKEND}${
+            isNil(selectedCustomImportIntegration.id)
+              ? getUrl(DatasetConfig.importFileDatasetUpd, {
+                  datasetId: datasetId,
+                  dataflowId: dataflowId,
+                  delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER)
+                })
+              : getUrl(DatasetConfig.importFileDatasetExternal, {
+                  datasetId: datasetId,
+                  integrationId: selectedCustomImportIntegration.id
+                })
+          }`}
+        />
+      )}
+      {isImportOtherSystemsDialogVisible && (
+        <Dialog
+          className={styles.Dialog}
+          footer={renderImportOtherSystemsFooter}
+          header={selectedCustomImportIntegration.name}
+          onHide={() => {
+            cleanImportOtherSystemsDialog();
+            setSelectedCustomImportIntegration({ id: null, name: null });
+          }}
+          visible={isImportOtherSystemsDialogVisible}>
+          <div
+            className={styles.text}
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['importPreviousDataConfirm'], {
+                importName: selectedCustomImportIntegration.name
+              })
+            }}></div>
+          <div className={styles.checkboxWrapper}>
+            <Checkbox
+              checked={replaceData}
+              id="replaceCheckbox"
+              inputId="replaceCheckbox"
+              onChange={() => setReplaceData(!replaceData)}
+              role="checkbox"
+            />
+            <label htmlFor="replaceCheckbox">
               <span className={styles.replaceDataLabel} onClick={() => setReplaceData(!replaceData)}>
                 {resourcesContext.messages['replaceData']}
               </span>
-                </label>
-              </div>
-            </Dialog>
-        )}
-        {isUpdatableDialogVisible && (
-            <ConfirmDialog
-                disabledConfirm={isDatasetUpdatable === dataset.updatable}
-                header={resourcesContext.messages['referenceStateDialogHeader']}
-                labelCancel={resourcesContext.messages['cancel']}
-                labelConfirm={resourcesContext.messages['save']}
-                onConfirm={onConfirmUpdateReferenceDataset}
-                onHide={() => setIsUpdatableDialogVisible(false)}
-                visible={isUpdatableDialogVisible}>
-              <Checkbox
-                  checked={isDatasetUpdatable}
-                  id="referenceDatasetUpdatableCheckbox"
-                  inputId="referenceDatasetUpdatableCheckbox"
-                  onChange={() => setIsDatasetUpdatable(!isDatasetUpdatable)}
-                  role="checkbox"
-              />
-              <label className={styles.checkboxLabel} htmlFor="referenceDatasetUpdatableCheckbox">
+            </label>
+          </div>
+        </Dialog>
+      )}
+      {isUpdatableDialogVisible && (
+        <ConfirmDialog
+          disabledConfirm={isDatasetUpdatable === dataset.updatable}
+          header={resourcesContext.messages['referenceStateDialogHeader']}
+          labelCancel={resourcesContext.messages['cancel']}
+          labelConfirm={resourcesContext.messages['save']}
+          onConfirm={onConfirmUpdateReferenceDataset}
+          onHide={() => setIsUpdatableDialogVisible(false)}
+          visible={isUpdatableDialogVisible}>
+          <Checkbox
+            checked={isDatasetUpdatable}
+            id="referenceDatasetUpdatableCheckbox"
+            inputId="referenceDatasetUpdatableCheckbox"
+            onChange={() => setIsDatasetUpdatable(!isDatasetUpdatable)}
+            role="checkbox"
+          />
+          <label className={styles.checkboxLabel} htmlFor="referenceDatasetUpdatableCheckbox">
             <span className={styles.pointer} onClick={() => setIsDatasetUpdatable(!isDatasetUpdatable)}>
               {resourcesContext.messages['unlockReferenceDatasetLabel']}
             </span>
-              </label>
-            </ConfirmDialog>
-        )}
-        {isDatasetsInfoDialogVisible && (
-            <Dialog
-                footer={renderDialogFooterCloseBtn()}
-                header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowId}`}
-                onHide={() => {
-                  setIsDatasetsInfoDialogVisible(false);
-                  resetDatasetInfoFiltersState();
-                }}
-                visible={isDatasetsInfoDialogVisible}>
-              <DatasetsInfo
-                  dataflowId={dataflowId}
-                  dataflowType={dataflowType}
-                  datasetId={datasetId}
-                  isReferenceDataset={isReferenceDatasetReferenceDataflow}
-              />
-            </Dialog>
-        )}
-        <Snapshots
-            isLoadingSnapshotListData={isLoadingSnapshotListData}
-            isSnapshotDialogVisible={isSnapshotDialogVisible}
-            setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
-            snapshotListData={snapshotListData}
-        />
-      </SnapshotContext.Provider>
+          </label>
+        </ConfirmDialog>
+      )}
+      {isDatasetsInfoDialogVisible && (
+        <Dialog
+          footer={renderDialogFooterCloseBtn()}
+          header={`${resourcesContext.messages['datasetsInfo']} - ${resourcesContext.messages['dataflowId']}: ${dataflowId}`}
+          onHide={() => {
+            setIsDatasetsInfoDialogVisible(false);
+            resetDatasetInfoFiltersState();
+          }}
+          visible={isDatasetsInfoDialogVisible}>
+          <DatasetsInfo
+            dataflowId={dataflowId}
+            dataflowType={dataflowType}
+            datasetId={datasetId}
+            isReferenceDataset={isReferenceDatasetReferenceDataflow}
+          />
+        </Dialog>
+      )}
+      <Snapshots
+        isLoadingSnapshotListData={isLoadingSnapshotListData}
+        isSnapshotDialogVisible={isSnapshotDialogVisible}
+        setIsSnapshotDialogVisible={setIsSnapshotDialogVisible}
+        snapshotListData={snapshotListData}
+      />
+    </SnapshotContext.Provider>
   );
 };
