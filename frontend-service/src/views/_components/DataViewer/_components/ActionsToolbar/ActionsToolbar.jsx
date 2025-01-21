@@ -45,6 +45,7 @@ export const ActionsToolbar = ({
   datasetType,
   hasWritePermissions,
   isDataflowOpen,
+  isDesignDataset,
   isDesignDatasetEditorRead,
   isExportable,
   isFilterable = true,
@@ -400,6 +401,7 @@ export const ActionsToolbar = ({
       datasetId={datasetId}
       hasWritePermissions={hasWritePermissions}
       isDataflowOpen={isDataflowOpen}
+      isDesignDataset={isDesignDataset}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
       isIcebergCreated={isIcebergCreated && dataAreManuallyEditable}
       isTableDataRestorationInProgress={isTableDataRestorationInProgress}

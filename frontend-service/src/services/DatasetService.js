@@ -460,6 +460,8 @@ export const DatasetService = {
     return dataset;
   },
 
+  handleStuckImportJob: async (jobId, error) => await DatasetRepository.handleStuckImportJob(jobId, error),
+
   updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
     await DatasetRepository.updateFieldOrder(datasetId, position, fieldSchemaId),
 
