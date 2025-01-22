@@ -2248,10 +2248,12 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                           finalJobId, datasetId, e);
                 }
               });
-
+      //only when we have release, we have a release and provider id for removal and addition of validations
       Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
-      deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
-      addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+      if (providerId != null && taskType == TaskType.RELEASE_TASK) {
+        deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
+        addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+      }
 
       LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
       taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
