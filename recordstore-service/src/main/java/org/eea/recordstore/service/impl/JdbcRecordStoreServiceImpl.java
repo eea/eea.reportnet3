@@ -367,6 +367,21 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       // waiting X seconds before releasing notifications, so database is able to write the
       // creation of all datasets
       Thread.sleep(timeToWaitBeforeReleasingNotification);
+
+      //todo: add the create empty tables logic during data collection
+      /*if (Boolean.TRUE.equals(dataflowControllerZuul.isBigDataflow(dataflowId))) {
+        List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataflowId);
+        combinedDatasets.forEach(dataSetMetabaseVO -> {
+          try {
+            datasetControllerZuul.createEmptyTables(dataSetMetabaseVO);
+          } catch (Exception e) {
+            throw new RuntimeException(e);
+          }
+        });
+        LOG.info("Dremio has created empty tables for all datasets");
+      }*/
+
+
       LOG.info("Releasing notifications via Kafka");
       // Release events to initialize databases content
       releaseConnectionCreatedEvents(datasetIdsAndSchemaIds, isMaterialized);
@@ -2249,9 +2264,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 }
               });
 
-      Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
-      deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
-      addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+      if (finalJobId != null) {
+        Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
+        deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
+        addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+      }
 
       LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
       taskService.updateStatusAndFinishedDate(ProcessStatusEnum.FINISHED.toString(), new Date(), task.getId());
@@ -3208,5 +3225,23 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       releaseFiles.add(String.format(FILE_PATTERN_NAME, snapshotId, LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX));
     }
     return releaseFiles;
+  }
+
+  /**
+   * Get only the reference test and reporting datasets
+   *
+   * @param dataflowId The dataflowId
+   *
+   * @return Return only the filtered datasets
+   */
+  private List<DataSetMetabaseVO> getCombinedDatasets(Long dataflowId) {
+    List<DataSetMetabaseVO> allDatasets = dataSetMetabaseControllerZuul.getAllDatasetsByDataflowId(dataflowId);
+    return allDatasets.stream()
+        .filter(dataSetMetabaseVO ->
+            dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)
+                || dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.TEST)
+                || dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REPORTING)
+        )
+        .collect(Collectors.toList());
   }
 }

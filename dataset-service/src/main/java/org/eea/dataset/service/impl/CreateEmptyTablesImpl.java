@@ -17,7 +17,6 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.CreateEmptyTables;
-import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -31,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -43,7 +41,6 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private final DremioHelperService dremioHelperService;
   private final SpatialDataHandling spatialDataHandling;
   private final SchemasRepository schemasRepository;
-  private final DatasetMetabaseService datasetMetabaseService;
 
   private static final Logger LOG = LoggerFactory.getLogger(CreateEmptyTablesImpl.class);
 
@@ -51,86 +48,75 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private String parquetFilePath;
 
   @Override
-  public void runCreationForAllDatasets(DataSetMetabaseVO dataset) {
-
-    List<DataSetMetabaseVO> allDatasets = datasetMetabaseService.getDataSetIdByDataflowId(dataset.getDataflowId());
-    List<DataSetMetabaseVO> combinedDatasets = allDatasets.stream()
-        .filter(dataSetMetabaseVO ->
-            // Include datasets that match reportingDatasets criteria
-            (dataSetMetabaseVO.getDatasetTypeEnum().equals(dataset.getDatasetTypeEnum())
-                && dataSetMetabaseVO.getDataflowId().equals(dataset.getDataflowId())
-                && (dataSetMetabaseVO.getDataProviderId() == null
-                || dataSetMetabaseVO.getDataProviderId().equals(dataset.getDataProviderId()))
-            )
-                // OR include datasets that match refDatasets criteria
-                || dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)
-        )
-        .collect(Collectors.toList());
-
-    combinedDatasets.forEach(dataSetMetabaseVO -> {
-      try {
-        runCreationForOneDataset(dataSetMetabaseVO);
-      } catch (EEAException e) {
-        throw new RuntimeException(e.getMessage());
-      }
-    });
-  }
-
-  @Override
   public void runCreationForOneDataset(DataSetMetabaseVO dataset) throws EEAException {
     DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
 
     for (TableSchema tableSchema : schema.getTableSchemas()) {
-      S3PathResolver s3TablePathResolver = new S3PathResolver(
-          dataset.getDataflowId(),
-          dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
-          dataset.getId(),
-          tableSchema.getNameTableSchema(),
-          tableSchema.getNameTableSchema(),
-          getRightPath(dataset, true)
-      );
-
-      try {
-        s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
-        boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, getRightPath(dataset, false));
-        if (!folderExists) {
-
-          List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
-
-          FieldSchema recordIdSchema = new FieldSchema();
-          recordIdSchema.setHeaderName("record_id");
-          recordIdSchema.setType(DataType.TEXT);
-
-          FieldSchema providerCodeSchema = new FieldSchema();
-          providerCodeSchema.setHeaderName("data_provider_code");
-          providerCodeSchema.setType(DataType.TEXT);
-
-          fieldSchemas.add(0, providerCodeSchema);
-          fieldSchemas.add(0, recordIdSchema);
-
-          try {
-            List<Schema.Field> fields = new ArrayList<>();
-            fieldSchemas
-                .forEach(field -> {
-                  if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
-                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
-                  } else {
-                    fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
-                  }
-                });
-
-            regenerateTables(dataset, tableSchema, fields);
-          } catch (Exception e) {
-            throw new EEAException(e.getMessage());
-          }
-        }
-
-      } catch (Exception e) {
-        LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
-        throw new EEAException("Something went wrong, trying to create empty tables ");
-      }
+      processTableSchema(dataset, tableSchema);
     }
   }
+
+  @Override
+  public void runCreationForSpecificTableSchema(DataSetMetabaseVO dataset, String tableSchemaId) throws EEAException {
+    DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+    TableSchema targetTableSchema = schema.getTableSchemas().stream()
+        .filter(table -> table.getIdTableSchema().toString().equals(tableSchemaId))
+        .findFirst()
+        .orElseThrow(() -> new EEAException("Table schema with ID " + tableSchemaId + " not found"));
+    processTableSchema(dataset, targetTableSchema);
+  }
+
+  private void processTableSchema(DataSetMetabaseVO dataset, TableSchema tableSchema) throws EEAException {
+    S3PathResolver s3TablePathResolver = new S3PathResolver(
+        dataset.getDataflowId(),
+        dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
+        dataset.getId(),
+        tableSchema.getNameTableSchema(),
+        tableSchema.getNameTableSchema(),
+        getRightPath(dataset, true)
+    );
+
+    try {
+      if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.DESIGN)) {
+        s3Helper.deleteTableIfEmpty(tableSchema.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
+      }
+      boolean folderExists = s3Helper.checkFolderExist(s3TablePathResolver, getRightPath(dataset, false));
+      if (!folderExists) {
+
+        List<FieldSchema> fieldSchemas = tableSchema.getRecordSchema().getFieldSchema();
+
+        FieldSchema recordIdSchema = new FieldSchema();
+        recordIdSchema.setHeaderName("record_id");
+        recordIdSchema.setType(DataType.TEXT);
+
+        FieldSchema providerCodeSchema = new FieldSchema();
+        providerCodeSchema.setHeaderName("data_provider_code");
+        providerCodeSchema.setType(DataType.TEXT);
+
+        fieldSchemas.add(0, providerCodeSchema);
+        fieldSchemas.add(0, recordIdSchema);
+
+        try {
+          List<Schema.Field> fields = new ArrayList<>();
+          fieldSchemas.forEach(field -> {
+            if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
+              fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
+            } else {
+              fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
+            }
+          });
+
+          regenerateTables(dataset, tableSchema, fields);
+        } catch (Exception e) {
+          throw new EEAException(e.getMessage());
+        }
+      }
+    } catch (Exception e) {
+      LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
+      throw new EEAException("Something went wrong, trying to create empty tables ");
+    }
+  }
+
 
   private void regenerateTables(DataSetMetabaseVO dataset, TableSchema tableSchema, List<Schema.Field> fields) throws Exception {
     Schema schema1 = Schema.createRecord("Data", null, null, false, fields);
