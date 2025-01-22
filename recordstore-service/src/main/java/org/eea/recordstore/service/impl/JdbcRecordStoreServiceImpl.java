@@ -2266,8 +2266,10 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
       if (finalJobId != null) {
         Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
-        deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
-        addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+        if (providerId != null) {
+          deletePreviousValidationsFromDC(datasetId, dataflowId, providerId);
+          addNewValidationsToDC(datasetId, dataflowId, providerId, finalProcessVO, finalJobId);
+        }
       }
 
       LOG.info("Updating task status of task with id {} ith idSnapshot {} and processId {} to FINISHED", task.getId(), idSnapshot, processId);
