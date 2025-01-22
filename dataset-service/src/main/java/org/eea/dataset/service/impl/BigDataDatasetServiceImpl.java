@@ -137,6 +137,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     DataFlowControllerZuul dataFlowControllerZuul;
 
+    @Autowired
+    private CreateEmptyTables createEmptyTables;
+
     /** The pk catalogue repository. */
     @Autowired
     private PkCatalogueRepository pkCatalogueRepository;
@@ -854,6 +857,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     s3HelperPrivate.deleteFolder(s3ReferenceTablePathResolver, S3_DATAFLOW_REFERENCE_FOLDER_PATH);
                 }
             }
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            createEmptyTables.runCreationForSpecificTableSchema(dataSetMetabaseVO, tableSchemaId);
 
             if (jobId != null) {
                 jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);

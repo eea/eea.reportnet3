@@ -987,4 +987,13 @@ public interface DatasetController {
    */
   @GetMapping("/getImportRelatedStatistics/{datasetId}")
   Map<String, ImportStatisticsVO> getImportRelatedStatistics(@PathVariable("datasetId") Long datasetId) throws Exception;
+
+  /***
+   * Create empty tables for each dataset schema of the dataflow
+   *
+   * @param datasetMetabaseVO The datasetMetabaseVO object
+   * @throws Exception The exception
+   */
+  @PostMapping("/private/createEmptyTables")
+  void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception;
 }

@@ -21,6 +21,7 @@ import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMe
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -114,7 +115,9 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
-            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            String path = getPath(datasetId);
+
+            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             deleteRuleFolderIfExists(validationResolver, ruleVO);
@@ -170,6 +173,17 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             LOG.error("Error creating validation folder for ruleId {}, datasetId {} and taskId {},{}", ruleId, datasetId, taskId, e.getMessage());
             throw new DremioValidationException(e.getMessage());
         }
+    }
+
+    private String getPath(Long datasetId) {
+        DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+        String path;
+        if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
+            path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
+        } else {
+            path = S3_TABLE_AS_FOLDER_QUERY_PATH;
+        }
+        return path;
     }
 
     /**
@@ -306,7 +320,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     }
 
     private String getModifiedQuery(S3PathResolver dataTableResolver, String valQuery, String replace) {
-        valQuery = valQuery.replace("from " + s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH) + " where record_id in " + replace, "");
+        valQuery = valQuery.replace("from " + s3Service.getTableAsFolderQueryPath(dataTableResolver, getPath(dataTableResolver.getDatasetId())) + " where record_id in " + replace, "");
         return valQuery;
     }
 
@@ -471,7 +485,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         });
         S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
         //if the dataset to validate is of reference type, then the table path should be changed
-        String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        String originTablePath = s3Service.getTableAsFolderQueryPath(origTableTableResolver, getPath(datasetId));
         S3PathResolver referTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdReferenced, referencedTableSchema.getNameTableSchema());
         String referTablePath = s3Service.getTablePathByDatasetType(dataflowId, datasetIdReferenced, referencedTableSchema.getNameTableSchema(), referTableResolver);
         recordIds =  (List<String>) method.invoke(object, originTablePath, referTablePath, origFieldNames, referFieldNames, integrityVO.getIsDoubleReferenced());  //checkIntegrityConstraint
