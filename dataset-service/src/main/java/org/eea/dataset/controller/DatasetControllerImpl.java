@@ -3161,7 +3161,6 @@ public class DatasetControllerImpl implements DatasetController {
         releasedDatasetDataInfoVO = bigDataDatasetService.getReleasedDatasetDataInfoDL(collectionDatasetMetabaseVO, reportingDatasetMetabaseVO, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
       }
       else{
-        //todo
         releasedDatasetDataInfoVO = datasetService.getReleasedDatasetDataInfo(collectionDatasetId, reportingDatasetId, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
       }
     }
