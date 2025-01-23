@@ -363,7 +363,7 @@ export const Dataflow = () => {
     }
 
     return {
-      apiKeyBtn: isLeadDesigner || isLeadReporterOfCountry,
+      apiKeyBtn: (isLeadDesigner && !(isAdmin && (!isCustodian || !isDataCustodian))) || isLeadReporterOfCountry,
       datasetsInfoBtn: isAdmin || isDataCustodian,
       editBtn: !isBusinessDataflow && (isLeadDesigner || isAdmin),
       editBusinessBtn: isBusinessDataflow && (isLeadDesigner || isAdmin),
@@ -1432,6 +1432,9 @@ export const Dataflow = () => {
               <ManageLeadReporters
                 dataflowId={dataflowId}
                 dataflowType={dataflowState.dataflowType}
+                isAdmin={isAdmin}
+                isCustodian={isCustodian}
+                isDataCustodian={isDataCustodian}
                 leadReportersDeleted={dataflowState.allReportersDeleted}
                 representativesImport={dataflowState.representativesImport}
                 selectedDataProviderGroup={{

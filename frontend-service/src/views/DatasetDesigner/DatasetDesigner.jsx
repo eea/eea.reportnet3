@@ -220,6 +220,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     webformOptionsLoadingStatus
   } = designerState;
 
+  const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+  const isCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+  const isDataflowCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN.key
+  ]);
   const exportMenuRef = useRef();
   const importMenuRef = useRef();
 
@@ -253,12 +258,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   }, []);
 
   useEffect(() => {
-    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
-    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
-
     leftSideBarContext.removeModels();
 
-    if (isAdmin || isDataCustodian) {
+    if (isAdmin || isCustodian) {
       leftSideBarContext.addModels([
         {
           className: 'dataflow-help-datasets-info-step',
@@ -1347,52 +1349,57 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     <div className={styles.qcDialogFooterWrapper}>
       {renderQCsHistoryButton()}
       {renderQCsHistoryButtonTooltip()}
-
+      {!(isAdmin && (!isCustodian || !isDataflowCustodian)) && (
+        <>
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            disabled={designerState.isDownloadingQCRules}
+            icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
+            label={resourcesContext.messages['downloadQCsButtonLabel']}
+            onClick={() => onDownloadQCRules()}
+          />
+          <Button
+            className="p-button-animated-blink"
+            icon="plus"
+            label={resourcesContext.messages['createFieldValidationBtn']}
+            onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
+          />
+          <Button
+            className="p-button-animated-blink"
+            icon="plus"
+            label={resourcesContext.messages['createRowValidationBtn']}
+            onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
+          />
+          <Button
+            className="p-button-animated-blink"
+            icon="plus"
+            label={resourcesContext.messages['createTableValidationBtn']}
+            onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
+          />
+          <Button
+            className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
+            disabled={allSqlValidationRunning}
+            icon={allSqlValidationRunning ? 'spinnerAnimate' : 'check'}
+            label={resourcesContext.messages['validateAllSqlRulesBtn']}
+            onClick={validateAllQcRules}
+            tooltip={resourcesContext.messages['validateAllRulesBtnTootip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+          <Button
+            className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
+            disabled={sqlValidationRunning}
+            icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
+            label={resourcesContext.messages['validateSqlRulesBtn']}
+            onClick={validateQcRules}
+            tooltip={resourcesContext.messages['validateRulesBtnTootip']}
+            tooltipOptions={{ position: 'top' }}
+          />
+        </>
+      )}
       <Button
-        className="p-button-secondary p-button-animated-blink"
-        disabled={designerState.isDownloadingQCRules}
-        icon={designerState.isDownloadingQCRules ? 'spinnerAnimate' : 'export'}
-        label={resourcesContext.messages['downloadQCsButtonLabel']}
-        onClick={() => onDownloadQCRules()}
-      />
-      <Button
-        className="p-button-animated-blink"
-        icon="plus"
-        label={resourcesContext.messages['createFieldValidationBtn']}
-        onClick={() => validationContext.onOpenModalFromOpener('field', 'validationsListDialog')}
-      />
-      <Button
-        className="p-button-animated-blink"
-        icon="plus"
-        label={resourcesContext.messages['createRowValidationBtn']}
-        onClick={() => validationContext.onOpenModalFromOpener('row', 'validationsListDialog')}
-      />
-      <Button
-        className="p-button-animated-blink"
-        icon="plus"
-        label={resourcesContext.messages['createTableValidationBtn']}
-        onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
-      />
-      <Button
-        className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
-        disabled={allSqlValidationRunning}
-        icon={allSqlValidationRunning ? 'spinnerAnimate' : 'check'}
-        label={resourcesContext.messages['validateAllSqlRulesBtn']}
-        onClick={validateAllQcRules}
-        tooltip={resourcesContext.messages['validateAllRulesBtnTootip']}
-        tooltipOptions={{ position: 'top' }}
-      />
-      <Button
-        className={`p-button-secondary p-button-animated-blink p-button-right-aligned`}
-        disabled={sqlValidationRunning}
-        icon={sqlValidationRunning ? 'spinnerAnimate' : 'check'}
-        label={resourcesContext.messages['validateSqlRulesBtn']}
-        onClick={validateQcRules}
-        tooltip={resourcesContext.messages['validateRulesBtnTootip']}
-        tooltipOptions={{ position: 'top' }}
-      />
-      <Button
-        className={`p-button-secondary p-button-animated-blink p-button-right-aligned ${styles.closeButton}`}
+        className={`p-button-secondary p-button-animated-blink p-button-right-aligned ${
+          isAdmin && (!isCustodian || !isDataflowCustodian) ? styles.adminCloseButton : styles.closeButton
+        }`}
         icon="cancel"
         label={resourcesContext.messages['close']}
         onClick={onHideValidationsDialog}
@@ -1618,6 +1625,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             dataset={designerState.metaData.dataset}
             datasetSchemaAllTables={datasetSchemaAllTables}
             datasetSchemaId={designerState.datasetSchemaId}
+            isAdmin={isAdmin}
+            isCustodian={isCustodian}
+            isDataflowCustodian={isDataflowCustodian}
             isDataflowOpen={isDataflowOpen}
             isDatasetDesigner
             setHasQCsHistory={setHasQCsHistory}
@@ -1820,7 +1830,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               {designerState?.bigData && (
                 <Button
                   className={styles.openWebformButton}
-                  disabled={isDataflowOpen || isLoadingIceberg || noEditableCheck}
+                  disabled={
+                    (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
+                    isDataflowOpen ||
+                    isLoadingIceberg ||
+                    noEditableCheck
+                  }
                   helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
                   icon={!isIcebergCreated ? 'lock' : 'unlock'}
                   isLoading={isLoadingIceberg}
@@ -1842,7 +1857,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
                 }`}
                 disabled={
-                  isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || actionsContext.isInProgress
+                  (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
+                  isDataflowOpen ||
+                  isDesignDatasetEditorRead ||
+                  isIcebergCreated ||
+                  actionsContext.isInProgress
                 }
                 icon={
                   actionsContext.isInProgress && actionsContext.importDatasetProcessing ? 'spinnerAnimate' : 'import'
@@ -1887,7 +1906,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                 ref={exportMenuRef}
               />
               <DatasetDeleteDataDialog
-                disabled={isIcebergCreated || actionsContext.isInProgress}
+                disabled={
+                  (isAdmin && (!isCustodian || !isDataflowCustodian)) || isIcebergCreated || actionsContext.isInProgress
+                }
                 icon={
                   actionsContext.isInProgress && actionsContext.deleteDatasetProcessing ? 'spinnerAnimate' : 'trash'
                 }
@@ -2010,6 +2031,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             editable={!isDataflowOpen && !isDesignDatasetEditorRead}
             getIsTableCreated={setIsTableCreated}
             getUpdatedTabs={onUpdateTabs}
+            isAdmin={isAdmin}
+            isCustodian={isCustodian}
+            isDataflowCustodian={isDataflowCustodian}
             isDataflowOpen={isDataflowOpen}
             isDesignDatasetEditorRead={isDesignDatasetEditorRead}
             isGroupedValidationDeleted={dataViewerOptions.isGroupedValidationDeleted}

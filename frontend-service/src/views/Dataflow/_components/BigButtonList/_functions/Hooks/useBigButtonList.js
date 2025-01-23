@@ -45,10 +45,15 @@ const useBigButtonList = ({
   onShowUpdateDataCollectionModal,
   setErrorDialogData
 }) => {
+  const { permissions } = config;
+
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
+
+  const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
+  const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
 
   const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.CUSTODIAN.key,
@@ -81,7 +86,7 @@ const useBigButtonList = ({
       !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
 
     return {
-      createDataCollection: isLeadDesigner && isDesignStatus,
+      createDataCollection: !(isAdmin && !isCustodian) && isLeadDesigner && isDesignStatus,
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
       copyDataCollectionToEUDataset: isLeadDesigner && isDraftStatus,
       exportEUDataset: isLeadDesigner && isDraftStatus,
@@ -102,7 +107,7 @@ const useBigButtonList = ({
       groupByRepresentative: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
       manageReporters: isLeadDesigner || isStewardSupport,
       manualTechnicalAcceptance: (isLeadDesigner || isStewardSupport) && isManualAcceptance,
-      newSchema: isDesigner && isDesignStatus,
+      newSchema: isCustodian && isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
