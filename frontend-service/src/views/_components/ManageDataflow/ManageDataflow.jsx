@@ -39,6 +39,7 @@ export const ManageDataflow = ({
   isDataflowOpen,
   isEditing = false,
   isVisible,
+  isUpdatingUserText,
   manageDialogs,
   manualAcceptance,
   obligation,
@@ -426,7 +427,8 @@ export const ManageDataflow = ({
                    <div className={styles.addUserTextButtonWrapper}>
                      <Button
                        className="p-button-text p-c "
-                       icon="check"
+                       disabled={isUpdatingUserText}
+                       icon={!isUpdatingUserText ? 'check' : 'spinnerAnimate'}
                        label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
                        onClick={() => onUpdateAddUserText(addUserText)}
                       />
