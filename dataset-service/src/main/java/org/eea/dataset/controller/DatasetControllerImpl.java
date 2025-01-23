@@ -3152,6 +3152,9 @@ public class DatasetControllerImpl implements DatasetController {
       Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(collectionDatasetMetabaseVO.getDataflowId());
       DataProviderVO providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(providerCode, dataProviderGroupId);
       Long reportingDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(collectionDatasetMetabaseVO.getDatasetSchema(), providerVO.getId());
+      if(reportingDatasetId == null){
+        throw new Exception("Could not find reporting dataset for dataflowId " + collectionDatasetMetabaseVO.getDataflowId() + " and providerCode " + providerCode);
+      }
       DataSetMetabaseVO reportingDatasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(reportingDatasetId);
 
       if(dataFlowControllerZuul.isBigDataflow(reportingDatasetMetabaseVO.getDataflowId())){

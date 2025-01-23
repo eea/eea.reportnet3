@@ -1282,7 +1282,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String dataProviderCode = "''";
         if(providerId != 0L) {
             DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
-            dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderCode + "'" : dataProviderCode;
+            dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderVO.getCode() + "'" : dataProviderCode;
         }
 
         s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
@@ -1970,7 +1970,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String dremioTableQueryPath;
         if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
             //data collection
-            s3PathResolverCollection.setPath(S3_TABLE_NAME_DC_FOLDER_PATH);
+            s3PathResolverCollection.setPath(S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
             dremioTableQueryPath = S3_TABLE_NAME_DC_QUERY_PATH;
         }
         else{
@@ -1979,7 +1979,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dremioTableQueryPath = S3_TABLE_NAME_EU_QUERY_PATH;
         }
         boolean folderExistCollection = s3HelperPrivate.checkTableNameDCFolderExist(s3PathResolverCollection);
-        if (folderExistCollection && dremioHelperService.checkFolderPromoted(s3PathResolverCollection,s3PathResolverCollection.getTableName())) {
+        if (folderExistCollection && dremioHelperService.checkFolderPromoted(s3PathResolverCollection, s3PathResolverCollection.getTableName())) {
 
 
             String collectionPathDremio = s3ServicePrivate.getTableDCAsFolderQueryPath(s3PathResolverCollection, dremioTableQueryPath);
