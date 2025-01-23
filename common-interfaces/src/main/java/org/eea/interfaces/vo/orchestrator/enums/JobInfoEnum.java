@@ -48,6 +48,7 @@ public enum JobInfoEnum {
     ERROR_DREMIO_ENDPOINT_RESPONSE("Could not retrieve information from Dremio endpoints"),
 
     ERROR_COULD_NOT_UPLOAD_FILE_TO_PUBLIC_S3("Could not upload file to public s3");
+    ERROR_ICEBERG_TABLE_EXISTS("The job failed because there is an iceberg table in the dataset");
 
 
     /** The value. */

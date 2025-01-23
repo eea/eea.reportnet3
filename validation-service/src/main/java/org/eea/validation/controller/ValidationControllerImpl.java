@@ -34,6 +34,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
@@ -232,6 +233,11 @@ public class ValidationControllerImpl implements ValidationController {
           TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                   && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+            if(jobId != null) {
+              jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+              jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            }
+            validationHelper.deleteLockToReleaseProcess(datasetId);
             throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
           }
         }
@@ -248,6 +254,7 @@ public class ValidationControllerImpl implements ValidationController {
       LOG.error("Error validating datasetId {} with jobId {}. Message {}", datasetId, jobId, e.getMessage(), e);
       validationHelper.deleteLockToReleaseProcess(datasetId);
     } catch (Exception e) {
+      validationHelper.deleteLockToReleaseProcess(datasetId);
       LOG.error("Unexpected error! Error validating dataset data for datasetId {} with jobId {}. Message: {}", datasetId, jobId, e.getMessage());
       throw e;
     }
@@ -331,6 +338,8 @@ public class ValidationControllerImpl implements ValidationController {
    * Gets the group failed validations by id dataset.
    *
    * @param datasetId the dataset id
+   * @param dataflowId
+   * @param providerId
    * @param pageNum the page num
    * @param pageSize the page size
    * @param headers the headers
@@ -343,13 +352,17 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @GetMapping(value = "listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN')")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
   @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
       hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
       @ApiParam(value = "Dataset id used in the retrieval process",
           example = "1") @PathVariable("id") Long datasetId,
+      @ApiParam(type = "Long", value = "Dataflow id",
+              example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @ApiParam(type = "Long", value = "Provider id",
+              example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
       @ApiParam(value = "Page number the filtering starts in.", example = "0", defaultValue = "0",
           required = false) @RequestParam(value = "pageNum", defaultValue = "0",
               required = false) Integer pageNum,
@@ -406,13 +419,17 @@ public class ValidationControllerImpl implements ValidationController {
 
   @Override
   @GetMapping(value = "listGroupValidationsDL/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN')")
+  @PreAuthorize("checkAccessSuperUser('DATASET',#datasetId) OR hasAnyRole('ADMIN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT')")
   @ApiOperation(value = "Gets all the failed validations for a given dataset grouped by code",
           hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATASET_INCORRECT_ID)
   public FailedValidationsDatasetVO getGroupFailedValidationsByIdDatasetDL(
           @ApiParam(value = "Dataset id used in the retrieval process",
                   example = "1") @PathVariable("id") Long datasetId,
+          @ApiParam(type = "Long", value = "Dataflow id",
+                  example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+          @ApiParam(type = "Long", value = "Provider id",
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
           @ApiParam(value = "Page number the filtering starts in.", example = "0", defaultValue = "0",
                   required = false) @RequestParam(value = "pageNum", defaultValue = "0",
                   required = false) Integer pageNum,
