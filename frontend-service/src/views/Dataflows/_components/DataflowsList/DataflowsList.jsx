@@ -90,12 +90,12 @@ export const DataflowsList = ({
   return (
     <>
       <Button
-        className="p-button-primary"
-        icon={'list'}
+        className={`"p-button-primary" ${styles.compressedButton}`}
+        icon={isCompressed ? 'list' : 'table'}
         label={isCompressed ? resourcesContext.messages['maximizeList'] : resourcesContext.messages['minimizeList']}
         onClick={() => setIsCompressed(!isCompressed)}
       />
-      <div className={`${styles.wrap} ${className}`}>
+      <div className={`${styles.wrap} ${className} ${isCompressed ? styles.compressedListWrapper : ''}`} >
         {renderContent()}
       </div>
     </>

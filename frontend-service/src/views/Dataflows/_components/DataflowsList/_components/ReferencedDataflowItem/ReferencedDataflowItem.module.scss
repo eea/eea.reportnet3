@@ -246,14 +246,10 @@
 }
 
 .compressedList{
-  height:150px;
-  div[class*='_text_'] p{
-    display:none!important;
+  div[class*='_obligation_'] p{
+    max-width:300px;
   }
-  div[class*='_container_']{
-    height:150px!important;
-  }
-  div[class*='_status_']{
-    justify-content: center;
+  div[class*='_text_'] h3,p{
+    max-width:300px;
   }
 }

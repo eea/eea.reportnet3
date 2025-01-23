@@ -43,3 +43,22 @@
   left: 0 !important;
   top: 0 !important;
 }
+
+.compressedListWrapper{
+  @media screen and (min-width:1300px){
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2rem;
+  }
+  hr[class*=_pinnedSeparator_]{
+    grid-column-start: 1;
+    grid-column-end: -1;
+  }
+}
+
+.compressedButton{
+  display:none;
+  @media screen and (min-width:1300px){
+    display:inline-block;
+  }
+}
