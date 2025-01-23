@@ -21,10 +21,12 @@ import org.eea.exception.EEAException;
 import org.eea.exception.ParquetConversionException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -142,6 +144,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   private CreateEmptyTables createEmptyTables;
+
+  @Autowired
+  public RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Gets the data tables values.
@@ -3133,5 +3138,44 @@ public class DatasetControllerImpl implements DatasetController {
   @PostMapping("/private/createEmptyTables")
   public void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception {
     createEmptyTables.runCreationForOneDataset(datasetMetabaseVO);
+  }
+
+  /**
+   * Get released dataset data info
+   *
+   * @param collectionDatasetId the dataset id
+   * @param providerCode the provider code
+   * @param tableSchemaId the table schema id
+   * @return a ReleasedDatasetDataInfoVO object
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getReleasedDatasetDataInfo")
+  public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode, @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception{
+    ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO;
+    try{
+      DataSetMetabaseVO collectionDatasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(collectionDatasetId);
+      DatasetTypeEnum datasetType = datasetService.getDatasetType(collectionDatasetId);
+      Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(collectionDatasetMetabaseVO.getDataflowId());
+      DataProviderVO providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(providerCode, dataProviderGroupId);
+      Long reportingDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(collectionDatasetMetabaseVO.getDatasetSchema(), providerVO.getId());
+      if(reportingDatasetId == null){
+        throw new Exception("Could not find reporting dataset for dataflowId " + collectionDatasetMetabaseVO.getDataflowId() + " and providerCode " + providerCode);
+      }
+      DataSetMetabaseVO reportingDatasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(reportingDatasetId);
+
+      if(dataFlowControllerZuul.isBigDataflow(reportingDatasetMetabaseVO.getDataflowId())){
+        releasedDatasetDataInfoVO = bigDataDatasetService.getReleasedDatasetDataInfoDL(collectionDatasetMetabaseVO, reportingDatasetMetabaseVO, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+      }
+      else{
+        releasedDatasetDataInfoVO = datasetService.getReleasedDatasetDataInfo(collectionDatasetId, reportingDatasetId, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve release dataset data info for collectionDatasetId {}, provider code {} and tableSchemaId {}", collectionDatasetId, providerCode, tableSchemaId);
+      throw e;
+    }
+    return releasedDatasetDataInfoVO;
   }
 }
