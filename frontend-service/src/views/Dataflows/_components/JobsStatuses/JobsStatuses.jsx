@@ -384,24 +384,24 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   };
 
   const getCancelButton = job => (
-      <ActionsColumn
-          disabledButtons={
-            !(
-                job.jobStatus === 'IN_PROGRESS' &&
-                (job.jobType === 'IMPORT' ||
-                    job.jobType === 'VALIDATION' ||
-                    job.jobType === 'RELEASE' ||
-                    job.jobType === 'FILE_EXPORT') &&
-                getDateDifferenceInMinutes(job.dateStatusChanged) > 9
-            )
-          }
-          onDeleteClick={() => {
-            setIsDeleteDialogVisible(true);
-            setJobStatus(job);
-          }}
-          rowDataId={job.id}
-          tooltip={resourcesContext.messages['cancel']}
-      />
+    <ActionsColumn
+      disabledButtons={
+        !(
+          job.jobStatus === 'IN_PROGRESS' &&
+          (job.jobType === 'IMPORT' ||
+            job.jobType === 'VALIDATION' ||
+            job.jobType === 'RELEASE' ||
+            job.jobType === 'FILE_EXPORT') &&
+          getDateDifferenceInMinutes(job.dateStatusChanged) > 9
+        )
+      }
+      onDeleteClick={() => {
+        setIsDeleteDialogVisible(true);
+        setJobStatus(job);
+      }}
+      rowDataId={job.id}
+      tooltip={resourcesContext.messages['cancel']}
+    />
   );
 
   const getJobStatusTemplate = job => (

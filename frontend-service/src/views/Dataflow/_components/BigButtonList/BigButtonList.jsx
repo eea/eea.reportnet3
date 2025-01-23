@@ -25,6 +25,7 @@ import { ManageManualAcceptanceDataset } from 'views/Dataflow/_components/Manage
 import { ManualAcceptanceDatasets } from 'views/Dataflow/_components/ManualAcceptanceDatasets';
 import { NewDatasetSchemaForm } from 'views/_components/NewDatasetSchemaForm';
 import { TooltipButton } from 'views/_components/TooltipButton';
+import { InputTextarea } from 'views/_components/InputTextarea';
 
 import { ConfirmationReceiptService } from 'services/ConfirmationReceiptService';
 import { DataCollectionService } from 'services/DataCollectionService';
@@ -44,11 +45,13 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
+import {CharacterCounter} from "../../../_components/CharacterCounter";
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+
 
 export const BigButtonList = ({
   dataflowState,
@@ -63,6 +66,7 @@ export const BigButtonList = ({
   onSaveName,
   onShowManageReportersDialog,
   onUpdateData,
+  onUpdateAddUserText,
   setIsCopyDataCollectionToEUDatasetLoading,
   setIsExportEUDatasetLoading,
   setIsReceiptLoading,
@@ -78,6 +82,9 @@ export const BigButtonList = ({
 
   const [errorDialogData, setErrorDialogData] = useState({ isVisible: false, message: '' });
 
+  const [addUserText, setAddUserText] = useState('');
+  const [addInitialUserText, setAddInitialUserText] = useState('');
+  const [addUserTexthappened, setAddUserTexthappened] = useState(false);
   const [cloneDataflow, setCloneDataflow] = useState({});
   const [cloneDialogVisible, setCloneDialogVisible] = useState(false);
   const [dataCollectionDialog, setDataCollectionDialog] = useState(false);
@@ -132,6 +139,14 @@ export const BigButtonList = ({
   const { resetFiltersState: resetCloneSchemasFiltersState } = useFilters('cloneSchemas');
   const { resetFiltersState: resetManualAcceptanceDatasetsFiltersState } = useFilters('manualAcceptanceDatasets');
   const { resetFiltersState: resetHistoricReleasesFiltersState } = useFilters('historicReleases');
+
+  const onKeyChange = event => {
+    if (event.key === 'Escape') {
+      setAddUserText(addInitialUserText);
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+    }
+  };
 
   const changeIsActiveButtonState = buttonState => {
     setIsActiveButton(buttonState);
@@ -596,6 +611,7 @@ export const BigButtonList = ({
           inputId={`technicalAcceptance${value}`}
           onChange={event => onChangeRadioButton(event.target.value)}
           value={value}
+          {...(value === 'No' && (addUserText !== '' || addUserTexthappened) ? { disabled: true } : null)}
         />
         <label className={styles.label} htmlFor={`technicalAcceptance${value}`}>
           {value}
@@ -842,6 +858,7 @@ export const BigButtonList = ({
       {isConfirmCollectionDialog && (
         <ConfirmDialog
           disabledConfirm={isNil(isManualTechnicalAcceptance)}
+          disabledCancel={addUserText !== '' || addUserTexthappened}
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
@@ -857,6 +874,43 @@ export const BigButtonList = ({
             <label>{resourcesContext.messages['manualTechnicalAcceptanceTitle']}</label>
             {renderRadioButtonsCreateDC()}
           </div>
+          {isManualTechnicalAcceptance &&
+            <>
+              <h4 className={styles.addUserTextLabel}>{resourcesContext.messages['addUserTextToReceipt']}</h4>
+              <InputTextarea
+                className={`addUserTextArea`}
+                collapsedHeight={75}
+                hasMaxCharCounter={true}
+                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
+                id="createUserTextToReceipt"
+                key="createUserTextToReceipt"
+                onBlur={e => setAddUserText(e.target.value)}
+                onChange={e => setAddUserText(e.target.value)}
+                onFocus={e => {
+                  setAddInitialUserText(e.target.value);
+                }}
+                onKeyDown={e => onKeyChange(e)}
+                placeholder={resourcesContext.messages['addUserTextToReceiptNew']}
+                value={addUserText}
+              />
+              <CharacterCounter
+                currentLength={addUserText.length}
+                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
+                style={{ position: 'relative', right: '0px', top: '5px' }}
+              />
+              <div className={styles.addUserTextButtonWrapper}>
+              <Button
+                className="p-button-text p-c "
+                icon="check"
+                label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
+                onClick={() => {
+                  onUpdateAddUserText(addUserText);
+                  setAddUserTexthappened(true);
+                }}
+              />
+              </div>
+            </>
+          }
         </ConfirmDialog>
       )}
 

@@ -681,6 +681,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES.equals(importFileInDremioInfo.getErrorMessage())){
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FAILED_READ_ONLY_TABLES, null);
                 eventType = EventType.IMPORT_READ_ONLY_TABLES_ERROR_EVENT;
+            } else if(EEAErrorMessage.DREMIO_ENDPOINT_ERROR_RESPONSE.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_DREMIO_ENDPOINT_RESPONSE, null);
+                eventType = EventType.DREMIO_ENDPOINT_ERROR_RESPONSE;
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -1285,54 +1288,61 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaName)) {
             //table does not exist, so we need to create it first
             StringBuilder createIcebergTable = new StringBuilder("CREATE TABLE IF NOT EXISTS " + icebergTablePath + " (");
-            createIcebergTable.append(PARQUET_RECORD_ID_COLUMN_HEADER + " VARCHAR , " + PARQUET_PROVIDER_CODE_COLUMN_HEADER + " VARCHAR ");
+            createIcebergTable.append("\"" + PARQUET_RECORD_ID_COLUMN_HEADER + "\" VARCHAR, \"" + PARQUET_PROVIDER_CODE_COLUMN_HEADER + "\" VARCHAR");
 
-            for(int i=0; i< records.get(0).getFields().size(); i++){
+            for (int i = 0; i < records.get(0).getFields().size(); i++) {
                 FieldVO field = records.get(0).getFields().get(i);
+                createIcebergTable.append(", \"").append(field.getName()).append("\" ");
+
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
-                    createIcebergTable.append(", ").append(field.getName()).append(" VARBINARY ");
+                    createIcebergTable.append("VARBINARY");
                 } else {
-                    createIcebergTable.append(", ").append(field.getName()).append(" VARCHAR ");
+                    createIcebergTable.append("VARCHAR");
                 }
             }
+
             createIcebergTable.append(" )");
 
             String createIcebergTableProcessId = dremioHelperService.executeSqlStatement(createIcebergTable.toString());
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(createIcebergTable.toString(), createIcebergTableProcessId, null);
         }
 
-        for (RecordVO record: records){
-            //create update query for the record
+        for (RecordVO record : records) {
             StringBuilder insertQueryBuilder = new StringBuilder().append("INSERT INTO ").append(icebergTablePath).append(" (");
-            insertQueryBuilder.append(PARQUET_RECORD_ID_COLUMN_HEADER + ", " + PARQUET_PROVIDER_CODE_COLUMN_HEADER);
-            String recordId = UUID.randomUUID().toString();
+            insertQueryBuilder.append("\"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\", \"").append(PARQUET_PROVIDER_CODE_COLUMN_HEADER).append("\"");
 
+            String recordId = UUID.randomUUID().toString();
             StringBuilder insertQueryValuesBuilder = new StringBuilder().append(") VALUES ('").append(recordId).append("', ").append(dataProviderCode);
-            for (int i=0; i< record.getFields().size(); i++) {
+
+            for (int i = 0; i < record.getFields().size(); i++) {
                 FieldVO field = record.getFields().get(i);
-                insertQueryBuilder.append(", ").append(field.getName()).append(" ");
+                // Wrap the field name in double quotes
+                insertQueryBuilder.append(", \"").append(field.getName()).append("\"");
+
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
                     String fieldValue = (field.getValue() != null) ? field.getValue() : "";
                     String refactoredValue = spatialDataHandling.refactorQuery(fieldValue, i);
-                    insertQueryValuesBuilder.append(", ").append(refactoredValue).append(" ");
+                    insertQueryValuesBuilder.append(", ").append(refactoredValue);
                 } else {
                     String fieldValue = "";
                     if (field.getValue() != null) {
-                        fieldValue = field.getValue().replace("'","''");
+                        fieldValue = field.getValue().replace("'", "''");
                         if (fieldValue.matches(".*[^\u0000-\u007F].*")) {
                             fieldValue = "ENCODE('" + fieldValue + "', 'UTF-8')";
                             insertQueryValuesBuilder.append(", ").append(fieldValue);
                         } else {
-                            //fieldValue = field.getValue();
-                            insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
+                            insertQueryValuesBuilder.append(", '").append(fieldValue).append("'");
                         }
                     } else {
-                        insertQueryValuesBuilder.append(", '").append(fieldValue).append("' ");
+                        insertQueryValuesBuilder.append(", '").append(fieldValue).append("'");
                     }
                 }
             }
+
             insertQueryValuesBuilder.append(" )");
             String finalInsertQuery = insertQueryBuilder + insertQueryValuesBuilder.toString();
+
+            // Execute the query
             String processId = dremioHelperService.executeSqlStatement(finalInsertQuery);
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(finalInsertQuery, processId, 2000L);
         }
@@ -1347,51 +1357,79 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        for (RecordVO record: records){
-            //create update query for the record
+        for (RecordVO record : records) {
+            // Create update query for the record
             StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
-            for(int i=0; i< record.getFields().size(); i++){
+            for (int i = 0; i < record.getFields().size(); i++) {
                 FieldVO field = record.getFields().get(i);
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType()) && !field.getType().equals(DataType.POINT)) {
                     continue;
                 }
+
+                // Wrap field name in double quotes
+                String fieldName = "\"" + field.getName() + "\"";
                 String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
-                updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
-                updateQueryBuilder.append((i != record.getFields().size() -1) ? ", " : " ");
+                updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
+
+                if (i != record.getFields().size() - 1) {
+                    updateQueryBuilder.append(", ");
+                }
             }
+
+            // Remove trailing comma, if any
             if (updateQueryBuilder.length() >= 2 && updateQueryBuilder.substring(updateQueryBuilder.length() - 2).equals(", ")) {
                 updateQueryBuilder.delete(updateQueryBuilder.length() - 2, updateQueryBuilder.length());
             }
-            updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(record.getId()).append("'");
+
+            // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
+            updateQueryBuilder.append(" WHERE \"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\" = '").append(record.getId()).append("'");
+
             if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
                 updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
             }
+
+            // Execute the query
             String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
             dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
         }
+
         //todo handle updateCascadePK
     }
 
     @Override
-    public void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception{
+    public void updateField(Long dataflowId, Long providerId, Long datasetId, FieldVO field, String recordId, TableSchemaVO tableSchemaVO, boolean updateCascadePK) throws Exception {
         providerId = providerId != null ? providerId : 0L;
-        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(
+            dataflowId,
+            providerId,
+            datasetId,
+            tableSchemaVO.getNameTableSchema(),
+            tableSchemaVO.getNameTableSchema(),
+            S3_TABLE_AS_FOLDER_QUERY_PATH
+        );
         s3IcebergTablePathResolver.setIsIcebergTable(true);
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        //create update query for the record
+        // Create update query for the record
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
+
+        // Wrap field name in double quotes
+        String fieldName = "\"" + field.getName() + "\"";
         String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
-        updateQueryBuilder.append(field.getName()).append(" = '").append(fieldValue).append("'");
-        updateQueryBuilder.append(" WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '").append(recordId).append("'");
+        updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
+
+        // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
+        updateQueryBuilder.append(" WHERE \"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\" = '").append(recordId).append("'");
+
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
             updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
         }
+
         String processId = dremioHelperService.executeSqlStatement(updateQueryBuilder.toString());
         dremioHelperService.checkIfDremioProcessFinishedSuccessfully(updateQueryBuilder.toString(), processId, 2000L);
 
-        //todo handle updateCascadePK
+        // TODO: Handle updateCascadePK
     }
 
     @Override
@@ -1533,27 +1571,40 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 List<FieldSchemaVO> fieldSchemas = tableSchemaVO.getRecordSchema().getFieldSchema();
                 String tableHeaders = constructRecordIdCreationForQuery();
-                tableHeaders += ", " + providerCode + " AS " + PARQUET_PROVIDER_CODE_COLUMN_HEADER + ", ";
-                for (FieldSchemaVO fieldSchema: fieldSchemas){
-                    if(fieldSchema.getType().equals(DataType.ATTACHMENT)){
-                        //remove attachment file name
+                tableHeaders += ", " + providerCode + " AS \"" + PARQUET_PROVIDER_CODE_COLUMN_HEADER + "\", ";
+
+                for (FieldSchemaVO fieldSchema : fieldSchemas) {
+                    if (fieldSchema.getType().equals(DataType.ATTACHMENT)) {
+                        // Remove attachment file name
                         tableHeaders += " '' AS ";
                     }
-                    tableHeaders +=  " " + fieldSchema.getName() + " ,";
-                }
-                if(tableHeaders.endsWith(",")){
-                    tableHeaders = tableHeaders.substring(0, tableHeaders.length()-1);
+                    // Wrap field names in double quotes
+                    tableHeaders += "\"" + fieldSchema.getName() + "\", ";
                 }
 
-                //remove previous data if they exist
-                S3PathResolver s3TablePathResolver = new S3PathResolver(designDataSetMetabaseVO.getDataflowId(), providerId, datasetIdForCreation, tableSchemaName, tableSchemaName, S3_TABLE_AS_FOLDER_QUERY_PATH);
+                // Remove the trailing comma, if any
+                if (tableHeaders.endsWith(", ")) {
+                    tableHeaders = tableHeaders.substring(0, tableHeaders.length() - 2);
+                }
+
+                // Remove previous data if it exists
+                S3PathResolver s3TablePathResolver = new S3PathResolver(
+                    designDataSetMetabaseVO.getDataflowId(),
+                    providerId,
+                    datasetIdForCreation,
+                    tableSchemaName,
+                    tableSchemaName,
+                    S3_TABLE_AS_FOLDER_QUERY_PATH
+                );
+
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
-                    //remove old parquet table because it will be recreated
+                    // Remove old Parquet table because it will be recreated
                     dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
                     s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
                 }
 
-                if (!s3HelperPrivate.checkFolderExist(s3DesignTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3DesignTablePathResolver, tableSchemaName)) {
+                if (!s3HelperPrivate.checkFolderExist(s3DesignTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) ||
+                    !dremioHelperService.checkFolderPromoted(s3DesignTablePathResolver, tableSchemaName)) {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(
                         EventType.PREFILLED_TABLE_HAS_NO_DATA_ERROR,
                         null,
@@ -1561,14 +1612,17 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                             .user(SecurityContextHolder.getContext().getAuthentication().getName())
                             .dataflowId(designDataSetMetabaseVO.getDataflowId())
                             .datasetId(designDatasetId)
-                            .tableSchemaId(tableSchemaId).build()
+                            .tableSchemaId(tableSchemaId)
+                            .build()
                     );
 
                     String exceptionMsg = "Table marked as prefilled has no data";
                     throw new Exception(exceptionMsg);
                 }
 
-                String queryToCreatePrefilledTable = "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
+                // Construct the query to create the prefilled table
+                String queryToCreatePrefilledTable =
+                    "CREATE TABLE " + dremioNewTableQueryPath + " AS SELECT " + tableHeaders + " FROM " + dremioDesignTableQueryPath;
 
                 String processId = dremioHelperService.executeSqlStatement(queryToCreatePrefilledTable);
                 dremioHelperService.checkIfDremioProcessFinishedSuccessfully(queryToCreatePrefilledTable, processId, null);

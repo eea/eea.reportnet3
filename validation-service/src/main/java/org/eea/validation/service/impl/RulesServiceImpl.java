@@ -18,6 +18,7 @@ import org.eea.interfaces.controller.dataset.DatasetController.DataSetController
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
@@ -27,7 +28,6 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
-import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -38,6 +38,9 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -82,8 +85,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.*;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -185,6 +186,9 @@ public class RulesServiceImpl implements RulesService {
   private DatasetRepository datasetRepository;
 
   @Autowired
+  private ProcessControllerZuul processControllerZuul;
+
+  @Autowired
   @Qualifier("dremioJdbcTemplate")
   private JdbcTemplate dremioJdbcTemplate;
 
@@ -273,6 +277,8 @@ public class RulesServiceImpl implements RulesService {
   private static final String TYPE_DATA = "typeData";
 
   private static final String KEYWORDS = "DELETE,INSERT,DROP";
+
+  private static final int defaultProcessPriority = 20;
 
   @Override
   public void validateAllRules(Long datasetId, boolean checkNoSQL, String user) {
@@ -1709,19 +1715,25 @@ public class RulesServiceImpl implements RulesService {
    * Export data validation CSV file.
    *
    * @param datasetId the dataset id
+   * @param folderName the folder name
+   * @param fileNameWithExtension the filename
+   * @param processUUID the process id
    * @throws EEAException the EEA exception
    * @throws IOException Signals that an I/O exception has occurred.
    */
   @Async
   @Override
-  public void exportQCCSV(Long datasetId) throws EEAException, IOException {
+  public void exportQCCSV(Long datasetId, String folderName, String fileNameWithExtension, String processUUID) throws Exception {
+
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseController.findDatasetMetabaseById(datasetId);
+    Boolean processUpdated = processControllerZuul.updateProcess(datasetId, dataSetMetabaseVO.getDataflowId(), ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.EXPORT_QC, processUUID,
+            SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+    if(!processUpdated){
+      throw new Exception("Could not update exportQCs process to status IN_PROGRESS for processId=" + processUUID + " and datasetId "+ datasetId);
+    }
+
     DatasetTypeEnum datasetType = dataSetControllerZuul.getDatasetType(datasetId);
 
-    // Sets the validation file name and it's root directory
-    String folderName = "dataset-" + datasetId + "-QCS";
-    String composedFileName = folderName + "-"
-            + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH.mm.ss"));
-    String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
     File fileFolder = new File(pathPublicFile, folderName);
 
     String creatingFileError =
@@ -1757,9 +1769,13 @@ public class RulesServiceImpl implements RulesService {
     catch (IOException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
               notificationVO);
-      LOG
-              .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
+      LOG.error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
                       datasetId, e.getMessage(), e));
+      processUpdated = processControllerZuul.updateProcess(datasetId, dataSetMetabaseVO.getDataflowId(), ProcessStatusEnum.CANCELED, ProcessTypeEnum.EXPORT_QC, processUUID,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+      if(!processUpdated){
+        throw new Exception("Could not update exportQCs process to status CANCELED for processId=" + processUUID + " and datasetId "+ datasetId);
+      }
       return;
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportQCCSV csvWriter.writeNext or fillQCExportData for datasetId {}. Message: {}", datasetId, e.getMessage());
@@ -1776,16 +1792,29 @@ public class RulesServiceImpl implements RulesService {
     // event completed
     try (OutputStream out = new FileOutputStream(fileWrite.toString())) {
       out.write(file);
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_COMPLETED_EVENT, null,
-              notificationVO);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_COMPLETED_EVENT, null,notificationVO);
+      processUpdated = processControllerZuul.updateProcess(datasetId, dataSetMetabaseVO.getDataflowId(), ProcessStatusEnum.FINISHED, ProcessTypeEnum.EXPORT_QC, processUUID,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+      if(!processUpdated){
+        throw new Exception("Could not update exportQCs process to status FINISHED for processId=" + processUUID + " and datasetId "+ datasetId);
+      }
     } catch (FileNotFoundException e) {
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_QC_FAILED_EVENT, null,
               notificationVO);
-      LOG
-              .error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
+      LOG.error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
                       datasetId, e.getMessage(), e));
+      processUpdated = processControllerZuul.updateProcess(datasetId, dataSetMetabaseVO.getDataflowId(), ProcessStatusEnum.CANCELED, ProcessTypeEnum.EXPORT_QC, processUUID,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+      if(!processUpdated){
+        throw new Exception("Could not update exportQCs process to status CANCELED for processId=" + processUUID + " and datasetId "+ datasetId);
+      }
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in exportQCCSV when releasing notification (EXPORT_QC_COMPLETED_EVENT) for datasetId {}. Message: {}", datasetId, e.getMessage());
+      processUpdated = processControllerZuul.updateProcess(datasetId, dataSetMetabaseVO.getDataflowId(), ProcessStatusEnum.CANCELED, ProcessTypeEnum.EXPORT_QC, processUUID,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+      if(!processUpdated){
+        throw new Exception("Could not update exportQCs process to status CANCELED for processId=" + processUUID + " and datasetId "+ datasetId);
+      }
       throw e;
     }
   }

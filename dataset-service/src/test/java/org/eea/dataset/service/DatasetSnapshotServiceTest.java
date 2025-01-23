@@ -64,6 +64,7 @@ import org.eea.interfaces.vo.dataflow.LeadReporterVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReleaseReceiptVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
@@ -113,6 +114,10 @@ public class DatasetSnapshotServiceTest {
   /** The lock service. */
   @Mock
   private LockService lockService;
+
+  /** The release receipt service. */
+  @Mock
+  private ReleaseReceiptService releaseReceiptService;
 
   /** The snapshot repository. */
   @Mock
@@ -793,7 +798,7 @@ public class DatasetSnapshotServiceTest {
    * Creates the recepit PDF.
    */
   @Test
-  public void createRecepitPDFTest() {
+  public void createRecepitPDFTest() throws EEAException {
     Mockito.mock(Authentication.class);
     SecurityContext securityContext = Mockito.mock(SecurityContext.class);
     SecurityContextHolder.setContext(securityContext);
@@ -814,6 +819,8 @@ public class DatasetSnapshotServiceTest {
     representative.setLeadReporters(leadReportersVO);
     representative.setReceiptDownloaded(true);
     representative.setReceiptOutdated(true);
+    // Mock ReleaseReceiptVO
+    ReleaseReceiptVO releaseReceiptVO = new ReleaseReceiptVO(1L, "Test Note", 1L);
     datasets.add(dataset);
     representatives.add(representative);
     obligationVO.setObligationId(1);
@@ -823,6 +830,8 @@ public class DatasetSnapshotServiceTest {
     dataflowVO.setObligation(obligationVO);
     Mockito.when(dataflowControllerZuul.findById(Mockito.any(), Mockito.any()))
         .thenReturn(dataflowVO);
+
+    Mockito.when(releaseReceiptService.getReleaseReceiptByDataflowId(Mockito.any())).thenReturn(releaseReceiptVO);
     Mockito.when(representativeControllerZuul.findRepresentativesByIdDataFlow(Mockito.any()))
         .thenReturn(representatives);
     Mockito.when(userManagementControllerZull.getUserByUserId()).thenReturn(userRepresentationVO);

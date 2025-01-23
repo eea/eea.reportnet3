@@ -766,6 +766,9 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS. */
   public static final String ERROR_IMPORT_FAILED_READ_ONLY_TABLES = "Import failed because the tables are read only";
 
+  /** The Constant ERROR_DREMIO_ENDPOINT_RESPONSE. */
+  public static final String DREMIO_ENDPOINT_ERROR_RESPONSE = "Could not retrieve information from Dremio endpoints";
+
   /** The Constant DATAFLOW_ERROR. {@value}. */
   public static final String DATAFLOW_GET_ERROR = "Error getting the dataflows";
 
@@ -803,6 +806,16 @@ public final class EEAErrorMessage {
   /** The Constant REVERSE_SOFT_DELETE_DATAFLOW_FAILED */
   public static final String REVERSE_SOFT_DELETE_DATAFLOW_FAILED = "Reverse soft delete failed";
 
+  /** The Constant RELEASE_RECEIPT_NOTFOUND: {@value}. */
+  public static final String RELEASE_RECEIPT_NOTFOUND = "Release Receipt not found";
+
+  /** The Constant CREATING_RELEASE_RECEIPT: {@value}. */
+  public static final String CREATING_RELEASE_RECEIPT =
+          "An unknown error happened while creating a release receipt.";
+
+  /** The Constant UPDATING_RELEASE_RECEIPT: {@value}. */
+  public static final String UPDATING_RELEASE_RECEIPT =
+          "An unknown error happened while updating a release receipt.";
 
 
   /**

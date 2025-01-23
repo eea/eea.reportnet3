@@ -17,6 +17,7 @@ export const Dialog = ({
   children,
   className,
   closeOnEscape = false,
+  disabledCancel = false,
   contentStyle,
   dialogType,
   focusOnShow = true,
@@ -101,6 +102,7 @@ export const Dialog = ({
         focusOnShow={focusOnShow}
         footer={footer}
         header={header}
+        closable={!disabledCancel}
         id={id}
         maximizable={false}
         onHide={onHide}

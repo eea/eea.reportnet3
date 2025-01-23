@@ -141,6 +141,10 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
           }
 
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
+            // Wrap field name with "" to avoid SQL failing due to reserved keywords or special characters
+            if (fieldName != null && !fieldName.isBlank()) {
+                fieldName = "\"" + fieldName.trim() + "\"";
+            }
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
             query.append("select record_id,").append(fieldName != null ? fieldName : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
@@ -382,6 +386,8 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
      */
     private boolean isRecordValid(List<String> parameters, String fieldName, SqlRowSet rs, Method method, Object object) throws IllegalAccessException, InvocationTargetException {
         boolean isValid = false;
+        //remove "" "" added to field name for safe sql expressions
+        fieldName = fieldName.replace("\"", "");
         if (object instanceof GeoJsonValidationUtils || object instanceof GeometryValidationUtils) {
             if (object instanceof GeoJsonValidationUtils) {
                 try {

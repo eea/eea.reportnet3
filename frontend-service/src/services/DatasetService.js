@@ -460,13 +460,18 @@ export const DatasetService = {
     return dataset;
   },
 
+  handleStuckImportJob: async (jobId, error) => await DatasetRepository.handleStuckImportJob(jobId, error),
+
   updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
     await DatasetRepository.updateFieldOrder(datasetId, position, fieldSchemaId),
 
   updateTableOrder: async (datasetId, position, tableSchemaId) =>
     await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
 
-  getSchema: async (dataflowId, datasetId) => {
+  getAddUserText: async (dataflowId) =>
+    await DatasetRepository.getAddUserText(dataflowId),
+
+    getSchema: async (dataflowId, datasetId) => {
     const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
     const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);
 
@@ -841,6 +846,9 @@ export const DatasetService = {
 
   updateDatasetDesign: async (datasetId, datasetSchema) =>
     await DatasetRepository.updateDatasetDesign(datasetId, datasetSchema),
+
+  updateAddUserText: async (dataflowId, note) =>
+    await DatasetRepository.updateAddUserText({ dataflowId, note }),
 
   updateDatasetNameDesign: async (datasetId, datasetSchemaName) =>
     await DatasetRepository.updateDatasetNameDesign(datasetId, datasetSchemaName),

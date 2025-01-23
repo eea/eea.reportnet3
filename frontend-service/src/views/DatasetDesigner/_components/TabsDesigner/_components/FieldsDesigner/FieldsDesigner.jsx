@@ -517,6 +517,7 @@ export const FieldsDesigner = ({
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
           isDataflowOpen={isDataflowOpen}
+          isDesignDataset={true}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
           isExportable={true}
           isGroupedValidationDeleted={isGroupedValidationDeleted}
