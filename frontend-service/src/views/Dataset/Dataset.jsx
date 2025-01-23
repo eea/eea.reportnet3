@@ -156,6 +156,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
 
+  const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+  const isCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+  const isDataflowCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+    config.permissions.roles.CUSTODIAN.key
+  ]);
+
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
   let bigDataRef = useRef();
@@ -181,12 +187,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }, []);
 
   useEffect(() => {
-    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
-    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
-
     leftSideBarContext.removeModels();
 
-    if (isAdmin || isDataCustodian) {
+    if (isAdmin || isCustodian) {
       leftSideBarContext.addModels([
         {
           className: 'dataflow-help-datasets-info-step',
@@ -219,9 +222,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   }, [tableSchema]);
 
   useEffect(() => {
-    const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
-    const isDataCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
-
     if (isNil(dataset)) {
       return;
     }
@@ -255,7 +255,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         );
         setHasWritePermissions(isCustodianInReferenceDataset && isDatasetUpdatable);
 
-        if ((isAdmin || isDataCustodian) && isCustodianInReferenceDataset) {
+        if ((isAdmin || isCustodian) && isCustodianInReferenceDataset) {
           leftSideBarContext.addModels([
             {
               className: 'dataflow-help-datasets-info-step',
@@ -1525,7 +1525,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             {metadata?.dataflow.bigData && (
               <Button
                 className={styles.openWebformButton}
-                disabled={!hasWritePermissions || isLoadingIceberg || noEditableCheck}
+                disabled={
+                  (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
+                  !hasWritePermissions ||
+                  isLoadingIceberg ||
+                  noEditableCheck
+                }
                 helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
                 icon={!isIcebergCreated ? 'lock' : 'unlock'}
                 isLoading={isLoadingIceberg}
