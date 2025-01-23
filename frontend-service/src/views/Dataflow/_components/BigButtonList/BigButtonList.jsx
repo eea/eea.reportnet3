@@ -51,6 +51,7 @@ import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integration
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import isEmpty from "lodash/isEmpty";
 
 
 export const BigButtonList = ({
@@ -60,6 +61,7 @@ export const BigButtonList = ({
   handleRedirect,
   isLeadReporter,
   isLeadReporterOfCountry,
+  isUpdatingUserText,
   manageDialogs,
   onCleanUpReceipt,
   onOpenReleaseConfirmDialog,
@@ -876,7 +878,7 @@ export const BigButtonList = ({
           </div>
           {isManualTechnicalAcceptance &&
             <>
-              <h4 className={styles.addUserTextLabel}>{resourcesContext.messages['addUserTextToReceipt']}</h4>
+              <h4 className={styles.addUserTextLabel}>{resourcesContext.messages['addUserTextToReceipt']}<span className={styles.addUserTextLabelHelp}>{resourcesContext.messages['addUserTextToReceiptHelp']}</span></h4>
               <InputTextarea
                 className={`addUserTextArea`}
                 collapsedHeight={75}
@@ -901,8 +903,9 @@ export const BigButtonList = ({
               <div className={styles.addUserTextButtonWrapper}>
               <Button
                 className="p-button-text p-c "
-                icon="check"
                 label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
+                disabled={isUpdatingUserText}
+                icon={!isUpdatingUserText ? 'check' : 'spinnerAnimate'}
                 onClick={() => {
                   onUpdateAddUserText(addUserText);
                   setAddUserTexthappened(true);

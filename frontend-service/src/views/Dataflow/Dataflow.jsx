@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef,useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import dayjs from 'dayjs';
@@ -66,6 +66,7 @@ import { Calendar } from 'views/_components/Calendar';
 export const Dataflow = () => {
   const navigate = useNavigate();
   const { dataflowId, representativeId } = useParams();
+  const [isUpdatingUserText, setIsUpdatingUserText] = useState(false);
 
   const exportImportMenuRef = useRef(null);
 
@@ -595,9 +596,12 @@ export const Dataflow = () => {
 
   const onUpdateAddUserText = async note => {
     try {
+      setIsUpdatingUserText(true);
       await DatasetService.updateAddUserText(dataflowState.id, note);
     } catch (error) {
       console.error('DatasetDesigner - onUpdateDescription.', error);
+    } finally {
+      setIsUpdatingUserText(false);
     }
   };
 
@@ -1315,6 +1319,7 @@ export const Dataflow = () => {
           handleRedirect={handleRedirect}
           isLeadReporter={isLeadReporter}
           isLeadReporterOfCountry={isLeadReporterOfCountry}
+          isUpdatingUserText={isUpdatingUserText}
           manageDialogs={manageDialogs}
           onCleanUpReceipt={onCleanUpReceipt}
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
@@ -1807,6 +1812,7 @@ export const Dataflow = () => {
             onLoadReportingDataflow={onLoadReportingDataflow}
             onUpdateSoftDelete={onUpdateSoftDelete}
             onUpdateAddUserText={onUpdateAddUserText}
+            isUpdatingUserText={isUpdatingUserText}
             resetDeliveryDate={resetDeliveryDate}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}
