@@ -1271,7 +1271,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String dataProviderCode = "''";
         if(providerId != 0L) {
             DataProviderVO dataProviderVO = representativeControllerZuul.findDataProviderById(providerId);
-            dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderCode + "'" : dataProviderCode;
+            dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderVO.getCode() + "'" : dataProviderCode;
         }
 
         s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
