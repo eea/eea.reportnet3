@@ -9,12 +9,11 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
-import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
@@ -23,8 +22,8 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
-import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -127,14 +126,6 @@ public class ValidationHelper implements DisposableBean {
   @Value("${validation.recordBatchSize}")
   private int recordBatchSize;
 
-  /** The task released tax. */
-  @Value("${validation.tasks.release.tax}")
-  private int taskReleasedTax;
-
-  /** The initial tax. */
-  @Value("${validation.tasks.initial.tax}")
-  private int initialTax;
-
   /** The max running tasks. */
   @Value("${validation.tasks.parallelism}")
   private int maxRunningTasks;
@@ -185,6 +176,9 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
 
+  @Autowired
+  private DatasetController.DataSetControllerZuul dataSetControllerZuul;
+
   /** The Constant DATASET: {@value}. */
   private static final String DATASET = "dataset_";
 
@@ -193,16 +187,10 @@ public class ValidationHelper implements DisposableBean {
   private TaskMapper taskMapper;
 
   @Autowired
-  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-
-  @Autowired
   private S3Helper s3Helper;
 
   @Autowired
   private DremioHelperService dremioHelperService;
-
-  @Autowired
-  private SpatialDataHandling spatialDataHandling;
 
 
   /**
@@ -367,9 +355,16 @@ public class ValidationHelper implements DisposableBean {
         s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
       }
 
-      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-      createTablesIfNotExist(schema, dataset);
+      List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
+      combinedDatasets.forEach(dataSetMetabaseVO -> {
+        try {
+          dataSetControllerZuul.createEmptyTables(dataSetMetabaseVO);
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
+      });
 
+      DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
       List<Rule> rules = rulesRepository.findRulesEnabled(new ObjectId(dataset.getDatasetSchema()));
       for (Rule rule : rules) {
         TableSchema tableSchema = null;
@@ -415,70 +410,20 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
-  /**
-   * Create the tables on Dremio if not exists
-   *
-   * @param schema The schema object from Mongo
-   * @param dataset The dataset object from Metabase
-   * @throws EEAException exception
-   */
-  private void createTablesIfNotExist(DataSetSchema schema, DataSetMetabaseVO dataset) throws EEAException {
-    for (TableSchema t : schema.getTableSchemas()) {
-      S3PathResolver s3TablePathResolver = new S3PathResolver(
-          dataset.getDataflowId(),
-          dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L,
-          dataset.getId(),
-          t.getNameTableSchema(),
-          t.getNameTableSchema(),
-          S3_TABLE_NAME_FOLDER_PATH
-      );
-
-      try {
-        s3Helper.deleteTableIfEmpty(t.getNameTableSchema(), s3TablePathResolver, dremioHelperService);
-      } catch (Exception e) {
-        throw new EEAException("ValidationHelper. Error while trying to delete parquet table");
-      }
-
-      List<FieldSchema> fieldSchemas = t.getRecordSchema().getFieldSchema();
-
-      FieldSchema recordIdSchema = new FieldSchema();
-      recordIdSchema.setHeaderName("record_id");
-      recordIdSchema.setType(DataType.TEXT);
-
-      FieldSchema providerCodeSchema = new FieldSchema();
-      providerCodeSchema.setHeaderName("data_provider_code");
-      providerCodeSchema.setType(DataType.TEXT);
-
-      fieldSchemas.add(0, providerCodeSchema);
-      fieldSchemas.add(0, recordIdSchema);
-
-      // Map field schemas to column definitions
-      String columnDefinitions = fieldSchemas.stream()
-          .map(field -> {
-            String type = spatialDataHandling.getGeoJsonEnums().contains(field.getType()) ? " VARBINARY " : " VARCHAR ";
-            // Wrap field header names in double quotes to avoid issues with reserved keywords or special characters
-            return "\"" + field.getHeaderName() + "\" " + type;
-          })
-          .collect(Collectors.joining(", "));
-
-      try {
-        String tablePath = s3Helper.getS3Service().getTableAsFolderQueryPath(s3TablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
-
-        // Construct the CREATE TABLE query
-        String query = String.format(
-            "CREATE TABLE IF NOT EXISTS %s (%s)",
-            tablePath,
-            columnDefinitions
-        );
-
-        // Execute the query
-        String id = dremioHelperService.executeSqlStatement(query);
-        dremioHelperService.checkIfDremioProcessFinishedSuccessfully(query, id, null);
-        dremioHelperService.refreshTableMetadataAndPromote(null, tablePath, s3TablePathResolver, t.getNameTableSchema());
-      } catch (Exception e) {
-        throw new EEAException(e.getMessage());
-      }
-    }
+  private List<DataSetMetabaseVO> getCombinedDatasets(DataSetMetabaseVO dataset) {
+    List<DataSetMetabaseVO> allDatasets = datasetMetabaseControllerZuul.getAllDatasetsByDataflowId(dataset.getDataflowId());
+    return allDatasets.stream()
+        .filter(dataSetMetabaseVO ->
+            // Include datasets that match reportingDatasets criteria
+            (dataSetMetabaseVO.getDatasetTypeEnum().equals(dataset.getDatasetTypeEnum())
+                && dataSetMetabaseVO.getDataflowId().equals(dataset.getDataflowId())
+                && (dataSetMetabaseVO.getDataProviderId() == null
+                || dataSetMetabaseVO.getDataProviderId().equals(dataset.getDataProviderId()))
+            )
+                // OR include datasets that match refDatasets criteria
+                || dataSetMetabaseVO.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)
+        )
+        .collect(Collectors.toList());
   }
 
   private boolean isDremioSqlRuleMethod(String whenCondition) {

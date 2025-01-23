@@ -118,6 +118,9 @@ public class S3HelperImpl implements S3Helper {
     @Override
     public void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver, DremioHelperService dremioHelperService) throws Exception {
         String tablePath = getS3Service().getTableAsFolderQueryPath(tablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && !dremioHelperService.checkFolderPromoted(tablePathResolver, tablePathResolver.getTableName())) {
+            dremioHelperService.promoteFolderOrFile(tablePathResolver, tablePathResolver.getTableName());
+        }
         if (checkFolderExist(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH) && dremioHelperService.getRowCount(tablePath) == 0) {
             dremioHelperService.demoteFolderOrFile(tablePathResolver, tableSchemaName);
             deleteFolder(tablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
