@@ -48,8 +48,6 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
   /** The entity access service. */
   private EntityAccessService entityAccessService;
 
-  private EeaSecurityExpressionRootConfiguration eeaSecurityExpressionRootConfiguration;
-
 
 
   /**
@@ -66,7 +64,6 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
 
     this.userManagementControllerZull = userManagementControllerZull;
     this.entityAccessService = entityAccessService;
-    this.eeaSecurityExpressionRootConfiguration = new EeaSecurityExpressionRootConfiguration();
   }
 
   /**

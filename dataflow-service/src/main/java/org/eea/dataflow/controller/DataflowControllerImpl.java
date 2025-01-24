@@ -50,6 +50,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
@@ -108,6 +109,17 @@ public class DataflowControllerImpl implements DataFlowController {
 //  public void init() {
 //    eeaAuthorizationKey = dataflowHelper.getEeaAuthorizationKey();
 //  }
+
+  @Value("${eea.authorization.key}")
+  private String eeaAuthorizationKey;
+
+  public static String staticEeaAuthorizationKey;
+
+  @PostConstruct
+  public void init() {
+    staticEeaAuthorizationKey = eeaAuthorizationKey;
+  }
+
 
 
   /**
@@ -852,12 +864,11 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/internal/country/{countryCode}")
-  @PreAuthorize("checkAuthorizationKeyFromConsul(#key, @dataflowHelper.getEeaAuthorizationKey())")
+  @PreAuthorize("checkAuthorizationKeyFromConsul(#key, T(org.eea.dataflow.controller.DataflowControllerImpl).staticEeaAuthorizationKey)")
   @Cacheable(value = "paginated_dataflows_with_national_coordinators")
   @ApiOperation(value = "Gets all the dataflow that use a specific Country Code with the reporters",
           hidden = false)
   public PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(
-//          @Value("${eea.authorization.key}") String eeaAuthorizationKey,
           @ApiParam(value = "Hash value key",
                   example = "HASH-ABC-123") @RequestParam("key") String key,
           @ApiParam(value = "Country Code",
