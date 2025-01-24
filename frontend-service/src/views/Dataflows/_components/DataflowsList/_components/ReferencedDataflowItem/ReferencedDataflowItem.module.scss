@@ -270,4 +270,10 @@
       max-width: 550px;
     }
   }
+  @media screen and (min-width:2200px) {
+    div[class*='_obligation_'] p ,
+    div[class*='_text_'] h3, p {
+      max-width: 720px;
+    }
+  }
 }
