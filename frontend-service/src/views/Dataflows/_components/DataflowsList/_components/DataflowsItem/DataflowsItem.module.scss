@@ -111,7 +111,7 @@
     }
   }
   &:first-of-type {
-    margin-top: 2rem;
+    //margin-top: 2rem;
   }
   &:last-child {
     margin-bottom: 4rem;
@@ -405,4 +405,14 @@
 .tooltip {
   max-width: 300px;
   word-break: break-all;
+}
+
+
+.compressedList{
+  div[class*='_obligation_'] p{
+    max-width:300px;
+  }
+  div[class*='_text_'] h3,p{
+    max-width:300px;
+  }
 }

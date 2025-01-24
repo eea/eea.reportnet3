@@ -244,3 +244,12 @@
     }
   }
 }
+
+.compressedList{
+  div[class*='_obligation_'] p{
+    max-width:300px;
+  }
+  div[class*='_text_'] h3,p{
+    max-width:300px;
+  }
+}
