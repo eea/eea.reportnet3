@@ -1,4 +1,5 @@
 .container {
+  margin-top:1rem;
   position: relative;
   border: none;
   background-color: var(--c-lilac-100);
@@ -85,7 +86,7 @@
     }
   }
   &:first-of-type {
-    margin-top: 2rem;
+    //margin-top: 2rem;
   }
   &:last-child {
     margin-bottom: 4rem;
