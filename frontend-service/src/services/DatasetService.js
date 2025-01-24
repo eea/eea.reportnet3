@@ -162,10 +162,15 @@ export const DatasetService = {
 
   downloadTableDataDL: async (datasetId, fileName) => await DatasetRepository.downloadTableDataDL(datasetId, fileName),
 
+  getAlignmentBetween: async (dataflowId) =>
+    await DatasetRepository.getAlignmentBetween(dataflowId),
+
   getStatistics: async (datasetId, tableSchemaNames) => {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
 
-    //Sort by schema order
+
+
+      //Sort by schema order
     datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort(
       (a, b) => tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema)
     );

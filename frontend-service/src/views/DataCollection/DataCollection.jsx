@@ -141,6 +141,16 @@ export const DataCollection = () => {
     }
   };
 
+  const getAlignmentBetween = async () => {
+    try {
+      const res = await DatasetService.getAlignmentBetween(dataflowId);
+      console.log(res);
+    } catch (error) {
+      console.error('DataCollection - getWebformList.', error);
+      notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+    }
+  }
+
   const getExtensionsList = () => {
     const internalExtensionsList = config.exportTypes.exportDatasetTypes
       .map(type => {
@@ -366,6 +376,14 @@ export const DataCollection = () => {
         iconSize="3.5rem"
         subtitle={getSubtitle()}
         title={dataCollectionName}
+      />
+      <Button
+        className="p-button-text p-c "
+        label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
+        icon={'check'}
+        onClick={() => {
+          getAlignmentBetween();
+        }}
       />
       <div className={styles.ButtonsBar}>
         <Toolbar>

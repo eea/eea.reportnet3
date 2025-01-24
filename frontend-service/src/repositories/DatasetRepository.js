@@ -243,6 +243,11 @@ export const DatasetRepository = {
   getTableImportedMetadata: async ({ datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DatasetConfig.getTableImportedMetadata, { datasetId }) }),
 
+  getAlignmentBetween: async (dataflowId) =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getAlignmentBetween, { dataflowId }),
+    }),
+
   getPresignedUrl: async ({
     datasetId,
     dataflowId,
