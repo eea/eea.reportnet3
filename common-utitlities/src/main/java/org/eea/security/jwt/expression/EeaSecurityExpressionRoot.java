@@ -1,5 +1,6 @@
 package org.eea.security.jwt.expression;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.eea.interfaces.vo.ums.enums.AccessScopeEnum;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.security.jwt.utils.EntityAccessService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.expression.SecurityExpressionRoot;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionOperations;
@@ -21,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * The type Eea security expression root.
  */
-
+//@Component
 @Slf4j
 public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
     implements MethodSecurityExpressionOperations {
@@ -45,12 +48,13 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
   /** The entity access service. */
   private EntityAccessService entityAccessService;
 
+  private EeaSecurityExpressionRootConfiguration eeaSecurityExpressionRootConfiguration;
+
 
 
   /**
    * Creates a new instance.
    *
-   * @param authentication the {@link Authentication} to use. Cannot be null.
    * @param userManagementControllerZull the user management controller zull
    * @param entityAccessService the entity access service
    */
@@ -58,8 +62,30 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
       UserManagementControllerZull userManagementControllerZull,
       EntityAccessService entityAccessService) {
     super(authentication);
+//    super(SecurityContextHolder.getContext().getAuthentication());
+
     this.userManagementControllerZull = userManagementControllerZull;
     this.entityAccessService = entityAccessService;
+    this.eeaSecurityExpressionRootConfiguration = new EeaSecurityExpressionRootConfiguration();
+  }
+
+  /**
+   * Authorize a user by a hash from consul.
+   *
+   * @param key the given key for authorization
+   *
+   * @return the boolean
+   */
+  public boolean checkAuthorizationKeyFromConsul(String providedKey, String consulKey) {
+    boolean canAccess = false;
+    List<String> authorizationsKeys = new ArrayList<>();
+    authorizationsKeys.add(consulKey);
+
+    if (!authorizationsKeys.isEmpty() && providedKey != null) {
+      canAccess = authorizationsKeys.stream().anyMatch(cK -> cK.equals(providedKey)) && !isApiKey();
+    }
+
+    return canAccess;
   }
 
   /**

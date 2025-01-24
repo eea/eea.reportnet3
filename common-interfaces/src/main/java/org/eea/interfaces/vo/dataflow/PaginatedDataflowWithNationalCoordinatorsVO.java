@@ -9,7 +9,7 @@ import java.util.List;
  * The Class PaginatedDataflowVO.
  */
 @Data
-public class PaginatedDataflowPerCountryVO {
+public class PaginatedDataflowWithNationalCoordinatorsVO {
 
   /** The dataflows. */
   private List<?> dataflows;

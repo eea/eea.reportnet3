@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -29,7 +30,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
-import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowWithNationalCoordinatorsVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -49,6 +50,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -99,6 +101,14 @@ public class DataflowControllerImpl implements DataFlowController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+//  private String eeaAuthorizationKey;
+//
+//  @PostConstruct
+//  public void init() {
+//    eeaAuthorizationKey = dataflowHelper.getEeaAuthorizationKey();
+//  }
+
 
   /**
    * Find by id.
@@ -812,7 +822,6 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/getPublicDataflows")
-
   @ApiOperation(value = "Gets all the public dataflows", hidden = true)
   public PaginatedDataflowVO getPublicDataflows(
           @RequestBody(required = false) Map<String, String> filters,
@@ -843,10 +852,14 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/internal/country/{countryCode}")
-  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+  @PreAuthorize("checkAuthorizationKeyFromConsul(#key, @dataflowHelper.getEeaAuthorizationKey())")
+  @Cacheable(value = "paginated_dataflows_with_national_coordinators")
   @ApiOperation(value = "Gets all the dataflow that use a specific Country Code with the reporters",
           hidden = false)
-  public PaginatedDataflowPerCountryVO getDataflowsByCountry(
+  public PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(
+//          @Value("${eea.authorization.key}") String eeaAuthorizationKey,
+          @ApiParam(value = "Hash value key",
+                  example = "HASH-ABC-123") @RequestParam("key") String key,
           @ApiParam(value = "Country Code",
                   example = "AL") @PathVariable("countryCode") String countryCode,
           @ApiParam(value = "pageNum: page number to show", example = "0",

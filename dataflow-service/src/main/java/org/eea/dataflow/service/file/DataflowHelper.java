@@ -88,6 +88,9 @@ public class DataflowHelper {
   @Value("${exportDataflowSchemaInformationPath}")
   private String pathExportDataflowSchemaInformation;
 
+  @Value("${eea.authorization.key}")
+  private String eeaAuthorizationKey;
+
 
   /**
    * Export schema information.
@@ -545,5 +548,9 @@ public class DataflowHelper {
       result = "No";
     }
     return result;
+  }
+
+  public String getEeaAuthorizationKey() {
+    return eeaAuthorizationKey;
   }
 }

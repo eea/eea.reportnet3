@@ -9,7 +9,7 @@ import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
-import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowWithNationalCoordinatorsVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -216,7 +216,7 @@ public interface DataflowService {
    * @return the public dataflows by country
    * @throws EEAException the EEA exception
    */
-  PaginatedDataflowPerCountryVO getDataflowsByCountry(String countryCode, String header, boolean asc,
+  PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(String countryCode, String header, boolean asc,
                                                       int page, int pageSize, Map<String, String> filters) throws EEAException;
 
   /**

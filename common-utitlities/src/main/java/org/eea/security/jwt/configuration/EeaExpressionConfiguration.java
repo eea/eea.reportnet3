@@ -4,6 +4,7 @@ import org.eea.interfaces.controller.ums.UserManagementController.UserManagement
 import org.eea.security.jwt.expression.EeaMethodSecurityExpressionHandler;
 import org.eea.security.jwt.utils.EntityAccessService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;

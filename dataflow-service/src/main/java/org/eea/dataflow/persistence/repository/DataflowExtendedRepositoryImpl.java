@@ -122,6 +122,107 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "right join data_provider dp on r.data_provider_id = dp.id\r\n"
       + "inner join dataset_aux on d.id = dataset_aux.dataflowid";
 
+  // this implementation is about all dataflows so the changes are:
+  // - removed "public dataflow flag set to true"
+  // - filters some dataflows based on names (having "TEST", "DEMO" etc)
+  // - joins representatives to get their emails
+  private static final String QUERY_JSON_COUNTRY_INTERNAL = "WITH doc AS (\n" +
+          "    SELECT json_array_elements(asjsonconverter) AS docaux FROM CAST(:aux AS json) AS asjsonconverter\n" +
+          "),\n" +
+          "obligationtable AS (\n" +
+          "    SELECT \n" +
+          "        (docaux ->> 'obligationId') AS obligationId,\n" +
+          "        (docaux ->> 'oblTitle') AS obligation,\n" +
+          "        (docaux ->> 'description') AS description,\n" +
+          "        (docaux ->> 'validSince') AS validSince,\n" +
+          "        (docaux ->> 'validTo') AS validTo,\n" +
+          "        (docaux ->> 'comment') AS comment,\n" +
+          "        (docaux ->> 'nextDeadline') AS nextDeadline,\n" +
+          "        CAST((docaux ->> 'legalInstrument') AS json)->>'sourceTitle' AS legal_Instrument,\n" +
+          "        (docaux ->> 'client') AS client,\n" +
+          "        (docaux ->> 'countries') AS countries,\n" +
+          "        (docaux ->> 'issues') AS issues,\n" +
+          "        (docaux ->> 'reportFreq') AS reportFreq,\n" +
+          "        (docaux ->> 'reportFreqDetail') AS reportFreqDetail\n" +
+          "    FROM doc\n" +
+          "),\n" +
+          "table_aux AS (\n" +
+          "    SELECT d.id AS datasetid, d.dataflowid, d.status, dp.code, s.date_released \n" +
+          "    FROM dataset d\n" +
+          "    INNER JOIN reporting_dataset rd ON rd.id = d.id\n" +
+          "    INNER JOIN data_provider dp ON dp.id = d.data_provider_id\n" +
+          "    LEFT JOIN \"snapshot\" s ON d.id = s.reporting_dataset_id\n" +
+          "    WHERE dp.code = :countryCode\n" +
+          "),\n" +
+          "table_aux2 AS (\n" +
+          "    SELECT dataflowid, jsonb_agg(json_build_object('delivery_status', status, 'code', code, 'date_released', date_released)) datasets\n" +
+          "    FROM table_aux \n" +
+          "    GROUP BY dataflowid\n" +
+          "),\n" +
+          "pending_aux AS (\n" +
+          "    SELECT dataflowid, COUNT(status) AS totalpendings FROM table_aux WHERE status = 'PENDING' GROUP BY dataflowid\n" +
+          "),\n" +
+          "released_aux AS (\n" +
+          "    SELECT dataflowid, COUNT(status) AS totalreleased FROM table_aux WHERE status = 'RELEASED' GROUP BY dataflowid\n" +
+          "),\n" +
+          "technically_aux AS (\n" +
+          "    SELECT dataflowid, COUNT(status) AS totaltec FROM table_aux WHERE status = 'TECHNICALLY_ACCEPTED' GROUP BY dataflowid\n" +
+          "),\n" +
+          "correction_aux AS (\n" +
+          "    SELECT dataflowid, COUNT(status) AS totalcorrec FROM table_aux WHERE status = 'CORRECTION_REQUESTED' GROUP BY dataflowid\n" +
+          "),\n" +
+          "final_aux AS (\n" +
+          "    SELECT dataflowid, COUNT(status) AS totalfinal FROM table_aux WHERE status = 'FINAL_FEEDBACK' GROUP BY dataflowid\n" +
+          "),\n" +
+          "total_aux AS (\n" +
+          "    SELECT dataflowid, COUNT(status) AS totaldatasets FROM table_aux GROUP BY dataflowid\n" +
+          "),\n" +
+          "table_aux3 AS (\n" +
+          "    SELECT t2.dataflowid, totaldatasets, COALESCE(totalpendings,0) AS pending, COALESCE(totalreleased,0) AS released, COALESCE(totaltec,0) AS technically,\n" +
+          "           COALESCE(totalcorrec,0) AS correction, COALESCE(totalfinal,0) AS finalfeedback, datasets \n" +
+          "    FROM table_aux2 t2\n" +
+          "    LEFT JOIN total_aux ON t2.dataflowid = total_aux.dataflowid\n" +
+          "    LEFT JOIN pending_aux ON t2.dataflowid = pending_aux.dataflowid\n" +
+          "    LEFT JOIN released_aux ON t2.dataflowid = released_aux.dataflowid\n" +
+          "    LEFT JOIN technically_aux ON t2.dataflowid = technically_aux.dataflowid\n" +
+          "    LEFT JOIN correction_aux ON t2.dataflowid = correction_aux.dataflowid\n" +
+          "    LEFT JOIN final_aux ON t2.dataflowid = final_aux.dataflowid\n" +
+          "),\n" +
+          "dataset_aux AS (\n" +
+          "    SELECT dataflowid, delivery_status, MAX(date_released) AS date_released\n" +
+          "    FROM (\n" +
+          "        SELECT dataflowid,\n" +
+          "            CASE \n" +
+          "                WHEN pending > 0 THEN 'PENDING'\n" +
+          "                WHEN released = totaldatasets THEN 'RELEASED'\n" +
+          "                WHEN technically = totaldatasets THEN 'TECHNICALLY_ACCEPTED'\n" +
+          "                WHEN correction > 0 THEN 'CORRECTION_REQUESTED'\n" +
+          "                WHEN finalfeedback > 0 THEN 'FINAL_FEEDBACK'\n" +
+          "            END AS delivery_status,\n" +
+          "            jsonb_array_elements(datasets) ->> 'date_released' AS date_released\n" +
+          "        FROM table_aux3\n" +
+          "    ) table_aux4\n" +
+          "    GROUP BY dataflowid, delivery_status\n" +
+          "),\n" +
+          "dataflow_filtered AS (\n" +
+          "    SELECT d.* \n" +
+          "    FROM dataflow d\n" +
+          "    WHERE d.name NOT LIKE '%TEST%'\n" +
+          "    AND d.name NOT LIKE '%DELETE%'\n" +
+          "    AND d.name NOT LIKE '%DEMO%'\n" +
+          "    AND d.name NOT LIKE '%CLONE%'\n" +
+          "    AND d.name NOT LIKE '%OBSOLETE%'\n" +
+          "    AND d.name NOT LIKE '%DESIGN%'\n" +
+          "    AND d.name NOT LIKE '%MASTER%'\n" +
+          ")\n" +
+          "SELECT d.*, ot.legal_Instrument, ot.obligation, dataset_aux.delivery_status, dataset_aux.date_released, rl.email\n" +
+          "FROM obligationtable ot \n" +
+          "RIGHT JOIN dataflow_filtered d ON d.obligation_id = CAST(ot.obligationId AS INTEGER)\n" +
+          "LEFT JOIN representative r ON d.id = r.dataflow_id\n" +
+          "RIGHT JOIN data_provider dp ON r.data_provider_id = dp.id\n" +
+          "INNER JOIN dataset_aux ON d.id = dataset_aux.dataflowid\n" +
+          "LEFT JOIN representative_leadreporter rl ON r.id = rl.representative_id;\n";
+
   /** The Constant COUNTRY_CODE. */
   private static final String COUNTRY_CODE_CONDITION = " dp.code = :countryCode ";
 

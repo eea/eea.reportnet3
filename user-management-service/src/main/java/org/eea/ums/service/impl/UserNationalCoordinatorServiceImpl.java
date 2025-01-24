@@ -86,7 +86,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
 
   public List<UserNationalCoordinatorVO> getNationalCoordinators(String countryCode) {
     String nationalCoordinator = "Provider-%-NATIONAL_COORDINATOR";
-    if (countryCode != null) nationalCoordinator.replace("%", countryCode);
+    if (countryCode != null) nationalCoordinator = nationalCoordinator.replace("%", countryCode); // search only for one country code, example: Provider-AT-NATIONAL_COORDINATOR
     GroupInfo[] groupInfo =
         keycloakConnectorService.getGroupsWithSearch(nationalCoordinator);
     List<UserNationalCoordinatorVO> usersNC = new ArrayList<>();
@@ -95,6 +95,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
         List<UserRepresentation> users =
             Arrays.asList(keycloakConnectorService.getUsersByGroupId(groupInfo[i].getId()));
         for (UserRepresentation userRepresentation : users) {
+          if (countryCode != null && countryCode.equals(getCountry(groupInfo[i].getName()))) continue;
           UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
           userNC.setEmail(userRepresentation.getEmail());
           userNC.setCountryCode(getCountry(groupInfo[i].getName()));

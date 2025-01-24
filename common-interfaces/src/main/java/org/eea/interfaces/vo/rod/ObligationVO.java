@@ -58,4 +58,7 @@ public class ObligationVO implements Serializable {
   /** The report freq detail. */
   private String reportFreqDetail;
 
+  /** The link of the obligation. */
+  private String obligationLink;
+
 }
