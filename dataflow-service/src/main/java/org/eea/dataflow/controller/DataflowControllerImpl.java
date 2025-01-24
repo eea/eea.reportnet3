@@ -24,6 +24,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
+import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
@@ -38,11 +39,14 @@ import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
@@ -95,6 +99,12 @@ public class DataflowControllerImpl implements DataFlowController {
   @Autowired
   private LockService lockService;
 
+  @Autowired
+  private UserManagementController.UserManagementControllerZull userManagementControllerZull;
+
+  @Autowired
+  private AdminUserAuthorization adminUserAuthorization;
+
   /** The dataflow helper. */
   @Autowired
   private DataflowHelper dataflowHelper;
@@ -103,15 +113,14 @@ public class DataflowControllerImpl implements DataFlowController {
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
 
-//  private String eeaAuthorizationKey;
-//
-//  @PostConstruct
-//  public void init() {
-//    eeaAuthorizationKey = dataflowHelper.getEeaAuthorizationKey();
-//  }
-
   @Value("${eea.authorization.key}")
   private String eeaAuthorizationKey;
+
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
 
   public static String staticEeaAuthorizationKey;
 
@@ -887,8 +896,15 @@ public class DataflowControllerImpl implements DataFlowController {
           @RequestBody(required = false) Map<String, String> filters) {
 
     try {
+      // set admin as user (not tested)
+      TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
+      JobVO job = new JobVO();
+      Map<String, Object> jobUser = new HashMap<>();
+      jobUser.put("userId", key);
+      job.setParameters(jobUser);
+      adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, job);
       return dataflowService.getDataflowsByCountry(countryCode, sortField, asc, pageNum,
-              pageSize, filters);
+              pageSize, filters, key);
     } catch (EEAException e) {
       LOG.error("There was an error retrieving the dataflows for the country: {}",
               countryCode);

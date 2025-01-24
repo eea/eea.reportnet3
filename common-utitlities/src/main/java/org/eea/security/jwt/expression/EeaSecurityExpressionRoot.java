@@ -75,11 +75,9 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
    */
   public boolean checkAuthorizationKeyFromConsul(String providedKey, String consulKey) {
     boolean canAccess = false;
-    List<String> authorizationsKeys = new ArrayList<>();
-    authorizationsKeys.add(consulKey);
 
-    if (!authorizationsKeys.isEmpty() && providedKey != null) {
-      canAccess = authorizationsKeys.stream().anyMatch(cK -> cK.equals(providedKey)) && !isApiKey();
+    if (consulKey != null && providedKey != null) {
+      canAccess = consulKey.equals(providedKey);
     }
 
     return canAccess;

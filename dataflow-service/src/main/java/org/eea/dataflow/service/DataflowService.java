@@ -217,7 +217,7 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(String countryCode, String header, boolean asc,
-                                                      int page, int pageSize, Map<String, String> filters) throws EEAException;
+                                                      int page, int pageSize, Map<String, String> filters, String key) throws EEAException;
 
   /**
    * Gets the public dataflows by country.

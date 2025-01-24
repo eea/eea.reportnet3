@@ -804,7 +804,7 @@ public class DataflowServiceImpl implements DataflowService {
    */
   @Override
   public PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(String countryCode, String header,
-      boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
+      boolean asc, int page, int pageSize, Map<String, String> filters, String key) throws EEAException {
 
     try {
       Pageable pageable = PageRequest.of(page, pageSize);
@@ -821,7 +821,7 @@ public class DataflowServiceImpl implements DataflowService {
               dataflowInternalMapper.entityListToClass(dataflows);
 
       List<UserNationalCoordinatorVO> nationalCoordinators =
-              userManagementControllerZull.getUserNationalCoordinatorFilterByCountryCode(countryCode);
+              userManagementControllerZull.getUserNationalCoordinatorFilterByCountryCode(countryCode, key);
 
       for (DataflowInternalVO dataflowVO : dataflowsVOList) {
         // SET REPRESENTATIVES
