@@ -39,9 +39,7 @@ import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
-import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
-import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
@@ -99,12 +97,6 @@ public class DataflowControllerImpl implements DataFlowController {
   @Autowired
   private LockService lockService;
 
-  @Autowired
-  private UserManagementController.UserManagementControllerZull userManagementControllerZull;
-
-  @Autowired
-  private AdminUserAuthorization adminUserAuthorization;
-
   /** The dataflow helper. */
   @Autowired
   private DataflowHelper dataflowHelper;
@@ -115,12 +107,6 @@ public class DataflowControllerImpl implements DataFlowController {
 
   @Value("${eea.authorization.key}")
   private String eeaAuthorizationKey;
-
-  @Value("${eea.keycloak.admin.user}")
-  private String adminUser;
-
-  @Value("${eea.keycloak.admin.password}")
-  private String adminPass;
 
   public static String staticEeaAuthorizationKey;
 
