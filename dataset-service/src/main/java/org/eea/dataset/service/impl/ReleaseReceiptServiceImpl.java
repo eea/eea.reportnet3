@@ -51,9 +51,8 @@ public class ReleaseReceiptServiceImpl implements ReleaseReceiptService {
 
     @Override
     public ReleaseReceiptVO getReleaseReceiptByDataflowId(Long dataflowId) throws EEAException {
-        ReleaseReceipt releaseReceipt = releaseReceiptRepository.findByDataflowId(dataflowId)
-            .orElseThrow(() -> new EEAException(EEAErrorMessage.RELEASE_RECEIPT_NOTFOUND));
-        return mapToVO(releaseReceipt);
+        ReleaseReceipt releaseReceipt = releaseReceiptRepository.findByDataflowId(dataflowId).orElse(null);
+        return releaseReceipt != null ? mapToVO(releaseReceipt) : null;
     }
 
     @Override
