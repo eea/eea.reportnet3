@@ -826,7 +826,7 @@ public class DataflowServiceImpl implements DataflowService {
       for (DataflowInternalVO dataflowVO : dataflowsVOList) {
         // SET REPRESENTATIVES
         dataflowVO.setRepresentatives(
-                representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowVO.getId())
+                representativeService.getRepresetativesByIdDataFlow(dataflowVO.getId())
         );
         // SET OBLIGATIONS
         for (ObligationVO obligation : obligations) {
@@ -859,10 +859,6 @@ public class DataflowServiceImpl implements DataflowService {
               dataflowRepository.countByCountryPublicDataflows(obligationJson, filters, header, asc, countryCode));
       dataflowPaginated.setFilteredRecords(dataflowRepository
               .countByCountryFiltered(obligationJson, filters, header, asc, countryCode, false));
-
-//      LOG.info("Obligations count: {}", obligations.size(), obligationJson);
-//      LOG.info("Dataflows count: {}, Dataflows: {}", dataflows.size(), dataflows);
-//      LOG.info("DataflowsVO count: {}, DataflowsVO: {}", dataflowsVOList.size(), dataflowsVOList);
 
       return dataflowPaginated;
     } catch (JsonProcessingException e) {

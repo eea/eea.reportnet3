@@ -896,15 +896,9 @@ public class DataflowControllerImpl implements DataFlowController {
           @RequestBody(required = false) Map<String, String> filters) {
 
     try {
-      // set admin as user (not tested)
-      TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
-      JobVO job = new JobVO();
-      Map<String, Object> jobUser = new HashMap<>();
-      jobUser.put("userId", key);
-      job.setParameters(jobUser);
-      adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, job);
-      return dataflowService.getDataflowsByCountry(countryCode, sortField, asc, pageNum,
+      PaginatedDataflowWithNationalCoordinatorsVO paginatedDataflowWithNationalCoordinatorsVO =  dataflowService.getDataflowsByCountry(countryCode, sortField, asc, pageNum,
               pageSize, filters, key);
+      return paginatedDataflowWithNationalCoordinatorsVO;
     } catch (EEAException e) {
       LOG.error("There was an error retrieving the dataflows for the country: {}",
               countryCode);
