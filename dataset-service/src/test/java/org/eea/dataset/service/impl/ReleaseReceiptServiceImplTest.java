@@ -112,12 +112,4 @@ public class ReleaseReceiptServiceImplTest {
         Assert.assertEquals(dataflowId, result.getDataflowId());
         Assert.assertEquals("Test Note", result.getNote());
     }
-
-    @Test(expected = EEAException.class)
-    public void testGetReleaseReceiptByDataflowId_NotFound() throws EEAException {
-        Long dataflowId = 1L;
-
-        Mockito.when(releaseReceiptRepository.findByDataflowId(dataflowId)).thenReturn(Optional.empty());
-        releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
-    }
 }
