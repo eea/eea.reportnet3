@@ -116,12 +116,6 @@ public class DataflowControllerImpl implements DataFlowController {
   @Value("${eea.authorization.key}")
   private String eeaAuthorizationKey;
 
-  @Value("${eea.keycloak.admin.user}")
-  private String adminUser;
-
-  @Value("${eea.keycloak.admin.password}")
-  private String adminPass;
-
   public static String staticEeaAuthorizationKey;
 
   @PostConstruct
