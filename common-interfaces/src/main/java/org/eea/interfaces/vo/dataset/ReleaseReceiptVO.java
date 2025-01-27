@@ -23,9 +23,13 @@ public class ReleaseReceiptVO implements Serializable {
     private Long dataflowId;
 
     /**
-     * Instantiates a new ReleaseReceiptTextVO.
+     * Instantiates a new ReleaseReceiptVO.
+     * Fields are initialized with default values.
      */
     public ReleaseReceiptVO() {
+        this.id = null;
+        this.note = "";
+        this.dataflowId = null;
     }
 
     /**
