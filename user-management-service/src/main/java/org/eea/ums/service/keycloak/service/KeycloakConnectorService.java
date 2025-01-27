@@ -201,6 +201,14 @@ public interface KeycloakConnectorService {
   UserRepresentation[] getUsersByGroupId(String groupId);
 
   /**
+   * Gets the users by group id.
+   *
+   * @param groupId the group id
+   * @return the user by group id
+   */
+  UserRepresentation[] getUsersByGroupIdAndCountryCode(String groupId, String countryCode);
+
+  /**
    * Removes the user from group.
    *
    * @param userId the user id

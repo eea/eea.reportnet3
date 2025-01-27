@@ -38,6 +38,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,6 +55,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -109,6 +111,17 @@ public class UserManagementControllerImpl implements UserManagementController {
   /** The user national coordinator service. */
   @Autowired
   private UserNationalCoordinatorService userNationalCoordinatorService;
+
+  @Value("${eea.authorization.key}")
+  private String eeaAuthorizationKey;
+
+  public static String staticEeaAuthorizationKey;
+
+  @PostConstruct
+  public void init() {
+    staticEeaAuthorizationKey = eeaAuthorizationKey;
+  }
+
 
   private static final Logger LOG = LoggerFactory.getLogger(UserManagementControllerImpl.class);
 
@@ -1034,11 +1047,12 @@ public class UserManagementControllerImpl implements UserManagementController {
   }
 
   @Override
-  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN') or checkAuthorizationKeyFromConsul(#key, T(org.eea.ums.controller.UserManagementControllerImpl).staticEeaAuthorizationKey)")
   @ApiOperation(value = "Get list of national coordinators", hidden = true)
   @GetMapping("/nationalCoordinator/{countryCode}")
   public List<UserNationalCoordinatorVO> getUserNationalCoordinatorFilterByCountryCode(
-          @PathVariable("countryCode") String countryCode
+          @PathVariable("countryCode") String countryCode,
+          @RequestParam(value = "key") String key
   ) {
     return userNationalCoordinatorService.getNationalCoordinators(countryCode);
   };

@@ -25,4 +25,6 @@ public class LegalInstrumentVO implements Serializable {
 
   /** The source alias. */
   private String sourceAlias;
+
+  private String legalInstrumentLink;
 }

@@ -50,7 +50,7 @@ import org.eea.interfaces.vo.dataflow.DataflowInternalVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
-import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowWithNationalCoordinatorsVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
@@ -835,8 +835,8 @@ public class DataflowServiceImpl implements DataflowService {
    * @throws EEAException the EEA exception
    */
   @Override
-  public PaginatedDataflowPerCountryVO getDataflowsByCountry(String countryCode, String header,
-                                                             boolean asc, int page, int pageSize, Map<String, String> filters) throws EEAException {
+  public PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(String countryCode, String header,
+      boolean asc, int page, int pageSize, Map<String, String> filters, String key) throws EEAException {
 
     try {
       Pageable pageable = PageRequest.of(page, pageSize);
@@ -853,17 +853,23 @@ public class DataflowServiceImpl implements DataflowService {
               dataflowInternalMapper.entityListToClass(dataflows);
 
       List<UserNationalCoordinatorVO> nationalCoordinators =
-              userManagementControllerZull.getUserNationalCoordinatorFilterByCountryCode(countryCode);
+              userManagementControllerZull.getUserNationalCoordinatorFilterByCountryCode(countryCode, key);
 
       for (DataflowInternalVO dataflowVO : dataflowsVOList) {
         // SET REPRESENTATIVES
         dataflowVO.setRepresentatives(
-                representativeControllerZuul.findRepresentativesByIdDataFlow(dataflowVO.getId())
+                representativeService.getRepresetativesByIdDataFlow(dataflowVO.getId())
         );
         // SET OBLIGATIONS
         for (ObligationVO obligation : obligations) {
           if (dataflowVO.getObligation().getObligationId()
                   .equals(obligation.getObligationId())) {
+            obligation.setObligationLink(
+                    "https://rod.eionet.europa.eu/obligations/"+obligation.getObligationId()
+            );
+            obligation.getLegalInstrument().setLegalInstrumentLink(
+                    "https://rod.eionet.europa.eu/instruments/" + obligation.getLegalInstrument().getSourceId()
+            );
             dataflowVO.setObligation(obligation);
           }
         }
@@ -877,7 +883,7 @@ public class DataflowServiceImpl implements DataflowService {
                 .findReferenceDatasetByDataflowId(dataflow.getId()));
       });
 
-      PaginatedDataflowPerCountryVO dataflowPaginated = new PaginatedDataflowPerCountryVO();
+      PaginatedDataflowWithNationalCoordinatorsVO dataflowPaginated = new PaginatedDataflowWithNationalCoordinatorsVO();
 
       dataflowPaginated.setNationalCoordinators(nationalCoordinators);
       dataflowPaginated.setDataflows(dataflowsVOList);
@@ -885,10 +891,6 @@ public class DataflowServiceImpl implements DataflowService {
               dataflowRepository.countByCountryPublicDataflows(obligationJson, filters, header, asc, countryCode));
       dataflowPaginated.setFilteredRecords(dataflowRepository
               .countByCountryFiltered(obligationJson, filters, header, asc, countryCode, false));
-
-//      LOG.info("Obligations count: {}", obligations.size(), obligationJson);
-//      LOG.info("Dataflows count: {}, Dataflows: {}", dataflows.size(), dataflows);
-//      LOG.info("DataflowsVO count: {}, DataflowsVO: {}", dataflowsVOList.size(), dataflowsVOList);
 
       return dataflowPaginated;
     } catch (JsonProcessingException e) {

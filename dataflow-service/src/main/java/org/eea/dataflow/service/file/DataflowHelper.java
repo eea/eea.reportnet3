@@ -88,7 +88,6 @@ public class DataflowHelper {
   @Value("${exportDataflowSchemaInformationPath}")
   private String pathExportDataflowSchemaInformation;
 
-
   /**
    * Export schema information.
    *
@@ -546,4 +545,5 @@ public class DataflowHelper {
     }
     return result;
   }
+
 }

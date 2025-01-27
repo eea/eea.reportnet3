@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -23,13 +24,14 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
+import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataflowCountVO;
 import org.eea.interfaces.vo.dataflow.DataflowPrivateVO;
 import org.eea.interfaces.vo.dataflow.DataflowPublicVO;
 import org.eea.interfaces.vo.dataflow.DatasetsSummaryVO;
-import org.eea.interfaces.vo.dataflow.PaginatedDataflowPerCountryVO;
+import org.eea.interfaces.vo.dataflow.PaginatedDataflowWithNationalCoordinatorsVO;
 import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
@@ -37,11 +39,14 @@ import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
+import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
+import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.security.authorization.ObjectAccessRoleEnum;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
@@ -49,6 +54,8 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -92,6 +99,12 @@ public class DataflowControllerImpl implements DataFlowController {
   @Autowired
   private LockService lockService;
 
+  @Autowired
+  private UserManagementController.UserManagementControllerZull userManagementControllerZull;
+
+  @Autowired
+  private AdminUserAuthorization adminUserAuthorization;
+
   /** The dataflow helper. */
   @Autowired
   private DataflowHelper dataflowHelper;
@@ -99,6 +112,24 @@ public class DataflowControllerImpl implements DataFlowController {
   /** The notification controller zuul. */
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
+
+  @Value("${eea.authorization.key}")
+  private String eeaAuthorizationKey;
+
+  @Value("${eea.keycloak.admin.user}")
+  private String adminUser;
+
+  @Value("${eea.keycloak.admin.password}")
+  private String adminPass;
+
+  public static String staticEeaAuthorizationKey;
+
+  @PostConstruct
+  public void init() {
+    staticEeaAuthorizationKey = eeaAuthorizationKey;
+  }
+
+
 
   /**
    * Find by id.
@@ -919,7 +950,6 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/getPublicDataflows")
-
   @ApiOperation(value = "Gets all the public dataflows", hidden = true)
   public PaginatedDataflowVO getPublicDataflows(
           @RequestBody(required = false) Map<String, String> filters,
@@ -950,10 +980,13 @@ public class DataflowControllerImpl implements DataFlowController {
    */
   @Override
   @PostMapping("/internal/country/{countryCode}")
-  @PreAuthorize("hasAnyRole('ADMIN','DATA_CUSTODIAN')")
+  @PreAuthorize("checkAuthorizationKeyFromConsul(#key, T(org.eea.dataflow.controller.DataflowControllerImpl).staticEeaAuthorizationKey)")
+  @Cacheable(value = "paginated_dataflows_with_national_coordinators")
   @ApiOperation(value = "Gets all the dataflow that use a specific Country Code with the reporters",
           hidden = false)
-  public PaginatedDataflowPerCountryVO getDataflowsByCountry(
+  public PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(
+          @ApiParam(value = "Hash value key",
+                  example = "HASH-ABC-123") @RequestParam("key") String key,
           @ApiParam(value = "Country Code",
                   example = "AL") @PathVariable("countryCode") String countryCode,
           @ApiParam(value = "pageNum: page number to show", example = "0",
@@ -970,8 +1003,9 @@ public class DataflowControllerImpl implements DataFlowController {
           @RequestBody(required = false) Map<String, String> filters) {
 
     try {
-      return dataflowService.getDataflowsByCountry(countryCode, sortField, asc, pageNum,
-              pageSize, filters);
+      PaginatedDataflowWithNationalCoordinatorsVO paginatedDataflowWithNationalCoordinatorsVO =  dataflowService.getDataflowsByCountry(countryCode, sortField, asc, pageNum,
+              pageSize, filters, key);
+      return paginatedDataflowWithNationalCoordinatorsVO;
     } catch (EEAException e) {
       LOG.error("There was an error retrieving the dataflows for the country: {}",
               countryCode);

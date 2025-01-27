@@ -613,6 +613,20 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
   }
 
   /**
+   * Gets the users by group id.
+   *
+   * @param groupId the group id
+   *
+   * @return the users by group id
+   */
+  @Override
+  public UserRepresentation[] getUsersByGroupIdAndCountryCode(String groupId, String countryCode) {
+    // fetch all relevant dataflow/datasets and users
+
+    return new UserRepresentation[0];
+  }
+
+  /**
    * Gets the user roles.
    *
    * @param userId the user id
