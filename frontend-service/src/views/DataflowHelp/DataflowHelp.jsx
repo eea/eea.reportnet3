@@ -34,8 +34,8 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 
 import { CurrentPage } from 'views/_functions/Utils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import dayjs from "dayjs";
-import {TextUtils} from "../../repositories/_utils/TextUtils";
+import dayjs from 'dayjs';
+import { TextUtils } from '../../repositories/_utils/TextUtils';
 
 export const DataflowHelp = () => {
   const navigate = useNavigate();
@@ -51,6 +51,7 @@ export const DataflowHelp = () => {
   const [datasetsSchemas, setDatasetsSchemas] = useState();
   const [documents, setDocuments] = useState([]);
   const [hasCustodianPermissions, setHasCustodianPermissions] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isDataUpdated, setIsDataUpdated] = useState(false);
   const [isDeletingDocument, setIsDeletingDocument] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,6 +74,8 @@ export const DataflowHelp = () => {
     if (!isUndefined(userContext.contextRoles)) {
       const userRoles = userContext.getUserRole(`${config.permissions.prefixes.DATAFLOW}${dataflowId}`);
 
+      const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
+
       const isLeadDesigner =
         userRoles.includes(config.permissions.roles.CUSTODIAN.key) ||
         userRoles.includes(config.permissions.roles.STEWARD.key);
@@ -84,6 +87,7 @@ export const DataflowHelp = () => {
 
       const isStewardSupport = userRoles.includes(config.permissions.roles.STEWARD_SUPPORT.key);
 
+      setIsAdmin(isAdmin);
       setHasCustodianPermissions(isDesigner);
       setIsDocumentsWeblinksToolbarVisible(isLeadDesigner || isStewardSupport);
     }
@@ -104,7 +108,7 @@ export const DataflowHelp = () => {
 
   useEffect(() => {
     onLoadDatasetsSchemas();
-  }, [hasCustodianPermissions]);
+  }, [hasCustodianPermissions, isAdmin]);
 
   useCheckNotifications(
     ['DELETE_DOCUMENT_FAILED_EVENT', 'DELETE_DOCUMENT_COMPLETED_EVENT'],
@@ -163,7 +167,7 @@ export const DataflowHelp = () => {
       const data = await DataflowService.get(dataflowId);
       setDataflowType(data.type);
       setIsLoading(false);
-      if (!hasCustodianPermissions) {
+      if (!hasCustodianPermissions && !isAdmin) {
         if (!isEmpty(data.datasets)) {
           const datasets = [...data.datasets, ...data.referenceDatasets];
 
@@ -190,7 +194,7 @@ export const DataflowHelp = () => {
         } else {
           setIsLoadingSchemas(false);
         }
-      } else {
+      } else if (hasCustodianPermissions || isAdmin) {
         if (!isEmpty(data.designDatasets)) {
           const datasetSchemas = data.designDatasets.map(async designDataset => {
             return await onLoadDatasetSchema(designDataset.datasetId);
