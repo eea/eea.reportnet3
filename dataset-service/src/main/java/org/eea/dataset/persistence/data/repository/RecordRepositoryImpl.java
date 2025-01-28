@@ -996,7 +996,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         bw.write("{\"fieldName\":\"" + StringEscapeUtils.escapeJson(fieldVO.getName()) + "\",");
         if (fieldVO.getValue().contains("\"")) {
           //A change has been made due to ticket #283535
-          String noQuotes = StringEscapeUtils.escapeJson(fieldVO.getValue()).replace("\\\\", "").replace("\"", "");
+          String noQuotes = StringEscapeUtils.escapeJson(fieldVO.getValue()).replaceAll("\\\\", "").replaceAll("\"", "");
           bw.write("\"value\":\"" + noQuotes + "\",");
         } else {
           bw.write("\"value\":\"" + StringEscapeUtils.escapeJson(fieldVO.getValue()) + "\",");
