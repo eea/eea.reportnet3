@@ -558,7 +558,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setLoadingStatus('pending');
     setIsDeleteDialogVisible(false);
     try {
-      await JobsStatusesService.cancelJob(jobStatus.id);
+      await JobsStatusesService.cancelJob(jobStatus.id, jobStatus.dataflowId, jobStatus.datasetId);
       setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - onConfirmDeleteDialog.', error);
