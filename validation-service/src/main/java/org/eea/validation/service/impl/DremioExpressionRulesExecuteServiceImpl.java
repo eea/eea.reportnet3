@@ -135,17 +135,13 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             List<Object> parameters = new ArrayList<>();
 
             String fieldName = getFieldName(datasetSchemaId, tableSchemaId, ruleVO);
-            // Wrap field name with "" to avoid SQL failing due to reserved keywords or special characters
-            if (fieldName != null && !fieldName.isBlank()) {
-                fieldName = "\"" + fieldName.trim() + "\"";
-            }
 
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
             Map<String, List<String>> headerNames = new HashMap<>();  //map of method as key and list of field names (that exist as parameters in method) as values
 
             query.append("select record_id");
             if (!fieldName.equals("")) {
-                query.append(COMMA).append(fieldName);
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldName));
             }
             Map<String, String> fieldSchemaIdNameMap = new HashMap<>();
             createHeaders(datasetSchemaId, query, parameters, fieldName, headerNames, ruleVO.getWhenCondition(), fieldSchemaIdNameMap);
@@ -392,7 +388,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         List<Object> parameters;
 
         //remove "" "" added to field name for safe sql expressions
-        fieldName = fieldName.replace("\"", "");
+        //fieldName = dremioHelperService.removeQuotesFromFieldNames(fieldName);
 
         RuleExpressionDTO ruleExpressionDTO = ruleVO.getWhenCondition();
         String ruleMethodName = ruleExpressionDTO.getOperator().getFunctionName();
@@ -519,10 +515,8 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             parameters = ruleExpressionDTO.getParams();
             parameters.forEach(p -> {
                 FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, (String) p);
-                String quotedSchemaFieldName = "\"" + fieldSchema.getName() + "\"";
-                hNames.add(quotedSchemaFieldName);
-                query.append(COMMA).append(quotedSchemaFieldName);
-                fieldSchemaIdNameMap.put(fieldSchema.getId(), quotedSchemaFieldName);
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
+                fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             });
             headerNames.put(ruleMethodName, hNames);
         } else {
@@ -615,13 +609,12 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         } else if (!isNumeric(parameter) && !parameter.startsWith(OPEN_BRACKET) && !parameter.startsWith(SINGLE_QUOTE) && !parameter.startsWith(DOUBLE_QUOTE)) {
             if (!isDate(parameter)) {
                 FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, parameter);
-                String quotedSchemaFieldName = "\"" + fieldSchema.getName() + "\"";
-                if (!list.contains(quotedSchemaFieldName)) {
-                    list.add(quotedSchemaFieldName);
+                if (!list.contains(fieldSchema.getName())) {
+                    list.add(fieldSchema.getName());
                 }
                 headerNames.put(methodName, list);
-                query.append(COMMA).append(quotedSchemaFieldName);
-                fieldSchemaIdNameMap.put(fieldSchema.getId(), quotedSchemaFieldName);
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
+                fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             }
         }
     }
@@ -776,7 +769,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         } else if (intHeaders !=null && intHeaders.size()>0) {
             firstValue = (String) pm.get(0);
             fieldValue.setIdFieldSchema((String) pm.get(0));
-            fieldValue.setValue(rs.getString(intHeaders.get(0).replace("\"", "")));
+            fieldValue.setValue(rs.getString(intHeaders.get(0)));
         } else {
             firstValue = (String) pm.get(0);
             fieldValue.setIdFieldSchema(referenceId);

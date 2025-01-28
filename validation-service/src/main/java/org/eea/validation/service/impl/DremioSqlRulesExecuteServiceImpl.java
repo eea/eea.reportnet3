@@ -136,10 +136,6 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             if (fieldName==null) {
                 fieldName = "";
             }
-            // Wrap field name with "" to avoid SQL failing due to reserved keywords or special characters
-            if (!fieldName.isBlank()) {
-                fieldName = "\"" + fieldName + "\"";
-            }
 
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
@@ -361,7 +357,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
                 break;
             case 2:
-                recordIds = (List<String>) method.invoke(object, fieldName, tablePath);  //isUniqueConstraint
+                recordIds = (List<String>) method.invoke(object, dremioHelperService.addQuotesToFieldNames(fieldName), tablePath);  //isUniqueConstraint
                 break;
             case 5:
                 //checkIntegrityConstraint
@@ -481,12 +477,12 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         TableSchema referencedTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(referDatasetSchema, integrityVO.getReferencedFields().get(0));
         integrityVO.getOriginFields().forEach(originField -> {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(originSchemaId, originField);
-            origFieldNames.add("\"" + fieldSchema.getName() + "\"");
+            origFieldNames.add(fieldSchema.getName());
 
         });
         integrityVO.getReferencedFields().forEach(referField -> {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(referencedSchemaId, referField);
-            referFieldNames.add("\"" + fieldSchema.getName() + "\"");
+            referFieldNames.add(fieldSchema.getName());
 
         });
         S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
