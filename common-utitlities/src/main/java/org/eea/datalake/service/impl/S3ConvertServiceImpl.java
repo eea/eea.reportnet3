@@ -84,7 +84,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers) {
         File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         LOG.info("Creating file for export: {}", csvFile);
 
@@ -96,6 +96,11 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
+
+        if (csvFile.length() == 0) {
+            return createEmptyCSVFile(tableName, datasetId, headers);
+        }
+
         return csvFile;
     }
 
@@ -137,6 +142,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                 try (InputStream inputStream = new FileInputStream(parquetFile);
                      ParquetReader<GenericRecord> r = AvroParquetReader.<GenericRecord>builder(new ParquetStream(inputStream)).disableCompatibility().build()) {
                     GenericRecord record;
+
+
 
                     while ((record = r.read()) != null) {
                         boolean canExcludeHeaders = canExcludeHeaders(datasetTypeEnum);
