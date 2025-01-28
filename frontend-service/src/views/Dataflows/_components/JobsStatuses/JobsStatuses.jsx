@@ -359,7 +359,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const getTableColumns = () => {
     const columns = getJobsStatusesColumns();
 
-    if ((isAdmin || isCustodian) && activeIndex !== 1) {
+    if (activeIndex !== 1) {
       columns.push({
         key: 'buttonsUniqueId',
         header: resourcesContext.messages['actions'],
@@ -385,30 +385,31 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const getCancelButton = job => {
     const isDataflowCustodian = userContext.hasContextAccessPermission(
-        config.permissions.prefixes.DATAFLOW,
-        job.dataflowId,
-        [config.permissions.roles.CUSTODIAN.key]
+      config.permissions.prefixes.DATAFLOW,
+      job.dataflowId,
+      [config.permissions.roles.CUSTODIAN.key]
     );
+
     return (
-        <ActionsColumn
-            disabledButtons={
-                (!isAdmin && !isDataflowCustodian) ||
-                !(
-                    job.jobStatus === 'IN_PROGRESS' &&
-                    (job.jobType === 'IMPORT' ||
-                        job.jobType === 'VALIDATION' ||
-                        job.jobType === 'RELEASE' ||
-                        job.jobType === 'FILE_EXPORT') &&
-                    getDateDifferenceInMinutes(job.dateStatusChanged) > 9
-                )
-            }
-            onDeleteClick={() => {
-              setIsDeleteDialogVisible(true);
-              setJobStatus(job);
-            }}
-            rowDataId={job.id}
-            tooltip={resourcesContext.messages['cancel']}
-        />
+      <ActionsColumn
+        disabledButtons={
+          (!isAdmin && !isDataflowCustodian && userContext.preferredUsername !== job.creatorUsername) ||
+          !(
+            job.jobStatus === 'IN_PROGRESS' &&
+            (job.jobType === 'IMPORT' ||
+              job.jobType === 'VALIDATION' ||
+              job.jobType === 'RELEASE' ||
+              job.jobType === 'FILE_EXPORT') &&
+            getDateDifferenceInMinutes(job.dateStatusChanged) > 9
+          )
+        }
+        onDeleteClick={() => {
+          setIsDeleteDialogVisible(true);
+          setJobStatus(job);
+        }}
+        rowDataId={job.id}
+        tooltip={resourcesContext.messages['cancel']}
+      />
     );
   };
 
@@ -557,7 +558,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setLoadingStatus('pending');
     setIsDeleteDialogVisible(false);
     try {
-      await JobsStatusesService.cancelJob(jobStatus.id);
+      await JobsStatusesService.cancelJob(jobStatus.id, jobStatus.dataflowId, jobStatus.datasetId);
       setLoadingStatus('success');
     } catch (error) {
       console.error('JobsStatus - onConfirmDeleteDialog.', error);

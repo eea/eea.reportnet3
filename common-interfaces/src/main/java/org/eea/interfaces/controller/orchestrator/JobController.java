@@ -254,7 +254,7 @@ public interface JobController {
      * @param jobId
      */
     @PutMapping(value = "/cancelJob/{jobId}")
-    void cancelJob(@PathVariable("jobId") Long jobId) throws Exception;
+    void cancelJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "dataflowId") Long dataflowId, @RequestParam(value = "datasetId") Long datasetId) throws Exception;
 
     /**
      * Updates job info value
