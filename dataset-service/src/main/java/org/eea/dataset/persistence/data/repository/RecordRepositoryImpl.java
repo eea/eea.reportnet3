@@ -676,13 +676,13 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           .collect(Collectors.toList());
     }
     try (FileWriter fw = new FileWriter(jsonFile);
-        BufferedWriter bw = new BufferedWriter(fw)) {
+         BufferedWriter bw = new BufferedWriter(fw)) {
 
       // get json for each table requested
       bw.write("{\"tables\":[");
       for (int i = 0; i< tableSchemaList.size(); i++) {
         TableSchema tableSchema = tableSchemaList.get(i);
-
+        Boolean wroteEmptyRecords = false;
         Long totalRecords;
         try {
           totalRecords = getCountDL(totalRecordsQueryDL(datasetId, tableSchema, filterValue, columnName, dataProviderCodes, limit, offset, true));
@@ -690,6 +690,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           totalRecords = 0L;
           bw.write("{\"records\":[");
           bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
+          wroteEmptyRecords = true;
         }
 
         if (totalRecords != null && totalRecords > 0L) {
@@ -697,8 +698,14 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
           getAllRecordsDL(query, tableSchema, bw, datasetId);
           bw.write("],\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
         }
+        else{
+          if(!wroteEmptyRecords) {
+            bw.write("{\"records\":[]");
+            bw.write(",\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
+          }
+        }
         if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-            || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
+                || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
           bw.write(",\"totalRecords\":" + totalRecords);
         }
         if (i == tableSchemaList.size() - 1) {
