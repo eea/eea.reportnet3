@@ -975,17 +975,21 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     ReleaseReceiptInfoVO receiptInfo = new ReleaseReceiptInfoVO();
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
 
-    ReleaseReceiptVO releaseReceipt = new ReleaseReceiptVO();
+    ReleaseReceiptVO releaseReceipt;
     try {
       releaseReceipt = releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
+      if (releaseReceipt == null) {
+        releaseReceipt = new ReleaseReceiptVO();
+        releaseReceipt.setNote("");
+      }
     } catch (EEAException e) {
-      LOG.error("Cannot get release receipt for dataflow id {}. Message {}",
+      LOG.error("Cannot get release receipt for dataflow id {}. Message: {}",
               dataflowId, e.getMessage(), e);
-      // Set the note to an empty string if the receipt is not found
+      releaseReceipt = new ReleaseReceiptVO();
       releaseReceipt.setNote("");
     }
 
-      //if is manual acceptance a text note is added to final receipt
+    //if is manual acceptance a text note is added to final receipt
     boolean isManualAcceptance = Boolean.TRUE.equals(dataflow.isManualAcceptance());
 
     receiptInfo.setIdDataflow(dataflowId);
