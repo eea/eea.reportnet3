@@ -494,42 +494,44 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     long recordCounter = 0;
 
     String detectedCharset = detectEncoding(csvFile.getPath());
-    try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()), Charset.forName(detectedCharset));
-         CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
-             .setHeader()
-             .setSkipHeaderRecord(false)
-             .setDelimiter(delimiterChar)
-             .setIgnoreHeaderCase(true)
-             .setIgnoreEmptyLines(false)
-             .setTrim(true).build());
-         CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
-                 CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                 CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+    if (detectedCharset != null) {
+      try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()), Charset.forName(detectedCharset));
+           CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+               .setHeader()
+               .setSkipHeaderRecord(false)
+               .setDelimiter(delimiterChar)
+               .setIgnoreHeaderCase(true)
+               .setIgnoreEmptyLines(false)
+               .setTrim(true).build());
+           CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
+               CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+               CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
       CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
 
-      for (CSVRecord csvRecord : csvParser) {
-        checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", csvFile, importFileInDremioInfo);
-        recordCounter++;
-        if (recordCounter == 1) {
-          String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
-          csvWriter.writeNext(headersArray);
+        for (CSVRecord csvRecord : csvParser) {
+          checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", csvFile, importFileInDremioInfo);
+          recordCounter++;
+          if (recordCounter == 1) {
+            String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
+            csvWriter.writeNext(headersArray);
+          }
+
+          //compare with the number of headers
+          if (csvRecord.size() > csvParser.getHeaderMap().size()) {
+            importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
+          }
+
+          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter);
+          String[] rowArray = row.toArray(new String[0]);
+          csvWriter.writeNext(rowArray);
         }
 
-        //compare with the number of headers
-        if (csvRecord.size() > csvParser.getHeaderMap().size()) {
-          importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
-        }
-
-        List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter);
-        String[] rowArray = row.toArray(new String[0]);
-        csvWriter.writeNext(rowArray);
+        csvWriter.flush();
+        modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
+      } catch (IOException | UncheckedIOException e) {
+        handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
       }
-
-      csvWriter.flush();
-      modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
-    } catch (IOException | UncheckedIOException e) {
-      handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
     }
 
     if (recordCounter == 0) {
@@ -576,7 +578,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
              .setIgnoreEmptyLines(false)
              .setTrim(true).build())) {
 
-      CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
+        CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
 
       for (CSVRecord csvRecord : csvParser) {
         fileIsEmpty = false;
