@@ -322,7 +322,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       }
 
       boolean needToDemoteTable = true;
-      s3Helper.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver, dremioHelperService);
+      if (datasetType.equals(DatasetTypeEnum.DESIGN)) {
+        s3Helper.deleteTableIfEmpty(tableSchemaName, s3TablePathResolver, dremioHelperService);
+      }
 
 
       for (FileWithRecordNum entry : csvFilesWithAddedColumns) {

@@ -1146,7 +1146,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), true);
 
-        s3TablePathResolver.setPath(parquetTableQueryPathConstant);
+        s3TablePathResolver.setPath(parquetTableS3PathConstant);
         String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
 
         //if table does not exist or has 0 records do not do anything
@@ -1282,7 +1282,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dataProviderCode = (dataProviderVO.getCode() != null) ? "'" + dataProviderVO.getCode() + "'" : dataProviderCode;
         }
 
-        s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
+        if (datasetMetabaseService.getDatasetType(datasetId).equals(DatasetTypeEnum.DESIGN)) {
+            s3HelperPrivate.deleteTableIfEmpty(tableSchemaName, s3IcebergTablePathResolver, dremioHelperService);
+        }
 
         //check if table exists and if not create it
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaName)) {
