@@ -95,7 +95,7 @@ public class UserNationalCoordinatorServiceImpl implements UserNationalCoordinat
         List<UserRepresentation> users =
             Arrays.asList(keycloakConnectorService.getUsersByGroupId(groupInfo[i].getId()));
         for (UserRepresentation userRepresentation : users) {
-          if (countryCode != null && countryCode.equals(getCountry(groupInfo[i].getName()))) continue;
+          if (countryCode != null && !countryCode.equals(getCountry(groupInfo[i].getName()))) continue; // if there is a country code, if there is no match between given country code and fetched then continue
           UserNationalCoordinatorVO userNC = new UserNationalCoordinatorVO();
           userNC.setEmail(userRepresentation.getEmail());
           userNC.setCountryCode(getCountry(groupInfo[i].getName()));

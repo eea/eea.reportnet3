@@ -6,6 +6,7 @@ import lombok.ToString;
 import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -15,6 +16,7 @@ public class DataflowInternalVO extends DataFlowVO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private List<UserNationalCoordinatorVO> nationalCoordinatorVOList;
+    private String dataflowLink;
 
+    private List<Date> releasedDates;
 }

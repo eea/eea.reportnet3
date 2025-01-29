@@ -56,6 +56,7 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -112,6 +113,14 @@ public class DataflowServiceImpl implements DataflowService {
   /** The max message length. */
   @Value("${spring.health.db.check.frequency}")
   private int maxMessageLength;
+
+  /** The reportnet url. */
+  @Value("${reportnet.url}")
+  private String reportnetUrl;
+
+  /** The reportnet url. */
+  @Value("${rod.url}")
+  private String rodUrl;
 
   /** The dataset metabase controller. */
   @Autowired
@@ -824,6 +833,10 @@ public class DataflowServiceImpl implements DataflowService {
               userManagementControllerZull.getUserNationalCoordinatorFilterByCountryCode(countryCode, key);
 
       for (DataflowInternalVO dataflowVO : dataflowsVOList) {
+        // SET DATAFLOW LINK
+        dataflowVO.setDataflowLink(
+                reportnetUrl + "/dataflow/" + dataflowVO.getId()
+        );
         // SET REPRESENTATIVES
         dataflowVO.setRepresentatives(
                 representativeService.getRepresetativesByIdDataFlow(dataflowVO.getId())
@@ -832,15 +845,10 @@ public class DataflowServiceImpl implements DataflowService {
         for (ObligationVO obligation : obligations) {
           if (dataflowVO.getObligation().getObligationId()
                   .equals(obligation.getObligationId())) {
-            obligation.setObligationLink(
-                    "https://rod.eionet.europa.eu/obligations/"+obligation.getObligationId()
-            );
-            obligation.getLegalInstrument().setLegalInstrumentLink(
-                    "https://rod.eionet.europa.eu/instruments/" + obligation.getLegalInstrument().getSourceId()
-            );
             dataflowVO.setObligation(obligation);
           }
         }
+        // snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc
       }
 
       List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
@@ -849,6 +857,12 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowsVOList.stream().forEach(dataflow -> {
         dataflow.setReferenceDatasets(referenceDatasetControllerZuul
                 .findReferenceDatasetByDataflowId(dataflow.getId()));
+        dataflow.getObligation().setObligationLink(
+                rodUrl + "/obligations/" + dataflow.getObligation().getObligationId()
+        );
+        dataflow.getObligation().getLegalInstrument().setLegalInstrumentLink(
+                rodUrl + "/instruments/" + dataflow.getObligation().getLegalInstrument().getSourceId()
+        );
       });
 
       PaginatedDataflowWithNationalCoordinatorsVO dataflowPaginated = new PaginatedDataflowWithNationalCoordinatorsVO();
@@ -856,9 +870,9 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowPaginated.setNationalCoordinators(nationalCoordinators);
       dataflowPaginated.setDataflows(dataflowsVOList);
       dataflowPaginated.setTotalRecords(
-              dataflowRepository.countByCountryPublicDataflows(obligationJson, filters, header, asc, countryCode));
+              dataflowRepository.countAllDataflowsByCountry(obligationJson, filters, header, asc, countryCode));
       dataflowPaginated.setFilteredRecords(dataflowRepository
-              .countByCountryFiltered(obligationJson, filters, header, asc, countryCode, false));
+              .countAllDataflowsByCountryFiltered(obligationJson, filters, header, asc, countryCode));
 
       return dataflowPaginated;
     } catch (JsonProcessingException e) {
