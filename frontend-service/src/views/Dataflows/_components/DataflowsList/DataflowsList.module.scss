@@ -48,7 +48,7 @@
 .compressedListWrapper{
   @media screen and (min-width:1300px){
     display:grid;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr 1fr 1fr;
     gap:0 2rem;
   }
   hr[class*=_pinnedSeparator_]{

@@ -408,35 +408,47 @@
 }
 
 
-.compressedList{
-  @media screen and (min-width:1200px) {
-    div[class*='_obligation_'] p,
-    div[class*='_text_'] h3, p {
-      max-width: 300px;
+.compressedList.compressedList{
+  @media screen and (min-width:1300px) {
+    height:190px;
+    .obligation p,
+    .text p,
+    .upperIcon,
+    .icon,
+    .role{
+      display: none;
     }
-  }
-  @media screen and (min-width:1400px) {
-    div[class*='_obligation_'] p,
-    div[class*='_text_'] h3, p {
-      max-width: 400px;
+    .text{
+      order:-1;
+      h3{
+        max-width: 250px;
+      }
+    }
+    > a {
+      display: flex !important;
+      flex-direction: column;
+    }
+    .status{
+      text-align: left;
+    }
+    .dataflowDates{
+      margin-left: 0;
+      text-align: left!important;
     }
   }
   @media screen and (min-width:1600px) {
-    div[class*='_obligation_'] p,
-    div[class*='_text_'] h3, p {
-      max-width: 450px;
+    .text h3{
+      max-width: 400px;
     }
   }
-  @media screen and (min-width:1800px) {
-    div[class*='_obligation_'] p ,
-    div[class*='_text_'] h3, p {
-      max-width: 550px;
+  @media screen and (min-width:1900px) {
+    .text h3{
+      max-width: 500px;
     }
   }
   @media screen and (min-width:2200px) {
-    div[class*='_obligation_'] p ,
-    div[class*='_text_'] h3, p {
-      max-width: 720px;
+    .text h3{
+      max-width: 600px;
     }
   }
 }
