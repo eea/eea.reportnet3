@@ -245,18 +245,17 @@
     }
   }
 }
-
-.compressedList.compressedList.compressedList.compressedList.compressedList{
+.compressedList.compressedList{
   @media screen and (min-width:1300px) {
     height:190px;
-    div[class*='_obligation_'] p,
-    div[class*='_text_'] p,
-    div[class*='upperIcon'],
-    div[class*='icon'],
-    div[class*='role']{
+    .obligation p,
+    .text p,
+    .upperIcon,
+    .icon,
+    .role{
       display: none;
     }
-    div[class*='_text_']{
+    .text{
       order:-1;
       h3{
         max-width: 250px;
@@ -266,39 +265,27 @@
       display: flex !important;
       flex-direction: column;
     }
-    div[class*='status']{
+    .status{
       text-align: left;
     }
-    div[class*='status']{
-      text-align: left;
-    }
-    div[class*='Dates']{
+    .dataflowDates{
       margin-left: 0;
-      text-align: left;
+      text-align: left!important;
     }
   }
   @media screen and (min-width:1600px) {
-    div[class*='_text_']{
-      order:-1;
-      h3{
-        max-width: 400px;
-      }
+    .text h3{
+      max-width: 400px;
     }
   }
   @media screen and (min-width:1900px) {
-    div[class*='_text_']{
-      order:-1;
-      h3{
-        max-width: 500px;
-      }
+    .text h3{
+      max-width: 500px;
     }
   }
   @media screen and (min-width:2200px) {
-    div[class*='_text_']{
-      order:-1;
-      h3{
-        max-width: 600px;
-      }
+    .text h3{
+      max-width: 600px;
     }
   }
 }
