@@ -408,35 +408,59 @@
 }
 
 
-.compressedList{
-  @media screen and (min-width:1200px) {
+.compressedList.compressedList.compressedList.compressedList.compressedList{
+  @media screen and (min-width:1300px) {
+    height:190px;
     div[class*='_obligation_'] p,
-    div[class*='_text_'] h3, p {
-      max-width: 300px;
+    div[class*='_text_'] p,
+    div[class*='upperIcon'],
+    div[class*='icon'],
+    div[class*='role']{
+      display: none;
     }
-  }
-  @media screen and (min-width:1400px) {
-    div[class*='_obligation_'] p,
-    div[class*='_text_'] h3, p {
-      max-width: 400px;
+    div[class*='_text_']{
+      order:-1;
+      h3{
+        max-width: 250px;
+      }
+    }
+    > a {
+      display: flex !important;
+      flex-direction: column;
+    }
+    div[class*='status']{
+      text-align: left;
+    }
+    div[class*='status']{
+      text-align: left;
+    }
+    div[class*='Dates']{
+      margin-left: 0;
+      text-align: left;
     }
   }
   @media screen and (min-width:1600px) {
-    div[class*='_obligation_'] p,
-    div[class*='_text_'] h3, p {
-      max-width: 450px;
+    div[class*='_text_']{
+      order:-1;
+      h3{
+        max-width: 400px;
+      }
     }
   }
-  @media screen and (min-width:1800px) {
-    div[class*='_obligation_'] p ,
-    div[class*='_text_'] h3, p {
-      max-width: 550px;
+  @media screen and (min-width:1900px) {
+    div[class*='_text_']{
+      order:-1;
+      h3{
+        max-width: 500px;
+      }
     }
   }
   @media screen and (min-width:2200px) {
-    div[class*='_obligation_'] p ,
-    div[class*='_text_'] h3, p {
-      max-width: 720px;
+    div[class*='_text_']{
+      order:-1;
+      h3{
+        max-width: 600px;
+      }
     }
   }
 }
