@@ -162,8 +162,8 @@ export const DatasetService = {
 
   downloadTableDataDL: async (datasetId, fileName) => await DatasetRepository.downloadTableDataDL(datasetId, fileName),
 
-  getAlignmentBetween: async (dataflowId) =>
-    await DatasetRepository.getAlignmentBetween(dataflowId),
+  getAlignmentBetween: async (datasetId,selectedRepresentativesCode,selectedTable) =>
+    await DatasetRepository.getAlignmentBetween(datasetId,selectedRepresentativesCode,selectedTable),
 
   getStatistics: async (datasetId, tableSchemaNames) => {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);

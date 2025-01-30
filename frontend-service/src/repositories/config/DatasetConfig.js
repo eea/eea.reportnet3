@@ -11,7 +11,7 @@ export const DatasetConfig = {
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
   getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}',
-  getAlignmentBetween:'/dataset/getReleasedDatasetDataInfo?collectionDatasetId=1491&providerCode=AT&tableSchemaId=67922aeb697f4c5b07b61aa6',
+  getAlignmentBetween:'/dataset/getReleasedDatasetDataInfo?collectionDatasetId={:datasetId}&providerCode={:selectedRepresentativesCode}&tableSchemaId={:selectedTable}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
   getIsEdited: '/dataset/tablesUpdated/?datasetId={:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',

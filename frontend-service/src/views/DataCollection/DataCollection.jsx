@@ -6,6 +6,7 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataCollection.module.scss';
 
+import { CountryUtils } from 'views/_functions/Utils/CountryUtils';
 import { config } from 'conf';
 import { DatasetConfig } from 'repositories/config/DatasetConfig';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -38,6 +39,7 @@ import { CurrentPage, MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isNil } from 'lodash';
 import dayjs from "dayjs";
+import {Dropdown} from "../_components/Dropdown";
 
 export const DataCollection = () => {
   const navigate = useNavigate();
@@ -62,6 +64,11 @@ export const DataCollection = () => {
   const [metadata, setMetadata] = useState(undefined);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
+  const [selectedTable,setSelectedTable] = useState('');
+  const [representatives,setRepresentatives] = useState();
+  const [selectedRepresentatives,setSelectedRepresentatives] = useState();
+  const [selectedRepresentativesCode,setSelectedRepresentativesCode] = useState('');
+  const [alignmentResults,setAlignmentResults] = useState();
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -87,9 +94,21 @@ export const DataCollection = () => {
     false
   );
 
+  const onLoadManualAcceptanceDatasets = async () => {
+    try {
+      const data = await DataflowService.getDatasetsFinalFeedback(dataflowId);
+      setRepresentatives(data)
+      setSelectedRepresentatives(data[0].datasetId);
+    } catch (error) {
+      console.error('ManualAcceptanceDatasets - onLoadManualAcceptanceDatasets.', error);
+      notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' }, true);
+    }
+  };
+
   useEffect(() => {
     leftSideBarContext.removeModels();
     getMetadata();
+    onLoadManualAcceptanceDatasets();
   }, []);
 
   useEffect(() => {
@@ -143,11 +162,14 @@ export const DataCollection = () => {
 
   const getAlignmentBetween = async () => {
     try {
-      const res = await DatasetService.getAlignmentBetween(dataflowId);
-      console.log(res);
+      const res = await DatasetService.getAlignmentBetween(datasetId,selectedRepresentativesCode,selectedTable);
+      setAlignmentResults(res);
     } catch (error) {
       console.error('DataCollection - getWebformList.', error);
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
+    }
+    finally{
+      console.log(alignmentResults);
     }
   }
 
@@ -205,6 +227,12 @@ export const DataCollection = () => {
     }
   };
 
+  const onChangeHandler = e => {
+    setSelectedRepresentatives(e.target.value);
+    const code = representatives?.find(dataset => dataset.datasetId === e.target.value)
+    setSelectedRepresentativesCode(CountryUtils.getCountryCode(code.dataProviderName));
+  };
+
   const onLoadDataflowData = async () => {
     try {
       const data = await DataflowService.get(dataflowId);
@@ -246,23 +274,23 @@ export const DataCollection = () => {
       const datasetSchema = await DatasetService.getSchema(dataflowId, datasetId);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       const tableSchemaNamesList = [];
-      setTableSchema(
-        datasetSchema.tables.map(tableSchema => {
-          tableSchemaNamesList.push(tableSchema.tableSchemaName);
-          return {
-            dataAreManuallyEditable: tableSchema['dataAreManuallyEditable'],
-            description: tableSchema['tableSchemaDescription'],
-            fixedNumber: tableSchema['tableSchemaFixedNumber'],
-            hasInfoTooltip: true,
-            id: tableSchema['tableSchemaId'],
-            name: tableSchema['tableSchemaName'],
-            notEmpty: tableSchema['tableSchemaNotEmpty'],
-            numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
-            readOnly: tableSchema['tableSchemaReadOnly'],
-            toPrefill: tableSchema['tableSchemaToPrefill']
-          };
-        })
-      );
+      const tableSchemaTemp = datasetSchema.tables.map(tableSchema => {
+        tableSchemaNamesList.push(tableSchema.tableSchemaName);
+        return {
+          dataAreManuallyEditable: tableSchema['dataAreManuallyEditable'],
+          description: tableSchema['tableSchemaDescription'],
+          fixedNumber: tableSchema['tableSchemaFixedNumber'],
+          hasInfoTooltip: true,
+          id: tableSchema['tableSchemaId'],
+          name: tableSchema['tableSchemaName'],
+          notEmpty: tableSchema['tableSchemaNotEmpty'],
+          numberOfFields: tableSchema.records ? tableSchema.records[0].fields?.length : 0,
+          readOnly: tableSchema['tableSchemaReadOnly'],
+          toPrefill: tableSchema['tableSchemaToPrefill']
+        };
+      })
+      setTableSchema(tableSchemaTemp);
+      setSelectedTable(tableSchemaTemp[0].id);
       setTableSchemaColumns(
         datasetSchema.tables.map(table => {
           return table.records[0].fields.map(field => {
@@ -368,7 +396,6 @@ export const DataCollection = () => {
   if (loading) {
     return layout(<Spinner />);
   }
-
   return layout(
     <Fragment>
       <Title
@@ -376,6 +403,22 @@ export const DataCollection = () => {
         iconSize="3.5rem"
         subtitle={getSubtitle()}
         title={dataCollectionName}
+      />
+      <Dropdown
+        ariaLabel="choose tables"
+        className={styles.dataTablesDropdown}
+        name="tableDropdown"
+        options={tableSchema?.map(schema => ({label:schema.name,value:schema.id})) ?? []}
+        onChange = {e => setSelectedTable(e.target.value)}
+        value={selectedTable}
+      />
+      <Dropdown
+        ariaLabel="choose representative"
+        className={styles.dataTablesDropdown}
+        name="tableRepresentativeDropdown"
+        options={representatives?.map(representative => ({label:representative.dataProviderName,value:representative.datasetId})) ?? []}
+        onChange = {e => onChangeHandler(e)}
+        value={selectedRepresentatives}
       />
       <Button
         className="p-button-text p-c "
