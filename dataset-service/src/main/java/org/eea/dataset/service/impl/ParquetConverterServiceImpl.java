@@ -176,29 +176,29 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO);
 
       //update statistics
-
       updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase, fileExtension);
+    }
 
-      if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty()) {
-        for(String warningMessage : importFileInDremioInfo.getWarningMessages()) {
-          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))) {
-            numberOfEmptyFiles++;
-          }
-          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
-            numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace++;
-          }
-          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
-            numberOfFailedImportsForWrongNumberOfRecords++;
-          }
-          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
-            numberOfFailedImportsForOnlyReadOnlyFields++;
-          }
-          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
-            numberOfFailedImportsForReadOnlyTables++;
-          }
-          if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null))){
-            numberOfImportsForMismatchOfData++;
-          }
+    //handle warnings
+    if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty()) {
+      for(String warningMessage : importFileInDremioInfo.getWarningMessages()) {
+        if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))) {
+          numberOfEmptyFiles++;
+        }
+        if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+          numberOfFailedImportsForFixedNumberOfRecordsWithoutReplace++;
+        }
+        if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+          numberOfFailedImportsForWrongNumberOfRecords++;
+        }
+        if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
+          numberOfFailedImportsForOnlyReadOnlyFields++;
+        }
+        if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
+          numberOfFailedImportsForReadOnlyTables++;
+        }
+        if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null))){
+          numberOfImportsForMismatchOfData++;
         }
       }
     }
