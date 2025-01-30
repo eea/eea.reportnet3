@@ -75,6 +75,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -505,7 +506,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     long recordCounter = 0;
 
     String detectedCharset = detectEncoding(csvFile.getPath());
-    if (detectedCharset != null) {
+    if (detectedCharset != null && !hasZeroRows(csvFile.getPath())) {
       try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()), Charset.forName(detectedCharset));
            CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
                .setHeader()
@@ -580,71 +581,73 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     File csvFileWithAddedColumns = null;
 
     String detectedCharset = detectEncoding(csvFile.getPath());
-    try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()), Charset.forName(detectedCharset));
-         CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
-             .setHeader()
-             .setSkipHeaderRecord(false)
-             .setDelimiter(delimiterChar)
-             .setIgnoreHeaderCase(true)
-             .setIgnoreEmptyLines(false)
-             .setTrim(true).build())) {
+    if (detectedCharset != null && !hasZeroRows(csvFile.getPath())) {
+      try (Reader reader = Files.newBufferedReader(Paths.get(csvFile.getPath()), Charset.forName(detectedCharset));
+           CSVParser csvParser = new CSVParser(reader, CSVFormat.DEFAULT.builder()
+               .setHeader()
+               .setSkipHeaderRecord(false)
+               .setDelimiter(delimiterChar)
+               .setIgnoreHeaderCase(true)
+               .setIgnoreEmptyLines(false)
+               .setTrim(true).build())) {
 
         CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
 
-      for (CSVRecord csvRecord : csvParser) {
-        fileIsEmpty = false;
-        checkForEmptyValues(csvRecord, "Empty first line in csv file {}. {}", csvFile, importFileInDremioInfo);
+        for (CSVRecord csvRecord : csvParser) {
+          fileIsEmpty = false;
+          checkForEmptyValues(csvRecord, "Empty first line in csv file {}. {}", csvFile, importFileInDremioInfo);
 
-        if (recordCounter == 0) {
-          csvFileWithAddedColumns = createNewFilePath(csvFile);
-          csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
-                  CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
-                  CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-          String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
-          csvWriter.writeNext(headersArray);
+          if (recordCounter == 0) {
+            csvFileWithAddedColumns = createNewFilePath(csvFile);
+            csvWriter = new CSVWriter(new FileWriter(csvFileWithAddedColumns),
+                CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+            String[] headersArray = typeMapping.getExpectedHeaders().stream().map(FieldSchema::getHeaderName).toArray(String[]::new);
+            csvWriter.writeNext(headersArray);
+          }
+
+          if (csvRecord.size() > csvParser.getHeaderMap().size()) {
+            importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
+          }
+
+          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter);
+          String[] rowArray = row.toArray(new String[0]);
+          csvWriter.writeNext(rowArray);
+          row.clear();
+          row = null;
+          rowArray = null;
+          recordCounter++;
+
+          if (recordCounter % 100 == 0) {
+            System.gc();
+          }
+
+          if (recordCounter == batchSize) {
+            csvWriter.flush();
+            csvWriter.close();
+            System.gc();
+            modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
+            recordCounter = 0;
+          }
         }
 
-        if (csvRecord.size() > csvParser.getHeaderMap().size()) {
-          importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
+        if (fileIsEmpty) {
+          LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
+          return null;
         }
-
-        List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter);
-        String[] rowArray = row.toArray(new String[0]);
-        csvWriter.writeNext(rowArray);
-        row.clear();
-        row = null;
-        rowArray = null;
-        recordCounter++;
-
-        if (recordCounter % 100 == 0) {
-          System.gc();
-        }
-
-        if (recordCounter == batchSize) {
-          csvWriter.flush();
-          csvWriter.close();
-          System.gc();
+      } catch (IOException | UncheckedIOException e) {
+        handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
+      } finally {
+        if (recordCounter != 0) {
+          if (csvWriter != null) {
+            csvWriter.flush();
+            csvWriter.close();
+          }
           modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
-          recordCounter = 0;
-        }
-      }
 
-      if (fileIsEmpty) {
-        LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
-        return null;
-      }
-    } catch (IOException | UncheckedIOException e) {
-      handleCsvProcessingError(e, csvFile, importFileInDremioInfo);
-    } finally {
-      if (recordCounter != 0) {
-        if (csvWriter != null) {
-          csvWriter.flush();
-          csvWriter.close();
         }
-        modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
-
+        System.gc();
       }
-      System.gc();
     }
 
     LOG.info(MEASUREMENTS + " with job {} modifyCsvFile finished", importFileInDremioInfo);
@@ -1143,5 +1146,20 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     lastImportFileExtensionStat.setStatName(LAST_IMPORT_FILE_EXTENSION);
     lastImportFileExtensionStat.setValue(fileExtension);
     statisticsService.saveOrUpdateStatistics(lastImportFileExtensionStat);
+  }
+
+  /**
+   * Checks if the given file has 0 rows
+   *
+   * @param filePath The file path
+   * @return True, if it has 0 rows
+   */
+  private boolean hasZeroRows(String filePath) {
+    try (Stream<String> lines = Files.lines(Paths.get(filePath))) {  // Try-with-resources ensures closure
+      return lines.noneMatch(line -> !line.trim().isEmpty()); // No non-empty lines
+    } catch (IOException e) {
+      e.printStackTrace();
+      return false; // Handle error gracefully
+    }
   }
 }
