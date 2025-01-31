@@ -459,7 +459,7 @@ export const DataCollection = () => {
                       {`${alignmentResults?.data?.hasReleased ? resourcesContext.messages['alignmentBetweenReleasedYes'] : resourcesContext.messages['alignmentBetweenReleasedNot']}`}
                     </span>
                 </li>
-                {alignmentResults?.data?.modifiedAfterRelease != null && (
+                {alignmentResults?.data?.modifiedAfterRelease != null && alignmentResults?.data?.hasReleased && (
                   <li>
                     <span>
                       {`${alignmentResults?.data?.modifiedAfterRelease ? resourcesContext.messages['alignmentBetweenModifiedYes'] : resourcesContext.messages['alignmentBetweenModifiedNot']}`}
