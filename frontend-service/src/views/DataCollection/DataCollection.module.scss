@@ -9,4 +9,63 @@
 
 .dataTablesDropdown {
   max-width: 16rem;
+  margin-inline:1rem;
+}
+
+.alignmentBetweenWrapper{
+  margin-bottom:1rem;
+  color:var(--c-gray-110);
+  span{
+    font-size: 0.875rem;
+  }
+  > p{
+    margin-top:1rem;
+    font-weight:bold;
+  }
+  &.expanded{
+    border:1px solid var(--c-gray-10);
+    .alignmentBetweenExpandButton{
+      &:before{
+        transform:rotate(45deg) translatey(-4px);
+      }
+    }
+  }
+}
+
+.alignmentData{
+  padding-top:1rem;
+}
+
+.alignmentBetweenExpandButton{
+  background:transparent;
+  margin:0;
+  border:none;
+  font-size:1.2rem;
+  cursor:pointer;
+  box-shadow:none!important;
+  padding:0.5rem 1rem;
+  span{
+    display:inline-block!important;
+  }
+  &:before{
+    height:10px;
+    width:10px;
+    content:"";
+    border-right:1px solid var(--c-black-color);
+    border-bottom:1px solid var(--c-black-color);
+    display:inline-block;
+    margin-right:1rem;
+    transform:rotate(-45deg);
+  }
+}
+
+.alignmentBetweenInnerWrapper{
+  display:none;
+  padding:1rem;
+}
+
+.expanded{
+  .alignmentBetweenInnerWrapper{
+    display:block;
+  }
 }

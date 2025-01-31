@@ -50,6 +50,8 @@ export const DataCollection = () => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
+  const [alignmentResults,setAlignmentResults] = useState();
+  const [alignmentToggler,setAlignmentToggler] = useState(false);
   const [dataCollectionName, setDataCollectionName] = useState();
   const [dataflowName, setDataflowName] = useState('');
   const [dataflowType, setDataflowType] = useState('');
@@ -64,11 +66,11 @@ export const DataCollection = () => {
   const [metadata, setMetadata] = useState(undefined);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [selectedTable,setSelectedTable] = useState('');
   const [representatives,setRepresentatives] = useState();
+  const [selectedTable,setSelectedTable] = useState('');
   const [selectedRepresentatives,setSelectedRepresentatives] = useState();
   const [selectedRepresentativesCode,setSelectedRepresentativesCode] = useState('');
-  const [alignmentResults,setAlignmentResults] = useState();
+
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -99,6 +101,7 @@ export const DataCollection = () => {
       const data = await DataflowService.getDatasetsFinalFeedback(dataflowId);
       setRepresentatives(data)
       setSelectedRepresentatives(data[0].datasetId);
+      setSelectedRepresentativesCode(CountryUtils.getCountryCode(data[0].dataProviderName));
     } catch (error) {
       console.error('ManualAcceptanceDatasets - onLoadManualAcceptanceDatasets.', error);
       notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' }, true);
@@ -404,30 +407,68 @@ export const DataCollection = () => {
         subtitle={getSubtitle()}
         title={dataCollectionName}
       />
-      <Dropdown
-        ariaLabel="choose tables"
-        className={styles.dataTablesDropdown}
-        name="tableDropdown"
-        options={tableSchema?.map(schema => ({label:schema.name,value:schema.id})) ?? []}
-        onChange = {e => setSelectedTable(e.target.value)}
-        value={selectedTable}
-      />
-      <Dropdown
-        ariaLabel="choose representative"
-        className={styles.dataTablesDropdown}
-        name="tableRepresentativeDropdown"
-        options={representatives?.map(representative => ({label:representative.dataProviderName,value:representative.datasetId})) ?? []}
-        onChange = {e => onChangeHandler(e)}
-        value={selectedRepresentatives}
-      />
-      <Button
-        className="p-button-text p-c "
-        label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
-        icon={'check'}
-        onClick={() => {
-          getAlignmentBetween();
-        }}
-      />
+      <div className={`${styles.alignmentBetweenWrapper} ${alignmentToggler ? styles.expanded : ''}`}>
+        <Button
+          className={`"p-button-rounded p-button-secondary-transparent p-button-animated-blink" ${styles.alignmentBetweenExpandButton}`}
+          id="buttonExpand"
+          label={resourcesContext.messages['alignmentBetweenProposal']}
+          onClick={ () => setAlignmentToggler(!alignmentToggler)}
+        />
+        <div className={styles.alignmentBetweenInnerWrapper}>
+          <label>{resourcesContext.messages['alignmentBetweenTableComparison']}</label>
+          <Dropdown
+            ariaLabel="choose tables"
+            className={styles.dataTablesDropdown}
+            name="tableDropdown"
+            options={tableSchema?.map(schema => ({label: schema.name, value: schema.id})) ?? []}
+            onChange={e => setSelectedTable(e.target.value)}
+            value={selectedTable}
+          />
+          <label>{resourcesContext.messages['alignmentBetweenTableCountry']}</label>
+          <Dropdown
+            ariaLabel="choose representative"
+            className={styles.dataTablesDropdown}
+            name="tableRepresentativeDropdown"
+            options={representatives?.map(representative => ({
+              label: representative.dataProviderName,
+              value: representative.datasetId
+            })) ?? []}
+            onChange={e => onChangeHandler(e)}
+            value={selectedRepresentatives}
+          />
+          <Button
+            className="p-button-text p-c "
+            label={resourcesContext.messages['applyFilters']}
+            icon={'check'}
+            onClick={() => {
+              getAlignmentBetween();
+            }}
+          />
+          {alignmentResults && (
+            <div className={styles.alignmentData}>
+              <p>{resourcesContext.messages['alignmentBetweenResultsHeading']}</p>
+              <ul>
+                <li>
+                  <span>{`${resourcesContext.messages['alignmentBetweenCollectionRecords']} ${alignmentResults?.data?.collectionDatasetNumberOfRecords}`}</span>
+                </li>
+                <li>
+                  <span>{`${resourcesContext.messages['alignmentBetweenReleased']} ${alignmentResults?.data?.hasReleased ? 'Yes' : 'No'}`}</span>
+                </li>
+                {alignmentResults?.data?.modifiedAfterRelease != null && (
+                  <li>
+                <span>
+                   reportingDatasetNumberOfRecords{` ${resourcesContext.messages['alignmentBetweenModified']} ${alignmentResults?.data?.modifiedAfterRelease ? 'Yes' : 'No'}`}
+                </span>
+                  </li>
+                )}
+                <li>
+                  <span>{`${resourcesContext.messages['alignmentBetweenDatasetRecords']} ${alignmentResults?.data?.reportingDatasetNumberOfRecords}`}</span>
+                </li>
+              </ul>
+            </div>
+          )}
+        </div>
+      </div>
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">
