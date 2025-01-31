@@ -87,8 +87,8 @@ public final class PaMConstants {
   /** The Constant STATUS_IMPLEMENTATION: {@value}. */
   public static final String STATUS_IMPLEMENTATION = "StatusImplementation";
 
-  /** The Constant PROJECTIONS_SCENARIO: {@value}. */
-  public static final String PROJECTIONS_SCENARIO = "ProjectionsScenario";
+  /** The Constant PROJECTION_SCENARIOS: {@value}. */
+  public static final String PROJECTION_SCENARIOS = "ProjectionScenarios";
 
   /** The Constant UNION_POLICY_LIST: {@value}. */
   public static final String UNION_POLICY_LIST = "UnionPolicyList";
