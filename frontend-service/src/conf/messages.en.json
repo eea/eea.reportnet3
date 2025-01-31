@@ -1241,7 +1241,7 @@
     "providerDatasetDataRemoveDialogHeader": "Remove dataset data",
     "providerDatasetDataRemoveDialogContent": "Are you sure you want to remove all data from ",
     "projectedCoordinates": "Projected coordinates",
-    "ProjectionsScenario": "Type",
+    "ProjectionScenarios": "Projection Scenarios",
     "properties": "Properties",
     "propertiesModalDataflowDescriptionLabel": "Description",
     "propertiesModalDataflowNameLabel": "Name",

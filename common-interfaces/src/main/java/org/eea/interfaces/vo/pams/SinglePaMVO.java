@@ -31,8 +31,8 @@ public class SinglePaMVO {
   /** The implementation period comment. */
   private String implementationPeriodComment;
 
-  /** The projections scenario. */
-  private String projectionsScenario;
+  /** The projection scenarios. */
+  private String projectionScenarios;
 
   /** The union policy list. */
   private List<String> unionPolicyList;

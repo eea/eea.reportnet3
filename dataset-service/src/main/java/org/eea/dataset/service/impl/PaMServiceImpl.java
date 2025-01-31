@@ -484,8 +484,8 @@ public class PaMServiceImpl implements PaMService {
               getValue(fields, schemaIds.get(PaMConstants.IMPLEMENTATION_PERIOD_COMMENT)));
           singlePaMVO.setStatusImplementation(
               getValue(fields, schemaIds.get(PaMConstants.STATUS_IMPLEMENTATION)));
-          singlePaMVO.setProjectionsScenario(
-              getValue(fields, schemaIds.get(PaMConstants.PROJECTIONS_SCENARIO)));
+          singlePaMVO.setProjectionScenarios(
+              getValue(fields, schemaIds.get(PaMConstants.PROJECTION_SCENARIOS)));
           singlePaMVO.setOtherPolicyInstrument(
               getValue(fields, schemaIds.get(PaMConstants.OTHER_POLICY_INSTRUMENT)));
           singlePaMVO.setUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_T1)));
@@ -583,8 +583,8 @@ public class PaMServiceImpl implements PaMService {
         .findIdFieldSchema(PaMConstants.IMPLEMENTATION_PERIOD_COMMENT, table1Id, schema)));
     schemaIds.put(PaMConstants.STATUS_IMPLEMENTATION, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.STATUS_IMPLEMENTATION, table1Id, schema)));
-    schemaIds.put(PaMConstants.PROJECTIONS_SCENARIO, isFieldSchemaNull(
-        fileCommonUtils.findIdFieldSchema(PaMConstants.PROJECTIONS_SCENARIO, table1Id, schema)));
+    schemaIds.put(PaMConstants.PROJECTION_SCENARIOS, isFieldSchemaNull(
+        fileCommonUtils.findIdFieldSchema(PaMConstants.PROJECTION_SCENARIOS, table1Id, schema)));
     schemaIds.put(PaMConstants.UNION_POLICY_LIST, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.UNION_POLICY_LIST, table1Id, schema)));
     schemaIds.put(PaMConstants.TYPE_POLICY_INSTRUMENT, isFieldSchemaNull(
