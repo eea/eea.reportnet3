@@ -88,6 +88,10 @@ export const DataflowRepository = {
         : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId })
     }),
 
+  getDatasetsProvidersStatus: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsProvidersStatus, { dataflowId }) }),
+
+
   getRepresentativesUsersList: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) }),
 
@@ -125,6 +129,9 @@ export const DataflowRepository = {
 
   getIcebergTables: async ({ dataflowId, providerId, datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId }) }),
+
+  getRepresentativeCode:async selectedRepresentatives =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativeCode, { selectedRepresentatives }) }),
 
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),

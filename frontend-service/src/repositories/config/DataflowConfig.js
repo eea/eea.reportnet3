@@ -22,6 +22,7 @@ export const DataflowConfig = {
   getApiKeyCustodian: '/user/getApiKey?dataflowId={:dataflowId}',
   getCloneableDataflows: '/dataflow/cloneableDataflows',
   getDatasetsFinalFeedbackAndReleasedStatus: '/datasetmetabase/dataflow/{:dataflowId}',
+  getDatasetsProvidersStatus: '/datasetmetabase/dataflow/{:dataflowId}',
   getDatasetsInfo: '/dataflow/{:dataflowId}/datasetsSummary',
   getDatasetsValidationStatistics:
     '/datasetmetabase/globalStatistics/dataflow/{:dataflowId}/dataSchema/{:datasetSchemaId}',
@@ -34,6 +35,7 @@ export const DataflowConfig = {
   getPublicDataflowsByCountryCode:
     '/dataflow/public/country/{:country}?asc={:asc}&pageNum={:pageNum}&pageSize={:pageSize}&sortField={:sortField}',
   getRepresentativesUsersList: '/user/userRoles/dataflow/{:dataflowId}',
+  getRepresentativeCode: '/representative/dataProvider/id/{:selectedRepresentatives}',
   getSchemas: '/dataschema/getSchemas/dataflow/{:dataflowId}',
   getSchemasValidation: '/dataschema/validate/dataflow/{:dataflowId}',
   getUserList: '/user/getUserRolesByDataflow/{:dataflowId}/dataProviderId/{:representativeId}',

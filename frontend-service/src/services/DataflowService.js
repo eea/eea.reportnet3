@@ -368,6 +368,8 @@ export const DataflowService = {
     return sortBy(usersList, ['dataflowName', 'role']);
   },
 
+  getDatasetsProvidersStatus: async dataflowId =>  await DataflowRepository.getDatasetsProvidersStatus(dataflowId),
+
   getRepresentativesUsersList: async dataflowId => {
     const response = await DataflowRepository.getRepresentativesUsersList(dataflowId);
     const usersList = DataflowUtils.parseDataProvidersUserList(response.data);
@@ -414,6 +416,8 @@ export const DataflowService = {
 
     return icebergTables;
   },
+
+  getRepresentativeCode: async selectedRepresentatives =>  await DataflowRepository.getRepresentativeCode(selectedRepresentatives),
 
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
