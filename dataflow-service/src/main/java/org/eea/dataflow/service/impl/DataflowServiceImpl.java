@@ -36,6 +36,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
@@ -56,7 +57,6 @@ import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
-import org.eea.interfaces.vo.dataset.DataSetVO;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
@@ -126,6 +126,10 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  /** The dataset metabase controller. */
+  @Autowired
+  private DatasetSnapshotController.DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
+
   /** The user management controller zull. */
   @Autowired
   private UserManagementControllerZull userManagementControllerZull;
@@ -179,7 +183,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /** The dataflow mapper. */
+  /** The dataflow internal mapper. */
   @Autowired
   private DataflowInternalMapper dataflowInternalMapper;
 
@@ -848,11 +852,17 @@ public class DataflowServiceImpl implements DataflowService {
             dataflowVO.setObligation(obligation);
           }
         }
-        // snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc
       }
 
-      List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
-      setReportingsAllDataflows(dataflowsVOList, providerId);
+      List<DataProviderVO> dataProviderVOs = representativeService.findDataProvidersByCode(countryCode);
+      setReportingsAllDataflows(dataflowsVOList, dataProviderVOs);
+      dataflowsVOList.stream().forEach(dataflowInternalVO -> {
+        ReportingDatasetVO reportingDatasetVO = dataflowInternalVO.getReportingDatasets().stream().findFirst().get();
+        if (reportingDatasetVO != null) {
+          List<Date> releasedDates = dataSetSnapshotControllerZuul.historicReleaseDatesAuthorizedByConsul(reportingDatasetVO.getId(), dataflowInternalVO.getId(), key);
+          dataflowInternalVO.setReleasedDates(releasedDates);
+        }
+      });
 
       dataflowsVOList.stream().forEach(dataflow -> {
         dataflow.setReferenceDatasets(referenceDatasetControllerZuul
@@ -1201,17 +1211,17 @@ public class DataflowServiceImpl implements DataflowService {
    * Sets the reportings.
    *
    * @param dataflowList the dataflow public list
-   * @param providerId the provider id
+   * @param dataProviderVOs the provider id
    */
   private void setReportingsAllDataflows(List<DataflowInternalVO> dataflowList,
-      List<DataProviderVO> providerId) {
+      List<DataProviderVO> dataProviderVOs) {
     dataflowList.stream().forEach(dataflow -> {
       findObligationDataflow(dataflow);
       dataflow.setReportingDatasets(new ArrayList<>());
       List<ReportingDatasetVO> reportings =
           datasetMetabaseControllerZuul.findReportingDataSetByDataflowId(dataflow.getId());
       if (!reportings.isEmpty()) {
-        for (DataProviderVO dataProviderVO : providerId) {
+        for (DataProviderVO dataProviderVO : dataProviderVOs) {
           List<ReportingDatasetVO> reportingsProvider =
               reportings.stream().filter(r -> r.getDataProviderId().equals(dataProviderVO.getId()))
                   .collect(Collectors.toList());

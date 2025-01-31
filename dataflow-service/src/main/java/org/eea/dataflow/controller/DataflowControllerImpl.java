@@ -860,7 +860,7 @@ public class DataflowControllerImpl implements DataFlowController {
   @Override
   @PostMapping("/internal/country/{countryCode}")
   @PreAuthorize("checkAuthorizationKeyFromConsul(#key, T(org.eea.dataflow.controller.DataflowControllerImpl).staticEeaAuthorizationKey)")
-  @Cacheable(value = "paginated_dataflows_with_national_coordinators")
+//  @Cacheable(value = "paginated_dataflows_with_national_coordinators")
   @ApiOperation(value = "Gets all the dataflow that use a specific Country Code with the reporters",
           hidden = false)
   public PaginatedDataflowWithNationalCoordinatorsVO getDataflowsByCountry(

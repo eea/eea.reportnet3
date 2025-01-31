@@ -3,7 +3,6 @@ package org.eea.interfaces.vo.dataflow;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
-import org.eea.interfaces.vo.ums.UserNationalCoordinatorVO;
 
 import java.io.Serializable;
 import java.util.Date;

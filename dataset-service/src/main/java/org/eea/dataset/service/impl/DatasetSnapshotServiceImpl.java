@@ -1038,6 +1038,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   /**
+   * Gets the snapshots released by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id dataset
+   */
+  @Override
+  public List<Date> getSnapshotsReleasedDatesByIdDataset(Long datasetId) {
+    List<Date> releasedDates =
+            snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(datasetId)
+                    .stream().map(Snapshot::getDateReleased).collect(Collectors.toList());
+    return releasedDates;
+  }
+
+  /**
    * Gets the snapshots released by id data collection.
    *
    * @param dataCollectionId the data collection id
@@ -1049,6 +1063,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollectionId);
     return releaseMapper.entityListToClass(snapshots.stream()
             .filter(snapshot -> snapshot.getDateReleased() != null).collect(Collectors.toList()));
+  }
+
+  /**
+   * Gets the snapshot released dates by id data collection.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the snapshots released by id data collection
+   */
+  @Override
+  public List<Date> getSnapshotsReleasedDatesByIdDataCollection(Long dataCollectionId) {
+    List<Date> releasedDates =
+            snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollectionId)
+                    .stream().map(Snapshot::getDateReleased).collect(Collectors.toList());
+    return releasedDates;
   }
 
   /**
@@ -1078,6 +1106,35 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return releaseMapper
             .entityListToClass(snapshots.stream().filter(snapshot -> snapshot.getDateReleased() != null
                     && Boolean.TRUE.equals(snapshot.getEuReleased())).collect(Collectors.toList()));
+  }
+
+
+  /**
+   * Gets the snapshot released dates by id EU dataset.
+   *
+   * @param euDatasetId the eu dataset id
+   * @return the snapshots released by id EU dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Date> getSnapshotsReleasedDatesByIdEUDataset(Long euDatasetId) throws EEAException {
+    // find datacollectionid
+    EUDataset eudataset = eUDatasetRepository.findById(euDatasetId).orElse(null);
+    if (eudataset == null) {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    DataCollection dataCollection = dataCollectionRepository
+            .findFirstByDatasetSchema(eudataset.getDatasetSchema()).orElse(null);
+    if (dataCollection == null) {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    // find snapshots for the datacollection released in the eudataset
+    List<Date> releasedDates =
+            snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollection.getId())
+                    .stream().map(Snapshot::getDateReleased).collect(Collectors.toList());
+    return releasedDates;
   }
 
   /**
@@ -1131,6 +1188,36 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         }
     }
     return releases;
+  }
+
+  /**
+   * Gets the dataset historic release dates per each type only dates.
+   *
+   * @param datasetId the dataset id
+   * @return the releases
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Date> getReleaseDates(Long datasetId) throws EEAException {
+    List<Date> releaseDates = new ArrayList<>();
+    DatasetTypeEnum datasetType = datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum();
+    if (DatasetTypeEnum.REPORTING
+            .equals(datasetType)) {
+      // if dataset is reporting return released dates
+      releaseDates = getSnapshotsReleasedDatesByIdDataset(datasetId);
+    } else {
+      // if the snapshot is a datacollection
+      if (DatasetTypeEnum.COLLECTION
+              .equals(datasetType)) {
+        releaseDates = getSnapshotsReleasedDatesByIdDataCollection(datasetId);
+      } else
+        // if the snapshot is an eudataset
+        if (DatasetTypeEnum.EUDATASET
+                .equals(datasetType)) {
+          releaseDates = getSnapshotsReleasedDatesByIdEUDataset(datasetId);
+        }
+    }
+    return releaseDates;
   }
 
 
