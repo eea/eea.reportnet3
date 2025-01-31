@@ -13,6 +13,7 @@
 }
 
 .alignmentBetweenWrapper{
+  border:1px solid var(--c-gray-10);
   margin-bottom:1rem;
   color:var(--c-gray-110);
   span{
@@ -23,7 +24,6 @@
     font-weight:bold;
   }
   &.expanded{
-    border:1px solid var(--c-gray-10);
     .alignmentBetweenExpandButton{
       &:before{
         transform:rotate(45deg) translatey(-4px);
@@ -43,25 +43,25 @@
   font-size:1.2rem;
   cursor:pointer;
   box-shadow:none!important;
-  padding:0.5rem 1rem;
+  padding:1rem 1.7rem;
   span{
     display:inline-block!important;
   }
   &:before{
-    height:10px;
-    width:10px;
+    height:8px;
+    width:8px;
     content:"";
     border-right:1px solid var(--c-black-color);
     border-bottom:1px solid var(--c-black-color);
     display:inline-block;
-    margin-right:1rem;
+    margin-right:0.7rem;
     transform:rotate(-45deg);
   }
 }
 
 .alignmentBetweenInnerWrapper{
   display:none;
-  padding:1rem;
+  padding:1rem 2rem;
 }
 
 .expanded{

@@ -452,18 +452,20 @@ export const DataCollection = () => {
                   <span>{`${resourcesContext.messages['alignmentBetweenCollectionRecords']} ${alignmentResults?.data?.collectionDatasetNumberOfRecords}`}</span>
                 </li>
                 <li>
-                  <span>{`${resourcesContext.messages['alignmentBetweenReleased']} ${alignmentResults?.data?.hasReleased ? 'Yes' : 'No'}`}</span>
+                  <span>{`${resourcesContext.messages['alignmentBetweenDatasetRecords']} ${alignmentResults?.data?.reportingDatasetNumberOfRecords}`}</span>
+                </li>
+                <li>
+                    <span>
+                      {`${alignmentResults?.data?.hasReleased ? resourcesContext.messages['alignmentBetweenReleasedYes'] : resourcesContext.messages['alignmentBetweenReleasedNot']}`}
+                    </span>
                 </li>
                 {alignmentResults?.data?.modifiedAfterRelease != null && (
                   <li>
-                <span>
-                   reportingDatasetNumberOfRecords{` ${resourcesContext.messages['alignmentBetweenModified']} ${alignmentResults?.data?.modifiedAfterRelease ? 'Yes' : 'No'}`}
-                </span>
+                    <span>
+                      {`${alignmentResults?.data?.modifiedAfterRelease ? resourcesContext.messages['alignmentBetweenModifiedYes'] : resourcesContext.messages['alignmentBetweenModifiedNot']}`}
+                    </span>
                   </li>
                 )}
-                <li>
-                  <span>{`${resourcesContext.messages['alignmentBetweenDatasetRecords']} ${alignmentResults?.data?.reportingDatasetNumberOfRecords}`}</span>
-                </li>
               </ul>
             </div>
           )}
