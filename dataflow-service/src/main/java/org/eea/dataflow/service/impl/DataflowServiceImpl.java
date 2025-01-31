@@ -36,6 +36,7 @@ import org.eea.interfaces.controller.dataset.DataCollectionController.DataCollec
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.dataset.TestDatasetController.TestDatasetControllerZuul;
@@ -113,9 +114,21 @@ public class DataflowServiceImpl implements DataflowService {
   @Value("${spring.health.db.check.frequency}")
   private int maxMessageLength;
 
+  /** The reportnet url. */
+  @Value("${reportnet.url}")
+  private String reportnetUrl;
+
+  /** The reportnet url. */
+  @Value("${rod.url}")
+  private String rodUrl;
+
   /** The dataset metabase controller. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
+
+  /** The dataset metabase controller. */
+  @Autowired
+  private DatasetSnapshotController.DataSetSnapshotControllerZuul dataSetSnapshotControllerZuul;
 
   /** The user management controller zull. */
   @Autowired
@@ -170,7 +183,7 @@ public class DataflowServiceImpl implements DataflowService {
   @Autowired
   private DataflowMapper dataflowMapper;
 
-  /** The dataflow mapper. */
+  /** The dataflow internal mapper. */
   @Autowired
   private DataflowInternalMapper dataflowInternalMapper;
 
@@ -856,6 +869,10 @@ public class DataflowServiceImpl implements DataflowService {
               userManagementControllerZull.getUserNationalCoordinatorFilterByCountryCode(countryCode, key);
 
       for (DataflowInternalVO dataflowVO : dataflowsVOList) {
+        // SET DATAFLOW LINK
+        dataflowVO.setDataflowLink(
+                reportnetUrl + "/dataflow/" + dataflowVO.getId()
+        );
         // SET REPRESENTATIVES
         dataflowVO.setRepresentatives(
                 representativeService.getRepresetativesByIdDataFlow(dataflowVO.getId())
@@ -864,23 +881,30 @@ public class DataflowServiceImpl implements DataflowService {
         for (ObligationVO obligation : obligations) {
           if (dataflowVO.getObligation().getObligationId()
                   .equals(obligation.getObligationId())) {
-            obligation.setObligationLink(
-                    "https://rod.eionet.europa.eu/obligations/"+obligation.getObligationId()
-            );
-            obligation.getLegalInstrument().setLegalInstrumentLink(
-                    "https://rod.eionet.europa.eu/instruments/" + obligation.getLegalInstrument().getSourceId()
-            );
             dataflowVO.setObligation(obligation);
           }
         }
       }
 
-      List<DataProviderVO> providerId = representativeService.findDataProvidersByCode(countryCode);
-      setReportingsAllDataflows(dataflowsVOList, providerId);
+      List<DataProviderVO> dataProviderVOs = representativeService.findDataProvidersByCode(countryCode);
+      setReportingsAllDataflows(dataflowsVOList, dataProviderVOs);
+      dataflowsVOList.stream().forEach(dataflowInternalVO -> {
+        ReportingDatasetVO reportingDatasetVO = dataflowInternalVO.getReportingDatasets().stream().findFirst().get();
+        if (reportingDatasetVO != null) {
+          List<Date> releasedDates = dataSetSnapshotControllerZuul.historicReleaseDatesAuthorizedByConsul(reportingDatasetVO.getId(), dataflowInternalVO.getId(), key);
+          dataflowInternalVO.setReleasedDates(releasedDates);
+        }
+      });
 
       dataflowsVOList.stream().forEach(dataflow -> {
         dataflow.setReferenceDatasets(referenceDatasetControllerZuul
                 .findReferenceDatasetByDataflowId(dataflow.getId()));
+        dataflow.getObligation().setObligationLink(
+                rodUrl + "/obligations/" + dataflow.getObligation().getObligationId()
+        );
+        dataflow.getObligation().getLegalInstrument().setLegalInstrumentLink(
+                rodUrl + "/instruments/" + dataflow.getObligation().getLegalInstrument().getSourceId()
+        );
       });
 
       PaginatedDataflowWithNationalCoordinatorsVO dataflowPaginated = new PaginatedDataflowWithNationalCoordinatorsVO();
@@ -888,9 +912,9 @@ public class DataflowServiceImpl implements DataflowService {
       dataflowPaginated.setNationalCoordinators(nationalCoordinators);
       dataflowPaginated.setDataflows(dataflowsVOList);
       dataflowPaginated.setTotalRecords(
-              dataflowRepository.countByCountryPublicDataflows(obligationJson, filters, header, asc, countryCode));
+              dataflowRepository.countAllDataflowsByCountry(obligationJson, filters, header, asc, countryCode));
       dataflowPaginated.setFilteredRecords(dataflowRepository
-              .countByCountryFiltered(obligationJson, filters, header, asc, countryCode, false));
+              .countAllDataflowsByCountryFiltered(obligationJson, filters, header, asc, countryCode));
 
       return dataflowPaginated;
     } catch (JsonProcessingException e) {
@@ -1219,17 +1243,17 @@ public class DataflowServiceImpl implements DataflowService {
    * Sets the reportings.
    *
    * @param dataflowList the dataflow public list
-   * @param providerId the provider id
+   * @param dataProviderVOs the provider id
    */
   private void setReportingsAllDataflows(List<DataflowInternalVO> dataflowList,
-      List<DataProviderVO> providerId) {
+      List<DataProviderVO> dataProviderVOs) {
     dataflowList.stream().forEach(dataflow -> {
       findObligationDataflow(dataflow);
       dataflow.setReportingDatasets(new ArrayList<>());
       List<ReportingDatasetVO> reportings =
           datasetMetabaseControllerZuul.findReportingDataSetByDataflowId(dataflow.getId());
       if (!reportings.isEmpty()) {
-        for (DataProviderVO dataProviderVO : providerId) {
+        for (DataProviderVO dataProviderVO : dataProviderVOs) {
           List<ReportingDatasetVO> reportingsProvider =
               reportings.stream().filter(r -> r.getDataProviderId().equals(dataProviderVO.getId()))
                   .collect(Collectors.toList());

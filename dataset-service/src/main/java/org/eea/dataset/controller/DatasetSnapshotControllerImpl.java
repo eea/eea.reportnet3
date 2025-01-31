@@ -42,6 +42,7 @@ import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.*;
@@ -104,6 +106,16 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
   @Autowired
   private DatasetTableService datasetTableService;
+
+  @Value("${eea.authorization.key}")
+  private String eeaAuthorizationKey;
+
+  public static String staticEeaAuthorizationKey;
+
+  @PostConstruct
+  public void init() {
+    staticEeaAuthorizationKey = eeaAuthorizationKey;
+  }
 
   /**
    * The default release process priority
@@ -703,6 +715,36 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
           @ApiParam(type = "Long", value = "Dataflow Id",
                   example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId) {
     return this.historicReleases(datasetId, dataflowId);
+  }
+
+  /**
+   * Historic releases dates authorized by consul key.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @Override
+  @HystrixCommand
+  @GetMapping(value = "/historicReleaseDatesAuthorizedByConsul", produces = MediaType.APPLICATION_JSON_VALUE)
+  @PreAuthorize("checkAuthorizationKeyFromConsul(#key, T(org.eea.dataset.controller.DatasetSnapshotControllerImpl).staticEeaAuthorizationKey)")
+  @ApiOperation(value = "Get historic releases", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully get data"),
+          @ApiResponse(code = 400, message = "Dataset not found")})
+  public List<Date> historicReleaseDatesAuthorizedByConsul(
+          @ApiParam(type = "Long", value = "Dataset Id",
+                  example = "0") @RequestParam("datasetId") Long datasetId,
+          @ApiParam(type = "Long", value = "Dataflow Id",
+                  example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+          @ApiParam(type = "String", value = "key",
+                  example = "HASH-ABC-123") @RequestParam("key") String key) {
+    List<Date> releaseDates = new ArrayList<>();
+    try {
+      releaseDates = datasetSnapshotService.getReleaseDates(datasetId);
+    } catch (EEAException e) {
+      LOG.error("Error getting release dates for dataset id {}. Error Message: {}", datasetId, e.getMessage(), e);
+    }
+    return releaseDates;
   }
 
   /**
