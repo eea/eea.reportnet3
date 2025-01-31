@@ -237,7 +237,7 @@ export const Tab = ({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'flex-start',
-          maxWidth: '250px'
+          width: 'auto'
         }}>
         {getTooltipMessage()}
       </div>
