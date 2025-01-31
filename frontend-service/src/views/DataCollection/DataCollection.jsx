@@ -6,7 +6,6 @@ import isUndefined from 'lodash/isUndefined';
 
 import styles from './DataCollection.module.scss';
 
-import { CountryUtils } from 'views/_functions/Utils/CountryUtils';
 import { config } from 'conf';
 import { DatasetConfig } from 'repositories/config/DatasetConfig';
 import { getUrl } from 'repositories/_utils/UrlUtils';
@@ -98,10 +97,19 @@ export const DataCollection = () => {
 
   const onLoadManualAcceptanceDatasets = async () => {
     try {
-      const data = await DataflowService.getDatasetsFinalFeedback(dataflowId);
-      setRepresentatives(data)
-      setSelectedRepresentatives(data[0].datasetId);
-      setSelectedRepresentativesCode(CountryUtils.getCountryCode(data[0].dataProviderName));
+      const data = await DataflowService.getDatasetsProvidersStatus(dataflowId);
+      setRepresentatives(data.data)
+      setSelectedRepresentatives(data.data[0].dataProviderId);
+    } catch (error) {
+      console.error('ManualAcceptanceDatasets - onLoadManualAcceptanceDatasets.', error);
+      notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' }, true);
+    }
+  };
+
+  const getRepresentativeCode = async () => {
+    try {
+      const data = await DataflowService.getRepresentativeCode(selectedRepresentatives);
+      setSelectedRepresentativesCode(data.data.code);
     } catch (error) {
       console.error('ManualAcceptanceDatasets - onLoadManualAcceptanceDatasets.', error);
       notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' }, true);
@@ -117,6 +125,10 @@ export const DataCollection = () => {
   useEffect(() => {
     getExtensionsList();
   }, [metadata?.dataflow.bigData]);
+
+  useEffect(() => {
+    selectedRepresentatives && getRepresentativeCode();
+  }, [selectedRepresentatives]);
 
   useEffect(() => {
     const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
@@ -230,11 +242,6 @@ export const DataCollection = () => {
     }
   };
 
-  const onChangeHandler = e => {
-    setSelectedRepresentatives(e.target.value);
-    const code = representatives?.find(dataset => dataset.datasetId === e.target.value)
-    setSelectedRepresentativesCode(CountryUtils.getCountryCode(code.dataProviderName));
-  };
 
   const onLoadDataflowData = async () => {
     try {
@@ -430,10 +437,10 @@ export const DataCollection = () => {
             className={styles.dataTablesDropdown}
             name="tableRepresentativeDropdown"
             options={representatives?.map(representative => ({
-              label: representative.dataProviderName,
-              value: representative.datasetId
+              label: representative.dataSetName,
+              value: representative.dataProviderId
             })) ?? []}
-            onChange={e => onChangeHandler(e)}
+            onChange={e => setSelectedRepresentatives(e.target.value)}
             value={selectedRepresentatives}
           />
           <Button
@@ -444,6 +451,7 @@ export const DataCollection = () => {
               getAlignmentBetween();
             }}
           />
+
           {alignmentResults && (
             <div className={styles.alignmentData}>
               <p>{resourcesContext.messages['alignmentBetweenResultsHeading']}</p>
