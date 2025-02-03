@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
-import org.apache.commons.collections.ListUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -69,6 +68,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -150,7 +150,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private DatasetSnapshotService datasetSnapshotService;
 
     @Autowired
-    private ReportingDatasetService reportingDatasetService;
+    private TableDataRetriever tableDataRetriever;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
@@ -2002,13 +2002,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         List<ReleaseVO> releases = datasetSnapshotService.getReleases(reportingDataset.getId());
         if(releases != null && releases.size() > 0){
             releasedDatasetDataInfoVO.setHasReleased(true);
-            ReportingDatasetVO reportingDatasetVO = reportingDatasetService.getReportingDatasetById(reportingDataset.getId());
-            if(reportingDatasetVO != null){
-                List<ReportingDatasetVO> reportingDatasetsVO = Arrays.asList(reportingDatasetVO);
-                reportingDatasetService.hasUpdatesAfterRelease(reportingDatasetsVO);
-                releasedDatasetDataInfoVO.setModifiedAfterRelease(reportingDatasetVO.getHasUpdatesAfterRelease());
+            ResponseEntity<?> updatedTablesResponse = tableDataRetriever.getTablesUpdatedAfterRelease(reportingDataset.getId());
+            HashMap<String, Boolean> updatedTablesHashmap = (HashMap<String, Boolean>) updatedTablesResponse.getBody();
+            if(updatedTablesHashmap.get(tableSchemaId) != null){
+                releasedDatasetDataInfoVO.setModifiedAfterRelease(updatedTablesHashmap.get(tableSchemaId));
             }
-
+            else{
+                releasedDatasetDataInfoVO.setModifiedAfterRelease(false);
+            }
         }
         else{
             releasedDatasetDataInfoVO.setHasReleased(false);
