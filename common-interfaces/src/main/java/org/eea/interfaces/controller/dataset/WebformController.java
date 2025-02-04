@@ -61,6 +61,20 @@ public interface WebformController {
                                         @RequestParam(value = "providerId", required = false) Long providerId
                                         );
 
+  @GetMapping(("/{datasetId}/restoreWebformConfigSchema"))
+  void restoreWebformConfigSchema(@PathVariable("datasetId") Long datasetId,
+                                               @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                                @RequestParam(value = "providerId", required = false) Long providerId,
+                                               @RequestParam(value = "webformName") String webformName,
+                                               @RequestParam(value = "version", required = false) Long version);
+
+  @GetMapping(("/{datasetId}/getWebformConfigSchema"))
+  ResponseEntity<?> getWebformConfigSchema(@PathVariable("datasetId") Long datasetId,
+                                  @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                  @RequestParam(value = "providerId", required = false) Long providerId,
+                                  @RequestParam(value = "webformName") String webformName,
+                                  @RequestParam(value = "version", required = false) Long version);
+
   /**
    * Update webform config.
    *
