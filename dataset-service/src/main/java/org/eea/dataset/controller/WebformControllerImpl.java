@@ -112,6 +112,43 @@ public class WebformControllerImpl implements WebformController {
     return webformService.uploadWebFormConfig(webformConfig, datasetId);
   }
 
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','DATAFLOW_CUSTODIAN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','DATAFLOW_CUSTODIAN')")
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+  @GetMapping(("/{datasetId}/restoreWebformConfigSchema"))
+  @ApiOperation(value = "Restore webForm config schema by name and version", hidden = true)
+  public void restoreWebformConfigSchema(@ApiParam(type = "Long", value = "The Dataset id",
+                                               example = "1258") @PathVariable("datasetId") Long datasetId,
+                                         @ApiParam(type = "Long", value = "The Dataflow id",
+                                             example = "5469") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                         @ApiParam(type = "Long", value = "The Provider id",
+                                             example = "52") @RequestParam(value = "providerId", required = false) Long providerId,
+                                         @ApiParam(type = "String", value = "The webForm name",
+                                             example = "PAM_horizontal")  @RequestParam(value = "webformName") String webformName,
+                                         @ApiParam(type = "Long", value = "The version to restore",
+                                             example = "5")  @RequestParam(value = "version", required = false) Long version) {
+    webformService.restorePreviousWebFormVersions(webformName, version, datasetId);
+  }
+
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId, 'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','DATAFLOW_CUSTODIAN') OR checkApiKey(#dataflowId,#providerId,#datasetId,'DATASCHEMA_CUSTODIAN','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','REFERENCEDATASET_CUSTODIAN','DATAFLOW_CUSTODIAN')")
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+  @GetMapping(("/{datasetId}/getWebformConfigSchema"))
+  @ApiOperation(value = "Restore webForm config schema by name and version", hidden = true)
+  public ResponseEntity<?> getWebformConfigSchema(@ApiParam(type = "Long", value = "The Dataset id",
+                                             example = "1258") @PathVariable("datasetId") Long datasetId,
+                                         @ApiParam(type = "Long", value = "The Dataflow id",
+                                             example = "5469") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                         @ApiParam(type = "Long", value = "The Provider id",
+                                             example = "52") @RequestParam(value = "providerId", required = false) Long providerId,
+                                         @ApiParam(type = "String", value = "The webForm name",
+                                             example = "PAM_horizontal")  @RequestParam(value = "webformName") String webformName,
+                                         @ApiParam(type = "Long", value = "The version to restore",
+                                             example = "5")  @RequestParam(value = "version", required = false) Long version) {
+    return webformService.getWebformConfigHistorySchema(webformName, version);
+  }
 
   /**
    * Update webform config.

@@ -567,20 +567,24 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         try {
 
           int recordsTmpExport = queryGetRecordCountbyFilterChain(RECORD_COUNT_QUERY, datasetId, filterChain);
-          LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}", recordsTmpExport, filterChain, totalRecords);
+          LOG.info("For datasetId {} and table {} table temp_etlexport has {} rows for filterChain {}. Total records : {}", datasetId, tableSchemaId, recordsTmpExport, filterChain, totalRecords);
 
           while (recordsTmpExport != totalRecords) {
             if (recordsTmpExport != 0) {
               do {
-                LOG.info("Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", recordsTmpExport, filterChain, totalRecords);
+                LOG.info("For datasetId {} and table {} Table temp_etlexport has {} rows for filterChain {}. Total records : {}. Deleting old records", datasetId, tableSchemaId, recordsTmpExport, filterChain, totalRecords);
                 deleteTempEtlExportByFilterValue(datasetId, filterChain, recordsTmpExport);
 
                 recordsTmpExport = queryGetRecordCountbyFilterChain(RECORD_COUNT_QUERY, datasetId, filterChain);
-                LOG.info("Table temp_etlexport has {} rows for filterChain {}. Records stored {}", recordsTmpExport, filterChain, recordsTmpExport);
+                LOG.info("For datasetId {} and table {} Table temp_etlexport has {} rows for filterChain {}. Records stored {}", datasetId, tableSchemaId, recordsTmpExport, filterChain, recordsTmpExport);
               } while (recordsTmpExport != 0);
             }
             exportAndImportToEtlExportTable(datasetId, filterChain, stringQuery);
             recordsTmpExport = queryGetRecordCountbyFilterChain(RECORD_COUNT_QUERY, datasetId, filterChain);
+            if(recordsTmpExport == 0){
+              LOG.info("Found 0 records in temp_etlExport after recreation for datasetId {} and tableSchemaId {} ", datasetId, tableSchemaId);
+              break;
+            }
           }
         } catch (Exception e) {
           LOG_ERROR.error("Error creating a file into the temp_etlexport from dataset {}", datasetId, e);
@@ -624,28 +628,30 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       if (totalRecords != null && totalRecords > 0L) {
 
         Object resultPosition = null;
-
-
         // We need to know which is the first position in the temp table to take the results
         // If there's no position that means we have to import the data from that request
         resultPosition = queryGetRecordCountbyFilterChain(POSITION_QUERY, datasetId, filterChain);
-        LOG.info("First position in the temp_etlexport {}", resultPosition.toString());
 
-        Long firstPosition = Long.valueOf(resultPosition.toString());
-        Long initExtract = (Long.valueOf(offset - 1) * limit) + firstPosition;
-        for (Long offsetAux2 = initExtract; offsetAux2 < initExtract + limit
-            && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
-          if (offsetAux2 + limitAux > initExtract + limit) {
-            limitAux = initExtract + limit - offsetAux2;
+        LOG.info("For datasetId {} and tableSchemaId {} first position in the temp_etlexport {} ", datasetId, tableSchemaId, resultPosition);
+
+        if(resultPosition != null) {
+
+          Long firstPosition = Long.valueOf(resultPosition.toString());
+          Long initExtract = (Long.valueOf(offset - 1) * limit) + firstPosition;
+          for (Long offsetAux2 = initExtract; offsetAux2 < initExtract + limit
+                  && offsetAux2 < initExtract + totalRecords; offsetAux2 += limitAux) {
+            if (offsetAux2 + limitAux > initExtract + limit) {
+              limitAux = initExtract + limit - offsetAux2;
+            }
+
+            List recordJsons = queryGetRecordJSONbyFilterChain(RECORD_JSON_QUERY, datasetId, filterChain, offsetAux2, limitAux);
+
+            // add to table's records list
+            if (recordJsons != null) {
+              tableRecords.addAll(gsonparser.parseList(recordJsons.toString()));
+            }
+            System.gc();
           }
-
-          List recordJsons = queryGetRecordJSONbyFilterChain(RECORD_JSON_QUERY, datasetId, filterChain, offsetAux2, limitAux);
-
-          // add to table's records list
-          if (recordJsons != null) {
-            tableRecords.addAll(gsonparser.parseList(recordJsons.toString()));
-          }
-          System.gc();
         }
       }
       resultTable.put("records", tableRecords);
