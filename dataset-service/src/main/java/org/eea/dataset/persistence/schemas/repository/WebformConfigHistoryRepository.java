@@ -5,6 +5,7 @@ import org.eea.dataset.persistence.schemas.domain.webform.WebformConfigHistory;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,5 +15,8 @@ public interface WebformConfigHistoryRepository extends MongoRepository<WebformC
 
   // Find the latest version
   Optional<WebformConfigHistory> findFirstByIdWebformConfigSchemaOrderByVersionDesc(ObjectId idWebformConfigSchema);
+
+  // TODO: Find all records with the same idWebformConfigSchema
+  List<WebformConfigHistory> findByIdWebformConfigSchema(ObjectId idWebformConfigSchema);
 }
 
