@@ -875,8 +875,8 @@ public class DataflowServiceImpl implements DataflowService {
           .filter(obligationWithDataflows -> !obligationWithDataflows.getDataflows().isEmpty())
           .collect(Collectors.toList());
 
-      int start = (pageNum - 1) * pageSize;
-      int end = Math.min(start + pageSize, obligationWithDataflowsList.size());
+      int start = pageNum * pageSize;
+      int end = Math.min(start + pageSize - 1, obligationWithDataflowsList.size());
       List<ObligationWithDataflowsVO> paginatedList = obligationWithDataflowsList.subList(start, end);
 
       PaginatedObligationVO paginatedObligationVO = new PaginatedObligationVO();
