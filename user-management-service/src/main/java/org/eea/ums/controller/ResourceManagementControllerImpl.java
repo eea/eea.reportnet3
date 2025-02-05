@@ -99,6 +99,23 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   }
 
   /**
+   * Delete resource.
+   *
+   * @param resourceInfoVO the resource info VO
+   */
+  @DeleteMapping(value = "private/delete")
+  @ResponseStatus(HttpStatus.OK)
+  @Override
+  @HystrixCommand
+  @ApiOperation(value = "Delete a list of Resources", hidden = true)
+  public void deleteResourcePrivate(@ApiParam(type = "List<Object>",
+          value = "ResourceInfoVO Object List") @RequestBody List<ResourceInfoVO> resourceInfoVO) {
+    ThreadPropertiesManager.setVariable("user",
+            SecurityContextHolder.getContext().getAuthentication().getName());
+    securityProviderInterfaceService.deleteResourceInstances(resourceInfoVO);
+  }
+
+  /**
    * Delete resource by name.
    *
    * @param resourceName the resource name
@@ -127,6 +144,20 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
   public void deleteResourceByDatasetId(@ApiParam(type = "Object",
       value = "Dataset ids Long list") @RequestParam("datasetIds") List<Long> datasetIds) {
     securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetIds);
+  }
+
+  /**
+   * Delete resource by dataset id.
+   *
+   * @param datasetId the dataset ids
+   */
+  @DeleteMapping("private/delete_by_dataset_id")
+  @Override
+  @HystrixCommand
+  @ApiOperation(value = "Delete a Resource its Dataset Id", hidden = true)
+  public void deleteResourceByDatasetIdPrivate(@ApiParam(type = "Object",
+          value = "Dataset ids Long") @RequestParam("datasetId") Long datasetId) {
+    securityProviderInterfaceService.deleteResourceInstancesByDatasetId(datasetId);
   }
 
   /**
@@ -172,6 +203,25 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
     return securityProviderInterfaceService.getGroupsByIdResourceType(idResource, resourceType);
   }
 
+  /**
+   * Gets the groups by id resource type.
+   *
+   * @param idResource the id resource
+   * @param resourceType the resource type
+   *
+   * @return the groups by id resource type
+   */
+  @GetMapping("private/getResourceInfoVOByResource")
+  @Override
+  @HystrixCommand
+  @ApiOperation(value = "Get Resources by their Type", response = ResourceInfoVO.class,
+          responseContainer = "List", hidden = true)
+  public List<ResourceInfoVO> getGroupsByIdResourceTypePrivate(
+          @ApiParam(value = "Resource id", example = "0") @RequestParam("idResource") Long idResource,
+          @ApiParam(type = "Object",
+                  value = "Resource type enum") @RequestParam("resourceType") ResourceTypeEnum resourceType) {
+    return securityProviderInterfaceService.getGroupsByIdResourceType(idResource, resourceType);
+  }
 
   /**
    * Creates the resources.

@@ -391,6 +391,28 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   }
 
   /**
+   * Delete dataset schema.
+   *
+   * @param datasetId the dataset id
+   */
+  @DeleteMapping(value = "private/dataset/deleteDatasetSchemaRulesAndIntegrity", produces = MediaType.APPLICATION_JSON_VALUE)
+  @Override
+  @ApiOperation(value = "Delete Dataset Schema", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete"),
+          @ApiResponse(code = 400, message = "dataset incorrect or execution error"),
+          @ApiResponse(code = 404, message = EEAErrorMessage.DATASET_NOTFOUND),
+          @ApiResponse(code = 401, message = EEAErrorMessage.PK_REFERENCED),
+          @ApiResponse(code = 403, message = EEAErrorMessage.NOT_ENOUGH_PERMISSION),
+          @ApiResponse(code = 500, message = "Error deleting")})
+  public void deleteDatasetSchemaRulesAndIntegrityPrivate(@RequestParam("schemaId") String schemaId, @RequestParam("datasetId") Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+    dataschemaService.deleteDatasetSchema(schemaId, datasetId);
+  }
+
+  /**
    * Creates the table schema.
    *
    * @param datasetId the dataset id

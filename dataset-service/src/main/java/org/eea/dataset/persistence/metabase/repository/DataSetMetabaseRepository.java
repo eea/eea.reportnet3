@@ -147,4 +147,18 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    */
   @Query("SELECT d.dataProviderId FROM DataSetMetabase d where d.id = :datasetId")
   Long findDataProviderIdById(@Param("datasetId") Long datasetId);
-}
+
+
+  @Query(value = "SELECT ds.id AS datasetId, " +
+          "COALESCE( " +
+          "   (SELECT 'Dataset-' || ds.id FROM reporting_dataset rds WHERE rds.id = ds.id), " +
+          "   (SELECT 'Dataschema-' || ds.id FROM design_dataset rds WHERE rds.id = ds.id), " +
+          "   (SELECT 'EUDataset-' || ds.id FROM eu_dataset rds WHERE rds.id = ds.id), " +
+          "   (SELECT 'TestDataset-' || ds.id FROM test_dataset rds WHERE rds.id = ds.id), " +
+          "   (SELECT 'DataCollection-' || ds.id FROM data_collection rds WHERE rds.id = ds.id), " +
+          "   (SELECT 'ReferenceDataset-' || ds.id FROM reference_dataset rds WHERE rds.id = ds.id), " +
+          "   'fail' " +
+          ") AS datasetGroupPrefix " +
+          "FROM dataset ds " +
+          "WHERE ds.dataflowid = :dataflowId", nativeQuery = true)
+  List<Object[]> findDatasetGroupsByDataflowId(@Param("dataflowId") Long dataflowId);}

@@ -337,6 +337,45 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
   }
 
   /**
+   * Delete resource instances containing the ID in the name.
+   * <p>
+   * Example: Dataflow-1-DATA_CUSTODIAN and Dataflow-1-LEAD_REPORTER would be deleted if the list
+   * contains the ID 1.
+   * </p>
+   *
+   * @param datasetId the dataset ids
+   */
+  @Override
+  public void deleteResourceInstancesByDatasetId(Long datasetId) {
+    if (datasetId == null) {
+      return;
+    }
+    // Retrieve the groups for the given datasetId.
+    GroupInfo[] groupCall = keycloakConnectorService.getGroupsWithSearch(String.valueOf(datasetId));
+    List<GroupInfo> groups = new ArrayList<>();
+    if (groupCall != null && groupCall.length > 0) {
+      groups.addAll(Arrays.asList(groupCall));
+    }
+
+    for (GroupInfo group : groups) {
+      String[] parts = group.getName().split("-");
+      if (parts.length > 1) {
+        try {
+          Long groupDatasetId = Long.parseLong(parts[1]);
+          if (groupDatasetId.equals(datasetId)) {
+            keycloakConnectorService.deleteGroupDetail(group.getId());
+            LOG.info("Group {} with id {} deleted", group.getName(), group.getId());
+          }
+        } catch (NumberFormatException e) {
+          LOG.warn("Skipping group with unexpected name format: {}", group.getName());
+        }
+      } else {
+        LOG.warn("Skipping group with insufficient name parts: {}", group.getName());
+      }
+    }
+  }
+
+  /**
    * Adds the user to user group.
    *
    * @param userId the user resourceId

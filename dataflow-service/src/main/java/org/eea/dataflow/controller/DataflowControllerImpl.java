@@ -17,6 +17,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.dataflow.service.DataflowService;
+import org.eea.dataflow.service.DataflowCleanupService;
 import org.eea.dataflow.service.RepresentativeService;
 import org.eea.dataflow.service.file.DataflowHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -85,6 +86,11 @@ public class DataflowControllerImpl implements DataFlowController {
   @Lazy
   private DataflowService dataflowService;
 
+
+  /** The dataflow service. */
+  @Autowired
+  @Lazy
+  private DataflowCleanupService dataflowCleanupService;
   /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
@@ -1484,5 +1490,21 @@ public class DataflowControllerImpl implements DataFlowController {
       LOG.error("Unexpected error! Could not update provider group id {} for dataflow with id {} ", dataProviderGroupId, dataflowId, e);
       throw e;
     }
+  }
+
+  /**
+   * Endpoint to trigger the cleanup of a specific dataflow by ID.
+   *
+   * @return a response indicating the success or failure of the operation.
+   */
+  @GetMapping("/delete")
+  @Override
+  public ResponseEntity<String> cleanupDataflow() {
+    try {
+      dataflowCleanupService.deleteDataflowsOlderThanNumberOfMonths(1);
+      return ResponseEntity.ok("Cleanup initiated for dataflow ID: " );
+    } catch (Exception e) {
+    }
+      return null;
   }
 }

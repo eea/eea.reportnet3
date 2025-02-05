@@ -5,6 +5,7 @@ package org.eea.dataset.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import javax.annotation.CheckForNull;
 import org.apache.commons.lang3.StringUtils;
@@ -742,5 +743,16 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   @GetMapping(value = "/private/getAllDatasetsByDataflowId/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   public List<DataSetMetabaseVO> getAllDatasetsByDataflowId(@PathVariable Long dataflowId) {
     return datasetMetabaseService.getDataSetIdByDataflowId(dataflowId);
+  }
+
+  /**
+   * Endpoint to retrieve dataset Ids and groups by dataflow ID.
+   *
+   * @param dataflowId The ID of the dataflow.
+   * @return A map of dataset IDs to dataset group prefixes.
+   */
+  @GetMapping("private/getDatasetIdsAndGroups/{dataflowId}")
+  public Map<Long, String> getDatasetIdsAndGroups(@PathVariable Long dataflowId) {
+    return datasetMetabaseService.getDatasetIdsAndGroupsByDataflowId(dataflowId);
   }
 }

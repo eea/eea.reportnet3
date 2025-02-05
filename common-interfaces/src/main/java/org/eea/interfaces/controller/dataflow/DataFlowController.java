@@ -32,7 +32,10 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public interface DataFlowController {
 
-  /**
+    @GetMapping("/delete")
+    ResponseEntity<String> cleanupDataflow();
+
+    /**
    * The Interface DataFlowControllerZuul.
    */
   @FeignClient(value = "dataflow", path = "/dataflow")
