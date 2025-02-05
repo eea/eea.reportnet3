@@ -133,13 +133,15 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             deleteRuleFolderIfExists(validationResolver, ruleVO);
 
             List<Object> parameters = new ArrayList<>();
+
             String fieldName = getFieldName(datasetSchemaId, tableSchemaId, ruleVO);
+
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
             Map<String, List<String>> headerNames = new HashMap<>();  //map of method as key and list of field names (that exist as parameters in method) as values
 
             query.append("select record_id");
             if (!fieldName.equals("")) {
-                query.append(COMMA).append(fieldName);
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldName));
             }
             Map<String, String> fieldSchemaIdNameMap = new HashMap<>();
             createHeaders(datasetSchemaId, query, parameters, fieldName, headerNames, ruleVO.getWhenCondition(), fieldSchemaIdNameMap);
@@ -384,6 +386,10 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private boolean isRecordValid(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object, Map<String, String> fieldSchemaIdNameMap)
             throws IllegalAccessException, InvocationTargetException {
         List<Object> parameters;
+
+        //remove "" "" added to field name for safe sql expressions
+        //fieldName = dremioHelperService.removeQuotesFromFieldNames(fieldName);
+
         RuleExpressionDTO ruleExpressionDTO = ruleVO.getWhenCondition();
         String ruleMethodName = ruleExpressionDTO.getOperator().getFunctionName();
         boolean isValid = false;
@@ -509,8 +515,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             parameters = ruleExpressionDTO.getParams();
             parameters.forEach(p -> {
                 FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, (String) p);
-                hNames.add(fieldSchema.getName());
-                query.append(COMMA).append(fieldSchema.getName());
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
                 fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             });
             headerNames.put(ruleMethodName, hNames);
@@ -608,7 +613,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     list.add(fieldSchema.getName());
                 }
                 headerNames.put(methodName, list);
-                query.append(COMMA).append(fieldSchema.getName());
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
                 fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             }
         }

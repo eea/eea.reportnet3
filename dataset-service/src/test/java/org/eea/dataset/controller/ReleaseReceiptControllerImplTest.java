@@ -115,10 +115,25 @@ public class ReleaseReceiptControllerImplTest {
         Assert.assertEquals(expectedVO, response.getBody());
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test
     public void testGetReleaseReceiptByDataflowId_NotFound() throws EEAException {
-        Mockito.when(releaseReceiptService.getReleaseReceiptByDataflowId(1L)).thenThrow(new EEAException("Not found"));
+        // Mock the service method to return null (simulate no data found)
+        Mockito.when(releaseReceiptService.getReleaseReceiptByDataflowId(1L)).thenReturn(null);
 
-        releaseReceiptController.getReleaseReceiptByDataflowId(1L);
+        // Call the controller method
+        ResponseEntity<ReleaseReceiptVO> response = releaseReceiptController.getReleaseReceiptByDataflowId(1L);
+
+        // Assert that the response status is 200 OK
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        // Manually compare the fields of the returned ReleaseReceiptVO with an empty object
+        ReleaseReceiptVO expected = new ReleaseReceiptVO();
+        ReleaseReceiptVO actual = response.getBody();
+
+        Assert.assertNotNull(actual);
+        Assert.assertEquals(expected.getId(), actual.getId());
+        Assert.assertEquals(expected.getNote(), actual.getNote());
+        Assert.assertEquals(expected.getDataflowId(), actual.getDataflowId());
     }
+
 }

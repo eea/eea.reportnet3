@@ -2744,12 +2744,11 @@ public class FileTreatmentHelper implements DisposableBean {
         private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out, DatasetTypeEnum datasetTypeEnum) {
             try {
                 File csvFile;
+                List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
-
                     csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
                 } else {
-                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum);
+                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers);
                 }
 
                 s3ConvertService.convertParquetToCSVinZIP(csvFile, tableName, out);
@@ -2761,12 +2760,11 @@ public class FileTreatmentHelper implements DisposableBean {
 
         private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, DatasetTypeEnum datasetTypeEnum) {
             try {
+                List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
-
                     s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
                 } else {
-                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum);
+                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers);
                 }
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in convertParquetToCSV for datasetId {} and tableName {}", datasetId, tableName, e);

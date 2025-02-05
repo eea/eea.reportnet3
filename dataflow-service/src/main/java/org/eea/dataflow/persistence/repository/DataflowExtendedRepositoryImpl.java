@@ -122,6 +122,73 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
       + "right join data_provider dp on r.data_provider_id = dp.id\r\n"
       + "inner join dataset_aux on d.id = dataset_aux.dataflowid";
 
+  // this implementation is about all dataflows so the changes are:
+  // - removed "public dataflow flag set to true"
+  // - filters some dataflows based on names (having "TEST", "DEMO" etc)
+  // - joins representatives to get their emails
+  private static final String QUERY_JSON_COUNTRY_INTERNAL = "with doc as (    \r\n"
+          + "select json_array_elements(asjsonconverter) as docaux from cast (:aux as json) asjsonconverter),\r\n"
+          + "obligationtable as (select (docaux ->> 'obligationId' ) as obligationId,\r\n"
+          + "(docaux ->> 'oblTitle' ) as obligation,\r\n"
+          + "(docaux ->> 'description' ) as description,\r\n"
+          + "(docaux ->> 'validSince' ) as validSince,\r\n" + "(docaux ->> 'validTo' ) as validTo,\r\n"
+          + "(docaux ->> 'comment' ) as comment,\r\n"
+          + "(docaux ->> 'nextDeadline' ) as nextDeadline,\r\n"
+          + "cast((docaux ->> 'legalInstrument' )as json)->>'sourceTitle' as legal_Instrument,\r\n"
+          + "(docaux ->> 'client' ) as client,\r\n" + "(docaux ->> 'countries' ) as countries,\r\n"
+          + "(docaux ->> 'issues' ) as issues,\r\n" + "(docaux ->> 'reportFreq' ) as reportFreq,\r\n"
+          + "(docaux ->> 'reportFreqDetail' ) as reportFreqDetail\r\n" + "from doc),\r\n"
+          + "   table_aux as ( select d.id as datasetid, d.dataflowid, d.status, dp.code, s.date_released from dataset d\r\n"
+          + "inner join reporting_dataset rd \r\n" + "    on rd.id = d.id \r\n"
+          + "inner join data_provider dp \r\n" + "    on dp.id = d.data_provider_id \r\n"
+          + "left join \"snapshot\" s\r\n" + "    on d.id = s.reporting_dataset_id \r\n"
+          + "where dp.code = :countryCode),\r\n"
+          + "table_aux2 as (select dataflowid ,jsonb_agg(json_build_object('delivery_status',\"status\",'code',\"code\",'date_released',\"date_released\")) datasets from table_aux group by dataflowid),\r\n"
+          + "pending_aux as(select dataflowid, count(status) totalpendings from table_aux where status = 'PENDING' group by dataflowid), \r\n"
+          + "released_aux as(select dataflowid, count(status) totalreleased from table_aux where status = 'RELEASED' group by dataflowid),\r\n"
+          + "technically_aux as(select dataflowid, count(status) totaltec from table_aux where status = 'TECHNICALLY_ACCEPTED' group by dataflowid),\r\n"
+          + "correction_aux as(select dataflowid, count(status) totalcorrec from table_aux where status = 'CORRECTION_REQUESTED' group by dataflowid),\r\n"
+          + "final_aux as(select dataflowid, count(status) totalfinal from table_aux where status = 'FINAL_FEEDBACK' group by dataflowid),\r\n"
+          + "total_aux as(select dataflowid, count(status) totaldatasets from table_aux group by dataflowid),\r\n"
+          + "table_aux3 as(select t2.dataflowid, totaldatasets, coalesce (totalpendings,0) pending, coalesce (totalreleased,0) released,coalesce (totaltec,0) technically\r\n"
+          + "    ,coalesce (totalcorrec,0) correction ,coalesce (totalfinal,0) finalfeedback,datasets from table_aux2 t2 \r\n"
+          + "left join total_aux on t2.dataflowid = total_aux.dataflowid \r\n"
+          + "left join pending_aux on t2.dataflowid = pending_aux.dataflowid \r\n"
+          + "left join released_aux on t2.dataflowid = released_aux.dataflowid\r\n"
+          + "left join technically_aux on t2.dataflowid = technically_aux.dataflowid\r\n"
+          + "left join correction_aux on t2.dataflowid = correction_aux.dataflowid\r\n"
+          + "left join final_aux on t2.dataflowid = final_aux.dataflowid),\r\n"
+          + "dataset_aux as (select dataflowid,delivery_status,max(date_released) date_released from (select dataflowid,\r\n"
+          + "(case when pending > 0  then 'PENDING'\r\n"
+          + "when released = totaldatasets then 'RELEASED'\r\n"
+          + "when technically = totaldatasets then 'TECHNICALLY_ACCEPTED'\r\n"
+          + "when correction > 0 then 'CORRECTION_REQUESTED'\r\n"
+          + "when finalfeedback > 0 then 'FINAL_FEEDBACK'\r\n" + "end) as delivery_status\r\n"
+          + ",jsonb_array_elements(datasets) ->> 'date_released' date_released\r\n"
+          + "from table_aux3) table_aux4 group by dataflowid,delivery_status)\r\n"
+          + ",\n" +
+          "dataflow_filtered AS (\n" +
+          "SELECT\n" +
+          "\td.id,\n" +
+          "\td.is_deleted,\n" +
+          "\td.obligation_id\n" +
+          "FROM\n" +
+          "\tdataflow d\n" +
+          "WHERE\n" +
+          "\td.name NOT ILIKE '%TEST%'\n" +
+          "\tAND d.name NOT ILIKE '%DELETE%'\n" +
+          "\tAND d.name NOT ILIKE '%DEMO%'\n" +
+          "\tAND d.name NOT ILIKE '%CLONE%'\n" +
+          "\tAND d.name NOT ILIKE '%OBSOLETE%'\n" +
+          "\tAND d.name NOT ILIKE '%DESIGN%'\n" +
+          "\tAND d.name NOT ILIKE '%MASTER%'\n" +
+          "\tAND d.is_deleted = FALSE)"
+          + "    select d.*,ot.legal_Instrument, ot.obligation, dataset_aux.delivery_status, dataset_aux.date_released from obligationtable ot RIGHT join dataflow d \r\n"
+          + "    on d.obligation_id = cast(ot.obligationId as integer)\r\n"
+          + "left join representative r on d.id = r.dataflow_id\r\n"
+          + "right join data_provider dp on r.data_provider_id = dp.id\r\n"
+          + "inner join dataset_aux on d.id = dataset_aux.dataflowid";
+
   /** The Constant COUNTRY_CODE. */
   private static final String COUNTRY_CODE_CONDITION = " dp.code = :countryCode ";
 
@@ -337,25 +404,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
     return Long.valueOf(query.getResultList().get(0).toString());
   }
 
-  /**
-   * Count by country.
-   *
-   * @param obligationJson the obligation json
-   * @param filters the filters
-   * @param orderHeader the order header
-   * @param asc the asc
-   * @param countryCode the country code
-   * @return the long
-   * @throws EEAException the EEA exception
-   */
-  @Override
-  public Long countByCountryAllDataflows(String obligationJson, Map<String, String> filters, String orderHeader,
-                                         boolean asc, String countryCode) throws EEAException {
-    Query query = buildCountByCountryQuery(obligationJson, filters, orderHeader, asc, countryCode);
-
-    return Long.valueOf(query.getResultList().get(0).toString());
-  }
-
   private Query buildCountByCountryQuery(String obligationJson, Map<String, String> filters, String orderHeader,
                                          boolean asc, String countryCode) throws EEAException {
     StringBuilder sb = new StringBuilder();
@@ -394,7 +442,6 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     query.setParameter("aux", obligationJson);
     query.setParameter(COUNTRY_CODE, countryCode);
-    query.setParameter("public", Boolean.TRUE);
 
     return Long.valueOf(query.getResultList().get(0).toString());
   }
@@ -452,7 +499,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     Query query = entityManager.createNativeQuery(sb.toString());
 
-    setParameters(obligationJson, true, filters, query, null, null, null);
+    setParameters(obligationJson, false, filters, query, null, null, null);
 
     query.setParameter(COUNTRY_CODE, countryCode);
 
@@ -815,7 +862,7 @@ public class DataflowExtendedRepositoryImpl implements DataflowExtendedRepositor
 
     boolean addAnd = true;
 
-    sb.append(QUERY_JSON_COUNTRY);
+    sb.append(QUERY_JSON_COUNTRY_INTERNAL);
     sb.append(" where " + HAS_DATASETS);
     sb.append(AND + COUNTRY_CODE_CONDITION);
 

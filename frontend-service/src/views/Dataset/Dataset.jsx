@@ -994,7 +994,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             description: tableSchema.description || tableSchema.tableSchemaDescription,
             id: tableSchema.tableSchemaId,
             name: tableSchema.tableSchemaName,
-            notEmpty: tableSchema.notEmpty,
+            notEmpty: tableSchema.tableSchemaNotEmpty,
             hasInfoTooltip: true,
             hasErrors: {
               ...datasetStatistics.tables.filter(table => table.tableSchemaId === tableSchema.tableSchemaId)[0]

@@ -24,11 +24,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import  java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -468,5 +470,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         String createNewTableQuery = "CREATE TABLE " + newTablePathInDremio + " AS SELECT * FROM " + oldTablePathInDremio;
         String processId = executeSqlStatement(createNewTableQuery);
         checkIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId, null);
+    }
+
+    @Override
+    public String addQuotesToFieldNames(String fieldNames) {
+        if (fieldNames != null && !fieldNames.isBlank()) {
+            fieldNames = Arrays.stream(fieldNames.split(",")) // Split by commas
+                    .map(String::trim)                        // Remove spaces around field names
+                    .filter(field -> !field.isBlank())        // Filter out empty or invalid field names
+                    .filter(field -> !field.contains("\"")) // Skip fields that already contain double quotes
+                    .map(field -> "\"" + field + "\"")  // Wrap each field in double quotes
+                    .collect(Collectors.joining(","));      // Join them back with commas
+        }
+        return fieldNames;
     }
 }

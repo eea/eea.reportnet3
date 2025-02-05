@@ -129,7 +129,7 @@ public class ReleaseReceiptControllerImpl implements ReleaseReceiptController {
         try {
             ReleaseReceiptVO releaseReceiptVO = releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
 
-            return ResponseEntity.ok(releaseReceiptVO);
+            return ResponseEntity.ok(releaseReceiptVO != null ? releaseReceiptVO : new ReleaseReceiptVO());
 
         } catch (EEAException e) {
             LOG.error("Error retrieving release receipt for dataflowId {}: {}", dataflowId, e.getMessage(), e);

@@ -164,7 +164,7 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
 
   private String getImportPathForParquet(DataSetMetabaseVO dataset) {
     if (Objects.requireNonNull(dataset.getDatasetTypeEnum()) == DatasetTypeEnum.REFERENCE) {
-      return S3_DATAFLOW_REFERENCE_FOLDER_PATH;
+      return S3_DATAFLOW_REFERENCE_PATH;
     }
     return S3_TABLE_NAME_WITH_PARQUET_FOLDER_PATH;
   }

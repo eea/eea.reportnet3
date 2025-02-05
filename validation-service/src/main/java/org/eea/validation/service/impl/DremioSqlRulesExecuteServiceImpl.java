@@ -357,7 +357,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
                 break;
             case 2:
-                recordIds = (List<String>) method.invoke(object, fieldName, tablePath);  //isUniqueConstraint
+                recordIds = (List<String>) method.invoke(object, dremioHelperService.addQuotesToFieldNames(fieldName), tablePath);  //isUniqueConstraint
                 break;
             case 5:
                 //checkIntegrityConstraint
@@ -477,11 +477,13 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
         TableSchema referencedTableSchema = UniqueValidationUtils.getTableSchemaFromIdFieldSchema(referDatasetSchema, integrityVO.getReferencedFields().get(0));
         integrityVO.getOriginFields().forEach(originField -> {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(originSchemaId, originField);
-            origFieldNames.add(fieldSchema.getName());
+            origFieldNames.add(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
+
         });
         integrityVO.getReferencedFields().forEach(referField -> {
             FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(referencedSchemaId, referField);
-            referFieldNames.add(fieldSchema.getName());
+            referFieldNames.add(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
+
         });
         S3PathResolver origTableTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdOrigin, originTableSchema.getNameTableSchema());
         //if the dataset to validate is of reference type, then the table path should be changed
