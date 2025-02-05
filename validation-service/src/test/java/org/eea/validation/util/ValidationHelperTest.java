@@ -231,7 +231,6 @@ public class ValidationHelperTest {
   public void executeValidation() throws EEAException {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
-    ReflectionTestUtils.setField(validationHelper, "initialTax", 2);
     ConsumerGroupVO consumerGroups = new ConsumerGroupVO();
     Collection<MemberDescriptionVO> members = new ArrayList<>();
 
@@ -285,7 +284,6 @@ public class ValidationHelperTest {
   public void executeValidation2() throws EEAException {
     ReflectionTestUtils.setField(validationHelper, "fieldBatchSize", 20);
     ReflectionTestUtils.setField(validationHelper, "recordBatchSize", 20);
-    ReflectionTestUtils.setField(validationHelper, "initialTax", 2);
     List<TableValue> tables = new ArrayList<>();
     TableValue table = new TableValue();
     table.setId(1l);

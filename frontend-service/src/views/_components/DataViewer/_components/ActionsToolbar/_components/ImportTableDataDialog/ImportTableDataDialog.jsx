@@ -21,6 +21,7 @@ export const ImportTableDataDialog = ({
   datasetId,
   hasWritePermissions,
   isDataflowOpen,
+  isDesignDataset,
   isDesignDatasetEditorRead,
   isIcebergCreated,
   isTableDataRestorationInProgress,
@@ -62,6 +63,8 @@ export const ImportTableDataDialog = ({
       notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
     }
   };
+
+  const onChangeImportDialogVisibility = isVisible => setImportTableDialogVisible(isVisible);
 
   const onUpload = async () => {
     const action = 'TABLE_IMPORT';
@@ -151,13 +154,16 @@ export const ImportTableDataDialog = ({
           dialogVisible={importTableDialogVisible}
           infoTooltip={`${resourcesContext.messages['supportedFileExtensionsTooltip']} .csv`}
           invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+          isDesignDataset={isDesignDataset}
           isDialog={true}
           name="file"
+          onChangeImportDialogVisibility={onChangeImportDialogVisibility}
           onError={onImportTableError}
           onUpload={onUpload}
           onValidateFile={onValidateFile}
           replaceCheck={true}
           s3={bigData ? true : false}
+          tableName={tableName}
           tableSchemaId={tableId}
           timeoutBeforeClose={true}
           url={`${window.env.REACT_APP_BACKEND}${getUrl(DatasetConfig.importFileTableUpd, {

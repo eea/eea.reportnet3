@@ -348,4 +348,8 @@ public interface DatasetMetabaseController {
       @RequestParam("providerIds") List<Long> providerIds);
 
 
+  @GetMapping(value = "/private/getAllDatasetsByDataflowId/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<DataSetMetabaseVO> getAllDatasetsByDataflowId(@PathVariable Long dataflowId);
+
+
 }

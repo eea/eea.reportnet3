@@ -21,6 +21,7 @@ import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
+import org.eea.dataset.service.ReleaseReceiptService;
 import org.eea.dataset.service.ReportingDatasetService;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.pdf.ReceiptPDFGenerator;
@@ -41,6 +42,7 @@ import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.ReleaseReceiptVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -50,7 +52,7 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
-import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptInfoVO;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -181,6 +183,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  /** The release receipt service. */
+  @Autowired
+  private ReleaseReceiptService releaseReceiptService;
 
   /** The representative controller zuul. */
   @Autowired
@@ -966,22 +972,37 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Override
   public void createReceiptPDF(OutputStream out, Long dataflowId, Long dataProviderId) {
 
-    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
+    ReleaseReceiptInfoVO receiptInfo = new ReleaseReceiptInfoVO();
     DataFlowVO dataflow = dataflowControllerZuul.findById(dataflowId, null);
+
+    ReleaseReceiptVO releaseReceipt;
+    try {
+      releaseReceipt = releaseReceiptService.getReleaseReceiptByDataflowId(dataflowId);
+      if (releaseReceipt == null) {
+        releaseReceipt = new ReleaseReceiptVO();
+        releaseReceipt.setNote("");
+      }
+    } catch (EEAException e) {
+      LOG.error("Cannot get release receipt for dataflow id {}. Message: {}",
+              dataflowId, e.getMessage(), e);
+      releaseReceipt = new ReleaseReceiptVO();
+      releaseReceipt.setNote("");
+    }
 
     //if is manual acceptance a text note is added to final receipt
     boolean isManualAcceptance = Boolean.TRUE.equals(dataflow.isManualAcceptance());
 
-    receipt.setIdDataflow(dataflowId);
-    receipt.setDataflowName(dataflow.getName());
-    receipt.setObligationId(dataflow.getObligation().getObligationId());
-    receipt.setObligationTitle(dataflow.getObligation().getOblTitle());
-    receipt.setDatasets(dataflow.getReportingDatasets().stream()
+    receiptInfo.setIdDataflow(dataflowId);
+    receiptInfo.setDataflowName(dataflow.getName());
+    receiptInfo.setNote(releaseReceipt.getNote());
+    receiptInfo.setObligationId(dataflow.getObligation().getObligationId());
+    receiptInfo.setObligationTitle(dataflow.getObligation().getOblTitle());
+    receiptInfo.setDatasets(dataflow.getReportingDatasets().stream()
             .filter(rd -> rd.getIsReleased() && rd.getDataProviderId().equals(dataProviderId))
             .collect(Collectors.toList()));
 
-    if (!receipt.getDatasets().isEmpty()) {
-      receipt.setProviderAssignation(receipt.getDatasets().get(0).getDataSetName());
+    if (!receiptInfo.getDatasets().isEmpty()) {
+      receiptInfo.setProviderAssignation(receiptInfo.getDatasets().get(0).getDataSetName());
     }
 
     List<RepresentativeVO> representatives =
@@ -989,12 +1010,12 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
                     .filter(r -> r.getDataProviderId().equals(dataProviderId)).collect(Collectors.toList());
 
     UserRepresentationVO user = userManagementControllerZull.getUserByUserId();
-    receipt.setEmail(user.getEmail());
+    receiptInfo.setEmail(user.getEmail());
 
     if (!representatives.isEmpty()) {
       RepresentativeVO representative = representatives.get(0);
 
-      receipt.setProviderEmail(user.getEmail());
+      receiptInfo.setProviderEmail(user.getEmail());
 
       // Check if it's needed to update the status of the button (i.e I only want to download the
       // receipt twice, but no state is changed)
@@ -1008,7 +1029,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
     }
 
-    receiptPDFGenerator.generatePDF(receipt, out, isManualAcceptance);
+    receiptPDFGenerator.generatePDF(receiptInfo, out, isManualAcceptance);
   }
 
   /**
@@ -1038,6 +1059,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   }
 
   /**
+   * Gets the snapshots released by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id dataset
+   */
+  @Override
+  public List<Date> getSnapshotsReleasedDatesByIdDataset(Long datasetId) {
+    List<Date> releasedDates =
+            snapshotRepository.findByReportingDatasetIdOrderByCreationDateDesc(datasetId)
+                    .stream().map(Snapshot::getDateReleased).collect(Collectors.toList());
+    return releasedDates;
+  }
+
+  /**
    * Gets the snapshots released by id data collection.
    *
    * @param dataCollectionId the data collection id
@@ -1049,6 +1084,20 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
             snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollectionId);
     return releaseMapper.entityListToClass(snapshots.stream()
             .filter(snapshot -> snapshot.getDateReleased() != null).collect(Collectors.toList()));
+  }
+
+  /**
+   * Gets the snapshot released dates by id data collection.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the snapshots released by id data collection
+   */
+  @Override
+  public List<Date> getSnapshotsReleasedDatesByIdDataCollection(Long dataCollectionId) {
+    List<Date> releasedDates =
+            snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollectionId)
+                    .stream().map(Snapshot::getDateReleased).collect(Collectors.toList());
+    return releasedDates;
   }
 
   /**
@@ -1078,6 +1127,35 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     return releaseMapper
             .entityListToClass(snapshots.stream().filter(snapshot -> snapshot.getDateReleased() != null
                     && Boolean.TRUE.equals(snapshot.getEuReleased())).collect(Collectors.toList()));
+  }
+
+
+  /**
+   * Gets the snapshot released dates by id EU dataset.
+   *
+   * @param euDatasetId the eu dataset id
+   * @return the snapshots released by id EU dataset
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Date> getSnapshotsReleasedDatesByIdEUDataset(Long euDatasetId) throws EEAException {
+    // find datacollectionid
+    EUDataset eudataset = eUDatasetRepository.findById(euDatasetId).orElse(null);
+    if (eudataset == null) {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    DataCollection dataCollection = dataCollectionRepository
+            .findFirstByDatasetSchema(eudataset.getDatasetSchema()).orElse(null);
+    if (dataCollection == null) {
+      LOG.error(EEAErrorMessage.DATASET_NOTFOUND);
+      throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
+    }
+    // find snapshots for the datacollection released in the eudataset
+    List<Date> releasedDates =
+            snapshotRepository.findByDataCollectionIdOrderByCreationDateDesc(dataCollection.getId())
+                    .stream().map(Snapshot::getDateReleased).collect(Collectors.toList());
+    return releasedDates;
   }
 
   /**
@@ -1131,6 +1209,36 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
         }
     }
     return releases;
+  }
+
+  /**
+   * Gets the dataset historic release dates per each type only dates.
+   *
+   * @param datasetId the dataset id
+   * @return the releases
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<Date> getReleaseDates(Long datasetId) throws EEAException {
+    List<Date> releaseDates = new ArrayList<>();
+    DatasetTypeEnum datasetType = datasetMetabaseService.findDatasetMetabase(datasetId).getDatasetTypeEnum();
+    if (DatasetTypeEnum.REPORTING
+            .equals(datasetType)) {
+      // if dataset is reporting return released dates
+      releaseDates = getSnapshotsReleasedDatesByIdDataset(datasetId);
+    } else {
+      // if the snapshot is a datacollection
+      if (DatasetTypeEnum.COLLECTION
+              .equals(datasetType)) {
+        releaseDates = getSnapshotsReleasedDatesByIdDataCollection(datasetId);
+      } else
+        // if the snapshot is an eudataset
+        if (DatasetTypeEnum.EUDATASET
+                .equals(datasetType)) {
+          releaseDates = getSnapshotsReleasedDatesByIdEUDataset(datasetId);
+        }
+    }
+    return releaseDates;
   }
 
 

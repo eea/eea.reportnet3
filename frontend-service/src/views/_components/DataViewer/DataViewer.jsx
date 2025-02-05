@@ -68,6 +68,7 @@ export const DataViewer = ({
   hasWritePermissions,
   dataflowType,
   isDataflowOpen = false,
+  isDesignDataset = false,
   isDesignDatasetEditorRead,
   isExportable,
   isFilterable,
@@ -1288,6 +1289,7 @@ export const DataViewer = ({
         hasCountryCode={hasCountryCode}
         hasWritePermissions={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
         isDataflowOpen={isDataflowOpen}
+        isDesignDataset={isDesignDataset}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
         isExportable={isExportable}
         isFilterable={isFilterable}

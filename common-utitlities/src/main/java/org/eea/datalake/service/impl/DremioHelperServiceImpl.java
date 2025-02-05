@@ -2,12 +2,14 @@ package org.eea.datalake.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import lombok.SneakyThrows;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.DremioApiJob;
 import org.eea.datalake.service.model.DremioItemTypeEnum;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dremio.controller.DremioApiController;
 import org.eea.interfaces.vo.dremio.*;
@@ -22,11 +24,13 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import  java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -105,6 +109,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         return false;
     }
 
+    @SneakyThrows
     @Override
     public DremioDirectoryItemsResponse getDirectoryItems(S3PathResolver s3PathResolver, String folderName) {
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_PATH : S3_DEFAULT_BUCKET_PATH;
@@ -124,11 +129,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         try {
             directoryItems = dremioApiController.getDirectoryItems(token, directoryPath);
         } catch (FeignException e) {
+            //retry call if there is an authentication error
+            String errorMessage = "Could not retrieve directory items for datasetId " + s3PathResolver.getDatasetId() + " and table " + s3PathResolver.getTableName();
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                directoryItems = dremioApiController.getDirectoryItems(token, directoryPath);
+                try {
+                    directoryItems = dremioApiController.getDirectoryItems(token, directoryPath);
+                }
+                catch (Exception e2){
+                    throw new DremioApiException(errorMessage);
+                }
             } else {
-                throw e;
+                throw new DremioApiException(errorMessage);
             }
         }
         return directoryItems;
@@ -157,6 +169,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         return folderId;
     }
 
+    @SneakyThrows
     @Override
     public void promoteFolderOrFile(S3PathResolver s3PathResolver, String folderName) {
         String directoryPath;
@@ -193,16 +206,24 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         try {
             dremioApiController.promote(token, folderId, requestBody);
         } catch (FeignException e) {
+            //retry call if there is an authentication error
+            String errorMessage = "Could not promote for datasetId " + s3PathResolver.getDatasetId() + " and folder " + folderName;
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                dremioApiController.promote(token, folderId, requestBody);
+                try {
+                    dremioApiController.promote(token, folderId, requestBody);
+                }
+                catch (Exception e2){
+                    throw new DremioApiException(errorMessage);
+                }
             } else {
-                throw e;
+                throw new DremioApiException(errorMessage);
             }
         }
         LOG.info("Promoted folder {}", directoryPath);
     }
 
+    @SneakyThrows
     @Override
     public void demoteFolderOrFile(S3PathResolver s3PathResolver, String folderName) {
         String bucketName = (BooleanUtils.isTrue(s3PathResolver.getIsIcebergTable())) ? S3_ICEBERG_BUCKET_PATH : S3_DEFAULT_BUCKET_PATH;
@@ -215,11 +236,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         try {
             dremioApiController.demote(token, folderId);
         } catch (FeignException e) {
+            //retry call if there is an authentication error
+            String errorMessage = "Could not demote for datasetId " + s3PathResolver.getDatasetId() + " and folder " + folderName;
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                dremioApiController.demote(token, folderId);
+                try {
+                    dremioApiController.demote(token, folderId);
+                }
+                catch (Exception e2){
+                    throw new DremioApiException(errorMessage);
+                }
             } else {
-                throw e;
+                throw new DremioApiException(errorMessage);
             }
         }
         LOG.info("Demoted folder {}", directoryPath);
@@ -238,33 +266,46 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
     }
 
+    @SneakyThrows
     @Override
     public String executeSqlStatement(String sqlStatement){
         DremioSqlRequestBody dremioSqlRequestBody = new DremioSqlRequestBody(sqlStatement);
         try {
             return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
         } catch (FeignException e) {
+            //retry call if there is an authentication error
+            String errorMessage = "Could not execute sql statement " + sqlStatement;
             if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
+                try {
+                    return dremioApiController.sqlQuery(token, dremioSqlRequestBody).getId();
+                }
+                catch (Exception e2){
+                    throw new DremioApiException(errorMessage);
+                }
             } else {
-                LOG.error("Could not execute sql statement {} in dremio", sqlStatement);
-                throw e;
+                throw new DremioApiException(errorMessage);
             }
         }
     }
 
+    @SneakyThrows
     @Override
-    public DremioJobStatusResponse pollForJobStatus(String id){
+    public DremioJobStatusResponse pollForJobStatus(String id) {
         try {
             return dremioApiController.pollForJobStatus(token, id);
         } catch (FeignException e) {
-            if (e.status()== HttpStatus.UNAUTHORIZED.value()) {
+            //retry call if there is an authentication error
+            String errorMessage = "Could not poll for dremio job status for job id" + id;
+            if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
                 token = this.getAuthToken();
-                return dremioApiController.pollForJobStatus(token, id);
+                try {
+                    return dremioApiController.pollForJobStatus(token, id);
+                } catch (Exception e2) {
+                    throw new DremioApiException(errorMessage);
+                }
             } else {
-                LOG.error("Could not retrieve dremio job status for id {}", id);
-                throw e;
+                throw new DremioApiException(errorMessage);
             }
         }
     }
@@ -429,5 +470,18 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         String createNewTableQuery = "CREATE TABLE " + newTablePathInDremio + " AS SELECT * FROM " + oldTablePathInDremio;
         String processId = executeSqlStatement(createNewTableQuery);
         checkIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId, null);
+    }
+
+    @Override
+    public String addQuotesToFieldNames(String fieldNames) {
+        if (fieldNames != null && !fieldNames.isBlank()) {
+            fieldNames = Arrays.stream(fieldNames.split(",")) // Split by commas
+                    .map(String::trim)                        // Remove spaces around field names
+                    .filter(field -> !field.isBlank())        // Filter out empty or invalid field names
+                    .filter(field -> !field.contains("\"")) // Skip fields that already contain double quotes
+                    .map(field -> "\"" + field + "\"")  // Wrap each field in double quotes
+                    .collect(Collectors.joining(","));      // Join them back with commas
+        }
+        return fieldNames;
     }
 }

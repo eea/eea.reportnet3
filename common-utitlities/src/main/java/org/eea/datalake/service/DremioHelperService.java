@@ -35,4 +35,6 @@ public interface DremioHelperService {
     long getRowCount(String tablePath) throws Exception;
 
     void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception;
+
+    String addQuotesToFieldNames(String fieldNames);
 }

@@ -112,20 +112,6 @@ public interface DataflowExtendedRepository {
 
 
   /**
-   * Count by country.
-   *
-   * @param obligationJson the obligation json
-   * @param filters the filters
-   * @param orderHeader the order header
-   * @param asc the asc
-   * @param countryCode the country code
-   * @return the long
-   * @throws EEAException the EEA exception
-   */
-  Long countByCountryAllDataflows(String obligationJson, Map<String, String> filters, String orderHeader,
-                                     boolean asc, String countryCode) throws EEAException;
-
-  /**
    * Count all dataflows by country.
    *
    * @param obligationJson the obligation json

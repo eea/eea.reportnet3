@@ -9,6 +9,7 @@ import org.eea.interfaces.vo.metabase.SnapshotVO;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -180,12 +181,28 @@ public interface DatasetSnapshotService {
   List<ReleaseVO> getSnapshotsReleasedByIdDataset(Long datasetId);
 
   /**
+   * Gets the snapshots released by id dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id dataset
+   */
+  List<Date> getSnapshotsReleasedDatesByIdDataset(Long datasetId);
+
+  /**
    * Gets the snapshots released by id data collection.
    *
    * @param dataCollectionId the data collection id
    * @return the snapshots released by id data collection
    */
   List<ReleaseVO> getSnapshotsReleasedByIdDataCollection(Long dataCollectionId);
+
+  /**
+   * Gets the snapshot released dates by id data collection.
+   *
+   * @param dataCollectionId the data collection id
+   * @return the snapshots released by id data collection
+   */
+  List<Date> getSnapshotsReleasedDatesByIdDataCollection(Long dataCollectionId);
 
   /**
    * Gets the snapshots released by id EU dataset.
@@ -195,6 +212,15 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   List<ReleaseVO> getSnapshotsReleasedByIdEUDataset(Long datasetId) throws EEAException;
+
+  /**
+   * Gets the snapshot released dates by id EU dataset.
+   *
+   * @param datasetId the dataset id
+   * @return the snapshots released by id EU dataset
+   * @throws EEAException the EEA exception
+   */
+  List<Date> getSnapshotsReleasedDatesByIdEUDataset(Long datasetId) throws EEAException;
 
   /**
    * Update snapshot EU release.
@@ -211,6 +237,15 @@ public interface DatasetSnapshotService {
    * @throws EEAException the EEA exception
    */
   List<ReleaseVO> getReleases(Long datasetId) throws EEAException;
+
+  /**
+   * Gets the dataset historic release dates per each type only dates.
+   *
+   * @param datasetId the dataset id
+   * @return the releases
+   * @throws EEAException the EEA exception
+   */
+  List<Date> getReleaseDates(Long datasetId) throws EEAException;
 
 
   /**

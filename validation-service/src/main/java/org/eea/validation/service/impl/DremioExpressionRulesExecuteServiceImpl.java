@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.dto.dataset.schemas.rule.RuleExpressionDTO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
@@ -111,33 +112,41 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         try {
             //if the dataset to validate is of reference type, then the table path should be changed
             S3PathResolver dataTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, tableName);
-
-            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+            String path;
+            if (dataset.getDatasetTypeEnum().equals(DatasetTypeEnum.REFERENCE)) {
+                path = S3_DATAFLOW_REFERENCE_QUERY_PATH;
+            } else {
+                path = S3_TABLE_AS_FOLDER_QUERY_PATH;
+            }
+            String tablePath = s3Service.getTableAsFolderQueryPath(dataTableResolver, path);
             long rowCount = dremioHelperService.getRowCount(tablePath);
             if (rowCount == 0) {
                 return;
             }
 
             S3PathResolver validationResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetId, S3_VALIDATION);
-            DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+
             String providerCode = getProviderCode(dataset);
             StringBuilder query = new StringBuilder();
             RuleVO ruleVO = rulesService.findRule(datasetSchemaId, ruleId);
             deleteRuleFolderIfExists(validationResolver, ruleVO);
 
             List<Object> parameters = new ArrayList<>();
+
             String fieldName = getFieldName(datasetSchemaId, tableSchemaId, ruleVO);
+
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
             Map<String, List<String>> headerNames = new HashMap<>();  //map of method as key and list of field names (that exist as parameters in method) as values
 
             query.append("select record_id");
             if (!fieldName.equals("")) {
-                query.append(COMMA).append(fieldName);
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldName));
             }
             Map<String, String> fieldSchemaIdNameMap = new HashMap<>();
             createHeaders(datasetSchemaId, query, parameters, fieldName, headerNames, ruleVO.getWhenCondition(), fieldSchemaIdNameMap);
 
-            query.append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+            query.append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
             runRuleAndCreateParquet(createParquetWithSQL, providerCode, ruleVO, fieldName, fileName, headerNames, rs,  dataTableResolver, validationResolver, fieldSchemaIdNameMap);
         } catch (Exception e1) {
@@ -377,6 +386,10 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
     private boolean isRecordValid(String providerCode, RuleVO ruleVO, String fieldName, Map<String, List<String>> headerNames, SqlRowSet rs, Class<?> cls, Object object, Map<String, String> fieldSchemaIdNameMap)
             throws IllegalAccessException, InvocationTargetException {
         List<Object> parameters;
+
+        //remove "" "" added to field name for safe sql expressions
+        //fieldName = dremioHelperService.removeQuotesFromFieldNames(fieldName);
+
         RuleExpressionDTO ruleExpressionDTO = ruleVO.getWhenCondition();
         String ruleMethodName = ruleExpressionDTO.getOperator().getFunctionName();
         boolean isValid = false;
@@ -502,8 +515,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             parameters = ruleExpressionDTO.getParams();
             parameters.forEach(p -> {
                 FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, (String) p);
-                hNames.add(fieldSchema.getName());
-                query.append(COMMA).append(fieldSchema.getName());
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
                 fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             });
             headerNames.put(ruleMethodName, hNames);
@@ -601,7 +613,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     list.add(fieldSchema.getName());
                 }
                 headerNames.put(methodName, list);
-                query.append(COMMA).append(fieldSchema.getName());
+                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
                 fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             }
         }

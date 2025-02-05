@@ -556,8 +556,6 @@ public class DataCollectionServiceImplTest {
     designs.add(design);
     Mockito.when(designDatasetService.getDesignDataSetIdByDataflowId(any()))
         .thenReturn(designs);
-    Mockito.when(rulesControllerZuul.getAllDisabledRules(any(), any()))
-        .thenReturn(1);
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))

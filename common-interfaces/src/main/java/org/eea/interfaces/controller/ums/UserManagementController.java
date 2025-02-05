@@ -407,7 +407,7 @@ public interface UserManagementController {
    * @return the user national coordinator
    */
   @GetMapping("/nationalCoordinator/{countryCode}")
-  List<UserNationalCoordinatorVO> getUserNationalCoordinatorFilterByCountryCode(@PathVariable String countryCode);
+  List<UserNationalCoordinatorVO> getUserNationalCoordinatorFilterByCountryCode(@PathVariable String countryCode, @RequestParam String key);
 
 
   /**

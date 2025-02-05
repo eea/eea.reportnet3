@@ -347,6 +347,12 @@ export const DatasetRepository = {
     });
   },
 
+  handleStuckImportJob: async (jobId, error) =>
+    await HTTPRequester.post({
+      url: getUrl(DatasetConfig.handleStuckImportJob, { jobId }),
+      data: { error }
+    }),
+
   updateFieldOrder: async (datasetId, position, fieldSchemaId) =>
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateFieldOrder, { datasetId, position }),
@@ -357,6 +363,11 @@ export const DatasetRepository = {
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateTableOrder, { datasetId, position }),
       data: { id: tableSchemaId, position }
+    }),
+
+  getAddUserText: async (dataflowId) =>
+    await HTTPRequester.get({
+      url: getUrl(DatasetConfig.getAddUserText, { dataflowId }),
     }),
 
   getSchema: async datasetId => {
@@ -445,6 +456,12 @@ export const DatasetRepository = {
     await HTTPRequester.update({
       url: getUrl(DatasetConfig.updateDatasetDesign, { datasetId }),
       data: datasetSchema
+    }),
+
+  updateAddUserText: async (note) =>
+    await HTTPRequester.update({
+      url: DatasetConfig.updateAddUserText,
+      data:note
     }),
 
   updateField: async (datasetId, recordId, tableSchemaId, datasetTableRecords, updateInCascade = false) =>

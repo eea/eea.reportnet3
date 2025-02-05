@@ -177,7 +177,6 @@ public class DatasetMetabaseServiceTest {
    */
   @Test
   public void testGetDataSetIdByDataflowId() {
-    when(dataSetMetabaseMapper.entityListToClass(Mockito.any())).thenReturn(new ArrayList<>());
     when(dataSetMetabaseRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
     datasetMetabaseService.getDataSetIdByDataflowId(Mockito.anyLong());

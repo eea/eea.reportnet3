@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
-import org.eea.interfaces.vo.metabase.ReleaseReceiptVO;
+import org.eea.interfaces.vo.metabase.ReleaseReceiptInfoVO;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -48,7 +48,7 @@ public class ReceiptPDFGeneratorTest {
     dataset.setNameDatasetSchema("");
     datasets.add(dataset);
     dataset.setDateReleased(new Date());
-    ReleaseReceiptVO receipt = new ReleaseReceiptVO();
+    ReleaseReceiptInfoVO receipt = new ReleaseReceiptInfoVO();
     receipt.setDataflowName("word ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo");
     receipt.setDatasets(datasets);
     receipt.setProviderAssignation("");

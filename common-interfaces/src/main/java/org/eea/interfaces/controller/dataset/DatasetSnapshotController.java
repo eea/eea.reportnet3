@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -198,6 +199,18 @@ public interface DatasetSnapshotController {
   @GetMapping(value = "/historicReleases", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReleaseVO> historicReleasesLegacy(@RequestParam("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId);
+
+  /**
+   * Historic releases dates authorized by consul key.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @return the list
+   */
+  @GetMapping(value = "/historicReleaseDatesAuthorizedByConsul", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<Date> historicReleaseDatesAuthorizedByConsul(@RequestParam("datasetId") Long datasetId,
+                                                    @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                                                    @RequestParam("key") String key);
 
   /**
    * Historic releases by representative.
