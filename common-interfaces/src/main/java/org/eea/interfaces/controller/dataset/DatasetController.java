@@ -997,6 +997,15 @@ public interface DatasetController {
   @PostMapping("/private/createEmptyTables")
   void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception;
 
+  /***
+   * Create empty tables for each table schema of the dataflow
+   *
+   * @param datasetMetabaseVO The datasetMetabaseVO object
+   * @throws Exception The exception
+   */
+  @PostMapping("/private/{tableSchemaId}/createEmptyTablesV2")
+  void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable("tableSchemaId") String tableSchemaId) throws Exception;
+
   /**
    * Get released dataset data info
    *
