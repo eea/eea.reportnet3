@@ -358,7 +358,10 @@ public class ValidationHelper implements DisposableBean {
       List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
       combinedDatasets.forEach(dataSetMetabaseVO -> {
         try {
-          dataSetControllerZuul.createEmptyTables(dataSetMetabaseVO);
+          DataSetSchema schema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataSetMetabaseVO.getDatasetSchema()));
+          for (TableSchema tableSchema : schema.getTableSchemas()) {
+            dataSetControllerZuul.createEmptyTablesV2(dataSetMetabaseVO, tableSchema.getIdTableSchema().toString());
+          }
         } catch (Exception e) {
           throw new RuntimeException(e);
         }

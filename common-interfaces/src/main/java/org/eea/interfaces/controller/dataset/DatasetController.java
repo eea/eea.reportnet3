@@ -537,7 +537,6 @@ public interface DatasetController {
    * Delete attachment.
    *
    * @param datasetId the dataset id
-   * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaName the table name
@@ -559,7 +558,6 @@ public interface DatasetController {
    * Delete attachment legacy.
    *
    * @param datasetId the dataset id
-   * @param fieldId the field id
    * @param dataflowId the dataflow id
    * @param providerId the provider id
    * @param tableSchemaName the table name
@@ -613,7 +611,6 @@ public interface DatasetController {
    * @param delimiter the delimiter
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
-   * @param filePathInS3 the filePathInS3
    */
   @PostMapping("/v2/importFileData/{datasetId}")
   void importBigFileData(@PathVariable("datasetId") Long datasetId,
@@ -996,4 +993,13 @@ public interface DatasetController {
    */
   @PostMapping("/private/createEmptyTables")
   void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception;
+
+  /***
+   * Create empty tables for each table schema of the dataflow
+   *
+   * @param datasetMetabaseVO The datasetMetabaseVO object
+   * @throws Exception The exception
+   */
+  @PostMapping("/private/{tableSchemaId}/createEmptyTablesV2")
+  void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable("tableSchemaId") String tableSchemaId) throws Exception;
 }

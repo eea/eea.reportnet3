@@ -112,8 +112,8 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
         }
       }
     } catch (Exception e) {
-      LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
-      throw new EEAException("Something went wrong, trying to create empty tables ");
+      LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {} , with exception message: {}", dataset.getDataflowId(), dataset.getId(), e.getMessage());
+      throw new EEAException("Something went wrong, trying to create empty tables with message: " + e.getMessage());
     }
   }
 
