@@ -111,7 +111,7 @@ public interface DatasetSchemaController {
   void updateDatasetSchema(@PathVariable("datasetId") Long datasetId,
       @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO);
 
-  @DeleteMapping(value = "/private/dataset/deleteDatasetSchemaRulesAndIntegrity", produces = MediaType.APPLICATION_JSON_VALUE)
+  @DeleteMapping(value = "/private/deleteDatasetSchemaRulesAndIntegrity", produces = MediaType.APPLICATION_JSON_VALUE)
   void deleteDatasetSchemaRulesAndIntegrityPrivate(@RequestParam("schemaId") String schemaId, @RequestParam("datasetId") Long datasetId);
 
   /**

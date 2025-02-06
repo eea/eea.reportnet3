@@ -395,7 +395,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
    *
    * @param datasetId the dataset id
    */
-  @DeleteMapping(value = "private/dataset/deleteDatasetSchemaRulesAndIntegrity", produces = MediaType.APPLICATION_JSON_VALUE)
+
   @Override
   @ApiOperation(value = "Delete Dataset Schema", hidden = true)
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete"),
@@ -404,6 +404,7 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
           @ApiResponse(code = 401, message = EEAErrorMessage.PK_REFERENCED),
           @ApiResponse(code = 403, message = EEAErrorMessage.NOT_ENOUGH_PERMISSION),
           @ApiResponse(code = 500, message = "Error deleting")})
+  @DeleteMapping(value = "/private/deleteDatasetSchemaRulesAndIntegrity", produces = MediaType.APPLICATION_JSON_VALUE)
   public void deleteDatasetSchemaRulesAndIntegrityPrivate(@RequestParam("schemaId") String schemaId, @RequestParam("datasetId") Long datasetId) {
     if (datasetId == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,

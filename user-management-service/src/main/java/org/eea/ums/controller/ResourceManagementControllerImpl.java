@@ -103,7 +103,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    *
    * @param resourceInfoVO the resource info VO
    */
-  @DeleteMapping(value = "private/delete")
+  @DeleteMapping(value = "/private/delete")
   @ResponseStatus(HttpStatus.OK)
   @Override
   @HystrixCommand
@@ -151,7 +151,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    *
    * @param datasetId the dataset ids
    */
-  @DeleteMapping("private/delete_by_dataset_id")
+  @DeleteMapping("/private/delete_by_dataset_id")
   @Override
   @HystrixCommand
   @ApiOperation(value = "Delete a Resource its Dataset Id", hidden = true)
@@ -211,7 +211,7 @@ public class ResourceManagementControllerImpl implements ResourceManagementContr
    *
    * @return the groups by id resource type
    */
-  @GetMapping("private/getResourceInfoVOByResource")
+  @GetMapping("/private/getResourceInfoVOByResource")
   @Override
   @HystrixCommand
   @ApiOperation(value = "Get Resources by their Type", response = ResourceInfoVO.class,

@@ -44,7 +44,7 @@ public interface ResourceManagementController {
   void deleteResource(@RequestBody List<ResourceInfoVO> resourceInfoVO);
 
 
-  @DeleteMapping(value = "private/delete")
+  @DeleteMapping(value = "/private/delete")
   @ResponseStatus(HttpStatus.OK)
   void deleteResourcePrivate(@RequestBody List<ResourceInfoVO> resourceInfoVO);
 
@@ -82,7 +82,7 @@ public interface ResourceManagementController {
       @RequestParam("resourceType") ResourceTypeEnum resourceType);
 
 
-  @GetMapping("private/getResourceInfoVOByResource")
+  @GetMapping("/private/getResourceInfoVOByResource")
   List<ResourceInfoVO> getGroupsByIdResourceTypePrivate(@RequestParam("idResource") Long idResource,
                                                         @RequestParam("resourceType") ResourceTypeEnum resourceType);
   /**
@@ -101,6 +101,6 @@ public interface ResourceManagementController {
   @DeleteMapping("/delete_by_dataset_id")
   void deleteResourceByDatasetId(@RequestParam("datasetIds") List<Long> datasetIds);
 
-  @DeleteMapping("private/delete_by_dataset_id")
+  @DeleteMapping("/private/delete_by_dataset_id")
   void deleteResourceByDatasetIdPrivate(@RequestParam("datasetId") Long datasetId) throws InterruptedException;
 }

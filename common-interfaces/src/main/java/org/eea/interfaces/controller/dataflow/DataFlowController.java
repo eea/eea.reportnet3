@@ -32,9 +32,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public interface DataFlowController {
 
-    @GetMapping("/delete")
-    ResponseEntity<String> cleanupDataflow();
-
     /**
    * The Interface DataFlowControllerZuul.
    */
@@ -469,4 +466,7 @@ public interface DataFlowController {
 
   @PutMapping(value = "/updateDataProviderGroupIdById/{dataflowId}")
   void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId);
+
+  @GetMapping("/delete")
+  ResponseEntity<String> cleanupDataflows() throws Exception;
 }

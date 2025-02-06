@@ -81,9 +81,12 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
 
                 // If the dataflow is big data, perform additional cleanup - to be implemented
                 if (isBigData) {
+                    //todo
                     return;
                 }
-                else {cleanupDataflow(dataflowId);}
+                else {
+                    cleanupDataflow(dataflowId);
+                }
 
             } catch (EEAException e) {
                 LOG.error("{}: {}", EEAErrorMessage.ERROR_CLEANUP_SOFT_DELETED_DATAFLOW, dataflowVO.getId(), e);
@@ -92,8 +95,7 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
                 throw new EEAException(EEAErrorMessage.ERROR_CLEANUP_SOFT_DELETED_DATAFLOW, e);
             }
         }
-
-        LOG.info("Cleanup process completed.");
+        LOG.info("Cleanup process completed for dataflowIds {}", dataflowIdsToDelete);
     }
 
     private void cleanupDataflowDatalakes(Long dataflowId) {
@@ -106,11 +108,11 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
         try {
             // Step 1: Retrieve distinct dataset schemas
             List<String> datasetSchemasIds = retrieveDatasetSchemasForDataflow(dataflowId);
-            LOG.info("Found {} dataset schemas for deletion.", datasetSchemasIds.size());
+            LOG.info("Found {} dataset schemas for deletion for dataflow ID: {}", datasetSchemasIds.size(), dataflowId);
 
             // Step 2: Retrieve dataset groups
             Map<Long, String> datasetIdsAndGroups = retrieveDatasetIdsGroupsForDataflow(dataflowId);
-            LOG.info("Found {} dataset groups for deletion.", datasetIdsAndGroups.size());
+            LOG.info("Found {} dataset groups for deletion for dataflow ID: {}", datasetIdsAndGroups.size(), dataflowId);
 
             // Step 3: Delete dataflow resources reporting, if it fails, stop process
             boolean resourceDeletionSuccess = false;

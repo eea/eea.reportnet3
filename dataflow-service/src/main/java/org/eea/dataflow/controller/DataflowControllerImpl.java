@@ -1497,14 +1497,16 @@ public class DataflowControllerImpl implements DataFlowController {
    *
    * @return a response indicating the success or failure of the operation.
    */
-  @GetMapping("/delete")
   @Override
-  public ResponseEntity<String> cleanupDataflow() {
+  @PreAuthorize("hasAnyRole('ADMIN')")
+  @GetMapping("/delete")
+  public ResponseEntity<String> cleanupDataflows() throws Exception {
     try {
-      dataflowCleanupService.deleteDataflowsOlderThanNumberOfMonths(1);
+      dataflowCleanupService.deleteDataflowsOlderThanNumberOfMonths(2);
       return ResponseEntity.ok("Cleanup initiated for dataflow ID: " );
     } catch (Exception e) {
+      LOG.error("Unexpected error! Could not cleanup Dataflows Error: {}", e.getMessage());
+      throw e;
     }
-      return null;
   }
 }

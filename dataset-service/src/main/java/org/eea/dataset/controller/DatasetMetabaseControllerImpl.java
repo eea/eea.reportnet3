@@ -751,7 +751,7 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
    * @param dataflowId The ID of the dataflow.
    * @return A map of dataset IDs to dataset group prefixes.
    */
-  @GetMapping("private/getDatasetIdsAndGroups/{dataflowId}")
+  @GetMapping("/private/getDatasetIdsAndGroups/{dataflowId}")
   public Map<Long, String> getDatasetIdsAndGroups(@PathVariable Long dataflowId) {
     return datasetMetabaseService.getDatasetIdsAndGroupsByDataflowId(dataflowId);
   }
