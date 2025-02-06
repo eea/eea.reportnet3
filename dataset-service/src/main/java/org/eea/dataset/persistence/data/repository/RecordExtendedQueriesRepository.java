@@ -130,6 +130,5 @@ public interface RecordExtendedQueriesRepository {
                                 Integer limit, Integer offset, String filterValue, String columnName,
                                 String dataProviderCodes, Long jobId, Long dataflowId, String user, String processUUID) throws EEAException, IOException, SQLException;
 
-  Long countByTableSchema(Long datasetId, String idTableSchema)
-      throws SQLException;
+  Long countByTableSchema(Long datasetId, String idTableSchema, String whereClause) throws SQLException;
 }

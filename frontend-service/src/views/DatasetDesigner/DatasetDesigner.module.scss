@@ -82,13 +82,10 @@
   .datasetConfigurationButtons {
     display: flex;
     align-items: center;
-    margin-left: .5rem;
+    margin-left: 0.5rem;
     > div {
       display: flex;
-      margin-right: .5rem;
-    }
-    button:last-child {
-      // margin-top: 5px;
+      margin-right: 0.5rem;
     }
   }
 }
@@ -171,6 +168,10 @@
 }
 
 .buttonAlignRight {
+  margin-left: auto !important;
+}
+
+.adminCloseButton {
   margin-left: auto !important;
 }
 

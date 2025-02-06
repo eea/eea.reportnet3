@@ -44,6 +44,9 @@ export const QCList = ({
   dataset,
   datasetSchemaAllTables,
   datasetSchemaId,
+  isAdmin,
+  isCustodian,
+  isDataflowCustodian,
   isDataflowOpen = false,
   isDatasetDesigner = false,
   setHasQCsHistory = () => {},
@@ -351,7 +354,7 @@ export const QCList = ({
       }
     );
 
-    if (isDatasetDesigner) {
+    if (isDatasetDesigner && !(isAdmin && (!isCustodian || !isDataflowCustodian))) {
       columns.push(
         { key: 'automatic', header: resourcesContext.messages['automatic'], template: getAutomaticTemplate },
         {
@@ -366,6 +369,17 @@ export const QCList = ({
           header: resourcesContext.messages['actions'],
           template: getActionsTemplate
         }
+      );
+    } else if (isDatasetDesigner) {
+      columns.push(
+        { key: 'automatic', header: resourcesContext.messages['automatic'], template: getAutomaticTemplate },
+        {
+          key: 'enabled',
+          header: resourcesContext.messages['enabled'],
+          template: getEnabledTemplate,
+          editor: getCheckboxEditor
+        },
+        { key: 'isCorrect', header: resourcesContext.messages['valid'], template: getCorrectTemplate }
       );
     }
 

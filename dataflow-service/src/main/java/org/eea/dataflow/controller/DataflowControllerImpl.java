@@ -39,6 +39,7 @@ import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.rod.PaginatedObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
 import org.eea.lock.annotation.LockCriteria;
@@ -1042,6 +1043,36 @@ public class DataflowControllerImpl implements DataFlowController {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.DATAFLOW_GET_ERROR);
     } catch (Exception e){
       LOG.error("Unexpected error! Could not retrieve public dataflows for countryCode {} Message: {}", countryCode, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * Gets the public dataflows by obligation.
+   *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
+   * @return the public dataflows
+   */
+  @Override
+  @PostMapping("/getPublicDataflowsByObligation")
+
+  @ApiOperation(value = "Gets all the public dataflows by obligation", hidden = true)
+  public PaginatedObligationVO getPublicDataflowsByObligation(
+      @RequestBody(required = false) Map<String, String> filters,
+      @RequestParam(required = false) String orderHeader,
+      @RequestParam(required = false) boolean asc, @RequestParam(required = false) Integer pageSize,
+      @RequestParam(required = false) Integer pageNum) {
+    try {
+      return dataflowService.getPublicDataflowsByObligation(filters, orderHeader, asc, pageSize, pageNum);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "An error happened trying to retrieve the dataflows");
+    } catch (Exception e){
+      LOG.error("Unexpected error! Could not retrieve public dataflows. Message: {}", e.getMessage());
       throw e;
     }
   }

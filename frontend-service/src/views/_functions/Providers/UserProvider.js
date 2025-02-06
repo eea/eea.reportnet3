@@ -15,7 +15,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { userReducer } from 'views/_functions/Reducers/userReducer';
 
 import { SystemNotificationService } from 'services/SystemNotificationService';
-import {config} from "../../../conf";
+import { config } from '../../../conf';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -62,14 +62,16 @@ export const UserProvider = ({ children }) => {
           }
         },
 
-        hasContextAccessPermission: (entity, entityID, allowedPermissions) => {
-            const isAdmin = allowedPermissions.some(permission => userState.accessRole?.includes(config.permissions.roles.ADMIN.key))
-            if (isAdmin) {
-                return true;
-            }
-            if (isNil(userState.contextRoles)) {
-                return false;
-            }
+        hasContextAccessPermission: (entity, entityID, allowedPermissions, dataflowCustodian) => {
+          const isAdmin = allowedPermissions.some(permission =>
+            userState.accessRole?.includes(config.permissions.roles.ADMIN.key)
+          );
+          if (isAdmin && !dataflowCustodian) {
+            return true;
+          }
+          if (isNil(userState.contextRoles)) {
+            return false;
+          }
           return allowedPermissions.some(allowedPermission => {
             if (isNil(entityID)) {
               return userState.contextRoles.some(role => role.startsWith(entity) && role.endsWith(allowedPermission));

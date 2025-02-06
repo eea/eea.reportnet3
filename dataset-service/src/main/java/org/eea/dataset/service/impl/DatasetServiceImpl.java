@@ -52,6 +52,7 @@ import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -136,6 +137,8 @@ public class DatasetServiceImpl implements DatasetService {
 
   /** The Constant DATASET_ID: {@value}. */
   private static final String DATASET_ID = "dataset_%s";
+
+  public static final String DATA_PROVIDER_CODE = "data_provider_code";
 
   /** The Constant NUMBER_ERROR_RETRIEVING_STATS. */
   private static final Integer NUMBER_ERROR_RETRIEVING_STATS = 100000;
@@ -3825,6 +3828,31 @@ public class DatasetServiceImpl implements DatasetService {
   @Cacheable(value = "dataProviderId", key = "#datasetId")
   public Long getDataProviderIdById(Long datasetId) {
     return dataSetMetabaseRepository.findDataProviderIdById(datasetId);
+  }
+
+  @Override
+  public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(Long collectionDatasetId, Long reportingDatasetId, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception{
+    ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO = new ReleasedDatasetDataInfoVO();
+    //we do not have info for modified after release for citus dataflow, so we explicitly set it to null
+    releasedDatasetDataInfoVO.setModifiedAfterRelease(null);
+
+    //find number of records for reporting dataset
+    releasedDatasetDataInfoVO.setReportingDatasetNumberOfRecords(recordRepository.countByTableSchema(reportingDatasetId, tableSchemaId, null));
+
+    //find number of records for collection dataset for specific data provider code
+    String dataProviderWhereClause = " and r." + DATA_PROVIDER_CODE +  " = '" + dataProviderVO.getCode()+ "' ";
+    releasedDatasetDataInfoVO.setCollectionDatasetNumberOfRecords(recordRepository.countByTableSchema(collectionDatasetId, tableSchemaId, dataProviderWhereClause));
+
+    //check if reporting dataset has released
+    List<ReleaseVO> releases = datasetSnapshotService.getReleases(reportingDatasetId);
+    if(releases != null && releases.size() > 0){
+      releasedDatasetDataInfoVO.setHasReleased(true);
+    }
+    else{
+      releasedDatasetDataInfoVO.setHasReleased(false);
+    }
+
+    return releasedDatasetDataInfoVO;
   }
 
 }

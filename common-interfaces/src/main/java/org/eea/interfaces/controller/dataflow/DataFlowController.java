@@ -14,6 +14,7 @@ import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
+import org.eea.interfaces.vo.rod.PaginatedObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -272,6 +273,21 @@ public interface DataFlowController {
    */
   @PostMapping("/getPublicDataflows")
   PaginatedDataflowVO getPublicDataflows(@RequestBody Map<String, String> filters,
+      @RequestParam String orderHeader, @RequestParam boolean asc, @RequestParam Integer pageSize,
+      @RequestParam Integer pageNum);
+
+  /**
+   * Gets the public dataflows by obligation.
+   *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
+   * @return the public dataflows
+   */
+  @PostMapping("/getPublicDataflowsByObligation")
+  PaginatedObligationVO getPublicDataflowsByObligation(@RequestBody Map<String, String> filters,
       @RequestParam String orderHeader, @RequestParam boolean asc, @RequestParam Integer pageSize,
       @RequestParam Integer pageNum);
 

@@ -106,7 +106,7 @@ export const ReferenceDataflow = () => {
   useBreadCrumbs({ currentPage: CurrentPage.REFERENCE_DATAFLOW, referenceDataflowId });
 
   const getLeftSidebarButtonsVisibility = () => ({
-    apiKeyBtn: dataflowState.isCustodian,
+    apiKeyBtn: dataflowState.isCustodian && dataflowState.isCustodianUser,
     datasetsInfoBtn: dataflowState.isAdmin || dataflowState.isCustodian,
     editBtn: dataflowState.isCustodian || dataflowState.isAdmin,
     exportBtn:

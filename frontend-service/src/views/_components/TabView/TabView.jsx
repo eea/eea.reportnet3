@@ -30,6 +30,9 @@ export const TabView = ({
   maxLength,
   name,
   initialTabIndexDrag,
+  isAdmin,
+  isCustodian,
+  isDataflowCustodian,
   isDatasetReleased,
   isErrorDialogVisible,
   isDataflowOpen,
@@ -254,9 +257,11 @@ export const TabView = ({
           onTabEditingHeader={onTabEditingHeader}
           onTabHasErrors={onTabHasErrors}
           onTabHeaderClick={event => {
-            onTabHeaderClick(event, tab, index);
-            if (!isUndefined(onTabEditingHeader)) {
-              onTabEditingHeader(false);
+            if (!(isAdmin && (!isCustodian || !isDataflowCustodian))) {
+              onTabHeaderClick(event, tab, index);
+              if (!isUndefined(onTabEditingHeader)) {
+                onTabEditingHeader(false);
+              }
             }
           }}
           onTabMouseWheel={onTabMouseWheel}

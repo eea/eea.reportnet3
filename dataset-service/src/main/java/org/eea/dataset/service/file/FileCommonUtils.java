@@ -470,7 +470,7 @@ public class FileCommonUtils {
    * @return the long
    */
   public Long countRecordsByTableSchema(String idTableSchema, Long datasetId) throws SQLException {
-    return recordRepository.countByTableSchema(datasetId, idTableSchema);
+    return recordRepository.countByTableSchema(datasetId, idTableSchema, null);
   }
 
   /**

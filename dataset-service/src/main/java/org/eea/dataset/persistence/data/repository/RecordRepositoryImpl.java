@@ -2186,7 +2186,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
   }
 
   @Override
-  public Long countByTableSchema(Long datasetId, String idTableSchema) throws SQLException {
+  public Long countByTableSchema(Long datasetId, String idTableSchema, String whereClause) throws SQLException {
     Connection connection = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
@@ -2195,13 +2195,16 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
       String query = "select count(r.id) from dataset_%s.record_value r, dataset_%s.table_value t where "
           + "t.id = r.id_table and t.id_table_schema=?";
 
+      if(StringUtils.isNotBlank(whereClause)){
+        query += whereClause;
+      }
+
       ConnectionDataVO connectionDataVO = recordStoreControllerZuul
           .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
 
       connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
           connectionDataVO.getUser(), connectionDataVO.getPassword());
       query = String.format(query, datasetId, datasetId);
-      LOG.info("countByTableSchema query: {}", query);
 
       pstmt = connection.prepareStatement(query);
       pstmt.setString(1, idTableSchema);

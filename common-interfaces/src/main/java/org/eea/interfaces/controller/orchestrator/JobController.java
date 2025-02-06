@@ -67,11 +67,14 @@ public interface JobController {
      * Adds a validation job
      *
      * @param datasetId the id of the dataset that will be validated
+     * @param dataflowId the id of the dataflow
+     * @param providerId the id of the provider
      * @param released the released
-     * @return
+     * @return the jobId
      */
     @PutMapping(value = "/addValidationJob/{datasetId}")
-    void addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "released", required = false) boolean released,
+    Long addValidationJob(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                          @RequestParam(value = "providerId", required = false) Long providerId, @RequestParam(value = "released", required = false) boolean released,
                           @RequestParam(value = "createParquetWithSQL", required = false) boolean createParquetWithSQL);
 
     /**
@@ -251,7 +254,7 @@ public interface JobController {
      * @param jobId
      */
     @PutMapping(value = "/cancelJob/{jobId}")
-    void cancelJob(@PathVariable("jobId") Long jobId) throws Exception;
+    void cancelJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "dataflowId") Long dataflowId, @RequestParam(value = "datasetId") Long datasetId) throws Exception;
 
     /**
      * Updates job info value

@@ -20,6 +20,9 @@ export const ImportTableDataDialog = ({
   dataflowId,
   datasetId,
   hasWritePermissions,
+  isAdmin,
+  isCustodian,
+  isDataflowCustodian,
   isDataflowOpen,
   isDesignDataset,
   isDesignDatasetEditorRead,
@@ -121,6 +124,7 @@ export const ImportTableDataDialog = ({
             !hasWritePermissions || isDataflowOpen || isDesignDatasetEditorRead ? null : 'p-button-animated-blink'
           }`}
           disabled={
+            (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
             isIcebergCreated ||
             !hasWritePermissions ||
             isDataflowOpen ||

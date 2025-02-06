@@ -13,6 +13,7 @@ const getCountryName = countryCode => {
   }
 };
 
+
 export const CountryUtils = {
-  getCountryName
+  getCountryName,
 };
