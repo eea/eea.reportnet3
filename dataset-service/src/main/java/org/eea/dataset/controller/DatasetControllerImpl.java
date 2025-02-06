@@ -3132,7 +3132,7 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @PostMapping("/private/createEmptyTables")
   @HystrixCommand(commandProperties = {
-      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "65000")})
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
   public void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception {
     createEmptyTables.runCreationForOneDataset(datasetMetabaseVO);
   }
