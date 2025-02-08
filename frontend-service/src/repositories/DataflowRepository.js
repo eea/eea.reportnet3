@@ -118,6 +118,13 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.createEmptyDatasetSchema, { dataflowId, datasetSchemaName })
     }),
 
+  getPublicObligations: async ({ filterBy, isAsc = true, numberRows, pageNum, sortByHeader = 'name' }) => {
+    return await HTTPRequester.post({
+      url: getUrl(DataflowConfig.getPublicObligations, { isAsc, numberRows, pageNum, sortBy: sortByHeader }),
+      data: { ...filterBy }
+    });
+  },
+
   getPublicData: async ({ filterBy, isAsc = true, numberRows, pageNum, sortByHeader = 'name' }) => {
     return await HTTPRequester.post({
       url: getUrl(DataflowConfig.getPublicData, { isAsc, numberRows, pageNum, sortBy: sortByHeader }),

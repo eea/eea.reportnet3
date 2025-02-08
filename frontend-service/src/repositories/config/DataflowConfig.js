@@ -29,6 +29,7 @@ export const DataflowConfig = {
   getDetails: '/dataflow/v1/{:dataflowId}/getmetabase',
   getIcebergTables:
     '/dataset/getIcebergTables?dataflowId={:dataflowId}&providerId={:providerId}&datasetId={:datasetId}',
+  getPublicObligations: '/dataflow/getPublicDataflowsByObligation?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicData:
     '/dataflow/getPublicDataflows?asc={:isAsc}&pageNum={:pageNum}&orderHeader={:sortBy}&pageSize={:numberRows}',
   getPublicDataflowData: '/dataflow/getPublicDataflow/{:dataflowId}',

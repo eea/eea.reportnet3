@@ -192,6 +192,13 @@ export const PublicFrontpage = () => {
                 </div>
                 <div
                   className={styles.showPublicDataButton}
+                  onMouseDown={e => handleRedirect(e, `${routes.PUBLIC_DATAFLOWS}?categorized=obligation`)}>
+                  <p>
+                    <strong>View by dataflow dataflow status and download reported data</strong>
+                  </p>
+                </div>
+                <div
+                  className={styles.showPublicDataButton}
                   onMouseDown={e => handleRedirect(e, getUrl(routes.PUBLIC_COUNTRIES, {}, true))}>
                   <p>
                     <strong>View by country dataflow status and download reported data</strong>

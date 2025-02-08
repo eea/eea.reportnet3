@@ -20,7 +20,7 @@
       width: 25% !important;
     }
 
-    > div > div:nth-child(8) {
+    > div > div:nth-child(8):not(.responsiveCardsGrid) {
       margin-left: auto;
       display: flex;
       flex-wrap: wrap;
