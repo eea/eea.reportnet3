@@ -308,10 +308,10 @@ export const PublicDataflows = () => {
     }
 
     return (
-      <div className="responsiveCardsGridWrapper">
+      <div>
         {obligations.map(obligation => (
           <>
-            <h2>{obligation.title}</h2>
+            <h2 className={styles.obligationTitle}>{obligation.title}</h2>
             <div className="responsiveCardsGrid">
               {obligation.dataflows.map(dataflow => (
                 <PublicCard
