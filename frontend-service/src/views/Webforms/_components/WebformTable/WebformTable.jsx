@@ -365,8 +365,6 @@ export const WebformTable = ({
       );
     }
   }
-  console.log(isLoadingIceberg);
-  console.log(allManualCheck);
 
   return (
     <div className={styles.contentWrap}>
