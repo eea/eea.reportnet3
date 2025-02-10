@@ -172,6 +172,25 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      */
     @Query(nativeQuery = true, value = "select j.provider_id from jobs j where j.id= :jobId")
     Long findProviderIdByJobId(Long jobId);
+
+    /**
+     * Count jobs by dataflowId and job status
+     * @param dataflowId the dataflow id
+     * @param jobStatus the job status
+     * @return the number of jobs
+     */
+    Integer countByDataflowIdAndJobStatus(Long dataflowId, JobStatusEnum jobStatus);
+
+    /**
+     * Count jobs by dataflowId, job status, providerId, and release
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param jobStatus the job status
+     * @param release the release filter
+     * @return the number of jobs
+     */
+    Integer countByDataflowIdAndProviderIdAndJobStatusAndRelease(
+        Long dataflowId, Long providerId, JobStatusEnum jobStatus, boolean release);
 }
 
 
