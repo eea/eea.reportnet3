@@ -153,10 +153,21 @@ const parseNewEntitiesTableRecord = (
     let fields;
 
     if (!isUndefined(table)) {
+      let autoIncrementFields = table.elements.filter(field => field?.autoIncrement === true);
+
       fields = table.records[0].fields.map(field => {
         let fkFieldValue;
+        let isAutoIncrementField = false;
+
         if (fkFields) {
           fkFieldValue = fkFields.filter(fkField => TextUtils.areEquals(fkField.fieldName, field.name))[0]?.value;
+        }
+
+        if (!isEmpty(autoIncrementFields)) {
+          isAutoIncrementField = autoIncrementFields.some(
+            filteredField =>
+              filteredField?.fieldId === field?.fieldId || filteredField?.fieldSchema === field?.fieldSchema
+          );
         }
         return {
           fieldData: {
@@ -169,7 +180,8 @@ const parseNewEntitiesTableRecord = (
               : null,
             type: field.type,
             fieldSchemaId: field.fieldSchema || field.fieldId,
-            name: field.name
+            name: field.name,
+            autoIncrement: isAutoIncrementField
           }
         };
       });
@@ -269,6 +281,7 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords, rootTa
           fieldType: 'EMPTY',
           ...element,
           ...fields.find(field => field['fieldSchemaId'] === element['fieldSchema']),
+          autoIncrement: element.autoIncrement,
           codelistItems: element.codelistItems || [],
           description: element.description || '',
           isDisabled: isNil(element.fieldSchema),

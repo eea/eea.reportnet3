@@ -488,7 +488,12 @@ export const WebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
-            disabled={isSubTableCreated || field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
+            disabled={
+              isSubTableCreated ||
+              field.fieldSchema === rootPkFieldId ||
+              field.fieldSchemaId === rootPkFieldId ||
+              field.isPrimary
+            }
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
             keyfilter={RecordUtils.getFilter(type)}

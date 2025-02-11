@@ -167,7 +167,7 @@ export const WebformTable = ({
 
     if (!isEmpty(newEmptyRecord)) {
       try {
-        await DatasetService.createRecord(datasetId, tableSchemaId, [newEmptyRecord]);
+        await DatasetService.createWebformTableRecord(datasetId, tableSchemaId, [newEmptyRecord]);
         onUpdateData();
       } catch (error) {
         console.error('WebformTable - onAddMultipleWebform.', error);
