@@ -881,8 +881,12 @@ public class DataflowServiceImpl implements DataflowService {
 
       PaginatedObligationVO paginatedObligationVO = new PaginatedObligationVO();
       paginatedObligationVO.setObligations(paginatedList);
-      paginatedObligationVO.setTotalRecords((long) obligationWithDataflowsList.size());
-      paginatedObligationVO.setFilteredRecords((long) paginatedList.size());
+      paginatedObligationVO.setTotalRecords(dataflowRepository.countByShowPublicInfo(Boolean.TRUE));
+      long filteredDataflowCount = paginatedList.stream()
+          .mapToLong(obligation -> obligation.getDataflows().size())
+          .sum();
+
+      paginatedObligationVO.setFilteredRecords(filteredDataflowCount);
 
       return paginatedObligationVO;
 
