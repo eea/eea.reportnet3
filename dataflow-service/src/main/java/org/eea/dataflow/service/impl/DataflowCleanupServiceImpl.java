@@ -7,6 +7,7 @@ import org.eea.exception.EEAException;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -15,6 +16,7 @@ import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -45,49 +47,50 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
     @Autowired
     private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
 
+    /** The dataset controller zuul. */
+    @Autowired
+    private DataSetControllerZuul     dataSetControllerZuul;
+
     /** The dataflow repository. */
     @Autowired
     private DataflowRepository dataflowRepository;
 
     @Autowired
     private DataflowCleanupRepository dataflowCleanupRepository;
+
     @Autowired
     private DataflowServiceImpl dataflowService;
 
 
+
+    /** The timeout. */
+    @Value("${scheduling.jobForDeletingSoftDeletedDataflows.numberOfMonths}")
+    private Integer numberOfMonths;
+
     @Transactional
     @Override
-    public void deleteDataflowsOlderThanNumberOfMonths(Integer numberOfMonths) throws EEAException {
+    public void deleteDataflowsOlderThanNumberOfMonths() throws EEAException {
         LOG.info("Starting cleanup process for soft-deleted dataflows older than {} months.", numberOfMonths);
 
-        List<Dataflow> dataflowIdsToDelete;
+        List<Dataflow> dataflowsToDelete;
         try {
-            dataflowIdsToDelete = dataflowRepository.findSoftDeletedDataflowsOlderThanNumberOfMonths(numberOfMonths);
+            dataflowsToDelete = dataflowRepository.findSoftDeletedDataflowsOlderThanNumberOfMonths(numberOfMonths);
         } catch (Exception e) {
             LOG.error("Error retrieving dataflows for deletion older than {} months.", numberOfMonths, e);
             throw new EEAException(EEAErrorMessage.ERROR_RETRIEVING_SOFT_DELETED_DATAFLOWS, e);
         }
 
-        if (dataflowIdsToDelete == null || dataflowIdsToDelete.isEmpty()) {
-            LOG.info("No dataflows found for deletion.");
+        if (dataflowsToDelete == null || dataflowsToDelete.isEmpty()) {
+            LOG.info("Daily Cleanup No dataflows found for deletion.");
             return;
         }
 
-        for (Dataflow dataflowVO : dataflowIdsToDelete) {
+        List<Long> dataflowIds = new ArrayList<>();
+        for (Dataflow dataflowVO : dataflowsToDelete) {
             try {
                 Long dataflowId = dataflowVO.getId();
-
-                boolean isBigData = dataflowService.getMetabaseById(dataflowId).getBigData();
-
-                // If the dataflow is big data, perform additional cleanup - to be implemented
-                if (isBigData) {
-                    //todo
-                    return;
-                }
-                else {
-                    cleanupDataflow(dataflowId);
-                }
-
+                cleanupDataflow(dataflowId);
+                dataflowIds.add(dataflowId);
             } catch (EEAException e) {
                 LOG.error("{}: {}", EEAErrorMessage.ERROR_CLEANUP_SOFT_DELETED_DATAFLOW, dataflowVO.getId(), e);
             } catch (Exception e) {
@@ -95,72 +98,53 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
                 throw new EEAException(EEAErrorMessage.ERROR_CLEANUP_SOFT_DELETED_DATAFLOW, e);
             }
         }
-        LOG.info("Cleanup process completed for dataflowIds {}", dataflowIdsToDelete);
+        LOG.info("Daily Cleanup process completed for dataflowIds {}", dataflowIds);
     }
 
-    private void cleanupDataflowDatalakes(Long dataflowId) {
+    private void cleanupDataflowBigData(Long dataflowId) {
+        dataSetControllerZuul.deleteBigDataRootFolder(dataflowId);
     }
 
     @Transactional
-    public void cleanupDataflow(Long dataflowId) throws EEAException {
+    public boolean cleanupDataflow(Long dataflowId) throws EEAException {
         LOG.info("Processing deletion for dataflow ID: {}", dataflowId);
-
         try {
-            // Step 1: Retrieve distinct dataset schemas
+            // Step 1: Retrieve dataset schemas and groups
             List<String> datasetSchemasIds = retrieveDatasetSchemasForDataflow(dataflowId);
-            LOG.info("Found {} dataset schemas for deletion for dataflow ID: {}", datasetSchemasIds.size(), dataflowId);
-
-            // Step 2: Retrieve dataset groups
             Map<Long, String> datasetIdsAndGroups = retrieveDatasetIdsGroupsForDataflow(dataflowId);
-            LOG.info("Found {} dataset groups for deletion for dataflow ID: {}", datasetIdsAndGroups.size(), dataflowId);
+            LOG.info("Found {} dataset schemas and {} dataset groups for deletion for dataflow ID: {}",
+                    datasetSchemasIds.size(), datasetIdsAndGroups.size(), dataflowId);
 
-            // Step 3: Delete dataflow resources reporting, if it fails, stop process
-            boolean resourceDeletionSuccess = false;
-            try {
-                resourceDeletionSuccess = deleteDataflowResourcesReporting(datasetIdsAndGroups, dataflowId);
-            } catch (EEAException e) {
-                LOG.error("EEAException occurred while deleting dataflow resources for ID: {}", dataflowId, e);
-            } catch (Exception e) {
-                LOG.error("Exception occurred while deleting dataflow resources for ID: {}", dataflowId, e);
+            // Step 2: Delete dataflow Keycloak resources
+            if (!datasetIdsAndGroups.isEmpty()) {
+                deleteDataflowResourcesReporting(datasetIdsAndGroups, dataflowId);
+            } else {
+                LOG.warn("No dataset groups found for deletion for Keyclock groups for dataflow ID: {}", dataflowId);
             }
 
-            // If resource deletion fails, stop execution
-            if (!resourceDeletionSuccess) {
-                LOG.error("Stopping cleanup process as resource deletion failed for dataflow ID: {}", dataflowId);
-                return;
+            // Step 3: Delete dependent MongoDB records.
+            for (Long datasetId : datasetIdsAndGroups.keySet()) {
+                deleteRulesSchemaFromMongo(datasetId);
+                deleteDatasetSchemaFromMongo(datasetId);
             }
 
-            LOG.info("Starting cleanup for Metabase for dataflow ID: {}", dataflowId);
-
-            try {
-                boolean metabaseDataflowRelatedObjectDeletionSuccess = executeMetabaseDataflowRelatedObjectDeletions(dataflowId);
-
-                // Proceed with MongoDB deletion only if Metabase deletions were successful
-                if (metabaseDataflowRelatedObjectDeletionSuccess) {
-                    for (Long datasetId : datasetIdsAndGroups.keySet()) {
-                        deleteRulesSchemaFromMongo(datasetId);
-                        deleteDatasetSchemaFromMongo(datasetId);
-                    }
-                } else {
-                    LOG.warn("Skipping MongoDB deletion for dataflow ID: {} due to Metabase entries deletion failure.", dataflowId);
-                }
-
-                LOG.info("Completed cleanup orchestration for dataflow ID: {}", dataflowId, metabaseDataflowRelatedObjectDeletionSuccess);
-            } catch (EEAException e) {
-                LOG.error("EEAException occurred during cleanup orchestration for dataflow ID: {}", dataflowId, e);
-                throw e;
-            } catch (Exception e) {
-                LOG.error("Exception occurred during cleanup orchestration for dataflow ID: {}", dataflowId, e);
-                throw e;
+            // Step 4: For big data flows, perform additional Datalakes cleanup BEFORE deleting the metabase record
+            boolean isBigData = dataflowService.getMetabaseById(dataflowId).getBigData();
+            if (isBigData) {
+                cleanupDataflowBigData(dataflowId);
             }
-        } catch (EEAException e) {
-            LOG.error("EEAException encountered in cleanupDataflow process for ID: {}", dataflowId, e);
-            throw e;
+
+            // Step 5: Delete Metabase records;
+            executeMetabaseDataflowRelatedObjectDeletions(dataflowId);
+
+            LOG.info("Completed cleanup orchestration for dataflow ID: {}", dataflowId);
+            return true;
         } catch (Exception e) {
-            LOG.error("Exception encountered in cleanupDataflow process for ID: {}", dataflowId, e);
-            throw e;
+            LOG.error("Exception encountered during cleanupDataflow process for ID: {}", dataflowId, e);
+            throw new EEAException(EEAErrorMessage.ERROR_CLEANUP_SOFT_DELETED_DATAFLOW, e);
         }
     }
+
 
     List<String> retrieveDatasetSchemasForDataflow(Long dataflowId) {
         List<DataSetMetabaseVO> datasetsVO = datasetMetabaseControllerZuul.getAllDatasetsByDataflowId(dataflowId);
@@ -176,7 +160,7 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
         return datasetMetabaseControllerZuul.getDatasetIdsAndGroups(dataflowId);
     }
 
-    public boolean deleteDataflowResourcesReporting(Map<Long, String> datasetIdsAndGroups, Long dataflowId) throws EEAException {
+    public void deleteDataflowResourcesReporting(Map<Long, String> datasetIdsAndGroups, Long dataflowId) throws EEAException {
         LOG.info("Executing Keycloak group deletions for dataset groups.");
         try {
             List<Long> datasetIds = new ArrayList<>(datasetIdsAndGroups.keySet());
@@ -204,7 +188,6 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
                 }
             }
 
-            return true;
         } catch (EEAException e) {
             LOG.error("EEAException encountered during Keycloak deletion for Dataflow ID: {}", dataflowId, e);
             throw e;
@@ -241,10 +224,10 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
             dataflowCleanupRepository.deleteForeignRelationsDestination(dataflowId);
             dataflowCleanupRepository.deleteDatasets(dataflowId);
             dataflowCleanupRepository.deleteNativeDataflow(dataflowId);
-            LOG.info("Successfully executed deletion steps for dataflow ID: {}", dataflowId);
+            LOG.info("Successfully executed Metabase deletion steps for dataflow ID: {}", dataflowId);
             return true;
         } catch (Exception e) {
-            LOG.error("Error during execution of deletion steps for dataflow ID: {}", dataflowId, e);
+            LOG.error("Error during execution of Metabase deletion steps for dataflow ID: {}", dataflowId, e);
             throw new EEAException(EEAErrorMessage.ERROR_DELETING_DATAFLOW_METABASE_RELATED_OBJECTS, e);
         }
     }
@@ -278,6 +261,4 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
             throw new EEAException(EEAErrorMessage.ERROR_DELETING_DATASET_SCHEMA, e);
         }
     }
-
-
 }

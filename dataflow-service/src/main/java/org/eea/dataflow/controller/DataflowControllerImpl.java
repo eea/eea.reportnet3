@@ -87,10 +87,11 @@ public class DataflowControllerImpl implements DataFlowController {
   private DataflowService dataflowService;
 
 
-  /** The dataflow service. */
+  /** The dataflow Cleanup service. */
   @Autowired
   @Lazy
   private DataflowCleanupService dataflowCleanupService;
+
   /** The representative service. */
   @Autowired
   private RepresentativeService representativeService;
@@ -1502,8 +1503,8 @@ public class DataflowControllerImpl implements DataFlowController {
   @GetMapping("/delete")
   public ResponseEntity<String> cleanupDataflows() throws Exception {
     try {
-      dataflowCleanupService.deleteDataflowsOlderThanNumberOfMonths(2);
-      return ResponseEntity.ok("Cleanup initiated for dataflow ID: " );
+      dataflowCleanupService.deleteDataflowsOlderThanNumberOfMonths();
+      return ResponseEntity.ok("Cleanup initiated for dataflows: " );
     } catch (Exception e) {
       LOG.error("Unexpected error! Could not cleanup Dataflows Error: {}", e.getMessage());
       throw e;
