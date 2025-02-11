@@ -2644,7 +2644,7 @@ public class DatasetServiceImpl implements DatasetService {
     for (FieldVO fieldVO : fieldVOs) {
       if (fieldSchemaId.equals(fieldVO.getIdFieldSchema())) {
         if (BooleanUtils.isTrue(fieldVO.getAutoIncrement())) {
-          //get auto increment value
+          //set up autoincrement value
           Long autoIncrementValue;
           if(StringUtils.isNotBlank(previousFieldSchemaAndValueMap.get(fieldVO.getIdFieldSchema()))){
             //if there are multiple records being inserted get the new value from the previous one and increment it
