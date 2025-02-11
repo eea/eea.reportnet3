@@ -4,6 +4,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -2636,16 +2637,30 @@ public class DatasetServiceImpl implements DatasetService {
     // Find the fieldVO with the fieldSchemaId if exists
     for (FieldVO fieldVO : fieldVOs) {
       if (fieldSchemaId.equals(fieldVO.getIdFieldSchema())) {
-        if (null != fieldVO.getValue()) {
-          value = fieldVO.getValue();
+        if (BooleanUtils.isTrue(fieldVO.getAutoIncrement())) {
+          //get auto increment value
+          Long autoIncrementValue;
+          List<FieldValue> allFields = fieldRepository.findAllByIdFieldSchemaIn(Collections.singletonList(fieldVO.getIdFieldSchema()));
 
-          // Sort values if there are multiple
-          if (DataType.MULTISELECT_CODELIST.equals(dataType)
-              || (DataType.LINK.equals(dataType) || DataType.EXTERNAL_LINK.equals(dataType)
-                  && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
-            String[] values = value.trim().split("\\s*;\\s*");
-            Arrays.sort(values);
-            value = Arrays.stream(values).collect(Collectors.joining("; "));
+          OptionalLong maxValue = allFields.stream().map(FieldValue::getValue)
+                  .filter(numericValue -> numericValue != null && !numericValue.isBlank()) // Remove null and blank values
+                  .mapToLong(Long::parseLong) // Convert to long
+                  .max(); // Get max value
+
+          autoIncrementValue = (maxValue.isPresent()) ? maxValue.getAsLong() + 1 : 1L;
+          value = String.valueOf(autoIncrementValue);
+        } else {
+          if (null != fieldVO.getValue()) {
+            value = fieldVO.getValue();
+
+            // Sort values if there are multiple
+            if (DataType.MULTISELECT_CODELIST.equals(dataType)
+                    || (DataType.LINK.equals(dataType) || DataType.EXTERNAL_LINK.equals(dataType)
+                    && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
+              String[] values = value.trim().split("\\s*;\\s*");
+              Arrays.sort(values);
+              value = Arrays.stream(values).collect(Collectors.joining("; "));
+            }
           }
         }
         fieldVOs.remove(fieldVO);
