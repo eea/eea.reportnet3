@@ -20,13 +20,18 @@
       width: 25% !important;
     }
 
-    > div > div:nth-child(8) {
+    > div > div:nth-child(8):not([class*='responsiveCardsGrid']) {
       margin-left: auto;
       display: flex;
       flex-wrap: wrap;
       width: auto !important;
     }
   }
+}
+
+.obligationTitle{
+  margin-top:2rem;
+  margin-bottom:2rem;
 }
 
 .bottomPaginator {

@@ -177,6 +177,16 @@ export const Filters = ({
     [recoilId]
   );
 
+   async function handleResetFilters() {
+     setViewData(new Date());
+     await onResetFilters();
+     await onReset({ sortByHeader: '', sortByOption: 'idle' });
+   }
+
+   useEffect(() => {
+     return () => handleResetFilters()
+   }, []);
+
   const renderFilter = (option, type) => {
     if (option.nestedOptions) {
       return option.nestedOptions.map(nestedOption => renderFilter(nestedOption, option.type));
@@ -240,11 +250,7 @@ export const Filters = ({
             disabled={isLoading}
             icon="undo"
             label={resourcesContext.messages['reset']}
-            onClick={async () => {
-              setViewData(new Date());
-              await onResetFilters();
-              await onReset({ sortByHeader: '', sortByOption: 'idle' });
-            }}
+            onClick={handleResetFilters}
           />
         </div>
       </div>
