@@ -37,24 +37,35 @@ const getPamFieldValue = (fieldName, pamId, type) => {
   }
 };
 
-const parseEntityTables = (tables, entityId, rootPkFieldId) =>
-  tables.map(table => ({
+const parseEntityTables = (tables, entityId, rootPkFieldId, autoIncrementFields) => {
+  return tables.map(table => ({
     idTableSchema: table.tableSchemaId,
     records: [
       {
-        fields: parseEntityFields(!isEmpty(table.records) ? table.records[0].fields : [], entityId, rootPkFieldId),
+        fields: parseEntityFields(
+          !isEmpty(table.records) ? table.records[0].fields : [],
+          entityId,
+          rootPkFieldId,
+          autoIncrementFields
+        ),
         id: null,
         idRecordSchema: !isEmpty(table.records) ? table.records[0].recordSchemaId : null
       }
     ]
   }));
+};
 
-const parseEntityFields = (fields, entityId, rootPkFieldId) =>
+const parseEntityFields = (fields, entityId, rootPkFieldId, autoIncrementFields) =>
   fields.map(field => ({
     id: null,
     idFieldSchema: field.fieldId || field.fieldSchema,
     value: getEntityFieldValue(field, entityId, rootPkFieldId),
-    name: field.name
+    name: field.name,
+    autoIncrement: autoIncrementFields
+      ? autoIncrementFields.some(filteredField => filteredField === field.name)
+        ? true
+        : false
+      : undefined
   }));
 
 const getEntityFieldValue = (field, entityId, rootPkFieldId) => {
