@@ -59,6 +59,8 @@ public class FieldVO implements Serializable {
 
   private String referenceFieldSchemaId;
 
+  private Boolean autoIncrement;
+
   /**
    * Hash code.
    *
