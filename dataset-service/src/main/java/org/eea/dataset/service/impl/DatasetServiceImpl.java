@@ -2586,6 +2586,9 @@ public class DatasetServiceImpl implements DatasetService {
 
     List<RecordValue> recordValues = new ArrayList<>();
 
+    //used for auto increment field and multiple records
+    Map<String, String> previousFieldSchemaAndValueMap = new HashMap<>();
+    String previousValue = "";
     // Rebuild each record to ensure it contains proper fields
     for (RecordVO recordVO : recordVOs) {
       List<FieldVO> fieldVOs = recordVO.getFields();
@@ -2603,7 +2606,9 @@ public class DatasetServiceImpl implements DatasetService {
         FieldValue fieldValue = new FieldValue();
         fieldValue.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
         fieldValue.setType(fieldSchema.getType());
-        fieldValue.setValue(filterFieldValue(fieldSchema, datasetType, fieldVOs));
+        String value = filterFieldValue(fieldSchema, datasetType, fieldVOs, previousFieldSchemaAndValueMap);
+        previousFieldSchemaAndValueMap.put(fieldSchema.getIdFieldSchema().toString(), value);
+        fieldValue.setValue(value);
         fieldValue.setRecord(recordValue);
         fieldValues.add(fieldValue);
       }
@@ -2618,11 +2623,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldSchema the field schema
    * @param datasetType the dataset type
    * @param fieldVOs the field V os
+   * @param previousFieldSchemaAndValueMap the map to use for auto increment
    *
    * @return the string
    */
   private String filterFieldValue(FieldSchema fieldSchema, DatasetTypeEnum datasetType,
-      List<FieldVO> fieldVOs) {
+      List<FieldVO> fieldVOs, Map<String, String> previousFieldSchemaAndValueMap) {
 
     String value = "";
     String fieldSchemaId = fieldSchema.getIdFieldSchema().toString();
@@ -2638,16 +2644,16 @@ public class DatasetServiceImpl implements DatasetService {
     for (FieldVO fieldVO : fieldVOs) {
       if (fieldSchemaId.equals(fieldVO.getIdFieldSchema())) {
         if (BooleanUtils.isTrue(fieldVO.getAutoIncrement())) {
-          //get auto increment value
+          //set up autoincrement value
           Long autoIncrementValue;
-          List<FieldValue> allFields = fieldRepository.findAllByIdFieldSchemaIn(Collections.singletonList(fieldVO.getIdFieldSchema()));
-
-          OptionalLong maxValue = allFields.stream().map(FieldValue::getValue)
-                  .filter(numericValue -> numericValue != null && !numericValue.isBlank()) // Remove null and blank values
-                  .mapToLong(Long::parseLong) // Convert to long
-                  .max(); // Get max value
-
-          autoIncrementValue = (maxValue.isPresent()) ? maxValue.getAsLong() + 1 : 1L;
+          if(StringUtils.isNotBlank(previousFieldSchemaAndValueMap.get(fieldVO.getIdFieldSchema()))){
+            //if there are multiple records being inserted get the new value from the previous one and increment it
+            autoIncrementValue = Long.valueOf(previousFieldSchemaAndValueMap.get(fieldVO.getIdFieldSchema())) + 1;
+          }
+          else{
+            Optional<FieldValue> lastFieldValueInserted =  fieldRepository.findMaxValueByIdFieldSchema(fieldVO.getIdFieldSchema());
+            autoIncrementValue = (lastFieldValueInserted.isPresent()) ? Long.valueOf(lastFieldValueInserted.get().getValue()) + 1 : 1L;
+          }
           value = String.valueOf(autoIncrementValue);
         } else {
           if (null != fieldVO.getValue()) {

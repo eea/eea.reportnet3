@@ -1335,17 +1335,31 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     insertQueryValuesBuilder.append(", ").append(refactoredValue);
                 } else {
                     String fieldValue = "";
-                    if (field.getValue() != null) {
-                        fieldValue = field.getValue().replace("'", "''");
-                        if (fieldValue.matches(".*[^\u0000-\u007F].*")) {
-                            fieldValue = "ENCODE('" + fieldValue + "', 'UTF-8')";
-                            insertQueryValuesBuilder.append(", ").append(fieldValue);
+                    if(BooleanUtils.isTrue(field.getAutoIncrement())){
+                        //set up autoincrement value
+                        String escapedFieldName = "\"" + field.getName() + "\"";
+                        String getPreviousMaxFieldValueQuery =  "SELECT CAST( " + escapedFieldName + "  AS BIGINT) AS numeric_value FROM " + icebergTablePath
+                                + " WHERE " + escapedFieldName + " IS NOT NULL AND TRIM(" + escapedFieldName + ") <> '' ORDER BY numeric_value DESC LIMIT 1";
+
+                        String previousMaxFieldValue = dremioJdbcTemplate.query(getPreviousMaxFieldValueQuery, (rs, rowNum) -> rs.getString(1)).stream().findFirst().orElse(null);
+                        Long autoIncrementValue = (StringUtils.isNotBlank(previousMaxFieldValue)) ? Long.valueOf(previousMaxFieldValue) + 1 : 1L;
+                        fieldValue = String.valueOf(autoIncrementValue);
+                        insertQueryValuesBuilder.append(", '").append(fieldValue).append("'");
+                    }
+                    else{
+                        if (field.getValue() != null) {
+                            fieldValue = field.getValue().replace("'", "''");
+                            if (fieldValue.matches(".*[^\u0000-\u007F].*")) {
+                                fieldValue = "ENCODE('" + fieldValue + "', 'UTF-8')";
+                                insertQueryValuesBuilder.append(", ").append(fieldValue);
+                            } else {
+                                insertQueryValuesBuilder.append(", '").append(fieldValue).append("'");
+                            }
                         } else {
                             insertQueryValuesBuilder.append(", '").append(fieldValue).append("'");
                         }
-                    } else {
-                        insertQueryValuesBuilder.append(", '").append(fieldValue).append("'");
                     }
+
                 }
             }
 

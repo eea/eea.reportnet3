@@ -1,6 +1,7 @@
 package org.eea.dataset.persistence.data.repository;
 
 import java.util.List;
+import java.util.Optional;
 import javax.transaction.Transactional;
 import org.eea.dataset.persistence.data.domain.FieldValue;
 import org.eea.dataset.persistence.data.domain.RecordValue;
@@ -212,5 +213,9 @@ public interface FieldRepository
    */
   @Query
   List<FieldValue> findAllByIdFieldSchemaIn(List<String> idFieldSchemas);
+
+  @Query(value = "SELECT * FROM field_value WHERE id_field_schema = :idFieldSchema AND value IS NOT NULL AND TRIM(value) <> '' ORDER BY CAST(value AS BIGINT) DESC LIMIT 1", nativeQuery = true)
+  Optional<FieldValue> findMaxValueByIdFieldSchema(@Param("idFieldSchema") String idFieldSchema);
+
 
 }
