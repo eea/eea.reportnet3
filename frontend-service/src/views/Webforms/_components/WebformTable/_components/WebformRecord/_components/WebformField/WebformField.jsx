@@ -492,7 +492,7 @@ export const WebformField = ({
               isSubTableCreated ||
               field.fieldSchema === rootPkFieldId ||
               field.fieldSchemaId === rootPkFieldId ||
-              field.isPrimary
+              field.autoIncrement
             }
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
