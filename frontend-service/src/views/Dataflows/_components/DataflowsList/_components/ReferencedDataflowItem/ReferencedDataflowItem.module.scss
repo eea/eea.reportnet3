@@ -260,6 +260,14 @@
       order:-1;
       h3{
         max-width: 250px;
+        p{
+          margin: 0 0 0.5rem 0 !important;
+          font-size: 1.62rem;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          display:inline;
+        }
       }
     }
     > a {
