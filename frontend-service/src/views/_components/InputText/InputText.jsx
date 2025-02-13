@@ -21,6 +21,7 @@ export class InputText extends Component {
     autoFocus: false,
     characterCounterStyles: { top: '-30px' },
     expandable: false,
+    hasErrors: false,
     hasMaxCharCounter: false,
     id: null,
     keyfilter: null,
@@ -39,6 +40,7 @@ export class InputText extends Component {
     autoFocus: PropTypes.bool,
     characterCounterStyles: PropTypes.object,
     expandable: PropTypes.bool,
+    hasErrors: PropTypes.bool,
     hasMaxCharCounter: PropTypes.bool,
     id: PropTypes.string,
     keyfilter: PropTypes.any,
@@ -119,6 +121,7 @@ export class InputText extends Component {
   render() {
     const className = classNames('p-inputtext p-component', this.props.className, {
       'p-disabled': this.props.disabled,
+      'p-webformfielderror': this.props.hasErrors,
       'p-filled':
         (this.props.value != null && this.props.value.toString().length > 0) ||
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0)
