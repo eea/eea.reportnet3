@@ -1668,6 +1668,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         else if(filePathInS3.endsWith(XLSX_TYPE)){
             fileExtension = XLSX_TYPE;
         }
+        else if(filePathInS3.endsWith(XLSM_TYPE)){
+            fileExtension = XLSM_TYPE;
+        }
         else if(filePathInS3.endsWith(XLS_TYPE)){
             fileExtension = XLS_TYPE;
         }

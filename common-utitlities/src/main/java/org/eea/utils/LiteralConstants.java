@@ -387,6 +387,9 @@ public final class LiteralConstants {
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLSX_TYPE = ".xlsx";
 
+  /** The Constant XLSM_TYPE: {@value}. */
+  public static final String XLSM_TYPE = ".xlsm";
+
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLS_TYPE = ".xls";
 
