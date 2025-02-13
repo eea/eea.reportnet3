@@ -111,7 +111,7 @@
     }
   }
   &:first-of-type {
-    margin-top: 2rem;
+    //margin-top: 2rem;
   }
   &:last-child {
     margin-bottom: 4rem;
@@ -405,4 +405,51 @@
 .tooltip {
   max-width: 300px;
   word-break: break-all;
+}
+
+
+
+.compressedList.compressedList{
+  @media screen and (min-width:1300px) {
+    height:190px;
+    .obligation p,
+    .text p,
+    .upperIcon,
+    .icon,
+    .role{
+      display: none;
+    }
+    .text{
+      order:-1;
+      h3{
+        max-width: 250px;
+      }
+    }
+    > a {
+      display: flex !important;
+      flex-direction: column;
+    }
+    .status{
+      text-align: left;
+    }
+    .dataflowDates{
+      margin-left: 0;
+      text-align: left!important;
+    }
+  }
+  @media screen and (min-width:1600px) {
+    .text h3{
+      max-width: 400px;
+    }
+  }
+  @media screen and (min-width:1900px) {
+    .text h3{
+      max-width: 500px;
+    }
+  }
+  @media screen and (min-width:2200px) {
+    .text h3{
+      max-width: 600px;
+    }
+  }
 }
