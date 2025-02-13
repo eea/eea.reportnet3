@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
@@ -34,6 +34,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 
 export const PublicDataflows = () => {
+  const [params] = useSearchParams();
   const navigate = useNavigate();
 
   const resourcesContext = useContext(ResourcesContext);
@@ -44,10 +45,12 @@ export const PublicDataflows = () => {
   const { setData, sortByOptions } = useApplyFilters('publicDataflows');
 
   const [contentStyles, setContentStyles] = useState({});
+  const [categorized, setCategorized] = useState();
   const [filteredRecords, setFilteredRecords] = useState(0);
   const [goToPage, setGoToPage] = useState(1);
   const [isFiltered, setIsFiltered] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [obligations, setObligations] = useState();
   const [pageInputTooltip, setPageInputTooltip] = useState(resourcesContext.messages['currentPageInfoMessage']);
   const [pagination, setPagination] = useState({ firstRow: 0, numberRows: config.DATAFLOWS_PER_PAGE, pageNum: 0 });
   const [publicDataflows, setPublicDataflows] = useState([]);
@@ -56,8 +59,17 @@ export const PublicDataflows = () => {
   useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
 
   useEffect(() => {
-    onLoadPublicDataflows();
-  }, [pagination, sortByOptions]);
+    setCategorized(params.get('categorized') ?? "default");
+  }, [params]);
+
+  useEffect(() => {
+    if (categorized === 'default') {
+      onLoadPublicDataflows();
+    }
+    else if (categorized === 'obligation') {
+      onLoadPublicObligations();
+    }
+  }, [pagination, sortByOptions, categorized]);
 
   useEffect(() => {
     if (!themeContext.headerCollapse) {
@@ -157,12 +169,27 @@ export const PublicDataflows = () => {
     }
   };
 
+  const onLoadPublicObligations = async (sortBy = sortByOptions) => {
+    setIsLoading(true);
+    try {
+      const publicData = await DataflowService.getPublicObligations({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
+      setObligations(publicData.obligations)
+      setFilteredRecords(publicData.filteredRecords);
+      setTotalRecords(publicData.totalRecords);
+      setIsFiltered(publicData.filteredRecords !== publicData.totalRecords);
+    } catch (error) {
+      console.error('PublicDataflows - onLoadPublicDataflows.', error);
+    }
+    finally {
+      setIsLoading(false);
+    }
+  }
+
   const onLoadPublicDataflows = async (sortBy = sortByOptions) => {
     setIsLoading(true);
 
     try {
       const publicData = await DataflowService.getPublicData({ filterBy, numberRows, pageNum, sortByOptions: sortBy });
-
       setPublicDataflows(publicData.dataflows);
       setData(
         publicData.dataflows.map(dataflow => ({
@@ -209,7 +236,7 @@ export const PublicDataflows = () => {
               dataLength={totalRecords}
               filteredDataLength={filteredRecords}
               isFiltered={isFiltered}
-              nameRecords="dataflows"
+              nameRecords={categorized ==='obligation' ? "obligations" : "dataflows"}
             />
           }
           rows={numberRows}
@@ -261,6 +288,53 @@ export const PublicDataflows = () => {
     );
   };
 
+  const renderPublicObligations = () => {
+    if (isLoading) {
+      return (
+        <div className={styles.noDataflows}>
+          <Spinner className={styles.spinner} />
+        </div>
+      );
+    }
+
+    if (isEmpty(obligations)) {
+      if (totalRecords !== filteredRecords) {
+        return (
+          <div className={styles.noDataflows}>{resourcesContext.messages['noDataflowsWithSelectedParameters']}</div>
+        );
+      } else {
+        return <div className={styles.noDataflows}>{resourcesContext.messages['noDataflows']}</div>;
+      }
+    }
+
+    return (
+      <div>
+        {obligations.map(obligation => (
+          <>
+            <h2 className={styles.obligationTitle}>{obligation.title}</h2>
+            <div className="responsiveCardsGrid">
+              {obligation.dataflows.map(dataflow => (
+                <PublicCard
+                  animation
+                  card={dataflow}
+                  dataflowId={dataflow.id}
+                  dueDate={dataflow.expirationDate}
+                  key={dataflow.id}
+                  landingPageCard={false}
+                  obligation={dataflow.obligation}
+                  onCardClick={onOpenDataflow}
+                  status={resourcesContext.messages[dataflow.status]}
+                  subtitle={{text: dataflow.description, url: ''}}
+                  title={{text: dataflow.name, url: ''}}
+                />
+              ))}
+            </div>
+          </>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <PublicLayout>
       <div className={styles.content} style={contentStyles}>
@@ -276,7 +350,8 @@ export const PublicDataflows = () => {
             recoilId="publicDataflows"
           />
           <div className={styles.topPaginator}>{renderPaginator()}</div>
-          {renderPublicDataflowsContent()}
+          {categorized === 'default' && renderPublicDataflowsContent()}
+          {categorized === 'obligation' && renderPublicObligations()}
           <div className={styles.bottomPaginator}>{renderPaginator()}</div>
         </div>
       </div>

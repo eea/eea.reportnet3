@@ -183,9 +183,6 @@ export const DataCollection = () => {
       console.error('DataCollection - getWebformList.', error);
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
     }
-    finally{
-      console.log(alignmentResults);
-    }
   }
 
   const getExtensionsList = () => {

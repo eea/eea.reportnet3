@@ -21,6 +21,7 @@ import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 import { ServiceUtils } from 'services/_utils/ServiceUtils';
+import {ObligationUtils} from "./_utils/ObligationUtils";
 
 export const DataflowService = {
   countByType: async () => {
@@ -384,6 +385,32 @@ export const DataflowService = {
 
   createEmptyDatasetSchema: async (dataflowId, datasetSchemaName) =>
     await DataflowRepository.createEmptyDatasetSchema(dataflowId, datasetSchemaName),
+
+  getPublicObligations: async ({ filterBy, numberRows, pageNum, sortByOptions }) => {
+    const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortByOptions);
+    const filteredFilterBy = DataflowUtils.parseRequestFilterBy(filterBy);
+
+    const publicObligations = await DataflowRepository.getPublicObligations({
+      filterBy: filteredFilterBy,
+      isAsc,
+      numberRows,
+      pageNum,
+      sortByHeader
+    })
+
+    const parsedObligations = publicObligations.data.obligations.map(obligation => {
+      const parsedObligation = ObligationUtils.parseObligation(obligation);
+      return {
+        ...parsedObligation,
+        dataflows: DataflowUtils.parsePublicDataflowListDTO(obligation.dataflows).map(dataflow => ({
+          ...dataflow,
+          obligation: parsedObligation
+        }))
+      };
+    });
+
+    return { ...publicObligations.data, obligations: parsedObligations };
+  },
 
   getPublicData: async ({ filterBy, numberRows, pageNum, sortByOptions }) => {
     const { isAsc, sortByHeader } = DataflowUtils.parseRequestSortBy(sortByOptions);
