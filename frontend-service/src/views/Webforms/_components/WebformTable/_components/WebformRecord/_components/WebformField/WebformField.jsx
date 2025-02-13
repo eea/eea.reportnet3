@@ -41,6 +41,7 @@ export const WebformField = ({
   datasetId,
   datasetSchemaId,
   element,
+  hasErrors,
   entitiesRecords,
   isConditional,
   isConditionalChanged,
@@ -404,6 +405,7 @@ export const WebformField = ({
               }}
               optionLabel="itemType"
               options={linkItemsOptions}
+              style={hasErrors ? { border: '2px solid #b90202' } : null}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
               valuesSeparator=";"
             />
@@ -432,6 +434,7 @@ export const WebformField = ({
               optionLabel="itemType"
               options={linkItemsOptions}
               showFilterClear={true}
+              style={hasErrors ? { border: '2px solid #b90202' } : null}
               value={RecordUtils.getLinkValue(linkItemsOptions, field.value)}
             />
           );
@@ -455,6 +458,7 @@ export const WebformField = ({
                 ? getObjectiveOptions(sectorAffectedValue)
                 : field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))
             }
+            style={hasErrors ? { border: '2px solid #b90202' } : null}
             value={getMultiselectValues(
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
@@ -475,6 +479,7 @@ export const WebformField = ({
             }}
             options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
             showFilterClear={true}
+            style={hasErrors ? { border: '2px solid #b90202' } : null}
             value={field.value}
           />
         );
@@ -489,6 +494,7 @@ export const WebformField = ({
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
             disabled={isSubTableCreated || field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
+            hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
             keyfilter={RecordUtils.getFilter(type)}
@@ -516,6 +522,7 @@ export const WebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);

@@ -282,6 +282,7 @@ export const PaMsWebformRecord = ({
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
+                      hasErrors={!isNil(element.validations)}
                       isConditional={
                         !isNil(pamsWebformRecordState.record) &&
                         pamsWebformRecordState.record.elements.filter(
@@ -381,6 +382,17 @@ export const PaMsWebformRecord = ({
                   className={styles.nonExistTable}
                   dangerouslySetInnerHTML={{
                     __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], {
+                      tableName: element.name
+                    })
+                  }}
+                />
+              )}
+
+              {element.tableSchemaNotEmpty && isEmpty(element.elementsRecords) && (
+                <span
+                  className={styles.nonExistTable}
+                  dangerouslySetInnerHTML={{
+                    __html: TextUtils.parseText(resourcesContext.messages['mandatoryTableMessage'], {
                       tableName: element.name
                     })
                   }}

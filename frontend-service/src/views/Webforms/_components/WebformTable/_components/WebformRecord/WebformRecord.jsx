@@ -262,6 +262,7 @@ export const WebformRecord = ({
                       datasetSchemaId={datasetSchemaId}
                       element={element}
                       entitiesRecords={entitiesRecords}
+                      hasErrors={!isNil(element.validations)}
                       isConditional={
                         !isNil(webformRecordState.record) &&
                         webformRecordState.record.elements.filter(
@@ -383,6 +384,17 @@ export const WebformRecord = ({
                   className={styles.nonExistTable}
                   dangerouslySetInnerHTML={{
                     __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], {
+                      tableName: element.name
+                    })
+                  }}
+                />
+              )}
+
+              {element.tableSchemaNotEmpty && isEmpty(element.elementsRecords) && (
+                <span
+                  className={styles.nonExistTable}
+                  dangerouslySetInnerHTML={{
+                    __html: TextUtils.parseText(resourcesContext.messages['mandatoryTableMessage'], {
                       tableName: element.name
                     })
                   }}
