@@ -415,6 +415,7 @@ export const PaMsWebformField = ({
           );
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
+
           return (
             <DropdownWebform
               appendTo={document.body}
@@ -470,12 +471,14 @@ export const PaMsWebformField = ({
           />
         );
       case 'CODELIST':
+        const codelistOptions = field.codelistItems.map(codelist => ({ itemType: codelist, value: codelist }));
+        const selectedValue = RecordUtils.getLinkValue(codelistOptions, field.value);
         return (
           <DropdownWebform
             appendTo={document.body}
+            currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
             disabled={isLoadingData}
-            filter={true}
-            id={field.fieldId || field.fieldSchemaId}
+            id={field.fieldId}
             isLoadingData={isLoadingData}
             onChange={event => {
               const value =
@@ -488,11 +491,12 @@ export const PaMsWebformField = ({
               else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
             }}
             onFilterInputChangeBackend={filter => onFilter(filter, field)}
-            optionLabel={'itemType'}
-            options={field.codelistItems.map(codelist => ({ itemType: codelist, value: codelist }))}
+            optionLabel="itemType"
+            options={codelistOptions}
             showFilterClear={true}
+            singleCodelist={true}
             style={hasErrors ? { border: '2px solid #b90202' } : null}
-            value={{ itemType: field.value, value: field.value }}
+            value={RecordUtils.getLinkValue(codelistOptions, field.value)}
           />
         );
       case 'TEXT':

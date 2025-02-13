@@ -58,6 +58,7 @@ const DropdownWebform = props => {
     scrollHeight = '200px',
     showClear = false,
     showFilterClear = false,
+    singleCodelist = false,
     style = null,
     tabIndex = null,
     tooltip = null,
@@ -423,11 +424,11 @@ const DropdownWebform = props => {
       onFilterInputChangeBackend('');
       setFilterState('');
       setTimeout(() => {
-        filterInputRef.current.focus();
+        filterInputRef?.current?.focus();
       }, 200);
     } else {
       setFilterState('');
-      filterInputRef.current.focus();
+      filterInputRef?.current?.focus();
     }
   };
 
@@ -515,7 +516,7 @@ const DropdownWebform = props => {
   const bindDocumentClickListener = () => {
     if (!documentClickListener) {
       documentClickListener = event => {
-        if (!selfClick && !overlayClick && !filterInputRef.current.contains(event.target)) {
+        if (!selfClick && !overlayClick && !filterInputRef?.current?.contains(event.target)) {
           hide();
         }
 
@@ -672,7 +673,7 @@ const DropdownWebform = props => {
   const renderItems = selectedOption => {
     let items = options;
 
-    if (items && hasFilter()) {
+    if (items && hasFilter() && !singleCodelist) {
       items = filterFunc(items);
     }
 
