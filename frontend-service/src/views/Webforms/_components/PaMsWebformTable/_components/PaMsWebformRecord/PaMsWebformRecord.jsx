@@ -252,6 +252,7 @@ export const PaMsWebformRecord = ({
         return (
           checkLabelVisibility(element) &&
           !isFieldVisible &&
+          element.isVisible !== false &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
@@ -282,6 +283,7 @@ export const PaMsWebformRecord = ({
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
+                      hasErrors={!isNil(element.validations)}
                       isConditional={
                         !isNil(pamsWebformRecordState.record) &&
                         pamsWebformRecordState.record.elements.filter(
@@ -381,6 +383,17 @@ export const PaMsWebformRecord = ({
                   className={styles.nonExistTable}
                   dangerouslySetInnerHTML={{
                     __html: TextUtils.parseText(resourcesContext.messages['tableIsNotCreated'], {
+                      tableName: element.name
+                    })
+                  }}
+                />
+              )}
+
+              {element.tableSchemaNotEmpty && isEmpty(element.elementsRecords) && (
+                <span
+                  className={styles.nonExistTable}
+                  dangerouslySetInnerHTML={{
+                    __html: TextUtils.parseText(resourcesContext.messages['mandatoryTableMessage'], {
                       tableName: element.name
                     })
                   }}

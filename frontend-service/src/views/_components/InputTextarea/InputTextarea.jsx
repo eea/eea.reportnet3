@@ -13,6 +13,7 @@ export class InputTextarea extends Component {
     cols: 10,
     displayedHeight: 100,
     expandableOnClick: false,
+    hasErrors: false,
     maxLength: null,
     moveCaretToEnd: false,
     onInput: null,
@@ -25,6 +26,7 @@ export class InputTextarea extends Component {
   static propTypes = {
     autoResize: PropTypes.bool,
     expandableOnClick: PropTypes.bool,
+    hasErrors: PropTypes.bool,
     maxLength: PropTypes.number,
     moveCaretToEnd: PropTypes.bool,
     onInput: PropTypes.func,
@@ -169,6 +171,7 @@ export class InputTextarea extends Component {
   render() {
     const className = classNames('p-inputtext p-inputtextarea p-component', this.props.className, {
       'p-disabled': this.props.disabled,
+      'p-webformfielderror': this.props.hasErrors,
       'p-filled':
         (this.props.value != null && this.props.value.toString().length > 0) ||
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0),

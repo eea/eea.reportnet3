@@ -10,6 +10,9 @@ body .p-component:disabled {
   opacity: 0.5;
   filter: alpha(opacity=50);
 }
+body .p-webformfielderror {
+  border: 2px solid #b90202;
+}
 body .pi {
   font-size: 1.25em;
 }
