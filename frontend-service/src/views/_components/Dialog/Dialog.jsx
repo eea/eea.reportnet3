@@ -97,12 +97,12 @@ export const Dialog = ({
       <PrimeDialog
         blockScroll={blockScroll}
         className={className}
+        closable={!disabledCancel}
         closeOnEscape={closeOnEscape}
         contentStyle={contentStyle}
         focusOnShow={focusOnShow}
         footer={footer}
         header={header}
-        closable={!disabledCancel}
         id={id}
         maximizable={false}
         onHide={onHide}

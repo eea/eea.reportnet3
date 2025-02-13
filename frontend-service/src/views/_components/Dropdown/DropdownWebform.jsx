@@ -736,10 +736,6 @@ const DropdownWebform = props => {
     return dataKey ? ObjectUtils.resolveFieldData(option, dataKey) : getOptionLabel(option);
   };
 
-  const checkValidity = () => {
-    return nativeSelectRef.checkValidity;
-  };
-
   // Component willMount/willUnmount with UseEffect hook
   useEffect(() => {
     if (autoFocus && focusInputRef.current) {
