@@ -1,6 +1,7 @@
 package org.eea.ums.controller;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -263,7 +264,8 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @return the resources by user
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+      name = "execution.isolation.thread.timeoutInMilliseconds", value = "600000")})
   @PreAuthorize("isAuthenticated()")
   @GetMapping("/resources_by_type")
   @ApiOperation(value = "Get logged User's Resources by their Types",
