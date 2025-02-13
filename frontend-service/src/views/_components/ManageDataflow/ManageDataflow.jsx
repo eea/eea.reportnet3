@@ -1,4 +1,4 @@
-import {Fragment, useContext, useEffect, useReducer, useRef, useState} from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -10,12 +10,12 @@ import styles from './ManageDataflow.module.scss';
 import { Button } from 'views/_components/Button';
 import { Checkbox } from 'views/_components/Checkbox';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
-import { CharacterCounter } from "../CharacterCounter";
-import { DatasetService } from "../../../services/DatasetService";
+import { CharacterCounter } from '../CharacterCounter';
+import { DatasetService } from '../../../services/DatasetService';
 import { ManageDataflowForm } from './_components/ManageDataflowForm';
 import { Dialog } from 'views/_components/Dialog';
 import { InputText } from 'views/_components/InputText';
-import { InputTextarea } from "../InputTextarea";
+import { InputTextarea } from '../InputTextarea';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DataflowService } from 'services/DataflowService';
@@ -53,7 +53,6 @@ export const ManageDataflow = ({
   setCheckedObligation,
   state
 }) => {
-
   const [addUserText, setAddUserText] = useState('');
   const [addInitialUserText, setAddInitialUserText] = useState('');
 
@@ -99,7 +98,7 @@ export const ManageDataflow = ({
   }, [state]);
 
   useEffect(() => {
-    {manualAcceptance && state.status === 'DRAFT' && getTextToReceipt()}
+    manualAcceptance && state.status === 'DRAFT' && getTextToReceipt();
   }, []);
 
   useEffect(() => {
@@ -141,7 +140,7 @@ export const ManageDataflow = ({
       console.error('Dataset - getWebformList.', error);
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
     }
-  }
+  };
 
   const handleDeleteError = error => {
     if (error.response.status === 423) {
@@ -400,43 +399,43 @@ export const ManageDataflow = ({
                 : state.isReportingDataflowDialogVisible
             }
           />
-          {manualAcceptance && state.status === 'DRAFT' &&
+          {manualAcceptance && state.status === 'DRAFT' && (
             <>
               <h4 className={styles.addUserTextLabel}>{resourcesContext.messages['addUserTextToReceiptEdit']}</h4>
-                <InputTextarea
-                  className={`class`}
-                  collapsedHeight={75}
-                  hasMaxCharCounter={true}
-                  maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
-                  id="createDataCollectionText"
-                  key="createDataCollectionText"
-                  onBlur={e => setAddUserText(e.target.value)}
-                  onChange={e => setAddUserText(e.target.value)}
-                  onFocus={e => {
-                    setAddInitialUserText(e.target.value);
-                  }}
-                  onKeyDown={e => onKeyChange(e)}
-                  placeholder={resourcesContext.messages['addUserTextToReceiptNew']}
-                  value={addUserText}
-                 />
-                 <CharacterCounter
-                    currentLength={addUserText.length}
-                    maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
-                    style={{ position: 'relative', right: '0px', top: '5px' }}
-                 />
-                   <div className={styles.addUserTextButtonWrapper}>
-                     <Button
-                       className="p-button-text p-c "
-                       disabled={isUpdatingUserText}
-                       icon={!isUpdatingUserText ? 'check' : 'spinnerAnimate'}
-                       label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
-                       onClick={() => onUpdateAddUserText(addUserText)}
-                      />
-                    </div>
-                  </>
-              }
-            </Dialog>
-        )}
+              <InputTextarea
+                className={`class`}
+                collapsedHeight={75}
+                hasMaxCharCounter={true}
+                id="createDataCollectionText"
+                key="createDataCollectionText"
+                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
+                onBlur={e => setAddUserText(e.target.value)}
+                onChange={e => setAddUserText(e.target.value)}
+                onFocus={e => {
+                  setAddInitialUserText(e.target.value);
+                }}
+                onKeyDown={e => onKeyChange(e)}
+                placeholder={resourcesContext.messages['addUserTextToReceiptNew']}
+                value={addUserText}
+              />
+              <CharacterCounter
+                currentLength={addUserText.length}
+                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
+                style={{ position: 'relative', right: '0px', top: '5px' }}
+              />
+              <div className={styles.addUserTextButtonWrapper}>
+                <Button
+                  className="p-button-text p-c "
+                  disabled={isUpdatingUserText}
+                  icon={!isUpdatingUserText ? 'check' : 'spinnerAnimate'}
+                  label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
+                  onClick={() => onUpdateAddUserText(addUserText)}
+                />
+              </div>
+            </>
+          )}
+        </Dialog>
+      )}
 
       {state.isDeleteDialogVisible && (
         <ConfirmDialog

@@ -1,4 +1,4 @@
-import {forwardRef} from 'react';
+import { forwardRef } from 'react';
 
 import styles from './ConfirmDialog.module.scss';
 
@@ -61,9 +61,9 @@ export const ConfirmDialog = forwardRef((props, _) => {
       )}
       <Button
         className={`${!isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary p-button-animated-blink'}`}
+        disabled={disabledCancel}
         icon={iconCancel ? iconCancel : 'cancel'}
         label={labelCancel}
-        disabled={disabledCancel}
         onClick={onHide}
         style={{ marginRight: '0' }}
       />
@@ -74,9 +74,9 @@ export const ConfirmDialog = forwardRef((props, _) => {
     <div className={styles.confirmDialog} onKeyPress={!disabledConfirm ? onKeyPress : null} ref={divRef}>
       <Dialog
         className={className}
+        disabledCancel={disabledCancel}
         focusOnShow={true}
         footer={footer}
-        disabledCancel={disabledCancel}
         header={header}
         onHide={onHide}
         style={

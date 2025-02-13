@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef,useState } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import dayjs from 'dayjs';
@@ -605,7 +605,6 @@ export const Dataflow = () => {
     }
   };
 
-
   const resetObligations = () => {
     setCheckedObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
     setObligation({ id: dataflowState.obligations.obligationId, title: dataflowState.obligations.title });
@@ -970,8 +969,8 @@ export const Dataflow = () => {
     try {
       if (!isNil(event.xhr) && !isNil(event.xhr.response)) {
         DownloadFile(
-            event.xhr.response,
-            `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Results.csv`
+          event.xhr.response,
+          `${TextUtils.ellipsis(dataflowState.name, config.notifications.STRING_LENGTH_MAX)}_Results.csv`
         );
         dataflowDispatch({ type: 'SET_REPRESENTATIVES_IMPORT', payload: true });
       }
@@ -1037,7 +1036,6 @@ export const Dataflow = () => {
       }
     }
   };
-
 
   const onShowManageReportersDialog = () => manageDialogs('isManageRolesDialogVisible', true);
 
@@ -1325,8 +1323,8 @@ export const Dataflow = () => {
           onOpenReleaseConfirmDialog={onOpenReleaseConfirmDialog}
           onSaveName={onSaveName}
           onShowManageReportersDialog={onShowManageReportersDialog}
-          onUpdateData={setIsDataUpdated}
           onUpdateAddUserText={onUpdateAddUserText}
+          onUpdateData={setIsDataUpdated}
           setIsCopyDataCollectionToEUDatasetLoading={setIsCopyDataCollectionToEUDatasetLoading}
           setIsExportEUDatasetLoading={setIsExportEUDatasetLoading}
           setIsReceiptLoading={setIsReceiptLoading}
@@ -1744,23 +1742,23 @@ export const Dataflow = () => {
         )}
 
         {dataflowState.isImportAndReplaceLeadReportersVisible && (
-            <CustomFileUpload
-                accept={getImportExtensions}
-                bigData={dataflowState.data.bigData}
-                chooseLabel={resourcesContext.messages['selectFile']}
-                dialogHeader={`${resourcesContext.messages['importAndReplaceLeadReporters']}`}
-                dialogOnHide={() => manageDialogs('isImportAndReplaceLeadReportersVisible', false)}
-                dialogVisible={dataflowState.isImportAndReplaceLeadReportersVisible}
-                infoTooltip={infoExtensionsTooltip}
-                invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
-                isDialog={true}
-                name="file"
-                onUpload={onUploadAndReplaceLeadReporters}
-                url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importAndReplaceFile, {
-                  dataflowId,
-                  dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
-                })}`}
-            />
+          <CustomFileUpload
+            accept={getImportExtensions}
+            bigData={dataflowState.data.bigData}
+            chooseLabel={resourcesContext.messages['selectFile']}
+            dialogHeader={`${resourcesContext.messages['importAndReplaceLeadReporters']}`}
+            dialogOnHide={() => manageDialogs('isImportAndReplaceLeadReportersVisible', false)}
+            dialogVisible={dataflowState.isImportAndReplaceLeadReportersVisible}
+            infoTooltip={infoExtensionsTooltip}
+            invalidExtensionMessage={resourcesContext.messages['invalidExtensionFile']}
+            isDialog={true}
+            name="file"
+            onUpload={onUploadAndReplaceLeadReporters}
+            url={`${window.env.REACT_APP_BACKEND}${getUrl(RepresentativeConfig.importAndReplaceFile, {
+              dataflowId,
+              dataProviderGroupId: dataflowState.dataProviderSelected.dataProviderGroupId
+            })}`}
+          />
         )}
 
         {dataflowState.isUserListVisible && (
@@ -1807,15 +1805,15 @@ export const Dataflow = () => {
             isCustodian={isLeadDesigner}
             isDataflowOpen={isOpenStatus}
             isEditing={true}
+            isUpdatingUserText={isUpdatingUserText}
             isVisible={dataflowState.isReportingDataflowDialogVisible}
             manageDialogs={manageDialogs}
             manualAcceptance={dataflowState.data.manualAcceptance}
             obligation={obligation}
             onEditDataflow={onEditDataflow}
             onLoadReportingDataflow={onLoadReportingDataflow}
-            onUpdateSoftDelete={onUpdateSoftDelete}
             onUpdateAddUserText={onUpdateAddUserText}
-            isUpdatingUserText={isUpdatingUserText}
+            onUpdateSoftDelete={onUpdateSoftDelete}
             resetDeliveryDate={resetDeliveryDate}
             resetObligations={resetObligations}
             setCheckedObligation={setCheckedObligation}

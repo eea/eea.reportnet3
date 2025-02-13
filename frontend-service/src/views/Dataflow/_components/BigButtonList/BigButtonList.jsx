@@ -45,14 +45,12 @@ import { useBigButtonList } from './_functions/Hooks/useBigButtonList';
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
-import {CharacterCounter} from "../../../_components/CharacterCounter";
+import { CharacterCounter } from '../../../_components/CharacterCounter';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integrations/_functions/Utils/IntegrationsUtils';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import isEmpty from "lodash/isEmpty";
-
 
 export const BigButtonList = ({
   dataflowState,
@@ -859,8 +857,8 @@ export const BigButtonList = ({
 
       {isConfirmCollectionDialog && (
         <ConfirmDialog
-          disabledConfirm={isNil(isManualTechnicalAcceptance)}
           disabledCancel={addUserText !== '' || addUserTexthappened}
+          disabledConfirm={isNil(isManualTechnicalAcceptance)}
           header={resourcesContext.messages['createDataCollection']}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
@@ -876,16 +874,21 @@ export const BigButtonList = ({
             <label>{resourcesContext.messages['manualTechnicalAcceptanceTitle']}</label>
             {renderRadioButtonsCreateDC()}
           </div>
-          {isManualTechnicalAcceptance &&
+          {isManualTechnicalAcceptance && (
             <>
-              <h4 className={styles.addUserTextLabel}>{resourcesContext.messages['addUserTextToReceipt']}<span className={styles.addUserTextLabelHelp}>{resourcesContext.messages['addUserTextToReceiptHelp']}</span></h4>
+              <h4 className={styles.addUserTextLabel}>
+                {resourcesContext.messages['addUserTextToReceipt']}
+                <span className={styles.addUserTextLabelHelp}>
+                  {resourcesContext.messages['addUserTextToReceiptHelp']}
+                </span>
+              </h4>
               <InputTextarea
                 className={`addUserTextArea`}
                 collapsedHeight={75}
                 hasMaxCharCounter={true}
-                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
                 id="createUserTextToReceipt"
                 key="createUserTextToReceipt"
+                maxLength={config.TEXT_TO_RECEIPT_MAX_LENGTH}
                 onBlur={e => setAddUserText(e.target.value)}
                 onChange={e => setAddUserText(e.target.value)}
                 onFocus={e => {
@@ -901,19 +904,19 @@ export const BigButtonList = ({
                 style={{ position: 'relative', right: '0px', top: '5px' }}
               />
               <div className={styles.addUserTextButtonWrapper}>
-              <Button
-                className="p-button-text p-c "
-                label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
-                disabled={isUpdatingUserText}
-                icon={!isUpdatingUserText ? 'check' : 'spinnerAnimate'}
-                onClick={() => {
-                  onUpdateAddUserText(addUserText);
-                  setAddUserTexthappened(true);
-                }}
-              />
+                <Button
+                  className="p-button-text p-c "
+                  disabled={isUpdatingUserText}
+                  icon={!isUpdatingUserText ? 'check' : 'spinnerAnimate'}
+                  label={resourcesContext.messages['addUserTextToReceiptSaveButtonText']}
+                  onClick={() => {
+                    onUpdateAddUserText(addUserText);
+                    setAddUserTexthappened(true);
+                  }}
+                />
               </div>
             </>
-          }
+          )}
         </ConfirmDialog>
       )}
 
