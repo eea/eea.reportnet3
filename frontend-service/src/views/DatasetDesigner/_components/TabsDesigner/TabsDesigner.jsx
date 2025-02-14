@@ -481,6 +481,7 @@ export const TabsDesigner = ({
         onTabHasErrors={onTabHasErrors}
         onTabNameError={onTabNameError}
         onTabNameLengthWarning={onTabNameLengthWarning}
+        preventScrollLeft={true}
         tableImportedMetadata={tableImportedMetadata}
         tableSchemaId={tableSchemaId}
         tabs={tabs}

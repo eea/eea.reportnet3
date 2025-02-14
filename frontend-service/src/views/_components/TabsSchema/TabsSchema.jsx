@@ -149,9 +149,9 @@ export const TabsSchema = ({
       isDatasetReleased={isDatasetReleased}
       name="TabsSchema"
       onTabChange={onTabChange}
+      preventScrollLeft={true}
       tableImportedMetadata={tableImportedMetadata}
-      tableSchemaId={tableSchemaId}
-      >
+      tableSchemaId={tableSchemaId}>
       {tabs}
     </TabView>
   );

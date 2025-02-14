@@ -70,6 +70,7 @@ export const Tab = ({
   onTabMouseWheel,
   onTabNameError,
   onTabNameLengthWarning,
+  preventScrollLeft,
   readOnly = false,
   rightIcon,
   rightIconClass = '',
@@ -589,13 +590,11 @@ export const Tab = ({
           onClick={e => {
             if (!disabled) {
               onTabHeaderClick(e);
-              scrollTo(tabRef.current.offsetLeft - 80, 0);
+              !preventScrollLeft && scrollTo(tabRef.current.offsetLeft - 80, 0);
             }
           }}
           onDoubleClick={onTabDoubleClick}
-          onDragEnd={e => {
-            onTabDragEnd(e);
-          }}
+          onDragEnd={e => onTabDragEnd(e)}
           onDragLeave={onTabDragLeave}
           onDragOver={onTabDragOver}
           onDragStart={onTabDragStart}

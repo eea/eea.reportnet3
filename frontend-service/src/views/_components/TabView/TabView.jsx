@@ -49,6 +49,7 @@ export const TabView = ({
   onTabHasErrors,
   onTabNameError,
   onTabNameLengthWarning,
+  preventScrollLeft = false,
   renderActiveOnly = true,
   style = null,
   tabs,
@@ -187,7 +188,6 @@ export const TabView = ({
   };
 
   const isSelected = index => {
-
     if (designMode) {
       if (
         activeIdx !== TabsUtils.getIndexByTableProperty(QuerystringUtils.getUrlParamValue('tab'), tabs, 'tableSchemaId')
@@ -267,6 +267,7 @@ export const TabView = ({
           onTabMouseWheel={onTabMouseWheel}
           onTabNameError={onTabNameError}
           onTabNameLengthWarning={onTabNameLengthWarning}
+          preventScrollLeft={preventScrollLeft}
           readOnly={tab.props.readOnly}
           rightIcon={tab.props.rightIcon}
           rightIconClass={tab.props.rightIconClass}
@@ -274,7 +275,9 @@ export const TabView = ({
           scrollTo={scrollTo}
           selected={selected}
           showEditIcon={isDatasetReleased && editedTables[tab.key]}
-          tableImportedMetadata={designMode ? tableImportedMetadata[tab.props.tableSchemaId] : tableImportedMetadata[tab.key]}
+          tableImportedMetadata={
+            designMode ? tableImportedMetadata[tab.props.tableSchemaId] : tableImportedMetadata[tab.key]
+          }
           tableSchemaId={tab.props.tableSchemaId}
           toPrefill={tab.props.toPrefill}
           totalTabs={totalTabs}
