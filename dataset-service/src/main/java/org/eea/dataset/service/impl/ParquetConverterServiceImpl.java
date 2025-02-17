@@ -271,7 +271,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       }
 
       Boolean readOnlyFieldsExist = tableSchemaVO.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchemaVO::getReadOnly);
-      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()) {
+      if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !DatasetTypeEnum.REFERENCE.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()) {
         //convert old table to iceberg
         Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
         bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
@@ -1080,7 +1080,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
   private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType, Boolean removeFixedNumberData) throws Exception {
     Boolean allReadOnlyFields = tableSchema.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchema::getReadOnly);
-    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && (allReadOnlyFields || (tableSchema.getFixedNumber() && !removeFixedNumberData))){
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && (allReadOnlyFields || (tableSchema.getFixedNumber() && !removeFixedNumberData))){
       //we shouldn't remove data from tables that have all of their fields read only or are fixed number of records
       return;
     }
@@ -1100,7 +1100,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder, importFileInDremioInfo.getDatasetId());
 
     Boolean readOnlyFieldsExist = tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
-    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && BooleanUtils.isTrue(tableSchema.getToPrefill()) && readOnlyFieldsExist){
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && BooleanUtils.isTrue(tableSchema.getToPrefill()) && readOnlyFieldsExist){
       //restore prefilled data
       DesignDataset designDataset = datasetMetabaseService.getDesignDatasetByDataflowIdAndDatasetSchemaId(importFileInDremioInfo.getDataflowId(), datasetSchemaId);
       bigDataDatasetService.createPrefilledTables(designDataset.getId(), datasetSchemaId, importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getProviderId(), String.valueOf(tableSchema.getIdTableSchema()));
