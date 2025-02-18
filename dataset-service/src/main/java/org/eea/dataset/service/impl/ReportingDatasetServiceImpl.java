@@ -14,7 +14,6 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.domain.Snapshot;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
-import org.eea.dataset.persistence.metabase.repository.ReferenceDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
 import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
 import org.eea.dataset.service.ReportingDatasetService;
@@ -63,17 +62,13 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
   @Autowired
   private RepresentativeControllerZuul representativeControllerZuul;
 
-  /** The reference dataset repository. */
   @Autowired
-  private ReferenceDatasetRepository referenceDatasetRepository;
+  private DatasetController.DataSetControllerZuul dataSetControllerZuul;
 
   /**
    * The Constant LOG_ERROR.
    */
   private static final Logger LOG_ERROR = LoggerFactory.getLogger("error_logger");
-
-  @Autowired
-  private DatasetController.DataSetControllerZuul dataSetControllerZuul;
 
   @Autowired
   private DataFlowController dataFlowController;
@@ -96,7 +91,7 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
     isReleased(datasetsVO);
 
     if (Boolean.TRUE.equals(dataFlowController.isBigDataflow(idFlow))) {
-      hasUpdatesAfterRelease(datasetsVO);
+      //hasUpdatesAfterRelease(datasetsVO);
     }
 
     getDatasetSchemaNames(datasetsVO);

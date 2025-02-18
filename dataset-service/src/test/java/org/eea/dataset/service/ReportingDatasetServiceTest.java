@@ -120,7 +120,7 @@ public class ReportingDatasetServiceTest {
     ReportingDataset reporting = new ReportingDataset();
     reporting.setId(1L);
     snap.setReportingDataset(reporting);
-    when(dataSetControllerZuul.datasetsUpdatedAfterRelease(Mockito.anyLong())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
+    //when(dataSetControllerZuul.datasetsUpdatedAfterRelease(Mockito.anyLong())).thenReturn(new ResponseEntity<>(HttpStatus.OK));
     when(reportingDatasetRepository.findByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
     when(reportingDatasetMapper.entityListToClass(Mockito.any())).thenReturn(datasets);
