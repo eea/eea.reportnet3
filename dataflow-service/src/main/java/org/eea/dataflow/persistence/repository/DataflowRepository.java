@@ -105,7 +105,7 @@ public interface DataflowRepository
   @Modifying
   @Query(nativeQuery = true,
           value = "SELECT * FROM dataflow " +
-          "WHERE is_deleted = true " +
+          "WHERE is_deleted = true " + "AND type IN ('REPORTING', 'CITIZEN_SCIENCE', 'BUSINESS') "+
           "AND deleted_at < CURRENT_DATE - INTERVAL '1 month' * :numberOfMonths")
   List<Dataflow> findSoftDeletedDataflowsOlderThanNumberOfMonths(@Param("numberOfMonths") int numberOfMonths);
 

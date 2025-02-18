@@ -401,7 +401,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete"),
           @ApiResponse(code = 400, message = "dataset incorrect or execution error"),
           @ApiResponse(code = 404, message = EEAErrorMessage.DATASET_NOTFOUND),
-          @ApiResponse(code = 401, message = EEAErrorMessage.PK_REFERENCED),
           @ApiResponse(code = 403, message = EEAErrorMessage.NOT_ENOUGH_PERMISSION),
           @ApiResponse(code = 500, message = "Error deleting")})
   @DeleteMapping(value = "/private/deleteDatasetSchemaRulesAndIntegrity", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -410,7 +409,61 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
               EEAErrorMessage.DATASET_INCORRECT_ID);
     }
-    dataschemaService.deleteDatasetSchema(schemaId, datasetId);
+    try {
+        dataschemaService.deleteDatasetSchema(schemaId, datasetId);
+      } catch (Exception e) {
+        LOG.error("Unexpected error! Error deleting dataset schema for datasetId {} Message: {}", datasetId, e.getMessage());
+        throw e;
+      }
+  }
+
+  @Override
+  @ApiOperation(value = "Delete Unique constrains", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete"),
+          @ApiResponse(code = 400, message = "dataset incorrect or execution error"),
+          @ApiResponse(code = 404, message = EEAErrorMessage.DATASET_NOTFOUND),
+          @ApiResponse(code = 403, message = EEAErrorMessage.NOT_ENOUGH_PERMISSION),
+          @ApiResponse(code = 500, message = "Error deleting")})
+  @DeleteMapping(value = "/private/deleteUniqueConstrains", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteUniqueConstrainsPrivate(@RequestParam("schemaId") String schemaId) {
+    try {
+      dataschemaService.deleteUniquesConstraintFromDataset(schemaId);
+      LOG.info("Finished deleting Unique constrains for schemaId, {}", schemaId);
+    } catch (EEAException e) {
+      LOG.error("Error deleting Unique Constrains with schematId {}. Message: {}", schemaId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.ERROR_DELETING_UNIQUE_CONSTRAINS);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error deleting Unique constrains for schemaId {} Message: {}", schemaId, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Override
+  @ApiOperation(value = "Delete PK catalogue entries", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully delete"),
+          @ApiResponse(code = 400, message = "dataset incorrect or execution error"),
+          @ApiResponse(code = 404, message = EEAErrorMessage.DATASET_NOTFOUND),
+          @ApiResponse(code = 403, message = EEAErrorMessage.NOT_ENOUGH_PERMISSION),
+          @ApiResponse(code = 500, message = "Error deleting")})
+  @DeleteMapping(value = "/private/deleteDatasetSchemaPKCatalogue", produces = MediaType.APPLICATION_JSON_VALUE)
+  public void deleteDatasetSchemaPKCataloguePrivate(@RequestParam("schemaId") String schemaId, @RequestParam("datasetId") Long datasetId) {
+    if (datasetId == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.DATASET_INCORRECT_ID);
+    }
+
+    try {
+      dataschemaService.updatePkCatalogueDeletingSchema(schemaId, datasetId);
+      LOG.info("Finished deleting PK catalogue for datasetId, {}", datasetId);
+    } catch (EEAException e) {
+      LOG.error("Error PK catalogue Entries with datasetId {}. Message: {}", datasetId, e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+              EEAErrorMessage.ERROR_DELETING_PK_CATALOGUE);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error deleting PK Catalogue for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
   }
 
   /**

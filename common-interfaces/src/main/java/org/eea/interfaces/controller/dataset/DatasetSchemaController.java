@@ -112,7 +112,13 @@ public interface DatasetSchemaController {
       @RequestBody(required = true) DataSetSchemaVO datasetSchemaVO);
 
   @DeleteMapping(value = "/private/deleteDatasetSchemaRulesAndIntegrity", produces = MediaType.APPLICATION_JSON_VALUE)
-  void deleteDatasetSchemaRulesAndIntegrityPrivate(@RequestParam("schemaId") String schemaId, @RequestParam("datasetId") Long datasetId);
+  void deleteDatasetSchemaRulesAndIntegrityPrivate(@RequestParam("schemaId") String schemaId, @RequestParam("datasetId") Long datasetId) ;
+
+  @DeleteMapping(value = "/private/deleteUniqueConstrains", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteUniqueConstrainsPrivate(@RequestParam("schemaId") String schemaId) ;
+
+  @DeleteMapping(value = "/private/deleteDatasetSchemaPKCatalogue", produces = MediaType.APPLICATION_JSON_VALUE)
+  void deleteDatasetSchemaPKCataloguePrivate(@RequestParam("schemaId") String schemaId, @RequestParam("datasetId") Long datasetId) ;
 
   /**
    * Creates the table schema.

@@ -61,8 +61,6 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
     @Autowired
     private DataflowServiceImpl dataflowService;
 
-
-
     /** The timeout. */
     @Value("${scheduling.jobForDeletingSoftDeletedDataflows.numberOfMonths}")
     private Integer numberOfMonths;
@@ -101,19 +99,21 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
         LOG.info("Daily Cleanup process completed for dataflowIds {}", dataflowIds);
     }
 
-    private void cleanupDataflowBigData(Long dataflowId) {
+    @Override
+    public void cleanupDataflowBigData(Long dataflowId) {
         dataSetControllerZuul.deleteBigDataRootFolder(dataflowId);
     }
 
     @Transactional
-    public boolean cleanupDataflow(Long dataflowId) throws EEAException {
+    @Override
+    public void cleanupDataflow(Long dataflowId) throws EEAException {
         LOG.info("Processing deletion for dataflow ID: {}", dataflowId);
         try {
-            // Step 1: Retrieve dataset schemas and groups
-            List<String> datasetSchemasIds = retrieveDatasetSchemasForDataflow(dataflowId);
+            // Step 1:
+            // Retrieve dataset schemas and Dataset ids to be used for mongo deletions
+            Map<Long,String> datasetSchemasIdsAndDatasetIds = retrieveDatasetSchemasAndDatasetIdsForDataflow(dataflowId);
+            // Retrieve datasetIdsAndGroups to be used for Keyclock group deletions
             Map<Long, String> datasetIdsAndGroups = retrieveDatasetIdsGroupsForDataflow(dataflowId);
-            LOG.info("Found {} dataset schemas and {} dataset groups for deletion for dataflow ID: {}",
-                    datasetSchemasIds.size(), datasetIdsAndGroups.size(), dataflowId);
 
             // Step 2: Delete dataflow Keycloak resources
             if (!datasetIdsAndGroups.isEmpty()) {
@@ -123,10 +123,16 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
             }
 
             // Step 3: Delete dependent MongoDB records.
-            for (Long datasetId : datasetIdsAndGroups.keySet()) {
-                deleteRulesSchemaFromMongo(datasetId);
-                deleteDatasetSchemaFromMongo(datasetId);
-            }
+            datasetSchemasIdsAndDatasetIds.forEach((datasetId, datasetSchemaId) -> {
+                try {
+                    deleteRulesSchemaFromMongo(datasetId, datasetSchemaId );
+                    deleteDatasetSchemaPKCatalogueFromMongo(datasetId, datasetSchemaId);
+                    deleteDatasetSchemaUniqueConstrainsFromMongo(datasetId, datasetSchemaId);
+                    deleteDatasetSchemaFromMongo(datasetId, datasetSchemaId);
+                } catch (EEAException e) {
+                    throw new RuntimeException(e);
+                }
+            });
 
             // Step 4: For big data flows, perform additional Datalakes cleanup BEFORE deleting the metabase record
             boolean isBigData = dataflowService.getMetabaseById(dataflowId).getBigData();
@@ -138,15 +144,15 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
             executeMetabaseDataflowRelatedObjectDeletions(dataflowId);
 
             LOG.info("Completed cleanup orchestration for dataflow ID: {}", dataflowId);
-            return true;
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             LOG.error("Exception encountered during cleanupDataflow process for ID: {}", dataflowId, e);
             throw new EEAException(EEAErrorMessage.ERROR_CLEANUP_SOFT_DELETED_DATAFLOW, e);
         }
     }
 
-
-    List<String> retrieveDatasetSchemasForDataflow(Long dataflowId) {
+   @Override
+   public List<String> retrieveDatasetSchemasForDataflow(Long dataflowId) {
         List<DataSetMetabaseVO> datasetsVO = datasetMetabaseControllerZuul.getAllDatasetsByDataflowId(dataflowId);
         List<String> datasetSchemas = datasetsVO.stream()
                 .map(DataSetMetabaseVO::getDatasetSchema)
@@ -156,10 +162,22 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
         return datasetSchemas;
     }
 
+    public Map<Long, String> retrieveDatasetSchemasAndDatasetIdsForDataflow(Long dataflowId) {
+        List<DataSetMetabaseVO> datasetsVO = datasetMetabaseControllerZuul.getAllDatasetsByDataflowId(dataflowId);
+        return datasetsVO.stream()
+                .filter(vo -> vo.getDatasetSchema() != null) // Avoid null schemas
+                .collect(Collectors.toMap(
+                        DataSetMetabaseVO::getId,         // Key: Dataset ID
+                        DataSetMetabaseVO::getDatasetSchema // Value: Dataset Schema ID
+                ));
+    }
+
+    @Override
     public Map<Long, String> retrieveDatasetIdsGroupsForDataflow(Long dataflowId) {
         return datasetMetabaseControllerZuul.getDatasetIdsAndGroups(dataflowId);
     }
 
+    @Override
     public void deleteDataflowResourcesReporting(Map<Long, String> datasetIdsAndGroups, Long dataflowId) throws EEAException {
         LOG.info("Executing Keycloak group deletions for dataset groups.");
         try {
@@ -198,12 +216,9 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
     }
 
     @Transactional
-    public boolean executeMetabaseDataflowRelatedObjectDeletions(Long dataflowId) throws EEAException {
-        LOG.info("Executing deletion steps for dataflow ID: {}", dataflowId);
-        if (!dataflowService.getMetabaseById(dataflowId).isDeleted()) {
-            LOG.info("Dataflow ID: {} is not marked as deleted, skipping cleanup.", dataflowId);
-            return false;
-        }
+    @Override
+    public void executeMetabaseDataflowRelatedObjectDeletions(Long dataflowId) throws EEAException {
+        LOG.info("Executing Metabase deletion queries for dataflow ID: {}", dataflowId);
         try {
             dataflowCleanupRepository.deleteSnapshots(dataflowId);
             dataflowCleanupRepository.deleteSnapshotSchemas(dataflowId);
@@ -224,41 +239,50 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
             dataflowCleanupRepository.deleteForeignRelationsDestination(dataflowId);
             dataflowCleanupRepository.deleteDatasets(dataflowId);
             dataflowCleanupRepository.deleteNativeDataflow(dataflowId);
-            LOG.info("Successfully executed Metabase deletion steps for dataflow ID: {}", dataflowId);
-            return true;
+            LOG.info("Successfully executed Metabase deletion queries for dataflow ID: {}", dataflowId);
         } catch (Exception e) {
             LOG.error("Error during execution of Metabase deletion steps for dataflow ID: {}", dataflowId, e);
             throw new EEAException(EEAErrorMessage.ERROR_DELETING_DATAFLOW_METABASE_RELATED_OBJECTS, e);
         }
     }
 
-    public void deleteRulesSchemaFromMongo(Long datasetId) throws EEAException {
-        LOG.info("Deleting RulesSchema entry from MongoDB for dataset ID: {}", datasetId);
+    @Override
+    public void deleteRulesSchemaFromMongo(Long datasetId, String datasetSchemaId) throws EEAException {
         try {
-            String datasetSchemaId = datasetSchemaControllerZuul.getDatasetSchemaId(datasetId);
-            if (datasetSchemaId != null) {
-                rulesControllerZuul.deleteRulesSchema(datasetSchemaId, datasetId);
-            } else {
-                LOG.warn("No RulesSchema found for dataset ID: {}", datasetId);
-            }
+            rulesControllerZuul.deleteRulesSchema(datasetSchemaId, datasetId);
         } catch (Exception e) {
             LOG.error("Error while deleting RulesSchema from MongoDB for dataset ID: {}", datasetId, e);
             throw new EEAException(EEAErrorMessage.ERROR_DELETING_RULES_SCHEMA, e);
         }
     }
 
-    public void deleteDatasetSchemaFromMongo(Long datasetId) throws EEAException {
-        LOG.info("Deleting DataSetSchema entry from MongoDB for dataset ID: {}", datasetId);
+    @Override
+    public void deleteDatasetSchemaFromMongo(Long datasetId, String datasetSchemaId) throws EEAException {
         try {
-            String datasetSchemaId = datasetSchemaControllerZuul.getDatasetSchemaId(datasetId);
-            if (datasetSchemaId != null) {
                 datasetSchemaControllerZuul.deleteDatasetSchemaRulesAndIntegrityPrivate(datasetSchemaId, datasetId);
-            } else {
-                LOG.warn("No DataSetSchema found for dataset ID: {}", datasetId);
-            }
         } catch (Exception e) {
             LOG.error("Error while deleting DataSetSchema from MongoDB for dataset ID: {}", datasetId, e);
             throw new EEAException(EEAErrorMessage.ERROR_DELETING_DATASET_SCHEMA, e);
+        }
+    }
+
+    @Override
+    public void deleteDatasetSchemaPKCatalogueFromMongo(Long datasetId, String datasetSchemaId) throws EEAException {
+        try {
+            datasetSchemaControllerZuul.deleteDatasetSchemaPKCataloguePrivate(datasetSchemaId, datasetId);
+        } catch (Exception e) {
+            LOG.error("Error while deleting PK Catalogue from MongoDB for dataset ID: {}", datasetId, e);
+            throw new EEAException(EEAErrorMessage.ERROR_DELETING_DATASET_SCHEMA, e);
+        }
+    }
+
+    @Override
+    public void deleteDatasetSchemaUniqueConstrainsFromMongo(Long datasetId, String datasetSchemaId) throws EEAException {
+        try {
+            datasetSchemaControllerZuul.deleteUniqueConstrainsPrivate(datasetSchemaId);
+        } catch (Exception e) {
+            LOG.error("Error while deleting PK Catalogue from MongoDB for dataset ID: {}", datasetId, e);
+            throw new EEAException(EEAErrorMessage.ERROR_DELETING_UNIQUE_CONSTRAINS, e);
         }
     }
 }

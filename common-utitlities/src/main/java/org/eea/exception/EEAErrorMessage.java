@@ -840,6 +840,15 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_DELETING_KEYCLOAK_GROUPS: {@value}. */
   public static final String ERROR_DELETING_KEYCLOAK_GROUPS =
           "Error occurred while deleting Keycloak groups related to the dataflow.";
+
+  /** The Constant ERROR_DELETING_PK_CATALOGUE: {@value}. */
+  public static final String ERROR_DELETING_PK_CATALOGUE =
+          "An unknown error happenned while deleting PK Catalogue Entries.";
+
+  /** The Constant ERROR_DELETING_UNIQUE_CONSTRAINS: {@value}. */
+  public static final String ERROR_DELETING_UNIQUE_CONSTRAINS =
+          "An unknown error happenned while deleting Unique Constrains.";
+
   /**
    * Instantiates a new EEA error message.
    */
