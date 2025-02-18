@@ -56,7 +56,10 @@ export const PublicDataflows = () => {
   const [publicDataflows, setPublicDataflows] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOWS });
+  useBreadCrumbs(categorized === 'obligation'
+    ? { currentPage: CurrentPage.PUBLIC_DATAFLOWS_BY_OBLIGATION }
+    : { currentPage: CurrentPage.PUBLIC_DATAFLOWS }
+  );
 
   useEffect(() => {
     setCategorized(params.get('categorized') ?? "default");
@@ -210,7 +213,7 @@ export const PublicDataflows = () => {
   };
 
   const onOpenDataflow = (dataflowId, newTab) => {
-    const url = getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true);
+    const url = getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId,categorized }, true);
     if (!newTab) {
       return navigate(url);
     } else {

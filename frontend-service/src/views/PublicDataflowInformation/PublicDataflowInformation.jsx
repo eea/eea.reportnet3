@@ -46,6 +46,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const PublicDataflowInformation = () => {
   const navigate = useNavigate();
   const { dataflowId } = useParams();
+  const { categorized } = useParams();
 
   const baseRod3Url = 'https://rod.eionet.europa.eu';
 
@@ -64,7 +65,10 @@ export const PublicDataflowInformation = () => {
 
   const isBusinessDataflow = dataflowType === config.dataflowType.BUSINESS.value;
 
-  useBreadCrumbs({ currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId });
+  useBreadCrumbs(categorized === 'obligation'
+    ? { currentPage: CurrentPage.PUBLIC_DATAFLOWS_BY_OBLIGATION_DATAFLOW,dataflowId }
+    : { currentPage: CurrentPage.PUBLIC_DATAFLOW,dataflowId }
+  );
 
   useEffect(() => {
     onLoadPublicDataflowInformation();
