@@ -304,7 +304,7 @@ public class DataFlowServiceImplTest {
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<>());
     when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new Dataflow()));
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
@@ -347,7 +347,7 @@ public class DataFlowServiceImplTest {
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
@@ -676,7 +676,7 @@ public class DataFlowServiceImplTest {
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
     doNothing().when(datasetSchemaControllerZuul).deleteDatasetSchema(1L, true);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
@@ -701,7 +701,7 @@ public class DataFlowServiceImplTest {
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
@@ -792,7 +792,7 @@ public class DataFlowServiceImplTest {
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
@@ -853,7 +853,7 @@ public class DataFlowServiceImplTest {
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
@@ -887,7 +887,7 @@ public class DataFlowServiceImplTest {
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<ResourceAccessVO>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.any()))
@@ -935,7 +935,7 @@ public class DataFlowServiceImplTest {
 
     when(securityContext.getAuthentication()).thenReturn(authentication);
     when(authentication.getName()).thenReturn("name");
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
     when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
@@ -1435,7 +1435,7 @@ public class DataFlowServiceImplTest {
     when(authentication.getName()).thenReturn("name");
     when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new Dataflow()));
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(emptyDataflow);
-    when(userManagementControllerZull.getResourcesByUser(Mockito.any(ResourceTypeEnum.class)))
+    when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<>());
 
     DataFlowVO searchDataflow = dataflowServiceImpl.getById(1L, false);
