@@ -93,6 +93,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -731,7 +732,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Soft delete data flow.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the id dataflow
    */
   @Override
   @Transactional
@@ -747,7 +748,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Reverse soft delete data flow.
    *
-   * @param idDataflow the id dataflow
+   * @param dataflowId the id dataflow
    */
   @Override
   @Transactional
@@ -1374,7 +1375,7 @@ public class DataflowServiceImpl implements DataflowService {
   /**
    * Find obligation dataflow.
    *
-   * @param dataflowPublicVO the dataflow public VO
+   * @param dataflowVO the dataflow public VO
    */
   private void findObligationDataflow(DataFlowVO dataflowVO) {
     try {
@@ -1541,19 +1542,27 @@ public class DataflowServiceImpl implements DataflowService {
       }
 
       boolean isAdmin = isAdmin();
-      List<Long> datasetsIds;
-      List<ResourceAccessVO> datasets =
-              userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_SCHEMA);
+
+      List<ResourceTypeEnum> datasetTypes = new ArrayList<>();
+      datasetTypes.add(ResourceTypeEnum.DATA_SCHEMA);
 
       if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
-        datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATASET));
-        datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.DATA_COLLECTION));
-        datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.EU_DATASET));
-        datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.TEST_DATASET));
-        datasets.addAll(userManagementControllerZull.getResourcesByUser(ResourceTypeEnum.REFERENCE_DATASET));
+        datasetTypes.addAll(Arrays.asList(
+            ResourceTypeEnum.DATASET,
+            ResourceTypeEnum.DATA_COLLECTION,
+            ResourceTypeEnum.EU_DATASET,
+            ResourceTypeEnum.TEST_DATASET,
+            ResourceTypeEnum.REFERENCE_DATASET
+        ));
       }
 
-      datasetsIds = datasets.stream().map(ResourceAccessVO::getId).collect(Collectors.toList());
+      List<ResourceAccessVO> resources = userManagementControllerZull.getResourcesByUser();
+
+      final List<Long> datasetsIds = resources.parallelStream()
+          .filter(resource -> datasetTypes.contains(resource.getResource()))
+          .map(ResourceAccessVO::getId)
+          .collect(Collectors.toList());
+
       //if Type is Design we save some calls No Dc Eu Tests etc.
       if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
       if (providerId == null) {
