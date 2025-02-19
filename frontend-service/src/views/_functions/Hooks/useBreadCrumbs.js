@@ -158,6 +158,12 @@ export const useBreadCrumbs = ({
     label: resourcesContext.messages['publicDataflowsBreadcrumbs']
   });
 
+  const getPublicDataflowsByObligationCrumb = () => ({
+    command: () => navigate(`${routes.PUBLIC_DATAFLOWS}?categorized=obligation`),
+    href: `${routes.PUBLIC_DATAFLOWS}?categorized=obligation`,
+    label: resourcesContext.messages['publicDataflowsObligationBreadcrumbs']
+  });
+
   const getPublicHomeCrumb = () => ({
     command: () => navigate(getUrl(routes.ACCESS_POINT, {}, true)),
     href: getUrl(routes.ACCESS_POINT, {}, true),
@@ -207,6 +213,10 @@ export const useBreadCrumbs = ({
         breadCrumbContext.add([getHomeCrumb(), getDataflowsCrumb()]);
         break;
 
+      case CurrentPage.PUBLIC_DATAFLOWS_BY_OBLIGATION:
+        breadCrumbContext.add([getHomeCrumb(), getPublicDataflowsByObligationCrumb()]);
+        break;
+
       case CurrentPage.DATAFLOW:
         if (!isEmpty(dataflowStateData)) {
           const breadCrumbs = [getHomeCrumb(), getDataflowsCrumb(), getDataflowCrumb()];
@@ -250,6 +260,10 @@ export const useBreadCrumbs = ({
 
       case CurrentPage.PUBLIC_DATAFLOW:
         breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsCrumb(), getPublicDataflowCrumb()]);
+        break;
+
+      case CurrentPage.PUBLIC_DATAFLOWS_BY_OBLIGATION_DATAFLOW:
+        breadCrumbContext.add([getPublicHomeCrumb(), getPublicDataflowsByObligationCrumb(), getPublicDataflowCrumb()]);
         break;
 
       case CurrentPage.PUBLIC_DATAFLOWS:
