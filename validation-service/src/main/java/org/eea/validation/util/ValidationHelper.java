@@ -388,6 +388,12 @@ public class ValidationHelper implements DisposableBean {
         value.put("datasetSchema", dataset.getDatasetSchema());
         value.put("ruleId", rule.getRuleId().toString());
         value.put("ruleCode", rule.getShortCode());
+        if(rule.getThenCondition() != null && rule.getThenCondition().size() > 1){
+          value.put("ruleLevelError", rule.getThenCondition().get(1));
+        }
+        else{
+          value.put("ruleLevelError", null);
+        }
         value.put("tableName", tableSchema.getNameTableSchema());
         value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
@@ -923,6 +929,15 @@ public class ValidationHelper implements DisposableBean {
     value.put("dataProviderId", dataset.getDataProviderId());
     value.put("datasetSchema", dataset.getDatasetSchema());
     value.put("sqlRule", sqlRule != null ? sqlRule.getRuleId().toString() : null);
+    value.put("ruleCode", sqlRule != null ? sqlRule.getShortCode() : null);
+    if(sqlRule != null && sqlRule.getThenCondition() != null && sqlRule.getThenCondition().size() > 1){
+      value.put("ruleLevelError", sqlRule.getThenCondition().get(1));
+    }
+    else{
+      value.put("ruleLevelError", null);
+    }
+
+
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
   }
 

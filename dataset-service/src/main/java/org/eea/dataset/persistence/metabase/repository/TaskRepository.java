@@ -118,6 +118,18 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   void updateStatus(@Param("status") String status, @Param("taskId") Long taskId);
 
   Task findFirstByTaskTypeAndStatusOrderByVersionAscIdAsc(TaskType taskType, ProcessStatusEnum status);
+
+  /**
+   * Find all tasks based on status for a specific process id that were blockers
+   *
+   * @param processId the process id
+   * @param status the status
+   * @return the tasks
+   */
+  @Query(nativeQuery = true, value = "select * from task where process_id=:processId and status=:status and json like '%\"ruleLevelError\":\"BLOCKER\"%'")
+  List<Task> findAllByProcessIdAndStatusAndLevelErrorBlocker(@Param("processId") String processId, @Param("status") String status);
+
+
 }
 
 
