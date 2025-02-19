@@ -229,6 +229,9 @@ public class EeaSecurityExpressionRoot extends SecurityExpressionRoot
 
     if (details instanceof Map) {
       String userId = ((Map<String, String>) details).get(AuthenticationDetails.USER_ID);
+      if (dataflowId == null) {
+        return false;
+      }
       String apiKey = this.userManagementControllerZull.getApiKey(userId, dataflowId, dataProvider);
       canAccess = StringUtils.isNotBlank(apiKey) && SecurityContextHolder.getContext()
           .getAuthentication().getCredentials().toString().contains(apiKey);
