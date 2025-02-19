@@ -324,6 +324,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
 
             LinkedHashMap<String, Object> results = getResults(dremioApiJob);
             if (results == null) {
+                LOG.error("In executeSqlStatementGet {} results=null", sqlStatement);
                 throw new EEAException("Failed to fetch results within retry limit.");
             }
 
@@ -358,7 +359,8 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                         throw new EEAException("Retry failed after token refresh.");
                     }
                 } else {
-                    throw new EEAException("Failed to fetch results within retry limit.");
+                    LOG.error("In getResults for dremio job {} status={} message={}", dremioApiJob.getId(), e.status(), e.getMessage());
+                    throw new EEAException("Failed to fetch results within retry limit. statusCode=" + e.status());
                 }
             }
         }

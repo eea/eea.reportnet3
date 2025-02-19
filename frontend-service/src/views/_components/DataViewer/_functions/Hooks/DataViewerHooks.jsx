@@ -334,7 +334,7 @@ export const useSetColumns = (
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.field)[0];
     let recordId = rowData.recordId;
-    let fieldName = field.fieldData.fieldName;
+    let fieldName = field?.fieldData?.fieldName;
     let dataProviderCode = !isEmpty(rowData?.providerCode) ? rowData?.providerCode : undefined;
 
     const renderField = () => {
