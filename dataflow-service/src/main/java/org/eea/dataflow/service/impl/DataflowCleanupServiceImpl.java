@@ -237,6 +237,7 @@ public class DataflowCleanupServiceImpl implements DataflowCleanupService {
             dataflowCleanupRepository.deleteRepresentatives(dataflowId);
             dataflowCleanupRepository.deleteForeignRelationsOrigin(dataflowId);
             dataflowCleanupRepository.deleteForeignRelationsDestination(dataflowId);
+            dataflowCleanupRepository.deleteDatasetTable(dataflowId);
             dataflowCleanupRepository.deleteDatasets(dataflowId);
             dataflowCleanupRepository.deleteNativeDataflow(dataflowId);
             LOG.info("Successfully executed Metabase deletion queries for dataflow ID: {}", dataflowId);

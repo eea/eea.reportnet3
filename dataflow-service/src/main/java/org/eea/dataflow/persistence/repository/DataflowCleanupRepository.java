@@ -30,6 +30,11 @@ public interface DataflowCleanupRepository extends JpaRepository<Dataflow, Long>
 
     @Transactional
     @Modifying
+    @Query(nativeQuery = true, value = "DELETE FROM dataset_table WHERE dataset_id IN (SELECT id FROM dataset WHERE dataflowid = :dataflowId)")
+    void deleteDatasetTable(@Param("dataflowId") Long dataflowId);
+
+    @Transactional
+    @Modifying
     @Query(nativeQuery = true, value = "DELETE FROM snapshot_schema WHERE design_dataset_id IN (SELECT id FROM dataset WHERE dataflowid = :dataflowId)")
     void deleteSnapshotSchemas(@Param("dataflowId") Long dataflowId);
 
