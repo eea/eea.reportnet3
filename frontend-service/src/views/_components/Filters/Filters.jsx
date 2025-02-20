@@ -59,6 +59,7 @@ export const Filters = ({
   options = [],
   panelClassName,
   providerUsername,
+  publicFiltersReset = false,
   recoilId
 }) => {
   const resourcesContext = useContext(ResourcesContext);
@@ -184,7 +185,7 @@ export const Filters = ({
    }
 
    useEffect(() => {
-     return () => handleResetFilters()
+     return () => publicFiltersReset && handleResetFilters()
    }, []);
 
   const renderFilter = (option, type) => {

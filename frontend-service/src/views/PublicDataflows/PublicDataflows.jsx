@@ -350,6 +350,7 @@ export const PublicDataflows = () => {
             onReset={() => setPagination({ firstRow: 0, numberRows: numberRows, pageNum: 0 })}
             options={filterOptions}
             panelClassName="overwriteZindexPanel"
+            publicFiltersReset={true}
             recoilId="publicDataflows"
           />
           <div className={styles.topPaginator}>{renderPaginator()}</div>
