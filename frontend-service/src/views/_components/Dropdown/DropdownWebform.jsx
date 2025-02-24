@@ -653,7 +653,13 @@ const DropdownWebform = props => {
   };
 
   const renderClearIcon = () => {
-    if (value != null && showClear && !disabled) {
+    let optionsList = [];
+
+    if (options.length === 2) {
+      optionsList = options.filter(option => option?.value === 'Single' || option?.value === 'Group');
+    }
+
+    if (value != null && showClear && !disabled && optionsList.length !== 2) {
       return <i className="p-dropdown-clear-icon pi pi-times" onClick={clear}></i>;
     } else {
       return null;
