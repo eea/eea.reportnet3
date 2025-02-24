@@ -90,7 +90,7 @@ const DropdownWebform = props => {
     selfClick;
 
   useEffect(() => {
-    if (initialValue === null) {
+    if (initialValue === null || value === null) {
       setInitialValue(value);
     }
   }, [value]);
@@ -606,14 +606,12 @@ const DropdownWebform = props => {
 
   const renderLabel = (label, selectedOption) => {
     if (editable) {
-      let value = label || value || '';
-
       return (
         <input
           aria-label={ariaLabel}
           aria-labelledby={ariaLabelledBy}
           className="p-dropdown-label p-inputtext"
-          defaultValue={value}
+          defaultValue={selectedOption}
           disabled={disabled}
           maxLength={maxLength}
           onBlur={onInputBlur}
@@ -632,7 +630,7 @@ const DropdownWebform = props => {
       });
       return (
         <label className={className} style={{ fontStyle: isNull(selectedOption) ? 'italic' : 'inherit' }}>
-          <span>{label || placeholder || ''}</span>
+          <span>{selectedOption && label ? label : placeholder || ''}</span>
           {required && isNull(selectedOption) ? (
             <FontAwesomeIcon
               aria-label="required"

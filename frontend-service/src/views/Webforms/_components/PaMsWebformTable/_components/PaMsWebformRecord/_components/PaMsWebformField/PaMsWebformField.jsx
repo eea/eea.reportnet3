@@ -426,9 +426,9 @@ export const PaMsWebformField = ({
               isLoadingData={isLoadingData}
               onChange={event => {
                 const value =
-                  typeof event.target.value === 'object' && !Array.isArray(event.target.value)
-                    ? event.target.value.value
-                    : event.target.value;
+                  typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
+                    ? event.target?.value?.value
+                    : event.target?.value;
                 onFillField(field, option, value, isConditional);
                 pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                 if (isNil(field.recordId)) onSaveField(option, value);
@@ -437,6 +437,7 @@ export const PaMsWebformField = ({
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               optionLabel="itemType"
               options={linkItemsOptions}
+              showClear={true}
               showFilterClear={true}
               style={hasErrors ? { border: '2px solid #b90202' } : null}
               value={RecordUtils.getLinkValue(linkItemsOptions, field.value)}
@@ -482,9 +483,9 @@ export const PaMsWebformField = ({
             isLoadingData={isLoadingData}
             onChange={event => {
               const value =
-                typeof event.target.value === 'object' && !Array.isArray(event.target.value)
-                  ? event.target.value.value
-                  : event.target.value;
+                typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
+                  ? event.target?.value?.value
+                  : event.target?.value;
               onFillField(field, option, value, isConditional);
               pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
               if (isNil(field.recordId)) onSaveField(option, value);
@@ -493,6 +494,7 @@ export const PaMsWebformField = ({
             onFilterInputChangeBackend={filter => onFilter(filter, field)}
             optionLabel="itemType"
             options={codelistOptions}
+            showClear={true}
             showFilterClear={true}
             singleCodelist={true}
             style={hasErrors ? { border: '2px solid #b90202' } : null}
