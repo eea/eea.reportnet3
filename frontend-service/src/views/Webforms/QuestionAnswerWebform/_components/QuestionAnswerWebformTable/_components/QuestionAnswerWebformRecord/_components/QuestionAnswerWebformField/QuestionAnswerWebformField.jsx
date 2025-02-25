@@ -97,7 +97,16 @@ export const QuestionAnswerWebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(dataflowId, datasetId, field.fieldId, dataProviderId);
+      await DatasetService.deleteAttachment({
+        dataflowId,
+        datasetId,
+        fieldId: field.fieldId || field.fieldSchemaId,
+        dataProviderId,
+        tableSchemaName: undefined,
+        fieldName: field.name,
+        fileName: field.value,
+        recordId: field.recordId
+      });
       onFillField(field, field.fieldSchemaId, '');
       handleDialogs('deleteAttachment', false);
     } catch (error) {
@@ -130,7 +139,16 @@ export const QuestionAnswerWebformField = ({
 
   const onFileDownload = async (fileName, fieldId) => {
     try {
-      const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
+      const { data } = await DatasetService.downloadFileData({
+        dataflowId,
+        datasetId,
+        fieldId,
+        dataProviderId,
+        fileName,
+        recordId: field.recordId,
+        tableSchemaName: undefined,
+        fieldName: field.name
+      });
       DownloadFile(data, fileName);
     } catch (error) {
       console.error('QuestionAnswerWebformField - onFileDownload.', error);
@@ -283,7 +301,7 @@ export const QuestionAnswerWebformField = ({
                 icon="export"
                 iconPos={'right'}
                 label={field.value}
-                onClick={() => onFileDownload(field.value, field.fieldId)}
+                onClick={() => onFileDownload(field.value, field.fieldId || field.fieldSchemaId)}
               />
             )}
             {
@@ -377,12 +395,20 @@ export const QuestionAnswerWebformField = ({
               ? getUrl(DatasetConfig.uploadAttachment, {
                   dataflowId,
                   datasetId,
-                  fieldId: field.fieldId
+                  fieldId: field.fieldId || field.fieldSchemaId,
+                  tableSchemaName: undefined,
+                  fieldName: field.name,
+                  recordId: field.recordId,
+                  previousFileName: undefined
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
                   datasetId,
-                  fieldId: field.fieldId,
+                  fieldId: field.fieldId || field.fieldSchemaId,
+                  tableSchemaName: undefined,
+                  fieldName: field.name,
+                  recordId: field.recordId,
+                  previousFileName: undefined,
                   providerId: dataProviderId
                 })
           }`}
