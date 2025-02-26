@@ -121,6 +121,7 @@ export const QuestionAnswerWebformTable = ({
           datasetId={datasetId}
           getTableErrors={getTableErrors}
           record={record}
+          tableSchemaName={tables.name}
         />
       </Fragment>
     ));

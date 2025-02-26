@@ -43,6 +43,7 @@ export const QuestionAnswerWebformField = ({
   getTableErrors,
   nationalField,
   recordValidations,
+  tableSchemaName,
   title,
   tooltip
 }) => {
@@ -102,7 +103,7 @@ export const QuestionAnswerWebformField = ({
         datasetId,
         fieldId: field.fieldId || field.fieldSchemaId,
         dataProviderId,
-        tableSchemaName: undefined,
+        tableSchemaName: tableSchemaName,
         fieldName: field.name,
         fileName: field.value,
         recordId: field.recordId
@@ -146,7 +147,7 @@ export const QuestionAnswerWebformField = ({
         dataProviderId,
         fileName,
         recordId: field.recordId,
-        tableSchemaName: undefined,
+        tableSchemaName: tableSchemaName,
         fieldName: field.name
       });
       DownloadFile(data, fileName);
@@ -396,19 +397,19 @@ export const QuestionAnswerWebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: field.fieldId || field.fieldSchemaId,
-                  tableSchemaName: undefined,
+                  tableSchemaName: tableSchemaName,
                   fieldName: field.name,
                   recordId: field.recordId,
-                  previousFileName: undefined
+                  previousFileName: field.value
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
                   datasetId,
                   fieldId: field.fieldId || field.fieldSchemaId,
-                  tableSchemaName: undefined,
+                  tableSchemaName: tableSchemaName,
                   fieldName: field.name,
                   recordId: field.recordId,
-                  previousFileName: undefined,
+                  previousFileName: field.value,
                   providerId: dataProviderId
                 })
           }`}
