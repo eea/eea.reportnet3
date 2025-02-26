@@ -5,7 +5,14 @@ import styles from './QuestionAnswerWebformRecord.module.scss';
 
 import { QuestionAnswerWebformField } from './_components/QuestionAnswerWebformField';
 
-export const QuestionAnswerWebformRecord = ({ dataProviderId, dataflowId, datasetId, getTableErrors, record }) => (
+export const QuestionAnswerWebformRecord = ({
+  dataProviderId,
+  dataflowId,
+  datasetId,
+  getTableErrors,
+  record,
+  tableSchemaName
+}) => (
   <div className={styles.record}>
     {record.elements.map(element => {
       const { name, title, titleSource, tooltipSource } = element;
@@ -19,6 +26,7 @@ export const QuestionAnswerWebformRecord = ({ dataProviderId, dataflowId, datase
             getTableErrors={getTableErrors}
             nationalField={name}
             recordValidations={record.validations}
+            tableSchemaName={tableSchemaName}
             title={titleSource || title}
             tooltip={tooltipSource}
           />
