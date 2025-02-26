@@ -214,6 +214,8 @@ public interface BigDataDatasetService {
      */
     void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception;
 
+    void removeRootDataflowFolderFromS3(Long dataflowId);
+
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 
     void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception;

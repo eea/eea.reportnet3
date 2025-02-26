@@ -1508,6 +1508,27 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
+    public void removeRootDataflowFolderFromS3(Long dataflowId) {
+        S3PathResolver s3PathResolverParquet = new S3PathResolver(dataflowId);
+        s3PathResolverParquet.setIsIcebergTable(false);
+        s3PathResolverParquet.setPath(S3_ROOT_DATAFLOW_FOLDER_PATH);
+
+        S3PathResolver s3PathResolverIceberg = new S3PathResolver(dataflowId);
+        s3PathResolverIceberg.setIsIcebergTable(true);
+        s3PathResolverIceberg.setPath(S3_ROOT_DATAFLOW_FOLDER_PATH);
+
+        if (s3HelperPrivate.checkFolderExist(s3PathResolverParquet, s3PathResolverParquet.getPath())) {
+            s3HelperPrivate.deleteFolder(s3PathResolverParquet, s3PathResolverParquet.getPath());
+            LOG.info("Removed root Parquet dataflow folder: for dataflow id: {}", dataflowId);
+        }
+
+        if (s3HelperPrivate.checkFolderExist(s3PathResolverIceberg, s3PathResolverIceberg.getPath())) {
+            s3HelperPrivate.deleteFolder(s3PathResolverIceberg, s3PathResolverIceberg.getPath());
+            LOG.info("Removed root Iceberg dataflow folder: for dataflow id: {}", dataflowId);
+        }
+    }
+
+    @Override
     public void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception {
         String tableSchemaName = s3TablePathResolver.getTableName();
         List<S3Object> tableNameFilenames = s3HelperPrivate.getFilenamesFromTableNames(s3TablePathResolver);

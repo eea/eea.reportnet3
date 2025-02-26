@@ -1202,5 +1202,26 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
     return designDatasetRepository.findByDataflowIdAndDatasetSchema(dataflowId, datasetSchemaId);
   }
 
+  /**
+   * Retrieves a mapping of dataset IDs to their corresponding dataset group prefixes(Dataset Names)
+   * for a given dataflow ID. This helps identify datasets, data collections, and
+   * other related entities that need to be deleted.
+   *
+   * @param dataflowId The ID of the dataflow for which dataset groups are retrieved.
+   * @return A map where the key is the dataset ID and the value is the dataset group prefix.
+   *         Example: { 1L -> "Dataset Name-1", 2L -> "Dataset NAme-2" }
+   */
+  @Override
+  public Map<Long, String> getDatasetIdsAndGroupsByDataflowId(Long dataflowId) {
+    List<Object[]> results = dataSetMetabaseRepository.findDatasetGroupsByDataflowId(dataflowId);
+
+    return results.stream()
+            .collect(Collectors.toMap(
+                    row -> ((Number) row[0]).longValue(),  // dataset_id as key
+                    row -> (String) row[1],               // dataset_group_prefix as value
+                    (existing, replacement) -> existing  // Handle duplicates (keep first occurrence)
+            ));
+  }
+
 
 }

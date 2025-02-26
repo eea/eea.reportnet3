@@ -968,6 +968,15 @@ public interface DatasetController {
   List<TableSchemaIdNameVO> getAvailableForManualEditingTables(@PathVariable("datasetId") Long datasetId) throws Exception;
 
   /**
+   * Remove big data folder for dataflow id
+   *
+   * @param dataflowId the dataset id
+   *
+   */
+  @DeleteMapping("/private/bigDataFolder/dataflow/{dataflowId}")
+  void deleteBigDataRootFolder(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
    * Restore prefilled tables
    *
    * @param datasetId the dataset id to be restored

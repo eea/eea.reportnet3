@@ -1688,7 +1688,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         for (FieldSchema field : table.getRecordSchema().getFieldSchema()) {
           if (field.getReferencedField() != null) {
             updateCatalogueDeleting(field,
-                    datasetMetabaseService.findDatasetMetabase(datasetId).getDataflowId());
+                    dataflowId);
             // also delete from the dataflow reference catalogue if the field it's an external link
             updateDataflowReferencedCatalogue(field, dataflowId);
           }
