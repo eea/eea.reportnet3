@@ -1132,6 +1132,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
+        if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+            LOG.info("Can not convert iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} because  table data are not manually editable or the iceberg table has not been created", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema());
+            return;
+        }
+
         if(providerId == null) {
             providerId = datasetService.getDataProviderIdById(datasetId);
         }
@@ -1172,6 +1177,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception {
+        if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+            LOG.info("Can not convert iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} because  table data are not manually editable or the iceberg table has not been created", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema());
+            return;
+        }
         if(providerId == null) {
             providerId = datasetService.getDataProviderIdById(datasetId);
         }
