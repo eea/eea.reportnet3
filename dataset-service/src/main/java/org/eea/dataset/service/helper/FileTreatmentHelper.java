@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.CSVWriter;
 import feign.FeignException;
-import java.text.SimpleDateFormat;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -26,7 +25,6 @@ import org.eea.dataset.persistence.data.repository.*;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
-import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
 import org.eea.dataset.persistence.metabase.repository.DesignDatasetRepository;
@@ -40,7 +38,7 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetTableService;
-import org.eea.dataset.service.StatisticsService;
+import org.eea.dataset.service.ParquetConverterService;
 import org.eea.dataset.service.file.CSVSegmentedReaderStrategy;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -162,8 +160,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
     private int defaultImportProcessPriority = 20;
 
-    private DataSetMetabaseMapper dataSetMetabaseMapper;
-
 
     /**
      * The import path.
@@ -176,9 +172,6 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Value("${dataset.fieldMaxLength}")
     private int fieldMaxLength;
-
-    @Value("${importStorePath}")
-    private String importStorePath;
 
     /**
      * The dataset service.
@@ -353,7 +346,10 @@ public class FileTreatmentHelper implements DisposableBean {
     private DatasetTableService datasetTableService;
 
     @Autowired
-    private StatisticsService statisticsService;
+    private ParquetConverterService parquetConverterService;
+
+    @Autowired
+    private DataSetMetabaseMapper dataSetMetabaseMapper;
 
     /**
      * Initialize the executor service.
@@ -2035,8 +2031,8 @@ public class FileTreatmentHelper implements DisposableBean {
             if (fileName == null) {
                 throw new EEAException(EEAErrorMessage.FILE_NAME);
             }
-            String fileExtension = datasetService.getMimetype(originalFileName).toUpperCase();
-            String linesToBeInserted = new String();
+            String fileExtension = datasetService.getMimetype(originalFileName).toLowerCase();
+            String linesToBeInserted = "";
 
             final String mimeType = datasetService.getMimetype(fileName).toLowerCase();
             // validates file types for the data load
@@ -2081,44 +2077,20 @@ public class FileTreatmentHelper implements DisposableBean {
                                 schema, connectionDataVO, 0l, 0l, processId, EventType.COMMAND_FINALIZE_CSV_FILE_IMPORT_TO_DATASET, delimiter);
                     }
                     reader.close();
-                    linesToBeInserted = String.valueOf(lines);
+                    long numberOfRecords = lines - 1;//we remove the header to find the real number of records
+                    linesToBeInserted = String.valueOf(numberOfRecords);
                 }
                 if (FileTypeEnum.getEnum(mimeType.toLowerCase()) == FileTypeEnum.XLSX) {
                     this.addExcelImportTaskToProcess(filePath, partition.getId(), idTableSchema,dataflowId, datasetId, fileName, replace,
                             schema, connectionDataVO, processId, EventType.COMMAND_IMPORT_EXCEL_FILE_TO_DATASET, delimiter);
                 }
 
-                updateImportStatistics(idTableSchema, linesToBeInserted, dataSetMetabase, fileExtension);
+                parquetConverterService.updateImportStatistics(idTableSchema, linesToBeInserted, dataSetMetabase, fileExtension);
             } catch (Exception e) {
                 LOG.error("error processing file", e);
                 throw e;
             }
         }
-
-    private void updateImportStatistics(String tableSchemaId, String numberOfRecordsToBeInserted, DataSetMetabase dataSetMetabase, String fileExtension){
-        Statistics totalRecordsImportedStat = new Statistics();
-        totalRecordsImportedStat.setDataset(dataSetMetabase);
-        totalRecordsImportedStat.setIdTableSchema(tableSchemaId);
-        totalRecordsImportedStat.setStatName(TOTAL_RECORDS_IMPORTED);
-        totalRecordsImportedStat.setValue(numberOfRecordsToBeInserted);
-        statisticsService.saveOrUpdateStatistics(totalRecordsImportedStat);
-
-        Statistics lastImportDateStat = new Statistics();
-        lastImportDateStat.setDataset(dataSetMetabase);
-        lastImportDateStat.setIdTableSchema(tableSchemaId);
-        lastImportDateStat.setStatName(LAST_IMPORT_DATE);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        lastImportDateStat.setValue(dateFormat.format(new Date()));
-        statisticsService.saveOrUpdateStatistics(lastImportDateStat);
-
-        Statistics lastImportFileExtensionStat = new Statistics();
-        lastImportFileExtensionStat.setDataset(dataSetMetabase);
-        lastImportFileExtensionStat.setIdTableSchema(tableSchemaId);
-        lastImportFileExtensionStat.setStatName(LAST_IMPORT_FILE_EXTENSION);
-        lastImportFileExtensionStat.setValue(fileExtension);
-        statisticsService.saveOrUpdateStatistics(lastImportFileExtensionStat);
-    }
 
     @Transactional
     void addImportTaskToProcess(String filePath, Long partitionId,String idTableSchema,Long dataflowId,Long datasetId, String fileName,boolean replace,
