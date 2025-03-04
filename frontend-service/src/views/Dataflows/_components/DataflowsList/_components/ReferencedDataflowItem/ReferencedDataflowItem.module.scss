@@ -1,4 +1,5 @@
 .container {
+  margin-top:1rem;
   position: relative;
   border: none;
   background-color: var(--c-lilac-100);
@@ -241,6 +242,59 @@
       grid-column: 1/1;
       grid-row: 5/6;
       text-align: left;
+    }
+  }
+}
+
+.compressedList.compressedList{
+  @media screen and (min-width:1300px) {
+    height:190px;
+    .obligation p,
+    .text p,
+    .upperIcon,
+    .icon,
+    .role{
+      display: none;
+    }
+    .text{
+      order:-1;
+      h3{
+        max-width: 250px;
+        p{
+          margin: 0 0 0.5rem 0 !important;
+          font-size: 1.62rem;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          display:inline;
+        }
+      }
+    }
+    > a {
+      display: flex !important;
+      flex-direction: column;
+    }
+    .status{
+      text-align: left;
+    }
+    .dataflowDates{
+      margin-left: 0;
+      text-align: left!important;
+    }
+  }
+  @media screen and (min-width:1600px) {
+    .text h3{
+      max-width: 400px;
+    }
+  }
+  @media screen and (min-width:1900px) {
+    .text h3{
+      max-width: 500px;
+    }
+  }
+  @media screen and (min-width:2200px) {
+    .text h3{
+      max-width: 600px;
     }
   }
 }

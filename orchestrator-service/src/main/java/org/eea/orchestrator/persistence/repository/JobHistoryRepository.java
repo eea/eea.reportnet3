@@ -9,7 +9,7 @@ import java.util.Optional;
 /**
  * The Interface JobHistoryRepository.
  */
-public interface JobHistoryRepository extends JpaRepository<JobHistory, Long> {
+public interface JobHistoryRepository extends JobHistoryExtendedRepository, JpaRepository<JobHistory, Long> {
 
     /**
      *

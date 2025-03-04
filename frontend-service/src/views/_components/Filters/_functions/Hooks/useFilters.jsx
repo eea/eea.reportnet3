@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
+import { isEmpty } from 'lodash';
 
 import uniq from 'lodash/uniq';
 
@@ -18,8 +19,11 @@ export const useFilters = ({ hasCustomSort, keyStore, onFilterData, option, reco
   }, [recoilId]);
 
   const onFilter = async value => {
-    setFilterBy({ [option.key]: value });
-
+    if (isEmpty(value)) {
+      setFilterBy({});
+    } else {
+      setFilterBy({ [option.key]: value });
+    }
     if (!hasCustomSort) {
       await onFilterData({ key: option.key, value, type: option.type });
     }
