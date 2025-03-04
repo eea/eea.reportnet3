@@ -319,4 +319,5 @@ public interface DatasetMetabaseService {
    */
   DesignDataset getDesignDatasetByDataflowIdAndDatasetSchemaId(Long dataflowId, String datasetSchemaId);
 
+  Map<Long, String> getDatasetIdsAndGroupsByDataflowId(Long dataflowId);
 }

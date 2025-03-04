@@ -1687,7 +1687,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void deleteDataflowResources(Long dataflowId) throws EEAException {
+  protected void deleteDataflowResources(Long dataflowId) throws EEAException {
     // add resource to delete(DATAFLOW PART)
     try {
       List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull
