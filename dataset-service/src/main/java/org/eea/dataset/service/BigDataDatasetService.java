@@ -3,7 +3,9 @@ package org.eea.dataset.service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.*;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
@@ -212,6 +214,8 @@ public interface BigDataDatasetService {
      */
     void deleteRecord(Long dataflowId, Long providerId, Long datasetId, TableSchemaVO tableSchemaVO, List<String> recordIds, boolean deleteCascadePK) throws Exception;
 
+    void removeRootDataflowFolderFromS3(Long dataflowId);
+
     void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception;
 
     void createPrefilledTables(Long designDatasetId, String designDatasetSchemaId, Long datasetIdForCreation, Long providerId, String tableSchemaId) throws Exception;
@@ -229,4 +233,19 @@ public interface BigDataDatasetService {
      *
      */
     void insertRecordsInMultipleTables(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords) throws Exception;
+
+    /**
+     * Get released dataset data info DL
+     *
+     * @param collectionDataset the collection dataset
+     * @param reportingDataset the reporting dataset
+     * @param dataflowId the dataflow id
+     * @param dataProviderVO the data provider object
+     * @param tableSchemaId the table schema id
+     * @param datasetType the dataset type
+     * @return a ReleasedDatasetDataInfoVO object
+     *
+     */
+    ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(DataSetMetabaseVO collectionDataset, DataSetMetabaseVO reportingDataset, Long dataflowId,
+                                                           DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
 }

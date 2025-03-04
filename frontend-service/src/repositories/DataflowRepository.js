@@ -88,6 +88,10 @@ export const DataflowRepository = {
         : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId })
     }),
 
+  getDatasetsProvidersStatus: async dataflowId =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getDatasetsProvidersStatus, { dataflowId }) }),
+
+
   getRepresentativesUsersList: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativesUsersList, { dataflowId }) }),
 
@@ -114,6 +118,13 @@ export const DataflowRepository = {
       url: getUrl(DataflowConfig.createEmptyDatasetSchema, { dataflowId, datasetSchemaName })
     }),
 
+  getPublicObligations: async ({ filterBy, isAsc = true, numberRows, pageNum, sortByHeader = 'name' }) => {
+    return await HTTPRequester.post({
+      url: getUrl(DataflowConfig.getPublicObligations, { isAsc, numberRows, pageNum, sortBy: sortByHeader }),
+      data: { ...filterBy }
+    });
+  },
+
   getPublicData: async ({ filterBy, isAsc = true, numberRows, pageNum, sortByHeader = 'name' }) => {
     return await HTTPRequester.post({
       url: getUrl(DataflowConfig.getPublicData, { isAsc, numberRows, pageNum, sortBy: sortByHeader }),
@@ -125,6 +136,9 @@ export const DataflowRepository = {
 
   getIcebergTables: async ({ dataflowId, providerId, datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getIcebergTables, { dataflowId, providerId, datasetId }) }),
+
+  getRepresentativeCode:async selectedRepresentatives =>
+    await HTTPRequester.get({ url: getUrl(DataflowConfig.getRepresentativeCode, { selectedRepresentatives }) }),
 
   getSchemasValidation: async dataflowId =>
     await HTTPRequester.get({ url: getUrl(DataflowConfig.getSchemasValidation, { dataflowId }) }),

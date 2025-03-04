@@ -47,6 +47,9 @@ export const FieldsDesigner = ({
   datasetSchemas,
   designerState,
   hasPKReferenced,
+  isAdmin,
+  isCustodian,
+  isDataflowCustodian,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
@@ -516,6 +519,9 @@ export const FieldsDesigner = ({
           dataAreManuallyEditable={table.dataAreManuallyEditable}
           datasetSchemaId={datasetSchemaId}
           hasWritePermissions={true}
+          isAdmin={isAdmin}
+          isCustodian={isCustodian}
+          isDataflowCustodian={isDataflowCustodian}
           isDataflowOpen={isDataflowOpen}
           isDesignDataset={true}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
@@ -894,7 +900,9 @@ export const FieldsDesigner = ({
             className={`p-button-rounded p-button-secondary-transparent ${
               !isDataflowOpen && !isDesignDatasetEditorRead ? 'p-button-animated-blink' : null
             }`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead}
+            disabled={
+              (isAdmin && (!isCustodian || !isDataflowCustodian)) || isDataflowOpen || isDesignDatasetEditorRead
+            }
             icon="import"
             label={resourcesContext.messages['importTableSchema']}
             onClick={() => manageDialogs('isImportTableSchemaDialogVisible', true)}

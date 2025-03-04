@@ -46,6 +46,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.integration.IntegrationVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
@@ -67,6 +68,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -143,6 +145,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     /** The pk catalogue repository. */
     @Autowired
     private PkCatalogueRepository pkCatalogueRepository;
+
+    @Autowired
+    private DatasetSnapshotService datasetSnapshotService;
+
+    @Autowired
+    private TableDataRetriever tableDataRetriever;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
@@ -1509,6 +1517,27 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
+    public void removeRootDataflowFolderFromS3(Long dataflowId) {
+        S3PathResolver s3PathResolverParquet = new S3PathResolver(dataflowId);
+        s3PathResolverParquet.setIsIcebergTable(false);
+        s3PathResolverParquet.setPath(S3_ROOT_DATAFLOW_FOLDER_PATH);
+
+        S3PathResolver s3PathResolverIceberg = new S3PathResolver(dataflowId);
+        s3PathResolverIceberg.setIsIcebergTable(true);
+        s3PathResolverIceberg.setPath(S3_ROOT_DATAFLOW_FOLDER_PATH);
+
+        if (s3HelperPrivate.checkFolderExist(s3PathResolverParquet, s3PathResolverParquet.getPath())) {
+            s3HelperPrivate.deleteFolder(s3PathResolverParquet, s3PathResolverParquet.getPath());
+            LOG.info("Removed root Parquet dataflow folder: for dataflow id: {}", dataflowId);
+        }
+
+        if (s3HelperPrivate.checkFolderExist(s3PathResolverIceberg, s3PathResolverIceberg.getPath())) {
+            s3HelperPrivate.deleteFolder(s3PathResolverIceberg, s3PathResolverIceberg.getPath());
+            LOG.info("Removed root Iceberg dataflow folder: for dataflow id: {}", dataflowId);
+        }
+    }
+
+    @Override
     public void createReferenceFolder(S3PathResolver s3TablePathResolver) throws Exception {
         String tableSchemaName = s3TablePathResolver.getTableName();
         List<S3Object> tableNameFilenames = s3HelperPrivate.getFilenamesFromTableNames(s3TablePathResolver);
@@ -1668,6 +1697,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         else if(filePathInS3.endsWith(XLSX_TYPE)){
             fileExtension = XLSX_TYPE;
+        }
+        else if(filePathInS3.endsWith(XLSM_TYPE)){
+            fileExtension = XLSM_TYPE;
         }
         else if(filePathInS3.endsWith(XLS_TYPE)){
             fileExtension = XLS_TYPE;
@@ -1948,5 +1980,77 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
 
+    }
+
+    @Override
+    public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(DataSetMetabaseVO collectionDataset, DataSetMetabaseVO reportingDataset, Long dataflowId, DataProviderVO dataProviderVO, String tableSchemaId,
+                                                                  DatasetTypeEnum datasetType) throws Exception {
+        ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO = new ReleasedDatasetDataInfoVO();
+
+        //find number of records for reporting dataset
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, reportingDataset.getDatasetSchema());
+        S3PathResolver s3PathResolverReporting;
+        if (BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(reportingDataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), true);
+            s3PathResolverReporting.setIsIcebergTable(true);
+        } else {
+            s3PathResolverReporting = s3ServicePrivate.getS3PathResolverByDatasetType(reportingDataset, tableSchemaVO.getNameTableSchema(), false);
+            s3PathResolverReporting.setIsIcebergTable(false);
+        }
+        boolean folderExistReporting = s3HelperPrivate.checkFolderExist(s3PathResolverReporting);
+        if (folderExistReporting && dremioHelperService.checkFolderPromoted(s3PathResolverReporting, s3PathResolverReporting.getTableName())){
+            Long reportingDatasetRecordCount = dremioJdbcTemplate.queryForObject(s3HelperPrivate.buildRecordsCountQuery(s3PathResolverReporting), Long.class);
+            releasedDatasetDataInfoVO.setReportingDatasetNumberOfRecords(reportingDatasetRecordCount);
+        }
+        else{
+            releasedDatasetDataInfoVO.setReportingDatasetNumberOfRecords(0L);
+        }
+
+        //find number of records for data collection based on provider and table
+        S3PathResolver s3PathResolverCollection = s3ServicePrivate.getS3PathResolverByDatasetType(collectionDataset, tableSchemaVO.getNameTableSchema(), false);
+        String dremioTableQueryPath;
+        if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
+            //data collection
+            s3PathResolverCollection.setPath(S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+            dremioTableQueryPath = S3_TABLE_NAME_DC_QUERY_PATH;
+        }
+        else{
+            //eu dataset
+            s3PathResolverCollection.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
+            dremioTableQueryPath = S3_TABLE_NAME_EU_QUERY_PATH;
+        }
+        boolean folderExistCollection = s3HelperPrivate.checkTableNameDCFolderExist(s3PathResolverCollection);
+        if (folderExistCollection && dremioHelperService.checkFolderPromoted(s3PathResolverCollection, s3PathResolverCollection.getTableName())) {
+
+
+            String collectionPathDremio = s3ServicePrivate.getTableDCAsFolderQueryPath(s3PathResolverCollection, dremioTableQueryPath);
+            StringBuilder queryCollectionRecordCount = new StringBuilder().append("SELECT COUNT(").append(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER).append(") FROM ").append(collectionPathDremio)
+                    .append(" WHERE ").append(PARQUET_PROVIDER_CODE_COLUMN_HEADER).append(" = '").append(dataProviderVO.getCode()).append("' ");
+            Long collectionRecordCount = dremioJdbcTemplate.queryForObject(queryCollectionRecordCount.toString(), Long.class);
+            releasedDatasetDataInfoVO.setCollectionDatasetNumberOfRecords(collectionRecordCount);
+        }
+        else{
+            releasedDatasetDataInfoVO.setCollectionDatasetNumberOfRecords(0L);
+        }
+
+        //check if reporting dataset has released and if it has updates after release
+        List<ReleaseVO> releases = datasetSnapshotService.getReleases(reportingDataset.getId());
+        if(releases != null && releases.size() > 0){
+            releasedDatasetDataInfoVO.setHasReleased(true);
+            ResponseEntity<?> updatedTablesResponse = tableDataRetriever.getTablesUpdatedAfterRelease(reportingDataset.getId());
+            HashMap<String, Boolean> updatedTablesHashmap = (HashMap<String, Boolean>) updatedTablesResponse.getBody();
+            if(updatedTablesHashmap.get(tableSchemaId) != null){
+                releasedDatasetDataInfoVO.setModifiedAfterRelease(updatedTablesHashmap.get(tableSchemaId));
+            }
+            else{
+                releasedDatasetDataInfoVO.setModifiedAfterRelease(false);
+            }
+        }
+        else{
+            releasedDatasetDataInfoVO.setHasReleased(false);
+            releasedDatasetDataInfoVO.setModifiedAfterRelease(false);
+        }
+
+        return releasedDatasetDataInfoVO;
     }
 }

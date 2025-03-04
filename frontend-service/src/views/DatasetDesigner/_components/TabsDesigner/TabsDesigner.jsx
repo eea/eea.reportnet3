@@ -37,6 +37,9 @@ export const TabsDesigner = ({
   editable = false,
   getIsTableCreated,
   getUpdatedTabs,
+  isAdmin,
+  isCustodian,
+  isDataflowCustodian,
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isGroupedValidationDeleted,
@@ -457,6 +460,9 @@ export const TabsDesigner = ({
         checkEditingTabs={checkEditingTabs}
         designMode={true}
         initialTabIndexDrag={initialTabIndexDrag}
+        isAdmin={isAdmin}
+        isCustodian={isCustodian}
+        isDataflowCustodian={isDataflowCustodian}
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
         isErrorDialogVisible={isErrorDialogVisible}
@@ -512,6 +518,9 @@ export const TabsDesigner = ({
                       datasetSchemas={datasetSchemas}
                       designerState={designerState}
                       hasPKReferenced={tab.hasPKReferenced}
+                      isAdmin={isAdmin}
+                      isCustodian={isCustodian}
+                      isDataflowCustodian={isDataflowCustodian}
                       isDataflowOpen={isDataflowOpen}
                       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
                       isGroupedValidationDeleted={isGroupedValidationDeleted}

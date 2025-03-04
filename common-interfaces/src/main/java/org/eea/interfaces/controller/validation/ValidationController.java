@@ -71,20 +71,24 @@ public interface ValidationController {
   /**
    * Gets the group failed validations by id dataset.
    *
-   * @param datasetId the dataset id
-   * @param pageNum the page num
-   * @param pageSize the page size
-   * @param fields the fields
-   * @param asc the asc
-   * @param levelErrorsFilter the level errors filter
-   * @param typeEntitiesFilter the type entities filter
-   * @param tableFilter the table filter
-   * @param fieldValueFilter the field value filter
+   * @param datasetId
+   * @param dataflowId
+   * @param providerId
+   * @param pageNum
+   * @param pageSize
+   * @param fields
+   * @param asc
+   * @param levelErrorsFilter
+   * @param typeEntitiesFilter
+   * @param tableFilter
+   * @param fieldValueFilter
    * @return the group failed validations by id dataset
    */
   @GetMapping(value = "/listGroupValidations/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   FailedValidationsDatasetVO getGroupFailedValidationsByIdDataset(
       @PathVariable("id") Long datasetId,
+      @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
       @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
       @RequestParam(value = "fields", required = false) String fields,
@@ -101,6 +105,8 @@ public interface ValidationController {
   /**
    * Gets the group failed validations by id dataset from dremio
    * @param datasetId
+   * @param dataflowId
+   * @param providerId
    * @param pageNum
    * @param pageSize
    * @param fields
@@ -114,6 +120,8 @@ public interface ValidationController {
   @GetMapping(value = "/listGroupValidationsDL/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   FailedValidationsDatasetVO getGroupFailedValidationsByIdDatasetDL(
           @PathVariable("id") Long datasetId,
+          @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+          @RequestParam(value = "providerId", required = false) Long providerId,
           @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
           @RequestParam(value = "pageSize", defaultValue = "20", required = false) Integer pageSize,
           @RequestParam(value = "fields", required = false) String fields,

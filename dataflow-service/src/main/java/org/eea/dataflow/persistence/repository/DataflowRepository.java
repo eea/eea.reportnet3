@@ -98,6 +98,19 @@ public interface DataflowRepository
   void reverseSoftDelete(@Param("dataflowId") Long dataflowId);
 
   /**
+   * Find soft deleted dataflows older than the specified number of months.
+   *
+   * @param numberOfMonths the number of months to compare
+   */
+  @Modifying
+  @Query(nativeQuery = true,
+          value = "SELECT * FROM dataflow " +
+          "WHERE is_deleted = true " + "AND type IN ('REPORTING', 'CITIZEN_SCIENCE', 'BUSINESS') "+
+          "AND deleted_at < CURRENT_DATE - INTERVAL '1 month' * :numberOfMonths")
+  List<Dataflow> findSoftDeletedDataflowsOlderThanNumberOfMonths(@Param("numberOfMonths") int numberOfMonths);
+
+
+  /**
    * Find by id in order by status desc creation date desc.
    *
    * @param ids the ids

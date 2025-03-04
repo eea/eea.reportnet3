@@ -20,7 +20,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
-export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows = () => {} }) => {
+export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDataflows, isCompressed = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
@@ -61,7 +61,7 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
 
   const layout = children => (
     <div
-      className={`${styles.container} ${styles.accepted} ${
+      className={`${styles.container} ${styles.accepted} ${isCompressed ? `${styles.compressedList}` : ''} ${
         styles[itemContent.status]
       } dataflowList-first-dataflow-help-step`}
       onMouseEnter={() => setIsPinShowed(true)}

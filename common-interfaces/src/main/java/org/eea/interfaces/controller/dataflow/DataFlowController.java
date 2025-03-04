@@ -14,6 +14,7 @@ import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
+import org.eea.interfaces.vo.rod.PaginatedObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -31,7 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 public interface DataFlowController {
 
-  /**
+    /**
    * The Interface DataFlowControllerZuul.
    */
   @FeignClient(value = "dataflow", path = "/dataflow")
@@ -276,6 +277,21 @@ public interface DataFlowController {
       @RequestParam Integer pageNum);
 
   /**
+   * Gets the public dataflows by obligation.
+   *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
+   * @return the public dataflows
+   */
+  @PostMapping("/getPublicDataflowsByObligation")
+  PaginatedObligationVO getPublicDataflowsByObligation(@RequestBody Map<String, String> filters,
+      @RequestParam String orderHeader, @RequestParam boolean asc, @RequestParam Integer pageSize,
+      @RequestParam Integer pageNum);
+
+  /**
    * Gets the public dataflows.
    *
    * @param dataflowId the dataflow id
@@ -453,4 +469,7 @@ public interface DataFlowController {
 
   @PutMapping(value = "/updateDataProviderGroupIdById/{dataflowId}")
   void updateDataProviderGroupIdById(@PathVariable("dataflowId") Long dataflowId, @RequestParam("dataProviderGroupId") Long dataProviderGroupId);
+
+  @GetMapping("/delete")
+  ResponseEntity<String> cleanupDataflows() throws Exception;
 }

@@ -15,7 +15,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 import dayjs from "dayjs";
 
-export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }) => {
+export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompressed= () => {} }) => {
   const userContext = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -32,7 +32,7 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
 
   const renderDataflowLayout = children => (
     <div
-      className={`${styles.container} ${styles.accepted} ${
+      className={`${styles.container} ${styles.accepted} ${isCompressed ? `${styles.compressedList}` : ''} ${
         styles[dataflow.status]
       } dataflowList-first-dataflow-help-step`}
       onMouseEnter={() => setIsPinShowed(true)}

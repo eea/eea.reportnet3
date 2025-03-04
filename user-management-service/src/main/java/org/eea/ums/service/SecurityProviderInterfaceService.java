@@ -83,6 +83,7 @@ public interface SecurityProviderInterfaceService {
    */
   void deleteResourceInstancesByName(List<String> resourceName);
 
+  void deleteResourceInstancesByDatasetId(Long datasetId);
 
   /**
    * Add user to user group.

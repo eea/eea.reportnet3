@@ -14,6 +14,7 @@ import org.eea.interfaces.vo.dataflow.PaginatedDataflowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
+import org.eea.interfaces.vo.rod.PaginatedObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.springframework.data.domain.Pageable;
 
@@ -180,6 +181,20 @@ public interface DataflowService {
    * @throws EEAException the EEA exception
    */
   PaginatedDataflowVO getPublicDataflows(Map<String, String> filters, String orderHeader,
+      boolean asc, Integer sizePage, Integer numPage) throws EEAException;
+
+  /**
+   * Gets the public dataflows by obligation.
+   *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param sizePage the size page
+   * @param numPage the num page
+   * @return the public dataflows
+   * @throws EEAException the EEA exception
+   */
+  PaginatedObligationVO getPublicDataflowsByObligation(Map<String, String> filters, String orderHeader,
       boolean asc, Integer sizePage, Integer numPage) throws EEAException;
 
   /**

@@ -363,6 +363,9 @@ public final class LiteralConstants {
   /** The Constant S3_EXPORT_QUERY_PATH: {@value}. */
   public static final String S3_EXPORT_QUERY_PATH = ".\"%s\".\"collections\".\"%s\".\"export\".\"%s\"";
 
+  /** The Constant S3_ROOT_DATAFLOW_FOLDER_PATH: {@value}. */
+  public static final String S3_ROOT_DATAFLOW_FOLDER_PATH = "%s";
+
   /** The Constant S3_VALIDATION: {@value}. */
   public static final String S3_VALIDATION = "validation";
 
@@ -386,6 +389,9 @@ public final class LiteralConstants {
 
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLSX_TYPE = ".xlsx";
+
+  /** The Constant XLSM_TYPE: {@value}. */
+  public static final String XLSM_TYPE = ".xlsm";
 
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLS_TYPE = ".xls";

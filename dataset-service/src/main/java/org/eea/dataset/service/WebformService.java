@@ -68,4 +68,20 @@ public interface WebformService {
    * @return The response
    */
   ResponseEntity<?> uploadWebFormConfig(WebformConfigVO webformConfigVO, Long datasetId) ;
+
+  /**
+   * Get webform by name and version
+   * @param webFormName The webform name
+   * @param version The webform version
+   * @return The response
+   */
+  ResponseEntity<?> getWebformConfigHistorySchema(String webFormName, Long version);
+
+  /**
+   * Restore a specific version and keep history for that
+   * @param webFormName The webForm name
+   * @param version The version to restore
+   * @param datasetId The dataset id
+   */
+  void restorePreviousWebFormVersions(String webFormName, Long version, Long datasetId);
 }

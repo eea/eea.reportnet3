@@ -41,6 +41,7 @@ export const PaMsWebformField = ({
   datasetId,
   datasetSchemaId,
   element,
+  hasErrors,
   isConditional,
   isConditionalChanged,
   newRecord,
@@ -407,6 +408,7 @@ export const PaMsWebformField = ({
               }}
               optionLabel="itemType"
               options={linkItemsOptions}
+              style={hasErrors ? { border: '2px solid #b90202' } : null}
               value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
               valuesSeparator=";"
             />
@@ -435,6 +437,7 @@ export const PaMsWebformField = ({
               optionLabel="itemType"
               options={linkItemsOptions}
               showFilterClear={true}
+              style={hasErrors ? { border: '2px solid #b90202' } : null}
               value={RecordUtils.getLinkValue(linkItemsOptions, field.value)}
             />
           );
@@ -443,6 +446,8 @@ export const PaMsWebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
+            filter={true}
+            filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
@@ -458,6 +463,7 @@ export const PaMsWebformField = ({
                 ? getObjectiveOptions(sectorAffectedValue)
                 : field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))
             }
+            style={hasErrors ? { border: '2px solid #b90202' } : null}
             value={getMultiselectValues(
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
               field.value
@@ -471,6 +477,7 @@ export const PaMsWebformField = ({
             appendTo={document.body}
             disabled={isLoadingData}
             filter={true}
+            filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={isLoadingData}
             onChange={event => {
@@ -487,6 +494,7 @@ export const PaMsWebformField = ({
             optionLabel={'itemType'}
             options={field.codelistItems.map(codelist => ({ itemType: codelist, value: codelist }))}
             showFilterClear={true}
+            style={hasErrors ? { border: '2px solid #b90202' } : null}
             value={{ itemType: field.value, value: field.value }}
           />
         );
@@ -500,6 +508,7 @@ export const PaMsWebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
+            hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
             keyfilter={RecordUtils.getFilter(type)}
@@ -530,6 +539,7 @@ export const PaMsWebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);

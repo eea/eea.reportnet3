@@ -64,6 +64,8 @@ import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.eea.interfaces.vo.document.DocumentVO;
 import org.eea.interfaces.vo.enums.EntityClassEnum;
 import org.eea.interfaces.vo.rod.ObligationVO;
+import org.eea.interfaces.vo.rod.ObligationWithDataflowsVO;
+import org.eea.interfaces.vo.rod.PaginatedObligationVO;
 import org.eea.interfaces.vo.ums.DataflowUserRoleVO;
 import org.eea.interfaces.vo.ums.ResourceAccessVO;
 import org.eea.interfaces.vo.ums.ResourceInfoVO;
@@ -837,6 +839,92 @@ public class DataflowServiceImpl implements DataflowService {
   }
 
   /**
+   * Gets the public dataflows by obligation.
+   *
+   * @param filters the filters
+   * @param orderHeader the order header
+   * @param asc the asc
+   * @param pageSize the page size
+   * @param pageNum the page num
+   * @return the public dataflows
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public PaginatedObligationVO getPublicDataflowsByObligation(Map<String, String> filters,
+      String orderHeader,
+      boolean asc,
+      Integer pageSize,
+      Integer pageNum) throws EEAException {
+
+    try {
+      Pageable pageable = null;
+      if (pageNum != null && pageSize != null) {
+        pageable = PageRequest.of(pageNum, pageSize);
+      }
+
+      List<ObligationVO> obligations = obligationControllerZull
+          .findOpenedObligations(null, null, null, null, null).getObligations();
+
+      obligations.sort(Comparator.comparing(ObligationVO::getOblTitle,
+          asc ? Comparator.naturalOrder() : Comparator.reverseOrder()));
+
+      ObjectMapper objectMapper = new ObjectMapper();
+      String arrayToJson = objectMapper.writeValueAsString(obligations);
+
+      List<Dataflow> dataflows = dataflowRepository.findPaginated(arrayToJson, pageable, Boolean.TRUE,
+          filters, orderHeader, asc, null, null, null);
+
+      List<DataFlowVO> dataflowVOList = dataflowMapper.entityListToClass(dataflows);
+
+      List<ObligationWithDataflowsVO> obligationWithDataflowsList = obligations.stream()
+          .map(obligation -> {
+            List<DataFlowVO> filteredDataflows = dataflowVOList.stream()
+                .filter(dataflow -> dataflow.getObligation().getObligationId().equals(obligation.getObligationId()))
+                .sorted(Comparator.comparing(DataFlowVO::getName,
+                    asc ? Comparator.naturalOrder() : Comparator.reverseOrder()))
+                .collect(Collectors.toList());
+
+            return convertToObligationWithDataflowsVO(obligation, filteredDataflows);
+          })
+          .filter(obligationWithDataflows -> !obligationWithDataflows.getDataflows().isEmpty())
+          .collect(Collectors.toList());
+
+      PaginatedObligationVO paginatedObligationVO = new PaginatedObligationVO();
+      paginatedObligationVO.setObligations(obligationWithDataflowsList);
+      paginatedObligationVO.setTotalRecords(dataflowRepository.countByShowPublicInfo(Boolean.TRUE));
+      paginatedObligationVO.setFilteredRecords(dataflowRepository.countPaginated(arrayToJson, pageable, Boolean.TRUE,
+          filters, orderHeader, asc, null, null, null));
+
+      return paginatedObligationVO;
+
+    } catch (Exception e) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_GET_ERROR);
+    }
+  }
+
+  private ObligationWithDataflowsVO convertToObligationWithDataflowsVO(ObligationVO obligation, List<DataFlowVO> dataflows) {
+    ObligationWithDataflowsVO obligationWithDataflows = new ObligationWithDataflowsVO();
+
+    obligationWithDataflows.setObligationId(obligation.getObligationId());
+    obligationWithDataflows.setOblTitle(obligation.getOblTitle());
+    obligationWithDataflows.setDescription(obligation.getDescription());
+    obligationWithDataflows.setValidSince(obligation.getValidSince());
+    obligationWithDataflows.setValidTo(obligation.getValidTo());
+    obligationWithDataflows.setComment(obligation.getComment());
+    obligationWithDataflows.setNextDeadline(obligation.getNextDeadline());
+    obligationWithDataflows.setLegalInstrument(obligation.getLegalInstrument());
+    obligationWithDataflows.setClient(obligation.getClient());
+    obligationWithDataflows.setCountries(obligation.getCountries());
+    obligationWithDataflows.setIssues(obligation.getIssues());
+    obligationWithDataflows.setReportFreq(obligation.getReportFreq());
+    obligationWithDataflows.setReportFreqDetail(obligation.getReportFreqDetail());
+
+    obligationWithDataflows.setDataflows(dataflows);
+
+    return obligationWithDataflows;
+  }
+
+  /**
    * Gets the public dataflows by country.
    *
    * @param countryCode the country code
@@ -1599,7 +1687,7 @@ public class DataflowServiceImpl implements DataflowService {
    * @param dataflowId the dataflow id
    * @throws EEAException the EEA exception
    */
-  private void deleteDataflowResources(Long dataflowId) throws EEAException {
+  protected void deleteDataflowResources(Long dataflowId) throws EEAException {
     // add resource to delete(DATAFLOW PART)
     try {
       List<ResourceInfoVO> resourceCustodian = resourceManagementControllerZull

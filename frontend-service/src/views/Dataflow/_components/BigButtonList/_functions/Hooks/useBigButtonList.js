@@ -45,10 +45,22 @@ const useBigButtonList = ({
   onShowUpdateDataCollectionModal,
   setErrorDialogData
 }) => {
+  const { permissions } = config;
+
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
   const [buttonsVisibility, setButtonsVisibility] = useState({});
+
+  const isAdmin = userContext.hasPermission([permissions.roles.ADMIN.key]);
+  const isCustodian = userContext.hasPermission([permissions.roles.CUSTODIAN.key, permissions.roles.STEWARD.key]);
+
+  const isDataflowCustodian = userContext.hasContextAccessPermission(
+    config.permissions.prefixes.DATAFLOW,
+    dataflowId,
+    [config.permissions.roles.CUSTODIAN.key],
+    true
+  );
 
   const isLeadDesigner = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.CUSTODIAN.key,
@@ -81,10 +93,10 @@ const useBigButtonList = ({
       !isNil(dataflowState.data.datasets) && dataflowState.data.datasets.some(dataset => dataset.isReleased);
 
     return {
-      createDataCollection: isLeadDesigner && isDesignStatus,
+      createDataCollection: !(isAdmin && !isCustodian) && isLeadDesigner && isDesignStatus,
       cloneSchemasFromDataflow: isLeadDesigner && isDesignStatus,
-      copyDataCollectionToEUDataset: isLeadDesigner && isDraftStatus,
-      exportEUDataset: isLeadDesigner && isDraftStatus,
+      copyDataCollectionToEUDataset: isDataflowCustodian && isLeadDesigner && isDraftStatus,
+      exportEUDataset: isDataflowCustodian && isLeadDesigner && isDraftStatus,
       dashboard: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
       designDatasets:
         (isLeadDesigner ||
@@ -102,7 +114,7 @@ const useBigButtonList = ({
       groupByRepresentative: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
       manageReporters: isLeadDesigner || isStewardSupport,
       manualTechnicalAcceptance: (isLeadDesigner || isStewardSupport) && isManualAcceptance,
-      newSchema: isDesigner && isDesignStatus,
+      newSchema: isCustodian && isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
@@ -314,74 +326,80 @@ const useBigButtonList = ({
       });
     }
 
-    return uniqBy(allDatasets, 'dataProviderId').map(dataset => {
-      const datasetRepresentative = dataflowState.data.representatives.find(
-        representative => representative.dataProviderId === dataset.dataProviderId
-      );
+    return uniqBy(allDatasets, 'dataProviderId')
+      .map(dataset => {
+        const datasetRepresentative = dataflowState.data.representatives.find(
+          representative => representative.dataProviderId === dataset.dataProviderId
+        );
 
-      const getTechnicalAcceptanceStatus = () => {
-        if (!dataflowState.data.manualAcceptance) {
-          return null;
-        }
-
-        const datasets = allDatasets.filter(ds => ds.dataProviderId === dataset.dataProviderId);
-        if (datasets.some(ds => ds.status === config.datasetStatus.CORRECTION_REQUESTED.key)) {
-          return resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label];
-        } else if (datasets.some(ds => ds.status === config.datasetStatus.FINAL_FEEDBACK.key)) {
-          return resourcesContext.messages[config.datasetStatus.FINAL_FEEDBACK.label];
-        } else if (datasets.every(ds => ds.status === config.datasetStatus.TECHNICALLY_ACCEPTED.key)) {
-          return resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label];
-        }
-      };
-
-      const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
-      const releasedShowPublicInfoUpdating = dataset.isReleased && dataflowState.isShowPublicInfoUpdating;
-      const representativeRestrictFromPublicUpdating =
-        datasetRepresentative?.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
-        dataflowState.restrictFromPublicIsUpdating.value;
-
-      return {
-        buttonClass: 'dataset',
-        buttonIcon: 'representative',
-        caption: dataset.name,
-        dataProviderId: dataset.dataProviderId,
-        handleRedirect: () => {
-          handleRedirect(
-            getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true)
-          );
-        },
-        helpClassName: 'dataflow-dataset-container-help-step',
-        infoStatus: dataset.isReleased,
-        infoStatusIcon: true,
-        layout: 'defaultBigButton',
-        model: [
-          {
-            label: resourcesContext.messages['historicReleases'],
-            command: () => {
-              onShowHistoricReleases('reportingDataset');
-              getDataHistoricReleasesByRepresentatives(dataset.name, dataset.dataProviderId);
-            }
+        const getTechnicalAcceptanceStatus = () => {
+          if (!dataflowState.data.manualAcceptance) {
+            return null;
           }
-        ],
-        onWheel: getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true),
-        restrictFromPublicAccess: restrictFromPublicAccess && !dataflowState.restrictFromPublicIsUpdating.value,
-        restrictFromPublicInfo:
-          dataset.isReleased && (dataflowState.data.showPublicInfo || dataflowState.isShowPublicInfoUpdating),
-        restrictFromPublicIsUpdating: releasedShowPublicInfoUpdating || representativeRestrictFromPublicUpdating,
-        restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
-        technicalAcceptanceStatus: technicalAcceptanceStatus,
-        visibility: true
-      };
-    })
+
+          const datasets = allDatasets.filter(ds => ds.dataProviderId === dataset.dataProviderId);
+          if (datasets.some(ds => ds.status === config.datasetStatus.CORRECTION_REQUESTED.key)) {
+            return resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label];
+          } else if (datasets.some(ds => ds.status === config.datasetStatus.FINAL_FEEDBACK.key)) {
+            return resourcesContext.messages[config.datasetStatus.FINAL_FEEDBACK.label];
+          } else if (datasets.every(ds => ds.status === config.datasetStatus.TECHNICALLY_ACCEPTED.key)) {
+            return resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label];
+          }
+        };
+
+        const technicalAcceptanceStatus = getTechnicalAcceptanceStatus();
+        const releasedShowPublicInfoUpdating = dataset.isReleased && dataflowState.isShowPublicInfoUpdating;
+        const representativeRestrictFromPublicUpdating =
+          datasetRepresentative?.dataProviderId === dataflowState.restrictFromPublicIsUpdating.dataProviderId &&
+          dataflowState.restrictFromPublicIsUpdating.value;
+
+        return {
+          buttonClass: 'dataset',
+          buttonIcon: 'representative',
+          caption: dataset.name,
+          dataProviderId: dataset.dataProviderId,
+          handleRedirect: () => {
+            handleRedirect(
+              getUrl(routes.DATAFLOW_REPRESENTATIVE, { dataflowId, representativeId: dataset.dataProviderId }, true)
+            );
+          },
+          helpClassName: 'dataflow-dataset-container-help-step',
+          infoStatus: dataset.isReleased,
+          infoStatusIcon: true,
+          layout: 'defaultBigButton',
+          model: [
+            {
+              label: resourcesContext.messages['historicReleases'],
+              command: () => {
+                onShowHistoricReleases('reportingDataset');
+                getDataHistoricReleasesByRepresentatives(dataset.name, dataset.dataProviderId);
+              }
+            }
+          ],
+          onWheel: getUrl(
+            routes.DATAFLOW_REPRESENTATIVE,
+            { dataflowId, representativeId: dataset.dataProviderId },
+            true
+          ),
+          restrictFromPublicAccess: restrictFromPublicAccess && !dataflowState.restrictFromPublicIsUpdating.value,
+          restrictFromPublicInfo:
+            dataset.isReleased && (dataflowState.data.showPublicInfo || dataflowState.isShowPublicInfoUpdating),
+          restrictFromPublicIsUpdating: releasedShowPublicInfoUpdating || representativeRestrictFromPublicUpdating,
+          restrictFromPublicStatus: datasetRepresentative?.restrictFromPublic,
+          technicalAcceptanceStatus: technicalAcceptanceStatus,
+          visibility: true
+        };
+      })
       .map(provider => {
         const hasUpdatesAfterRelease = datasets
           .filter(dataset => dataset.dataProviderId === provider.dataProviderId)
-          .some(dataset => dataset.hasUpdatesAfterRelease)
-        return ({
+          .some(dataset => dataset.hasUpdatesAfterRelease);
+        return {
           ...provider,
           hasUpdatesAfterRelease,
-          hasUpdatesAfterReleaseTooltip: hasUpdatesAfterRelease && resourcesContext.messages['hasUpdatesAfterReleaseDataflowTooltip'],
-        })
+          hasUpdatesAfterReleaseTooltip:
+            hasUpdatesAfterRelease && resourcesContext.messages['hasUpdatesAfterReleaseDataflowTooltip']
+        };
       });
   };
 
@@ -578,6 +596,7 @@ const useBigButtonList = ({
       handleRedirect: dataflowState.isCopyDataCollectionToEUDatasetLoading
         ? () => {}
         : () => onShowCopyDataCollectionToEUDatasetModal(),
+      enabled: isDataflowCustodian,
       layout: 'defaultBigButton',
       visibility: buttonsVisibility.copyDataCollectionToEUDataset
     }
@@ -609,6 +628,7 @@ const useBigButtonList = ({
       buttonIcon: dataflowState.isExportEUDatasetLoading ? 'spinner' : 'fileExport',
       buttonIconClass: dataflowState.isExportEUDatasetLoading ? 'spinner' : '',
       caption: 'Export EU datasets',
+      enabled: isDataflowCustodian,
       handleRedirect: dataflowState.isExportEUDatasetLoading ? () => {} : () => onShowExportEUDatasetModal(),
       layout: 'defaultBigButton',
       model: exportEUDatasetModel,

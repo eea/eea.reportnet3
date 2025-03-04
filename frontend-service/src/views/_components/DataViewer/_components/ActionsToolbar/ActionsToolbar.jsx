@@ -44,6 +44,9 @@ export const ActionsToolbar = ({
   datasetId,
   datasetType,
   hasWritePermissions,
+  isAdmin,
+  isCustodian,
+  isDataflowCustodian,
   isDataflowOpen,
   isDesignDataset,
   isDesignDatasetEditorRead,
@@ -400,6 +403,9 @@ export const ActionsToolbar = ({
       dataflowId={dataflowId}
       datasetId={datasetId}
       hasWritePermissions={hasWritePermissions}
+      isAdmin={isAdmin}
+      isCustodian={isCustodian}
+      isDataflowCustodian={isDataflowCustodian}
       isDataflowOpen={isDataflowOpen}
       isDesignDataset={isDesignDataset}
       isDesignDatasetEditorRead={isDesignDatasetEditorRead}
@@ -440,6 +446,7 @@ export const ActionsToolbar = ({
         />
         <DeleteDialog
           disabled={
+            (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
             (isIcebergCreated && dataAreManuallyEditable) ||
             !hasWritePermissions ||
             isUndefined(records.totalRecords) ||

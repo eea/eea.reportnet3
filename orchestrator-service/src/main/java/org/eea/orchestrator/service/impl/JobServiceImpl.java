@@ -4,12 +4,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.enums.FmeJobStatusEnum;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -117,6 +120,9 @@ public class JobServiceImpl implements JobService {
 
     @Autowired
     private UserManagementControllerZull userManagementControllerZull;
+
+    @Autowired
+    private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
 
     /**
      * The job utils.
@@ -199,6 +205,20 @@ public class JobServiceImpl implements JobService {
         if (job.getJobType() == JobTypeEnum.IMPORT && numberOfCurrentJobs < maximumNumberOfInProgressImportJobs) {
             return true;
         } else if (jobType == JobTypeEnum.VALIDATION && !job.isRelease() && numberOfCurrentJobs < maximumNumberOfInProgressValidationJobs) {
+            if (Boolean.TRUE.equals(dataFlowControllerZuul.isBigDataflow(job.getDataflowId()))) {
+                DatasetTypeEnum datasetTypeEnum = dataSetControllerZuul.getDatasetType(job.getDatasetId());
+                if (datasetTypeEnum.equals(DatasetTypeEnum.DESIGN)) {
+                    int countDesignJobs = jobRepository.countByDataflowIdAndJobStatus(job.getDataflowId(), JobStatusEnum.IN_PROGRESS);
+                    if (countDesignJobs >= 1) {
+                        return false;
+                    }
+                } else if (datasetTypeEnum.equals(DatasetTypeEnum.REPORTING)) {
+                    int countReportingJobs = jobRepository.countByDataflowIdAndProviderIdAndJobStatusAndRelease(job.getDataflowId(), job.getProviderId(), JobStatusEnum.IN_PROGRESS, false);
+                    if (countReportingJobs >= 1) {
+                        return false;
+                    }
+                }
+            }
             return true;
         } else if (jobType == JobTypeEnum.COPY_TO_EU_DATASET && numberOfCurrentJobs < maximumNumberOfInProgressCopyToEuDatasetJobs) {
             return true;

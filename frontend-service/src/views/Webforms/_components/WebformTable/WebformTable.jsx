@@ -405,7 +405,7 @@ export const WebformTable = ({
       <div className={styles.overlay}>
         <div
           style={
-            isLoadingIceberg || !allManualCheck
+            bigData && (isLoadingIceberg || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
               : !bigData || isIcebergCreated
               ? { opacity: 1 }

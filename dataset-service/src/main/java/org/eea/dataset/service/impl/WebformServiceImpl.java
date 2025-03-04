@@ -1,7 +1,10 @@
 package org.eea.dataset.service.impl;
 
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.WebformMetabaseMapper;
@@ -10,6 +13,7 @@ import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
+import org.eea.dataset.persistence.schemas.domain.webform.WebformConfigHistory;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -172,6 +176,7 @@ public class WebformServiceImpl implements WebformService {
           webform.setName(name);
         }
 
+        webformConfigRepository.saveWebFormConfigHistory(webform);
         webformConfigRepository.updateWebFormConfig(webform);
         webformRepository.save(webformMetabase);
         // we need to update the webform name in all dataset schemas if has been changed
@@ -282,6 +287,61 @@ public class WebformServiceImpl implements WebformService {
     return new ResponseEntity<>(message, status);
   }
 
+  @Override
+  public ResponseEntity<?> getWebformConfigHistorySchema(String webFormName, Long version) {
+    String message;
+    HttpStatus status = HttpStatus.OK;
+    try{
+      WebformMetabase webformMetabase = webformRepository.findByLabel(webFormName);
+      WebformConfigHistory history = getWebFormConfigHistory(webformMetabase, version);
+      if (history == null) {
+        message = "The webform config with name: " + webFormName + " and version: " + version + " does not exist";
+        status = HttpStatus.BAD_REQUEST;
+        LOG.error(message);
+        return new ResponseEntity<>(message, status);
+      }
+      Map<String, Object> response = new HashMap<>();
+      response.put("content", history.getFile());
+      response.put("version", history.getVersion());
+      response.put("name", history.getName());
+      response.put("createdAt", DateTimeFormatter.ISO_INSTANT.format(history.getCreatedAt()));
+      if (webformMetabase != null && webformMetabase.getType() != null) {
+        response.put("type", webformMetabase.getType().getValue());
+      }
+      return new ResponseEntity<>(response, status);
+    } catch (Exception e) {
+      message = e.getMessage();
+      status = HttpStatus.INTERNAL_SERVER_ERROR;
+      LOG.error("Unexpected error! Error while getting webForm with name {} Message: {}", webFormName, e.getMessage());
+      return new ResponseEntity<>(message, status);
+    }
+  }
+
+  @Override
+  @Transactional
+  public void restorePreviousWebFormVersions(String webFormName, Long version, Long datasetId) {
+    try{
+      WebformMetabase webformMetabase = webformRepository.findByLabel(webFormName);
+      WebformConfigHistory history = getWebFormConfigHistory(webformMetabase, version);
+      if (history != null) {
+        WebformConfigVO webformConfigVO = new WebformConfigVO();
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonContent = objectMapper.writeValueAsString(history.getFile());
+        webformConfigVO.setContent(jsonContent);
+        webformConfigVO.setName(history.getName());
+        webformConfigVO.setType(webformMetabase.getType());
+        webformConfigVO.setIdReferenced(history.getIdReferenced());
+        uploadWebFormConfig(webformConfigVO, datasetId);
+      } else {
+        String message = "The webform config with name: " + webFormName + " and version: " + version + " does not exist";
+        throw new EEAException(message);
+      }
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error while restoring webForm with name {} Message: {}", webFormName, e.getMessage());
+      throw new RuntimeException();
+    }
+  }
+
   /**
    * Find webform config content by id.
    *
@@ -295,6 +355,12 @@ public class WebformServiceImpl implements WebformService {
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     return mapper.writeValueAsString(webform.getFile());
+  }
+
+  private WebformConfigHistory getWebFormConfigHistory(WebformMetabase webformMetabase, Long version) {
+    WebformConfig configMongo = webformMetabase != null ? webformConfigRepository.findByIdReferenced(webformMetabase.getId()) : null;
+    ObjectId webConfigId = configMongo != null ? configMongo.getId() : null;
+    return webformConfigRepository.getWebFormConfigHistory(webConfigId, version);
   }
 
 }

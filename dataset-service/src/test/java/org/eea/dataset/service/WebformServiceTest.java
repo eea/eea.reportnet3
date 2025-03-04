@@ -13,7 +13,9 @@ import org.eea.dataset.mapper.WebformMetabaseMapper;
 import org.eea.dataset.persistence.metabase.domain.WebformMetabase;
 import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.webform.WebformConfig;
+import org.eea.dataset.persistence.schemas.domain.webform.WebformConfigHistory;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
+import org.eea.dataset.persistence.schemas.repository.WebformConfigHistoryRepository;
 import org.eea.dataset.persistence.schemas.repository.WebformConfigRepository;
 import org.eea.dataset.service.impl.WebformServiceImpl;
 import org.eea.exception.EEAErrorMessage;
@@ -53,6 +55,9 @@ public class WebformServiceTest {
 
   @Mock
   private WebformConfigRepository webformConfigRepository;
+
+  @Mock
+  private WebformConfigHistoryRepository webformConfigHistoryRepository;
 
   @Mock
   private SchemasRepository schemasRepository;
@@ -216,5 +221,77 @@ public class WebformServiceTest {
     Mockito.verify(webformConfigRepository, times(1)).save(Mockito.any(WebformConfig.class));
     Mockito.verify(webformRepository, times(1)).save(Mockito.any(WebformMetabase.class));
     Mockito.verify(datasetSchemaService, times(1)).updateWebform(Mockito.anyString(), Mockito.any(WebformVO.class));
+  }
+  @Test
+  public void testRestorePreviousWebFormVersions() {
+    String webFormName = "testWebform";
+    Long version = 1L;
+    Long datasetId = 100L;
+
+    WebformMetabase webformMetabase = new WebformMetabase();
+    webformMetabase.setId(1L);
+    webformMetabase.setLabel(webFormName);
+    webformMetabase.setValue(webFormName);
+    webformMetabase.setType(WebformTypeEnum.PAMS);
+
+    WebformConfigHistory history = new WebformConfigHistory();
+    history.setId(new ObjectId());
+    history.setIdReferenced(1L);
+    history.setVersion(version);
+    history.setName(webFormName);
+    Map<String, Object> fileContent = new HashMap<>();
+    fileContent.put("key", "value");
+    history.setFile(fileContent);
+
+    WebformConfig webformConfig = new WebformConfig();
+    webformConfig.setIdReferenced(1L);
+    webformConfig.setId(new ObjectId());
+    webformConfig.setName(webFormName);
+
+    Mockito.when(webformRepository.findById(Mockito.any())).thenReturn(Optional.of(webformMetabase));
+    Mockito.when(webformRepository.findByLabel(webFormName)).thenReturn(webformMetabase);
+    Mockito.when(webformConfigRepository.getWebFormConfigHistory(Mockito.any(), Mockito.eq(version)))
+        .thenReturn(history);
+    Mockito.when(webformConfigRepository.findByIdReferenced(webformMetabase.getId())).thenReturn(webformConfig);
+
+    webformServiceImpl.restorePreviousWebFormVersions(webFormName, version, datasetId);
+
+    Mockito.verify(webformConfigRepository, times(1)).getWebFormConfigHistory(Mockito.any(), Mockito.eq(version));
+    Mockito.verify(webformConfigRepository, times(1)).saveWebFormConfigHistory(Mockito.any(WebformConfig.class));
+  }
+
+  @Test
+  public void testGetWebformConfigHistorySchema() {
+    String webFormName = "testWebform";
+    Long version = 1L;
+
+    WebformMetabase webformMetabase = new WebformMetabase();
+    webformMetabase.setId(1L);
+    webformMetabase.setLabel(webFormName);
+    webformMetabase.setValue(webFormName);
+    webformMetabase.setType(WebformTypeEnum.PAMS);
+
+    WebformConfigHistory history = new WebformConfigHistory();
+    history.setId(new ObjectId());
+    history.setIdReferenced(1L);
+    history.setVersion(version);
+    history.setName(webFormName);
+    history.setCreatedAt(java.time.Instant.now());
+    Map<String, Object> fileContent = new HashMap<>();
+    fileContent.put("key", "value");
+    history.setFile(fileContent);
+
+    Mockito.when(webformRepository.findByLabel(webFormName)).thenReturn(webformMetabase);
+    Mockito.when(webformConfigRepository.getWebFormConfigHistory(Mockito.any(), Mockito.eq(version)))
+        .thenReturn(history);
+
+    ResponseEntity<?> response = webformServiceImpl.getWebformConfigHistorySchema(webFormName, version);
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertEquals(webFormName, ((Map<?, ?>) response.getBody()).get("name"));
+    assertEquals(version, ((Map<?, ?>) response.getBody()).get("version"));
+
+    Mockito.verify(webformConfigRepository, times(1)).getWebFormConfigHistory(Mockito.any(), Mockito.eq(version));
+    Mockito.verify(webformRepository, times(1)).findByLabel(webFormName);
   }
 }

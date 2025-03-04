@@ -76,10 +76,12 @@ export const JobsStatusesRepository = {
       })
     }),
 
-  cancelJob: async jobId =>
+  cancelJob: async (jobId, dataflowId, datasetId) =>
     await HTTPRequester.update({
       url: getUrl(JobsStatusesConfig.cancelJob, {
-        jobId
+        jobId,
+        dataflowId,
+        datasetId
       })
     })
 };

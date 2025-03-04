@@ -817,6 +817,37 @@ public final class EEAErrorMessage {
   public static final String UPDATING_RELEASE_RECEIPT =
           "An unknown error happened while updating a release receipt.";
 
+  /** The Constant ERROR_RETRIEVING_SOFT_DELETED_DATAFLOWS: {@value}. */
+  public static final String ERROR_RETRIEVING_SOFT_DELETED_DATAFLOWS =
+          "Soft Deleted Dataflows could not be retrieved.";
+
+  /** The Constant ERROR_DELETING_DATAFLOW: {@value}. */
+  public static final String ERROR_CLEANUP_SOFT_DELETED_DATAFLOW =
+          "Error occurred while cleanup of soft deleted dataflow.";
+
+  /** The Constant ERROR_DELETING_RULES_SCHEMA: {@value}. */
+  public static final String ERROR_DELETING_RULES_SCHEMA =
+          "Error deleting RulesSchema from MongoDB.";
+
+  /** The Constant ERROR_DELETING_DATASET_SCHEMA: {@value}. */
+  public static final String ERROR_DELETING_DATASET_SCHEMA =
+          "Error deleting DataSetSchema from MongoDB.";
+
+  /** The Constant ERROR_DELETING_DATAFLOW_METABASE_RELATED_OBJECTS: {@value}. */
+  public static final String ERROR_DELETING_DATAFLOW_METABASE_RELATED_OBJECTS =
+          "Error occurred while deleting Metabase entries related to the dataflow.";
+
+  /** The Constant ERROR_DELETING_KEYCLOAK_GROUPS: {@value}. */
+  public static final String ERROR_DELETING_KEYCLOAK_GROUPS =
+          "Error occurred while deleting Keycloak groups related to the dataflow.";
+
+  /** The Constant ERROR_DELETING_PK_CATALOGUE: {@value}. */
+  public static final String ERROR_DELETING_PK_CATALOGUE =
+          "An unknown error happenned while deleting PK Catalogue Entries.";
+
+  /** The Constant ERROR_DELETING_UNIQUE_CONSTRAINS: {@value}. */
+  public static final String ERROR_DELETING_UNIQUE_CONSTRAINS =
+          "An unknown error happenned while deleting Unique Constrains.";
 
   /**
    * Instantiates a new EEA error message.

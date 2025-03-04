@@ -968,6 +968,15 @@ public interface DatasetController {
   List<TableSchemaIdNameVO> getAvailableForManualEditingTables(@PathVariable("datasetId") Long datasetId) throws Exception;
 
   /**
+   * Remove big data folder for dataflow id
+   *
+   * @param dataflowId the dataset id
+   *
+   */
+  @DeleteMapping("/private/bigDataFolder/dataflow/{dataflowId}")
+  void deleteBigDataRootFolder(@PathVariable("dataflowId") Long dataflowId);
+
+  /**
    * Restore prefilled tables
    *
    * @param datasetId the dataset id to be restored
@@ -996,4 +1005,26 @@ public interface DatasetController {
    */
   @PostMapping("/private/createEmptyTables")
   void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception;
+
+  /***
+   * Create empty tables for each table schema of the dataflow
+   *
+   * @param datasetMetabaseVO The datasetMetabaseVO object
+   * @throws Exception The exception
+   */
+  @PostMapping("/private/{tableSchemaId}/createEmptyTablesV2")
+  void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable("tableSchemaId") String tableSchemaId) throws Exception;
+
+  /**
+   * Get released dataset data info
+   *
+   * @param collectionDatasetId the dataset id
+   * @param providerCode the provider code
+   * @param tableSchemaId the table schema id
+   * @return a ReleasedDatasetDataInfoVO object
+   *
+   */
+  @GetMapping("/getReleasedDatasetDataInfo")
+  ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode,
+                                                       @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
 }

@@ -25,6 +25,14 @@ public interface ReportingDatasetService {
    */
   List<ReportingDatasetVO> getDataSetIdBySchemaId(String schemaId);
 
+  /**
+   * Gets the data set id by id.
+   *
+   * @param datasetId
+   * @return the dataset
+   */
+   ReportingDatasetVO getReportingDatasetById(Long datasetId);
+
 
   /**
    * Update reporting dataset metabase.
@@ -78,5 +86,13 @@ public interface ReportingDatasetService {
    * @return the reportings by dataflow ids
    */
   List<ReportingDatasetVO> getReportingsByDataflowIds(List<Long> dataflowIds);
+
+  /**
+   * Checks if a list of reporting datasets have been updated after releasing
+   *
+   * @param datasetsVO the datasets
+   * @return
+   */
+  void hasUpdatesAfterRelease(List<ReportingDatasetVO> datasetsVO);
 
 }

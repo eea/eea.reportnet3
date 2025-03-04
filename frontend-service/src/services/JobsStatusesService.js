@@ -82,7 +82,7 @@ export const JobsStatusesService = {
     return response.data;
   },
 
-  cancelJob: async jobId => {
-    await JobsStatusesRepository.cancelJob(jobId);
+  cancelJob: async (jobId, dataflowId, datasetId) => {
+    await JobsStatusesRepository.cancelJob(jobId, dataflowId, datasetId);
   }
 };

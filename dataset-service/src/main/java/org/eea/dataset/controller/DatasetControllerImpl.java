@@ -21,10 +21,12 @@ import org.eea.exception.EEAException;
 import org.eea.exception.ParquetConversionException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -142,6 +144,9 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   private CreateEmptyTables createEmptyTables;
+
+  @Autowired
+  public RepresentativeControllerZuul representativeControllerZuul;
 
   /**
    * Gets the data tables values.
@@ -3075,6 +3080,23 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  /**
+   * Get available for manual editing tables in dataflow
+   *
+   * @param dataflowId the dataset id
+   */
+  @Override
+  @DeleteMapping("/private/bigDataFolder/dataflow/{dataflowId}")
+  public void deleteBigDataRootFolder(@PathVariable("dataflowId") Long dataflowId) {
+    try{
+      bigDataDatasetService.removeRootDataflowFolderFromS3(dataflowId);
+    }
+    catch (Exception e){
+      LOG.error("Could not remove root folder in S3 {}", dataflowId);
+      throw e;
+    }
+  }
+
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/restorePrefilledTables/{datasetId}")
@@ -3117,7 +3139,56 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Override
   @PostMapping("/private/createEmptyTables")
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
   public void createEmptyTables(@RequestBody DataSetMetabaseVO datasetMetabaseVO) throws Exception {
     createEmptyTables.runCreationForOneDataset(datasetMetabaseVO);
+  }
+
+  @PostMapping("/private/{tableSchemaId}/createEmptyTablesV2")
+  @HystrixCommand(commandProperties = {
+      @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
+  @Override
+  public void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable String tableSchemaId) throws Exception {
+    createEmptyTables.runCreationForSpecificTableSchema(datasetMetabaseVO, tableSchemaId);
+  }
+
+  /**
+   * Get released dataset data info
+   *
+   * @param collectionDatasetId the dataset id
+   * @param providerCode the provider code
+   * @param tableSchemaId the table schema id
+   * @return a ReleasedDatasetDataInfoVO object
+   *
+   */
+  @Override
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/getReleasedDatasetDataInfo")
+  public ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode, @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception{
+    ReleasedDatasetDataInfoVO releasedDatasetDataInfoVO;
+    try{
+      DataSetMetabaseVO collectionDatasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(collectionDatasetId);
+      DatasetTypeEnum datasetType = datasetService.getDatasetType(collectionDatasetId);
+      Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(collectionDatasetMetabaseVO.getDataflowId());
+      DataProviderVO providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(providerCode, dataProviderGroupId);
+      Long reportingDatasetId = datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId(collectionDatasetMetabaseVO.getDatasetSchema(), providerVO.getId());
+      if(reportingDatasetId == null){
+        throw new Exception("Could not find reporting dataset for dataflowId " + collectionDatasetMetabaseVO.getDataflowId() + " and providerCode " + providerCode);
+      }
+      DataSetMetabaseVO reportingDatasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(reportingDatasetId);
+
+      if(dataFlowControllerZuul.isBigDataflow(reportingDatasetMetabaseVO.getDataflowId())){
+        releasedDatasetDataInfoVO = bigDataDatasetService.getReleasedDatasetDataInfoDL(collectionDatasetMetabaseVO, reportingDatasetMetabaseVO, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+      }
+      else{
+        releasedDatasetDataInfoVO = datasetService.getReleasedDatasetDataInfo(collectionDatasetId, reportingDatasetId, reportingDatasetMetabaseVO.getDataflowId(), providerVO, tableSchemaId, datasetType);
+      }
+    }
+    catch (Exception e){
+      LOG.error("Could not retrieve release dataset data info for collectionDatasetId {}, provider code {} and tableSchemaId {}", collectionDatasetId, providerCode, tableSchemaId);
+      throw e;
+    }
+    return releasedDatasetDataInfoVO;
   }
 }
