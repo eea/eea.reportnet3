@@ -34,6 +34,7 @@ export const PaMsWebform = ({
   dataProviderId,
   datasetId,
   isIcebergCreated,
+  isLoadingIceberg,
   isReleasing,
   isReporting,
   overview,
@@ -341,6 +342,7 @@ export const PaMsWebform = ({
           getFieldSchemaId={getFieldSchemaId}
           isAddingPamsId={paMsWebformState.isAddingSingleRecord || paMsWebformState.isAddingGroupRecord}
           isIcebergCreated={isIcebergCreated}
+          isLoadingIceberg={isLoadingIceberg}
           isRefresh={paMsWebformState.isRefresh}
           isReporting={isReporting}
           onUpdatePamsValue={onUpdatePamsValue}

@@ -37,6 +37,7 @@ export const WebformView = ({
   getFieldSchemaId,
   isAddingPamsId = false,
   isIcebergCreated,
+  isLoadingIceberg,
   isRefresh,
   isReporting,
   onUpdatePamsValue,
@@ -278,6 +279,7 @@ export const WebformView = ({
         getFieldSchemaId={getFieldSchemaId}
         isGroup={isGroup}
         isIcebergCreated={isIcebergCreated}
+        isLoadingIceberg={isLoadingIceberg}
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
