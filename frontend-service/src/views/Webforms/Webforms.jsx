@@ -143,6 +143,7 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReporting={isReporting}
           state={state}

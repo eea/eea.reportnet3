@@ -25,6 +25,7 @@ export const QuestionAnswerWebformRecord = ({
             datasetId={datasetId}
             getTableErrors={getTableErrors}
             nationalField={name}
+            recordId={record.recordId}
             recordValidations={record.validations}
             tableSchemaName={tableSchemaName}
             title={titleSource || title}

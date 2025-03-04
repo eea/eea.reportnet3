@@ -42,6 +42,7 @@ export const QuestionAnswerWebformField = ({
   datasetId,
   getTableErrors,
   nationalField,
+  recordId,
   recordValidations,
   tableSchemaName,
   title,
@@ -52,7 +53,7 @@ export const QuestionAnswerWebformField = ({
 
   const [questionAnswerWebformFieldState, questionAnswerWebformFieldDispatch] = useReducer(qaWebformFieldReducer, {
     field: nationalField,
-    isDialogVisible: { deleteAttachment: false, uploadFile: false }
+    isDialogVisible: { isDeletingAttachment: false, deleteAttachment: false, uploadFile: false }
   });
 
   const { field, isDialogVisible } = questionAnswerWebformFieldState;
@@ -98,6 +99,7 @@ export const QuestionAnswerWebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
+      handleDialogs('isDeletingAttachment', true);
       await DatasetService.deleteAttachment({
         dataflowId,
         datasetId,
@@ -106,11 +108,13 @@ export const QuestionAnswerWebformField = ({
         tableSchemaName: tableSchemaName,
         fieldName: field.name,
         fileName: field.value,
-        recordId: field.recordId
+        recordId
       });
       onFillField(field, field.fieldSchemaId, '');
       handleDialogs('deleteAttachment', false);
+      handleDialogs('isDeletingAttachment', false);
     } catch (error) {
+      handleDialogs('isDeletingAttachment', false);
       console.error('QuestionAnswerWebformField - onConfirmDeleteAttachment.', error);
     }
   };
@@ -146,7 +150,7 @@ export const QuestionAnswerWebformField = ({
         fieldId,
         dataProviderId,
         fileName,
-        recordId: field.recordId,
+        recordId,
         tableSchemaName: tableSchemaName,
         fieldName: field.name
       });
@@ -399,7 +403,7 @@ export const QuestionAnswerWebformField = ({
                   fieldId: field.fieldId || field.fieldSchemaId,
                   tableSchemaName: tableSchemaName,
                   fieldName: field.name,
-                  recordId: field.recordId,
+                  recordId,
                   previousFileName: field.value
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
@@ -408,7 +412,7 @@ export const QuestionAnswerWebformField = ({
                   fieldId: field.fieldId || field.fieldSchemaId,
                   tableSchemaName: tableSchemaName,
                   fieldName: field.name,
-                  recordId: field.recordId,
+                  recordId,
                   previousFileName: field.value,
                   providerId: dataProviderId
                 })
@@ -419,6 +423,7 @@ export const QuestionAnswerWebformField = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           header={resourcesContext.messages['deleteAttachmentHeader']}
+          iconConfirm={isDialogVisible.isDeletingAttachment && 'spinnerAnimate'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}

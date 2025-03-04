@@ -26,6 +26,8 @@ export const QuestionAnswerWebformTable = ({
   dataflowId,
   datasetId,
   errorMessages,
+  isIcebergCreated,
+  isLoadingIceberg,
   schemaTables,
   tables
 }) => {
@@ -129,18 +131,27 @@ export const QuestionAnswerWebformTable = ({
 
   return (
     <div className={styles.content}>
-      {isNil(schemaTables) ? (
-        renderMissingTables(tables.name)
-      ) : (
-        <Fragment>
-          <div className={styles.titleWrapper}>
-            <h2>{tables.title}</h2>
-            {hasErrors && <IconTooltip className={`webform-validationErrors `} levelError={'ERROR'} />}
-          </div>
+      <div
+        style={
+          bigData && isLoadingIceberg
+            ? { opacity: 0.5, pointerEvents: 'none' }
+            : !bigData || isIcebergCreated
+            ? { opacity: 1 }
+            : { opacity: 0.5, pointerEvents: 'none' }
+        }>
+        {isNil(schemaTables) ? (
+          renderMissingTables(tables.name)
+        ) : (
+          <Fragment>
+            <div className={styles.titleWrapper}>
+              <h2>{tables.title}</h2>
+              {hasErrors && <IconTooltip className={`webform-validationErrors `} levelError={'ERROR'} />}
+            </div>
 
-          {isLoading ? <Spinner style={{ top: 0 }} /> : renderRecords()}
-        </Fragment>
-      )}
+            {isLoading ? <Spinner style={{ top: 0 }} /> : renderRecords()}
+          </Fragment>
+        )}
+      </div>
     </div>
   );
 };
