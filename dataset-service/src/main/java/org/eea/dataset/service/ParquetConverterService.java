@@ -1,13 +1,13 @@
 package org.eea.dataset.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 
 import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 public interface ParquetConverterService {
 
@@ -19,4 +19,5 @@ public interface ParquetConverterService {
 
     File exportParquetToCsvFile(String existingTableQueryPath, String exportTableQueryPath, String exportTableS3Path, String exportedFileName, String exportedFilePath, S3PathResolver s3ExportPathResolver) throws Exception;
 
+    void updateImportStatistics(String tableSchemaId, String numberOfRecordsToBeInserted, DataSetMetabase dataSetMetabase, String fileExtension);
 }
