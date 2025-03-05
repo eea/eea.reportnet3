@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
@@ -14,6 +15,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
@@ -25,12 +27,14 @@ import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -69,6 +73,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -192,6 +197,11 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private DremioHelperService dremioHelperService;
 
+  @Autowired
+  private DatasetSchemaControllerZuul datasetSchemaController;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
 
   /**
    * Instantiates a new validation helper.
@@ -580,7 +590,31 @@ public class ValidationHelper implements DisposableBean {
    * @param dataset the dataset metabase object
    * @param processId the process id
    */
+  @SneakyThrows
   public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId) {
+    //check materialized view record count and compare it to record_value
+    Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+    List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaController.getTableSchemasIds(dataset.getId(), dataset.getDataflowId(), dataset.getDataProviderId());
+    String materializedViewSelectQuery = "select matviewname from pg_matviews  where schemaname = 'dataset_" + dataset.getId() + "'";
+    List<String> materializedViewList = jdbcTemplate.queryForList(materializedViewSelectQuery, String.class);
+    for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
+      if(materializedViewList.contains(tableSchemaIdNameVO.getNameTableSchema())){
+        Integer numberOfRecordValues = validationService.getNumberOfRecordsInTable(dataset.getId(), tableSchemaIdNameVO.getIdTableSchema());
+        String materializedViewRecordCount = "select count(*) from dataset_" + dataset.getId() + "." + tableSchemaIdNameVO.getNameTableSchema();
+        Integer numberOfMaterializedViewRecords = jdbcTemplate.queryForObject(materializedViewRecordCount, Integer.class);
+        if(numberOfRecordValues != numberOfMaterializedViewRecords){
+          LOG.error("For datasetId {} table {} and jobId {} the materialized views are not updated. numberOfRecordValues={} numberOfMaterializedViewRecords={} Canceling job.", dataset.getId(), tableSchemaIdNameVO.getNameTableSchema(), jobId, numberOfRecordValues, numberOfMaterializedViewRecords);
+          jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
+          return;
+        }
+      }
+      else{
+        LOG.error("For datasetId {} table {} and jobId {} the materialized view does not exist. Canceling job.", dataset.getId(), tableSchemaIdNameVO.getNameTableSchema(), jobId);
+        jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
+        return;
+      }
+    }
+
     // Initialize process as coordinator
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));

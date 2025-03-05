@@ -51,7 +51,9 @@ public enum JobInfoEnum {
 
     ERROR_ICEBERG_TABLE_EXISTS("The job failed because there is an iceberg table in the dataset"),
 
-    ERROR_RELEASE_CANCELED_BLOCKERS("There are canceled tasks for blocker errors");
+    ERROR_RELEASE_CANCELED_BLOCKERS("There are canceled tasks for blocker errors"),
+
+    ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The materialized views have not been created successfully");
 
 
     /** The value. */

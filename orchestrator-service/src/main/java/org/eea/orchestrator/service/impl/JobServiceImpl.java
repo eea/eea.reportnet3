@@ -2,6 +2,7 @@ package org.eea.orchestrator.service.impl;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
@@ -467,8 +468,12 @@ public class JobServiceImpl implements JobService {
         }
     }
     @Override
-    public void cancelJob(Long jobId) throws EEAException {
-        LOG.info("User cancelling job {}", jobId);
+    public void cancelJob(Long jobId, JobInfoEnum jobInfo, Boolean jobShouldFail) throws EEAException {
+        JobStatusEnum jobStatus = JobStatusEnum.CANCELED_BY_ADMIN;
+        if(BooleanUtils.isTrue(jobShouldFail)){
+            jobStatus = JobStatusEnum.FAILED;
+        }
+        LOG.info("User cancelling job {} with jobInfo {}", jobId, jobInfo);
         JobVO jobVO = findById(jobId);
         List<String> processIds = jobProcessService.findProcessesByJobId(jobId);
         for (String processId : processIds) {
@@ -493,7 +498,8 @@ public class JobServiceImpl implements JobService {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
             }
         }
-        updateJobStatus(jobId, JobStatusEnum.CANCELED_BY_ADMIN);
+        updateJobInfo(jobId, jobInfo, null);
+        updateJobStatus(jobId, jobStatus);
         LOG.info("Updated job {} to status CANCELED_BY_ADMIN", jobId);
         Map<String, Object> value = new HashMap<>();
         String user = jobVO.getCreatorUsername();
