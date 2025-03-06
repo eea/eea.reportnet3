@@ -1123,7 +1123,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
   }
 
-  private void updateImportStatistics(String tableSchemaId, String numberOfRecordsToBeInserted, DataSetMetabase dataSetMetabase, String fileExtension){
+  @Override
+  public void updateImportStatistics(String tableSchemaId, String numberOfRecordsToBeInserted, DataSetMetabase dataSetMetabase, String fileExtension){
     Statistics totalRecordsImportedStat = new Statistics();
     totalRecordsImportedStat.setDataset(dataSetMetabase);
     totalRecordsImportedStat.setIdTableSchema(tableSchemaId);

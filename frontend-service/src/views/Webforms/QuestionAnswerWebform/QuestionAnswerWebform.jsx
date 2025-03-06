@@ -10,7 +10,16 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-export const QuestionAnswerWebform = ({ bigData, dataflowId, dataProviderId, datasetId, state, tables = [] }) => {
+export const QuestionAnswerWebform = ({
+  bigData,
+  dataflowId,
+  dataProviderId,
+  datasetId,
+  isIcebergCreated,
+  isLoadingIceberg,
+  state,
+  tables = []
+}) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const { areEquals } = TextUtils;
@@ -66,6 +75,8 @@ export const QuestionAnswerWebform = ({ bigData, dataflowId, dataProviderId, dat
               dataProviderId={dataProviderId}
               datasetId={datasetId}
               errorMessages={getErrorMessages}
+              isIcebergCreated={isIcebergCreated}
+              isLoadingIceberg={isLoadingIceberg}
               schemaTables={schemaTable}
               tables={table}
             />

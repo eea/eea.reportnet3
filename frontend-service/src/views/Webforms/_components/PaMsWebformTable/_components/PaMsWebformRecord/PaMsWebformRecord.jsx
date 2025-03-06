@@ -252,6 +252,7 @@ export const PaMsWebformRecord = ({
         return (
           checkLabelVisibility(element) &&
           !isFieldVisible &&
+          element.isVisible !== false &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (

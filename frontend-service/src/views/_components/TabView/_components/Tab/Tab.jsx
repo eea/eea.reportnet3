@@ -31,58 +31,59 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 import TooltipButtonRed from 'views/_components/TooltipButton/TooltipButtonRed';
 
 export const Tab = ({
-                      addTab,
-                      ariaControls,
-                      bigData = false,
-                      checkEditingTabs,
-                      className,
-                      closeIcon,
-                      description = '',
-                      designMode = false,
-                      divScrollTabsRef,
-                      disabled = false,
-                      editable = false,
-                      fixedNumber = false,
-                      hasInfoTooltip = false,
-                      hasPKReferenced = false,
-                      header,
-                      headerStyle,
-                      id,
-                      isDataflowOpen,
-                      isDesignDatasetEditorRead,
-                      index,
-                      initialTabIndexDrag,
-                      isNavigationHidden,
-                      leftIcon,
-                      manualEdit,
-                      maxLength,
-                      newTab,
-                      notEmpty = true,
-                      numberOfFields,
-                      onTabBlur,
-                      onTabAddCancel,
-                      onTabDeleteClick,
-                      onTabDragAndDrop,
-                      onTabDragAndDropStart,
-                      onTabEditingHeader,
-                      onTabHasErrors,
-                      onTabHeaderClick,
-                      onTabMouseWheel,
-                      onTabNameError,
-                      onTabNameLengthWarning,
-                      readOnly = false,
-                      rightIcon,
-                      rightIconClass = '',
-                      rightIconTooltip,
-                      scrollTo,
-                      selected,
-                      showEditIcon = false,
-                      tableSchemaId,
-                      tableImportedMetadata,
-                      toPrefill = false,
-                      totalTabs,
-                      viewType
-                    }) => {
+  addTab,
+  ariaControls,
+  bigData = false,
+  checkEditingTabs,
+  className,
+  closeIcon,
+  description = '',
+  designMode = false,
+  divScrollTabsRef,
+  disabled = false,
+  editable = false,
+  fixedNumber = false,
+  hasInfoTooltip = false,
+  hasPKReferenced = false,
+  header,
+  headerStyle,
+  id,
+  isDataflowOpen,
+  isDesignDatasetEditorRead,
+  index,
+  initialTabIndexDrag,
+  isNavigationHidden,
+  leftIcon,
+  manualEdit,
+  maxLength,
+  newTab,
+  notEmpty = true,
+  numberOfFields,
+  onTabBlur,
+  onTabAddCancel,
+  onTabDeleteClick,
+  onTabDragAndDrop,
+  onTabDragAndDropStart,
+  onTabEditingHeader,
+  onTabHasErrors,
+  onTabHeaderClick,
+  onTabMouseWheel,
+  onTabNameError,
+  onTabNameLengthWarning,
+  preventScrollLeft,
+  readOnly = false,
+  rightIcon,
+  rightIconClass = '',
+  rightIconTooltip,
+  scrollTo,
+  selected,
+  showEditIcon = false,
+  tableSchemaId,
+  tableImportedMetadata,
+  toPrefill = false,
+  totalTabs,
+  viewType
+}) => {
   const [isDragging, setIsDragging] = useState(false);
   const [editingHeader, setEditingHeader] = useState(!isUndefined(newTab) ? newTab : false);
   const [hasErrors, setHasErrors] = useState(false);
@@ -211,20 +212,30 @@ export const Tab = ({
         {renderFixedNumber()}
         {renderNotEmpty()}
         {renderNumberOfFiedls()}
-        { !!tableImportedMetadata?.lastImportDate && <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportDate']}: ${dayjs(tableImportedMetadata.lastImportDate).format('DD-MM-YYYY HH:mm')}`}</p> }
-        { !!tableImportedMetadata?.numberOfRecordsImported && <p className={styles.propertyLabel}>{`${resourcesContext.messages['numberOfRecordsImported']}: ${tableImportedMetadata.numberOfRecordsImported}`}</p> }
-        { !!tableImportedMetadata?.fileExtension && <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportFileExtension']}: ${tableImportedMetadata.fileExtension}`}</p> }
+        {!!tableImportedMetadata?.lastImportDate && (
+          <p className={styles.propertyLabel}>{`${resourcesContext.messages['lastImportDate']}: ${dayjs(
+            tableImportedMetadata.lastImportDate
+          ).format('DD-MM-YYYY HH:mm')}`}</p>
+        )}
+        {!!tableImportedMetadata?.numberOfRecordsImported && (
+          <p
+            className={
+              styles.propertyLabel
+            }>{`${resourcesContext.messages['numberOfRecordsImported']}: ${tableImportedMetadata.numberOfRecordsImported}`}</p>
+        )}
+        {!!tableImportedMetadata?.fileExtension && (
+          <p
+            className={
+              styles.propertyLabel
+            }>{`${resourcesContext.messages['lastImportFileExtension']}: ${tableImportedMetadata.fileExtension}`}</p>
+        )}
       </div>
     );
   };
 
   const getManualTooltipMessage = () => {
     const renderDescription = () => {
-      return (
-        <Fragment>
-          <p className={styles.propertyLabel}>{resourcesContext.messages['enableManualEditInfo']}</p>
-        </Fragment>
-      );
+      return <p className={styles.propertyLabel}>{resourcesContext.messages['enableManualEditInfo']}</p>;
     };
 
     return <div className={`${styles.fieldText} ${styles.tooltipWrapper}`}>{renderDescription()}</div>;
@@ -480,16 +491,26 @@ export const Tab = ({
         values.push({ field: resourcesContext.messages['notEmpty'], key: 'notEmpty', value: notEmpty });
       }
       if (!!tableImportedMetadata?.lastImportDate) {
-        values.push({ field: resourcesContext.messages['lastImportDate'], key: 'lastImportDate', value: `${dayjs(tableImportedMetadata.lastImportDate).format('DD-MM-YYYY HH:mm')}`})
+        values.push({
+          field: resourcesContext.messages['lastImportDate'],
+          key: 'lastImportDate',
+          value: `${dayjs(tableImportedMetadata.lastImportDate).format('DD-MM-YYYY HH:mm')}`
+        });
       }
       if (!!tableImportedMetadata?.numberOfRecordsImported) {
-        values.push({ field: resourcesContext.messages['numberOfRecordsImported'], key: 'numberOfRecordsImported', value: `${tableImportedMetadata.numberOfRecordsImported}`})
+        values.push({
+          field: resourcesContext.messages['numberOfRecordsImported'],
+          key: 'numberOfRecordsImported',
+          value: `${tableImportedMetadata.numberOfRecordsImported}`
+        });
       }
       if (!!tableImportedMetadata?.fileExtension) {
-        values.push({ field: resourcesContext.messages['lastImportFileExtension'], key: 'lastImportFileExtension', value: `${tableImportedMetadata.fileExtension}`})
+        values.push({
+          field: resourcesContext.messages['lastImportFileExtension'],
+          key: 'lastImportFileExtension',
+          value: `${tableImportedMetadata.fileExtension}`
+        });
       }
-
-
 
       return (
         <Dialog
@@ -569,13 +590,11 @@ export const Tab = ({
           onClick={e => {
             if (!disabled) {
               onTabHeaderClick(e);
-              scrollTo(tabRef.current.offsetLeft - 80, 0);
+              !preventScrollLeft && scrollTo(tabRef.current.offsetLeft - 80, 0);
             }
           }}
           onDoubleClick={onTabDoubleClick}
-          onDragEnd={e => {
-            onTabDragEnd(e);
-          }}
+          onDragEnd={e => onTabDragEnd(e)}
           onDragLeave={onTabDragLeave}
           onDragOver={onTabDragOver}
           onDragStart={onTabDragStart}
@@ -655,15 +674,21 @@ export const Tab = ({
           ) : (
             <span className="p-tabview-title">{!isUndefined(titleHeader) ? titleHeader : header}</span>
           )}
-          {showEditIcon && <>
-            <span data-for={`${id}-edit-tooltip`} data-tip>
-              <FontAwesomeIcon className={styles.tabIconEdit} icon={AwesomeIcons('edit')}/>
-            </span>
-            <ReactTooltip className={styles.tabEditTooltip} border={true} effect="solid" id={`${id}-edit-tooltip`} place="top">
-              {resourcesContext.messages['editedTable']}
-            </ReactTooltip>
-          </>
-          }
+          {showEditIcon && (
+            <>
+              <span data-for={`${id}-edit-tooltip`} data-tip>
+                <FontAwesomeIcon className={styles.tabIconEdit} icon={AwesomeIcons('edit')} />
+              </span>
+              <ReactTooltip
+                border={true}
+                className={styles.tabEditTooltip}
+                effect="solid"
+                id={`${id}-edit-tooltip`}
+                place="top">
+                {resourcesContext.messages['editedTable']}
+              </ReactTooltip>
+            </>
+          )}
           {renderRightSpan()}
           {renderRightSpanTooltip()}
           {bigData && !manualEdit && !viewType?.design && designMode && !addTab && !editingHeader && (

@@ -4,6 +4,7 @@ import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -2585,6 +2586,9 @@ public class DatasetServiceImpl implements DatasetService {
 
     List<RecordValue> recordValues = new ArrayList<>();
 
+    //used for auto increment field and multiple records
+    Map<String, String> previousFieldSchemaAndValueMap = new HashMap<>();
+    String previousValue = "";
     // Rebuild each record to ensure it contains proper fields
     for (RecordVO recordVO : recordVOs) {
       List<FieldVO> fieldVOs = recordVO.getFields();
@@ -2602,7 +2606,9 @@ public class DatasetServiceImpl implements DatasetService {
         FieldValue fieldValue = new FieldValue();
         fieldValue.setIdFieldSchema(fieldSchema.getIdFieldSchema().toString());
         fieldValue.setType(fieldSchema.getType());
-        fieldValue.setValue(filterFieldValue(fieldSchema, datasetType, fieldVOs));
+        String value = filterFieldValue(fieldSchema, datasetType, fieldVOs, previousFieldSchemaAndValueMap);
+        previousFieldSchemaAndValueMap.put(fieldSchema.getIdFieldSchema().toString(), value);
+        fieldValue.setValue(value);
         fieldValue.setRecord(recordValue);
         fieldValues.add(fieldValue);
       }
@@ -2617,11 +2623,12 @@ public class DatasetServiceImpl implements DatasetService {
    * @param fieldSchema the field schema
    * @param datasetType the dataset type
    * @param fieldVOs the field V os
+   * @param previousFieldSchemaAndValueMap the map to use for auto increment
    *
    * @return the string
    */
   private String filterFieldValue(FieldSchema fieldSchema, DatasetTypeEnum datasetType,
-      List<FieldVO> fieldVOs) {
+      List<FieldVO> fieldVOs, Map<String, String> previousFieldSchemaAndValueMap) {
 
     String value = "";
     String fieldSchemaId = fieldSchema.getIdFieldSchema().toString();
@@ -2636,16 +2643,30 @@ public class DatasetServiceImpl implements DatasetService {
     // Find the fieldVO with the fieldSchemaId if exists
     for (FieldVO fieldVO : fieldVOs) {
       if (fieldSchemaId.equals(fieldVO.getIdFieldSchema())) {
-        if (null != fieldVO.getValue()) {
-          value = fieldVO.getValue();
+        if (BooleanUtils.isTrue(fieldVO.getAutoIncrement())) {
+          //set up autoincrement value
+          Long autoIncrementValue;
+          if(StringUtils.isNotBlank(previousFieldSchemaAndValueMap.get(fieldVO.getIdFieldSchema()))){
+            //if there are multiple records being inserted get the new value from the previous one and increment it
+            autoIncrementValue = Long.valueOf(previousFieldSchemaAndValueMap.get(fieldVO.getIdFieldSchema())) + 1;
+          }
+          else{
+            Optional<FieldValue> lastFieldValueInserted =  fieldRepository.findMaxValueByIdFieldSchema(fieldVO.getIdFieldSchema());
+            autoIncrementValue = (lastFieldValueInserted.isPresent()) ? Long.valueOf(lastFieldValueInserted.get().getValue()) + 1 : 1L;
+          }
+          value = String.valueOf(autoIncrementValue);
+        } else {
+          if (null != fieldVO.getValue()) {
+            value = fieldVO.getValue();
 
-          // Sort values if there are multiple
-          if (DataType.MULTISELECT_CODELIST.equals(dataType)
-              || (DataType.LINK.equals(dataType) || DataType.EXTERNAL_LINK.equals(dataType)
-                  && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
-            String[] values = value.trim().split("\\s*;\\s*");
-            Arrays.sort(values);
-            value = Arrays.stream(values).collect(Collectors.joining("; "));
+            // Sort values if there are multiple
+            if (DataType.MULTISELECT_CODELIST.equals(dataType)
+                    || (DataType.LINK.equals(dataType) || DataType.EXTERNAL_LINK.equals(dataType)
+                    && Boolean.TRUE.equals(fieldSchema.getPkHasMultipleValues()))) {
+              String[] values = value.trim().split("\\s*;\\s*");
+              Arrays.sort(values);
+              value = Arrays.stream(values).collect(Collectors.joining("; "));
+            }
           }
         }
         fieldVOs.remove(fieldVO);

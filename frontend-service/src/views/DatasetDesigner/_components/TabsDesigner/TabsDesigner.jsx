@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
@@ -481,6 +481,7 @@ export const TabsDesigner = ({
         onTabHasErrors={onTabHasErrors}
         onTabNameError={onTabNameError}
         onTabNameLengthWarning={onTabNameLengthWarning}
+        preventScrollLeft={true}
         tableImportedMetadata={tableImportedMetadata}
         tableSchemaId={tableSchemaId}
         tabs={tabs}

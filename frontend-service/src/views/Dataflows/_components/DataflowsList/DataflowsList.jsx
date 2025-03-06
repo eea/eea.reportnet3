@@ -11,7 +11,7 @@ import { ReferencedDataflowItem } from './_components/ReferencedDataflowItem';
 import { Spinner } from 'views/_components/Spinner';
 
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import {Button} from "../../../_components/Button";
+import { Button } from '../../../_components/Button';
 
 export const DataflowsList = ({
   className,
@@ -40,14 +40,16 @@ export const DataflowsList = ({
         return (
           <DataflowsItem
             isAdmin={isAdmin}
+            isCompressed={isCompressed}
             isCustodian={isCustodian}
             itemContent={dataflow}
-            isCompressed={isCompressed}
             reorderDataflows={reorderDataflows}
           />
         );
       case config.dataflowType.REFERENCE.key:
-        return <ReferencedDataflowItem dataflow={dataflow} reorderDataflows={reorderDataflows} isCompressed={isCompressed} />;
+        return (
+          <ReferencedDataflowItem dataflow={dataflow} isCompressed={isCompressed} reorderDataflows={reorderDataflows} />
+        );
       default:
         break;
     }
@@ -95,7 +97,7 @@ export const DataflowsList = ({
         label={isCompressed ? resourcesContext.messages['maximizeList'] : resourcesContext.messages['minimizeList']}
         onClick={() => setIsCompressed(!isCompressed)}
       />
-      <div className={`${styles.wrap} ${className} ${isCompressed ? styles.compressedListWrapper : ''}`} >
+      <div className={`${styles.wrap} ${className} ${isCompressed ? styles.compressedListWrapper : ''}`}>
         {renderContent()}
       </div>
     </>

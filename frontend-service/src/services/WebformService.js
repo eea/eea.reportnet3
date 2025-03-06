@@ -6,8 +6,11 @@ export const WebformService = {
   addPamsRecords: async (datasetId, tables, pamId, type) =>
     await WebformRepository.addPamsRecords(datasetId, WebformUtils.parsePamTables(tables, pamId, type)),
 
-  addEntityRecord: async (datasetId, tables, entityId, rootPkFieldId) =>
-    await WebformRepository.addEntityRecord(datasetId, WebformUtils.parseEntityTables(tables, entityId, rootPkFieldId)),
+  addEntityRecord: async (datasetId, tables, entityId, rootPkFieldId, autoIncrementFields) =>
+    await WebformRepository.addEntityRecord(
+      datasetId,
+      WebformUtils.parseEntityTables(tables, entityId, rootPkFieldId, autoIncrementFields)
+    ),
 
   create: async webformConfiguration => await WebformRepository.create(webformConfiguration),
 

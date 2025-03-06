@@ -154,6 +154,12 @@ export const EntitiesWebform = ({
     setIsAddingEntityRecord(true);
     /*Filters the Root table and the tables that have only foreign keys linked
     to the Root table primary key*/
+
+    const autoIncrementFields = tables
+      .map(table => table.elements.filter(element => element.autoIncrement).map(element => element.name))
+      .filter(table => !isEmpty(table))
+      .flat();
+
     const filteredTables = datasetSchema.tables.filter(
       table =>
         table.tableSchemaNotEmpty &&
@@ -171,7 +177,8 @@ export const EntitiesWebform = ({
         datasetId,
         filteredTables,
         generateEntityId(entitiesTableRecords),
-        rootPkFieldId
+        rootPkFieldId,
+        !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
       );
 
       onUpdateData();
