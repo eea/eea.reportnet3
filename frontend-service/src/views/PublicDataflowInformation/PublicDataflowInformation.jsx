@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useLocation,useParams } from 'react-router-dom';
 
 import ReactTooltip from 'react-tooltip';
 
@@ -46,7 +46,9 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 export const PublicDataflowInformation = () => {
   const navigate = useNavigate();
   const { dataflowId } = useParams();
-  const { categorized } = useParams();
+
+  const location = useLocation();
+  const categorized = location.state;
 
   const baseRod3Url = 'https://rod.eionet.europa.eu';
 
