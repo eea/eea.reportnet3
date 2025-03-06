@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import {useNavigate, useSearchParams} from 'react-router-dom';
+import {useNavigate,useSearchParams} from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
 import isEmpty from 'lodash/isEmpty';
@@ -213,9 +213,9 @@ export const PublicDataflows = () => {
   };
 
   const onOpenDataflow = (dataflowId, newTab) => {
-    const url = getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId,categorized }, true);
+    const url = getUrl(routes.PUBLIC_DATAFLOW_INFORMATION, { dataflowId }, true);
     if (!newTab) {
-      return navigate(url);
+      return navigate(url,{ state: categorized });
     } else {
       window.open(url, '_blank');
     }
