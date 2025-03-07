@@ -1,15 +1,19 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import uniqueId from 'lodash/uniqueId';
 
+import { config } from 'conf';
+
 import styles from './EntitiesWebform.module.scss';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 
 import { Button } from 'views/_components/Button';
+import { ConfirmDialog } from 'views/_components/ConfirmDialog';
+import { InputText } from 'views/_components/InputText';
 import { TableManagement } from './_components/TableManagement';
 import { WebformView } from './_components/WebformView';
 
@@ -53,13 +57,16 @@ export const EntitiesWebform = ({
   const [entitiesWebformState, entitiesWebformDispatch] = useReducer(entitiesWebformReducer, {
     data: [],
     hasErrors: true,
+    isAddEntityIdDialogVisible: false,
     isAddingGroupRecord: false,
     isAddingEntityRecord: false,
     isDataUpdated: false,
+    isDuplicatePkDialogVisible: false,
     isLoading: true,
     isRefresh: false,
     entitiesRecords: [],
     selectedTable: { fieldSchemaId: null, rootTableId: null, recordId: null, tableName: null },
+    rootPkInput: '',
     selectedTableName: null,
     selectedTableSchemaId: null,
     tableList: { single: [] },
@@ -67,6 +74,8 @@ export const EntitiesWebform = ({
   });
   const { isDataUpdated, isLoading, entitiesRecords, selectedTable, selectedTableName, tableList, view } =
     entitiesWebformState;
+
+  const addEntityInputRef = useRef(null);
 
   useEffect(() => initialLoad(), [tables]);
 
@@ -103,10 +112,35 @@ export const EntitiesWebform = ({
       });
   }, [isDataUpdated]);
 
+  const checkInvalidCharacters = () => {
+    const invalidCharsRegex = new RegExp(/^[^a-zA-Z0-9_-]|[^a-zA-Z0-9_-]/);
+    return isEmpty(entitiesWebformState.rootPkInput) ? true : invalidCharsRegex.test(entitiesWebformState.rootPkInput);
+  };
+
+  const checkDuplicatePk = () => {
+    const entityPkValuesList = entitiesWebformState.entitiesRecords
+      .map(entityRecord =>
+        entityRecord.elements
+          .filter(element => element.fieldSchema === rootPkFieldId || element.fieldSchemaId === rootPkFieldId)
+          .map(element => element.value)
+      )
+      .filter(entityRecord => !isEmpty(entityRecord))
+      .flat();
+
+    return entityPkValuesList.some(entityPk => entityPk === entitiesWebformState.rootPkInput);
+  };
+
   const initialLoad = () => {
     entitiesWebformDispatch({
       type: 'INITIAL_LOAD',
       payload: { data: onLoadData() }
+    });
+  };
+
+  const manageDialogs = (dialog, value) => {
+    entitiesWebformDispatch({
+      type: 'MANAGE_DIALOGS',
+      payload: { dialog, value, rootPkInput: '' }
     });
   };
 
@@ -150,15 +184,16 @@ export const EntitiesWebform = ({
     return [];
   };
 
-  const onAddEntitiesRecord = async () => {
+  const onAddEntitiesRecord = async manualRootPk => {
     setIsAddingEntityRecord(true);
-    /*Filters the Root table and the tables that have only foreign keys linked
-    to the Root table primary key*/
 
     const autoIncrementFields = tables
       .map(table => table.elements.filter(element => element.autoIncrement).map(element => element.name))
       .filter(table => !isEmpty(table))
       .flat();
+
+    /*Filters the Root table and the tables that have only foreign keys linked
+    to the Root table primary key*/
 
     const filteredTables = datasetSchema.tables.filter(
       table =>
@@ -176,12 +211,13 @@ export const EntitiesWebform = ({
       await WebformService.addEntityRecord(
         datasetId,
         filteredTables,
-        generateEntityId(entitiesTableRecords),
+        manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
         rootPkFieldId,
         !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
       );
 
       onUpdateData();
+      setIsAddingEntityRecord(false);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -228,6 +264,9 @@ export const EntitiesWebform = ({
       }
     }
   };
+
+  const onAddEntityInputChange = value =>
+    entitiesWebformDispatch({ type: 'ON_ADD_ENTITY_INPUT_CHANGE', payload: { rootPkInput: value } });
 
   const onLoadData = () => {
     if (!isEmpty(datasetSchema)) {
@@ -426,6 +465,52 @@ export const EntitiesWebform = ({
         <strong> {resourcesContext.messages['webformEntitiesTitle']}</strong>
       </h2>
       {children}
+      {entitiesWebformState.isAddEntityIdDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-primary'}
+          disabledConfirm={checkInvalidCharacters() || entitiesWebformState.isAddingEntityRecord}
+          header={resourcesContext.messages['addEntityId']}
+          iconConfirm={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
+          labelConfirm={resourcesContext.messages['addEntity']}
+          onConfirm={() =>
+            checkDuplicatePk()
+              ? manageDialogs('isDuplicatePkDialogVisible', true)
+              : !checkInvalidCharacters() && onAddEntitiesRecord(true)
+          }
+          onHide={() => manageDialogs('isAddEntityIdDialogVisible', false)}
+          showCancelButton={false}
+          visible={entitiesWebformState.isAddEntityIdDialogVisible}>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['addEntityIdMessage'])
+            }}></p>
+          <InputText
+            autoFocus={true}
+            className={styles.inputText}
+            id={'addEntity'}
+            maxLength={config.INPUT_MAX_LENGTH}
+            onChange={event => onAddEntityInputChange(event.target.value)}
+            ref={addEntityInputRef}
+            value={entitiesWebformState.rootPkInput}
+          />
+        </ConfirmDialog>
+      )}
+      {entitiesWebformState.isDuplicatePkDialogVisible && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-primary'}
+          disabledCancel={true}
+          header={resourcesContext.messages['duplicateEntityId']}
+          labelConfirm={resourcesContext.messages['ok']}
+          onConfirm={() => manageDialogs('isDuplicatePkDialogVisible', false)}
+          onHide={() => manageDialogs('isDuplicatePkDialogVisible', false)}
+          showCancelButton={false}
+          visible={entitiesWebformState.isDuplicatePkDialogVisible}>
+          <p
+            dangerouslySetInnerHTML={{
+              __html: TextUtils.parseText(resourcesContext.messages['duplicateEntityIdMessage'])
+            }}></p>
+        </ConfirmDialog>
+      )}
     </Fragment>
   );
 
@@ -468,7 +553,17 @@ export const EntitiesWebform = ({
                 disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
                 icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
                 label={resourcesContext.messages['addEntity']}
-                onClick={() => onAddEntitiesRecord(list)}
+                onClick={() => {
+                  const manualRootId = tables
+                    .filter(table => table?.isRootTable === true)[0]
+                    .elements.some(element => element?.autoIncrement === false && element?.isPrimary === true);
+
+                  if (manualRootId) {
+                    manageDialogs('isAddEntityIdDialogVisible', true);
+                  } else {
+                    onAddEntitiesRecord();
+                  }
+                }}
               />
             </div>
           </li>
