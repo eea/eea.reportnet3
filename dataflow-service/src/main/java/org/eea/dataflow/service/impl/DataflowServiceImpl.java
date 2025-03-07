@@ -964,7 +964,7 @@ public class DataflowServiceImpl implements DataflowService {
         );
         // SET REPRESENTATIVES
         dataflowVO.setRepresentatives(
-                representativeService.getRepresetativesByIdDataFlow(dataflowVO.getId())
+                representativeService.getRepresetativesByIdDataFlowAndCountryCode(dataflowVO.getId(), countryCode)
         );
         // SET OBLIGATIONS
         for (ObligationVO obligation : obligations) {

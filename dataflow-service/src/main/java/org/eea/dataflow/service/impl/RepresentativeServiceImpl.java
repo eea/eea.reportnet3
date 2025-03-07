@@ -323,6 +323,22 @@ public class RepresentativeServiceImpl implements RepresentativeService {
         .entityListToClass(representativeRepository.findAllByDataflow_Id(dataflowId));
   }
 
+  /**
+   * Gets the represetatives by id data flow and country code.
+   *
+   * @param dataflowId the dataflow id
+   * @return the represetatives by id data flow
+   * @throws EEAException the EEA exception
+   */
+  @Override
+  public List<RepresentativeVO> getRepresetativesByIdDataFlowAndCountryCode(Long dataflowId, String countryCode) throws EEAException {
+    if (dataflowId == null) {
+      throw new EEAException(EEAErrorMessage.DATAFLOW_NOTFOUND);
+    }
+    LOG.info("Obtaining the representatives for the dataflow: {}, country code: {}", dataflowId, countryCode);
+    return representativeMapper
+        .entityListToClass(representativeRepository.findAllByDataflowIdAndCountryCode(dataflowId, countryCode));
+  }
 
   /**
    * Find all data providers

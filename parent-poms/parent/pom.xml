@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.4-TEST</api-gateway.version>
-      <communication.version>v3.4-TEST</communication.version>
-      <collaboration.version>v3.4-TEST</collaboration.version>
-      <dataflow.version>v3.4-TEST</dataflow.version>
-      <dataset.version>v3.4-TEST</dataset.version>
-      <document.version>v3.4-TEST</document.version>
-      <frontend.version>v3.4-TEST</frontend.version>
-      <indexsearch.version>v3.4-TEST</indexsearch.version>
-      <inspire.version>v3.4-TEST</inspire.version>
-      <recordstore.version>v3.4-TEST</recordstore.version>
-      <ums.version>v3.4-TEST</ums.version>
-      <validation.version>v3.4-TEST</validation.version>
-      <common-interfaces.version>v3.4-TEST</common-interfaces.version>
-      <common-utitlities.version>v3.4-TEST</common-utitlities.version>
-      <rod.version>v3.4-TEST</rod.version>
-      <orchestrator.version>v3.4-TEST</orchestrator.version>
+      <api-gateway.version>v3.4-FIX-REPRESENTATIVE-FILTERING</api-gateway.version>
+      <communication.version>v3.4-FIX-REPRESENTATIVE-FILTERING</communication.version>
+      <collaboration.version>v3.4-FIX-REPRESENTATIVE-FILTERING</collaboration.version>
+      <dataflow.version>v3.4-FIX-REPRESENTATIVE-FILTERING</dataflow.version>
+      <dataset.version>v3.4-FIX-REPRESENTATIVE-FILTERING</dataset.version>
+      <document.version>v3.4-FIX-REPRESENTATIVE-FILTERING</document.version>
+      <frontend.version>v3.4-FIX-REPRESENTATIVE-FILTERING</frontend.version>
+      <indexsearch.version>v3.4-FIX-REPRESENTATIVE-FILTERING</indexsearch.version>
+      <inspire.version>v3.4-FIX-REPRESENTATIVE-FILTERING</inspire.version>
+      <recordstore.version>v3.4-FIX-REPRESENTATIVE-FILTERING</recordstore.version>
+      <ums.version>v3.4-FIX-REPRESENTATIVE-FILTERING</ums.version>
+      <validation.version>v3.4-FIX-REPRESENTATIVE-FILTERING</validation.version>
+      <common-interfaces.version>v3.4-FIX-REPRESENTATIVE-FILTERING</common-interfaces.version>
+      <common-utitlities.version>v3.4-FIX-REPRESENTATIVE-FILTERING</common-utitlities.version>
+      <rod.version>v3.4-FIX-REPRESENTATIVE-FILTERING</rod.version>
+      <orchestrator.version>v3.4-FIX-REPRESENTATIVE-FILTERING</orchestrator.version>
   </properties>
 </project>
