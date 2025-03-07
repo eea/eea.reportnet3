@@ -11,7 +11,8 @@ export const DatasetConfig = {
   createRecordDesign: '/dataschema/{:datasetId}/fieldSchema',
   createTableDesign: '/dataschema/{:datasetId}/tableSchema',
   getIsIcebergTableCreated: '/dataset/isIcebergTableCreated/{:datasetId}/{:tableSchemaId}',
-  getAlignmentBetween:'/dataset/getReleasedDatasetDataInfo?collectionDatasetId={:datasetId}&providerCode={:selectedRepresentativesCode}&tableSchemaId={:selectedTable}',
+  getAlignmentBetween:
+    '/dataset/getReleasedDatasetDataInfo?collectionDatasetId={:datasetId}&providerCode={:selectedRepresentativesCode}&tableSchemaId={:selectedTable}',
   getIsAvailableForManualEditing: '/dataset/getAvailableForManualEditingTables/{:datasetId}',
   getIsEdited: '/dataset/tablesUpdated/?datasetId={:datasetId}',
   getSchema: '/dataschema/v1/datasetId/{:datasetId}',
@@ -87,6 +88,8 @@ export const DatasetConfig = {
   updateFieldDesign: '/dataschema/{:datasetId}/fieldSchema',
   updateReferenceDatasetStatus: '/referenceDataset/{:datasetId}?updatable={:updatable}',
   updateField:
+    '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
+  updateConditionalFieldsWebform:
     '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
