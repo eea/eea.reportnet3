@@ -4,6 +4,7 @@
 package org.eea.recordstore.service;
 
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.validation.TaskVO;
@@ -276,4 +277,12 @@ public interface RecordStoreService {
    * @return
    */
   List<String> getLatestReleaseSnapshots(Long datasetId, Long dataflowId);
+
+  /**
+   * Count records of materialized view and compare them to record_value count for the tables
+   * @param dataset
+   * @param jobId
+   * @return
+   */
+  Boolean recordValueCountMatchesMatViewCount(DataSetMetabaseVO dataset, Long jobId);
 }

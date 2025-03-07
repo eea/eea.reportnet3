@@ -28,9 +28,11 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.metabase.TaskType;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -62,6 +64,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -3227,6 +3231,36 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       releaseFiles.add(String.format(FILE_PATTERN_NAME, snapshotId, LiteralConstants.SNAPSHOT_FILE_TABLE_SUFFIX));
     }
     return releaseFiles;
+  }
+
+  @Override
+  public Boolean recordValueCountMatchesMatViewCount(DataSetMetabaseVO dataset, Long jobId){
+    List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaController.getTableSchemasIds(dataset.getId(), dataset.getDataflowId(), dataset.getDataProviderId());
+    String materializedViewSelectQuery = "select matviewname from pg_matviews  where schemaname = 'dataset_" + dataset.getId() + "'";
+    List<String> materializedViewList = jdbcTemplate.queryForList(materializedViewSelectQuery, String.class);
+    for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
+      if(materializedViewList.stream().anyMatch(tableSchemaIdNameVO.getNameTableSchema()::equalsIgnoreCase)){
+        Integer numberOfRecordValues = getNumberOfRecordsInTable(dataset.getId(), tableSchemaIdNameVO.getIdTableSchema());
+        String materializedViewRecordCount = "select count(*) from dataset_" + dataset.getId() + "." + tableSchemaIdNameVO.getNameTableSchema();
+        Integer numberOfMaterializedViewRecords = jdbcTemplate.queryForObject(materializedViewRecordCount, Integer.class);
+        if(numberOfRecordValues.intValue() != numberOfMaterializedViewRecords.intValue()){
+          LOG.error("For datasetId {} table {} and jobId {} the materialized views are not updated. numberOfRecordValues={} numberOfMaterializedViewRecords={} Canceling job.", dataset.getId(), tableSchemaIdNameVO.getNameTableSchema(), jobId, numberOfRecordValues, numberOfMaterializedViewRecords);
+          return false;
+        }
+      }
+      else{
+        LOG.error("For datasetId {} table {} and jobId {} the materialized view does not exist. Canceling job.", dataset.getId(), tableSchemaIdNameVO.getNameTableSchema(), jobId);
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private Integer getNumberOfRecordsInTable(Long datasetId, String tableSchemaId){
+    String recordCount = "select count(*) from dataset_" + datasetId + ".record_value rv inner join dataset_" + datasetId + ".table_value tv on "
+            + " rv.id_table = tv.id and tv.id_table_schema = '" + tableSchemaId + "' and tv.dataset_id=" + datasetId;
+    Integer numberOfRecordsInRecordValue = jdbcTemplate.queryForObject(recordCount, Integer.class);
+    return numberOfRecordsInRecordValue;
   }
 
   /**

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
@@ -20,6 +21,7 @@ import org.eea.interfaces.controller.dataset.ReferenceDatasetController.Referenc
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -73,7 +75,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -198,10 +199,7 @@ public class ValidationHelper implements DisposableBean {
   private DremioHelperService dremioHelperService;
 
   @Autowired
-  private DatasetSchemaControllerZuul datasetSchemaController;
-
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /**
    * Instantiates a new validation helper.
@@ -332,7 +330,8 @@ public class ValidationHelper implements DisposableBean {
 
       LOG.info("In executeValidation for datasetId {} and processId {} updateViews is {} and hasSqlEnabled is {}", datasetId, processId, updateViews, hasSqlEnabled);
       if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
-        executeValidationProcess(dataset, processId);
+        //if updateViews is false it means that the materialized views have already been updated, so we must compare the number of records
+        executeValidationProcess(dataset, processId, !updateViews);
       } else {
         deleteLockToReleaseProcess(datasetId);
         Map<String, Object> values = new HashMap<>();
@@ -591,29 +590,25 @@ public class ValidationHelper implements DisposableBean {
    * @param processId the process id
    */
   @SneakyThrows
-  public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId) {
-    //check materialized view record count and compare it to record_value
-    Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-    List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaController.getTableSchemasIds(dataset.getId(), dataset.getDataflowId(), dataset.getDataProviderId());
-    String materializedViewSelectQuery = "select matviewname from pg_matviews  where schemaname = 'dataset_" + dataset.getId() + "'";
-    List<String> materializedViewList = jdbcTemplate.queryForList(materializedViewSelectQuery, String.class);
-    for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
-      if(materializedViewList.contains(tableSchemaIdNameVO.getNameTableSchema())){
-        Integer numberOfRecordValues = validationService.getNumberOfRecordsInTable(dataset.getId(), tableSchemaIdNameVO.getIdTableSchema());
-        String materializedViewRecordCount = "select count(*) from dataset_" + dataset.getId() + "." + tableSchemaIdNameVO.getNameTableSchema();
-        Integer numberOfMaterializedViewRecords = jdbcTemplate.queryForObject(materializedViewRecordCount, Integer.class);
-        if(numberOfRecordValues != numberOfMaterializedViewRecords){
-          LOG.error("For datasetId {} table {} and jobId {} the materialized views are not updated. numberOfRecordValues={} numberOfMaterializedViewRecords={} Canceling job.", dataset.getId(), tableSchemaIdNameVO.getNameTableSchema(), jobId, numberOfRecordValues, numberOfMaterializedViewRecords);
-          jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
-          return;
-        }
+  public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId, Boolean compareRecordsToMaterializedViews) {
+    if(compareRecordsToMaterializedViews) {
+      //check materialized view record count and compare it to record_value
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      Boolean recordCountIsCorrect;
+      try {
+        recordCountIsCorrect = recordStoreControllerZuul.recordValueCountMatchesMatViewCount(dataset, jobId);
+      } catch (Exception e) {
+        LOG.error("There was an error during materialized view record comparison for jobId {} and datasetId {} Error:", jobId, dataset.getId(), e.getMessage());
+        jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
+        return;
       }
-      else{
-        LOG.error("For datasetId {} table {} and jobId {} the materialized view does not exist. Canceling job.", dataset.getId(), tableSchemaIdNameVO.getNameTableSchema(), jobId);
+      if (!BooleanUtils.isTrue(recordCountIsCorrect)) {
         jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
         return;
       }
     }
+
+
 
     // Initialize process as coordinator
     RulesSchema rules =
