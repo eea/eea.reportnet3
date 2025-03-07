@@ -26,7 +26,7 @@ export const routes = {
   PUBLIC_COUNTRY_INFORMATION_ID: '/public/countries/:countryCode',
   PUBLIC_COUNTRY_INFORMATION: '/public/country/:countryCode',
   PUBLIC_DATAFLOW_INFORMATION_ID: '/public/dataflows/:dataflowId',
-  PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId/:categorized',
+  PUBLIC_DATAFLOW_INFORMATION: '/public/dataflow/:dataflowId',
   PUBLIC_DATAFLOWS: '/public/dataflows',
   REFERENCE_DATAFLOW: '/referenceDataflow/:referenceDataflowId',
   REFERENCE_DATASET_SCHEMA: '/referenceDataflow/:dataflowId/datasetSchema/:datasetId',
