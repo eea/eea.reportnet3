@@ -806,6 +806,31 @@ export const DatasetService = {
     return await DatasetRepository.updateField(datasetId, recordId, tableSchemaId, datasetTableField, updateInCascade);
   },
 
+  updateConditionalFieldsWebform: async (datasetId, fields, recordId, tableSchemaId) => {
+    const datasetTableFields = fields.map(field => {
+      const datasetTableField = new DatasetTableField({});
+
+      datasetTableField.id = field?.fieldId;
+      datasetTableField.idFieldSchema = field?.fieldSchemaId;
+      datasetTableField.name = field?.name;
+      datasetTableField.type = field?.fieldType;
+      datasetTableField.value = DatasetUtils.parseValue({
+        type: field?.fieldType,
+        value: field?.value,
+        splitSRID: true
+      });
+      return datasetTableField;
+    });
+
+    return await DatasetRepository.updateConditionalFieldsWebform(
+      datasetId,
+      recordId,
+      tableSchemaId,
+      datasetTableFields,
+      false
+    );
+  },
+
   updateFieldWebform: async (datasetId, field, value, tableSchemaId) => {
     const datasetTableField = new DatasetTableField({});
 

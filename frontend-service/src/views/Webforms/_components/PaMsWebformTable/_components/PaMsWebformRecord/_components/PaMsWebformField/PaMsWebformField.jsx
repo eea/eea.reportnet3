@@ -167,6 +167,7 @@ export const PaMsWebformField = ({
       const conditionalField = record.elements.find(
         el => el.fieldSchemaId === element.referencedField.masterConditionalFieldId
       );
+
       queryClient
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
@@ -233,6 +234,25 @@ export const PaMsWebformField = ({
   };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+    let conditionalFields;
+    let parsedValues;
+
+    if (isConditional && field.fieldType === 'LINK') {
+      conditionalFields = record.elements.map(element =>
+        !(element.fieldSchema === option || element.fieldSchemaId === option)
+          ? { ...element, value: '' }
+          : { ...element, value: value }
+      );
+
+      parsedValues = conditionalFields.map(conditionalField =>
+        conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
+        ((conditionalField.fieldType === 'LINK' || conditionalField.fieldType === 'EXTERNAL_LINK') &&
+          Array.isArray(conditionalField.value))
+          ? conditionalField.value.join(';')
+          : conditionalField.value
+      );
+    }
+
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' ||
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
@@ -241,12 +261,21 @@ export const PaMsWebformField = ({
 
     try {
       if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
-        await DatasetService.updateFieldWebform(
-          datasetId,
-          field,
-          parsedValue,
-          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
-        );
+        if (!isNil(conditionalFields) && !isNil(parsedValues)) {
+          await DatasetService.updateConditionalFieldsWebform(
+            datasetId,
+            conditionalFields,
+            record.recordId,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        } else {
+          await DatasetService.updateFieldWebform(
+            datasetId,
+            field,
+            parsedValue,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        }
 
         if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
