@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
@@ -14,10 +16,12 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
+import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
@@ -25,12 +29,14 @@ import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.lock.enums.LockType;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -192,6 +198,8 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private DremioHelperService dremioHelperService;
 
+  @Autowired
+  private RecordStoreControllerZuul recordStoreControllerZuul;
 
   /**
    * Instantiates a new validation helper.
@@ -322,7 +330,8 @@ public class ValidationHelper implements DisposableBean {
 
       LOG.info("In executeValidation for datasetId {} and processId {} updateViews is {} and hasSqlEnabled is {}", datasetId, processId, updateViews, hasSqlEnabled);
       if (Boolean.FALSE.equals(updateViews) || Boolean.FALSE.equals(hasSqlEnabled)) {
-        executeValidationProcess(dataset, processId);
+        //if updateViews is false it means that the materialized views have already been updated, so we must compare the number of records
+        executeValidationProcess(dataset, processId, !updateViews);
       } else {
         deleteLockToReleaseProcess(datasetId);
         Map<String, Object> values = new HashMap<>();
@@ -391,6 +400,12 @@ public class ValidationHelper implements DisposableBean {
         value.put("datasetSchema", dataset.getDatasetSchema());
         value.put("ruleId", rule.getRuleId().toString());
         value.put("ruleCode", rule.getShortCode());
+        if(rule.getThenCondition() != null && rule.getThenCondition().size() > 1){
+          value.put("ruleLevelError", rule.getThenCondition().get(1));
+        }
+        else{
+          value.put("ruleLevelError", null);
+        }
         value.put("tableName", tableSchema.getNameTableSchema());
         value.put("tableSchemaId", tableSchema.getIdTableSchema().toString());
         value.put("bigData", "true");
@@ -577,7 +592,27 @@ public class ValidationHelper implements DisposableBean {
    * @param dataset the dataset metabase object
    * @param processId the process id
    */
-  public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId) {
+  @SneakyThrows
+  public void executeValidationProcess(final DataSetMetabaseVO dataset, String processId, Boolean compareRecordsToMaterializedViews) {
+    if(compareRecordsToMaterializedViews) {
+      //check materialized view record count and compare it to record_value
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      Boolean recordCountIsCorrect;
+      try {
+        recordCountIsCorrect = recordStoreControllerZuul.recordValueCountMatchesMatViewCount(dataset, jobId);
+      } catch (Exception e) {
+        LOG.error("There was an error during materialized view record comparison for jobId {} and datasetId {} Error:", jobId, dataset.getId(), e.getMessage());
+        jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
+        return;
+      }
+      if (!BooleanUtils.isTrue(recordCountIsCorrect)) {
+        jobControllerZuul.cancelJob(jobId, dataset.getDataflowId(), dataset.getId(), JobInfoEnum.ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT, true);
+        return;
+      }
+    }
+
+
+
     // Initialize process as coordinator
     RulesSchema rules =
         rulesRepository.findByIdDatasetSchema(new ObjectId(dataset.getDatasetSchema()));
@@ -926,6 +961,15 @@ public class ValidationHelper implements DisposableBean {
     value.put("dataProviderId", dataset.getDataProviderId());
     value.put("datasetSchema", dataset.getDatasetSchema());
     value.put("sqlRule", sqlRule != null ? sqlRule.getRuleId().toString() : null);
+    value.put("ruleCode", sqlRule != null ? sqlRule.getShortCode() : null);
+    if(sqlRule != null && sqlRule.getThenCondition() != null && sqlRule.getThenCondition().size() > 1){
+      value.put("ruleLevelError", sqlRule.getThenCondition().get(1));
+    }
+    else{
+      value.put("ruleLevelError", null);
+    }
+
+
     addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_TABLE, value);
   }
 

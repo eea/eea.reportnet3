@@ -638,9 +638,10 @@ public class JobControllerImpl implements JobController {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN') OR secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') OR secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
     @PutMapping(value = "/cancelJob/{jobId}")
-    public void cancelJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "dataflowId") Long dataflowId, @RequestParam(value = "datasetId") Long datasetId) throws Exception {
+    public void cancelJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "dataflowId") Long dataflowId, @RequestParam(value = "datasetId") Long datasetId,
+                          @RequestParam(value="jobInfo", required = false) JobInfoEnum jobInfo, @RequestParam(value="jobShouldFail", required = false) Boolean jobShouldFail) throws Exception {
         try {
-            jobService.cancelJob(jobId);
+            jobService.cancelJob(jobId, jobInfo, jobShouldFail);
         } catch (Exception e) {
             LOG.error("Error while cancelling job with id {}, error is {}", jobId, e.getMessage());
             throw e;

@@ -13,6 +13,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
@@ -771,6 +772,18 @@ public class RecordStoreControllerImpl implements RecordStoreController {
       IOUtils.copyLarge(in, out);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error downloading file {}. Message: {}", fileName, e.getMessage());
+      throw e;
+    }
+  }
+
+  @Override
+  @PostMapping(value = "/private/recordCountMatViewComparison")
+  public Boolean recordValueCountMatchesMatViewCount(@RequestBody DataSetMetabaseVO dataset, @RequestParam("jobId") Long jobId){
+    try{
+      return recordStoreService.recordValueCountMatchesMatViewCount(dataset, jobId);
+    }
+    catch (Exception e){
+      LOG.error("Unexpected error! Could not compare record value with materialized view for jobId {} and datasetId {}", jobId, dataset.getId(), e.getMessage());
       throw e;
     }
   }
