@@ -3,6 +3,16 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
     case 'INITIAL_LOAD':
       return { ...state, ...payload };
 
+    case 'MANAGE_DIALOGS':
+      return {
+        ...state,
+        [payload.dialog]: payload.value,
+        rootPkInput: payload.rootPkInput
+      };
+
+    case 'ON_ADD_ENTITY_INPUT_CHANGE':
+      return { ...state, rootPkInput: payload.rootPkInput };
+
     case 'ON_TOGGLE_VIEW':
       return { ...state, view: payload.view };
 
@@ -40,7 +50,7 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
       return { ...state, isLoading: payload.value };
 
     case 'SET_IS_ADDING_ENTITY_RECORD':
-      return { ...state, isAddingEntityRecord: payload.value };
+      return { ...state, isAddingEntityRecord: payload.value, isAddEntityIdDialogVisible: payload.value };
 
     case 'ON_REFRESH':
       return { ...state, isRefresh: payload.value };

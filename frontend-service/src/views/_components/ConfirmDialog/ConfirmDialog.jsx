@@ -28,6 +28,7 @@ export const ConfirmDialog = forwardRef((props, _) => {
     labelConfirm,
     onConfirm,
     onHide,
+    showCancelButton = true,
     visible
   } = props;
 
@@ -59,14 +60,18 @@ export const ConfirmDialog = forwardRef((props, _) => {
           {confirmTooltip}
         </ReactTooltip>
       )}
-      <Button
-        className={`${!isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary p-button-animated-blink'}`}
-        disabled={disabledCancel}
-        icon={iconCancel ? iconCancel : 'cancel'}
-        label={labelCancel}
-        onClick={onHide}
-        style={{ marginRight: '0' }}
-      />
+      {showCancelButton && (
+        <Button
+          className={`${
+            !isUndefined(classNameCancel) ? classNameCancel : 'p-button-secondary p-button-animated-blink'
+          }`}
+          disabled={disabledCancel}
+          icon={iconCancel ? iconCancel : 'cancel'}
+          label={labelCancel}
+          onClick={onHide}
+          style={{ marginRight: '0' }}
+        />
+      )}
     </div>
   );
 
