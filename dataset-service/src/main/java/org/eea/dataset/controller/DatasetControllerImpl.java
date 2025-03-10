@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.mapper.DataSetMetabaseMapperImpl;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -15,6 +16,7 @@ import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
+import org.eea.dataset.service.impl.ReferenceDatasetServiceImpl;
 import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -104,6 +106,14 @@ public class DatasetControllerImpl implements DatasetController {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  /** The Reference dataset service. */
+  @Autowired
+  private ReferenceDatasetServiceImpl referenceDatasetServiceImpl;
+
+  /** The dataset Metabase Mapper. */
+  @Autowired
+  private DataSetMetabaseMapperImpl dataSetMetabaseMapperImpl;
+
   /** The file treatment helper. */
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
@@ -119,7 +129,6 @@ public class DatasetControllerImpl implements DatasetController {
   /** The job controller zuul */
   @Autowired
   private JobControllerZuul jobControllerZuul;
-
 
   /** The dataflow controller zuul */
   @Autowired
@@ -2787,11 +2796,27 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @PreAuthorize("hasAnyRole('ADMIN')")
   @PostMapping("/createPublicFiles")
-  public void createPublicFiles(@RequestParam(value = "dataflowId", required=true) Long dataflowId, @RequestParam(value = "providerId", required=true) Long providerId){
+  public void createPublicFiles(@RequestParam(value = "dataflowId", required=true) Long dataflowId, @RequestParam(value = "providerId", required=false) Long providerId
+          , @RequestParam(value = "createReferenceDataset", required=false) Boolean createReferenceDataset){
     DataFlowVO dataflowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if (dataflowVO.isShowPublicInfo()) {
       try {
-        fileTreatmentHelper.savePublicFiles(dataflowId, providerId);
+        if(providerId!=null) {
+          fileTreatmentHelper.savePublicFiles(dataflowId, providerId);
+        }
+
+        if (Boolean.TRUE.equals(createReferenceDataset)) {
+          List<ReferenceDatasetVO> referenceDatasets = referenceDatasetServiceImpl.getReferenceDatasetByDataflowId(dataflowId);
+
+          for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+            DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(referenceDataset.getDatasetSchema());
+
+            if (schema != null && schema.getReferenceDataset() != null
+                    && Boolean.TRUE.equals(schema.getReferenceDataset())) {
+              fileTreatmentHelper.createReferenceDatasetFiles(dataSetMetabaseMapperImpl.classToEntity(datasetMetabaseService.findDatasetMetabase(referenceDataset.getId())));
+            }
+          }
+        }
         LOG.info("Successfully created public files for for dataflow {} with dataprovider {}", dataflowId, providerId);
       } catch (Exception e) {
         LOG.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}", dataflowId, providerId, e);
