@@ -19,7 +19,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.ReferenceDatasetController.ReferenceDatasetControllerZuul;
-import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController;
@@ -157,9 +156,6 @@ public class ValidationHelperTest {
   @Mock
   private RecordStoreController.RecordStoreControllerZuul recordStoreControllerZuul;
 
-  @Mock
-  private JobController.JobControllerZuul jobControllerZuul;
-
   /**
    * Inits the mocks.
    */
@@ -288,7 +284,6 @@ public class ValidationHelperTest {
 
     Mockito.when(jobProcessControllerZuul.findJobIdByProcessId("1")).thenReturn(1L);
     Mockito.when(recordStoreControllerZuul.recordValueCountMatchesMatViewCount(any(), any())).thenReturn(true);
-    Mockito.doNothing().when(jobControllerZuul).cancelJob(any(), any(), any(),any(), any());
 
     validationHelper.executeValidation(1l, "1", false, false);
     Mockito.verify(validationService, Mockito.times(1)).deleteAllValidation(Mockito.eq(1l));
