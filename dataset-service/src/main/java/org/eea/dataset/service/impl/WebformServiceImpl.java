@@ -295,7 +295,7 @@ public class WebformServiceImpl implements WebformService {
       WebformMetabase webformMetabase = webformRepository.findByLabel(webFormName);
       WebformConfigHistory history = getWebFormConfigHistory(webformMetabase, version);
       if (history == null) {
-        message = "The webform config with name: " + webFormName + " and version: " + version + " does not exist";
+        message = "The webform config history with name: " + webFormName + " and version: " + version + " does not exist";
         status = HttpStatus.BAD_REQUEST;
         LOG.error(message);
         return new ResponseEntity<>(message, status);
