@@ -90,7 +90,7 @@ export const DatasetConfig = {
   updateField:
     '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateConditionalFieldsWebform:
-    '/dataset/{:datasetId}/updateField?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
+    '/dataset/{:datasetId}/updateWebformFields?updateCascadePK={:updateInCascade}&recordId={:recordId}&tableSchemaId={:tableSchemaId}',
   updateRecord: '/dataset/{:datasetId}/updateRecord?updateCascadePK={:updateInCascade}&tableSchemaId={:tableSchemaId}',
   updateTableDesign: '/dataschema/{:datasetId}/tableSchema',
   validate: '/orchestrator/jobs/addValidationJob/{:datasetId}',
