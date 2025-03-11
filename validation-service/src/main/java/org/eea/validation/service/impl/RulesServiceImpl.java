@@ -1696,7 +1696,7 @@ public class RulesServiceImpl implements RulesService {
       for (Iterator<Rule> iterator = ruleSchema.getRules().iterator(); iterator.hasNext(); ) {
         Rule rule = iterator.next();
 
-        if (shouldDeleteRule(rule)) {
+        if (Boolean.TRUE.equals(dataFlowVO.getBigData()) && shouldDeleteRule(rule)) {
           iterator.remove();
         } else {
           List<IntegritySchema> integrities = integrityMapper.classListToEntity(integritiesVo);
