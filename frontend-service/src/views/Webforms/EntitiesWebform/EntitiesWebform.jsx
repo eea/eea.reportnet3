@@ -218,6 +218,7 @@ export const EntitiesWebform = ({
 
       onUpdateData();
       setIsAddingEntityRecord(false);
+      setIsAddEntityIdDialogVisible(false);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -236,6 +237,7 @@ export const EntitiesWebform = ({
         );
       }
       setIsAddingEntityRecord(false);
+      setIsAddEntityIdDialogVisible(false);
     }
   };
 
@@ -362,6 +364,9 @@ export const EntitiesWebform = ({
 
   const setIsAddingEntityRecord = value =>
     entitiesWebformDispatch({ type: 'SET_IS_ADDING_ENTITY_RECORD', payload: { value } });
+
+  const setIsAddEntityIdDialogVisible = value =>
+    entitiesWebformDispatch({ type: 'SET_IS_ADD_ENTITY_ID_DIALOG_VISIBLE', payload: { value } });
 
   const renderOverviewButton = () => {
     if (view !== 'details') {

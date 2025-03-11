@@ -50,7 +50,10 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
       return { ...state, isLoading: payload.value };
 
     case 'SET_IS_ADDING_ENTITY_RECORD':
-      return { ...state, isAddingEntityRecord: payload.value, isAddEntityIdDialogVisible: payload.value };
+      return { ...state, isAddingEntityRecord: payload.value };
+
+    case 'SET_IS_ADD_ENTITY_ID_DIALOG_VISIBLE':
+      return { ...state, isAddEntityIdDialogVisible: payload.value };
 
     case 'ON_REFRESH':
       return { ...state, isRefresh: payload.value };
