@@ -34,6 +34,7 @@ export const PaMsWebformTable = ({
   isLoadingIceberg,
   isRefresh,
   isReporting,
+  isTableWebform = false,
   onTabChange,
   onUpdatePamsValue,
   onUpdateSinglesList,
@@ -314,6 +315,7 @@ export const PaMsWebformTable = ({
       isFixedNumber={webformData.fixedNumber || webformData.tableSchemaFixedNumber || null}
       isGroup={isGroup}
       isReporting={isReporting}
+      isTableWebform={isTableWebform}
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
