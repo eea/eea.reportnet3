@@ -95,7 +95,6 @@
   .fieldsBlock {
     display: flex;
     justify-content: space-between;
-    max-width: 90%;
     .field {
       flex: auto;
       margin-left: 0.5rem;
@@ -116,23 +115,39 @@
     }
   }
 
+  .fieldLabel {
+    width: 622px;
+  }
+
   .field {
-    margin-bottom: 2rem;
+    margin: 2.5rem 0 1.25rem 0;
     color: var(--general-text-color);
+    text-align: right;
+
     :global .p-multiselect {
-      width: 100%;
+      margin-left: auto;
+      width: 40rem;
       padding: 0.2rem 0;
     }
     :global .p-dropdown {
-      width: 100%;
+      text-align: right;
+      margin-left: auto;
+      width: 40rem;
+    }
+    :global .p-calendar {
+      margin-left: auto;
+      width: 40rem;
     }
     :global .p-inputtext:not(.p-column-filter) {
+      width: 40rem;
+      margin-left: auto;
       padding: 1rem 0.5rem;
     }
     label {
       display: inline-block;
-      max-width: 75%;
-      margin-bottom: 0.5rem;
+      max-width: 80%;
+      margin-bottom: 0.6rem;
+      text-align: left;
     }
     .requiredMark {
       color: var(--errors);

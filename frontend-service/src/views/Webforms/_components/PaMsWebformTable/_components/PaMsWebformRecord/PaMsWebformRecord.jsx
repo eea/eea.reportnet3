@@ -236,7 +236,7 @@ export const PaMsWebformRecord = ({
 
         return (
           <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
-            {element.elementsRecords.map(record => renderElements(record.elements))}
+            {element.elementsRecords.map(record => renderElements(record.elements, true))}
           </div>
         );
       }
@@ -256,7 +256,7 @@ export const PaMsWebformRecord = ({
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
-                <label>
+                <label className={styles.fieldLabel}>
                   {element.title}
                   {<span className={styles.requiredMark}>{checkShowRequired(element, elements) ? ' *' : ''}</span>}
                 </label>
