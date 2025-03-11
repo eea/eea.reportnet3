@@ -518,7 +518,9 @@ public class JobServiceImpl implements JobService {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
             }
         }
-        updateJobInfo(jobId, jobInfo, null);
+        if(jobInfo != null) {
+            updateJobInfo(jobId, jobInfo, null);
+        }
         updateJobStatus(jobId, jobStatus);
         LOG.info("Updated job {} to status CANCELED_BY_ADMIN", jobId);
         Map<String, Object> value = new HashMap<>();
