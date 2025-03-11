@@ -141,6 +141,10 @@ public class JobForFmeStatusPolling {
                             //check for fme callback and if thirty minutes have passed since timeFinished fme parameter
                             Map<String, Object> insertedParameters = job.getParameters();
                             if(insertedParameters.get("fmeCallback") != null && (Boolean) insertedParameters.get("fmeCallback") == false){
+                                if(insertedParameters.get("integrationId") == null){
+                                    LOG.info("In pollingForFmeJobs: job with id {} has null integrationId so we do not need to poll for fme status", job.getId());
+                                    continue;
+                                }
                                 if (jsonResponse.get(JSON_TIME_FINISHED_PARAM) != null) {
                                     String timeFinished = (String) jsonResponse.get(JSON_TIME_FINISHED_PARAM);
                                     if(fmeJobExceededMaxDuration(timeFinished))
