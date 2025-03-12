@@ -256,14 +256,14 @@ export const PaMsWebformRecord = ({
           element.isVisible !== false &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
             <div
-              className={isTableWebform ? styles.tableField : styles.field}
+              className={isTableWebform && fieldsBlock ? styles.tableField : styles.field}
               key={element.fieldId || element.fieldSchemaId}
               style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
-                <label className={isTableWebform && styles.fieldLabel}>
+                <label className={isTableWebform && fieldsBlock && styles.fieldLabel}>
                   {element.title}
                   {<span className={styles.requiredMark}>{checkShowRequired(element, elements) ? ' *' : ''}</span>}
-                  {isTableWebform && element.tooltip && isNil(element.customType) && (
+                  {isTableWebform && fieldsBlock && element.tooltip && isNil(element.customType) && (
                     <Button
                       className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
                       icon="infoCircle"
