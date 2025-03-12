@@ -123,12 +123,20 @@
   }
 
   .tableFieldsBlock {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     .tableField {
       flex: auto;
       margin-left: 0.5rem;
       margin-right: 0.5rem;
+      width:100%!important;
+      text-align: left;
+      textarea{
+        margin-left:0!important;
+      }
+      .p-component{
+        width:100%!important;
+      }
       &:first-of-type {
         margin-left: 0;
       }
@@ -146,7 +154,7 @@
   }
 
   .fieldLabel {
-    width: 640px;
+    width: 100%;
   }
 
   .field {
@@ -255,20 +263,20 @@
 
     :global .p-multiselect {
       margin-left: auto;
-      width: 40rem;
+      width: 100%;
       padding: 0.2rem 0;
     }
     :global .p-dropdown {
       text-align: right;
       margin-left: auto;
-      width: 40rem;
+      width: 100%;
     }
     :global .p-calendar {
       margin-left: auto;
-      width: 40rem;
+      width: 100%;
     }
     :global .p-inputtext:not(.p-column-filter) {
-      width: 40rem;
+      width: 100%;
       margin-left: auto;
       padding: 1rem 0.5rem;
     }
