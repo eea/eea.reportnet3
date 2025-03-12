@@ -576,6 +576,13 @@ public class FileTreatmentHelper implements DisposableBean {
         LOG.info("Reference file created in dataflowId {} for datasetId {}", dataset.getDataflowId(), dataset.getId());
     }
 
+
+    @Async
+    public void createReferenceDatasetFilesDL(DataSetMetabaseVO dataset) throws EEAException {
+        generateDatasetZipDL(dataset, importPath + "/dataflow-" + dataset.getDataflowId());
+    }
+
+
     /**
      * Export file.
      *
@@ -1045,62 +1052,39 @@ public class FileTreatmentHelper implements DisposableBean {
 
     @Async
     public void exportDatasetFileDL(Long datasetId, String mimeType) throws Exception {
-        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-        List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
-        for(TableSchemaIdNameVO entry: tableSchemas){
-            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-                throw new Exception("Can not export table data because iceberg table is created");
-            }
-        }
         try {
             String[] type = mimeType.split(" ");
-            String extension = "";
-            boolean isZip = false;
-            if (type.length > 1) {
-                extension = type[1];
-                isZip = true;
-            } else {
-                extension = type[0];
-            }
+
+            String extension = (type.length > 1) ? type[1] : type[0];
+            boolean isZip = type.length > 1;
 
             DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+
             if (isZip && CSV.getValue().equals(extension)) {
-                NotificationVO notificationVO = NotificationVO
-                    .builder()
-                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                    .datasetId(datasetId)
-                    .datasetName(dataset.getDataSetName())
-                    .mimeType(ZIP)
-                    .error("Error exporting table data")
-                    .build();
+                generateDatasetZipDL(dataset, exportDLPath + "/dataset-" + datasetId);
 
-                File datasetFolder = new File(exportDLPath, "dataset-" + datasetId);
-                datasetFolder.mkdirs();
-                File fileWriteZip = new File(new File(exportDLPath, "dataset-" + datasetId), dataset.getDataSetName() + ZIP_TYPE);
+                NotificationVO notificationVO = NotificationVO.builder()
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .datasetId(datasetId)
+                        .datasetName(dataset.getDataSetName())
+                        .mimeType(ZIP)
+                        .error("Error exporting table data")
+                        .build();
 
-                DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-                try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
-                    for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
-                        LOG.info("Exporting tableSchema {}", tableSchema);
-                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum());
-                    }
-                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
-                } catch (Exception e) {
-                    LOG.error("Error creating zip file for datasetId {}, file type {}", datasetId, mimeType, e);
-                }
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
             }
         } catch (Exception e) {
             LOG.error("Error exporting dataset data. datasetId {}, file type {}. Message {}",
-                datasetId, mimeType, e.getMessage(), e);
+                    datasetId, mimeType, e.getMessage(), e);
+
             NotificationVO notificationVO = NotificationVO.builder()
-                .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                .error("Error exporting dataset data").build();
-            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null,
-                notificationVO);
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .error("Error exporting dataset data").build();
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null, notificationVO);
         }
     }
+
 
     /**
      * Release lock releasing process.
@@ -2805,5 +2789,49 @@ public class FileTreatmentHelper implements DisposableBean {
         private void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
             s3ConvertService.createJsonFile(exportFilenames, tableName, datasetId, datasetTypeEnum);
         }
+
+    private void generateDatasetZipDL(DataSetMetabaseVO dataset, String zipDestinationPath) throws EEAException {
+        try {
+            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(dataset.getId());
+            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(dataset.getId());
+
+            for (TableSchemaIdNameVO entry : tableSchemas) {
+                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+                    throw new EEAException("Cannot export table data because iceberg table is created");
+                }
+            }
+
+            File zipFolder = new File(zipDestinationPath);
+            zipFolder.mkdirs();
+            File fileWriteZip = new File(zipFolder, dataset.getDataSetName() + ".zip");
+
+            DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+            try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+                for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+                    LOG.info("Exporting tableSchema {}", tableSchema);
+                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum());
+                }
+            } catch (Exception e) {
+                LOG.error("Error creating zip file for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
+                throw new EEAException("Error creating reference dataset ZIP", e);
+            }
+
+            DataSetMetabase dataSetMetabase  = dataSetMetabaseRepository.findById(dataset.getId()).orElse(null);
+            if (dataSetMetabase != null) {
+                dataSetMetabase.setPublicFileName(fileWriteZip.getName());
+                dataSetMetabaseRepository.save(dataSetMetabase);
+            } else {
+                LOG.error("Dataset with ID {} not found in the repository for saving", dataset.getId());
+            }
+
+            LOG.info("Reference dataset ZIP successfully created for datasetId {} in dataflow {}", dataset.getId(), dataset.getDataflowId());
+        } catch (Exception e) {
+            LOG.error("Error exporting dataset data for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
+            throw new EEAException("Error exporting reference dataset", e);
+        }
     }
+
+}
 

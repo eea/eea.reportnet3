@@ -2813,7 +2813,16 @@ public class DatasetControllerImpl implements DatasetController {
 
             if (schema != null && schema.getReferenceDataset() != null
                     && Boolean.TRUE.equals(schema.getReferenceDataset())) {
-              fileTreatmentHelper.createReferenceDatasetFiles(dataSetMetabaseMapperImpl.classToEntity(datasetMetabaseService.findDatasetMetabase(referenceDataset.getId())));
+
+              DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(referenceDataset.getId());
+
+              if(Boolean.TRUE.equals(dataflowVO.getBigData())){
+                fileTreatmentHelper.createReferenceDatasetFilesDL(datasetMetabaseVO);
+              }
+              else
+              {
+              fileTreatmentHelper.createReferenceDatasetFiles(dataSetMetabaseMapperImpl.classToEntity(datasetMetabaseVO));
+              }
             }
           }
         }
