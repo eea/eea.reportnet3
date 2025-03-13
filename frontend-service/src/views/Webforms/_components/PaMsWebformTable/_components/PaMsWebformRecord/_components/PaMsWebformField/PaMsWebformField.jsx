@@ -32,6 +32,7 @@ import { RecordUtils } from 'views/_functions/Utils';
 import { PaMsWebformRecordUtils } from 'views/Webforms/_components/PaMsWebformTable/_components/PaMsWebformRecord/_functions/Utils/PaMsWebformRecordUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { isEmpty } from 'lodash';
 
 export const PaMsWebformField = ({
   bigData = false,
@@ -410,7 +411,7 @@ export const PaMsWebformField = ({
             selectableYears={100}
             showSeconds={true}
             showTime={true}
-            value={new Date(field.value)}
+            value={!isEmpty(field.value) ? new Date(field.value) : null}
             yearNavigator={true}
           />
         );
