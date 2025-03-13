@@ -258,7 +258,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       if(validationJobId != null && !haveBlockers) {
         List<String> processIds = jobProcessControllerZuul.findProcessesByJobId(validationJobId);
         for(String processId: processIds) {
-          //check if there were canceled tasks that were related to blockers. If the list is not empty we need to fail the release
+          //check if there were canceled tasks that were related to blockers or canceled tasks without a rule id. If the list is not empty we need to fail the release
           List<Task> canceledBlockerTasks = taskRepository.findAllByProcessIdAndStatusAndLevelErrorBlocker(processId, ProcessStatusEnum.CANCELED.toString());
           if (canceledBlockerTasks != null && canceledBlockerTasks.size() > 0) {
             LOG.info("Found canceled tasks with blockers for validationJobId {} and processId {}", validationJobId, processId);
