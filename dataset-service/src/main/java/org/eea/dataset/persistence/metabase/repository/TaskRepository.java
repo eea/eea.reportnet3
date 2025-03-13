@@ -120,13 +120,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
   Task findFirstByTaskTypeAndStatusOrderByVersionAscIdAsc(TaskType taskType, ProcessStatusEnum status);
 
   /**
-   * Find all tasks based on status for a specific process id that were blockers
+   * Find all tasks based on status for a specific process id that were blockers or those that do not have a rule id
    *
    * @param processId the process id
    * @param status the status
    * @return the tasks
    */
-  @Query(nativeQuery = true, value = "select * from task where process_id=:processId and status=:status and json like '%\"ruleLevelError\":\"BLOCKER\"%'")
+  @Query(nativeQuery = true, value = "select * from task where process_id=:processId and status=:status and (json like '%\"ruleLevelError\":\"BLOCKER\"%' " +
+          "or (json like '%\"ruleId\":\"null\"%' and json not like '%\"sqlRule\":%') )")
   List<Task> findAllByProcessIdAndStatusAndLevelErrorBlocker(@Param("processId") String processId, @Param("status") String status);
 
 
