@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.eea.dataset.mapper.DataSetMetabaseMapperImpl;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -109,10 +108,6 @@ public class DatasetControllerImpl implements DatasetController {
   /** The Reference dataset service. */
   @Autowired
   private ReferenceDatasetServiceImpl referenceDatasetServiceImpl;
-
-  /** The dataset Metabase Mapper. */
-  @Autowired
-  private DataSetMetabaseMapperImpl dataSetMetabaseMapperImpl;
 
   /** The file treatment helper. */
   @Autowired
@@ -2814,15 +2809,9 @@ public class DatasetControllerImpl implements DatasetController {
             if (schema != null && schema.getReferenceDataset() != null
                     && Boolean.TRUE.equals(schema.getReferenceDataset())) {
 
-              DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(referenceDataset.getId());
 
-              if(Boolean.TRUE.equals(dataflowVO.getBigData())){
-                fileTreatmentHelper.createReferenceDatasetFilesDL(datasetMetabaseVO);
-              }
-              else
-              {
-              fileTreatmentHelper.createReferenceDatasetFiles(dataSetMetabaseMapperImpl.classToEntity(datasetMetabaseVO));
-              }
+              fileTreatmentHelper.saveReferenceDatasetPublicFiles(referenceDataset.getId(), dataflowVO);
+
             }
           }
         }
