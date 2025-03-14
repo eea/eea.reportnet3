@@ -230,9 +230,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Autowired
   private DataLakeValidationService dataLakeValidationService;
 
-  @Autowired
-  private DatasetSchemaControllerZuul datasetSchemaControllerZuul;
-
   /**
    * Run dataset validations.
    *
@@ -921,7 +918,7 @@ public class ValidationServiceImpl implements ValidationService {
               "", "", null, "", false, false);
     }
 
-    DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
+    DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
     setRuleMessageDL(schema, errors);
     validations.setErrors(errors);
 
