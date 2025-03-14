@@ -922,7 +922,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
-    getRuleMessageDL(schema, errors);
+    setRuleMessageDL(schema, errors);
     validations.setErrors(errors);
 
     validations.setTotalRecords(Long.valueOf(errors.size()));
@@ -955,13 +955,13 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   /**
-   * Gets the rule message.
+   * Sets the rule message.
    *
    * @param schema The schema
    * @param validationErrorRecords the errors
    */
   @Override
-  public void getRuleMessageDL(DataSetSchemaVO schema, List<GroupValidationVO> validationErrorRecords) {
+  public void setRuleMessageDL(DataSetSchemaVO schema, List<GroupValidationVO> validationErrorRecords) {
     for (TableSchemaVO tableSchemaVO : schema.getTableSchemas()) {
       String nameTableSchema = tableSchemaVO.getNameTableSchema();
       ObjectId idRecordSchema = new ObjectId(tableSchemaVO.getRecordSchema().getIdRecordSchema());

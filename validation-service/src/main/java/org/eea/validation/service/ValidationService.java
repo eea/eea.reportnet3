@@ -270,8 +270,8 @@ public interface ValidationService {
 
   /**
    * Sets the rule message (for viewing purposes) in case of big data
-   * @param schema
-   * @param errors
+   * @param schema The schema
+   * @param errors The errors list
    */
-  void getRuleMessageDL(DataSetSchemaVO schema , List<GroupValidationVO> errors);
+  void setRuleMessageDL(DataSetSchemaVO schema , List<GroupValidationVO> errors);
 }
