@@ -467,20 +467,32 @@ export const WebformField = ({
           />
         );
       case 'CODELIST':
+        const codelistOptions = field.codelistItems.map(codelist => ({ itemType: codelist, value: codelist }));
+        const selectedValue = RecordUtils.getLinkValue(codelistOptions, field.value);
         return (
           <DropdownWebform
             appendTo={document.body}
+            currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
+            disabled={isLoadingData}
             id={field.fieldId}
+            isLoadingData={isLoadingData}
             onChange={event => {
-              onFillField(field, option, event.target.value);
-              webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value: event.target.value } });
-              if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else onEditorSubmitValue(field, option, event.target.value);
+              const value =
+                typeof event.target.value === 'object' && !Array.isArray(event.target.value)
+                  ? event.target.value.value
+                  : event.target.value;
+              onFillField(field, option, value, isConditional);
+              webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+              if (isNil(field.recordId)) onSaveField(option, value);
+              else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
             }}
-            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
+            onFilterInputChangeBackend={filter => onFilter(filter, field)}
+            optionLabel="itemType"
+            options={codelistOptions}
             showFilterClear={true}
+            singleCodelist={true}
             style={hasErrors ? { border: '2px solid #b90202' } : null}
-            value={field.value}
+            value={RecordUtils.getLinkValue(codelistOptions, field.value)}
           />
         );
       case 'TEXT':
@@ -493,7 +505,12 @@ export const WebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
-            disabled={isSubTableCreated || field.fieldSchema === rootPkFieldId || field.fieldSchemaId === rootPkFieldId}
+            disabled={
+              isSubTableCreated ||
+              field.fieldSchema === rootPkFieldId ||
+              field.fieldSchemaId === rootPkFieldId ||
+              field.autoIncrement
+            }
             hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}

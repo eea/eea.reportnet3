@@ -42,7 +42,9 @@ export const QuestionAnswerWebformField = ({
   datasetId,
   getTableErrors,
   nationalField,
+  recordId,
   recordValidations,
+  tableSchemaName,
   title,
   tooltip
 }) => {
@@ -51,7 +53,7 @@ export const QuestionAnswerWebformField = ({
 
   const [questionAnswerWebformFieldState, questionAnswerWebformFieldDispatch] = useReducer(qaWebformFieldReducer, {
     field: nationalField,
-    isDialogVisible: { deleteAttachment: false, uploadFile: false }
+    isDialogVisible: { isDeletingAttachment: false, deleteAttachment: false, uploadFile: false }
   });
 
   const { field, isDialogVisible } = questionAnswerWebformFieldState;
@@ -97,10 +99,22 @@ export const QuestionAnswerWebformField = ({
 
   const onConfirmDeleteAttachment = async () => {
     try {
-      await DatasetService.deleteAttachment(dataflowId, datasetId, field.fieldId, dataProviderId);
+      handleDialogs('isDeletingAttachment', true);
+      await DatasetService.deleteAttachment({
+        dataflowId,
+        datasetId,
+        fieldId: field.fieldId || field.fieldSchemaId,
+        dataProviderId,
+        tableSchemaName: tableSchemaName,
+        fieldName: field.name,
+        fileName: field.value,
+        recordId
+      });
       onFillField(field, field.fieldSchemaId, '');
       handleDialogs('deleteAttachment', false);
+      handleDialogs('isDeletingAttachment', false);
     } catch (error) {
+      handleDialogs('isDeletingAttachment', false);
       console.error('QuestionAnswerWebformField - onConfirmDeleteAttachment.', error);
     }
   };
@@ -130,7 +144,16 @@ export const QuestionAnswerWebformField = ({
 
   const onFileDownload = async (fileName, fieldId) => {
     try {
-      const { data } = await DatasetService.downloadFileData(dataflowId, datasetId, fieldId, dataProviderId);
+      const { data } = await DatasetService.downloadFileData({
+        dataflowId,
+        datasetId,
+        fieldId,
+        dataProviderId,
+        fileName,
+        recordId,
+        tableSchemaName: tableSchemaName,
+        fieldName: field.name
+      });
       DownloadFile(data, fileName);
     } catch (error) {
       console.error('QuestionAnswerWebformField - onFileDownload.', error);
@@ -283,7 +306,7 @@ export const QuestionAnswerWebformField = ({
                 icon="export"
                 iconPos={'right'}
                 label={field.value}
-                onClick={() => onFileDownload(field.value, field.fieldId)}
+                onClick={() => onFileDownload(field.value, field.fieldId || field.fieldSchemaId)}
               />
             )}
             {
@@ -377,12 +400,20 @@ export const QuestionAnswerWebformField = ({
               ? getUrl(DatasetConfig.uploadAttachment, {
                   dataflowId,
                   datasetId,
-                  fieldId: field.fieldId
+                  fieldId: field.fieldId || field.fieldSchemaId,
+                  tableSchemaName: tableSchemaName,
+                  fieldName: field.name,
+                  recordId,
+                  previousFileName: field.value
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
                   datasetId,
-                  fieldId: field.fieldId,
+                  fieldId: field.fieldId || field.fieldSchemaId,
+                  tableSchemaName: tableSchemaName,
+                  fieldName: field.name,
+                  recordId,
+                  previousFileName: field.value,
                   providerId: dataProviderId
                 })
           }`}
@@ -392,6 +423,7 @@ export const QuestionAnswerWebformField = ({
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
           header={resourcesContext.messages['deleteAttachmentHeader']}
+          iconConfirm={isDialogVisible.isDeletingAttachment && 'spinnerAnimate'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}

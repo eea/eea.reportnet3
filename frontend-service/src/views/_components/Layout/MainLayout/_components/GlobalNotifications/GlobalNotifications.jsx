@@ -10,8 +10,13 @@ import { ValidationService } from 'services/ValidationService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 
+import { config } from 'conf';
+
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
+
 export const GlobalNotifications = ({ bigData }) => {
   const notificationContext = useContext(NotificationContext);
+  const { storage: storageConfig } = config;
 
   useEffect(() => {
     downloadAllSchemasInfoFile();
@@ -201,63 +206,79 @@ export const GlobalNotifications = ({ bigData }) => {
   };
 
   const downloadExportDatasetFile = async () => {
-    const notification = findHiddenNotification('EXPORT_DATASET_COMPLETED_EVENT');
+    const cLocalStorage = JSON.parse(sessionStorage.getItem(storageConfig.LOCAL_KEY));
 
-    if (isNil(notification)) {
-      return;
-    }
+    if (cLocalStorage?.isExportTab) {
+      const notification = findHiddenNotification('EXPORT_DATASET_COMPLETED_EVENT');
 
-    try {
-      notificationContext.add({ type: 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD' });
-
-      const downloadFileName = bigData
-        ? `${notification.content.datasetName}.${notification.content.mimeType}`
-        : notification.content.datasetName;
-
-      const { data } = bigData
-        ? await DatasetService.downloadExportDatasetFileDL(
-            notification.content.datasetId,
-            encodeURIComponent(downloadFileName)
-          )
-        : await DatasetService.downloadExportDatasetFile(
-            notification.content.datasetId,
-            encodeURIComponent(downloadFileName)
-          );
-
-      if (data.size !== 0) {
-        DownloadFile(data, downloadFileName);
+      if (isNil(notification)) {
+        return;
       }
-    } catch (error) {
-      console.error('GlobalNotifications - downloadExportDatasetFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' }, true);
-    } finally {
-      notificationContext.clearHiddenNotifications();
+
+      try {
+        notificationContext.add({ type: 'EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD' });
+
+        const downloadFileName = bigData
+          ? `${notification.content.datasetName}.${notification.content.mimeType}`
+          : notification.content.datasetName;
+
+        const { data } = bigData
+          ? await DatasetService.downloadExportDatasetFileDL(
+              notification.content.datasetId,
+              encodeURIComponent(downloadFileName)
+            )
+          : await DatasetService.downloadExportDatasetFile(
+              notification.content.datasetId,
+              encodeURIComponent(downloadFileName)
+            );
+
+        if (data.size !== 0) {
+          DownloadFile(data, downloadFileName);
+        }
+      } catch (error) {
+        console.error('GlobalNotifications - downloadExportDatasetFile.', error);
+        notificationContext.add({ type: 'DOWNLOAD_EXPORT_DATASET_FILE_ERROR' }, true);
+      } finally {
+        notificationContext.clearHiddenNotifications();
+
+        LocalUserStorageUtils.setPropertyToSessionStorage({
+          isExportTab: false
+        });
+      }
     }
   };
 
   const downloadExportTableDataFile = async () => {
-    const notification = findHiddenNotification('EXPORT_TABLE_DATA_COMPLETED_EVENT');
+    const cLocalStorage = JSON.parse(sessionStorage.getItem(storageConfig.LOCAL_KEY));
 
-    if (isNil(notification)) {
-      return;
-    }
+    if (cLocalStorage?.isExportTab) {
+      const notification = findHiddenNotification('EXPORT_TABLE_DATA_COMPLETED_EVENT');
 
-    try {
-      notificationContext.add({ type: 'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD' });
-
-      const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
-      const { data } = bigData
-        ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName)
-        : await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
-
-      if (data.size !== 0) {
-        DownloadFile(data, downloadFileName);
+      if (isNil(notification)) {
+        return;
       }
-    } catch (error) {
-      console.error('GlobalNotifications - downloadExportTableDataFile.', error);
-      notificationContext.add({ type: 'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR' }, true);
-    } finally {
-      notificationContext.clearHiddenNotifications();
+
+      try {
+        notificationContext.add({ type: 'EXPORT_TABLE_DATA_FILE_AUTOMATICALLY_DOWNLOAD' });
+
+        const downloadFileName = `${notification.content.fileName}.${notification.content.mimeType}`;
+        const { data } = bigData
+          ? await DatasetService.downloadTableDataDL(notification.content.datasetId, downloadFileName)
+          : await DatasetService.downloadTableData(notification.content.datasetId, downloadFileName);
+
+        if (data.size !== 0) {
+          DownloadFile(data, downloadFileName);
+        }
+      } catch (error) {
+        console.error('GlobalNotifications - downloadExportTableDataFile.', error);
+        notificationContext.add({ type: 'DOWNLOAD_EXPORT_TABLE_DATA_FILE_ERROR' }, true);
+      } finally {
+        notificationContext.clearHiddenNotifications();
+
+        LocalUserStorageUtils.setPropertyToSessionStorage({
+          isExportTab: false
+        });
+      }
     }
   };
 

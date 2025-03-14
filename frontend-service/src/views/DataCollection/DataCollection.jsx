@@ -35,10 +35,11 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage, MetadataUtils } from 'views/_functions/Utils';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isNil } from 'lodash';
-import dayjs from "dayjs";
-import {Dropdown} from "../_components/Dropdown";
+import dayjs from 'dayjs';
+import { Dropdown } from '../_components/Dropdown';
 
 export const DataCollection = () => {
   const navigate = useNavigate();
@@ -49,8 +50,8 @@ export const DataCollection = () => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
 
-  const [alignmentResults,setAlignmentResults] = useState();
-  const [alignmentToggler,setAlignmentToggler] = useState(false);
+  const [alignmentResults, setAlignmentResults] = useState();
+  const [alignmentToggler, setAlignmentToggler] = useState(false);
   const [dataCollectionName, setDataCollectionName] = useState();
   const [dataflowName, setDataflowName] = useState('');
   const [dataflowType, setDataflowType] = useState('');
@@ -65,11 +66,10 @@ export const DataCollection = () => {
   const [metadata, setMetadata] = useState(undefined);
   const [tableSchema, setTableSchema] = useState();
   const [tableSchemaColumns, setTableSchemaColumns] = useState();
-  const [representatives,setRepresentatives] = useState();
-  const [selectedTable,setSelectedTable] = useState('');
-  const [selectedRepresentatives,setSelectedRepresentatives] = useState();
-  const [selectedRepresentativesCode,setSelectedRepresentativesCode] = useState('');
-
+  const [representatives, setRepresentatives] = useState();
+  const [selectedTable, setSelectedTable] = useState('');
+  const [selectedRepresentatives, setSelectedRepresentatives] = useState();
+  const [selectedRepresentativesCode, setSelectedRepresentativesCode] = useState('');
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -98,7 +98,7 @@ export const DataCollection = () => {
   const onLoadManualAcceptanceDatasets = async () => {
     try {
       const data = await DataflowService.getDatasetsProvidersStatus(dataflowId);
-      setRepresentatives(data.data)
+      setRepresentatives(data.data);
       setSelectedRepresentatives(data.data[0].dataProviderId);
     } catch (error) {
       console.error('ManualAcceptanceDatasets - onLoadManualAcceptanceDatasets.', error);
@@ -177,13 +177,13 @@ export const DataCollection = () => {
 
   const getAlignmentBetween = async () => {
     try {
-      const res = await DatasetService.getAlignmentBetween(datasetId,selectedRepresentativesCode,selectedTable);
+      const res = await DatasetService.getAlignmentBetween(datasetId, selectedRepresentativesCode, selectedTable);
       setAlignmentResults(res);
     } catch (error) {
       console.error('DataCollection - getWebformList.', error);
       notificationContext.add({ type: 'LOADING_WEBFORM_OPTIONS_ERROR' }, true);
     }
-  }
+  };
 
   const getExtensionsList = () => {
     const internalExtensionsList = config.exportTypes.exportDatasetTypes
@@ -213,6 +213,10 @@ export const DataCollection = () => {
   };
 
   const onExportDataInternalExtension = async fileType => {
+    LocalUserStorageUtils.setPropertyToSessionStorage({
+      isExportTab: true
+    });
+
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
@@ -236,9 +240,12 @@ export const DataCollection = () => {
         },
         true
       );
+
+      LocalUserStorageUtils.setPropertyToSessionStorage({
+        isExportTab: false
+      });
     }
   };
-
 
   const onLoadDataflowData = async () => {
     try {
@@ -295,7 +302,7 @@ export const DataCollection = () => {
           readOnly: tableSchema['tableSchemaReadOnly'],
           toPrefill: tableSchema['tableSchemaToPrefill']
         };
-      })
+      });
       setTableSchema(tableSchemaTemp);
       setSelectedTable(tableSchemaTemp[0].id);
       setTableSchemaColumns(
@@ -348,7 +355,7 @@ export const DataCollection = () => {
   const getSubtitle = () => {
     let subtitle = metadata?.dataflow.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowName })
-      : dataflowName
+      : dataflowName;
 
     if (metadata?.dataflow.deleted) {
       const deletedAt = dayjs(metadata?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
@@ -405,18 +412,13 @@ export const DataCollection = () => {
   }
   return layout(
     <Fragment>
-      <Title
-        icon="dataCollection"
-        iconSize="3.5rem"
-        subtitle={getSubtitle()}
-        title={dataCollectionName}
-      />
+      <Title icon="dataCollection" iconSize="3.5rem" subtitle={getSubtitle()} title={dataCollectionName} />
       <div className={`${styles.alignmentBetweenWrapper} ${alignmentToggler ? styles.expanded : ''}`}>
         <Button
           className={`"p-button-rounded p-button-secondary-transparent p-button-animated-blink" ${styles.alignmentBetweenExpandButton}`}
           id="buttonExpand"
           label={resourcesContext.messages['alignmentBetweenProposal']}
-          onClick={ () => setAlignmentToggler(!alignmentToggler)}
+          onClick={() => setAlignmentToggler(!alignmentToggler)}
         />
         <div className={styles.alignmentBetweenInnerWrapper}>
           <label>{resourcesContext.messages['alignmentBetweenTableComparison']}</label>
@@ -424,8 +426,8 @@ export const DataCollection = () => {
             ariaLabel="choose tables"
             className={styles.dataTablesDropdown}
             name="tableDropdown"
-            options={tableSchema?.map(schema => ({label: schema.name, value: schema.id})) ?? []}
             onChange={e => setSelectedTable(e.target.value)}
+            options={tableSchema?.map(schema => ({ label: schema.name, value: schema.id })) ?? []}
             value={selectedTable}
           />
           <label>{resourcesContext.messages['alignmentBetweenTableCountry']}</label>
@@ -433,17 +435,19 @@ export const DataCollection = () => {
             ariaLabel="choose representative"
             className={styles.dataTablesDropdown}
             name="tableRepresentativeDropdown"
-            options={representatives?.map(representative => ({
-              label: representative.dataSetName,
-              value: representative.dataProviderId
-            })) ?? []}
             onChange={e => setSelectedRepresentatives(e.target.value)}
+            options={
+              representatives?.map(representative => ({
+                label: representative.dataSetName,
+                value: representative.dataProviderId
+              })) ?? []
+            }
             value={selectedRepresentatives}
           />
           <Button
             className="p-button-text p-c "
-            label={resourcesContext.messages['applyFilters']}
             icon={'check'}
+            label={resourcesContext.messages['applyFilters']}
             onClick={() => {
               getAlignmentBetween();
             }}
@@ -460,14 +464,22 @@ export const DataCollection = () => {
                   <span>{`${resourcesContext.messages['alignmentBetweenDatasetRecords']} ${alignmentResults?.data?.reportingDatasetNumberOfRecords}`}</span>
                 </li>
                 <li>
-                    <span>
-                      {`${alignmentResults?.data?.hasReleased ? resourcesContext.messages['alignmentBetweenReleasedYes'] : resourcesContext.messages['alignmentBetweenReleasedNot']}`}
-                    </span>
+                  <span>
+                    {`${
+                      alignmentResults?.data?.hasReleased
+                        ? resourcesContext.messages['alignmentBetweenReleasedYes']
+                        : resourcesContext.messages['alignmentBetweenReleasedNot']
+                    }`}
+                  </span>
                 </li>
                 {alignmentResults?.data?.modifiedAfterRelease != null && alignmentResults?.data?.hasReleased && (
                   <li>
                     <span>
-                      {`${alignmentResults?.data?.modifiedAfterRelease ? resourcesContext.messages['alignmentBetweenModifiedYes'] : resourcesContext.messages['alignmentBetweenModifiedNot']}`}
+                      {`${
+                        alignmentResults?.data?.modifiedAfterRelease
+                          ? resourcesContext.messages['alignmentBetweenModifiedYes']
+                          : resourcesContext.messages['alignmentBetweenModifiedNot']
+                      }`}
                     </span>
                   </li>
                 )}

@@ -415,6 +415,7 @@ export const PaMsWebformField = ({
           );
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
+
           return (
             <DropdownWebform
               appendTo={document.body}
@@ -425,9 +426,9 @@ export const PaMsWebformField = ({
               isLoadingData={isLoadingData}
               onChange={event => {
                 const value =
-                  typeof event.target.value === 'object' && !Array.isArray(event.target.value)
-                    ? event.target.value.value
-                    : event.target.value;
+                  typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
+                    ? event.target?.value?.value
+                    : event.target?.value;
                 onFillField(field, option, value, isConditional);
                 pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                 if (isNil(field.recordId)) onSaveField(option, value);
@@ -436,6 +437,7 @@ export const PaMsWebformField = ({
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               optionLabel="itemType"
               options={linkItemsOptions}
+              showClear={true}
               showFilterClear={true}
               style={hasErrors ? { border: '2px solid #b90202' } : null}
               value={RecordUtils.getLinkValue(linkItemsOptions, field.value)}
@@ -446,8 +448,6 @@ export const PaMsWebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
-            filter={true}
-            filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
@@ -472,30 +472,33 @@ export const PaMsWebformField = ({
           />
         );
       case 'CODELIST':
+        const codelistOptions = field.codelistItems.map(codelist => ({ itemType: codelist, value: codelist }));
+        const selectedValue = RecordUtils.getLinkValue(codelistOptions, field.value);
         return (
           <DropdownWebform
             appendTo={document.body}
+            currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
             disabled={isLoadingData}
-            filter={true}
-            filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
-            id={field.fieldId || field.fieldSchemaId}
+            id={field.fieldId}
             isLoadingData={isLoadingData}
             onChange={event => {
               const value =
-                typeof event.target.value === 'object' && !Array.isArray(event.target.value)
-                  ? event.target.value.value
-                  : event.target.value;
+                typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
+                  ? event.target?.value?.value
+                  : event.target?.value;
               onFillField(field, option, value, isConditional);
               pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
               if (isNil(field.recordId)) onSaveField(option, value);
               else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
             }}
             onFilterInputChangeBackend={filter => onFilter(filter, field)}
-            optionLabel={'itemType'}
-            options={field.codelistItems.map(codelist => ({ itemType: codelist, value: codelist }))}
+            optionLabel="itemType"
+            options={codelistOptions}
+            showClear={true}
             showFilterClear={true}
+            singleCodelist={true}
             style={hasErrors ? { border: '2px solid #b90202' } : null}
-            value={{ itemType: field.value, value: field.value }}
+            value={RecordUtils.getLinkValue(codelistOptions, field.value)}
           />
         );
       case 'TEXT':

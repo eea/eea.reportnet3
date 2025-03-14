@@ -16,6 +16,7 @@ import { DatasetTable } from 'entities/DatasetTable';
 import { DatasetTableField } from 'entities/DatasetTableField';
 import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 import { Validation } from 'entities/Validation';
+import { WebformTableField } from 'entities/WebformTableField';
 
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
@@ -55,6 +56,38 @@ export const DatasetService = {
     records.forEach(record => {
       const fields = record.dataRow.map(dataTableFieldDTO => {
         const newField = new DatasetTableField({});
+        newField.id = null;
+        newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
+        newField.name = dataTableFieldDTO.fieldData.name;
+        newField.type = dataTableFieldDTO.fieldData.type;
+        newField.value = DatasetUtils.parseValue({
+          type: dataTableFieldDTO.fieldData.type,
+          value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+          splitSRID: true
+        });
+
+        return newField;
+      });
+
+      const datasetTableRecord = new DatasetTableRecord();
+
+      datasetTableRecord.datasetPartitionId = record.dataSetPartitionId;
+      datasetTableRecord.fields = fields;
+      datasetTableRecord.idRecordSchema = record.recordSchemaId;
+      datasetTableRecord.id = null;
+
+      datasetTableRecords.push(datasetTableRecord);
+    });
+
+    return await DatasetRepository.createRecord(datasetId, tableSchemaId, datasetTableRecords);
+  },
+
+  createWebformTableRecord: async (datasetId, tableSchemaId, records) => {
+    const datasetTableRecords = [];
+    records.forEach(record => {
+      const fields = record.dataRow.map(dataTableFieldDTO => {
+        const newField = new WebformTableField({});
+        newField.autoIncrement = dataTableFieldDTO.fieldData.autoIncrement;
         newField.id = null;
         newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
         newField.name = dataTableFieldDTO.fieldData.name;
@@ -162,15 +195,13 @@ export const DatasetService = {
 
   downloadTableDataDL: async (datasetId, fileName) => await DatasetRepository.downloadTableDataDL(datasetId, fileName),
 
-  getAlignmentBetween: async (datasetId,selectedRepresentativesCode,selectedTable) =>
-    await DatasetRepository.getAlignmentBetween(datasetId,selectedRepresentativesCode,selectedTable),
+  getAlignmentBetween: async (datasetId, selectedRepresentativesCode, selectedTable) =>
+    await DatasetRepository.getAlignmentBetween(datasetId, selectedRepresentativesCode, selectedTable),
 
   getStatistics: async (datasetId, tableSchemaNames) => {
     const datasetTablesDTO = await DatasetRepository.getStatistics(datasetId);
 
-
-
-      //Sort by schema order
+    //Sort by schema order
     datasetTablesDTO.data.tables = datasetTablesDTO.data.tables.sort(
       (a, b) => tableSchemaNames.indexOf(a.nameTableSchema) - tableSchemaNames.indexOf(b.nameTableSchema)
     );
@@ -473,10 +504,9 @@ export const DatasetService = {
   updateTableOrder: async (datasetId, position, tableSchemaId) =>
     await DatasetRepository.updateTableOrder(datasetId, position, tableSchemaId),
 
-  getAddUserText: async (dataflowId) =>
-    await DatasetRepository.getAddUserText(dataflowId),
+  getAddUserText: async dataflowId => await DatasetRepository.getAddUserText(dataflowId),
 
-    getSchema: async (dataflowId, datasetId) => {
+  getSchema: async (dataflowId, datasetId) => {
     const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
     const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);
 
@@ -852,8 +882,7 @@ export const DatasetService = {
   updateDatasetDesign: async (datasetId, datasetSchema) =>
     await DatasetRepository.updateDatasetDesign(datasetId, datasetSchema),
 
-  updateAddUserText: async (dataflowId, note) =>
-    await DatasetRepository.updateAddUserText({ dataflowId, note }),
+  updateAddUserText: async (dataflowId, note) => await DatasetRepository.updateAddUserText({ dataflowId, note }),
 
   updateDatasetNameDesign: async (datasetId, datasetSchemaName) =>
     await DatasetRepository.updateDatasetNameDesign(datasetId, datasetSchemaName),
