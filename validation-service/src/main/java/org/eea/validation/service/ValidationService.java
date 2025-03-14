@@ -5,6 +5,7 @@ import org.bson.types.ObjectId;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ErrorsValidationVO;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.validation.persistence.data.domain.*;
 import org.eea.validation.persistence.schemas.DataSetSchema;
@@ -268,9 +269,9 @@ public interface ValidationService {
   void getRuleMessage(DatasetValue dataset, List<GroupValidationVO> errors);
 
   /**
-   * Gets the rule message in case of big data
-   * @param datasetSchema
+   * Sets the rule message (for viewing purposes) in case of big data
+   * @param schema
    * @param errors
    */
-  void getRuleMessageDL(String datasetSchema, List<GroupValidationVO> errors);
+  void getRuleMessageDL(DataSetSchemaVO schema , List<GroupValidationVO> errors);
 }
