@@ -292,6 +292,7 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords, rootTa
           pkMustBeUsed: element.pkMustBeUsed,
           pkReferenced: element.pkReferenced,
           recordId: record.recordId,
+          readOnly: element.readOnly,
           referencedField: element.referencedField,
           required: element.required,
           type: element.type,

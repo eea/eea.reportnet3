@@ -368,6 +368,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={event => {
@@ -394,6 +395,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={e => {
@@ -423,7 +425,7 @@ export const PaMsWebformField = ({
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -450,7 +452,7 @@ export const PaMsWebformField = ({
             <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -478,6 +480,7 @@ export const PaMsWebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
+            disabled={field?.readOnly}
             filter={true}
             filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
@@ -510,7 +513,7 @@ export const PaMsWebformField = ({
           <DropdownWebform
             appendTo={document.body}
             currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-            disabled={isLoadingData}
+            disabled={field?.readOnly || isLoadingData}
             id={field.fieldId}
             isLoadingData={isLoadingData}
             onChange={event => {
@@ -543,6 +546,7 @@ export const PaMsWebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
+            disabled={field?.readOnly}
             hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
@@ -574,6 +578,7 @@ export const PaMsWebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              disabled={field?.readOnly}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
