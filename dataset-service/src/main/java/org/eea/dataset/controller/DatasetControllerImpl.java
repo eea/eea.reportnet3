@@ -2810,7 +2810,7 @@ public class DatasetControllerImpl implements DatasetController {
                     && Boolean.TRUE.equals(schema.getReferenceDataset())) {
 
 
-              fileTreatmentHelper.saveReferenceDatasetPublicFiles(referenceDataset.getId(), dataflowVO);
+              fileTreatmentHelper.createReferenceDatasetPublicFiles(referenceDataset.getId(), dataflowVO);
 
             }
           }

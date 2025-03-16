@@ -582,12 +582,11 @@ public class FileTreatmentHelper implements DisposableBean {
         LOG.info("Reference file created in dataflowId {} for datasetId {}", dataset.getDataflowId(), dataset.getId());
     }
 
-
     @Async
     public void createReferenceDatasetFilesDL(DataSetMetabase dataset) throws EEAException {
         String nameFileUnique = String.format("%s", dataset.getDataSetName());
+
         createFilesAndZipDL(dataset, importPath + "/dataflow-" + dataset.getDataflowId(), nameFileUnique);
-        // we save the file in metabase with the name without the route
 
         DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(dataset.getId()).orElse(null);
         if (datasetMetabase != null) {
@@ -2876,6 +2875,9 @@ public class FileTreatmentHelper implements DisposableBean {
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(dataset.getId());
             List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(dataset.getId());
 
+            File fileFolder = new File(exportDLPath, "dataset-" + dataset.getId());
+            fileFolder.mkdirs();
+
             for (TableSchemaIdNameVO entry : tableSchemas) {
                 TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
                 if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
@@ -2908,7 +2910,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-    public void saveReferenceDatasetPublicFiles(Long referenceDatasetId, DataFlowVO dataflowVO) throws EEAException, IOException {
+    public void createReferenceDatasetPublicFiles(Long referenceDatasetId, DataFlowVO dataflowVO) throws EEAException, IOException {
         DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(referenceDatasetId)
                 .orElseThrow(() -> new EEAException("DatasetMetabase not found for ID: " + referenceDatasetId));
 

@@ -8,7 +8,9 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
@@ -36,6 +38,12 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
   /** The dataset metabase repository. */
   @Autowired
   private DataSetMetabaseRepository datasetMetabaseRepository;
+
+  /**
+   * The dataflow controller zuul.
+   */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   /** The record store controller zuul. */
   @Autowired
@@ -65,7 +73,10 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
   @Override
   public void execute(EEAEventVO eeaEventVO) throws EEAException {
     Long datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataset_id")));
+    Long dataflowId = datasetMetabaseRepository.findDataflowIdById(datasetId);
     DataSetMetabase dataset = datasetMetabaseRepository.findById(datasetId).orElse(null);
+    DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(dataflowId);
+
     if (null != dataset) {
       try {
         DataSetSchema schema =
@@ -74,7 +85,7 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
 
         Thread.sleep(10000);
 
-        fileTreatmentHelper.createReferenceDatasetFiles(dataset);
+        fileTreatmentHelper.createReferenceDatasetPublicFiles(datasetId, dataflowVO);
         recordStoreControllerZuul.refreshMaterializedView(datasetId, null);
       } catch (IOException | InterruptedException e) {
         LOG_ERROR.error(
