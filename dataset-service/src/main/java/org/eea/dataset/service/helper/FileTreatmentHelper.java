@@ -539,6 +539,19 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
+    public void createReferenceDatasetPublicFiles(Long referenceDatasetId, DataFlowVO dataflowVO) throws EEAException, IOException {
+        DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(referenceDatasetId)
+                .orElseThrow(() -> new EEAException("DatasetMetabase not found for ID: " + referenceDatasetId));
+
+        if(Boolean.TRUE.equals(dataflowVO.getBigData())){
+            createReferenceDatasetFilesDL(datasetMetabase);
+        }
+        else
+        {
+            createReferenceDatasetFiles(datasetMetabase);
+        }
+    }
+
     /**
      * Creates the reference dataset files.
      *
@@ -2772,6 +2785,46 @@ public class FileTreatmentHelper implements DisposableBean {
             }
         }
 
+    private void createFilesAndZipDL(DataSetMetabase dataset, String zipDestinationPath, String nameFileUnique) throws EEAException {
+        try {
+            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(dataset.getId());
+            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(dataset.getId());
+
+            File fileFolder = new File(exportDLPath, "dataset-" + dataset.getId());
+            fileFolder.mkdirs();
+
+            for (TableSchemaIdNameVO entry : tableSchemas) {
+                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
+                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+                    throw new EEAException("Cannot export table data because iceberg table is created");
+                }
+            }
+
+            File zipFolder = new File(zipDestinationPath);
+            zipFolder.mkdirs();
+            File fileWriteZip = new File(zipFolder, nameFileUnique + ".zip");
+
+            DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+            DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(dataset.getId());
+
+            try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
+                for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
+                    LOG.info("Exporting tableSchema {}", tableSchema);
+                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), datasetType);
+                }
+            } catch (Exception e) {
+                LOG.error("Error creating zip file for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
+                throw new EEAException("Error creating reference DL dataset ZIP", e);
+            }
+
+            LOG.info("Reference dataset DL ZIP successfully created for datasetId {} in dataflow {}", dataset.getId(), dataset.getDataflowId());
+        } catch (Exception e) {
+            LOG.error("Error exporting DL dataset data for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
+            throw new EEAException("Error exporting DL reference dataset", e);
+        }
+    }
+
         /**
          * Gets the code.
          *
@@ -2868,59 +2921,5 @@ public class FileTreatmentHelper implements DisposableBean {
         private void convertParquetToJSON(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum) {
             s3ConvertService.createJsonFile(exportFilenames, tableName, datasetId, datasetTypeEnum);
         }
-
-
-    private void createFilesAndZipDL(DataSetMetabase dataset, String zipDestinationPath, String nameFileUnique) throws EEAException {
-        try {
-            String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(dataset.getId());
-            List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(dataset.getId());
-
-            File fileFolder = new File(exportDLPath, "dataset-" + dataset.getId());
-            fileFolder.mkdirs();
-
-            for (TableSchemaIdNameVO entry : tableSchemas) {
-                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(entry.getIdTableSchema(), datasetSchemaId);
-                if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
-                        && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
-                    throw new EEAException("Cannot export table data because iceberg table is created");
-                }
-            }
-
-            File zipFolder = new File(zipDestinationPath);
-            zipFolder.mkdirs();
-            File fileWriteZip = new File(zipFolder, nameFileUnique + ".zip");
-
-            DataSetSchema dataSetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-            DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(dataset.getId());
-
-            try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
-                for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
-                    LOG.info("Exporting tableSchema {}", tableSchema);
-                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), datasetType);
-                }
-            } catch (Exception e) {
-                LOG.error("Error creating zip file for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
-                throw new EEAException("Error creating reference DL dataset ZIP", e);
-            }
-
-            LOG.info("Reference dataset DL ZIP successfully created for datasetId {} in dataflow {}", dataset.getId(), dataset.getDataflowId());
-        } catch (Exception e) {
-            LOG.error("Error exporting DL dataset data for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
-            throw new EEAException("Error exporting DL reference dataset", e);
-        }
-    }
-
-    public void createReferenceDatasetPublicFiles(Long referenceDatasetId, DataFlowVO dataflowVO) throws EEAException, IOException {
-        DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(referenceDatasetId)
-                .orElseThrow(() -> new EEAException("DatasetMetabase not found for ID: " + referenceDatasetId));
-
-        if(Boolean.TRUE.equals(dataflowVO.getBigData())){
-            createReferenceDatasetFilesDL(datasetMetabase);
-        }
-        else
-        {
-            createReferenceDatasetFiles(datasetMetabase);
-        }
-    }
 }
 
