@@ -812,7 +812,7 @@ public interface DatasetController {
    * @param providerId the provider id
    */
   @PostMapping("/createPublicFiles")
-  void createPublicFiles(@RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
+  void createPublicFiles(@RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId, @RequestParam("createReferenceDatasets") Boolean createReferenceDatasets);
 
   /**
    * Exports records in zipped file
