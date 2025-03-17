@@ -24,6 +24,8 @@ import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
+import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -916,7 +918,8 @@ public class ValidationServiceImpl implements ValidationService {
               "", "", null, "", false, false);
     }
 
-    getRuleMessageDL(dataSetMetabaseVO.getDatasetSchema(), errors);
+    DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
+    setRuleMessageDL(schema, errors);
     validations.setErrors(errors);
 
     validations.setTotalRecords(Long.valueOf(errors.size()));
@@ -949,24 +952,33 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   /**
-   * Gets the rule message.
+   * Sets the rule message.
    *
-   * @param datasetSchema
-   * @param errors the errors
-   * @return the rule message
+   * @param schema The schema
+   * @param validationErrorRecords the errors
    */
   @Override
-  public void getRuleMessageDL(String datasetSchema, List<GroupValidationVO> errors) {
-    RulesSchema rules =
-            rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchema));
-    if (null != rules && null != rules.getRules()) {
-      for (GroupValidationVO validation : errors) {
-        for (Rule rule : rules.getRules()) {
-          if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
-                  || EntityTypeEnum.RECORD == validation.getTypeEntity()
-                  || EntityTypeEnum.TABLE == validation.getTypeEntity())
-                  && validation.getShortCode().equals(rule.getShortCode())) {
-            validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
+  public void setRuleMessageDL(DataSetSchemaVO schema, List<GroupValidationVO> validationErrorRecords) {
+    for (TableSchemaVO tableSchemaVO : schema.getTableSchemas()) {
+      String nameTableSchema = tableSchemaVO.getNameTableSchema();
+      ObjectId idRecordSchema = new ObjectId(tableSchemaVO.getRecordSchema().getIdRecordSchema());
+      RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(schema.getIdDataSetSchema()));
+
+      Optional<Rule> ruleObj = Optional.ofNullable(rulesSchema)
+          .map(RulesSchema::getRules)
+          .orElse(Collections.emptyList())
+          .stream()
+          .filter(rule -> rule.getReferenceId().equals(idRecordSchema))
+          .findFirst();
+
+      if (ruleObj.isPresent()) {
+        for (GroupValidationVO validationErrorRecord : validationErrorRecords) {
+          if ((EntityTypeEnum.FIELD == validationErrorRecord.getTypeEntity()
+              || EntityTypeEnum.RECORD == validationErrorRecord.getTypeEntity()
+              || EntityTypeEnum.TABLE == validationErrorRecord.getTypeEntity())
+              && validationErrorRecord.getShortCode().equals(ruleObj.get().getShortCode())
+              && validationErrorRecord.getNameTableSchema().equalsIgnoreCase(nameTableSchema)) {
+            validationErrorRecord.setMessage(replacePlaceHolders(ruleObj.get().getThenCondition().get(0)));
           }
         }
       }
