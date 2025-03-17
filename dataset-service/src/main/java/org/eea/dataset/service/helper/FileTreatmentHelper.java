@@ -543,11 +543,9 @@ public class FileTreatmentHelper implements DisposableBean {
         DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(referenceDatasetId)
                 .orElseThrow(() -> new EEAException("DatasetMetabase not found for ID: " + referenceDatasetId));
 
-        if(Boolean.TRUE.equals(dataflowVO.getBigData())){
+        if (Boolean.TRUE.equals(dataflowVO.getBigData())) {
             createReferenceDatasetFilesDL(datasetMetabase);
-        }
-        else
-        {
+        } else {
             createReferenceDatasetFiles(datasetMetabase);
         }
     }
