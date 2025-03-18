@@ -32,6 +32,7 @@ import { RecordUtils } from 'views/_functions/Utils';
 import { PaMsWebformRecordUtils } from 'views/Webforms/_components/PaMsWebformTable/_components/PaMsWebformRecord/_functions/Utils/PaMsWebformRecordUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { isEmpty } from 'lodash';
 
 export const PaMsWebformField = ({
   bigData = false,
@@ -167,6 +168,7 @@ export const PaMsWebformField = ({
       const conditionalField = record.elements.find(
         el => el.fieldSchemaId === element.referencedField.masterConditionalFieldId
       );
+
       queryClient
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
@@ -233,6 +235,25 @@ export const PaMsWebformField = ({
   };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+    let conditionalFields;
+    let parsedValues;
+
+    if (isConditional && field.fieldType === 'LINK') {
+      conditionalFields = record.elements.map(element =>
+        !(element.fieldSchema === option || element.fieldSchemaId === option)
+          ? { ...element, value: '' }
+          : { ...element, value: value }
+      );
+
+      parsedValues = conditionalFields.map(conditionalField =>
+        conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
+        ((conditionalField.fieldType === 'LINK' || conditionalField.fieldType === 'EXTERNAL_LINK') &&
+          Array.isArray(conditionalField.value))
+          ? conditionalField.value.join(';')
+          : conditionalField.value
+      );
+    }
+
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' ||
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
@@ -241,12 +262,21 @@ export const PaMsWebformField = ({
 
     try {
       if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
-        await DatasetService.updateFieldWebform(
-          datasetId,
-          field,
-          parsedValue,
-          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
-        );
+        if (!isNil(conditionalFields) && !isNil(parsedValues)) {
+          await DatasetService.updateConditionalFieldsWebform(
+            datasetId,
+            conditionalFields,
+            record.recordId,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        } else {
+          await DatasetService.updateFieldWebform(
+            datasetId,
+            field,
+            parsedValue,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        }
 
         if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
@@ -338,6 +368,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={event => {
@@ -364,6 +395,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={e => {
@@ -381,7 +413,7 @@ export const PaMsWebformField = ({
             selectableYears={100}
             showSeconds={true}
             showTime={true}
-            value={new Date(field.value)}
+            value={!isEmpty(field.value) ? new Date(field.value) : null}
             yearNavigator={true}
           />
         );
@@ -393,7 +425,7 @@ export const PaMsWebformField = ({
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -420,7 +452,7 @@ export const PaMsWebformField = ({
             <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -448,6 +480,9 @@ export const PaMsWebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
+            disabled={field?.readOnly}
+            filter={true}
+            filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
@@ -478,7 +513,7 @@ export const PaMsWebformField = ({
           <DropdownWebform
             appendTo={document.body}
             currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-            disabled={isLoadingData}
+            disabled={field?.readOnly || isLoadingData}
             id={field.fieldId}
             isLoadingData={isLoadingData}
             onChange={event => {
@@ -511,6 +546,7 @@ export const PaMsWebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
+            disabled={field?.readOnly}
             hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
@@ -542,6 +578,7 @@ export const PaMsWebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              disabled={field?.readOnly}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {

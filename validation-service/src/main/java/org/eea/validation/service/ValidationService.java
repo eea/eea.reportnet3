@@ -273,4 +273,11 @@ public interface ValidationService {
    * @param errors
    */
   void getRuleMessageDL(String datasetSchema, List<GroupValidationVO> errors);
+
+  /**
+   * Gets the number of records in a specific table (citus)
+   * @param datasetId
+   * @param tableSchemaId
+   */
+  Integer getNumberOfRecordsInTable(Long datasetId, String tableSchemaId);
 }

@@ -70,6 +70,7 @@ export const PaMsWebformRecord = ({
   isFixedNumber = true,
   isGroup,
   isReporting,
+  isTableWebform,
   multipleRecords,
   onAddMultipleWebform,
   onRefresh,
@@ -226,7 +227,7 @@ export const PaMsWebformRecord = ({
 
         if (isSubTable()) {
           return (
-            <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
+            <div className={isTableWebform ? styles.tableFieldsBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
               {element.elementsRecords
                 .filter(record => elements.some(el => el.recordId === record.recordId))
                 .map(record => renderElements(record.elements, true))}
@@ -235,8 +236,8 @@ export const PaMsWebformRecord = ({
         }
 
         return (
-          <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
-            {element.elementsRecords.map(record => renderElements(record.elements))}
+          <div className={isTableWebform ? styles.tableFieldsBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
+            {element.elementsRecords.map(record => renderElements(record.elements, isTableWebform ? true : false))}
           </div>
         );
       }
@@ -254,15 +255,26 @@ export const PaMsWebformRecord = ({
           !isFieldVisible &&
           element.isVisible !== false &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
+            <div
+              className={isTableWebform && fieldsBlock ? styles.tableField : styles.field}
+              key={element.fieldId || element.fieldSchemaId}
+              style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
-                <label>
+                <label className={isTableWebform && fieldsBlock && styles.fieldLabel}>
                   {element.title}
                   {<span className={styles.requiredMark}>{checkShowRequired(element, elements) ? ' *' : ''}</span>}
+                  {isTableWebform && fieldsBlock && element.tooltip && isNil(element.customType) && (
+                    <Button
+                      className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                      icon="infoCircle"
+                      tooltip={element.tooltip}
+                      tooltipOptions={{ position: 'top' }}
+                    />
+                  )}
                 </label>
               )}
 
-              {element.tooltip && isNil(element.customType) && (
+              {!isTableWebform && element.tooltip && isNil(element.customType) && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"

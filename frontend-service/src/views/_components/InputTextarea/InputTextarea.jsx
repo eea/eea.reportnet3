@@ -11,6 +11,7 @@ export class InputTextarea extends Component {
     autoResize: false,
     collapsedHeight: 30,
     cols: 10,
+    disabled: false,
     displayedHeight: 100,
     expandableOnClick: false,
     hasErrors: false,
@@ -189,6 +190,7 @@ export class InputTextarea extends Component {
           {...textareaProps}
           autoFocus={this.props.autoFocus}
           className={className}
+          disabled={this.props.disabled}
           id={this.props.id}
           maxLength={this.props.maxLength}
           onBlur={this.onBlur}

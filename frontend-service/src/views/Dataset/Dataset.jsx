@@ -386,7 +386,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const getTableImportedMetadata = async () => {
-    if (!metadata?.dataflow?.bigData) return;
     if (
       metadata?.dataset?.datasetType === 'DESIGN' ||
       metadata?.dataset?.datasetType === 'REFERENCE' ||

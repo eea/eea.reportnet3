@@ -243,9 +243,9 @@ export const DatasetRepository = {
   getTableImportedMetadata: async ({ datasetId }) =>
     await HTTPRequester.get({ url: getUrl(DatasetConfig.getTableImportedMetadata, { datasetId }) }),
 
-  getAlignmentBetween: async (datasetId,selectedRepresentativesCode,selectedTable) =>
+  getAlignmentBetween: async (datasetId, selectedRepresentativesCode, selectedTable) =>
     await HTTPRequester.get({
-      url: getUrl(DatasetConfig.getAlignmentBetween, { datasetId,selectedRepresentativesCode,selectedTable }),
+      url: getUrl(DatasetConfig.getAlignmentBetween, { datasetId, selectedRepresentativesCode, selectedTable })
     }),
 
   getPresignedUrl: async ({
@@ -370,9 +370,9 @@ export const DatasetRepository = {
       data: { id: tableSchemaId, position }
     }),
 
-  getAddUserText: async (dataflowId) =>
+  getAddUserText: async dataflowId =>
     await HTTPRequester.get({
-      url: getUrl(DatasetConfig.getAddUserText, { dataflowId }),
+      url: getUrl(DatasetConfig.getAddUserText, { dataflowId })
     }),
 
   getSchema: async datasetId => {
@@ -463,10 +463,27 @@ export const DatasetRepository = {
       data: datasetSchema
     }),
 
-  updateAddUserText: async (note) =>
+  updateAddUserText: async note =>
     await HTTPRequester.update({
       url: DatasetConfig.updateAddUserText,
-      data:note
+      data: note
+    }),
+
+  updateConditionalFieldsWebform: async (
+    datasetId,
+    recordId,
+    tableSchemaId,
+    datasetTableFields,
+    updateInCascade = false
+  ) =>
+    await HTTPRequester.update({
+      url: getUrl(DatasetConfig.updateConditionalFieldsWebform, {
+        datasetId,
+        recordId,
+        tableSchemaId,
+        updateInCascade
+      }),
+      data: datasetTableFields
     }),
 
   updateField: async (datasetId, recordId, tableSchemaId, datasetTableRecords, updateInCascade = false) =>

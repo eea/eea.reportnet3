@@ -1090,4 +1090,9 @@ public class ValidationServiceImpl implements ValidationService {
     error.setValidationDate(validation.getValidationDate());
     error.setShortCode(validation.getShortCode());
   }
+
+  @Override
+  public Integer getNumberOfRecordsInTable(Long datasetId, String tableSchemaId){
+    return recordRepository.countRecordsTable(tableSchemaId);
+  }
 }

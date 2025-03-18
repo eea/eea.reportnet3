@@ -87,11 +87,24 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
         }
       }
 
+      let conditionalFieldsRecord;
+
+      if (payload.conditional && payload.field.fieldType === 'LINK') {
+        conditionalFieldsRecord = {
+          ...inmRecord,
+          elements: inmRecord.elements.map(element =>
+            !(element.fieldSchema === payload.option || element.fieldSchemaId === payload.option)
+              ? { ...element, value: '' }
+              : { ...element, value: payload.value }
+          )
+        };
+      }
+
       return {
         ...state,
         selectedField: payload.field,
         newRecord: inmNewRecord,
-        record: inmRecord,
+        record: conditionalFieldsRecord || inmRecord,
         isConditionalChanged: payload.conditional ? !state.isConditionalChanged : state.isConditionalChanged
       };
 

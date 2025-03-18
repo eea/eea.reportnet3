@@ -1,5 +1,6 @@
 package org.eea.interfaces.controller.recordstore;
 
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.validation.ProcessTaskVO;
@@ -293,4 +294,7 @@ public interface RecordStoreController {
   @GetMapping(value = "/downloadSnapshot/{datasetId}")
   void downloadSnapshotFile(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId,
                                                             @RequestParam("fileName") String fileName, HttpServletResponse response) throws Exception;
+
+  @PostMapping(value = "/private/recordCountMatViewComparison")
+  Boolean recordValueCountMatchesMatViewCount(@RequestBody DataSetMetabaseVO dataset, @RequestParam("jobId") Long jobId);
 }

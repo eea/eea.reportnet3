@@ -335,6 +335,7 @@ export const WebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId}
             monthNavigator={true}
             onBlur={event => {
@@ -361,6 +362,7 @@ export const WebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId}
             monthNavigator={true}
             onBlur={e => {
@@ -390,7 +392,7 @@ export const WebformField = ({
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -416,7 +418,7 @@ export const WebformField = ({
             <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -443,6 +445,7 @@ export const WebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
+            disabled={field?.readOnly}
             id={field.fieldId}
             itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
@@ -473,7 +476,7 @@ export const WebformField = ({
           <DropdownWebform
             appendTo={document.body}
             currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-            disabled={isLoadingData}
+            disabled={field?.readOnly || isLoadingData}
             id={field.fieldId}
             isLoadingData={isLoadingData}
             onChange={event => {
@@ -506,6 +509,7 @@ export const WebformField = ({
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
             disabled={
+              field?.readOnly ||
               isSubTableCreated ||
               field.fieldSchema === rootPkFieldId ||
               field.fieldSchemaId === rootPkFieldId ||
@@ -539,6 +543,7 @@ export const WebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              disabled={field?.readOnly}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
