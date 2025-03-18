@@ -429,12 +429,12 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             datasetSchemaPK =
                     schemasRepository.findByIdDataSetSchema(new ObjectId(pkDatasetSchemaId));
         }
-        String foreignKey = fkFieldSchema.getHeaderName();
+        String foreignKey = dremioHelperService.addQuotesToFieldNames(fkFieldSchema.getHeaderName());
         List<String> pkAndFkDetailsList = getPkAndFkHeaderValues(datasetSchemaPK, datasetSchemaFK, fkFieldSchema, tableSchemaId);
         String pkTableName = pkAndFkDetailsList.get(0);
-        String primaryKey = pkAndFkDetailsList.get(1);
-        String optionalPK = pkAndFkDetailsList.get(2);
-        String optionalFK = pkAndFkDetailsList.get(3);
+        String primaryKey = dremioHelperService.addQuotesToFieldNames(pkAndFkDetailsList.get(1));
+        String optionalPK = dremioHelperService.addQuotesToFieldNames(pkAndFkDetailsList.get(2));
+        String optionalFK = dremioHelperService.addQuotesToFieldNames(pkAndFkDetailsList.get(3));
         S3PathResolver pkTableResolver = new S3PathResolver(dataflowId, dataProviderId != null ? dataProviderId : 0, datasetIdRefered, pkTableName);
         String pkTablePath = s3Service.getTablePathByDatasetType(datasetSchemaPK.getIdDataFlow(), datasetIdRefered, pkTableName, pkTableResolver);
         recordIds = (List<String>) method.invoke(object, fkFieldSchema, pkMustBeUsed, tablePath, pkTablePath, foreignKey, primaryKey, optionalFK, optionalPK);  //isfieldFK
