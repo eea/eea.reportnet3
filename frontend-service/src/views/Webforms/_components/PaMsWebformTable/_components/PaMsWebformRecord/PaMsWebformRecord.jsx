@@ -223,11 +223,14 @@ export const PaMsWebformRecord = ({
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
+        const isBlockWithLabels = element.elements.some(blockElement => blockElement.type === 'LABEL');
         const isSubTable = () => element.elementsRecords.length > 1;
 
         if (isSubTable()) {
           return (
-            <div className={isTableWebform ? styles.tableFieldsBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
+            <div
+              className={isTableWebform && isBlockWithLabels ? styles.tableFieldsBlock : styles.fieldsBlock}
+              key={`BLOCK_${i}`}>
               {element.elementsRecords
                 .filter(record => elements.some(el => el.recordId === record.recordId))
                 .map(record => renderElements(record.elements, true))}
@@ -236,8 +239,12 @@ export const PaMsWebformRecord = ({
         }
 
         return (
-          <div className={isTableWebform ? styles.tableFieldsBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
-            {element.elementsRecords.map(record => renderElements(record.elements, isTableWebform ? true : false))}
+          <div
+            className={isTableWebform && isBlockWithLabels ? styles.tableFieldsBlock : styles.fieldsBlock}
+            key={`BLOCK_${i}`}>
+            {element.elementsRecords.map(record =>
+              renderElements(record.elements, isTableWebform && isBlockWithLabels ? true : false)
+            )}
           </div>
         );
       }
