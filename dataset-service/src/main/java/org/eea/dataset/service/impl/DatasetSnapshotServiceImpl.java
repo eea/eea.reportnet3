@@ -346,7 +346,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       snap.setReportingDataset(dataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
-      if (Boolean.TRUE.equals(createSnapshotVO.getReleased())) {
+      if (Boolean.TRUE.equals(createSnapshotVO.getReleased()) && Boolean.FALSE.equals(isSilentRelease(processId))) {
         snap.setDcReleased(true);
       } else {
         snap.setDcReleased(false);
@@ -599,16 +599,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
 
-      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-      if(jobId != null){
-        JobVO jobVO = jobControllerZuul.findJobById(jobId);
-        if (jobVO != null) {
-          Map<String, Object> parameters = jobVO.getParameters();
-          if(parameters.containsKey("silentRelease")){
-            silentRelease = (Boolean) parameters.get("silentRelease");
-          }
-        }
-      }
+      silentRelease = isSilentRelease(processId);
     }
 
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
@@ -668,6 +659,25 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
     }
+  }
+
+  /**
+   * Checks if the process is silent release or not
+   * @param processId The process id
+   * @return True if is Silent release
+   */
+  private Boolean isSilentRelease(String processId) {
+    Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+    if(jobId != null){
+      JobVO jobVO = jobControllerZuul.findJobById(jobId);
+      if (jobVO != null) {
+        Map<String, Object> parameters = jobVO.getParameters();
+        if(parameters.containsKey("silentRelease")){
+          return (Boolean) parameters.get("silentRelease");
+        }
+      }
+    }
+    return false;
   }
 
   /**
