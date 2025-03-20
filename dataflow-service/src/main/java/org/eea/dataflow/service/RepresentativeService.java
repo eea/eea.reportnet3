@@ -102,6 +102,14 @@ public interface RepresentativeService {
    */
   List<RepresentativeVO> getRepresetativesByIdDataFlow(Long dataflowId) throws EEAException;
 
+  /**
+   * Gets the represetatives by id data flow and country code.
+   *
+   * @param dataflowId the dataflow id
+   * @return the represetatives by id data flow
+   * @throws EEAException the EEA exception
+   */
+  List<RepresentativeVO> getRepresetativesByIdDataFlowAndCountryCode(Long dataflowId, String countryCode) throws EEAException;
 
   /**
    * Gets the data provider by id.

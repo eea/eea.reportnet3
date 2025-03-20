@@ -15,7 +15,9 @@ import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.junit.Before;
@@ -51,6 +53,9 @@ public class PrefillingReferenceDatasetSnapshotCommandTest {
   private FileTreatmentHelper fileTreatmentHelper;
 
   @Mock
+  private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Mock
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
   @Mock
@@ -81,14 +86,19 @@ public class PrefillingReferenceDatasetSnapshotCommandTest {
     datasetMetabase.setId(1L);
     datasetMetabase.setDatasetSchema(new ObjectId().toString());
 
+    DataFlowVO mockDataflow = new DataFlowVO();
+    mockDataflow.setId(100L);
+
     when(datasetMetabaseRepository.findById(Mockito.any()))
         .thenReturn(Optional.of(datasetMetabase));
 
     when(datasetSchemaRepository.findByIdDataSetSchema(Mockito.any()))
         .thenReturn(new DataSetSchema());
 
+    when(dataFlowControllerZuul.getMetabaseById(Mockito.any())).thenReturn(mockDataflow);
     prefillingReferenceDatasetSnapshotCommand.execute(eeaEventVO);
-    Mockito.verify(fileTreatmentHelper, times(1)).createReferenceDatasetFiles(Mockito.any());
+    Mockito.verify(fileTreatmentHelper, times(1)).createReferenceDatasetPublicFiles(Mockito.any(), Mockito.any());
+
 
   }
 

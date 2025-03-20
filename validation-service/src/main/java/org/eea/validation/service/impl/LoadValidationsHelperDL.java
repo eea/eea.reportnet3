@@ -71,12 +71,12 @@ public class LoadValidationsHelperDL {
         if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH) && dremioHelperService.checkFolderPromoted(s3PathResolver, s3PathResolver.getTableName())) {
             List<GroupValidationVO> errors = dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter, typeEntitiesFilter, tableFilter,
                     fieldValueFilter, shortCode, pageable, headerField, asc, true);
-            validationService.getRuleMessageDL(dataset.getDatasetSchema(), errors);
+            DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
+            validationService.setRuleMessageDL(schema, errors);
             validation.setErrors(errors);
             validation.setTotalErrors(dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class));
             validation.setTotalFilteredRecords(Long.valueOf(dataLakeValidationService.findGroupRecordsByFilter(s3PathResolver, levelErrorsFilter,
                 typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, pageable, headerField, asc, false).size()));
-            DataSetSchemaVO schema = datasetSchemaControllerZuul.findDataSchemaByDatasetId(datasetId);
             List<String> tableNames = schema.getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
             AtomicReference<Long> totalRecords = new AtomicReference<>(0L);
             tableNames.forEach(name -> {
