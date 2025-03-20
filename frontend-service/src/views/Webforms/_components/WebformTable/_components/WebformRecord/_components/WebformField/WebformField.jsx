@@ -32,6 +32,7 @@ import { RecordUtils } from 'views/_functions/Utils';
 import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_components/WebformRecord/_functions/Utils/WebformRecordUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { isEmpty } from 'lodash';
 
 export const WebformField = ({
   bigData = false,
@@ -380,7 +381,7 @@ export const WebformField = ({
             selectableYears={100}
             showSeconds={true}
             showTime={true}
-            value={new Date(field.value)}
+            value={!isEmpty(field.value) ? new Date(field.value) : null}
             yearNavigator={true}
           />
         );
