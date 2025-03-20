@@ -234,7 +234,26 @@ export const WebformField = ({
     }
   };
 
-  const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+  const onEditorSubmitValue = async (field, option, value, updateInCascade = false) => {
+    let conditionalFields;
+    let parsedValues;
+
+    if (isConditional && field.fieldType === 'LINK') {
+      conditionalFields = record.elements.map(element =>
+        !(element.fieldSchema === option || element.fieldSchemaId === option)
+          ? { ...element, value: '' }
+          : { ...element, value: value }
+      );
+
+      parsedValues = conditionalFields.map(conditionalField =>
+        conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
+        ((conditionalField.fieldType === 'LINK' || conditionalField.fieldType === 'EXTERNAL_LINK') &&
+          Array.isArray(conditionalField.value))
+          ? conditionalField.value.join(';')
+          : conditionalField.value
+      );
+    }
+
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' ||
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
@@ -243,12 +262,21 @@ export const WebformField = ({
 
     try {
       if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
-        await DatasetService.updateFieldWebform(
-          datasetId,
-          field,
-          parsedValue,
-          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
-        );
+        if (!isNil(conditionalFields) && !isNil(parsedValues)) {
+          await DatasetService.updateConditionalFieldsWebform(
+            datasetId,
+            conditionalFields,
+            record.recordId,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        } else {
+          await DatasetService.updateFieldWebform(
+            datasetId,
+            field,
+            parsedValue,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        }
       }
     } catch (error) {
       if (error.response.status === 423) {
@@ -337,7 +365,7 @@ export const WebformField = ({
             appendTo={document.body}
             dateFormat="yy-mm-dd"
             disabled={field?.readOnly}
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
@@ -364,11 +392,10 @@ export const WebformField = ({
             appendTo={document.body}
             dateFormat="yy-mm-dd"
             disabled={field?.readOnly}
-            id={field.fieldId}
+            id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={e => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
-              else onEditorSubmitValue(field, option, formatDateTime(e.value, isNil(e.value)));
             }}
             onChange={e => {
               onFillField(field, option, formatDateTime(e.value, isNil(e.value)));
@@ -522,14 +549,7 @@ export const WebformField = ({
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
-              else
-                onEditorSubmitValue(
-                  field,
-                  option,
-                  event.target.value,
-                  field.isPrimary || false,
-                  field.updatesGroupInfo
-                );
+              else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false);
             }}
             onChange={event => onFillField(field, option, event.target.value)}
             onFocus={event => onFocusField(event.target.value)}

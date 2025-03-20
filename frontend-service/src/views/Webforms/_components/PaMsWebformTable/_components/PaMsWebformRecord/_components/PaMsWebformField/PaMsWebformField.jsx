@@ -400,7 +400,6 @@ export const PaMsWebformField = ({
             monthNavigator={true}
             onBlur={e => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
-              else onEditorSubmitValue(field, option, formatDateTime(e.value, isNil(e.value)));
             }}
             onChange={e => {
               onFillField(field, option, formatDateTime(e.value, isNil(e.value)));

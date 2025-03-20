@@ -25,37 +25,7 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
               fieldRecord.fieldSchema === payload.option ||
               fieldRecord.fieldSchemaId === payload.option
           );
-          // field.elementsRecords.filter(record =>
-          //   record.fields.filter(field => field.fieldId === state.record.recordId)
-          // );
-
-          // const getIndexInElementsRecordsArr = () => {
-          //   return field.elementsRecords
-          //     .map(record =>
-          //       record.fields
-          //         .map(field => field.fieldId)
-          //         .map(ids => ids?.includes(payload.field.fieldId))
-          //         .filter(id => id === true)
-          //         .indexOf(true)
-          //     )
-          //     .indexOf(0);
-          // };
-
-          // const indexOfCorrespondentElementsRecords = getIndexInElementsRecordsArr();
-          // const checkRecordIsNotEmpty = () =>
-          //   !isEmpty(
-          //     field?.elementsRecords[indexOfCorrespondentElementsRecords]?.elements?.filter(
-          //       field => field.fieldSchemaId === payload.option
-          //     )
-          //   );
-
-          // if (checkRecordIsNotEmpty()) {
-          //   field.elementsRecords[indexOfCorrespondentElementsRecords].elements.filter(
-          //     field => field.fieldSchemaId === payload.option
-          //   )[0].value = payload.value;
-          // }
         }
-
         return field.fieldSchemaId === payload.option;
       });
 
