@@ -32,7 +32,6 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.metabase.TaskType;
-import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -64,8 +63,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.io.Resource;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -302,11 +299,6 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    * The Task Mapper
    */
   @Autowired private TaskMapper taskMapper;
-
-  /**
-   * The default release process priority
-   */
-  private int defaultReleaseProcessPriority = 20;
 
   /** The S3 Helper */
   @Autowired
@@ -1833,7 +1825,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        if (Boolean.TRUE.equals(snapshot.getRelease())) {
+        if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease() && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId))))) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease, processId);
         } else {
           Map<String, Object> createSnapshot = new HashMap<>();

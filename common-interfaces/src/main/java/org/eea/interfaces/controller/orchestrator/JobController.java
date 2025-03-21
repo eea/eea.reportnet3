@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -313,6 +312,14 @@ public interface JobController {
      */
     @PostMapping(value = "/handleStuckImportJob/{jobId}")
     void handleStuckImportJob(@PathVariable("jobId") Long jobId, @RequestBody String error) throws Exception;
+
+    /**
+     * Checks if the process is silent release or not
+     * @param processId The process id
+     * @return True if is Silent release
+     */
+    @GetMapping(value = "/private/isSilentRelease/{processId}")
+    Boolean isSilentRelease(@PathVariable("processId") String processId) ;
 }
 
 
