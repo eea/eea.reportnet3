@@ -21,6 +21,7 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.orchestrator.service.JobProcessService;
 import org.eea.orchestrator.service.JobService;
 import org.eea.orchestrator.utils.JobUtils;
 import org.eea.security.jwt.utils.AuthenticationDetails;
@@ -62,6 +63,9 @@ public class JobControllerImpl implements JobController {
     /** The job service. */
     @Autowired
     private JobService jobService;
+
+    @Autowired
+    private JobProcessService jobProcessService;
 
     /** The dataset metabase controller zuul */
     @Autowired
@@ -829,6 +833,22 @@ public class JobControllerImpl implements JobController {
             LOG.error("Could not handle stuck import job with id {} and error {} ", jobId, error);
             throw e;
         }
+    }
+
+    @Override
+    @GetMapping(value = "/private/isSilentRelease/{processId}")
+    public Boolean isSilentRelease(@PathVariable("processId") String processId) {
+        Long jobId = jobProcessService.findJobIdByProcessId(processId);
+        if(jobId != null){
+            JobVO jobVO = jobService.findById(jobId);
+            if (jobVO != null) {
+                Map<String, Object> parameters = jobVO.getParameters();
+                if(parameters.containsKey("silentRelease")){
+                    return (Boolean) parameters.get("silentRelease");
+                }
+            }
+        }
+        return false;
     }
 }
 

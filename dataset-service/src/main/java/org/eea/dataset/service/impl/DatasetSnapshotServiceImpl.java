@@ -9,7 +9,6 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.persistence.metabase.domain.*;
 import org.eea.dataset.persistence.metabase.repository.*;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -31,7 +30,6 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
-import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -242,12 +240,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
 
-  @Autowired
-  private RecordRepository recordRepository;
-
-  @Autowired
-  private JobProcessControllerZuul jobProcessControllerZuul;
-
   /**
    * Gets the by id.
    *
@@ -346,7 +338,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       snap.setReportingDataset(dataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
-      if (Boolean.TRUE.equals(createSnapshotVO.getReleased()) && Boolean.FALSE.equals(isSilentRelease(processId))) {
+      if (Boolean.TRUE.equals(createSnapshotVO.getReleased()) && Boolean.FALSE.equals(jobControllerZuul.isSilentRelease(processId))) {
         snap.setDcReleased(true);
       } else {
         snap.setDcReleased(false);
@@ -599,7 +591,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
 
-      silentRelease = isSilentRelease(processId);
+      silentRelease = jobControllerZuul.isSilentRelease(processId);
     }
 
     Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
@@ -659,25 +651,6 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       removeLockRelatedToCopyDataToEUDataset(idDataflow);
       releaseLocksRelatedToRelease(idDataflow, idDataProvider);
     }
-  }
-
-  /**
-   * Checks if the process is silent release or not
-   * @param processId The process id
-   * @return True if is Silent release
-   */
-  private Boolean isSilentRelease(String processId) {
-    Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-    if(jobId != null){
-      JobVO jobVO = jobControllerZuul.findJobById(jobId);
-      if (jobVO != null) {
-        Map<String, Object> parameters = jobVO.getParameters();
-        if(parameters.containsKey("silentRelease")){
-          return (Boolean) parameters.get("silentRelease");
-        }
-      }
-    }
-    return false;
   }
 
   /**
