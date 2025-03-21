@@ -232,7 +232,7 @@ export const PaMsWebformRecord = ({
               className={isTableWebform && isBlockWithLabels ? styles.tableFieldsBlock : styles.fieldsBlock}
               key={`BLOCK_${i}`}>
               {element.elementsRecords
-                .filter(record => elements.some(el => el.recordId === record.recordId))
+                .filter(elementsRecord => elementsRecord.recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
             </div>
           );
@@ -267,7 +267,7 @@ export const PaMsWebformRecord = ({
               key={element.fieldId || element.fieldSchemaId}
               style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
-                <label className={isTableWebform && fieldsBlock && styles.fieldLabel}>
+                <label className={isTableWebform && fieldsBlock ? styles.fieldLabel : undefined}>
                   {element.title}
                   {<span className={styles.requiredMark}>{checkShowRequired(element, elements) ? ' *' : ''}</span>}
                   {isTableWebform && fieldsBlock && element.tooltip && isNil(element.customType) && (
