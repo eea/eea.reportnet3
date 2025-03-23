@@ -73,6 +73,8 @@ public class DremioSQLValidationUtils {
     private List<String> calculateFKsimple(boolean pkMustBeUsed, FieldSchema fkFieldSchema, String fkTablePath, String pkTablePath,
                                            String foreignKey, String primaryKey) {
         //Handling of multiple/single value, pk must/mustn't be used and ignore/not ignore case
+        String quotedPrimaryKey = addQuotesToFieldNames(primaryKey);
+        String quotedForeignKey = addQuotesToFieldNames(foreignKey);
 
         StringBuilder query = new StringBuilder();
         List<String> recordIds = new ArrayList<>();
@@ -81,7 +83,7 @@ public class DremioSQLValidationUtils {
         if(BooleanUtils.isTrue(fkFieldSchema.getPkHasMultipleValues())) {
             //PK_QUERY_VALUES
             StringBuilder pkQuery = new StringBuilder();
-            pkQuery.append("select ").append(primaryKey).append(" from ").append(pkTablePath);
+            pkQuery.append("select ").append(quotedPrimaryKey).append(" from ").append(pkTablePath);
             List<String> pkValueList = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                 List<String> result = new ArrayList<>();
                 while (rs.next()) {
@@ -101,8 +103,8 @@ public class DremioSQLValidationUtils {
             }
             //FK_QUERY_VALUES
             StringBuilder fkQuery = new StringBuilder();
-            fkQuery.append("select ").append("record_id").append(",").append(foreignKey).append(" from ").append(fkTablePath)
-                    .append(" where ").append(foreignKey).append(" is not NULL and ").append(foreignKey).append(" != ''");
+            fkQuery.append("select ").append("record_id").append(",").append(quotedForeignKey).append(" from ").append(fkTablePath)
+                    .append(" where ").append(quotedForeignKey).append(" is not NULL and ").append(quotedForeignKey).append(" != ''");
             SqlRowSet fkValues = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkValues.next()) {
                 List<String> recordValues = new ArrayList<>(Arrays.asList(fkValues.getString(foreignKey).split(";")))
@@ -149,16 +151,16 @@ public class DremioSQLValidationUtils {
                 //FK_SINGLE_WRONG_IGNORE_CASE_LINK
                 if(pkMustBeUsed){
                     //PK_MUST_BE_USED
-                    query.append("select count(").append("pk.").append(primaryKey).append(") from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
-                            .append(" pk on LOWER(fk.").append(foreignKey).append(") = LOWER(pk.").append(primaryKey).append(") where fk.").append(foreignKey).append(" is null");
+                    query.append("select count(").append("pk.").append(quotedPrimaryKey).append(") from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
+                            .append(" pk on LOWER(fk.").append(quotedForeignKey).append(") = LOWER(pk.").append(quotedPrimaryKey).append(") where fk.").append(quotedForeignKey).append(" is null");
                     Long pkNotUsed = dremioJdbcTemplate.queryForObject(query.toString(), Long.class);
                     if (pkNotUsed > 0) {
                         recordIds.add(PK_NOT_USED);
                     }
                 }
                 else{
-                    query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(foreignKey).append(" is not NULL and fk.")
-                            .append(foreignKey).append(" != '' and LOWER(fk.").append(foreignKey).append(") not in (select LOWER(pk.").append(primaryKey)
+                    query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(quotedForeignKey).append(" is not NULL and fk.")
+                            .append(quotedForeignKey).append(" != '' and LOWER(fk.").append(quotedForeignKey).append(") not in (select LOWER(pk.").append(quotedPrimaryKey)
                             .append(") from ").append(pkTablePath).append(" pk)");
                     recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 }
@@ -166,15 +168,15 @@ public class DremioSQLValidationUtils {
             else{
                 if(pkMustBeUsed){
                     //PK_MUST_BE_USED
-                    query.append("select count(").append("pk.").append(primaryKey).append(") from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
-                            .append(" pk on fk.").append(foreignKey).append("=pk.").append(primaryKey).append(" where fk.").append(foreignKey).append(" is null");
+                    query.append("select count(").append("pk.").append(quotedPrimaryKey).append(") from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
+                            .append(" pk on fk.").append(quotedForeignKey).append("=pk.").append(quotedPrimaryKey).append(" where fk.").append(quotedForeignKey).append(" is null");
                     Long pkNotUsed = dremioJdbcTemplate.queryForObject(query.toString(), Long.class);
                     if (pkNotUsed > 0) {
                         recordIds.add(PK_NOT_USED);
                     }
                 }
                 else{
-                    String fieldName = "fk." + foreignKey;
+                    String fieldName = "fk." + quotedForeignKey;
                     query.append("select fk.record_id from ")
                         .append(fkTablePath).append(" fk ")
                         .append("where ")
@@ -183,7 +185,7 @@ public class DremioSQLValidationUtils {
                         .append(fieldName)
                         .append(" <> ''").append(" AND ")
                         .append(fieldName)
-                        .append(" not in (select pk.").append(primaryKey)
+                        .append(" not in (select pk.").append(quotedPrimaryKey)
                         .append(" from ")
                         .append(pkTablePath).append(" pk)");
                     recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
@@ -195,23 +197,30 @@ public class DremioSQLValidationUtils {
 
     private List<String> calculateFKCompose(boolean pkMustBeUsed, FieldSchema fkFieldSchema, String fkTablePath, String pkTablePath,
                                       String foreignKey, String primaryKey, String optionalFk, String optionalPk) {
+        String quotedPrimaryKey = addQuotesToFieldNames(primaryKey);
+        String quotedForeignKey = addQuotesToFieldNames(foreignKey);
+
+        String quotedOptionalPk = addQuotesToFieldNames(optionalPk);
+        String quotedOptionalFk = addQuotesToFieldNames(optionalFk);
+
+
         StringBuilder query = new StringBuilder();
         List<String> recordIds = new ArrayList<>();
         if (Boolean.FALSE.equals(fkFieldSchema.getPkHasMultipleValues())) {
             //FK_SINGLE_WRONG
             if(pkMustBeUsed){
                 //COMPOSE_PK_MUST_BE_USED_LIST
-                query.append("select pk.").append(primaryKey).append(" from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
+                query.append("select pk.").append(quotedPrimaryKey).append(" from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
                         .append(" pk on ");
                 if(BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())){
                     //FK_SINGLE_WRONG_IGNORE_CASE_LINK
-                    query.append(" lower(fk.").append(foreignKey).append(")=lower(pk.").append(primaryKey).append(")");
+                    query.append(" lower(fk.").append(quotedForeignKey).append(")=lower(pk.").append(quotedPrimaryKey).append(")");
                 }
                 else{
-                    query.append(" fk.").append(foreignKey).append("=pk.").append(primaryKey);
+                    query.append(" fk.").append(quotedForeignKey).append("=pk.").append(quotedPrimaryKey);
                 }
-                query.append(" and fk.").append(optionalFk)
-                        .append("=").append(optionalPk).append(" where fk.").append(foreignKey).append(" is null or fk.").append(optionalFk).append(" is null");
+                query.append(" and fk.").append(quotedOptionalFk)
+                        .append("=").append(quotedOptionalPk).append(" where fk.").append(quotedForeignKey).append(" is null or fk.").append(quotedOptionalFk).append(" is null");
                 List<String> res = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 if (res.size()>0) {
                     recordIds.add(PK_NOT_USED);
@@ -221,20 +230,20 @@ public class DremioSQLValidationUtils {
                 query.append("select fk.record_id from ").append(fkTablePath).append(" fk left join ").append(pkTablePath).append(" pk on ");
                 if(BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())){
                     //FK_SINGLE_WRONG_IGNORE_CASE_LINK
-                    query.append(" lower(fk.").append(foreignKey).append(")=lower(pk.").append(primaryKey).append(")");
+                    query.append(" lower(fk.").append(quotedForeignKey).append(")=lower(pk.").append(quotedPrimaryKey).append(")");
                 }
                 else{
-                    query.append(" fk.").append(foreignKey).append("=pk.").append(primaryKey);
+                    query.append(" fk.").append(quotedForeignKey).append("=pk.").append(quotedPrimaryKey);
                 }
-                query.append(" and ").append("fk.").append(optionalFk).append("=").append("pk.").append(optionalPk)
-                        .append(" where (pk.").append(primaryKey).append(" is null or pk.").append(optionalPk).append(" is null)")
-                        .append("and fk.").append(foreignKey).append(" is not NULL and fk.").append(foreignKey).append(" != ''");
+                query.append(" and ").append("fk.").append(quotedOptionalFk).append("=").append("pk.").append(quotedOptionalPk)
+                        .append(" where (pk.").append(quotedPrimaryKey).append(" is null or pk.").append(quotedOptionalPk).append(" is null)")
+                        .append("and fk.").append(quotedForeignKey).append(" is not NULL and fk.").append(quotedForeignKey).append(" != ''");
                 recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
             }
         } else {
             //PK_QUERY_VALUES
             StringBuilder pkQuery = new StringBuilder();
-            pkQuery.append("select ").append(optionalPk).append(",").append(primaryKey).append(" from ").append(pkTablePath);
+            pkQuery.append("select ").append(quotedOptionalPk).append(",").append(quotedPrimaryKey).append(" from ").append(pkTablePath);
             Map<String, String> pkWithOptionalMap = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                 HashMap<String,String> result = new HashMap<>();
                 while (rs.next()) {
@@ -261,8 +270,8 @@ public class DremioSQLValidationUtils {
 
             //FK_QUERY_VALUES
             StringBuilder fkQuery = new StringBuilder();
-            fkQuery.append("select ").append("record_id").append(",").append(optionalFk).append(",").append(foreignKey).append(" from ").append(fkTablePath)
-                    .append(" where ").append(foreignKey).append(" is not NULL and ").append(foreignKey).append(" != ''");
+            fkQuery.append("select ").append("record_id").append(",").append(quotedOptionalFk).append(",").append(quotedForeignKey).append(" from ").append(fkTablePath)
+                    .append(" where ").append(quotedForeignKey).append(" is not NULL and ").append(quotedForeignKey).append(" != ''");
             SqlRowSet fkWithOptionalRS = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkWithOptionalRS.next()) {
                 if (pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk))!=null) {
@@ -358,6 +367,18 @@ public class DremioSQLValidationUtils {
             }
         }
         return recordIds;
+    }
+
+    public String addQuotesToFieldNames(String fieldNames) {
+        if (fieldNames != null && !fieldNames.isBlank()) {
+            fieldNames = Arrays.stream(fieldNames.split(",")) // Split by commas
+                    .map(String::trim)                        // Remove spaces around field names
+                    .filter(field -> !field.isBlank())        // Filter out empty or invalid field names
+                    .filter(field -> !field.contains("\"")) // Skip fields that already contain double quotes
+                    .map(field -> "\"" + field + "\"")  // Wrap each field in double quotes
+                    .collect(Collectors.joining(","));      // Join them back with commas
+        }
+        return fieldNames;
     }
 }
 
