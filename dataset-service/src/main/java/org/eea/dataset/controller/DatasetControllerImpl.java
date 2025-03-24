@@ -38,10 +38,12 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -378,13 +380,26 @@ public class DatasetControllerImpl implements DatasetController {
     DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         if(StringUtils.isNotBlank(tableSchemaId)){
-          String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                   && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
             LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+            datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+          }
+        }
+        else{
+          List<TableSchemaIdNameVO> tableSchemaIdNameVOS =  datasetSchemaService.getTableSchemasIds(datasetId);
+          for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+              LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
+              datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+            }
           }
         }
 

@@ -1050,6 +1050,14 @@
           }
         },
         {
+          "key": "IMPORT_FAILED_EVENT_ICEBERG_EXISTS",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "LONG_RUNNING_IMPORT_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",

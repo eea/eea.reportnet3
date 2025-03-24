@@ -501,7 +501,9 @@ public enum EventType {
   IMPORT_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_dataset_schema_completed_event", true),
 
-
+  /** The import failed event iceberg exists. */
+  IMPORT_FAILED_EVENT_ICEBERG_EXISTS(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_failed_event_iceberg_exists", true),
 
   /** The sort field desing failed event. */
   SORT_FIELD_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
