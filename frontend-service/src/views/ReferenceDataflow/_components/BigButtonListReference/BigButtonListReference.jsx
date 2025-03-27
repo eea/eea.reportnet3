@@ -338,7 +338,7 @@ export const BigButtonListReference = ({
             }),
           visibility: dataflowState.isCustodian || dataflowState.isCustodianUser
         };
-      });
+      }).sort((a, b) => a.caption.localeCompare(b.caption));
 
   const createReferenceDatasets = {
     buttonClass: 'newItem',
