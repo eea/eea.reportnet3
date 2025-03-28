@@ -89,6 +89,7 @@ export const PaMsWebformRecord = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const [pamsWebformRecordState, pamsWebformRecordDispatch] = useReducer(pamsWebformRecordReducer, {
+    conditionalFieldChange: false,
     isConditionalChanged: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
@@ -97,7 +98,7 @@ export const PaMsWebformRecord = ({
     selectedRecordId: null
   });
 
-  const { isConditionalChanged, isDialogVisible, selectedRecordId } = pamsWebformRecordState;
+  const { conditionalFieldChange, isConditionalChanged, isDialogVisible, selectedRecordId } = pamsWebformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = PaMsWebformRecordUtils;
   const { parseRecordValidations } = WebformsUtils;
@@ -297,6 +298,7 @@ export const PaMsWebformRecord = ({
                     <PaMsWebformField
                       bigData={bigData}
                       columnsSchema={columnsSchema}
+                      conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
                       dataProviderId={dataProviderId}
                       datasetId={datasetId}
