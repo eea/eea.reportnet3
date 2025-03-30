@@ -7,6 +7,13 @@
       "fixed": false,
       "types": [
         {
+          "key": "IMPORT_WRONG_HEADERS_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "IMPORT_REPORTING_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -1419,6 +1426,20 @@
       "lifeTime": 20000,
       "fixed": false,
       "types": [{ "key": "IMPORT_NAMEFILE_WARNING_EVENT" }]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [
+        {
+          "key": "IMPORT_WRONG_HEADERS_WARNING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
+      ]
     },
     {
       "key": "warn",

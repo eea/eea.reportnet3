@@ -845,6 +845,8 @@
     "importEmptyFilesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all import files were empty.",
     "importFixedNumWithoutReplaceDataErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have fixed number of records and replace data option was not selected.",
     "importFixedNumWithoutReplaceDataWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have fixed number of records and replace data option was not selected.",
+    "importWrongHeadersErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: wrong headers.",
+    "importWrongHeadersWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have different headers.",
     "importWrongNumOfRecordsErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have fixed number of records and the files that were provided did not contain the same number of records.",
     "importWrongNumOfRecordsWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have fixed number of records and the files that were provided did not contain the same number of records.",
     "importOnlyReadOnlyFieldsErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have have only read only fields.",
