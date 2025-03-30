@@ -23,7 +23,7 @@ public class ImportFileInDremioInfo {
     private Long integrationId;
     private String delimiter;
     private String errorMessage;
-    private Set<String> warningMessages;
+    private List<String> warningMessages;
     private String dataProviderCode;
     private Boolean updateReferenceFolder;
 
