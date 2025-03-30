@@ -44,7 +44,7 @@ public class ImportWrongHeadersErrorEvent implements NotificableEventHandler {
      */
     @Override
     public EventType getEventType() {
-        return EventType.IMPORT_WRONG_NUM_OF_RECORDS_ERROR_EVENT;
+        return EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
     }
 
     /**
