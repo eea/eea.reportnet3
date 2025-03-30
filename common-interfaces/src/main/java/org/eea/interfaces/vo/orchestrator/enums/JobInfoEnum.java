@@ -27,6 +27,8 @@ public enum JobInfoEnum {
 
     ERROR_CSV_MULTIPLE_QUOTES_WITH_LINE_NUM("Multiple quotes were found in line %d"),
 
+    ERROR_ALL_FILES_ARE_WRONG("All the csv files in the zip were rejected. Import failed"),
+
     WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA("Some imports to fixed number of records tables failed because the Replace Data option was not selected"),
 
     ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA("Import failed because all tables have fixed number of records and the Replace Data option was not selected"),
@@ -49,7 +51,11 @@ public enum JobInfoEnum {
 
     ERROR_COULD_NOT_UPLOAD_FILE_TO_PUBLIC_S3("Could not upload file to public s3"),
 
-    ERROR_ICEBERG_TABLE_EXISTS("The job failed because there is an iceberg table in the dataset");
+    ERROR_ICEBERG_TABLE_EXISTS("The job failed because there is an iceberg table in the dataset"),
+
+    WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS("Some import files contain wrong headers"),
+
+    ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS("Import files contain wrong headers");
 
 
     /** The value. */
