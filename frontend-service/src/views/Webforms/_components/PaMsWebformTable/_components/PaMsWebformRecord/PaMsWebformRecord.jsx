@@ -89,7 +89,10 @@ export const PaMsWebformRecord = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const [pamsWebformRecordState, pamsWebformRecordDispatch] = useReducer(pamsWebformRecordReducer, {
+    conditionalFieldChange: false,
+    dependantConditionalFieldId: '',
     isConditionalChanged: false,
+    isDependantConditionalField: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
     record,
@@ -97,7 +100,14 @@ export const PaMsWebformRecord = ({
     selectedRecordId: null
   });
 
-  const { isConditionalChanged, isDialogVisible, selectedRecordId } = pamsWebformRecordState;
+  const {
+    conditionalFieldChange,
+    dependantConditionalFieldId,
+    isConditionalChanged,
+    isDependantConditionalField,
+    isDialogVisible,
+    selectedRecordId
+  } = pamsWebformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = PaMsWebformRecordUtils;
   const { parseRecordValidations } = WebformsUtils;
@@ -232,7 +242,7 @@ export const PaMsWebformRecord = ({
               className={isTableWebform && isBlockWithLabels ? styles.tableFieldsBlock : styles.fieldsBlock}
               key={`BLOCK_${i}`}>
               {element.elementsRecords
-                .filter(record => elements.some(el => el.recordId === record.recordId))
+                .filter(elementsRecord => elementsRecord.recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
             </div>
           );
@@ -267,7 +277,7 @@ export const PaMsWebformRecord = ({
               key={element.fieldId || element.fieldSchemaId}
               style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
-                <label className={isTableWebform && fieldsBlock && styles.fieldLabel}>
+                <label className={isTableWebform && fieldsBlock ? styles.fieldLabel : undefined}>
                   {element.title}
                   {<span className={styles.requiredMark}>{checkShowRequired(element, elements) ? ' *' : ''}</span>}
                   {isTableWebform && fieldsBlock && element.tooltip && isNil(element.customType) && (
@@ -297,10 +307,12 @@ export const PaMsWebformRecord = ({
                     <PaMsWebformField
                       bigData={bigData}
                       columnsSchema={columnsSchema}
+                      conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
                       dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
+                      dependantConditionalFieldId={dependantConditionalFieldId}
                       element={element}
                       hasErrors={!isNil(element.validations)}
                       isConditional={
@@ -312,6 +324,7 @@ export const PaMsWebformRecord = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isDependantConditionalField={isDependantConditionalField}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       onUpdatePamsValue={onUpdatePamsValue}

@@ -37,14 +37,17 @@ import { isEmpty } from 'lodash';
 export const PaMsWebformField = ({
   bigData = false,
   columnsSchema,
+  conditionalFieldChange,
   dataProviderId,
   dataflowId,
   datasetId,
   datasetSchemaId,
+  dependantConditionalFieldId,
   element,
   hasErrors,
   isConditional,
   isConditionalChanged,
+  isDependantConditionalField,
   newRecord,
   onFillField,
   onSaveField,
@@ -102,7 +105,7 @@ export const PaMsWebformField = ({
 
   useEffect(() => {
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
-  }, [newRecord, isConditionalChanged]);
+  }, [newRecord, conditionalFieldChange]);
 
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
@@ -239,11 +242,18 @@ export const PaMsWebformField = ({
     let parsedValues;
 
     if (isConditional && field.fieldType === 'LINK') {
-      conditionalFields = record.elements.map(element =>
-        !(element.fieldSchema === option || element.fieldSchemaId === option)
-          ? { ...element, value: '' }
-          : { ...element, value: value }
-      );
+      conditionalFields = record.elements
+        .map(element =>
+          !(element.fieldSchema === option || element.fieldSchemaId === option)
+            ? !isEmpty(field?.dependency)
+              ? element?.referencedField?.masterConditionalFieldId === field.fieldSchema ||
+                element?.referencedField?.masterConditionalFieldId === field.fieldSchemaId
+                ? { ...element, value: '' }
+                : { ...element }
+              : { ...element, value: '' }
+            : { ...element, value: value }
+        )
+        .filter(conditionalField => conditionalField.type === 'FIELD' && conditionalField.pk !== true);
 
       parsedValues = conditionalFields.map(conditionalField =>
         conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
@@ -420,6 +430,20 @@ export const PaMsWebformField = ({
       case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
+          if (
+            isConditionalChanged &&
+            !isEmpty(field.value) &&
+            (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+          ) {
+            const emptyValue = [];
+            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+                onFillField(field, option, emptyValue, isConditional);
+            } else {
+              onFillField(field, option, emptyValue, isConditional);
+            }
+          }
+
           return (
             <MultiSelectWebform
               appendTo={document.body}
@@ -448,6 +472,20 @@ export const PaMsWebformField = ({
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
 
+          if (
+            isConditionalChanged &&
+            !isEmpty(field.value) &&
+            (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+          ) {
+            const emptyValue = '';
+            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+                onFillField(field, option, emptyValue, isConditional);
+            } else {
+              onFillField(field, option, emptyValue, isConditional);
+            }
+          }
+
           return (
             <DropdownWebform
               appendTo={document.body}
@@ -461,10 +499,13 @@ export const PaMsWebformField = ({
                   typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
                     ? event.target?.value?.value
                     : event.target?.value;
-                onFillField(field, option, value, isConditional);
-                pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
-                if (isNil(field.recordId)) onSaveField(option, value);
-                else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+
+                if (value !== field.value) {
+                  onFillField(field, option, value, isConditional);
+                  pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+                  if (isNil(field.recordId)) onSaveField(option, value);
+                  else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+                }
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               optionLabel="itemType"
