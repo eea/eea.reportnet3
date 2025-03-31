@@ -57,13 +57,25 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
         }
       }
 
+      let dependantConditionalFieldId;
+      let isDependantConditionalField = false;
+
+      if (payload.conditional && payload.field.fieldType === 'LINK') {
+        if (!isEmpty(payload.field?.dependency)) {
+          isDependantConditionalField = true;
+          dependantConditionalFieldId = payload.field.fieldSchema || payload.field.fieldSchemaId;
+        }
+      }
+
       return {
         ...state,
         selectedField: payload.field,
         newRecord: inmNewRecord,
         record: inmRecord,
         conditionalFieldChange: payload.conditional ? !state.conditionalFieldChange : state.conditionalFieldChange,
-        isConditionalChanged: payload.conditional
+        isConditionalChanged: payload.conditional,
+        isDependantConditionalField,
+        dependantConditionalFieldId
       };
 
     case 'GET_DELETE_ROW_ID':

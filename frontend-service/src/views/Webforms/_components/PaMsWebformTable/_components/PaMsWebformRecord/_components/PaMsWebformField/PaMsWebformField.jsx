@@ -42,10 +42,12 @@ export const PaMsWebformField = ({
   dataflowId,
   datasetId,
   datasetSchemaId,
+  dependantConditionalFieldId,
   element,
   hasErrors,
   isConditional,
   isConditionalChanged,
+  isDependantConditionalField,
   newRecord,
   onFillField,
   onSaveField,
@@ -427,6 +429,20 @@ export const PaMsWebformField = ({
       case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
+          if (
+            isConditionalChanged &&
+            !isEmpty(field.value) &&
+            (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+          ) {
+            const emptyValue = [];
+            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+                onFillField(field, option, emptyValue, isConditional);
+            } else {
+              onFillField(field, option, emptyValue, isConditional);
+            }
+          }
+
           return (
             <MultiSelectWebform
               appendTo={document.body}
@@ -448,12 +464,26 @@ export const PaMsWebformField = ({
               optionLabel="itemType"
               options={linkItemsOptions}
               style={hasErrors ? { border: '2px solid #b90202' } : null}
-              value={isConditionalChanged ? [] : RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
+              value={RecordUtils.getMultiselectValues(linkItemsOptions, field.value)}
               valuesSeparator=";"
             />
           );
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
+
+          if (
+            isConditionalChanged &&
+            !isEmpty(field.value) &&
+            (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+          ) {
+            const emptyValue = '';
+            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+                onFillField(field, option, emptyValue, isConditional);
+            } else {
+              onFillField(field, option, emptyValue, isConditional);
+            }
+          }
 
           return (
             <DropdownWebform

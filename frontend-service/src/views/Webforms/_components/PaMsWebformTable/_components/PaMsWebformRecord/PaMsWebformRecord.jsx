@@ -90,7 +90,9 @@ export const PaMsWebformRecord = ({
 
   const [pamsWebformRecordState, pamsWebformRecordDispatch] = useReducer(pamsWebformRecordReducer, {
     conditionalFieldChange: false,
+    dependantConditionalFieldId: '',
     isConditionalChanged: false,
+    isDependantConditionalField: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
     record,
@@ -98,7 +100,14 @@ export const PaMsWebformRecord = ({
     selectedRecordId: null
   });
 
-  const { conditionalFieldChange, isConditionalChanged, isDialogVisible, selectedRecordId } = pamsWebformRecordState;
+  const {
+    conditionalFieldChange,
+    dependantConditionalFieldId,
+    isConditionalChanged,
+    isDependantConditionalField,
+    isDialogVisible,
+    selectedRecordId
+  } = pamsWebformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = PaMsWebformRecordUtils;
   const { parseRecordValidations } = WebformsUtils;
@@ -303,6 +312,7 @@ export const PaMsWebformRecord = ({
                       dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
+                      dependantConditionalFieldId={dependantConditionalFieldId}
                       element={element}
                       hasErrors={!isNil(element.validations)}
                       isConditional={
@@ -314,6 +324,7 @@ export const PaMsWebformRecord = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isDependantConditionalField={isDependantConditionalField}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       onUpdatePamsValue={onUpdatePamsValue}
