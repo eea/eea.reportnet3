@@ -465,7 +465,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         if(sendWrongFileNameWarning){
-//            importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
+            //initialize warning message
+            importFileInDremioInfo.setWarningMessages(new ArrayList<>());
             importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
             jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
         }
@@ -737,9 +738,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
 
-        Set <String> warningMessages = new HashSet<>(importFileInDremioInfo.getWarningMessages());
-
         if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty()) {
+            Set <String> warningMessages = new HashSet<>(importFileInDremioInfo.getWarningMessages());
             for(String warningMessage : warningMessages) {
                 if(warningMessage.equals(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
@@ -750,7 +750,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         value, notificationWarning);
                 }
                 if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))
-                        && !importFileInDremioInfo.getErrorMessage().equals(EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES)){
+                        && !EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())

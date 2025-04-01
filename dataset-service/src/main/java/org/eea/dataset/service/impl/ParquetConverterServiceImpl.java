@@ -302,10 +302,10 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       importFileInDremioInfo.setHasCorrectHeaders(false);
 
       if (convertParquetWithCustomWay) {
-        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType, csvFiles);
+        csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
       } else {
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
-          csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, spatialDataBatchSize, datasetType, csvFiles);
+          csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, spatialDataBatchSize, datasetType);
         } else {
           csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, datasetType);
         }
@@ -621,7 +621,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
 
   private List<FileWithRecordNum> modifyAndSplitCsvFile(File csvFile, DataSetSchema dataSetSchema,
-                                                        ImportFileInDremioInfo importFileInDremioInfo, Integer batchSize, DatasetTypeEnum datasetType, List<File> csvFiles) throws Exception {
+                                                        ImportFileInDremioInfo importFileInDremioInfo, Integer batchSize, DatasetTypeEnum datasetType) throws Exception {
     LOG.info(MEASUREMENTS + " with job {} modifyAndSplitCsvFile started", importFileInDremioInfo);
     char delimiterChar = !StringUtils.isBlank(importFileInDremioInfo.getDelimiter()) ?
         importFileInDremioInfo.getDelimiter().charAt(0) : defaultDelimiter;
