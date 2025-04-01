@@ -243,7 +243,7 @@ export const PaMsWebformRecord = ({
               key={`BLOCK_${i}`}>
               {element.elementsRecords
                 .filter(elementsRecord => elementsRecord.recordId === record.recordId)
-                .map(record => renderElements(record.elements, true))}
+                .map(record => renderElements(record.elements, isTableWebform && isBlockWithLabels ? true : false))}
             </div>
           );
         }
