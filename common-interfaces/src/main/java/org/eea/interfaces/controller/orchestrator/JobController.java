@@ -180,7 +180,9 @@ public interface JobController {
                                   @RequestParam(value = "offset", required = false, defaultValue = "0") Integer offset,
                                   @RequestParam(value = "filterValue", required = false) String filterValue,
                                   @RequestParam(value = "columnName", required = false) String columnName,
-                                  @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+                                  @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+                                  @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
+                                  @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
 
     /**
      * Update job's status

@@ -349,8 +349,10 @@ public class JobServiceImpl implements JobService {
         String filterValue = (parameters.get("filterValue") != null) ? (String) parameters.get("filterValue") : null;
         String columnName = (parameters.get("columnName") != null) ? (String) parameters.get("columnName") : null;
         String dataProviderCodes = (parameters.get("dataProviderCodes") != null) ? (String) parameters.get("dataProviderCodes") : null;
+        Boolean exportCsv = (parameters.get("exportCsv") != null) ? (Boolean) parameters.get("exportCsv") : false;
+        Boolean includeAttachments = (parameters.get("includeAttachments") != null) ? (Boolean) parameters.get("includeAttachments") : false;
 
-        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobVO.getId());
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, includeAttachments, jobVO.getId());
     }
 
     @Transactional

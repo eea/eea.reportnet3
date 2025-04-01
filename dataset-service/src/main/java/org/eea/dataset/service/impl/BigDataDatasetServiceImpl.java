@@ -2067,4 +2067,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         return releasedDatasetDataInfoVO;
     }
+
+    @Override
+    public void etlExportCsv(Long datasetId, String tableSchemaId, String tableName){
+        fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName);
+    }
 }

@@ -787,7 +787,7 @@ public class FileTreatmentHelper implements DisposableBean {
         return dataQuery;
     }
 
-    private void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName) {
+    public void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
 

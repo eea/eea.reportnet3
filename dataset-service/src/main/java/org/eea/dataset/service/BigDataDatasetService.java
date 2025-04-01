@@ -248,4 +248,6 @@ public interface BigDataDatasetService {
      */
     ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(DataSetMetabaseVO collectionDataset, DataSetMetabaseVO reportingDataset, Long dataflowId,
                                                            DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
+
+    void etlExportCsv(Long datasetId, String tableSchemaId, String tableName);
 }
