@@ -34,10 +34,11 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage } from 'views/_functions/Utils';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isNil } from 'lodash';
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
 export const EUDataset = () => {
   const navigate = useNavigate();
@@ -235,6 +236,10 @@ export const EUDataset = () => {
   const setIsLoading = value => euDatasetDispatch({ type: 'IS_LOADING', payload: { value } });
 
   const onExportDataInternalExtension = async fileType => {
+    LocalUserStorageUtils.setPropertyToSessionStorage({
+      isExportTab: true
+    });
+
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
@@ -258,6 +263,10 @@ export const EUDataset = () => {
         },
         true
       );
+
+      LocalUserStorageUtils.setPropertyToSessionStorage({
+        isExportTab: false
+      });
     }
   };
 
@@ -363,7 +372,7 @@ export const EUDataset = () => {
   const getSubtitle = () => {
     let subtitle = euDatasetState.bigData
       ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflowName })
-      : dataflowName
+      : dataflowName;
 
     if (euDatasetState?.metaData?.dataflow.deleted) {
       const deletedAt = dayjs(euDatasetState?.metaData?.dataflow.deletedAt).format(userContext.userProps.dateFormat);
@@ -412,12 +421,7 @@ export const EUDataset = () => {
 
   return renderLayout(
     <Fragment>
-      <Title
-        icon="euDataset"
-        iconSize="3.5rem"
-        subtitle={getSubtitle()}
-        title={datasetName}
-      />
+      <Title icon="euDataset" iconSize="3.5rem" subtitle={getSubtitle()} title={datasetName} />
       <div className={styles.ButtonsBar}>
         <Toolbar>
           <div className="p-toolbar-group-left">

@@ -93,6 +93,7 @@ export const TableWebform = ({
         isIcebergCreated={isIcebergCreated}
         isLoadingIceberg={isLoadingIceberg}
         isReporting={isReporting}
+        isTableWebform={true}
         onTabChange={tableWebformState.isVisible}
         setIsLoading={setIsLoading}
         webform={visibleContent}

@@ -67,6 +67,7 @@ import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'vi
 import { DatasetDesignerUtils } from './_functions/Utils/DatasetDesignerUtils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import dayjs from 'dayjs';
 
@@ -459,7 +460,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const getTableImportedMetadata = async () => {
-    if (!designerState.metaData?.dataflow?.bigData) return;
     if (
       designerState.metaData?.dataset?.datasetType === 'DESIGN' ||
       designerState.metaData?.dataset?.datasetType === 'REFERENCE' ||
@@ -792,6 +792,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
+    LocalUserStorageUtils.setPropertyToSessionStorage({
+      isExportTab: true
+    });
+
     const action = 'DATASET_EXPORT';
     actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXTERNAL_EXPORT_DESIGN_INIT' });
@@ -804,6 +808,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     } catch (error) {
       console.error('DatasetDesigner - onExportDataInternalExtension.', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
+
+      LocalUserStorageUtils.setPropertyToSessionStorage({
+        isExportTab: false
+      });
     }
   };
 

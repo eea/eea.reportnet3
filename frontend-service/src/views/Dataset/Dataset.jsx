@@ -55,6 +55,7 @@ import { useReporterDataset } from 'views/_components/Snapshots/_hooks/useReport
 import { CurrentPage, ExtensionUtils, MetadataUtils, QuerystringUtils } from 'views/_functions/Utils';
 import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import dayjs from 'dayjs';
 
@@ -385,7 +386,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const getTableImportedMetadata = async () => {
-    if (!metadata?.dataflow?.bigData) return;
     if (
       metadata?.dataset?.datasetType === 'DESIGN' ||
       metadata?.dataset?.datasetType === 'REFERENCE' ||
@@ -852,6 +852,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onExportDataInternalExtension = async fileType => {
+    LocalUserStorageUtils.setPropertyToSessionStorage({
+      isExportTab: true
+    });
+
     const action = 'DATASET_EXPORT';
     actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
@@ -864,6 +868,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     } catch (error) {
       console.error('Dataset - onExportDataInternalExtension.', error);
       onExportError('EXPORT_DATA_BY_ID_ERROR');
+
+      LocalUserStorageUtils.setPropertyToSessionStorage({
+        isExportTab: false
+      });
     }
   };
 

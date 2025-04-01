@@ -35,6 +35,7 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { CurrentPage, MetadataUtils } from 'views/_functions/Utils';
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isNil } from 'lodash';
 import dayjs from 'dayjs';
@@ -212,6 +213,10 @@ export const DataCollection = () => {
   };
 
   const onExportDataInternalExtension = async fileType => {
+    LocalUserStorageUtils.setPropertyToSessionStorage({
+      isExportTab: true
+    });
+
     setIsLoadingFile(true);
     notificationContext.add({ type: 'EXPORT_DATASET_DATA' });
 
@@ -235,6 +240,10 @@ export const DataCollection = () => {
         },
         true
       );
+
+      LocalUserStorageUtils.setPropertyToSessionStorage({
+        isExportTab: false
+      });
     }
   };
 

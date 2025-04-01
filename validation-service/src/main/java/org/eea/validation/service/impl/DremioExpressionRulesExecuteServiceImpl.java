@@ -74,6 +74,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
     private static final Logger LOG = LoggerFactory.getLogger(DremioExpressionRulesExecuteServiceImpl.class);
     private static final String RECORD_IF_THEN = "recordIfThen";
+    private static final String CLASS_RECORD_IF_THEN = "RuleOperators.recordIfThen";
     private  static final String RECORD_AND = "recordAnd";
     private static final String RECORD_OR = "recordOr";
     private static final String FIELD_AND = "fieldAnd";
@@ -195,13 +196,19 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             while (rs.next()) {
                 boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
                 if (!isValid) {
-                    if (count != 0) {
-                        validationQuery.append(",'");
+                    //We run again the same validation for if-then cases because we found a bug on ticket #285141
+                    if (ruleVO.getWhenConditionMethod().contains(CLASS_RECORD_IF_THEN)) {
+                        isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
                     }
-                    validationQuery.append(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER)).append("'");
-                    if (count == 0) {
-                        count++;
-                        createRuleFolder = true;
+                    if (!isValid) {
+                        if (count != 0) {
+                            validationQuery.append(",'");
+                        }
+                        validationQuery.append(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER)).append("'");
+                        if (count == 0) {
+                            count++;
+                            createRuleFolder = true;
+                        }
                     }
                 }
             }
@@ -261,7 +268,13 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
         while (rs.next()) {
             boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
             if (!isValid) {
-                recordIds.add(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+                //We run again the same validation for if-then cases because we found a bug on ticket #285141
+                if (ruleVO.getWhenConditionMethod().contains(CLASS_RECORD_IF_THEN)) {
+                    isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
+                }
+                if (!isValid) {
+                    recordIds.add(rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER));
+                }
             }
         }
         int count = 1;
@@ -319,11 +332,17 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             while (rs.next()) {
                 boolean isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
                 if (!isValid) {
-                    if (parquetRecordCount==0) {
-                        parquetRecordCount++;
+                    //We run again the same validation for if-then cases because we found a bug on ticket #285141
+                    if (ruleVO.getWhenConditionMethod().contains(CLASS_RECORD_IF_THEN)) {
+                        isValid = isRecordValid(providerCode, ruleVO, fieldName, headerNames, rs, cls, object, fieldSchemaIdNameMap);
                     }
-                    GenericRecord record = createParquetGenericRecord(headerMap, rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER), schema);
-                    writer.write(record);
+                    if (!isValid) {
+                        if (parquetRecordCount==0) {
+                            parquetRecordCount++;
+                        }
+                        GenericRecord record = createParquetGenericRecord(headerMap, rs.getString(PARQUET_RECORD_ID_COLUMN_HEADER), schema);
+                        writer.write(record);
+                    }
                 }
             }
             if (parquetRecordCount > 0) {

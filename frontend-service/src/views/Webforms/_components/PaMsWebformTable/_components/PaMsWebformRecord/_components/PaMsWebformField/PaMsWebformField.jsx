@@ -32,18 +32,22 @@ import { RecordUtils } from 'views/_functions/Utils';
 import { PaMsWebformRecordUtils } from 'views/Webforms/_components/PaMsWebformTable/_components/PaMsWebformRecord/_functions/Utils/PaMsWebformRecordUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { isEmpty } from 'lodash';
 
 export const PaMsWebformField = ({
   bigData = false,
   columnsSchema,
+  conditionalFieldChange,
   dataProviderId,
   dataflowId,
   datasetId,
   datasetSchemaId,
+  dependantConditionalFieldId,
   element,
   hasErrors,
   isConditional,
   isConditionalChanged,
+  isDependantConditionalField,
   newRecord,
   onFillField,
   onSaveField,
@@ -101,7 +105,7 @@ export const PaMsWebformField = ({
 
   useEffect(() => {
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
-  }, [newRecord, isConditionalChanged]);
+  }, [newRecord, conditionalFieldChange]);
 
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
@@ -167,6 +171,7 @@ export const PaMsWebformField = ({
       const conditionalField = record.elements.find(
         el => el.fieldSchemaId === element.referencedField.masterConditionalFieldId
       );
+
       queryClient
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
@@ -233,6 +238,32 @@ export const PaMsWebformField = ({
   };
 
   const onEditorSubmitValue = async (field, option, value, updateInCascade = false, updatesGroupInfo = false) => {
+    let conditionalFields;
+    let parsedValues;
+
+    if (isConditional && field.fieldType === 'LINK') {
+      conditionalFields = record.elements
+        .map(element =>
+          !(element.fieldSchema === option || element.fieldSchemaId === option)
+            ? !isEmpty(field?.dependency)
+              ? element?.referencedField?.masterConditionalFieldId === field.fieldSchema ||
+                element?.referencedField?.masterConditionalFieldId === field.fieldSchemaId
+                ? { ...element, value: '' }
+                : { ...element }
+              : { ...element, value: '' }
+            : { ...element, value: value }
+        )
+        .filter(conditionalField => conditionalField.type === 'FIELD' && conditionalField.pk !== true);
+
+      parsedValues = conditionalFields.map(conditionalField =>
+        conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
+        ((conditionalField.fieldType === 'LINK' || conditionalField.fieldType === 'EXTERNAL_LINK') &&
+          Array.isArray(conditionalField.value))
+          ? conditionalField.value.join(';')
+          : conditionalField.value
+      );
+    }
+
     const parsedValue =
       field.fieldType === 'MULTISELECT_CODELIST' ||
       ((field.fieldType === 'LINK' || field.fieldType === 'EXTERNAL_LINK') && Array.isArray(value))
@@ -241,12 +272,21 @@ export const PaMsWebformField = ({
 
     try {
       if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
-        await DatasetService.updateFieldWebform(
-          datasetId,
-          field,
-          parsedValue,
-          bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
-        );
+        if (!isNil(conditionalFields) && !isNil(parsedValues)) {
+          await DatasetService.updateConditionalFieldsWebform(
+            datasetId,
+            conditionalFields,
+            record.recordId,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        } else {
+          await DatasetService.updateFieldWebform(
+            datasetId,
+            field,
+            parsedValue,
+            bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
+          );
+        }
 
         if (!isNil(onUpdateSinglesList) && field?.updatesSingleListData) {
           onUpdateSinglesList();
@@ -338,6 +378,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={event => {
@@ -364,6 +405,7 @@ export const PaMsWebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
+            disabled={field?.readOnly}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={e => {
@@ -381,19 +423,33 @@ export const PaMsWebformField = ({
             selectableYears={100}
             showSeconds={true}
             showTime={true}
-            value={new Date(field.value)}
+            value={!isEmpty(field.value) ? new Date(field.value) : null}
             yearNavigator={true}
           />
         );
       case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
+          if (
+            isConditionalChanged &&
+            !isEmpty(field.value) &&
+            (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+          ) {
+            const emptyValue = [];
+            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+                onFillField(field, option, emptyValue, isConditional);
+            } else {
+              onFillField(field, option, emptyValue, isConditional);
+            }
+          }
+
           return (
             <MultiSelectWebform
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -416,11 +472,25 @@ export const PaMsWebformField = ({
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
 
+          if (
+            isConditionalChanged &&
+            !isEmpty(field.value) &&
+            (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+          ) {
+            const emptyValue = '';
+            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+                onFillField(field, option, emptyValue, isConditional);
+            } else {
+              onFillField(field, option, emptyValue, isConditional);
+            }
+          }
+
           return (
             <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-              disabled={isLoadingData}
+              disabled={field?.readOnly || isLoadingData}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
               isLoadingData={isLoadingData}
@@ -429,10 +499,13 @@ export const PaMsWebformField = ({
                   typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
                     ? event.target?.value?.value
                     : event.target?.value;
-                onFillField(field, option, value, isConditional);
-                pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
-                if (isNil(field.recordId)) onSaveField(option, value);
-                else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+
+                if (value !== field.value) {
+                  onFillField(field, option, value, isConditional);
+                  pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+                  if (isNil(field.recordId)) onSaveField(option, value);
+                  else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+                }
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               optionLabel="itemType"
@@ -448,6 +521,7 @@ export const PaMsWebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
+            disabled={field?.readOnly}
             filter={true}
             filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
@@ -480,7 +554,7 @@ export const PaMsWebformField = ({
           <DropdownWebform
             appendTo={document.body}
             currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-            disabled={isLoadingData}
+            disabled={field?.readOnly || isLoadingData}
             id={field.fieldId}
             isLoadingData={isLoadingData}
             onChange={event => {
@@ -513,6 +587,7 @@ export const PaMsWebformField = ({
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
+            disabled={field?.readOnly}
             hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
@@ -544,6 +619,7 @@ export const PaMsWebformField = ({
             <InputTextarea
               className={field.required ? styles.required : undefined}
               collapsedHeight={150}
+              disabled={field?.readOnly}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {

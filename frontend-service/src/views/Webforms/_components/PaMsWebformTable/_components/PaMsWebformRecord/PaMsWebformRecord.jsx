@@ -70,6 +70,7 @@ export const PaMsWebformRecord = ({
   isFixedNumber = true,
   isGroup,
   isReporting,
+  isTableWebform,
   multipleRecords,
   onAddMultipleWebform,
   onRefresh,
@@ -88,7 +89,10 @@ export const PaMsWebformRecord = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const [pamsWebformRecordState, pamsWebformRecordDispatch] = useReducer(pamsWebformRecordReducer, {
+    conditionalFieldChange: false,
+    dependantConditionalFieldId: '',
     isConditionalChanged: false,
+    isDependantConditionalField: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
     record,
@@ -96,7 +100,14 @@ export const PaMsWebformRecord = ({
     selectedRecordId: null
   });
 
-  const { isConditionalChanged, isDialogVisible, selectedRecordId } = pamsWebformRecordState;
+  const {
+    conditionalFieldChange,
+    dependantConditionalFieldId,
+    isConditionalChanged,
+    isDependantConditionalField,
+    isDialogVisible,
+    selectedRecordId
+  } = pamsWebformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = PaMsWebformRecordUtils;
   const { parseRecordValidations } = WebformsUtils;
@@ -222,21 +233,28 @@ export const PaMsWebformRecord = ({
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
+        const isBlockWithLabels = element.elements.some(blockElement => blockElement.type === 'LABEL');
         const isSubTable = () => element.elementsRecords.length > 1;
 
         if (isSubTable()) {
           return (
-            <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
+            <div
+              className={isTableWebform && isBlockWithLabels ? styles.tableFieldsBlock : styles.fieldsBlock}
+              key={`BLOCK_${i}`}>
               {element.elementsRecords
-                .filter(record => elements.some(el => el.recordId === record.recordId))
+                .filter(elementsRecord => elementsRecord.recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
             </div>
           );
         }
 
         return (
-          <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
-            {element.elementsRecords.map(record => renderElements(record.elements))}
+          <div
+            className={isTableWebform && isBlockWithLabels ? styles.tableFieldsBlock : styles.fieldsBlock}
+            key={`BLOCK_${i}`}>
+            {element.elementsRecords.map(record =>
+              renderElements(record.elements, isTableWebform && isBlockWithLabels ? true : false)
+            )}
           </div>
         );
       }
@@ -254,15 +272,26 @@ export const PaMsWebformRecord = ({
           !isFieldVisible &&
           element.isVisible !== false &&
           onToggleFieldVisibility(element.dependency, elements, element) && (
-            <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
+            <div
+              className={isTableWebform && fieldsBlock ? styles.tableField : styles.field}
+              key={element.fieldId || element.fieldSchemaId}
+              style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
-                <label>
+                <label className={isTableWebform && fieldsBlock ? styles.fieldLabel : undefined}>
                   {element.title}
                   {<span className={styles.requiredMark}>{checkShowRequired(element, elements) ? ' *' : ''}</span>}
+                  {isTableWebform && fieldsBlock && element.tooltip && isNil(element.customType) && (
+                    <Button
+                      className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                      icon="infoCircle"
+                      tooltip={element.tooltip}
+                      tooltipOptions={{ position: 'top' }}
+                    />
+                  )}
                 </label>
               )}
 
-              {element.tooltip && isNil(element.customType) && (
+              {!isTableWebform && element.tooltip && isNil(element.customType) && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"
@@ -278,10 +307,12 @@ export const PaMsWebformRecord = ({
                     <PaMsWebformField
                       bigData={bigData}
                       columnsSchema={columnsSchema}
+                      conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
                       dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
+                      dependantConditionalFieldId={dependantConditionalFieldId}
                       element={element}
                       hasErrors={!isNil(element.validations)}
                       isConditional={
@@ -293,6 +324,7 @@ export const PaMsWebformRecord = ({
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isDependantConditionalField={isDependantConditionalField}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       onUpdatePamsValue={onUpdatePamsValue}
