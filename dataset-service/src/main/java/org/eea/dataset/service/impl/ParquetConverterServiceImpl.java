@@ -121,7 +121,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private TableSchemaMapper tableSchemaMapper;
   private final StatisticsService statisticsService;
   private JdbcTemplate dremioJdbcTemplate;
-  private boolean hasWrongHeaders;
 
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
@@ -300,7 +299,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
       }
 
-      hasWrongHeaders = false;
+      importFileInDremioInfo.setHasCorrectHeaders(false);
 
       if (convertParquetWithCustomWay) {
         csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType, csvFiles);
@@ -312,7 +311,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
       }
 
-      if (hasWrongHeaders) {
+      if (importFileInDremioInfo.getHasCorrectHeaders()) {
         importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null));
         return 0L;
       }
@@ -542,9 +541,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
         String tableSchemaId = importFileInDremioInfo.getTableSchemaId() != null ? importFileInDremioInfo.getTableSchemaId() : fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
 
-        hasWrongHeaders = checkHeaders(tableSchemaId, dataSetSchema, csvParser);
-
-        if (hasWrongHeaders) {
+        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(tableSchemaId, dataSetSchema, csvParser));
+        if (importFileInDremioInfo.getHasCorrectHeaders()) {
           return null;
         }
 
@@ -649,9 +647,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
         String tableSchemaId = importFileInDremioInfo.getTableSchemaId() != null ? importFileInDremioInfo.getTableSchemaId() : fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
 
-        hasWrongHeaders = checkHeaders(tableSchemaId, dataSetSchema, csvParser);
-
-        if (hasWrongHeaders) {
+        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(tableSchemaId, dataSetSchema, csvParser));
+        if (importFileInDremioInfo.getHasCorrectHeaders()) {
           return null;
         }
 
