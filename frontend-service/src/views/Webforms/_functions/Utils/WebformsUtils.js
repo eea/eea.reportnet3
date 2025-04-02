@@ -303,6 +303,8 @@ const onParseWebformRecords = (records, webform, tableData, totalRecords, rootTa
           ...element,
           elementsRecords: onParseWebformRecords(records, { elements: element.elements }, tableData, totalRecords)
         });
+      } else if (element.type === 'LABEL' && rootTableName) {
+        result.push({ ...element });
       } else {
         let referencePkId;
         let referencePkValue;
