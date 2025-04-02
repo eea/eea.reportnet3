@@ -31,6 +31,7 @@ import { filterReducer } from './_functions/Reducers/filterReducer';
 
 import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotifications';
 
+import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isNil } from 'lodash';
@@ -157,6 +158,10 @@ export const ActionsToolbar = ({
     .filter(item => item !== null);
 
   const onExportTableData = async type => {
+    LocalUserStorageUtils.setPropertyToSessionStorage({
+      isExportTab: true
+    });
+
     const action = 'TABLE_EXPORT';
     actionsContext.testProcess(datasetId, action);
     notificationContext.add({ type: 'EXPORT_TABLE_DATA_START' }, true);
@@ -204,6 +209,10 @@ export const ActionsToolbar = ({
         },
         true
       );
+
+      LocalUserStorageUtils.setPropertyToSessionStorage({
+        isExportTab: false
+      });
     }
   };
 

@@ -54,6 +54,9 @@
   .field + h3 {
     margin-top: 3rem;
   }
+  .tableField + h3 {
+    margin-top: 3rem;
+  }
   h3 {
     .infoButtonWrapper {
       border-radius: 5px;
@@ -91,6 +94,9 @@
   h2 + .field {
     margin-top: 1rem;
   }
+  h2 + .tableField {
+    margin-top: 1rem;
+  }
 
   .fieldsBlock {
     display: flex;
@@ -116,6 +122,41 @@
     }
   }
 
+  .tableFieldsBlock {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    .tableField {
+      flex: auto;
+      margin-left: 0.5rem;
+      margin-right: 0.5rem;
+      width:100%!important;
+      text-align: left;
+      textarea{
+        margin-left:0!important;
+      }
+      .p-component{
+        width:100%!important;
+      }
+      &:first-of-type {
+        margin-left: 0;
+      }
+      &:last-of-type {
+        margin-right: 0;
+      }
+      .template {
+        color: var(--general-text-color);
+        width: 100%;
+      }
+      label {
+        max-width: 100%;
+      }
+    }
+  }
+
+  .fieldLabel {
+    width: 100%;
+  }
+
   .field {
     margin-bottom: 2rem;
     color: var(--general-text-color);
@@ -133,6 +174,117 @@
       display: inline-block;
       max-width: 75%;
       margin-bottom: 0.5rem;
+    }
+    .requiredMark {
+      color: var(--errors);
+    }
+    .label2 {
+      margin-top: 4rem 0 0 0;
+    }
+    .label3 {
+      margin: 2px 0 0 0;
+    }
+
+    .content {
+      display: flex;
+    }
+
+    .template {
+      width: 90%;
+
+      .nonExistField {
+        color: var(--errors);
+      }
+    }
+
+    :global .webform-validationErrors {
+      width: 2em !important;
+      &:first-of-type {
+        margin-left: 1rem !important;
+      }
+      :global .pi {
+        font-size: 1.8em;
+      }
+    }
+
+    .infoButtonWrapper {
+      border-radius: 5px;
+      border: 0.1rem solid var(--c-gray-25);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      .infoButton {
+        background-color: var(--c-white-color) !important;
+        border-radius: 50% !important;
+        color: var(--errors) !important;
+        font-size: 12pt !important;
+        height: 0.7em !important;
+        margin-left: 0.4rem !important;
+        width: 0.7em !important;
+        margin-right: 0.25rem;
+
+        > span {
+          left: 46% !important;
+          margin-left: -0.48em !important;
+          margin-top: -0.5em !important;
+        }
+
+        &:focus {
+          box-shadow: none !important;
+        }
+      }
+    }
+
+    .infoCircle {
+      background-color: var(--c-white-color);
+      border-radius: 50%;
+      color: var(--datatable-header-info-button-color);
+      font-size: 12pt;
+      height: 0.7em;
+      margin-left: 0.4rem;
+      width: 0.7em;
+
+      > span {
+        left: 46%;
+        margin-left: -0.48em;
+        margin-top: -0.5em;
+      }
+
+      &:focus {
+        box-shadow: none;
+      }
+    }
+  }
+
+  .tableField {
+    margin: 2.5rem 0 1.25rem 0;
+    color: var(--general-text-color);
+    text-align: right;
+
+    :global .p-multiselect {
+      margin-left: auto;
+      width: 100%;
+      padding: 0.2rem 0;
+    }
+    :global .p-dropdown {
+      text-align: right;
+      margin-left: auto;
+      width: 100%;
+    }
+    :global .p-calendar {
+      margin-left: auto;
+      width: 100%;
+    }
+    :global .p-inputtext:not(.p-column-filter) {
+      width: 100%;
+      margin-left: auto;
+      padding: 1rem 0.5rem;
+    }
+    label {
+      display: inline-block;
+      max-width: 80%;
+      margin-bottom: 0.6rem;
+      text-align: left;
     }
     .requiredMark {
       color: var(--errors);

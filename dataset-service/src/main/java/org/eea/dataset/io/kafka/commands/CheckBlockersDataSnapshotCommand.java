@@ -1,11 +1,15 @@
 package org.eea.dataset.io.kafka.commands;
 
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.data.repository.ValidationRepository;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -19,6 +23,7 @@ import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobProcessVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -121,6 +126,8 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   @Autowired
   private S3Service s3Service;
 
+  @Autowired
+  private TaskRepository taskRepository;
   /**
    * The Constant LOG.
    */
@@ -198,6 +205,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       parameters.put("userId", userId);
       parameters.put("datasetId", datasets);
       parameters.put("silentRelease", silentRelease);
+      if(validationJobId != null){
+        parameters.put("validationJobId", validationJobId);
+      }
       JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null,null, dataflowName,null, null, null);
 
       JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
@@ -244,6 +254,22 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
           }
         }
       }
+
+      if(validationJobId != null && !haveBlockers) {
+        List<String> processIds = jobProcessControllerZuul.findProcessesByJobId(validationJobId);
+        for(String processId: processIds) {
+          //check if there were canceled tasks that were related to blockers or canceled tasks without a rule id. If the list is not empty we need to fail the release
+          List<Task> canceledBlockerTasks = taskRepository.findAllByProcessIdAndStatusAndLevelErrorBlocker(processId, ProcessStatusEnum.CANCELED.toString());
+          if (canceledBlockerTasks != null && canceledBlockerTasks.size() > 0) {
+            LOG.info("Found canceled tasks with blockers for validationJobId {} and processId {}", validationJobId, processId);
+            haveBlockers = true;
+            jobControllerZuul.updateJobInfo(releaseJob.getId(), JobInfoEnum.ERROR_RELEASE_CANCELED_BLOCKERS, null);
+            failRelease(datasetId, user, dataset, releaseJob);
+            break;
+          }
+        }
+      }
+
       // If none blocker errors has found, we have to release datasets one by one
       if (!haveBlockers) {
         LOG.info(

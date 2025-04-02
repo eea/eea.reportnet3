@@ -91,6 +91,9 @@ public interface RecordRepository extends PagingAndSortingRepository<RecordValue
   @Query(nativeQuery = true, value = "SELECT count(*) from record_value")
   Integer countRecordsDataset();
 
+  @Query(nativeQuery = true, value = "SELECT count(*) from RecordValue rv INNER JOIN rv.tableValue tv WHERE tv.idTableSchema = :tableSchemaId")
+  Integer countRecordsTable(@Param("tableSchemaId") String tableSchemaId);
+
   /**
    * Find by ids.
    *

@@ -114,7 +114,7 @@ const useBigButtonList = ({
       groupByRepresentative: (isLeadDesigner || isObserver || isStewardSupport) && isDraftStatus,
       manageReporters: isLeadDesigner || isStewardSupport,
       manualTechnicalAcceptance: (isLeadDesigner || isStewardSupport) && isManualAcceptance,
-      newSchema: isCustodian && isDesigner && isDesignStatus,
+      newSchema: isDataflowCustodian && isDesigner && isDesignStatus,
       updateDataCollection: isLeadDesigner && isDraftStatus,
       receipt: isLeadReporterOfCountry && isReleased,
       release: isLeadReporterOfCountry,
@@ -509,7 +509,7 @@ const useBigButtonList = ({
           }
         ],
         visibility: true
-      }));
+      })).sort((a, b) => a.caption.localeCompare(b.caption));
 
   const euDatasetModels = isNil(dataflowState.data.euDatasets)
     ? []
@@ -532,7 +532,7 @@ const useBigButtonList = ({
           }
         ],
         visibility: true
-      }));
+      })).sort((a, b) => a.caption.localeCompare(b.caption));
 
   const isReleasing = dataflowState?.data?.datasets?.some(dataset => dataset.isReleasing);
 

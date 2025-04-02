@@ -1,6 +1,7 @@
 package org.eea.recordstore.service.impl;
 
 import com.github.dockerjava.api.model.Container;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
 import org.eea.interfaces.vo.validation.TaskVO;
@@ -539,5 +540,11 @@ public class RecordStoreServiceImpl implements RecordStoreService {
   public List<String> getLatestReleaseSnapshots(Long datasetId, Long dataflowId) {
     throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
   }
+
+  @Override
+  public Boolean recordValueCountMatchesMatViewCount(DataSetMetabaseVO dataset, Long jobId) {
+    throw new java.lang.UnsupportedOperationException(OPERATION_NOT_IMPLEMENTED_YET);
+  }
+
 
 }

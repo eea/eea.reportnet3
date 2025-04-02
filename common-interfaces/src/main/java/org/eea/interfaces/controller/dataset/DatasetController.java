@@ -274,6 +274,21 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId);
 
   /**
+   * Update fields.
+   *
+   * @param datasetId the dataset id
+   * @param fields the fields
+   * @param updateCascadePK the update cascade PK
+   * @param recordId the recordId
+   * @param tableSchemaId the tableSchemaId
+   */
+  @PutMapping("/{id}/updateWebformFields")
+  void updateWebformFields(@PathVariable("id") Long datasetId, @RequestBody List<FieldVO> fields,
+                   @RequestParam(value = "updateCascadePK", required = false) boolean updateCascadePK,
+                   @RequestParam(value = "recordId", required = false) String recordId,
+                   @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId);
+
+  /**
    * Gets the field values referenced.
    *
    * @param datasetIdOrigin the dataset id origin

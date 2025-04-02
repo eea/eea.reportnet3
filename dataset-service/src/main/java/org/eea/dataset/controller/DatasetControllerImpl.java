@@ -1416,6 +1416,75 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Update field.
+   *
+   * @param datasetId the dataset id
+   * @param fields the fields
+   * @param updateCascadePK the update cascade PK
+   * @param recordId the recordId
+   * @param tableSchemaId the tableSchemaId
+   */
+  @SneakyThrows
+  @Override
+  @HystrixCommand
+  @PutMapping("/{id}/updateWebformFields")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD', 'TESTDATASET_STEWARD')")
+  @ApiOperation(value = "Update field", hidden = true)
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully updated field"),
+      @ApiResponse(code = 404, message = "Error updating field, field not found"),
+      @ApiResponse(code = 400, message = "Error updating field, table is read only")})
+  public void updateWebformFields(
+      @ApiParam(type = "Long", value = "Dataset Id",
+          example = "0") @PathVariable("id") Long datasetId,
+      @ApiParam(value = "Field Object") @RequestBody List<FieldVO> fields,
+      @ApiParam(type = "boolean", value = "update cascade", example = "true") @RequestParam(
+          value = "updateCascadePK", required = false) boolean updateCascadePK,
+      @RequestParam(value = "recordId", required = false) String recordId,
+      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId) {
+
+    for (FieldVO field : fields) {
+      if (datasetService.checkIfDatasetLockedOrReadOnly(datasetId, field.getIdFieldSchema(),
+          EntityTypeEnum.FIELD)) {
+        LOG.error("Error updating a field in the dataset {}. The table is read only",
+            datasetId);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.TABLE_READ_ONLY);
+      }
+    }
+
+    try {
+      Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
+
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        Long providerId = datasetService.getDataProviderIdById(datasetId);
+        TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+        if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+            && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+          for (FieldVO field : fields) {
+            bigDataDatasetService.updateField(dataflowId, providerId, datasetId, field, recordId, tableSchemaVO, updateCascadePK);
+          }
+        }
+        else{
+          throw new Exception("The table data are not manually editable or the iceberg table has not been created");
+        }
+      }
+      else {
+        for (FieldVO field : fields) {
+          updateRecordHelper.executeFieldUpdateProcess(datasetId, field, updateCascadePK);
+        }
+      }
+    } catch (EEAException e) {
+      LOG.error("Error updating a field in the dataset {}. Message: {}", datasetId,
+          e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, EEAErrorMessage.UPDATING_FIELD);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error updating fields for datasetId {} Message: {}", datasetId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
    * Gets the field values referenced.
    *
    * @param datasetIdOrigin the dataset id origin
