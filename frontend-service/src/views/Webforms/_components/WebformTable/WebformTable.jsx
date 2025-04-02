@@ -373,7 +373,7 @@ export const WebformTable = ({
           <h3 className={styles.title}>
             <Button
               className={styles.addRecordButton}
-              icon="plus"
+              icon={webformTableState.isAddingMultiple ? 'spinnerAnimate' : 'add'}
               label={resourcesContext.messages['addRecord']}
               onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
             />

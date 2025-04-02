@@ -196,15 +196,16 @@ const parseNewEntitiesTableRecord = (
 
 const parseNewEntityTableRecordTable = (table, entityNumber, rootPkFieldId) => {
   if (!isNil(table) && !isNil(table.records) && !isEmpty(table.records)) {
-    const fields = table.records[0].fields.map(field => {
+    const fields = table.elements.map(element => {
       return {
         fieldData: {
-          [field.fieldSchema || field.fieldId]: TextUtils.areEquals(field?.referencedField?.idPk, rootPkFieldId)
+          [element.fieldSchema || element.fieldId]: TextUtils.areEquals(element?.referencedField?.idPk, rootPkFieldId)
             ? entityNumber
             : null,
-          type: field.type,
-          name: field.name,
-          fieldSchemaId: field.fieldSchema || field.fieldId
+          autoIncrement: element?.autoIncrement,
+          fieldSchemaId: element.fieldSchema || element.fieldId,
+          name: element.name,
+          type: element.fieldType
         }
       };
     });
