@@ -85,6 +85,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -2069,7 +2070,30 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void etlExportCsv(Long datasetId, String tableSchemaId, String tableName){
-        fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName);
+    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, Boolean includeAttachments) throws EEAException {
+        String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+        if (StringUtils.isNotBlank(tableSchemaId)) {
+            String tableName = datasetSchemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
+            fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true);
+            if(includeAttachments){
+                //delete attachments if they exist
+                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
+                }
+            }
+        }
+        else{
+            List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
+            for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS) {
+                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true);
+            }
+            if(includeAttachments){
+
+            }
+        }
+
+
+        //todo zip everything and then remove files
+        //location is exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE exportDLPath/dataset-datasetId/t1.csv
+        //File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
     }
 }

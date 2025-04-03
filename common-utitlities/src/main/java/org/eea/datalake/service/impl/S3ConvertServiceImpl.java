@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -84,7 +85,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers) {
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers, Boolean includeRecordId) {
         File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         LOG.info("Creating file for export: {}", csvFile);
 
@@ -92,7 +93,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum);
+            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum, includeRecordId);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
@@ -134,7 +135,12 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
-                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum) throws IOException {
+                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum, Boolean includeRecordId) throws IOException {
+
+        if(BooleanUtils.isTrue(includeRecordId)){
+            //if we use etlExportV4 we need to keep record id in the csv
+            headersToExclude.remove(RECORD_ID);
+        }
         int counter = 0;
         for (S3Object obj : exportFilenames) {
             File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);

@@ -19,7 +19,7 @@ public interface S3ConvertService {
 
     void convertParquetToCSVinZIP(File csvFile, String tableName, ZipOutputStream out);
 
-    File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, List<String> headers);
+    File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, List<String> headers, Boolean includeRecordId);
 
     File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers);
 

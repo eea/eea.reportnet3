@@ -38,10 +38,12 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -3017,6 +3019,36 @@ public class DatasetControllerImpl implements DatasetController {
 
     try {
       LOG.info("Creating etlExport File for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        if (StringUtils.isNotBlank(tableSchemaId)) {
+          TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+            LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
+          }
+        } else {
+          List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
+          for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+              LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
+              jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
+            }
+          }
+        }
+      }
+      else{
+        if(BooleanUtils.isTrue(exportCsv)){
+          jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ETL_EXPORT_V4_CITUS, null);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_ETL_EXPORTING_FILE_CITUS);
+        }
+      }
       datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
       LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {

@@ -329,6 +329,9 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private StatisticsService statisticsService;
 
+  @Autowired
+  private BigDataDatasetService bigDataDatasetService;
+
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
@@ -3817,21 +3820,7 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       LOG.info("Initiating FILE_EXPORT process for datasetId: {} and jobId {}", datasetId, jobId);
       if (BooleanUtils.isTrue(exportCsv)) {
-        /*
-        todo need to fix download endpoint as well
-        todo check if is iceberg
-        todo
-        if tableSchemaId != null{
-          create csv file named table.csv
-          extract attachments/table folder
-          zip them
-        }
-        else{
-          get all csv files
-          extract attachments folder
-          zip them
-        }
-         */
+        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, includeAttachments);
       }
       else {
         recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);

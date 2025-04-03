@@ -573,6 +573,12 @@ public final class EEAErrorMessage {
   public static final String EXPORTING_FILE_INTEGRATION =
       "An unknown error happenned while exporting a file through integration.";
 
+  /** The Constant EXPORTING_FILE_ICEBERG: {@value}. */
+  public static final String EXPORTING_FILE_ICEBERG = "Can not export because a table is iceberg";
+
+  /** The Constant ERROR_ETL_EXPORTING_FILE_CITUS: {@value}. */
+  public static final String ERROR_ETL_EXPORTING_FILE_CITUS = "Can not use etl export v4 for citus dataflows.";
+
   /** The Constant INSERTING_TABLE_DATA: {@value}. */
   public static final String INSERTING_DATASCHEMA =
       "An unknown error happenned while inserting a dataschema.";

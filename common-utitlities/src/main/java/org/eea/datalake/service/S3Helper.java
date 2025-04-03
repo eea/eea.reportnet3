@@ -163,4 +163,6 @@ public interface S3Helper {
      * @throws Exception exception
      */
     void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver, DremioHelperService dremioHelperService) throws Exception;
+
+    List<File> getFilesFromS3Locally(S3PathResolver s3PathResolver);
 }
