@@ -9,11 +9,14 @@ import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
+import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
@@ -21,7 +24,9 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockMethod;
+import org.eea.orchestrator.service.JobHistoryService;
 import org.eea.orchestrator.service.JobService;
+import org.eea.orchestrator.service.impl.JobProcessServiceImpl;
 import org.eea.orchestrator.utils.JobUtils;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
@@ -46,6 +51,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +69,9 @@ public class JobControllerImpl implements JobController {
     @Autowired
     private JobService jobService;
 
+    @Autowired
+    private JobHistoryService jobHistoryService;
+
     /** The dataset metabase controller zuul */
     @Autowired
     private DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
@@ -70,6 +79,10 @@ public class JobControllerImpl implements JobController {
     /** The dataset metabase controller zuul */
     @Autowired
     private DataFlowControllerZuul dataFlowControllerZuul;
+
+    /** The dataset metabase controller zuul */
+    @Autowired
+    private ProcessControllerZuul processControllerZuul;
 
     @Autowired
     private JobUtils jobUtils;
@@ -79,6 +92,8 @@ public class JobControllerImpl implements JobController {
             "jobStatus", "dateAdded", "dateStatusChanged", "fmeJobId", "dataflowName", "datasetName");
 
     private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
+    @Autowired
+    private JobProcessServiceImpl jobProcessServiceImpl;
 
 
     @Override
@@ -829,6 +844,49 @@ public class JobControllerImpl implements JobController {
             throw e;
         }
     }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping(value = "/canceledValidationTasks/{jobId}")
+    public List<JobCanceledValidationTasksVO> findCanceledValidationTasksByJobId(@PathVariable("jobId") Long jobId) {
+        JobVO job = jobService.findById(jobId);
+        JobHistoryVO jobHistory = null;
+
+        if (job == null) {
+            List<JobHistoryVO> jobHistories = jobHistoryService.getJobHistory(jobId);
+            if (jobHistories == null || jobHistories.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found");
+            }
+            jobHistory = jobHistories.get(0);
+        }
+
+        JobTypeEnum jobType = (job != null) ? job.getJobType() : jobHistory.getJobType();
+
+        if (!(jobType == JobTypeEnum.VALIDATION || jobType == JobTypeEnum.RELEASE)) {
+            return Collections.emptyList();
+        }
+
+        if (jobType == JobTypeEnum.RELEASE) {
+            Map<String, Object> parameters = (job != null) ? job.getParameters() : jobHistory.getParameters();
+            if (parameters != null && parameters.containsKey("validationJobId")) {
+                Object validationJobIdObj = parameters.get("validationJobId");
+                if (validationJobIdObj instanceof Number) {
+                    jobId = ((Number) validationJobIdObj).longValue();
+                }
+            } else {
+                LOG.warn("validationJobId parameter not found in job parameters");
+                return Collections.emptyList();
+            }
+        }
+
+        List<String> processIds = jobProcessServiceImpl.findProcessesByJobId(jobId);
+
+        List<JobCanceledValidationTasksVO> jobCanceledValidationTasksVO = processControllerZuul.findTasksByProcessIdsAndStatus(processIds);
+
+        LOG.info("Returning {} canceled validation tasks for jobId {}", jobCanceledValidationTasksVO.size(), jobId);
+        return jobCanceledValidationTasksVO;
+    }
+
 }
 
 
