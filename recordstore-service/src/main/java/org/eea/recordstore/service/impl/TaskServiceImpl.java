@@ -1,8 +1,11 @@
 package org.eea.recordstore.service.impl;
 
+import cdjd.com.fasterxml.jackson.databind.JsonNode;
+import cdjd.com.fasterxml.jackson.databind.ObjectMapper;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.recordstore.mapper.TaskMapper;
 import org.eea.recordstore.persistence.domain.Task;
 import org.eea.recordstore.persistence.repository.TaskRepository;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -78,4 +82,39 @@ public class TaskServiceImpl implements TaskService {
         List<Task> tasks = taskRepository.findByTaskTypeAndStatus(TaskType.IMPORT_TASK, ProcessStatusEnum.IN_PROGRESS);
         return taskMapper.entityListToClass(tasks);
     }
+
+    public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(List<String> processIds, ProcessStatusEnum statusEnum) {
+        List<Task> canceledTasks = taskRepository.findByProcessIdInAndStatus(processIds, statusEnum);
+
+        List<JobCanceledValidationTasksVO> result = new ArrayList<>();
+
+        for (Task task : canceledTasks) {
+            JobCanceledValidationTasksVO taskVO = new JobCanceledValidationTasksVO();
+            taskVO.setTaskId(task.getId());
+
+            if (task.getJson() != null) {
+                try {
+                    JsonNode taskJsonRootNode = new ObjectMapper().readTree(task.getJson());
+                    JsonNode taskJsonDataNode = taskJsonRootNode.path("data");
+
+                    if (taskJsonDataNode.has("ruleCode")) {
+                        taskVO.setRuleCode(taskJsonDataNode.get("ruleCode").asText());
+                    }
+                    if (taskJsonDataNode.has("ruleId")) {
+                        taskVO.setRuleId(taskJsonDataNode.get("ruleId").asText());
+                    }
+                    if (taskJsonDataNode.has("ruleLevelError")) {
+                        taskVO.setRuleLevelError(taskJsonDataNode.get("ruleLevelError").asText());
+                    }
+
+                } catch (Exception e) {
+                }
+            }
+
+            result.add(taskVO);
+        }
+
+        return result;
+    }
+
 }
