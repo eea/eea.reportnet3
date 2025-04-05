@@ -72,6 +72,7 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
         selectedField: payload.field,
         newRecord: inmNewRecord,
         record: inmRecord,
+        changedConditionalFieldData: payload.conditional ? payload.field : null,
         conditionalFieldChange: payload.conditional ? !state.conditionalFieldChange : state.conditionalFieldChange,
         isConditionalChanged: payload.conditional,
         isDependantConditionalField,
