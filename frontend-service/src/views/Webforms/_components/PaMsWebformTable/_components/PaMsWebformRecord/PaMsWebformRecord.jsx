@@ -89,6 +89,7 @@ export const PaMsWebformRecord = ({
   const resourcesContext = useContext(ResourcesContext);
 
   const [pamsWebformRecordState, pamsWebformRecordDispatch] = useReducer(pamsWebformRecordReducer, {
+    changedConditionalFieldData: null,
     conditionalFieldChange: false,
     dependantConditionalFieldId: '',
     isConditionalChanged: false,
@@ -101,6 +102,7 @@ export const PaMsWebformRecord = ({
   });
 
   const {
+    changedConditionalFieldData,
     conditionalFieldChange,
     dependantConditionalFieldId,
     isConditionalChanged,
@@ -306,6 +308,7 @@ export const PaMsWebformRecord = ({
                   ) : (
                     <PaMsWebformField
                       bigData={bigData}
+                      changedConditionalFieldData={changedConditionalFieldData}
                       columnsSchema={columnsSchema}
                       conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
