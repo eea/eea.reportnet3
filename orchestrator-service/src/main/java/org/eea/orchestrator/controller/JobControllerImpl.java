@@ -856,7 +856,7 @@ public class JobControllerImpl implements JobController {
         if (job == null) {
             List<JobHistoryVO> jobHistories = jobHistoryService.getJobHistory(jobId);
             if (jobHistories == null || jobHistories.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found");
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(EEAErrorMessage.JOB_NOT_FOUND, jobId));
             }
             jobHistory = jobHistories.get(0);
         }
