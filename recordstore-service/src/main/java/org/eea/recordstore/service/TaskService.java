@@ -1,5 +1,7 @@
 package org.eea.recordstore.service;
 
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
 
 import java.util.Date;
@@ -40,4 +42,10 @@ public interface TaskService {
      * @return the tasks
      */
     List<TaskVO> findImportTasksInProgress();
-}
+
+    /**
+     * Finds tasks coming from list of processIds and status statusEnum
+     * @return the tasks
+     */
+    List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(List<String> processIds, ProcessStatusEnum statusEnum);
+    }

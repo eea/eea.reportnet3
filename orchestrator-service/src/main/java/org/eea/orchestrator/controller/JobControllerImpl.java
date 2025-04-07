@@ -856,7 +856,8 @@ public class JobControllerImpl implements JobController {
         if (job == null) {
             List<JobHistoryVO> jobHistories = jobHistoryService.getJobHistory(jobId);
             if (jobHistories == null || jobHistories.isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Job not found");
+                LOG.warn(String.format(EEAErrorMessage.JOB_NOT_FOUND, jobId));
+                return Collections.emptyList();
             }
             jobHistory = jobHistories.get(0);
         }
@@ -875,7 +876,7 @@ public class JobControllerImpl implements JobController {
                     jobId = ((Number) validationJobIdObj).longValue();
                 }
             } else {
-                LOG.warn("validationJobId parameter not found in job parameters");
+                LOG.warn("validationJobId parameter not found in job parameters for jobId {}", jobId);
                 return Collections.emptyList();
             }
         }

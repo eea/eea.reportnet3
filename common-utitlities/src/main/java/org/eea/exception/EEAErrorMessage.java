@@ -849,6 +849,10 @@ public final class EEAErrorMessage {
   public static final String ERROR_DELETING_UNIQUE_CONSTRAINS =
           "An unknown error happenned while deleting Unique Constrains.";
 
+  /** The Constant JOB_NOT_FOUND: {@value}. */
+  public static final String JOB_NOT_FOUND =
+          "JOB not found for Job ID %s.";
+
   /**
    * Instantiates a new EEA error message.
    */
