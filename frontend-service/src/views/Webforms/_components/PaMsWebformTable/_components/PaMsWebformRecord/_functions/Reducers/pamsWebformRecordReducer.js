@@ -60,7 +60,7 @@ export const pamsWebformRecordReducer = (state, { type, payload }) => {
       let dependantConditionalFieldId;
       let isDependantConditionalField = false;
 
-      if (payload.conditional && payload.field.fieldType === 'LINK') {
+      if (payload.conditional && (payload.field.fieldType === 'LINK' || payload.field.fieldType === 'CODELIST')) {
         if (!isEmpty(payload.field?.dependency)) {
           isDependantConditionalField = true;
           dependantConditionalFieldId = payload.field.fieldSchema || payload.field.fieldSchemaId;

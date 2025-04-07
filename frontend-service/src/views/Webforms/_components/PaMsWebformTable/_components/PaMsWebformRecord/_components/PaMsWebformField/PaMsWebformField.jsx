@@ -242,7 +242,7 @@ export const PaMsWebformField = ({
     let conditionalFields;
     let parsedValues;
 
-    if (isConditional && field.fieldType === 'LINK') {
+    if (isConditional && (field.fieldType === 'LINK' || field.fieldType === 'CODELIST')) {
       const changedElementIndex = record.elements.indexOf(field);
 
       conditionalFields = record.elements
@@ -572,10 +572,12 @@ export const PaMsWebformField = ({
                 typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
                   ? event.target?.value?.value
                   : event.target?.value;
-              onFillField(field, option, value, isConditional);
-              pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
-              if (isNil(field.recordId)) onSaveField(option, value);
-              else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+              if (value !== field.value) {
+                onFillField(field, option, value, isConditional);
+                pamsWebformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+                if (isNil(field.recordId)) onSaveField(option, value);
+                else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+              }
             }}
             onFilterInputChangeBackend={filter => onFilter(filter, field)}
             optionLabel="itemType"
@@ -594,6 +596,23 @@ export const PaMsWebformField = ({
       case 'PHONE':
       case 'NUMBER_INTEGER':
       case 'NUMBER_DECIMAL':
+        if (
+          isConditionalChanged &&
+          !isEmpty(field.value) &&
+          (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+        ) {
+          const emptyValue = [];
+          if (
+            (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
+            !isEmpty(field.referencedField?.masterConditionalFieldId)
+          ) {
+            (field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+              record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData)) &&
+              onFillField(field, option, emptyValue, isConditional);
+          } else {
+            onFillField(field, option, emptyValue, isConditional);
+          }
+        }
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
