@@ -37,7 +37,7 @@ export const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible
 
   const onGetApiKey = async () => {
     try {
-      const { data } = await DataflowService.getApiKey(dataflowId, dataProviderId, isCustodian);
+      const { data } = await DataflowService.getApiKey(dataflowId, dataProviderId ? dataProviderId : undefined);
       setApiKey(data);
     } catch (error) {
       console.error('ApiKeyDialog - onGetApiKey.', error);
@@ -49,7 +49,7 @@ export const ApiKeyDialog = ({ dataflowId, dataProviderId, isApiKeyDialogVisible
   const onGenerateApiKey = async () => {
     setIsKeyLoading(true);
     try {
-      const { data } = await DataflowService.createApiKey(dataflowId, dataProviderId, isCustodian);
+      const { data } = await DataflowService.createApiKey(dataflowId, dataProviderId ? dataProviderId : undefined);
       setApiKey(data);
     } catch (error) {
       console.error('ApiKeyDialog - onGenerateApiKey.', error);

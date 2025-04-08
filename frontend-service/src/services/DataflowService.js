@@ -330,8 +330,8 @@ export const DataflowService = {
     return datasetSchemas;
   },
 
-  getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
-    await DataflowRepository.getApiKey(dataflowId, dataProviderId, isCustodian),
+  getApiKey: async (dataflowId, dataProviderId) =>
+    await DataflowRepository.getApiKey(dataflowId, dataProviderId),
 
   getPublicDataflowsByCountryCode: async ({ countryCode, sortOrder, pageNum, numberRows, sortField, filterBy }) => {
     const parsedFilterBy = DataflowUtils.parseRequestPublicCountryFilterBy(filterBy);
@@ -360,8 +360,8 @@ export const DataflowService = {
     return publicDataflowData;
   },
 
-  createApiKey: async (dataflowId, dataProviderId, isCustodian) =>
-    await DataflowRepository.createApiKey(dataflowId, dataProviderId, isCustodian),
+  createApiKey: async (dataflowId, dataProviderId) =>
+    await DataflowRepository.createApiKey(dataflowId, dataProviderId),
 
   getAllDataflowsUserList: async () => {
     const usersListDTO = await DataflowRepository.getAllDataflowsUserList();

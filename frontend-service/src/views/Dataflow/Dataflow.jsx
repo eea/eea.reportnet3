@@ -1933,7 +1933,7 @@ export const Dataflow = () => {
             dataflowId={dataflowId}
             dataProviderId={dataProviderId}
             isApiKeyDialogVisible={dataflowState.isApiKeyDialogVisible}
-            isCustodian={isLeadDesigner && !isLeadReporter}
+            isCustodian={isLeadDesigner}
             manageDialogs={manageDialogs}
           />
         )}

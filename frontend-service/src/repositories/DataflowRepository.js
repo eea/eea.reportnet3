@@ -1,6 +1,7 @@
 import { DataflowConfig } from './config/DataflowConfig';
 import { getUrl } from './_utils/UrlUtils';
 import { HTTPRequester } from './_utils/HTTPRequester';
+import isNil from "lodash/isNil";
 
 export const DataflowRepository = {
   countByType: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.countByType) }),
@@ -72,20 +73,16 @@ export const DataflowRepository = {
   exportSchemas: async dataflowId =>
     await HTTPRequester.download({ url: getUrl(DataflowConfig.exportSchemas, { dataflowId }) }),
 
-  createApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+  createApiKey: async (dataflowId, dataProviderId) =>
     await HTTPRequester.post({
-      url: isCustodian
-        ? getUrl(DataflowConfig.createApiKeyCustodian, { dataflowId })
-        : getUrl(DataflowConfig.createApiKey, { dataflowId, dataProviderId })
+      url: getUrl(DataflowConfig.createApiKey, { dataflowId, dataProviderId })
     }),
 
   getAllDataflowsUserList: async () => await HTTPRequester.get({ url: getUrl(DataflowConfig.getAllDataflowsUserList) }),
 
-  getApiKey: async (dataflowId, dataProviderId, isCustodian) =>
+  getApiKey: async (dataflowId, dataProviderId) =>
     await HTTPRequester.get({
-      url: isCustodian
-        ? getUrl(DataflowConfig.getApiKeyCustodian, { dataflowId })
-        : getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId })
+      url: getUrl(DataflowConfig.getApiKey, { dataflowId, dataProviderId })
     }),
 
   getDatasetsProvidersStatus: async dataflowId =>
