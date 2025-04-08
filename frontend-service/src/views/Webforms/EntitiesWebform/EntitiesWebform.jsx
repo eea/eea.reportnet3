@@ -36,6 +36,7 @@ export const EntitiesWebform = ({
   dataflowId,
   dataProviderId,
   datasetId,
+  hideEntities,
   isIcebergCreated,
   isReleasing,
   isReporting,
@@ -525,55 +526,79 @@ export const EntitiesWebform = ({
 
   return renderLayout(
     <Fragment>
-      <ul className={styles.tableList}>
-        {Object.keys(tableList).map(list => (
-          <li className={styles.tableListItem} key={uniqueId()}>
-            <div className={styles.tableListTitleWrapper}>
-              <span className={styles.tableListTitle}>{resourcesContext.messages['entitiesLabel']}:</span>
-            </div>
-            <div className={styles.tableListContentWrapper}>
-              {tableList[list].map(items => (
-                <span
-                  className={`${styles.tableListId} ${
-                    items.recordId === selectedTable.recordId ? styles.selected : null
-                  }`}
-                  key={uniqueId()}
-                  onClick={() => {
-                    if (!(bigData && !isIcebergCreated)) {
-                      entitiesWebformDispatch({
-                        type: 'ON_REFRESH',
-                        payload: { value: !entitiesWebformState.isRefresh }
-                      });
-                      onSelectRecord(items.recordId, items.id);
-                      onToggleView('details');
-                    }
-                  }}>
-                  {items.id || '-'}
-                </span>
-              ))}
-            </div>
-            <div className={styles.addButtonWrapper}>
-              <Button
-                className={styles.addButton}
-                disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
-                icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
-                label={resourcesContext.messages['addEntity']}
-                onClick={() => {
-                  const manualRootId = tables
-                    .filter(table => table?.isRootTable === true)[0]
-                    .elements.some(element => element?.autoIncrement === false && element?.isPrimary === true);
+      {hideEntities && view === 'overview' ? (
+        <div className={styles.hiddenEntitiesAddButton}>
+          <Button
+            className={styles.addButton}
+            disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
+            icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
+            label={resourcesContext.messages['addEntity']}
+            onClick={() => {
+              const manualRootId = tables
+                .filter(table => table?.isRootTable === true)[0]
+                .elements.some(element => element?.autoIncrement === false && element?.isPrimary === true);
 
-                  if (manualRootId) {
-                    manageDialogs('isAddEntityIdDialogVisible', true);
-                  } else {
-                    onAddEntitiesRecord();
-                  }
-                }}
-              />
-            </div>
-          </li>
-        ))}
-      </ul>
+              if (manualRootId) {
+                manageDialogs('isAddEntityIdDialogVisible', true);
+              } else {
+                onAddEntitiesRecord();
+              }
+            }}
+          />
+        </div>
+      ) : (
+        !hideEntities && (
+          <ul className={styles.tableList}>
+            {Object.keys(tableList).map(list => (
+              <li className={styles.tableListItem} key={uniqueId()}>
+                <div className={styles.tableListTitleWrapper}>
+                  <span className={styles.tableListTitle}>{resourcesContext.messages['entitiesLabel']}:</span>
+                </div>
+                <div className={styles.tableListContentWrapper}>
+                  {tableList[list].map(items => (
+                    <span
+                      className={`${styles.tableListId} ${
+                        items.recordId === selectedTable.recordId ? styles.selected : null
+                      }`}
+                      key={uniqueId()}
+                      onClick={() => {
+                        if (!(bigData && !isIcebergCreated)) {
+                          entitiesWebformDispatch({
+                            type: 'ON_REFRESH',
+                            payload: { value: !entitiesWebformState.isRefresh }
+                          });
+                          onSelectRecord(items.recordId, items.id);
+                          onToggleView('details');
+                        }
+                      }}>
+                      {items.id || '-'}
+                    </span>
+                  ))}
+                </div>
+                <div className={styles.addButtonWrapper}>
+                  <Button
+                    className={styles.addButton}
+                    disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
+                    icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
+                    label={resourcesContext.messages['addEntity']}
+                    onClick={() => {
+                      const manualRootId = tables
+                        .filter(table => table?.isRootTable === true)[0]
+                        .elements.some(element => element?.autoIncrement === false && element?.isPrimary === true);
+
+                      if (manualRootId) {
+                        manageDialogs('isAddEntityIdDialogVisible', true);
+                      } else {
+                        onAddEntitiesRecord();
+                      }
+                    }}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )
+      )}
 
       {renderOverviewButton()}
 

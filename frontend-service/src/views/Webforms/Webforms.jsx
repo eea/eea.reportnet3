@@ -93,6 +93,7 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          hideEntities={selectedConfiguration?.hideEntities}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReleasing={isReleasing}

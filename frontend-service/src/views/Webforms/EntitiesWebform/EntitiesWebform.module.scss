@@ -101,6 +101,7 @@
     }
 
     .addButtonWrapper {
+      text-align: right !important;
       width: 15%;
       display: flex;
       justify-content: flex-end;
@@ -134,6 +135,12 @@
       }
     }
   }
+}
+
+.hiddenEntitiesAddButton {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .missingElements {
