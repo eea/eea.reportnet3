@@ -438,6 +438,8 @@ public class S3HelperImpl implements S3Helper {
 
     @Override
     public List<File> getFilesFromS3Locally(S3PathResolver s3PathResolver){
-        getFileFromS3(String key, String fileName, String path, String fileType)
+        //getFileFromS3(String key, String fileName, String path, String fileType)
+        //path exportDLPath/dataset-datasetId/etlExport/attachments
+        return null;
     }
 }

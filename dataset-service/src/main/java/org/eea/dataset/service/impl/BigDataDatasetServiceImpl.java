@@ -2071,13 +2071,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, Boolean includeAttachments) throws EEAException {
-        String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+        DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         if (StringUtils.isNotBlank(tableSchemaId)) {
-            String tableName = datasetSchemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
+            String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true);
-            if(includeAttachments){
-                //delete attachments if they exist
+             if(includeAttachments){
+                //get attachments if they exist
+                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, dataSetMetabaseVO.getDataProviderId(), datasetId, tableName, tableName, S3_ATTACHMENTS_TABLE_PATH);
                 if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
+                    s3HelperPrivate.getFilesFromS3Locally(s3TablePathResolver);
                 }
             }
         }
@@ -2087,13 +2089,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true);
             }
             if(includeAttachments){
-
+                //get attachments if they exist
+                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, dataSetMetabaseVO.getDataProviderId(), datasetId, null, null, S3_ATTACHMENTS_PARENT_FOLDER_PATH);
+                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_PARENT_FOLDER_PATH)) {
+                    s3HelperPrivate.getFilesFromS3Locally(s3TablePathResolver);
+                }
             }
+
         }
 
 
         //todo zip everything and then remove files
-        //location is exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE exportDLPath/dataset-datasetId/t1.csv
+        //if we are at data collection or eu dataset the attachments are in different paths
+        //location is exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE exportDLPath/dataset-datasetId/etlExport/t1.csv
         //File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        //zip should contain t1.csv, t2.csv, attachments -> includes t1 and t2 folder -> include files
     }
 }
