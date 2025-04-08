@@ -1660,12 +1660,14 @@ public class FileTreatmentHelper implements DisposableBean {
 
             }
             if (warningList.size() > 0) {
-                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
-                NotificationVO notificationWarning = NotificationVO.builder()
-                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                        .datasetId(datasetId).fileName(originalFileName).build();
-                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
-                        value, notificationWarning);
+                if(warningList.contains(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null))) {
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+                    NotificationVO notificationWarning = NotificationVO.builder()
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                            .datasetId(datasetId).fileName(originalFileName).build();
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
+                            value, notificationWarning);
+                }
             }
 
         } catch (EEAException e) {
