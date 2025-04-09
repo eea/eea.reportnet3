@@ -83,6 +83,11 @@ public class TaskServiceImpl implements TaskService {
         return taskMapper.entityListToClass(tasks);
     }
 
+    /**
+     * Finds tasks from processIds and status statusEnum
+     * @return the tasks
+     */
+    @Override
     public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(List<String> processIds, ProcessStatusEnum statusEnum) {
         List<Task> canceledTasks = taskRepository.findByProcessIdInAndStatus(processIds, statusEnum);
 

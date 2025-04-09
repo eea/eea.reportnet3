@@ -34,6 +34,7 @@ import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -161,12 +162,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     int numberOfFailedImportsForOnlyReadOnlyFields = 0;
     int numberOfFailedImportsForReadOnlyTables = 0;
     int numberOfImportsForMismatchOfData = 0;
+    int numberOfImportsForWrongHeaders = 0;
     String fileExtension = StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId()) ? CSV : ZIP;
     DataSetMetabase dataSetMetabase = dataSetMetabaseMapper.classToEntity(datasetMetabaseService.findDatasetMetabase(importFileInDremioInfo.getDatasetId()));
     if(importFileInDremioInfo.getReplaceData()) {
       deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()));
     }
-    Set<String> warningMessages = new HashSet<>();
+    List<String> warningMessages = new ArrayList<>();
     //initialize warning message
     importFileInDremioInfo.setWarningMessages(warningMessages);
     for (File csvFile : csvFiles) {
@@ -176,7 +178,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       } else {
         tableSchemaVO = getTableSchemaVO(csvFile.getName(), dataSetSchema, importFileInDremioInfo);
       }
-      Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO);
+      Long numberOfRecordsToBeInserted = convertCsvToParquet(csvFile, dataSetSchema, importFileInDremioInfo, tableSchemaVO, csvFiles);
 
       //update statistics
       updateImportStatistics(tableSchemaVO.getIdTableSchema(), numberOfRecordsToBeInserted.toString(), dataSetMetabase, fileExtension);
@@ -202,6 +204,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
         if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null))){
           numberOfImportsForMismatchOfData++;
+        }
+        if (warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null))){
+          numberOfImportsForWrongHeaders++;
         }
       }
     }
@@ -242,10 +247,17 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         throw new Exception(EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES);
       }
     }
+
+    if (numberOfImportsForWrongHeaders != 0) {
+      if (numberOfImportsForWrongHeaders == csvFiles.size()) {
+        importFileInDremioInfo.setErrorMessage(EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS);
+        throw new Exception(EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS);
+      }
+    }
   }
 
   //returns the number of records that were inserted for a table
-  private Long convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, TableSchemaVO tableSchemaVO) throws Exception {
+  private Long convertCsvToParquet(File csvFile, DataSetSchema dataSetSchema, ImportFileInDremioInfo importFileInDremioInfo, TableSchemaVO tableSchemaVO, List<File> csvFiles) throws Exception {
     LOG.info("For job {} converting csv file {} to parquet file", importFileInDremioInfo, csvFile.getPath());
     Long numberOfRecordsToBeInserted = 0L;
     try {
@@ -287,6 +299,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         }
       }
 
+      importFileInDremioInfo.setHasCorrectHeaders(false);
 
       if (convertParquetWithCustomWay) {
         csvFilesWithAddedColumns = modifyAndSplitCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, maxCsvLinesPerFile, datasetType);
@@ -296,6 +309,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         } else {
           csvFilesWithAddedColumns = modifyCsvFile(csvFile, dataSetSchema, importFileInDremioInfo, datasetType);
         }
+      }
+
+      if (importFileInDremioInfo.getHasCorrectHeaders()) {
+        importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null));
+        return 0L;
       }
 
       if (csvFilesWithAddedColumns == null) {
@@ -520,7 +538,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
                CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-      CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
+        CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
+        String tableSchemaId = importFileInDremioInfo.getTableSchemaId() != null ? importFileInDremioInfo.getTableSchemaId() : fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+
+        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(tableSchemaId, dataSetSchema, csvParser));
+        if (importFileInDremioInfo.getHasCorrectHeaders()) {
+          return null;
+        }
 
         for (CSVRecord csvRecord : csvParser) {
           checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", csvFile, importFileInDremioInfo);
@@ -553,6 +577,34 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
     LOG.info(MEASUREMENTS + " with job {} modifyCsvFile finished", importFileInDremioInfo);
     return modifiedCsvFiles;
+  }
+
+  private static Boolean checkHeaders(String tableSchemaId, DataSetSchema dataSetSchema, CSVParser csvParser) {
+    RecordSchema recordSchema = getRecordSchema(tableSchemaId, dataSetSchema);
+
+    if (csvParser.getHeaderNames().size() != recordSchema.getFieldSchema().size()) {
+      return true;
+    }
+
+    for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
+      if (!csvParser.getHeaderNames().contains(fieldSchema.getHeaderName())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static RecordSchema getRecordSchema(String tableSchemaId, DataSetSchema schema) {
+    List<TableSchema> tablesSchema = schema.getTableSchemas();
+    TableSchema recordSchemas = null;
+
+    for (TableSchema tableSchema : tablesSchema) {
+      if (tableSchema.getIdTableSchema().toString().equalsIgnoreCase(tableSchemaId)) {
+        recordSchemas = tableSchema;
+      }
+    }
+    RecordSchema recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
+    return recordSchema;
   }
 
   /**
@@ -593,6 +645,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                .setTrim(true).build())) {
 
         CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
+        String tableSchemaId = importFileInDremioInfo.getTableSchemaId() != null ? importFileInDremioInfo.getTableSchemaId() : fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+
+        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(tableSchemaId, dataSetSchema, csvParser));
+        if (importFileInDremioInfo.getHasCorrectHeaders()) {
+          return null;
+        }
 
         for (CSVRecord csvRecord : csvParser) {
           fileIsEmpty = false;
