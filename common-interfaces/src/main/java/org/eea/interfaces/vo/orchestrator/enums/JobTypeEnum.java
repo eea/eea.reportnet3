@@ -18,7 +18,10 @@ public enum JobTypeEnum {
     COPY_TO_EU_DATASET("COPY_TO_EU_DATASET"),
 
     /** The file export type. */
-    FILE_EXPORT("FILE_EXPORT");
+    FILE_EXPORT("FILE_EXPORT"),
+
+    /** The delete type. */
+    DELETE("DELETE");
 
     /** The value. */
     private final String value;

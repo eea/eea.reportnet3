@@ -573,6 +573,14 @@ public final class EEAErrorMessage {
   public static final String DELETING_DESIGN_DATASET =
       "An unknown error happenned while deleting a dataset.";
 
+  /** The Constant DELETING_DATASET_DATA_REFUSED: {@value}. */
+  public static final String DELETING_DATASET_DATA_REFUSED =
+    "A delete dataset data can not be executed right now because there is another job being executed and is related to the same dataset id";
+
+  /** The Constant DELETING_TABLE_DATA_REFUSED: {@value}. */
+  public static final String DELETING_TABLE_DATA_REFUSED =
+    "A delete table data can not be executed right now because there is another job being executed and is related to the same dataset id";
+
   /** The Constant CREATING_FIELD_SCHEMA: {@value}. */
   public static final String CREATING_FIELD_SCHEMA =
       "An unknown error happenned while creating a field schema.";
