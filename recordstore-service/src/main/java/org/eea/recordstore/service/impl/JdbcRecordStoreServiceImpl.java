@@ -3233,7 +3233,11 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
       if(materializedViewList.stream().anyMatch(tableSchemaIdNameVO.getNameTableSchema()::equalsIgnoreCase)){
         Integer numberOfRecordValues = getNumberOfRecordsInTable(dataset.getId(), tableSchemaIdNameVO.getIdTableSchema());
-        String materializedViewRecordCount = "select count(*) from dataset_" + dataset.getId() + "." + tableSchemaIdNameVO.getNameTableSchema();
+        String materializedViewRecordCount = "select count(*) from dataset_"
+            + dataset.getId()
+            + ".\""
+            + tableSchemaIdNameVO.getNameTableSchema().toLowerCase()
+            + "\"";
         Integer numberOfMaterializedViewRecords = jdbcTemplate.queryForObject(materializedViewRecordCount, Integer.class);
         if(numberOfRecordValues.intValue() != numberOfMaterializedViewRecords.intValue()){
           LOG.error("For datasetId {} table {} and jobId {} the materialized views are not updated. numberOfRecordValues={} numberOfMaterializedViewRecords={} Canceling job.", dataset.getId(), tableSchemaIdNameVO.getNameTableSchema(), jobId, numberOfRecordValues, numberOfMaterializedViewRecords);
