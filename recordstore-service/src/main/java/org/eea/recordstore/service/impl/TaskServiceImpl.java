@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -88,18 +89,33 @@ public class TaskServiceImpl implements TaskService {
      * @return the tasks
      */
     @Override
-    public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(List<String> processIds, ProcessStatusEnum statusEnum) {
+    public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
+            List<String> processIds, ProcessStatusEnum statusEnum, int pageNum, int pageSize) {
+
         List<Task> canceledTasks = taskRepository.findByProcessIdInAndStatus(processIds, statusEnum);
+
+        if (canceledTasks.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        int fromIndex = pageNum * pageSize;
+        if (fromIndex >= canceledTasks.size()) {
+            return Collections.emptyList();
+        }
+
+        int toIndex = Math.min(fromIndex + pageSize, canceledTasks.size());
+        List<Task> paginatedTasks = canceledTasks.subList(fromIndex, toIndex);
 
         List<JobCanceledValidationTasksVO> result = new ArrayList<>();
 
-        for (Task task : canceledTasks) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        for (Task task : paginatedTasks) {
             JobCanceledValidationTasksVO taskVO = new JobCanceledValidationTasksVO();
             taskVO.setTaskId(task.getId());
 
             if (task.getJson() != null) {
                 try {
-                    JsonNode taskJsonRootNode = new ObjectMapper().readTree(task.getJson());
+                    JsonNode taskJsonRootNode = objectMapper.readTree(task.getJson());
                     JsonNode taskJsonDataNode = taskJsonRootNode.path("data");
 
                     if (taskJsonDataNode.has("ruleCode")) {

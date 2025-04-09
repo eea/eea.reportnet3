@@ -47,5 +47,6 @@ public interface TaskService {
      * Finds tasks coming from list of processIds and status statusEnum
      * @return the tasks
      */
-    List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(List<String> processIds, ProcessStatusEnum statusEnum);
+    List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
+            List<String> processIds, ProcessStatusEnum statusEnum, int pageNum, int pageSize);
     }
