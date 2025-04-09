@@ -751,7 +751,7 @@ public class JobControllerImpl implements JobController {
                 // copy from in to out
                 IOUtils.copyLarge(in, out);
                 // delete the file after downloading it ?
-                //FileUtils.forceDelete(file);
+                FileUtils.forceDelete(file);
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
                 throw e;

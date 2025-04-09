@@ -3820,7 +3820,7 @@ public class DatasetServiceImpl implements DatasetService {
     try {
       LOG.info("Initiating FILE_EXPORT process for datasetId: {} and jobId {}", datasetId, jobId);
       if (BooleanUtils.isTrue(exportCsv)) {
-        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, includeAttachments);
+        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
       }
       else {
         recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);

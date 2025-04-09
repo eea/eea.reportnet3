@@ -49,8 +49,12 @@ import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
+
+import static org.eea.utils.LiteralConstants.CSV_TYPE;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -74,6 +78,10 @@ public class JobServiceImpl implements JobService {
 
     @Value("${importPath}")
     private String importPath;
+
+    /**  The path export DL */
+    @Value("${exportDLPath}")
+    private String exportDLPath;
 
     /**
      * The admin user.
@@ -613,7 +621,30 @@ public class JobServiceImpl implements JobService {
     @Override
     public File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException {
         // we compound the route and create the file
-        File file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
+
+        File file;
+        JobVO job = findById(jobId);
+        if(job.getParameters().get("exportCsv") != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportCsv"))){
+            String folderToZipPath = exportDLPath + "/dataset-" + job.getDatasetId() + "/etlExportV4_" + jobId;
+            File parentFolder = new File(folderToZipPath);
+            file = new File(folderToZipPath + ".zip");
+
+            try {
+                //remove everything from the folder
+                Files.walk(parentFolder.toPath())
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
+            catch (Exception e){
+                LOG.error("Could not remove files from parent folder {}", folderToZipPath);
+            }
+
+        }
+        else{
+            file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
+        }
+        // we compound the route and create the file
         if (!file.exists()) {
             LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", jobId, fileName);
             throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);

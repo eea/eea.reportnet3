@@ -85,29 +85,49 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers, Boolean includeRecordId) {
-        File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers, Boolean etlExportV4, Long jobId) {
+        File csvFile = null;
+        if(BooleanUtils.isTrue(etlExportV4)){
+            String etlExportFolderName = (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
+            csvFile = new File(new File(new File(exportDLPath, "dataset-" + datasetId), etlExportFolderName), tableName + CSV_TYPE);
+        }
+        else{
+            csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        }
+        // Ensure the directories exist
+        csvFile.getParentFile().mkdirs();
         LOG.info("Creating file for export: {}", csvFile);
 
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum, includeRecordId);
+            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum, etlExportV4);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
 
         if (csvFile.length() == 0) {
-            return createEmptyCSVFile(tableName, datasetId, headers);
+            return createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId);
         }
 
         return csvFile;
     }
 
     @Override
-    public File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers) {
-        File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+    public File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId) {
+        File csvFile = null;
+        if(BooleanUtils.isTrue(etlExportV4)){
+            //we need to add the record is as a first element
+            if(!headers.contains(RECORD_ID)){
+                headers.add(0, RECORD_ID);
+            }
+            String etlExportFolderName = (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
+            csvFile = new File(new File(new File(exportDLPath, "dataset-" + datasetId), etlExportFolderName), tableName + CSV_TYPE);
+        }
+        else{
+            csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        }
         LOG.info("Creating file for export: {}", csvFile);
 
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
@@ -135,9 +155,9 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
-                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum, Boolean includeRecordId) throws IOException {
+                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) throws IOException {
 
-        if(BooleanUtils.isTrue(includeRecordId)){
+        if(BooleanUtils.isTrue(etlExportV4)){
             //if we use etlExportV4 we need to keep record id in the csv
             headersToExclude.remove(RECORD_ID);
         }
