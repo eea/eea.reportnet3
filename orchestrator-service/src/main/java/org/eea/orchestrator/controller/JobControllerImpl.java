@@ -849,7 +849,9 @@ public class JobControllerImpl implements JobController {
     @Override
     @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/canceledValidationTasks/{jobId}")
-    public List<JobCanceledValidationTasksVO> findCanceledValidationTasksByJobId(@PathVariable("jobId") Long jobId) {
+    public List<JobCanceledValidationTasksVO> findCanceledValidationTasksByJobId(@PathVariable("jobId") Long jobId,
+                                                                                 @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+                                                                                 @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
         JobVO job = jobService.findById(jobId);
         JobHistoryVO jobHistory = null;
 
@@ -883,7 +885,7 @@ public class JobControllerImpl implements JobController {
 
         List<String> processIds = jobProcessServiceImpl.findProcessesByJobId(jobId);
 
-        List<JobCanceledValidationTasksVO> jobCanceledValidationTasksVO = processControllerZuul.findTasksByProcessIdsAndStatus(processIds);
+        List<JobCanceledValidationTasksVO> jobCanceledValidationTasksVO = processControllerZuul.findTasksByProcessIdsAndStatus(processIds, pageNum, pageSize);
 
         LOG.info("Returning {} canceled validation tasks for jobId {}", jobCanceledValidationTasksVO.size(), jobId);
         return jobCanceledValidationTasksVO;

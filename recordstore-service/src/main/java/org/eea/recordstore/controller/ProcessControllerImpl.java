@@ -264,8 +264,12 @@ public class ProcessControllerImpl implements ProcessController {
   @Override
   @GetMapping("/private/findCanceledTasksByProcessIds")
   public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
-          @RequestParam(name = "processIds") List<String> processIds) {
-    return  taskServiceImpl.findTasksByProcessIdsAndStatus(processIds, ProcessStatusEnum.CANCELED);
-  }
+          @RequestParam(name = "processIds") List<String> processIds,
+          @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
+
+    Pageable pageable = PageRequest.of(pageNum, pageSize);
+    return taskServiceImpl.findTasksByProcessIdsAndStatus(processIds, ProcessStatusEnum.CANCELED, pageNum, pageSize);  }
+
 
 }

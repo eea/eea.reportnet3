@@ -66,10 +66,10 @@ public class JobControllerImplTest {
         job.setJobType(JobTypeEnum.VALIDATION);
         when(jobService.findById(JOB_ID)).thenReturn(job);
         when(jobProcessServiceImpl.findProcessesByJobId(JOB_ID)).thenReturn(List.of("process1"));
-        when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("process1")))
+        when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("process1"), 0, 10))
                 .thenReturn(List.of(new JobCanceledValidationTasksVO()));
 
-        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID);
+        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID, 0, 10);
         assertEquals(1, result.size());
     }
 
@@ -80,9 +80,9 @@ public class JobControllerImplTest {
         history.setJobType(JobTypeEnum.VALIDATION);
         when(jobHistoryService.getJobHistory(JOB_ID)).thenReturn(List.of(history));
         when(jobProcessServiceImpl.findProcessesByJobId(JOB_ID)).thenReturn(List.of("p1"));
-        when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("p1"))).thenReturn(Collections.emptyList());
+        when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("p1"), 0 , 10)).thenReturn(Collections.emptyList());
 
-        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID);
+        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID, 0,10);
         assertTrue(result.isEmpty());
     }
 
@@ -91,7 +91,7 @@ public class JobControllerImplTest {
         when(jobService.findById(JOB_ID)).thenReturn(null);
         when(jobHistoryService.getJobHistory(JOB_ID)).thenReturn(Collections.emptyList());
 
-        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID);
+        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID, 0 ,10);
 
         assertTrue(result.isEmpty()); // ✅ No exception, just empty list
     }
@@ -103,7 +103,7 @@ public class JobControllerImplTest {
         job.setJobType(JobTypeEnum.IMPORT);
         when(jobService.findById(JOB_ID)).thenReturn(job);
 
-        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID);
+        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID, 0 , 10);
         assertTrue(result.isEmpty());
     }
 
@@ -115,7 +115,7 @@ public class JobControllerImplTest {
         job.setParameters(new HashMap<>()); // missing validationJobId
         when(jobService.findById(JOB_ID)).thenReturn(job);
 
-        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID);
+        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID, 0 ,10);
         assertTrue(result.isEmpty());
     }
 
@@ -130,10 +130,10 @@ public class JobControllerImplTest {
 
         when(jobService.findById(JOB_ID)).thenReturn(job);
         when(jobProcessServiceImpl.findProcessesByJobId(5L)).thenReturn(List.of("p123"));
-        when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("p123")))
+        when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("p123"), 0 , 10))
                 .thenReturn(List.of(new JobCanceledValidationTasksVO()));
 
-        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID);
+        List<JobCanceledValidationTasksVO> result = jobController.findCanceledValidationTasksByJobId(JOB_ID, 0 , 10);
         assertEquals(1, result.size());
     }
 }

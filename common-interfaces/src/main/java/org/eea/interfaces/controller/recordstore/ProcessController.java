@@ -157,6 +157,9 @@ public interface ProcessController {
    * @return
    */
   @GetMapping("/private/findCanceledTasksByProcessIds")
-  List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(@RequestParam(name = "processIds") List<String> processIds);
+  List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
+          @RequestParam(name = "processIds") List<String> processIds,
+          @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize);
 
 }

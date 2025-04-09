@@ -316,7 +316,9 @@ public interface JobController {
     void handleStuckImportJob(@PathVariable("jobId") Long jobId, @RequestBody String error) throws Exception;
 
     @GetMapping(value = "/canceledValidationTasks/{jobId}")
-    List<JobCanceledValidationTasksVO> findCanceledValidationTasksByJobId(@PathVariable("jobId") Long jobId);
+    public List<JobCanceledValidationTasksVO> findCanceledValidationTasksByJobId(@PathVariable("jobId") Long jobId,
+                                                                                 @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+                                                                                 @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize);
 }
 
 
