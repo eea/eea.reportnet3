@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eea.validation.util.ValidationDroolsUtils;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 
 public class DremioNonSQLValidationUtils {
@@ -61,10 +62,10 @@ public class DremioNonSQLValidationUtils {
        if(!isBlank(value)){
            return true;
        }
-       Date dateDrools = null;
+       LocalDate localDate = null;
        try {
            sdf.setLenient(false);
-           dateDrools = sdf.parse(value);
+           localDate = LocalDate.parse(value);
        } catch( Exception e ){
            return false;
        }

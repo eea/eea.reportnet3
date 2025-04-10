@@ -150,7 +150,10 @@ const parseEntitiesRecordsWithParentData = (
           table.data.records.forEach(record => {
             if (!isEmpty(record.fields)) {
               record.fields.forEach(field => {
-                if (field.fieldSchemaId === fkEntityId && parseInt(field.value) === parseInt(entityValue)) {
+                if (
+                  field.fieldSchemaId === fkEntityId &&
+                  (parseInt(field.value) === parseInt(entityValue) || field.value === entityValue)
+                ) {
                   hasRecord = true;
                 }
               });

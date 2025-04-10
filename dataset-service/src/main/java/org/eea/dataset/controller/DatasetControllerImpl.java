@@ -15,6 +15,7 @@ import org.eea.dataset.service.*;
 import org.eea.dataset.service.helper.DeleteHelper;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.helper.UpdateRecordHelper;
+import org.eea.dataset.service.impl.ReferenceDatasetServiceImpl;
 import org.eea.dataset.service.model.TruncateDataset;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -37,10 +38,12 @@ import org.eea.interfaces.vo.lock.LockVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -104,6 +107,10 @@ public class DatasetControllerImpl implements DatasetController {
   @Autowired
   private DatasetSchemaService datasetSchemaService;
 
+  /** The Reference dataset service. */
+  @Autowired
+  private ReferenceDatasetServiceImpl referenceDatasetServiceImpl;
+
   /** The file treatment helper. */
   @Autowired
   private FileTreatmentHelper fileTreatmentHelper;
@@ -119,7 +126,6 @@ public class DatasetControllerImpl implements DatasetController {
   /** The job controller zuul */
   @Autowired
   private JobControllerZuul jobControllerZuul;
-
 
   /** The dataflow controller zuul */
   @Autowired
@@ -374,13 +380,26 @@ public class DatasetControllerImpl implements DatasetController {
     DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
     if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
       try {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         if(StringUtils.isNotBlank(tableSchemaId)){
-          String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
           TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                   && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
             LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+            datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+          }
+        }
+        else{
+          List<TableSchemaIdNameVO> tableSchemaIdNameVOS =  datasetSchemaService.getTableSchemasIds(datasetId);
+          for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+              LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
+              datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+            }
           }
         }
 
@@ -2856,11 +2875,30 @@ public class DatasetControllerImpl implements DatasetController {
   @Override
   @PreAuthorize("hasAnyRole('ADMIN')")
   @PostMapping("/createPublicFiles")
-  public void createPublicFiles(@RequestParam(value = "dataflowId", required=true) Long dataflowId, @RequestParam(value = "providerId", required=true) Long providerId){
+  public void createPublicFiles(@RequestParam(value = "dataflowId", required=true) Long dataflowId, @RequestParam(value = "providerId", required=false) Long providerId
+          , @RequestParam(value = "createReferenceDataset", required=false) Boolean createReferenceDataset){
     DataFlowVO dataflowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
     if (dataflowVO.isShowPublicInfo()) {
       try {
-        fileTreatmentHelper.savePublicFiles(dataflowId, providerId);
+        if(providerId!=null) {
+          fileTreatmentHelper.savePublicFiles(dataflowId, providerId);
+        }
+
+        if (Boolean.TRUE.equals(createReferenceDataset)) {
+          List<ReferenceDatasetVO> referenceDatasets = referenceDatasetServiceImpl.getReferenceDatasetByDataflowId(dataflowId);
+
+          for (ReferenceDatasetVO referenceDataset : referenceDatasets) {
+            DataSetSchemaVO schema = datasetSchemaService.getDataSchemaById(referenceDataset.getDatasetSchema());
+
+            if (schema != null && schema.getReferenceDataset() != null
+                    && Boolean.TRUE.equals(schema.getReferenceDataset())) {
+
+
+              fileTreatmentHelper.createReferenceDatasetPublicFiles(referenceDataset.getId(), dataflowVO);
+
+            }
+          }
+        }
         LOG.info("Successfully created public files for for dataflow {} with dataprovider {}", dataflowId, providerId);
       } catch (Exception e) {
         LOG.error("Unexpected error! Error creating folder for dataflow {} with dataprovider {}", dataflowId, providerId, e);

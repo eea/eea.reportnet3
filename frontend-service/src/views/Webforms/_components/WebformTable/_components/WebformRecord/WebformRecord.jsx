@@ -186,12 +186,12 @@ export const WebformRecord = ({
   const onToggleFieldVisibility = (referenceParentField, fields = []) => {
     if (isNil(referenceParentField)) return true;
     const filteredDependency = fields
-      .filter(field => TextUtils.areEquals(field.name, referenceParentField))
+      .filter(field => TextUtils.areEquals(field.name, referenceParentField.field))
       .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split('; ')));
 
     return filteredDependency
       .flat()
-      .map(field => referenceParentField.includes(field))
+      .map(field => referenceParentField.value.includes(field))
       .includes(true);
   };
 

@@ -22,6 +22,22 @@ public interface RepresentativeRepository extends CrudRepository<Representative,
   List<Representative> findAllByDataflow_Id(@Param("dataflowId") Long dataflowId);
 
   /**
+   * Find all by dataflow id and country code.
+   *
+   * @param dataflowId the dataflow id
+   * @param countryCode the country code
+   * @return the list of representatives
+   */
+  @Query("SELECT DISTINCT r FROM Representative r " +
+          "LEFT JOIN FETCH r.leadReporters rep " +
+          "JOIN r.dataProvider dp " +
+          "WHERE r.dataflow.id = :dataflowId " +
+          "AND dp.code = :countryCode")
+  List<Representative> findAllByDataflowIdAndCountryCode(
+          @Param("dataflowId") Long dataflowId,
+          @Param("countryCode") String countryCode);
+
+  /**
    * Exists by user mail.
    *
    * @param dataProviderId the data provider id
