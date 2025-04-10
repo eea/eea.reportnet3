@@ -2,6 +2,7 @@ import { JobsStatusesRepository } from 'repositories/JobsStatusesRepository';
 
 import { JobsStatusesUtils } from './_utils/JobsStatusesUtils';
 import { ServiceUtils } from 'services/_utils/ServiceUtils';
+import { parse } from '@babel/core';
 
 export const JobsStatusesService = {
   getJobsStatuses: async ({
@@ -79,6 +80,19 @@ export const JobsStatusesService = {
       jobStatus
     });
 
+    return response.data;
+  },
+
+  getCancelledValidations: async ({ jobId, pageNum, numberRows, sortOrder, sortField }) => {
+
+    const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
+    const response = await JobsStatusesRepository.getCancelledValidations({
+      jobId,
+      pageNum,
+      numberRows,
+      sortOrder: ServiceUtils.getSortOrder(sortOrder),
+      sortField: parsedSortField
+    });
     return response.data;
   },
 

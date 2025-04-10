@@ -75,6 +75,16 @@ export const JobsStatusesRepository = {
         jobStatus
       })
     }),
+  getCancelledValidations: async ({ jobId, pageNum, numberRows,sortOrder, sortField = '' }) =>
+    await HTTPRequester.get({
+      url: getUrl(JobsStatusesConfig.getCancelledValidations, {
+        jobId,
+        pageNum,
+        numberRows,
+        sortOrder,
+        sortField,
+      })
+    }),
 
   cancelJob: async (jobId, dataflowId, datasetId) =>
     await HTTPRequester.update({

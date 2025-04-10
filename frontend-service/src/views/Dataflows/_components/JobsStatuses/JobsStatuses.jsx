@@ -77,7 +77,14 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [providersTotalRecords, setProvidersTotalRecords] = useState(0);
   const [remainingJobs, setRemainingJobs] = useState(0);
   const [sort, setSort] = useState({ field: 'dateStatusChanged', order: -1 });
+  const [sortCancelled, setSortCancelled] = useState({ field: 'ruleCode', order: -1 });
   const [totalRecords, setTotalRecords] = useState(0);
+  const [showValidationTable, setShowValidationTable] = useState(false);
+  const [paginationInfo, setPaginationInfo] = useState({ recordsPerPage: 10, firstPageRecord: 0 });
+  const [columns, setColumns] = useState([]);
+  const [cancelledValidations, setCancelledValidations] = useState([]);
+  const [totalCancelledValidations, setTotalCancelledValidations] = useState(0);
+  const [isLoadingCancelledValidations, setIsLoadingCancelledValidations] = useState(false);
 
   const { getDateTimeFormatByUserPreferences, getDateDifferenceInMinutes } = useDateTimeFormatByUserPreferences();
   const { setData } = useApplyFilters('jobsStatuses');
@@ -237,6 +244,77 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const onSort = event => {
     setSort({ field: event.sortField, order: event.sortOrder });
     getJobsStatuses(undefined, undefined, undefined, event);
+  };
+
+  const onSortCancelledTasks = event => {
+    setSortCancelled({ field: event.sortField, order: event.sortOrder });
+    getCancelledTasks(
+      paginationInfo.firstPageRecord / paginationInfo.recordsPerPage,
+      paginationInfo.recordsPerPage,
+      event
+    );
+  };
+
+  const getCancelledTasks = async (page, rows, sortOption) => {
+    setIsLoadingCancelledValidations(true);
+    try {
+      const data = await JobsStatusesService.getCancelledValidations({
+        pageNum: page !== undefined ? page : pageNum,
+        numberRows: rows !== undefined ? rows : numberRows,
+        sortOrder: sortOption !== undefined ? sortOption.sortOrder : sortCancelled.order,
+        sortField: sortOption !== undefined ? sortOption.sortField : sortCancelled.field,
+        jobId: jobStatus?.id
+      });
+      console.log('Cancelled tasks data:', data); // Debugging line
+      setCancelledValidations(data || []);
+      setTotalCancelledValidations(data.length || 0);
+    } catch (error) {
+      console.error('JobsStatus - getCancelledTasks.', error);
+      setLoadingStatus('error');
+      notificationContext.add({ type: 'GET_CANCELLED_TASKS_ERROR' }, true);
+    } finally {
+      setIsLoadingCancelledValidations(false);
+    }
+  };
+
+  useEffect(() => {
+    const headers = [
+      {
+        id: 'ruleCode',
+        header: resourcesContext.messages['ruleCode'],
+        style: { width: '6rem' },
+        sortable: true
+      },
+      {
+        id: 'ruleLevelError',
+        header: resourcesContext.messages['ruleLevelError'],
+        style: { width: '6rem' },
+        sortable: true
+      }
+    ];
+
+    const columnsArray = headers.map(col => (
+      <Column
+        body={col.template}
+        field={col.id}
+        header={col.header}
+        key={col.id}
+        style={col.style}
+        sortable={col.sortable}
+      />
+    ));
+
+    setColumns(columnsArray);
+  }, [resourcesContext.messages]);
+
+  const newCancelledTasksClassName = rowData => ({
+    'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
+  });
+
+  const onChangePage = event => {
+    const pageNum = event.first / event.rows;
+    setPaginationInfo({ ...paginationInfo, recordsPerPage: event.rows, firstPageRecord: event.first });
+    getCancelledTasks(pageNum, event.rows);
   };
 
   const filterOptions = [
@@ -577,6 +655,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const onHideStatusInfoDialog = () => {
     setIsStatusInfoDialogVisible(false);
     setJobStatus(null);
+    setShowValidationTable(false);
+    setCancelledValidations([]);
+    // setPaginationInfo({ recordsPerPage: 10, firstPageRecord: 0 });
   };
 
   const renderFilters = () => (
@@ -743,6 +824,60 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           onHide={onHideStatusInfoDialog}
           visible={isStatusInfoDialogVisible}>
           {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
+          <br />
+          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && (
+            <>
+              <Button
+                className={`p-button-secondary ${styles.buttonPushDown}`}
+                icon="warning"
+                label={
+                  showValidationTable
+                    ? resourcesContext.messages['hideCancelledValidations']
+                    : resourcesContext.messages['showCancelledValidations']
+                }
+                onClick={() => {
+                  setShowValidationTable(!showValidationTable);
+                  if (!showValidationTable) {
+                    getCancelledTasks(paginationInfo.firstPageRecord, paginationInfo.recordsPerPage, sortCancelled);
+                  }
+                }}
+              />
+              {showValidationTable && (
+                <>
+                  {isLoadingCancelledValidations ? (
+                    <div className={styles.noCancelledTasksContent}>
+                      <Spinner className={styles.spinnerPosition} />
+                    </div>
+                  ) : cancelledValidations.length > 0 ? (
+                    <DataTable
+                      className={styles.cancelledValidationsTable}
+                      autoLayout={true}
+                      first={paginationInfo.firstPageRecord}
+                      hasDefaultCurrentPage={true}
+                      lazy={true}
+                      loading={isLoadingCancelledValidations}
+                      onPage={onChangePage}
+                      onSort={onSortCancelledTasks}
+                      sortField={sortCancelled.field}
+                      sortOrder={sortCancelled.order}
+                      paginator={true}
+                      paginatorRight={
+                        <span>{`${resourcesContext.messages['totalRecords']} ${totalCancelledValidations}`}</span>
+                      }
+                      rowClassName={newCancelledTasksClassName}
+                      rows={paginationInfo.recordsPerPage}
+                      rowsPerPageOptions={[5, 10, 15]}
+                      totalRecords={totalCancelledValidations}
+                      value={cancelledValidations}>
+                      {columns}
+                    </DataTable>
+                  ) : (
+                    <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </Dialog>
       )}
     </Fragment>
