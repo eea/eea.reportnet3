@@ -1217,8 +1217,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private boolean hasZeroRows(String filePath) {
     try (Stream<String> lines = Files.lines(Paths.get(filePath))) {  // Try-with-resources ensures closure
       return lines.noneMatch(line -> !line.trim().isEmpty()); // No non-empty lines
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (Exception e) {
       return false; // Handle error gracefully
     }
   }
