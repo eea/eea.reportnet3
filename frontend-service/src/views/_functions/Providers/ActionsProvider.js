@@ -70,7 +70,9 @@ export const ActionsProvider = ({ children }) => {
       for (let i = datasetJobs.jobsList.length - 1; i >= 0; i--) {
         if (
           (datasetJobs.jobsList[i].jobStatus === 'IN_PROGRESS' || datasetJobs.jobsList[i].jobStatus === 'QUEUED') &&
-          (datasetJobs.jobsList[i].jobType === 'IMPORT' || datasetJobs.jobsList[i].jobType === 'VALIDATION')
+          (datasetJobs.jobsList[i].jobType === 'IMPORT' ||
+            datasetJobs.jobsList[i].jobType === 'VALIDATION' ||
+            datasetJobs.jobsList[i].jobType === 'DELETE')
         ) {
           setIsInProgress(true);
           setJobTypeInProgress(datasetJobs.jobsList[i].jobType);
@@ -84,6 +86,9 @@ export const ActionsProvider = ({ children }) => {
       } else if (!pageRefresh && !action && jobTypeRef.current === 'VALIDATION') {
         pageRefresh = true;
         setValidateDatasetProcessing(true);
+      } else if (!pageRefresh && !action && jobTypeRef.current === 'DELETE') {
+        pageRefresh = true;
+        setDeleteDatasetProcessing(true);
       }
 
       if (!inProgressRef.current) {
