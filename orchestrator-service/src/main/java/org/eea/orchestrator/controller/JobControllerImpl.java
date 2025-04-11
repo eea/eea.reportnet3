@@ -22,6 +22,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.validation.TasksVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobHistoryService;
@@ -52,6 +53,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -849,48 +851,94 @@ public class JobControllerImpl implements JobController {
     @Override
     @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "/canceledValidationTasks/{jobId}")
-    public List<JobCanceledValidationTasksVO> findCanceledValidationTasksByJobId(@PathVariable("jobId") Long jobId,
-                                                                                 @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
-                                                                                 @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
+    public TasksVO findCanceledValidationTasksByJobId(
+            @PathVariable("jobId") Long jobId,
+            @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "asc", defaultValue = "true", required = false) boolean asc,
+            @RequestParam(value = "sortedColumn", defaultValue = "ruleCode", required = false) String sortedColumn) {
+
         JobVO job = jobService.findById(jobId);
         JobHistoryVO jobHistory = null;
 
+        // 1. If no JobVO, look in JobHistory
         if (job == null) {
             List<JobHistoryVO> jobHistories = jobHistoryService.getJobHistory(jobId);
             if (jobHistories == null || jobHistories.isEmpty()) {
                 LOG.warn(String.format(EEAErrorMessage.JOB_NOT_FOUND, jobId));
-                return Collections.emptyList();
+                return new TasksVO(Collections.emptyList(), 0L, 0L, 0L);
             }
             jobHistory = jobHistories.get(0);
         }
 
+        // 2. Determine JobType
         JobTypeEnum jobType = (job != null) ? job.getJobType() : jobHistory.getJobType();
-
-        if (!(jobType == JobTypeEnum.VALIDATION || jobType == JobTypeEnum.RELEASE)) {
-            return Collections.emptyList();
+        if (jobType != JobTypeEnum.VALIDATION && jobType != JobTypeEnum.RELEASE) {
+            LOG.info("Job type is not VALIDATION or RELEASE for jobId {}", jobId);
+            return new TasksVO(Collections.emptyList(), 0L, 0L, 0L);
         }
 
+        // 3. If RELEASE, get validationJobId
         if (jobType == JobTypeEnum.RELEASE) {
             Map<String, Object> parameters = (job != null) ? job.getParameters() : jobHistory.getParameters();
             if (parameters != null && parameters.containsKey("validationJobId")) {
                 Object validationJobIdObj = parameters.get("validationJobId");
                 if (validationJobIdObj instanceof Number) {
                     jobId = ((Number) validationJobIdObj).longValue();
+                } else {
+                    LOG.warn("Invalid validationJobId type in parameters for jobId {}", jobId);
+                    return new TasksVO(Collections.emptyList(), 0L, 0L, 0L);
                 }
             } else {
                 LOG.warn("validationJobId parameter not found in job parameters for jobId {}", jobId);
-                return Collections.emptyList();
+                return new TasksVO(Collections.emptyList(), 0L, 0L, 0L);
             }
         }
 
+        // 4. Retrieve all process IDs for the job
         List<String> processIds = jobProcessServiceImpl.findProcessesByJobId(jobId);
+        if (processIds == null || processIds.isEmpty()) {
+            LOG.info("No processes found for jobId {}", jobId);
+            return new TasksVO(Collections.emptyList(), 0L, 0L, 0L);
+        }
 
-        List<JobCanceledValidationTasksVO> jobCanceledValidationTasksVO = processControllerZuul.findTasksByProcessIdsAndStatus(processIds, pageNum, pageSize);
+        // 5. Retrieve canceled tasks from Zuul
+        List<JobCanceledValidationTasksVO> canceledTasks =
+                processControllerZuul.findTasksByProcessIdsAndStatus(processIds, pageNum, pageSize);
 
-        LOG.info("Returning {} canceled validation tasks for jobId {}", jobCanceledValidationTasksVO.size(), jobId);
-        return jobCanceledValidationTasksVO;
+        // 6. Sorting
+        switch (sortedColumn) {
+            case "taskId":
+                canceledTasks.sort(Comparator.comparing(JobCanceledValidationTasksVO::getTaskId));
+                break;
+            case "ruleCode":
+                canceledTasks.sort(Comparator.comparing(
+                        JobCanceledValidationTasksVO::getRuleCode,
+                        Comparator.nullsFirst(String::compareTo)));
+                break;
+            case "ruleLevelError":
+                canceledTasks.sort(Comparator.comparing(
+                        JobCanceledValidationTasksVO::getRuleLevelError,
+                        Comparator.nullsFirst(String::compareTo)));
+                break;
+            default:
+                break;
+        }
+
+        if (!asc) {
+            Collections.reverse(canceledTasks);
+        }
+
+        // 7. Build TasksVO and return
+        long totalRecords = canceledTasks.size();
+        long filteredRecords = canceledTasks.size();
+        long remainingTasks = 0L;
+
+        LOG.info("Returning {} canceled validation tasks for jobId {} (page {}/{}, sortedColumn={}, asc={})",
+                canceledTasks.size(), jobId, pageNum, pageSize, sortedColumn, asc);
+
+        return new TasksVO(canceledTasks, totalRecords, filteredRecords, remainingTasks);
     }
-
 }
 
 
