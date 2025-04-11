@@ -1924,6 +1924,10 @@ public class DatasetControllerImpl implements DatasetController {
 
     LOG.info("Downloading attachment from the datasetId {}", datasetId);
     try {
+      if (providerId == null) {
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        providerId = dataset.getDataProviderId();
+      }
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
       byte[] file = null;
       String filename = null;
@@ -2028,6 +2032,10 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Method updateAttachment was called for dataflowId {} datasetId {} and fieldId {}", dataflowId, datasetId, idField);
 
+      if (providerId == null) {
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        providerId = dataset.getDataProviderId();
+      }
 
       // Remove comma "," character to avoid error with special characters
       String fileName = file.getOriginalFilename();
@@ -2160,6 +2168,10 @@ public class DatasetControllerImpl implements DatasetController {
 
     try {
       LOG.info("Deleting attachment for dataflowId {}, datasetId {} and fieldId {}", dataflowId, datasetId, idField);
+      if (providerId == null) {
+        DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+        providerId = dataset.getDataProviderId();
+      }
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
       if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
         //check if table is read only
