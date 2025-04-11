@@ -6,7 +6,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eea.interfaces.controller.recordstore.ProcessController;
-import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -26,6 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Class ProcessControllerImpl.
@@ -263,7 +263,7 @@ public class ProcessControllerImpl implements ProcessController {
    */
   @Override
   @GetMapping("/private/findCanceledTasksByProcessIds")
-  public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
+  public Map<String, Object> findTasksByProcessIdsAndStatus(
           @RequestParam(name = "processIds") List<String> processIds,
           @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
           @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {

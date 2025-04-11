@@ -12,7 +12,7 @@ import java.io.Serializable;
 @Getter
 @Setter
 @ToString
-public class JobCanceledValidationTasksVO implements Serializable {
+public class JobCanceledValidationTaskVO implements Serializable {
 
     /** The Constant serialVersionUID. */
     private static final long serialVersionUID = 8101234578901234567L;

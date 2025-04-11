@@ -1,6 +1,5 @@
 package org.eea.interfaces.controller.recordstore;
 
-import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
@@ -10,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The Interface ProcessController.
@@ -157,7 +157,7 @@ public interface ProcessController {
    * @return
    */
   @GetMapping("/private/findCanceledTasksByProcessIds")
-  List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
+  Map<String, Object> findTasksByProcessIdsAndStatus(
           @RequestParam(name = "processIds") List<String> processIds,
           @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
           @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize);
