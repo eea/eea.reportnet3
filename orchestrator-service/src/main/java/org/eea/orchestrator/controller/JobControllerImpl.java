@@ -3,11 +3,9 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eea.exception.EEAErrorMessage;
-import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -16,12 +14,11 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
-import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTaskVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
-import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.TasksVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockMethod;
@@ -34,7 +31,6 @@ import org.eea.thread.ThreadPropertiesManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -49,7 +45,6 @@ import springfox.documentation.annotations.ApiIgnore;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -903,22 +898,24 @@ public class JobControllerImpl implements JobController {
         }
 
         // 5. Retrieve canceled tasks from Zuul
-        List<JobCanceledValidationTasksVO> canceledTasks =
+        Map<String, Object> canceledTasksMap =
                 processControllerZuul.findTasksByProcessIdsAndStatus(processIds, pageNum, pageSize);
+        List<JobCanceledValidationTaskVO> canceledTasks = (List<JobCanceledValidationTaskVO>) canceledTasksMap.get("tasks");
+        int totalRecords = (int) canceledTasksMap.get("totalRecords");
 
         // 6. Sorting
         switch (sortedColumn) {
             case "taskId":
-                canceledTasks.sort(Comparator.comparing(JobCanceledValidationTasksVO::getTaskId));
+                canceledTasks.sort(Comparator.comparing(JobCanceledValidationTaskVO::getTaskId));
                 break;
             case "ruleCode":
                 canceledTasks.sort(Comparator.comparing(
-                        JobCanceledValidationTasksVO::getRuleCode,
+                        JobCanceledValidationTaskVO::getRuleCode,
                         Comparator.nullsFirst(String::compareTo)));
                 break;
             case "ruleLevelError":
                 canceledTasks.sort(Comparator.comparing(
-                        JobCanceledValidationTasksVO::getRuleLevelError,
+                        JobCanceledValidationTaskVO::getRuleLevelError,
                         Comparator.nullsFirst(String::compareTo)));
                 break;
             default:
@@ -930,14 +927,19 @@ public class JobControllerImpl implements JobController {
         }
 
         // 7. Build TasksVO and return
-        long totalRecords = canceledTasks.size();
+
         long filteredRecords = canceledTasks.size();
-        long remainingTasks = 0L;
+        long alreadyFetched = (long) pageNum * pageSize + filteredRecords;
+        long remainingTasks = totalRecords - alreadyFetched;
+        if (remainingTasks < 0) {
+            remainingTasks = 0;
+        }
+
 
         LOG.info("Returning {} canceled validation tasks for jobId {} (page {}/{}, sortedColumn={}, asc={})",
                 canceledTasks.size(), jobId, pageNum, pageSize, sortedColumn, asc);
 
-        return new TasksVO(canceledTasks, totalRecords, filteredRecords, remainingTasks);
+        return new TasksVO(canceledTasks,(long) totalRecords, filteredRecords, remainingTasks);
     }
 }
 

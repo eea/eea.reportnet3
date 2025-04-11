@@ -5,25 +5,31 @@ import cdjd.com.fasterxml.jackson.databind.ObjectMapper;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
-import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTaskVO;
 import org.eea.recordstore.mapper.TaskMapper;
 import org.eea.recordstore.persistence.domain.Task;
 import org.eea.recordstore.persistence.repository.TaskRepository;
 import org.eea.recordstore.service.TaskService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TaskServiceImpl implements TaskService {
 
     private TaskRepository taskRepository;
     private TaskMapper taskMapper;
+
+    private static final Logger LOG = LoggerFactory.getLogger(TaskServiceImpl.class);
 
     @Autowired
     public TaskServiceImpl(TaskRepository taskRepository, TaskMapper taskMapper) {
@@ -89,53 +95,53 @@ public class TaskServiceImpl implements TaskService {
      * @return the tasks
      */
     @Override
-    public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
+    public Map<String, Object> findTasksByProcessIdsAndStatus(
             List<String> processIds, ProcessStatusEnum statusEnum, int pageNum, int pageSize) {
 
         List<Task> canceledTasks = taskRepository.findByProcessIdInAndStatus(processIds, statusEnum);
 
-        if (canceledTasks.isEmpty()) {
-            return Collections.emptyList();
+        int totalRecords = canceledTasks.size();
+        List<JobCanceledValidationTaskVO> resultList = new ArrayList<>();
+
+        if (totalRecords == 0) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("tasks", Collections.emptyList());
+            response.put("totalRecords", 0);
+            return response;
         }
 
         int fromIndex = pageNum * pageSize;
-        if (fromIndex >= canceledTasks.size()) {
-            return Collections.emptyList();
+        if (fromIndex >= totalRecords) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("tasks", Collections.emptyList());
+            response.put("totalRecords", totalRecords);
+            return response;
         }
-
-        int toIndex = Math.min(fromIndex + pageSize, canceledTasks.size());
+        int toIndex = Math.min(fromIndex + pageSize, totalRecords);
         List<Task> paginatedTasks = canceledTasks.subList(fromIndex, toIndex);
-
-        List<JobCanceledValidationTasksVO> result = new ArrayList<>();
 
         ObjectMapper objectMapper = new ObjectMapper();
         for (Task task : paginatedTasks) {
-            JobCanceledValidationTasksVO taskVO = new JobCanceledValidationTasksVO();
+            JobCanceledValidationTaskVO taskVO = new JobCanceledValidationTaskVO();
             taskVO.setTaskId(task.getId());
-
             if (task.getJson() != null) {
                 try {
-                    JsonNode taskJsonRootNode = objectMapper.readTree(task.getJson());
-                    JsonNode taskJsonDataNode = taskJsonRootNode.path("data");
-
-                    if (taskJsonDataNode.has("ruleCode")) {
-                        taskVO.setRuleCode(taskJsonDataNode.get("ruleCode").asText());
-                    }
-                    if (taskJsonDataNode.has("ruleId")) {
-                        taskVO.setRuleId(taskJsonDataNode.get("ruleId").asText());
-                    }
-                    if (taskJsonDataNode.has("ruleLevelError")) {
-                        taskVO.setRuleLevelError(taskJsonDataNode.get("ruleLevelError").asText());
-                    }
-
+                    JsonNode dataNode = objectMapper.readTree(task.getJson()).path("data");
+                    taskVO.setRuleCode(dataNode.path("ruleCode").asText(null));
+                    taskVO.setRuleId(dataNode.path("ruleId").asText(null));
+                    taskVO.setRuleLevelError(dataNode.path("ruleLevelError").asText(null));
                 } catch (Exception e) {
+                    LOG.warn("Failed to parse JSON for taskId {}: {}", task.getId(), e.getMessage());
                 }
             }
-
-            result.add(taskVO);
+            resultList.add(taskVO);
         }
 
-        return result;
+        Map<String, Object> response = new HashMap<>();
+        response.put("tasks", resultList);
+        response.put("totalRecords", totalRecords);
+
+        return response;
     }
 
 }

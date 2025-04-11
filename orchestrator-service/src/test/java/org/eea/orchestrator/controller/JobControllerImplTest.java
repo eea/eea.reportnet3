@@ -1,8 +1,7 @@
 package org.eea.orchestrator.controller;
 
-import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
-import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTaskVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
@@ -66,24 +65,28 @@ public class JobControllerImplTest {
         JobVO job = new JobVO();
         job.setId(JOB_ID);
         job.setJobType(JobTypeEnum.VALIDATION);
-        when(jobService.findById(JOB_ID)).thenReturn(job);
 
+        when(jobService.findById(JOB_ID)).thenReturn(job);
         when(jobProcessServiceImpl.findProcessesByJobId(JOB_ID)).thenReturn(List.of("process1"));
 
-        // Return a mutable list instead of List.of(...)
-        List<JobCanceledValidationTasksVO> mutableList = new ArrayList<>();
-        mutableList.add(new JobCanceledValidationTasksVO());
+        List<JobCanceledValidationTaskVO> mutableList = new ArrayList<>();
+        mutableList.add(new JobCanceledValidationTaskVO());
+
+        Map<String, Object> canceledMap = new HashMap<>();
+        canceledMap.put("tasks", mutableList);
+        canceledMap.put("totalRecords", 1); // as Integer
 
         when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("process1"), 0, 10))
-                .thenReturn(mutableList);
+                .thenReturn(canceledMap);
 
         TasksVO result = jobController.findCanceledValidationTasksByJobId(
-                JOB_ID, 0, 10, true, "ruleCode");
+                JOB_ID, 0, 10, true, "ruleCode"
+        );
 
-                assertNotNull(result);
+        assertNotNull(result);
         assertEquals(1, result.getTasksList().size());
+        assertEquals(Long.valueOf(1), result.getTotalRecords());
     }
-
 
     @Test
     public void testFindCanceledValidationTasksFromHistory() {
@@ -91,21 +94,21 @@ public class JobControllerImplTest {
 
         JobHistoryVO history = new JobHistoryVO();
         history.setJobType(JobTypeEnum.VALIDATION);
-
         when(jobHistoryService.getJobHistory(JOB_ID)).thenReturn(List.of(history));
+
         when(jobProcessServiceImpl.findProcessesByJobId(JOB_ID)).thenReturn(List.of("p1"));
+
+        Map<String, Object> canceledMap = new HashMap<>();
+        canceledMap.put("tasks", Collections.emptyList());
+        canceledMap.put("totalRecords", 0);
+
         when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("p1"), 0, 10))
-                .thenReturn(Collections.emptyList());
+                .thenReturn(canceledMap);
 
         TasksVO result = jobController.findCanceledValidationTasksByJobId(
-                JOB_ID,
-                0,
-                10,
-                true,
-                "ruleCode"
+                JOB_ID, 0, 10, true, "ruleCode"
         );
 
-        // We expect no tasks
         assertNotNull(result);
         assertTrue(result.getTasksList().isEmpty());
         assertEquals(Long.valueOf(0), result.getTotalRecords());
@@ -117,11 +120,7 @@ public class JobControllerImplTest {
         when(jobHistoryService.getJobHistory(JOB_ID)).thenReturn(Collections.emptyList());
 
         TasksVO result = jobController.findCanceledValidationTasksByJobId(
-                JOB_ID,
-                0,
-                10,
-                true,
-                "ruleCode"
+                JOB_ID, 0, 10, true, "ruleCode"
         );
 
         assertNotNull(result);
@@ -137,11 +136,7 @@ public class JobControllerImplTest {
         when(jobService.findById(JOB_ID)).thenReturn(job);
 
         TasksVO result = jobController.findCanceledValidationTasksByJobId(
-                JOB_ID,
-                0,
-                10,
-                true,
-                "ruleCode"
+                JOB_ID, 0, 10, true, "ruleCode"
         );
 
         assertNotNull(result);
@@ -151,20 +146,20 @@ public class JobControllerImplTest {
 
     @Test
     public void testReleaseJobWithMissingValidationId() {
+        // Arrange
         JobVO job = new JobVO();
         job.setId(JOB_ID);
         job.setJobType(JobTypeEnum.RELEASE);
-        job.setParameters(new HashMap<>()); // no validationJobId
+        job.setParameters(new HashMap<>()); // missing validationJobId
+
         when(jobService.findById(JOB_ID)).thenReturn(job);
 
+        // Act
         TasksVO result = jobController.findCanceledValidationTasksByJobId(
-                JOB_ID,
-                0,
-                10,
-                true,
-                "ruleCode"
+                JOB_ID, 0, 10, true, "ruleCode"
         );
 
+        // Assert
         assertNotNull(result);
         assertTrue(result.getTasksList().isEmpty());
         assertEquals(Long.valueOf(0), result.getTotalRecords());
@@ -183,20 +178,22 @@ public class JobControllerImplTest {
         when(jobService.findById(JOB_ID)).thenReturn(job);
         when(jobProcessServiceImpl.findProcessesByJobId(5L)).thenReturn(List.of("p123"));
 
-        List<JobCanceledValidationTasksVO> mutableList = new ArrayList<>();
-        mutableList.add(new JobCanceledValidationTasksVO());
+        List<JobCanceledValidationTaskVO> mutableList = new ArrayList<>();
+        mutableList.add(new JobCanceledValidationTaskVO());
+
+        Map<String, Object> canceledMap = new HashMap<>();
+        canceledMap.put("tasks", mutableList);
+        canceledMap.put("totalRecords", 1);
 
         when(processControllerZuul.findTasksByProcessIdsAndStatus(List.of("p123"), 0, 10))
-                .thenReturn(mutableList);
+                .thenReturn(canceledMap);
 
         TasksVO result = jobController.findCanceledValidationTasksByJobId(
                 JOB_ID, 0, 10, true, "ruleCode"
         );
 
-        // Assert
         assertNotNull(result);
         assertEquals(1, result.getTasksList().size());
         assertEquals(Long.valueOf(1), result.getTotalRecords());
     }
-
 }
