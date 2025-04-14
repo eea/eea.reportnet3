@@ -1,4 +1,4 @@
-package org.eea.interfaces.vo.validation;
+package org.eea.interfaces.vo.orchestrator;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,14 +15,14 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public class TasksVO implements Serializable {
+public class JobCanceledValidationTasksVO implements Serializable {
 
     private static final long serialVersionUID = -8922037724334609179L;
 
     /** The list of canceled tasks. */
-    private List<?> tasksList;
+    private List<JobCanceledValidationTaskVO> tasksList;
 
-    /** The total number of tasks (before pagination/filter). */
+    /** The total number of tasks. */
     private Long totalRecords;
 
     /** The number of tasks after any filter is applied. */
@@ -30,4 +30,5 @@ public class TasksVO implements Serializable {
 
     /** The number of remaining tasks if partial page. */
     private Long remainingTasks;
+
 }

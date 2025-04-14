@@ -4,6 +4,7 @@ import cdjd.com.fasterxml.jackson.databind.JsonNode;
 import cdjd.com.fasterxml.jackson.databind.ObjectMapper;
 import org.eea.interfaces.vo.metabase.TaskType;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTaskVO;
 import org.eea.recordstore.mapper.TaskMapper;
@@ -18,10 +19,8 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -95,35 +94,45 @@ public class TaskServiceImpl implements TaskService {
      * @return the tasks
      */
     @Override
-    public Map<String, Object> findTasksByProcessIdsAndStatus(
+    public JobCanceledValidationTasksVO findTasksByProcessIdsAndStatus(
             List<String> processIds, ProcessStatusEnum statusEnum, int pageNum, int pageSize) {
 
         List<Task> canceledTasks = taskRepository.findByProcessIdInAndStatus(processIds, statusEnum);
 
         int totalRecords = canceledTasks.size();
-        List<JobCanceledValidationTaskVO> resultList = new ArrayList<>();
-
         if (totalRecords == 0) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("tasks", Collections.emptyList());
-            response.put("totalRecords", 0);
-            return response;
+            // Return an empty response if no tasks
+            return new JobCanceledValidationTasksVO(
+                    Collections.emptyList(), // tasksList
+                    0L,                      // totalRecords
+                    0L,                      // filteredRecords
+                    0L                       // remainingTasks
+            );
         }
 
+        // Manual pagination
         int fromIndex = pageNum * pageSize;
         if (fromIndex >= totalRecords) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("tasks", Collections.emptyList());
-            response.put("totalRecords", totalRecords);
-            return response;
+            // Requested page is out of range: return empty list, but total still included
+            return new JobCanceledValidationTasksVO(
+                    Collections.emptyList(),
+                    (long) totalRecords,
+                    0L,
+                    0L
+            );
         }
+
         int toIndex = Math.min(fromIndex + pageSize, totalRecords);
         List<Task> paginatedTasks = canceledTasks.subList(fromIndex, toIndex);
 
+        //Convert paginated Task entities to JobCanceledValidationTaskVO
+        List<JobCanceledValidationTaskVO> tasksList = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
+
         for (Task task : paginatedTasks) {
             JobCanceledValidationTaskVO taskVO = new JobCanceledValidationTaskVO();
             taskVO.setTaskId(task.getId());
+
             if (task.getJson() != null) {
                 try {
                     JsonNode dataNode = objectMapper.readTree(task.getJson()).path("data");
@@ -134,14 +143,22 @@ public class TaskServiceImpl implements TaskService {
                     LOG.warn("Failed to parse JSON for taskId {}: {}", task.getId(), e.getMessage());
                 }
             }
-            resultList.add(taskVO);
+            tasksList.add(taskVO);
         }
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("tasks", resultList);
-        response.put("totalRecords", totalRecords);
+        long filteredRecords = tasksList.size();
+        long alreadyFetched = (long) pageNum * pageSize + filteredRecords;
+        long remainingTasks = totalRecords - alreadyFetched;
+        if (remainingTasks < 0) {
+            remainingTasks = 0;
+        }
 
-        return response;
+        return new JobCanceledValidationTasksVO(
+                tasksList,                 // tasksList
+                (long) totalRecords,       // totalRecords
+                filteredRecords,           // filteredRecords
+                remainingTasks             // remainingTasks
+        );
     }
 
 }
