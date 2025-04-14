@@ -251,7 +251,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     getCancelledTasks(
       paginationInfo.firstPageRecord / paginationInfo.recordsPerPage,
       paginationInfo.recordsPerPage,
-      event
+      { sortField: event.sortField, sortOrder: event.sortOrder }
     );
   };
 
@@ -266,8 +266,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         jobId: jobStatus?.id
       });
       console.log('Cancelled tasks data:', data); // Debugging line
-      setCancelledValidations(data || []);
-      setTotalCancelledValidations(data.length || 0);
+      setCancelledValidations(data.tasksList || []);
+      setTotalCancelledValidations(data.totalRecords);
     } catch (error) {
       console.error('JobsStatus - getCancelledTasks.', error);
       setLoadingStatus('error');
@@ -277,35 +277,36 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     }
   };
 
-  useEffect(() => {
-    const headers = [
+  const getCancelledValidationsColumns = () => {
+    const columns = [
       {
-        id: 'ruleCode',
+        key: 'ruleCode',
         header: resourcesContext.messages['ruleCode'],
-        style: { width: '6rem' },
-        sortable: true
+        template: rowData => <span>{rowData.ruleCode}</span>,
+        className: styles.smallColumn,
+        style: { width: '6rem' }
       },
       {
-        id: 'ruleLevelError',
+        key: 'ruleLevelError',
         header: resourcesContext.messages['ruleLevelError'],
-        style: { width: '6rem' },
-        sortable: true
+        template: rowData => <span>{rowData.ruleLevelError}</span>, 
+        className: styles.smallColumn,
+        style: { width: '6rem' }
       }
     ];
-
-    const columnsArray = headers.map(col => (
+  
+    return columns.map(column => (
       <Column
-        body={col.template}
-        field={col.id}
-        header={col.header}
-        key={col.id}
-        style={col.style}
-        sortable={col.sortable}
+        body={column.template}
+        className={column.className ? column.className : ''}
+        field={column.key}
+        header={column.header}
+        key={column.key}
+        sortable={column.key !== 'buttonsUniqueId' && column.key !== 'expanderColumn'} 
+        style={column.style}
       />
     ));
-
-    setColumns(columnsArray);
-  }, [resourcesContext.messages]);
+  };
 
   const newCancelledTasksClassName = rowData => ({
     'p-highlight-bg': rowData.index < notificationContext.all.filter(notification => !notification.isSystem).length
@@ -657,7 +658,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
     setJobStatus(null);
     setShowValidationTable(false);
     setCancelledValidations([]);
-    // setPaginationInfo({ recordsPerPage: 10, firstPageRecord: 0 });
+    setPaginationInfo({ recordsPerPage: 10, firstPageRecord: 0 });
   };
 
   const renderFilters = () => (
@@ -866,10 +867,11 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
                       }
                       rowClassName={newCancelledTasksClassName}
                       rows={paginationInfo.recordsPerPage}
-                      rowsPerPageOptions={[5, 10, 15]}
+                      rowsPerPageOptions={[5, 10, 15, 50]}
                       totalRecords={totalCancelledValidations}
                       value={cancelledValidations}>
-                      {columns}
+                      {/* {columns} */}
+                      {getCancelledValidationsColumns()}
                     </DataTable>
                   ) : (
                     <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
