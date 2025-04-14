@@ -261,9 +261,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       const data = await JobsStatusesService.getCancelledValidations({
         pageNum: page !== undefined ? page : pageNum,
         numberRows: rows !== undefined ? rows : numberRows,
-        sortOrder: sortOption !== undefined ? sortOption.sortOrder : sortCancelled.order,
-        sortField: sortOption !== undefined ? sortOption.sortField : sortCancelled.field,
-        jobId: jobStatus?.id
+        sortOrder: sortOption?.sortOrder || sortCancelled.order, 
+        sortField: sortOption?.sortField || sortCancelled.field, 
+        jobId: jobStatus?.jobId ?? jobStatus?.id
       });
       console.log('Cancelled tasks data:', data); // Debugging line
       setCancelledValidations(data.tasksList || []);

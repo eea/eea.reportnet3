@@ -90,7 +90,6 @@ export const JobsStatusesService = {
     sortField
   }) => {
     const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
-
     const response = await JobsStatusesRepository.getCancelledValidations({
       jobId,
       pageNum,
