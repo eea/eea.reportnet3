@@ -138,12 +138,15 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
     if (null == referenceDataset) {
       throw new EEAException(String.format(EEAErrorMessage.DATASET_NOTFOUND, datasetId));
     }
+
     referenceDataset.setUpdatable(updatable);
     referenceDatasetRepository.save(referenceDataset);
+
     if (!updatable) {
-      DataSetMetabase dataset = datasetMetabaseRepository.findById(datasetId).orElse(null);
-      fileTreatmentHelper.createReferenceDatasetFiles(dataset);
+      DataFlowVO dataflowVO = dataflowControllerZuul.findById(referenceDataset.getDataflowId(), null);
+      if (dataflowVO != null) {
+        fileTreatmentHelper.createReferenceDatasetPublicFiles(referenceDataset.getId(), dataflowVO);
+      }
     }
   }
-
 }

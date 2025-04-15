@@ -321,6 +321,14 @@ public interface JobController {
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
             @RequestParam(value = "asc", defaultValue = "true", required = false) boolean asc,
             @RequestParam(value = "sortedColumn", defaultValue = "ruleCode", required = false) String sortedColumn);
+
+    /**
+     * Checks if the process is silent release or not
+     * @param processId The process id
+     * @return True if is Silent release
+     */
+    @GetMapping(value = "/private/isSilentRelease/{processId}")
+    Boolean isSilentRelease(@PathVariable("processId") String processId) ;
 }
 
 

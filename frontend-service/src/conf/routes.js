@@ -20,7 +20,7 @@ export const routes = {
   FME: 'https://fme.discomap.eea.europa.eu/fmeserver/#/job/:fmeJobId/summary',
   LEGAL_NOTICE: '/legalNotice',
   LOGIN: '/login',
-  PRIVACY_POLICY_EIONET: 'https://www.eionet.europa.eu/reportnet/platform/footer/privacypolicy',
+  PRIVACY_POLICY_EIONET: 'https://reportnet.europa.eu/privacyPolicy',
   PRIVACY_STATEMENT: '/privacyPolicy',
   PUBLIC_COUNTRIES: '/public/countries',
   PUBLIC_COUNTRY_INFORMATION_ID: '/public/countries/:countryCode',

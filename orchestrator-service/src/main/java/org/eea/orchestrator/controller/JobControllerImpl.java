@@ -23,6 +23,7 @@ import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.orchestrator.service.JobHistoryService;
+import org.eea.orchestrator.service.JobProcessService;
 import org.eea.orchestrator.service.JobService;
 import org.eea.orchestrator.service.impl.JobProcessServiceImpl;
 import org.eea.orchestrator.utils.JobUtils;
@@ -68,6 +69,9 @@ public class JobControllerImpl implements JobController {
 
     @Autowired
     private JobHistoryService jobHistoryService;
+
+    @Autowired
+    private JobProcessService jobProcessService;
 
     /** The dataset metabase controller zuul */
     @Autowired
@@ -946,6 +950,22 @@ public class JobControllerImpl implements JobController {
         return jobCanceledValidationTasksVO;
     }
 
+
+    @Override
+    @GetMapping(value = "/private/isSilentRelease/{processId}")
+    public Boolean isSilentRelease(@PathVariable("processId") String processId) {
+        Long jobId = jobProcessService.findJobIdByProcessId(processId);
+        if(jobId != null){
+            JobVO jobVO = jobService.findById(jobId);
+            if (jobVO != null) {
+                Map<String, Object> parameters = jobVO.getParameters();
+                if(parameters.containsKey("silentRelease")){
+                    return (Boolean) parameters.get("silentRelease");
+                }
+            }
+        }
+        return false;
+    }
 }
 
 

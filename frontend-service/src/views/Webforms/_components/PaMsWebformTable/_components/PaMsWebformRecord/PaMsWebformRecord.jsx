@@ -322,8 +322,9 @@ export const PaMsWebformRecord = ({
                         !isNil(pamsWebformRecordState.record) &&
                         pamsWebformRecordState.record.elements.filter(
                           col =>
-                            !isNil(col.referencedField) &&
-                            col.referencedField.masterConditionalFieldId === element.fieldSchemaId
+                            (!isNil(col.referencedField) &&
+                              col.referencedField.masterConditionalFieldId === element.fieldSchemaId) ||
+                            (!isEmpty(col?.dependency) && col.dependency.field === element.name)
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}

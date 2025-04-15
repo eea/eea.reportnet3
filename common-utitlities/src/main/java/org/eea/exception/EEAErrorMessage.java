@@ -555,7 +555,7 @@ public final class EEAErrorMessage {
 
   /** The Constant IMPORTING_FILE_ICEBERG: {@value}. */
   public static final String IMPORTING_FILE_ICEBERG =
-          "Can not import because the table is iceberg";
+          "Can not import because an iceberg table exists";
 
   /** The Constant IMPORTING_FILE_DATASET: {@value}. */
   public static final String IMPORTING_REFUSED =

@@ -1748,6 +1748,7 @@
     "validationCanceledEvent": "Validation canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>, {:error}",
     "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>), {:error}",
     "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
+    "importFailedEventIcebergExists": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is a manually editable table in the dataflow",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "fmeImportJobFailedEvent": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
