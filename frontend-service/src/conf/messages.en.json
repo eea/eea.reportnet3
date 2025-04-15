@@ -778,6 +778,7 @@
     "geospatialDataMoreInfo": "Geospatial data - More info",
     "getConfigurationUserServiceError": "Error loading user preferences",
     "getJobsStatusesError": "Error loading jobs statuses",
+    "getCancelledTasksError": "Error loading cancelled validations",
     "getOrganizationsError": "Error loading organizations",
     "getMetadataError": "Error getting metadata",
     "getReferencedLinkValuesError": "Error while loading the referenced field values",
@@ -845,6 +846,8 @@
     "importEmptyFilesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all import files were empty.",
     "importFixedNumWithoutReplaceDataErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have fixed number of records and replace data option was not selected.",
     "importFixedNumWithoutReplaceDataWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have fixed number of records and replace data option was not selected.",
+    "importWrongHeadersErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: wrong headers.",
+    "importWrongHeadersWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have different headers.",
     "importWrongNumOfRecordsErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have fixed number of records and the files that were provided did not contain the same number of records.",
     "importWrongNumOfRecordsWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have fixed number of records and the files that were provided did not contain the same number of records.",
     "importOnlyReadOnlyFieldsErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have have only read only fields.",
@@ -1444,6 +1447,7 @@
     "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available",
     "showPublicInfoDataflowDialogHeader": "Show/hide public dataflow data",
     "showValidations": "Show validations",
+    "showCancelledValidations": "Show cancelled validations",
     "sidebarApiKeyBtn": "API-key",
     "single": "Single",
     "singleMultipleSelectItems": "Single/Multiple select items",
@@ -1759,6 +1763,11 @@
     "deletingNationalCoordinatorFailedEvent": "National coordinator has not been deleted",
     "nationalCoordinatorAddingProcessStartedEvent": "National coordinator adding process has been started, please wait...",
     "nationalCoordinatorDeletingProcessStartedEvent": "National coordinator deleting process has been started, please wait...",
-    "nationalCoordinatorAnotherProcessInProgressEvent": "Another National coordinator process is still in progress, please wait..."
+    "nationalCoordinatorAnotherProcessInProgressEvent": "Another National coordinator process is still in progress, please wait...",
+    "taskId": "Task id",
+    "ruleId": "Rule id",
+    "hideCancelledValidations": "Hide cancelled validations",
+    "noCancelledTasks": "There are no cancelled validations for this job"
+
   }
 }

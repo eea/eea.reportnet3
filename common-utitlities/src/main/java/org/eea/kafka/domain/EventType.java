@@ -717,7 +717,13 @@ public enum EventType {
       "parquet_to_iceberg_conversion_failed_event", true),
 
   PREFILLED_TABLE_HAS_NO_DATA_ERROR(LiteralConstants.DATA_REPORTING_TOPIC,
-      "prefilled_table_has_no_data_error", true);
+      "prefilled_table_has_no_data_error", true),
+
+  IMPORT_WRONG_HEADERS_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_wrongHeaders_error_event", true),
+
+  IMPORT_WRONG_HEADERS_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_wrongHeaders_warning_event", true);
 
   /** The topic. */
   private String topic;

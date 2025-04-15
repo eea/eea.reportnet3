@@ -136,6 +136,12 @@
   }
 }
 
+.hiddenEntitiesAddButton {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .missingElements {
   color: var(--main-font-color);
   display: flex;
