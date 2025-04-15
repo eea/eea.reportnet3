@@ -3822,6 +3822,18 @@ public class DatasetServiceImpl implements DatasetService {
       throw e;
     }
   }
+
+
+  @Override
+  public void failImportJob(Long jobId, Long datasetId, EventType eventType, JobInfoEnum jobInfo){
+    if(jobId != null) {
+      jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      jobControllerZuul.updateJobInfo(jobId, jobInfo, null);
+    }
+    releaseImportFailedNotification(datasetId, null, null, eventType);
+  }
+
+
   @Override
   public void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType, JobInfoEnum jobInfo){
     ProcessVO process = processControllerZuul.findById(processId);

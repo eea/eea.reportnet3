@@ -16,50 +16,65 @@ export const webformRecordReducer = (state, { type, payload }) => {
       ] = payload.value;
 
       const inmRecord = { ...state.record };
+
       const filteredRecord = inmRecord.elements.filter(field => {
         if (field.type === 'BLOCK') {
-          field.elementsRecords.filter(record =>
-            record.fields.filter(field => field.fieldId === state.record.recordId)
+          return field.elements.filter(
+            fieldRecord =>
+              fieldRecord.fieldId === payload.option ||
+              fieldRecord.fieldSchema === payload.option ||
+              fieldRecord.fieldSchemaId === payload.option
           );
-
-          const getIndexInElementsRecordsArr = () => {
-            return field.elementsRecords
-              .map(record =>
-                record.fields
-                  .map(field => field.fieldId)
-                  .map(ids => ids?.includes(payload.field.fieldId))
-                  .filter(id => id === true)
-                  .indexOf(true)
-              )
-              .indexOf(0);
-          };
-
-          const indexOfCorrespondentElementsRecords = getIndexInElementsRecordsArr();
-          const checkRecordIsNotEmpty = () =>
-            !isEmpty(
-              field?.elementsRecords[indexOfCorrespondentElementsRecords]?.elements?.filter(
-                field => field.fieldSchemaId === payload.option
-              )
-            );
-
-          if (checkRecordIsNotEmpty()) {
-            field.elementsRecords[indexOfCorrespondentElementsRecords].elements.filter(
-              field => field.fieldSchemaId === payload.option
-            )[0].value = payload.value;
-          }
         }
-
         return field.fieldSchemaId === payload.option;
       });
 
-      if (!isEmpty(filteredRecord))
-        inmRecord.elements.filter(field => field.fieldSchemaId === payload.option)[0].value = payload.value;
+      if (!isEmpty(filteredRecord)) {
+        if (!isEmpty(inmRecord.elements.filter(field => field.fieldSchemaId === payload.option))) {
+          inmRecord.elements.filter(
+            field =>
+              field.fieldId === payload.option ||
+              field.fieldSchema === payload.option ||
+              field.fieldSchemaId === payload.option
+          )[0].value = payload.value;
+        } else {
+          inmRecord.elements
+            .find(field => {
+              if (field.type === 'BLOCK') {
+                return field.elements.find(
+                  blockField => (blockField.fieldId || blockField.fieldSchema) === payload.option
+                );
+              }
+              return undefined;
+            })
+            .elementsRecords.find(elementRecord => elementRecord.recordId === payload.field.recordId)
+            .elements.find(
+              blockElement =>
+                blockElement.fieldId === payload.option ||
+                blockElement.fieldSchema === payload.option ||
+                blockElement.fieldSchemaId === payload.option
+            ).value = payload.value;
+        }
+      }
+
+      let conditionalFieldsRecord;
+
+      if (payload.conditional && payload.field.fieldType === 'LINK') {
+        conditionalFieldsRecord = {
+          ...inmRecord,
+          elements: inmRecord.elements.map(element =>
+            !(element.fieldSchema === payload.option || element.fieldSchemaId === payload.option)
+              ? { ...element, value: '' }
+              : { ...element, value: payload.value }
+          )
+        };
+      }
 
       return {
         ...state,
         selectedField: payload.field,
         newRecord: inmNewRecord,
-        record: inmRecord,
+        record: conditionalFieldsRecord || inmRecord,
         isConditionalChanged: payload.conditional ? !state.isConditionalChanged : state.isConditionalChanged
       };
 

@@ -6,11 +6,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.eea.interfaces.controller.recordstore.ProcessController;
-import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.impl.TaskServiceImpl;
 import org.slf4j.Logger;
@@ -263,9 +263,12 @@ public class ProcessControllerImpl implements ProcessController {
    */
   @Override
   @GetMapping("/private/findCanceledTasksByProcessIds")
-  public List<JobCanceledValidationTasksVO> findTasksByProcessIdsAndStatus(
-          @RequestParam(name = "processIds") List<String> processIds) {
-    return  taskServiceImpl.findTasksByProcessIdsAndStatus(processIds, ProcessStatusEnum.CANCELED);
-  }
+  public JobCanceledValidationTasksVO findTasksByProcessIdsAndStatus(
+          @RequestParam(name = "processIds") List<String> processIds,
+          @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
+
+      return taskServiceImpl.findTasksByProcessIdsAndStatus(processIds, ProcessStatusEnum.CANCELED, pageNum, pageSize);  }
+
 
 }

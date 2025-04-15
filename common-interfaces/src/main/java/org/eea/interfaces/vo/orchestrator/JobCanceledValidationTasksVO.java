@@ -1,31 +1,34 @@
 package org.eea.interfaces.vo.orchestrator;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
- * The Class JobCanceledValidationTasksVO.
+ * Represents a container of canceled validation tasks, plus summary stats.
  */
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-@ToString
 public class JobCanceledValidationTasksVO implements Serializable {
 
-    /** The Constant serialVersionUID. */
-    private static final long serialVersionUID = 8101234578901234567L;
+    private static final long serialVersionUID = -8922037724334609179L;
 
-    /** The task id. */
-    private Long taskId;
+    /** The list of canceled tasks. */
+    private List<JobCanceledValidationTaskVO> tasksList;
 
-    /** The rule code. */
-    private String ruleCode;
+    /** The total number of tasks. */
+    private Long totalRecords;
 
-    /** The rule id (SQL Rule). */
-    private String ruleId;
+    /** The number of tasks after any filter is applied. */
+    private Long filteredRecords;
 
-    /** The rule level error. */
-    private String ruleLevelError;
+    /** The number of remaining tasks if partial page. */
+    private Long remainingTasks;
+
 }

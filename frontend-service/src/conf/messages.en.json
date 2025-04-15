@@ -778,6 +778,7 @@
     "geospatialDataMoreInfo": "Geospatial data - More info",
     "getConfigurationUserServiceError": "Error loading user preferences",
     "getJobsStatusesError": "Error loading jobs statuses",
+    "getCancelledTasksError": "Error loading cancelled validations",
     "getOrganizationsError": "Error loading organizations",
     "getMetadataError": "Error getting metadata",
     "getReferencedLinkValuesError": "Error while loading the referenced field values",
@@ -1446,6 +1447,7 @@
     "showPublicInfoDataflowCheckboxLabel": "Dataflow public info is available",
     "showPublicInfoDataflowDialogHeader": "Show/hide public dataflow data",
     "showValidations": "Show validations",
+    "showCancelledValidations": "Show cancelled validations",
     "sidebarApiKeyBtn": "API-key",
     "single": "Single",
     "singleMultipleSelectItems": "Single/Multiple select items",
@@ -1746,6 +1748,7 @@
     "validationCanceledEvent": "Validation canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>, {:error}",
     "releaseCanceledEvent": "Release canceled for <strong>{:dataProviderName}</strong> (<a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>), {:error}",
     "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
+    "importFailedEventIcebergExists": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is a manually editable table in the dataflow",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "fmeImportJobFailedEvent": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
@@ -1760,6 +1763,11 @@
     "deletingNationalCoordinatorFailedEvent": "National coordinator has not been deleted",
     "nationalCoordinatorAddingProcessStartedEvent": "National coordinator adding process has been started, please wait...",
     "nationalCoordinatorDeletingProcessStartedEvent": "National coordinator deleting process has been started, please wait...",
-    "nationalCoordinatorAnotherProcessInProgressEvent": "Another National coordinator process is still in progress, please wait..."
+    "nationalCoordinatorAnotherProcessInProgressEvent": "Another National coordinator process is still in progress, please wait...",
+    "taskId": "Task id",
+    "ruleId": "Rule id",
+    "hideCancelledValidations": "Hide cancelled validations",
+    "noCancelledTasks": "There are no cancelled validations for this job"
+
   }
 }

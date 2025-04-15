@@ -2,16 +2,15 @@ package org.eea.interfaces.controller.orchestrator;
 
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.JobsVO;
-import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -316,7 +315,20 @@ public interface JobController {
     void handleStuckImportJob(@PathVariable("jobId") Long jobId, @RequestBody String error) throws Exception;
 
     @GetMapping(value = "/canceledValidationTasks/{jobId}")
-    List<JobCanceledValidationTasksVO> findCanceledValidationTasksByJobId(@PathVariable("jobId") Long jobId);
+    JobCanceledValidationTasksVO findCanceledValidationTasksByJobId(
+            @PathVariable("jobId") Long jobId,
+            @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize,
+            @RequestParam(value = "asc", defaultValue = "true", required = false) boolean asc,
+            @RequestParam(value = "sortedColumn", defaultValue = "ruleCode", required = false) String sortedColumn);
+
+    /**
+     * Checks if the process is silent release or not
+     * @param processId The process id
+     * @return True if is Silent release
+     */
+    @GetMapping(value = "/private/isSilentRelease/{processId}")
+    Boolean isSilentRelease(@PathVariable("processId") String processId) ;
 }
 
 

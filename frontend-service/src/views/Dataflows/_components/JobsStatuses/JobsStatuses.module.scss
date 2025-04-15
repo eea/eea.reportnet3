@@ -57,6 +57,10 @@ h6 {
   margin-left: auto !important;
 }
 
+.buttonPushDown {
+  margin-top: 1rem !important;
+}
+
 .deleteRowButton {
   border: 1px solid var(--general-border-color) !important;
   color: var(--errors) !important;
@@ -131,4 +135,24 @@ h6 {
 
 .tooltip:hover .tooltiptext {
   visibility: visible;
+}
+
+.cancelledValidationsTable {
+  margin-top: 1rem !important;
+}
+
+.emptyArrayMessage {
+  margin-top: 1rem !important;
+}
+
+.noCancelledTasksContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  flex-direction: column;
+  .spinnerPosition {
+    top: 0;
+    left: 0;
+  }
 }

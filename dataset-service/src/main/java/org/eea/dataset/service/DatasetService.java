@@ -711,6 +711,16 @@ public interface DatasetService {
   void failImportJobAndProcess(String processId, Long datasetId, String tableSchemaId, String fileName, EventType eventType, JobInfoEnum jobInfo);
 
   /**
+   * Fails import job
+   * @param jobId
+   * @param datasetId
+   * @param eventType
+   * @param jobInfo
+   * @return
+   */
+  void failImportJob(Long jobId, Long datasetId, EventType eventType, JobInfoEnum jobInfo);
+
+  /**
    * Get Data provider id by dataset id
    * @param datasetId
    */
