@@ -808,11 +808,11 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
         bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
-        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
+        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false, jobId);
       }
       else {
         LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-        deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false);
+        deleteHelper.executeDeleteDatasetProcess(datasetId, deletePrefilledTables, false, jobId);
       }
       LOG.info("Successfully deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
 
@@ -881,11 +881,11 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataFlowVO.getBigData()) {
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
         bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false);
-        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false);
+        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false, null);
       }
       else {
         LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
-        deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted);
+        deleteHelper.executeDeleteDatasetProcess(datasetId, false, technicallyAccepted, null);
       }
       LOG.info("Successfully privately deleted dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {

@@ -6,10 +6,12 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -92,6 +94,10 @@ public class DeleteHelper {
   @Autowired
   private RecordRepository recordRepository;
 
+  /** The job controller zuul */
+  @Autowired
+  private JobController.JobControllerZuul jobControllerZuul;
+
 
   /**
    * Instantiates a new file loader helper.
@@ -159,7 +165,7 @@ public class DeleteHelper {
    */
   @Async
   public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables,
-      boolean technicallyAccepted) {
+      boolean technicallyAccepted, Long jobId) {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
     // now the view is not updated, update the check to false
@@ -167,10 +173,10 @@ public class DeleteHelper {
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
 
-    releaseDeleteDatasetDataLocksAndSendNotification(datasetId, technicallyAccepted);
+    releaseDeleteDatasetDataLocksAndSendNotification(datasetId, technicallyAccepted, jobId);
   }
 
-  public void releaseDeleteDatasetDataLocksAndSendNotification(final Long datasetId, boolean technicallyAccepted){
+  public void releaseDeleteDatasetDataLocksAndSendNotification(final Long datasetId, boolean technicallyAccepted, Long jobId){
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
             ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
             : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
@@ -202,6 +208,11 @@ public class DeleteHelper {
       } catch (EEAException e) {
         LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
       }
+
+      if (jobId != null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+      }
+      LOG.info("Successfully deleted table data for datasetId {}", datasetId);
     }
   }
 

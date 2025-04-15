@@ -388,7 +388,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       disabledButtons={
         !(
           job.jobStatus === 'IN_PROGRESS' &&
-          (job.jobType === 'IMPORT' ||
+          (job.jobType === 'DELETE' ||
+            job.jobType === 'IMPORT' ||
             job.jobType === 'VALIDATION' ||
             job.jobType === 'RELEASE' ||
             job.jobType === 'FILE_EXPORT') &&
