@@ -36,6 +36,7 @@ import { isEmpty } from 'lodash';
 
 export const PaMsWebformField = ({
   bigData = false,
+  changedConditionalFieldData,
   columnsSchema,
   conditionalFieldChange,
   dataProviderId,
@@ -242,6 +243,8 @@ export const PaMsWebformField = ({
     let parsedValues;
 
     if (isConditional && field.fieldType === 'LINK') {
+      const changedElementIndex = record.elements.indexOf(field);
+
       conditionalFields = record.elements
         .map(element =>
           !(element.fieldSchema === option || element.fieldSchemaId === option)
@@ -250,7 +253,7 @@ export const PaMsWebformField = ({
                 element?.referencedField?.masterConditionalFieldId === field.fieldSchemaId
                 ? { ...element, value: '' }
                 : { ...element }
-              : { ...element, value: '' }
+              : { ...element, value: record.elements.indexOf(element) > changedElementIndex ? '' : element.value }
             : { ...element, value: value }
         )
         .filter(conditionalField => conditionalField.type === 'FIELD' && conditionalField.pk !== true);
@@ -436,8 +439,12 @@ export const PaMsWebformField = ({
             (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
           ) {
             const emptyValue = [];
-            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
-              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+            if (
+              (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
+              !isEmpty(field.referencedField?.masterConditionalFieldId)
+            ) {
+              (field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+                record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData)) &&
                 onFillField(field, option, emptyValue, isConditional);
             } else {
               onFillField(field, option, emptyValue, isConditional);
@@ -478,8 +485,12 @@ export const PaMsWebformField = ({
             (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
           ) {
             const emptyValue = '';
-            if (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) {
-              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId &&
+            if (
+              (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
+              !isEmpty(field.referencedField?.masterConditionalFieldId)
+            ) {
+              (field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+                record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData)) &&
                 onFillField(field, option, emptyValue, isConditional);
             } else {
               onFillField(field, option, emptyValue, isConditional);

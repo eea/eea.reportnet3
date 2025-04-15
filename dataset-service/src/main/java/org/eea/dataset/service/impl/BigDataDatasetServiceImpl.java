@@ -398,6 +398,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         } else {
             List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
             parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
+
         }
     }
 
@@ -464,7 +465,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         if(sendWrongFileNameWarning){
-//            importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
+            //initialize warning message
+            importFileInDremioInfo.setWarningMessages(new ArrayList<>());
             importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
             jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
         }
@@ -692,6 +694,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if(EEAErrorMessage.DREMIO_ENDPOINT_ERROR_RESPONSE.equals(importFileInDremioInfo.getErrorMessage())){
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_DREMIO_ENDPOINT_RESPONSE, null);
                 eventType = EventType.DREMIO_ENDPOINT_ERROR_RESPONSE;
+            } else if(EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+                eventType = EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -734,7 +739,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
 
         if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty()) {
-            for(String warningMessage : importFileInDremioInfo.getWarningMessages()) {
+            Set <String> warningMessages = new HashSet<>(importFileInDremioInfo.getWarningMessages());
+            for(String warningMessage : warningMessages) {
                 if(warningMessage.equals(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
@@ -743,7 +749,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))){
+                if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -751,7 +758,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -759,7 +767,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -767,7 +776,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -775,7 +785,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_ONLY_READ_ONLY_FIELDS_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -790,6 +801,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_MISMATCH_OF_DATA_WARNING_EVENT,
                         value, notificationWarning);
+                }
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(importFileInDremioInfo.getErrorMessage())){
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+                    NotificationVO notificationWarning = NotificationVO.builder()
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                            .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
+                            value, notificationWarning);
                 }
             }
         }

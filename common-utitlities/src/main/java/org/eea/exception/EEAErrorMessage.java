@@ -853,6 +853,9 @@ public final class EEAErrorMessage {
   public static final String JOB_NOT_FOUND =
           "JOB not found for Job ID %s.";
 
+  /** The Constant ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS */
+  public static final String ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS = "Import files contain wrong headers.";
+
   /**
    * Instantiates a new EEA error message.
    */
