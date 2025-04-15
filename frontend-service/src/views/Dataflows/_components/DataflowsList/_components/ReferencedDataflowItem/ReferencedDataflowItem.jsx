@@ -13,7 +13,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
 
-export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }) => {
+export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompressed = () => {} }) => {
   const resourcesContext = useContext(ResourcesContext);
 
   const [isPinned, setIsPinned] = useState(dataflow.pinned === 'pinned');
@@ -26,7 +26,7 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows = () => {} }
 
   const renderDataflowLayout = children => (
     <div
-      className={`${styles.container} ${styles.accepted} ${
+      className={`${styles.container} ${styles.accepted} ${isCompressed ? `${styles.compressedList}` : ''} ${
         styles[dataflow.status]
       } dataflowList-first-dataflow-help-step`}
       onMouseEnter={() => setIsPinShowed(true)}
