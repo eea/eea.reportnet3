@@ -558,7 +558,7 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Async
     public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
-
+        LOG.info("Creating reference dataset files for  dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
         ExportFilterVO filters = new ExportFilterVO();
         List<DesignDataset> desingDataset =
                 designDatasetRepository.findByDataflowId(dataset.getDataflowId());
@@ -595,6 +595,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     @Async
     public void createReferenceDatasetFilesDL(DataSetMetabase dataset) throws EEAException {
+        LOG.info("Creating reference dataset files for big data dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
         String nameFileUnique = String.format("%s", dataset.getDataSetName());
 
         createFilesAndZipDL(dataset, importPath + "/dataflow-" + dataset.getDataflowId(), nameFileUnique);

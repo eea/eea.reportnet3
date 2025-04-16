@@ -143,7 +143,7 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
     referenceDatasetRepository.save(referenceDataset);
 
     if (!updatable) {
-      DataFlowVO dataflowVO = dataflowControllerZuul.findById(referenceDataset.getDataflowId(), null);
+      DataFlowVO dataflowVO = dataflowControllerZuul.getMetabaseById(referenceDataset.getDataflowId());
       if (dataflowVO != null) {
         fileTreatmentHelper.createReferenceDatasetPublicFiles(referenceDataset.getId(), dataflowVO);
       }
