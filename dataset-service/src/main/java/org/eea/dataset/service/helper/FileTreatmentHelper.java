@@ -539,6 +539,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
+    @Async
     public void createReferenceDatasetPublicFiles(Long referenceDatasetId, DataFlowVO dataflowVO) throws EEAException, IOException {
         DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(referenceDatasetId)
                 .orElseThrow(() -> new EEAException("DatasetMetabase not found for ID: " + referenceDatasetId));

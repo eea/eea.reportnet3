@@ -148,5 +148,7 @@ public class ReferenceDatasetServiceImpl implements ReferenceDatasetService {
         fileTreatmentHelper.createReferenceDatasetPublicFiles(referenceDataset.getId(), dataflowVO);
       }
     }
+
+    LOG.info("Updated reference datasetId {} updatable to {}", datasetId, updatable);
   }
 }
