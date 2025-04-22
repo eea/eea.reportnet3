@@ -248,4 +248,6 @@ public interface BigDataDatasetService {
      */
     ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(DataSetMetabaseVO collectionDataset, DataSetMetabaseVO reportingDataset, Long dataflowId,
                                                            DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
+
+    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
 }

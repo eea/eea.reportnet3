@@ -521,7 +521,11 @@ public class JobControllerImpl implements JobController {
                                   @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                                           value = "columnName", required = false) String columnName,
                                   @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                                          value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                                          value = "dataProviderCodes", required = false) String dataProviderCodes,
+                                  @ApiParam(type = "Boolean", value = "Csv will be exported", example = "true") @RequestParam(
+                                          value = "exportCsv", required = false) Boolean exportCsv,
+                                  @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
+                                          value = "includeAttachments", required = false) Boolean includeAttachments) {
 
         ThreadPropertiesManager.setVariable("user", SecurityContextHolder.getContext().getAuthentication().getName());
         String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
@@ -537,6 +541,8 @@ public class JobControllerImpl implements JobController {
         parameters.put("filterValue", filterValue);
         parameters.put("columnName", columnName);
         parameters.put("dataProviderCodes", dataProviderCodes);
+        parameters.put("exportCsv", exportCsv);
+        parameters.put("includeAttachments", includeAttachments);
         parameters.put("userId", userId);
 
         String dataflowName = null;
@@ -760,8 +766,8 @@ public class JobControllerImpl implements JobController {
             try (FileInputStream in = new FileInputStream(file)) {
                 // copy from in to out
                 IOUtils.copyLarge(in, out);
-                // delete the file after downloading it ?
-                //FileUtils.forceDelete(file);
+                // delete the file after downloading it
+                FileUtils.forceDelete(file);
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
                 throw e;

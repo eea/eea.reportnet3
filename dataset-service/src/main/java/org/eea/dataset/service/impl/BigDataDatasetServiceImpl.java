@@ -23,6 +23,7 @@ import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
+import org.eea.dataset.service.file.ZipUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
@@ -85,6 +86,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -97,6 +99,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Value("${importPath}")
     private String importPath;
+
+    /**  The path export DL */
+    @Value("${exportDLPath}")
+    private String exportDLPath;
+
+    private int defaultFileExportProcessPriority = 20;
 
     private static final int defaultImportProcessPriority = 20;
 
@@ -2086,5 +2094,90 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         return releasedDatasetDataInfoVO;
+    }
+
+    @Override
+    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException {
+        try {
+            // the path of the parent folder which will be zipped
+            String folderToZipPath = exportDLPath + "/dataset-" + datasetId + "/etlExportV4_" + jobId;
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            if (jobId!=null) {
+                JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+                jobProcessControllerZuul.save(jobProcessVO);
+            }
+            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+            if (StringUtils.isNotBlank(tableSchemaId)) {
+                String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId);
+                if(includeAttachments){
+                    //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_TABLE_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_TABLE_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_EU_TABLE_PATH;
+                     }
+                     S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, path);
+                    if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                        String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                        s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                    }
+                }
+            } else {
+                List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
+                for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
+                    fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId);
+                }
+                 if(includeAttachments){
+                     //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_FOLDER_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
+                     }
+                    S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, path);
+                     if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                         String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                         s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                     }
+                }
+            }
+
+            //zip the folder
+            File folderToZip = new File(folderToZipPath);
+            File zipOutput = new File(folderToZipPath + ".zip");
+            try {
+                ZipUtils.zipFolder(folderToZip, zipOutput);
+            } catch (Exception e) {
+               LOG.error("There was an error when zipping the files for etl export v4 jobId {} folderToZipPath {}", jobId, folderToZipPath);
+               throw e;
+            }
+            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            if (jobId !=null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+            }
+        }
+        catch (Exception e) {
+            LOG.error("EtlExportV4 failed for jobId {} Error: {}", jobId, e.getMessage());
+            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            if (jobId != null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            }
+        }
     }
 }

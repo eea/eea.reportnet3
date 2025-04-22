@@ -1,9 +1,7 @@
 package org.eea.dataset.service.file;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -589,5 +587,37 @@ public class ZipUtils {
               e.getMessage(), e);
     }
     return integrities;
+  }
+
+  public static void zipFolder(File sourceFolder, File zipFile) throws IOException {
+    try (
+            FileOutputStream fos = new FileOutputStream(zipFile);
+            ZipOutputStream zos = new ZipOutputStream(fos)
+    ) {
+      zipFilesRecursively(sourceFolder, "", zos);
+    }
+  }
+
+  public static void zipFilesRecursively(File fileToZip, String zipEntryName, ZipOutputStream zos) throws IOException {
+    if (fileToZip.isHidden()) return;
+
+    if (fileToZip.isDirectory()) {
+      if (!zipEntryName.endsWith("/")) zipEntryName += "/";
+      zos.putNextEntry(new ZipEntry(zipEntryName));
+      zos.closeEntry();
+
+      File[] children = fileToZip.listFiles();
+      if (children != null) {
+        for (File child : children) {
+          zipFilesRecursively(child, zipEntryName + child.getName(), zos);
+        }
+      }
+      return;
+    }
+
+    ZipEntry zipEntry = new ZipEntry(zipEntryName);
+    zos.putNextEntry(zipEntry);
+    Files.copy(fileToZip.toPath(), zos);
+    zos.closeEntry();
   }
 }
