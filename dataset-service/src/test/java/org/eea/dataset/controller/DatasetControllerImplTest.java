@@ -1657,7 +1657,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), Mockito.nullable(Long.class));
   }
 
   /**
@@ -1676,7 +1676,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteImportTableLegacy(1L, "5cf0e9b3b793310e9ceca190", null, null);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), Mockito.nullable(Long.class));
   }
 
   @Test
@@ -1692,7 +1692,7 @@ public class DatasetControllerImplTest {
 
     datasetControllerImpl.deleteTableData(1L, "5cf0e9b3b793310e9ceca190", 1L, 1L);
     Mockito.verify(deleteHelper, times(1)).executeDeleteTableProcess(Mockito.anyLong(),
-        Mockito.any());
+        Mockito.any(), Mockito.nullable(Long.class));
   }
 
   @Test(expected = ResponseStatusException.class)

@@ -16,6 +16,7 @@ import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobProcessController.JobProcessControllerZuul;
@@ -113,6 +114,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Autowired
     DatasetSchemaService datasetSchemaService;
+
+    @Autowired
+    DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
 
 
     @Override
@@ -691,7 +695,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     }
 
     @Override
-    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName) throws Exception {
+    public void deleteTableData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String tableSchemaName, Long jobId) throws Exception {
         if(tableSchemaName == null) {
             String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
             tableSchemaName = datasetSchemaService.getTableSchemaName(datasetSchemaId, tableSchemaId);
@@ -717,10 +721,35 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaName);
             s3Helper.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH);
         }
+
+        if (jobId != null) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+
+            // after the table has been deleted, an event is sent to notify it
+            EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+              ? EventType.DELETE_TABLE_COMPLETED_EVENT
+              : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
+            Map<String, Object> value = new HashMap<>();
+            NotificationVO notificationVO = NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+              .tableSchemaId(tableSchemaId).build();
+            DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+            notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+            notificationVO.setDataflowName(dataFlowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+
+            value.put(LiteralConstants.DATASET_ID, datasetId);
+
+            try {
+                kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+            } catch (EEAException e) {
+                LOG.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+            }
+        }
     }
 
     @Override
-    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables) throws Exception {
+    public void deleteDatasetData(Long datasetId, Long dataflowId, Long providerId, Boolean deletePrefilledTables, Long jobId) throws Exception {
         DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
         if(providerId == null){
             providerId = dataSetMetabaseVO.getDataProviderId();
@@ -735,7 +764,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     continue;
                 }
             }
-            deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema());
+            deleteTableData(datasetId, dataflowId, providerId, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), jobId);
         }
     }
 
