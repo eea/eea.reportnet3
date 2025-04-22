@@ -154,7 +154,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Autowired
     private PkCatalogueRepository pkCatalogueRepository;
 
-    @Autowired
     private DatasetSnapshotService datasetSnapshotService;
 
     @Autowired
@@ -180,7 +179,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
-                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository) {
+                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, DatasetSnapshotService datasetSnapshotService) {
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
@@ -190,6 +189,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.fileTreatmentHelper = parquetConverterService.getFileTreatmentHelper();
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.schemasRepository = schemasRepository;
+        this.datasetSnapshotService = datasetSnapshotService;
     }
 
 
