@@ -807,8 +807,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables);
-        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false, jobId);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables, jobId);
       }
       else {
         LOG.info("Deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
@@ -880,8 +879,7 @@ public class DatasetControllerImpl implements DatasetController {
 
       if (dataFlowVO.getBigData()) {
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
-        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false);
-        deleteHelper.releaseDeleteDatasetDataLocksAndSendNotification(datasetId, false, null);
+        bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false, null);
       }
       else {
         LOG.info("Privately deleting dataset data for dataflowId {} and datasetId {}", dataflowId, datasetId);
@@ -999,13 +997,13 @@ public class DatasetControllerImpl implements DatasetController {
       DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
       if (dataFlowVO.getBigData()) {
         LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
-        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, null);
+        bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, null, jobId);
         deleteHelper.releaseDeleteTableDataLocksAndSendNotification(datasetId, tableSchemaId);
       }
       else {
         LOG.info("Deleting table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
         // This method will release the lock
-        deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId);
+        deleteHelper.executeDeleteTableProcess(datasetId, tableSchemaId, jobId);
       }
       LOG.info("Successfully deleted table data for dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
 
