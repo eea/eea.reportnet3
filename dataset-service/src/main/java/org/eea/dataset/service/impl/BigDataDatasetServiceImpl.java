@@ -2079,6 +2079,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException {
         try {
+            // the path of the parent folder which will be zipped
+            String folderToZipPath = exportDLPath + "/dataset-" + datasetId + "/etlExportV4_" + jobId;
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
             processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
                     processUUID, user, defaultFileExportProcessPriority, false);
             if (jobId!=null) {
@@ -2088,34 +2091,52 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
                     processUUID, user, defaultFileExportProcessPriority, false);
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
             if (StringUtils.isNotBlank(tableSchemaId)) {
                 String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
                 fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId);
-            /* if(includeAttachments){
-                //get attachments if they exist
-                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, dataSetMetabaseVO.getDataProviderId(), datasetId, tableName, tableName, S3_ATTACHMENTS_TABLE_PATH);
-                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_TABLE_PATH)) {
-                    s3HelperPrivate.getFilesFromS3Locally(s3TablePathResolver);
+                if(includeAttachments){
+                    //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_TABLE_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_TABLE_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_EU_TABLE_PATH;
+                     }
+                     S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, path);
+                    if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                        String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                        s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                    }
                 }
-            }*/
             } else {
                 List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
                 for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
                     fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId);
                 }
-            /*if(includeAttachments){
-                //get attachments if they exist
-                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, dataSetMetabaseVO.getDataProviderId(), datasetId, null, null, S3_ATTACHMENTS_PARENT_FOLDER_PATH);
-                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_ATTACHMENTS_PARENT_FOLDER_PATH)) {
-                    s3HelperPrivate.getFilesFromS3Locally(s3TablePathResolver);
+                 if(includeAttachments){
+                     //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_FOLDER_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
+                     }
+                    S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, path);
+                     if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                         String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                         s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                     }
                 }
-            }*/
-
             }
 
-
-            //todo zip everything and then remove files
-            String folderToZipPath = exportDLPath + "/dataset-" + datasetId + "/etlExportV4_" + jobId;
+            //zip the folder
             File folderToZip = new File(folderToZipPath);
             File zipOutput = new File(folderToZipPath + ".zip");
             try {
@@ -2124,13 +2145,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                LOG.error("There was an error when zipping the files for etl export v4 jobId {} folderToZipPath {}", jobId, folderToZipPath);
                throw e;
             }
-
-
-
-            //if we are at data collection or eu dataset the attachments are in different paths
-            //location is exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE exportDLPath/dataset-datasetId/etlExport/t1.csv
-            //File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
-            //zip should contain t1.csv, t2.csv, attachments -> includes t1 and t2 folder -> include files
             processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
                     processUUID, user, defaultFileExportProcessPriority, false);
             if (jobId !=null) {

@@ -6,6 +6,7 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -437,9 +438,36 @@ public class S3HelperImpl implements S3Helper {
     }
 
     @Override
-    public List<File> getFilesFromS3Locally(S3PathResolver s3PathResolver){
-        //getFileFromS3(String key, String fileName, String path, String fileType)
-        //path exportDLPath/dataset-datasetId/etlExport/attachments
-        return null;
+    public void getAttachmentsFromS3Locally(String attachmentsPathInS3, String parentFolderInDiskPath){
+        try {
+            ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                    .bucket(S3_DEFAULT_BUCKET_NAME) //attachments are only kept in the parquet bucket and never in the iceberg bucket
+                    .prefix(attachmentsPathInS3)
+                    .build();
+
+            ListObjectsV2Response listResponse = s3Client.listObjectsV2(listRequest);
+            List<S3Object> objects = listResponse.contents();
+
+            for (S3Object obj : objects) {
+                String key = obj.key();
+                if (!key.contains("attachments/") || key.endsWith("/")) {
+                    continue;
+                }
+
+                String relativePath = key.substring(key.indexOf("attachments/"));
+                Path targetPath = Paths.get(parentFolderInDiskPath, relativePath);
+
+                Files.createDirectories(targetPath.getParent());
+                s3Client.getObject(GetObjectRequest.builder()
+                        .bucket(S3_DEFAULT_BUCKET_NAME)
+                        .key(key)
+                        .build(), targetPath);
+
+            }
+            LOG.info("Downloaded attachments from s3 path {} to local path {}", attachmentsPathInS3, parentFolderInDiskPath);
+        }
+        catch (Exception e){
+            LOG.error("Could not download attachments from path {} to {} Error: ", attachmentsPathInS3, parentFolderInDiskPath, e);
+        }
     }
 }
