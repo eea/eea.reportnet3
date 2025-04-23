@@ -94,6 +94,7 @@ export const Webforms = ({
           dataProviderId={dataProviderId}
           datasetId={datasetId}
           hideEntities={selectedConfiguration?.hideEntities}
+          hideTabularData={selectedConfiguration?.hideTabularData}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReleasing={isReleasing}

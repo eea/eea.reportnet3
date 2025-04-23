@@ -68,6 +68,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
+  const [hideTabularData, setHideTabularData] = useState(false);
+  const { permissions } = config;
+  const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
 
   const [dataset, setDataset] = useState({});
   const [datasetProgressBarSteps, setDatasetProgressBarSteps] = useState({
@@ -373,6 +376,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
 
+  const getWebformConfiguration = async (webform, options) => {
+    try {
+      const selectedWebform = options.find(item => item.name === webform.name);
+      if (!selectedWebform) {
+        throw new Error('Webform not found in options');
+      }
+      const config = await WebformService.getWebformConfig(selectedWebform.id);
+
+      return config;
+    } catch (error) {
+      console.error('getWebformConfiguration error:', error);
+      notificationContext.add({ type: 'LOADING_WEBFORM_ERROR' }, true);
+      return null;
+    }
+  };
   const getEditedTables = async () => {
     if (metadata?.dataset?.datasetType === 'REPORTING' && metadata?.dataflow?.bigData) {
       try {
@@ -948,6 +966,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       setDatasetSchemaName(datasetSchema.datasetSchemaName);
       setLevelErrorTypes(datasetSchema.levelErrorTypes);
       setWebformData(datasetSchema.webform);
+
+      if (datasetSchema.webform?.name && webformOptions?.length) {
+        const config = await getWebformConfiguration(datasetSchema.webform, webformOptions);
+        setHideTabularData(!!config?.hideTabularData);
+      }
+
       if (isNil(datasetSchema.webform?.name)) {
         setSelectedView('tabularData');
       } else {
@@ -1214,10 +1238,18 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const renderSwitchView = () => {
     if (!isNil(webformData?.name)) {
-      const viewModes = [
-        { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] },
-        { key: 'webform', label: resourcesContext.messages['webform'] }
-      ];
+      let viewModes;
+      if (isProvider) {
+        viewModes = [
+          ...(!hideTabularData ? [{ key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }] : []),
+          { key: 'webform', label: resourcesContext.messages['webform'] }
+        ];
+      } else {
+        viewModes = [
+          { key: 'tabularData', label: resourcesContext.messages['tabularDataView'] },
+          { key: 'webform', label: resourcesContext.messages['webform'] }
+        ];
+      }
 
       return (
         <div className={styles.switchDivInput}>
