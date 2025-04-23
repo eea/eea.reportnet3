@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCircuitBreaker
 @EnableEEASwagger
 @EeaEnableSecurity
+@EnableLockAspect
 public class OrchestratorApplication {
 
   /**

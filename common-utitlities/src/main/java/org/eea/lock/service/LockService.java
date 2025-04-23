@@ -79,4 +79,9 @@ public interface LockService {
    * @param id
    */
   List<LockVO> findAllByCriteria(List<LockVO> locks, Long id);
+
+  /**
+   * Deletes locks from previous days at 9:00 AM.
+   */
+  int deletePreviousDayLocks();
 }
