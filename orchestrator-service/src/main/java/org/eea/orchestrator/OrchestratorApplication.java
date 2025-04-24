@@ -1,13 +1,12 @@
 package org.eea.orchestrator;
 
-import org.eea.lock.annotation.EnableLockAspect;
+import org.eea.lock.annotation.EnableLockService;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 /**
@@ -18,7 +17,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCircuitBreaker
 @EnableEEASwagger
 @EeaEnableSecurity
-@EnableLockAspect
+@EnableLockService
 public class OrchestratorApplication {
 
   /**
