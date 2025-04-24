@@ -107,54 +107,40 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private int defaultFileExportProcessPriority = 20;
 
     private static final int defaultImportProcessPriority = 20;
-    
+
     ParquetConverterService parquetConverterService;
 
-    @Autowired
-    JobControllerZuul jobControllerZuul;
+    private final JobControllerZuul jobControllerZuul;
 
-    @Autowired
-    JobProcessControllerZuul jobProcessControllerZuul;
+    private final JobProcessControllerZuul jobProcessControllerZuul;
 
-    @Autowired
-    DatasetMetabaseService datasetMetabaseService;
+    private final DatasetMetabaseService datasetMetabaseService;
 
-    @Autowired
-    ProcessControllerZuul processControllerZuul;
+    private final ProcessControllerZuul processControllerZuul;
 
     private FileTreatmentHelper fileTreatmentHelper;
 
-    @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
 
-    @Autowired
     public RepresentativeControllerZuul representativeControllerZuul;
 
-    @Autowired
-    FileCommonUtils fileCommonUtils;
+    private final FileCommonUtils fileCommonUtils;
 
-    @Autowired
-    DatasetSchemaService datasetSchemaService;
+    private final DatasetSchemaService datasetSchemaService;
 
-    @Autowired
-    SpatialDataHandling  spatialDataHandling;
+    private final SpatialDataHandling  spatialDataHandling;
 
-    @Autowired
-    DatasetTableService datasetTableService;
+    private final DatasetTableService datasetTableService;
 
-    @Autowired
-    DataFlowControllerZuul dataFlowControllerZuul;
+    private final DataFlowControllerZuul dataFlowControllerZuul;
 
-    @Autowired
     private CreateEmptyTables createEmptyTables;
 
     /** The pk catalogue repository. */
-    @Autowired
     private PkCatalogueRepository pkCatalogueRepository;
 
     private DatasetSnapshotService datasetSnapshotService;
 
-    @Autowired
     private TableDataRetriever tableDataRetriever;
 
     private final S3Service s3ServicePrivate;
@@ -179,7 +165,24 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
-                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, DatasetSnapshotService datasetSnapshotService, DatasetService datasetService) {
+                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, DatasetSnapshotService datasetSnapshotService, DatasetService datasetService, JobControllerZuul jobControllerZuul,
+                                     JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
+                                     FileCommonUtils fileCommonUtils, DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
+                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever) {
+        this.jobControllerZuul =  jobControllerZuul;
+        this.jobProcessControllerZuul = jobProcessControllerZuul;
+        this.datasetMetabaseService = datasetMetabaseService;
+        this.processControllerZuul = processControllerZuul;
+        this.kafkaSenderUtils = kafkaSenderUtils;
+        this.representativeControllerZuul  = representativeControllerZuul;
+        this.fileCommonUtils = fileCommonUtils;
+        this.datasetSchemaService = datasetSchemaService;
+        this.spatialDataHandling = spatialDataHandling;
+        this.datasetTableService = datasetTableService;
+        this.dataFlowControllerZuul = dataFlowControllerZuul;
+        this.createEmptyTables = createEmptyTables;
+        this.pkCatalogueRepository = pkCatalogueRepository;
+        this.tableDataRetriever = tableDataRetriever;
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
