@@ -1,6 +1,5 @@
 package org.eea.orchestrator;
 
-import org.eea.lock.annotation.EnableLockService;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.springframework.boot.SpringApplication;
@@ -17,7 +16,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableCircuitBreaker
 @EnableEEASwagger
 @EeaEnableSecurity
-@EnableLockService
 public class OrchestratorApplication {
 
   /**

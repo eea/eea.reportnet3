@@ -11,15 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 
-@Service
-@RequiredArgsConstructor
+//@Service
 public class JobForRemovingOldDaysLocks {
 
-  private final LockService lockService;
+  private final LockService lockService = null;
 
   private static final Logger LOG = LoggerFactory.getLogger(JobForRemovingOldDaysLocks.class);
 
-  @PostConstruct
+  //@PostConstruct
   private void init() {
     ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
     scheduler.initialize();
