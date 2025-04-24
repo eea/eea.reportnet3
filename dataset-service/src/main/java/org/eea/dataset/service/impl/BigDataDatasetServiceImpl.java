@@ -107,9 +107,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private int defaultFileExportProcessPriority = 20;
 
     private static final int defaultImportProcessPriority = 20;
-
-    @Autowired
-    DatasetService datasetService;
+    
     ParquetConverterService parquetConverterService;
 
     @Autowired
@@ -163,6 +161,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private final S3Service s3ServicePublic;
     private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
+    private final DatasetService datasetService;
+
     private final DremioHelperService dremioHelperService;
     private JdbcTemplate dremioJdbcTemplate;
 
@@ -179,7 +179,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
-                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, DatasetSnapshotService datasetSnapshotService) {
+                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, DatasetSnapshotService datasetSnapshotService, DatasetService datasetService) {
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
@@ -190,6 +190,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.schemasRepository = schemasRepository;
         this.datasetSnapshotService = datasetSnapshotService;
+        this.datasetService = datasetService;
     }
 
 
