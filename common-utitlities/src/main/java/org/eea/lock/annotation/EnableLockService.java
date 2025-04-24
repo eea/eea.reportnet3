@@ -1,6 +1,6 @@
 package org.eea.lock.annotation;
 
-import org.eea.lock.configuration.LockConfiguration;
+import org.eea.lock.configuration.LockServiceConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.Documented;
@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({LockConfiguration.class})
+@Import({LockServiceConfiguration.class})
 public @interface EnableLockService {
 }
