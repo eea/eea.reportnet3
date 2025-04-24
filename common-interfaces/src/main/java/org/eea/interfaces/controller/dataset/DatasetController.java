@@ -1042,4 +1042,7 @@ public interface DatasetController {
   @GetMapping("/getReleasedDatasetDataInfo")
   ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode,
                                                        @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
+
+  @PostMapping("/private/clearOldLocks")
+  int clearOldLocks();
 }

@@ -3310,4 +3310,10 @@ public class DatasetControllerImpl implements DatasetController {
     }
     return releasedDatasetDataInfoVO;
   }
+
+  @Override
+  @PostMapping("/private/clearOldLocks")
+  public int clearOldLocks() {
+    return lockService.deletePreviousDayLocks();
+  }
 }
