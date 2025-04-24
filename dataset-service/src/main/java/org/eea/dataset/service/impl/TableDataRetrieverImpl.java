@@ -17,6 +17,7 @@ import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,8 @@ public class TableDataRetrieverImpl implements TableDataRetriever {
   private final DatasetMetabaseService datasetMetabaseService;
   private final S3Helper s3Helper;
   private final DataSetMetabaseRepository dataSetMetabaseRepository;
+
+  @Lazy
   private final DatasetSchemaService datasetSchemaService;
   private final DataFlowController dataFlowController;
   private final DataCollectionController.DataCollectionControllerZuul dataCollectionControllerZuul;
