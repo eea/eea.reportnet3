@@ -6,6 +6,7 @@ import io.swagger.annotations.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -96,6 +97,8 @@ public class JobControllerImpl implements JobController {
     private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
     @Autowired
     private JobProcessServiceImpl jobProcessServiceImpl;
+
+    private static final String FILE_PATTERN_NAME_V4 = "etlExportV4_%s";
 
 
     @Override
@@ -756,10 +759,18 @@ public class JobControllerImpl implements JobController {
                                         @ApiParam(type = "Long", value = "Provider id",
                                                 example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
                                         @ApiParam(value = "response") HttpServletResponse response) throws Exception {
-        String fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
+
+        String fileName = null;
         try {
+            JobVO job = jobService.findById(jobId);
+            if(job.getParameters().get("exportCsv") != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportCsv"))){
+                fileName = String.format(FILE_PATTERN_NAME_V4, jobId) + ".zip";
+            }
+            else{
+                fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
+            }
             LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);
-            File file = jobService.downloadEtlExportedFile(jobId, fileName);
+            File file = jobService.downloadEtlExportedFile(job, fileName);
             LOG.info("Successfully downloaded file generated from v3 etl export for jobId {}", jobId);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
