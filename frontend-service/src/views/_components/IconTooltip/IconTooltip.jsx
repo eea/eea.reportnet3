@@ -3,11 +3,10 @@ import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { useState } from 'react';
 
-export const IconTooltip = ({ className = '', levelError, message, style, recordData }) => {
+export const IconTooltip = ({ className = '', levelError, message, style }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const openDialog = () => {
-    console.log(recordData);
     setIsDialogOpen(true);
   };
 
@@ -26,7 +25,7 @@ export const IconTooltip = ({ className = '', levelError, message, style, record
 
   switch (levelError) {
     case 'INFO':
-      buttonProps.icon = 'info';
+      buttonProps.icon = 'warning';
       buttonProps.className = `${styles.buttonCustom} ${styles.info} ${className}`;
       break;
     case 'WARNING':
@@ -34,7 +33,7 @@ export const IconTooltip = ({ className = '', levelError, message, style, record
       buttonProps.className = `${styles.buttonCustom} ${styles.warning} ${className}`;
       break;
     case 'ERROR':
-      buttonProps.icon = 'error';
+      buttonProps.icon = 'warning';
       buttonProps.className = `${styles.buttonCustom} ${styles.error} ${className}`;
       break;
     case 'BLOCKER':
