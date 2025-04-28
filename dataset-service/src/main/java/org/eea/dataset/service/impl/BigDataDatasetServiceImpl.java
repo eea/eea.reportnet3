@@ -166,7 +166,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
-                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, DatasetService datasetService, JobControllerZuul jobControllerZuul,
+                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
                                      JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
                                      FileCommonUtils fileCommonUtils, @Lazy DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
                                      PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever) {
