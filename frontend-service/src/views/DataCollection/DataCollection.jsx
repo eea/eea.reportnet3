@@ -98,8 +98,13 @@ export const DataCollection = () => {
   const onLoadManualAcceptanceDatasets = async () => {
     try {
       const data = await DataflowService.getDatasetsProvidersStatus(dataflowId);
-      setRepresentatives(data.data);
-      setSelectedRepresentatives(data.data[0].dataProviderId);
+      const filteredData = data.data.filter(item => item.datasetSchema === datasetSchemaId);
+      setRepresentatives(filteredData);
+      if (filteredData.length > 0) {
+        setSelectedRepresentatives(filteredData[0].dataProviderId);
+      } else {
+        setSelectedRepresentatives(null);
+      }
     } catch (error) {
       console.error('ManualAcceptanceDatasets - onLoadManualAcceptanceDatasets.', error);
       notificationContext.add({ type: 'LOAD_DATASETS_RELEASES_ERROR' }, true);
@@ -119,8 +124,11 @@ export const DataCollection = () => {
   useEffect(() => {
     leftSideBarContext.removeModels();
     getMetadata();
-    onLoadManualAcceptanceDatasets();
   }, []);
+
+  useEffect(() => {
+    onLoadManualAcceptanceDatasets();
+  }, [datasetSchemaId]);
 
   useEffect(() => {
     getExtensionsList();
