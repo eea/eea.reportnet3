@@ -612,20 +612,19 @@ public class JobServiceImpl implements JobService {
     /**
      * Download etl exported file.
      *
-     * @param jobId the job id
+     * @param job the job
      * @param fileName the file name
      * @return the file
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws EEAException the EEA exception
      */
     @Override
-    public File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException {
+    public File downloadEtlExportedFile(JobVO job, String fileName) throws EEAException {
         // we compound the route and create the file
 
         File file;
-        JobVO job = findById(jobId);
         if(job.getParameters().get("exportCsv") != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportCsv"))){
-            String folderToZipPath = exportDLPath + "/dataset-" + job.getDatasetId() + "/etlExportV4_" + jobId;
+            String folderToZipPath = exportDLPath + "/dataset-" + job.getDatasetId() + "/etlExportV4_" + job.getId();
             File parentFolder = new File(folderToZipPath);
             file = new File(folderToZipPath + ".zip");
 
@@ -646,7 +645,7 @@ public class JobServiceImpl implements JobService {
         }
         // we compound the route and create the file
         if (!file.exists()) {
-            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", jobId, fileName);
+            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", job.getId(), fileName);
             throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
         }
         return file;

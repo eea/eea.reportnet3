@@ -594,7 +594,7 @@ public class ZipUtils {
             FileOutputStream fos = new FileOutputStream(zipFile);
             ZipOutputStream zos = new ZipOutputStream(fos)
     ) {
-      zipFilesRecursively(sourceFolder, "", zos);
+      zipFilesRecursively(sourceFolder, sourceFolder.getName(), zos);
     }
   }
 
