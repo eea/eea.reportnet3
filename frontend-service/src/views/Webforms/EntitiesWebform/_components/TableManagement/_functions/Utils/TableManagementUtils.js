@@ -1,6 +1,5 @@
 import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import remove from 'lodash/remove';
 
 import { RecordUtils } from 'views/_functions/Utils/RecordUtils';
 
@@ -8,7 +7,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
   const filteredSchemaColumn = tableSchemaColumns.filter(tableSchemaColumn =>
-    TextUtils.areEquals(tableSchemaColumn.header, header)
+    header ? TextUtils.areEquals(tableSchemaColumn.header, header) : tableSchemaColumn.pk === true
   );
   if (!isNil(filteredSchemaColumn) && !isEmpty(filteredSchemaColumn)) {
     return filteredSchemaColumn[0].field;
@@ -17,43 +16,7 @@ const getFieldSchemaColumnIdByHeader = (tableSchemaColumns, header) => {
   }
 };
 
-const getSingleRecordOption = singleRecord => {
-  if (singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))] === '') {
-    return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]}`;
-  }
-
-  return `#${singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'ID'))]} - ${
-    singleRecord[Object.keys(singleRecord).find(key => TextUtils.areEquals(key, 'TITLE'))]
-  }`;
-};
-
-const parseListOfSingleEntities = (columns = [], records = []) => {
-  const options = records
-    .filter(record => record.IsGroup === 'Single')
-    .map(singleRecord => {
-      if (
-        Object.keys(singleRecord)
-          .map(key => key.toUpperCase())
-          .includes('ID', 'TITLE')
-      ) {
-        return getSingleRecordOption(singleRecord);
-      }
-
-      return null;
-    })
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-
-  return columns.map(column => {
-    if (column.header === 'ListOfSingleEntities') {
-      column.type = 'MULTISELECT_CODELIST';
-      column.codelistItems = remove(options, undefined || null);
-    }
-
-    return column;
-  });
-};
-
-const parseTableSchemaColumns = (schemaTables, records, rootTableName) => {
+const parseTableSchemaColumns = (schemaTables, rootTableName) => {
   const columns = [];
   schemaTables
     .filter(schemaTable => TextUtils.areEquals(schemaTable.tableSchemaName, rootTableName))
@@ -79,7 +42,7 @@ const parseTableSchemaColumns = (schemaTables, records, rootTableName) => {
       }
     });
 
-  return parseListOfSingleEntities(columns, records);
+  return columns;
 };
 
 const parseEntitiesRecordsWithParentData = (
