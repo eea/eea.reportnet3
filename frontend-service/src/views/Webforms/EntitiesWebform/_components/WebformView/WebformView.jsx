@@ -1,29 +1,20 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
 import pickBy from 'lodash/pickBy';
-import uniq from 'lodash/uniq';
-import uniqBy from 'lodash/uniqBy';
 import uniqueId from 'lodash/uniqueId';
 
 import styles from './WebformView.module.scss';
 
 import { Button } from 'views/_components/Button';
-import { Column } from 'primereact/column';
-import { DataTable } from 'views/_components/DataTable';
 import { Spinner } from 'views/_components/Spinner';
 import { Toolbar } from 'views/_components/Toolbar';
 import { WebformTable } from 'views/Webforms/_components/WebformTable';
 
-import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
-
-import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformView = ({
   bigData,
@@ -38,8 +29,6 @@ export const WebformView = ({
   isIcebergCreated,
   isRefresh,
   isReporting,
-  onUpdateEntitiesValue,
-  entitiesRecords,
   rootPkFieldId,
   rootTableName,
   selectedTable,
@@ -48,8 +37,6 @@ export const WebformView = ({
   state,
   tables
 }) => {
-  const resourcesContext = useContext(ResourcesContext);
-
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const { getWebformTabs } = WebformsUtils;
 
@@ -64,7 +51,7 @@ export const WebformView = ({
     singlesCalculatedData: []
   });
 
-  const { isLoading, isVisible, singlesCalculatedData } = webformViewState;
+  const { isLoading, isVisible } = webformViewState;
 
   useEffect(() => {
     const visibleTable = Object.keys(isVisible).filter(key => isVisible[key])[0];
@@ -79,141 +66,7 @@ export const WebformView = ({
     }
   }, [selectedTableName]);
 
-  const calculateSingle = field => {
-    let fields = [];
-    switch (field.name.toLowerCase()) {
-      case 'unionpolicyother':
-        fields = combinationFieldRender('otherUnionPolicy');
-        return <ul>{fields?.map(field => !isEmpty(field) && <li key={uniqueId()}>{field}</li>)}</ul>;
-      case 'ghgaffected':
-      case 'sectoraffected':
-      case 'policyinstrument':
-      case 'policyimpacting':
-      case 'otherpolicyinstrument':
-        fields = combinationFieldRender(field.name);
-        return <ul>{fields?.map(field => !isEmpty(field) && <li key={uniqueId()}>{field}</li>)}</ul>;
-      case 'entitynames':
-        fields = combinationFieldRender('entityName', 'id');
-        return <ul>{fields?.map(field => !isEmpty(field) && <li key={uniqueId()}>{field}</li>)}</ul>;
-      case 'statusimplementation':
-        return tableFieldRender(field.name, [
-          'implementationperiodstart',
-          'implementationperiodfinish',
-          'implementationperiodcomment'
-        ]);
-      case 'projectionscenarios':
-      case 'typepolicyinstrument':
-      case 'unionpolicylist':
-        return tableFieldRender(field.name, []);
-      case 'entities':
-        return combinationTableRender('entities');
-      case 'sectorobjectives':
-        return combinationTableRender('sectors');
-      case 'dimensions':
-        return combinationTableRender('dimensions');
-      default:
-        break;
-    }
-
-    return <span disabled={true}>{field.value}</span>;
-  };
-
-  const combinationFieldRender = (fieldName, previousField = '', separator = '-') => {
-    const combinatedValues = [];
-    singlesCalculatedData.forEach(singleRecord => {
-      let previousFieldValue = '';
-      if (previousField !== '') {
-        previousFieldValue =
-          singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === previousField.toLowerCase())];
-      }
-      const singleRecordValue =
-        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
-      if (!isNil(singleRecordValue)) {
-        combinatedValues.push(
-          Array.isArray(singleRecordValue)
-            ? singleRecordValue
-                .map(value => (previousFieldValue !== '' ? `${previousFieldValue} ${separator} ${value}` : value))
-                .filter(value => !isNil(value))
-                .join(', ')
-            : previousFieldValue !== ''
-            ? `${previousFieldValue} ${separator} ${singleRecordValue}`
-            : singleRecordValue
-        );
-      }
-    });
-
-    return uniq(combinatedValues);
-  };
-
-  const combinationTableRender = tableName => {
-    const calculated = singlesCalculatedData.flatMap(singlesRecord =>
-      singlesRecord[Object.keys(singlesRecord).find(key => key.toLowerCase() === tableName.toLowerCase())].map(
-        tableRecord => ({
-          rootTableId: singlesRecord['id'],
-          entityName: singlesRecord['entityName'],
-          ...tableRecord
-        })
-      )
-    );
-    return renderTable(uniqBy(calculated, value => JSON.stringify(value)));
-  };
-
-  const isGroup = () => {
-    const filteredField = entitiesRecords
-      .find(entityRecord => entityRecord.recordId === selectedTable.recordId)
-      ?.elements.find(element => TextUtils.areEquals(element.name, 'IsGroup'));
-    return TextUtils.areEquals(filteredField?.value, 'Group');
-  };
-
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
-
-  const renderColumns = fields => {
-    if (!isNil(fields[0])) {
-      return Object.keys(fields[0]).map(field => (
-        <Column
-          columnResizeMode="expand"
-          field={field}
-          filter={true}
-          filterMatchMode="contains"
-          header={resourcesContext.messages[field]}
-          key={field}
-          sortable={true}
-        />
-      ));
-    }
-  };
-
-  const tableFieldRender = (fieldName, columnFields) => {
-    const combinatedTableValues = [];
-    singlesCalculatedData.forEach(singleRecord => {
-      const singleRecordValue =
-        singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === fieldName.toLowerCase())];
-
-      if (!isNil(singleRecordValue)) {
-        const columnFieldsValues = {
-          rootTableId: singleRecord['id'],
-          entityName: singleRecord['entityName'],
-          [fieldName]: singleRecordValue
-        };
-        columnFields.forEach(columnField => {
-          const columnFieldValue =
-            singleRecord[Object.keys(singleRecord).find(key => key.toLowerCase() === columnField.toLowerCase())];
-          if (!isNil(columnFieldValue)) {
-            columnFieldsValues[columnField] = columnFieldValue;
-          }
-        });
-        combinatedTableValues.push(columnFieldsValues);
-      }
-    });
-
-    return renderTable(combinatedTableValues);
-  };
-
-  const renderTable = fields => (
-    <DataTable summary={resourcesContext.messages['webformEntitiesTitle']} value={fields}>
-      {renderColumns(fields)}
-    </DataTable>
-  );
 
   const onChangeWebformTab = name => {
     Object.keys(isVisible).forEach(tab => {
@@ -254,20 +107,16 @@ export const WebformView = ({
     return (
       <WebformTable
         bigData={bigData}
-        calculateSingle={calculateSingle}
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}
         datasetId={datasetId}
         datasetSchema={datasetSchema}
         datasetSchemaId={datasetSchemaId}
-        entitiesRecords={entitiesRecords}
         getFieldSchemaId={getFieldSchemaId}
-        isGroup={isGroup}
         isIcebergCreated={isIcebergCreated}
         isRefresh={isRefresh}
         isReporting={isReporting}
         onTabChange={isVisible}
-        onUpdateEntitiesValue={onUpdateEntitiesValue}
         rootPkFieldId={rootPkFieldId}
         rootTableName={rootTableName}
         selectedTable={selectedTable}
