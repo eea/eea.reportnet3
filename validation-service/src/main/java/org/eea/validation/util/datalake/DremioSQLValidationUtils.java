@@ -1,6 +1,7 @@
 package org.eea.validation.util.datalake;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.eea.utils.UtilityClass;
 import org.eea.validation.configuration.DremioConfiguration;
 import org.eea.validation.persistence.schemas.FieldSchema;
 import org.springframework.context.annotation.Import;
@@ -73,8 +74,8 @@ public class DremioSQLValidationUtils {
     private List<String> calculateFKsimple(boolean pkMustBeUsed, FieldSchema fkFieldSchema, String fkTablePath, String pkTablePath,
                                            String foreignKey, String primaryKey) {
         //Handling of multiple/single value, pk must/mustn't be used and ignore/not ignore case
-        String quotedPrimaryKey = addQuotesToFieldNames(primaryKey);
-        String quotedForeignKey = addQuotesToFieldNames(foreignKey);
+        String quotedPrimaryKey = UtilityClass.addQuotesToFieldNames(primaryKey);
+        String quotedForeignKey = UtilityClass.addQuotesToFieldNames(foreignKey);
 
         StringBuilder query = new StringBuilder();
         List<String> recordIds = new ArrayList<>();
@@ -197,11 +198,11 @@ public class DremioSQLValidationUtils {
 
     private List<String> calculateFKCompose(boolean pkMustBeUsed, FieldSchema fkFieldSchema, String fkTablePath, String pkTablePath,
                                       String foreignKey, String primaryKey, String optionalFk, String optionalPk) {
-        String quotedPrimaryKey = addQuotesToFieldNames(primaryKey);
-        String quotedForeignKey = addQuotesToFieldNames(foreignKey);
+        String quotedPrimaryKey = UtilityClass.addQuotesToFieldNames(primaryKey);
+        String quotedForeignKey = UtilityClass.addQuotesToFieldNames(foreignKey);
 
-        String quotedOptionalPk = addQuotesToFieldNames(optionalPk);
-        String quotedOptionalFk = addQuotesToFieldNames(optionalFk);
+        String quotedOptionalPk = UtilityClass.addQuotesToFieldNames(optionalPk);
+        String quotedOptionalFk = UtilityClass.addQuotesToFieldNames(optionalFk);
 
 
         StringBuilder query = new StringBuilder();
@@ -367,18 +368,6 @@ public class DremioSQLValidationUtils {
             }
         }
         return recordIds;
-    }
-
-    public String addQuotesToFieldNames(String fieldNames) {
-        if (fieldNames != null && !fieldNames.isBlank()) {
-            fieldNames = Arrays.stream(fieldNames.split(",")) // Split by commas
-                    .map(String::trim)                        // Remove spaces around field names
-                    .filter(field -> !field.isBlank())        // Filter out empty or invalid field names
-                    .filter(field -> !field.contains("\"")) // Skip fields that already contain double quotes
-                    .map(field -> "\"" + field + "\"")  // Wrap each field in double quotes
-                    .collect(Collectors.joining(","));      // Join them back with commas
-        }
-        return fieldNames;
     }
 }
 

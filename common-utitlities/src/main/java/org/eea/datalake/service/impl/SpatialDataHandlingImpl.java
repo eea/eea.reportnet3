@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.utils.UtilityClass;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
@@ -121,7 +122,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         result.append(", ");
       }
 
-      String fieldName = "\"" + fieldSchemaVO.getName() + "\""; // Wrap field names in double quotes
+      String fieldName = UtilityClass.addQuotesToFieldNames(fieldSchemaVO.getName());
 
       if (geoJsonEnums.contains(fieldSchemaVO.getType())) {
         result.append(FROM_XEX).append("(").append(fieldName).append(") AS ").append(fieldName);

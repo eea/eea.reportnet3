@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -112,11 +113,18 @@ public class DataLakeDataRetrieverUtils {
         dataQuery.append(" where (");
         List<String> headers = fieldIdMap.values().stream().filter(d -> !spatialDataHandling.getGeoJsonEnums().contains(d.getType())).map(FieldSchemaVO::getName).collect(Collectors.toList());
         LOG.info("headers : {}", headers);
-        dataQuery.append("\"").append(headers.get(0)).append("\"").append(" like '%").append(fieldValue).append("%'");
-        LOG.info("headers.get(0) : {}", headers.get(0));
+        dataQuery.append(UtilityClass.addQuotesToFieldNames(headers.get(0))).append(" like '%").append(fieldValue).append("%'");
         headers.remove(headers.get(0));
         LOG.info("headers : {}", headers);
-        headers.forEach(header -> dataQuery.append(" OR ").append("\"").append(header).append("\"").append(" like '%").append(fieldValue).append("%'"));
+        headers.stream()
+            .map(UtilityClass::addQuotesToFieldNames)
+            .forEach(quotedHeader ->
+                dataQuery.append(" OR ")
+                    .append(quotedHeader)
+                    .append(" like '%")
+                    .append(fieldValue)
+                    .append("%'")
+            );
         dataQuery.append(")");
     }
 
