@@ -329,9 +329,6 @@ public class DatasetServiceImpl implements DatasetService {
   @Autowired
   private StatisticsService statisticsService;
 
-  @Autowired
-  private BigDataDatasetService bigDataDatasetService;
-
   /** The import path. */
   @Value("${importPath}")
   private String importPath;
@@ -3819,12 +3816,7 @@ public class DatasetServiceImpl implements DatasetService {
     String processUUID = UUID.randomUUID().toString();
     try {
       LOG.info("Initiating FILE_EXPORT process for datasetId: {} and jobId {}", datasetId, jobId);
-      if (BooleanUtils.isTrue(exportCsv)) {
-        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
-      }
-      else {
-        recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);
-      }
+      recordRepository.findAndGenerateETLJsonV3(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, processUUID);
       LOG.info("FILE_EXPORT process submitted for datasetId: {} and jobId {}", datasetId, jobId);
     } catch (Exception e) {
       LOG.error("FILE_EXPORT process error in  Dataset {} and jobId {}. Message: {}", datasetId, jobId, e);
