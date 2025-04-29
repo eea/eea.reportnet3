@@ -1336,7 +1336,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         for (RecordVO record : records) {
             StringBuilder insertQueryBuilder = new StringBuilder().append("INSERT INTO ").append(icebergTablePath).append(" (");
-            insertQueryBuilder.append("\"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\", \"").append(PARQUET_PROVIDER_CODE_COLUMN_HEADER).append("\"");
+            String fieldNames = PARQUET_RECORD_ID_COLUMN_HEADER + "," + PARQUET_PROVIDER_CODE_COLUMN_HEADER;
+            insertQueryBuilder.append(UtilityClass.addQuotesToFieldNames(fieldNames));
 
             String recordId = UUID.randomUUID().toString();
             StringBuilder insertQueryValuesBuilder = new StringBuilder().append(") VALUES ('").append(recordId).append("', ").append(dataProviderCode);
@@ -1354,7 +1355,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     String fieldValue = "";
                     if(BooleanUtils.isTrue(field.getAutoIncrement())){
                         //set up autoincrement value
-                        String escapedFieldName = "\"" + field.getName() + "\"";
+                        String escapedFieldName = UtilityClass.addQuotesToFieldNames(field.getName());
                         String getPreviousMaxFieldValueQuery =  "SELECT CAST( " + escapedFieldName + "  AS BIGINT) AS numeric_value FROM " + icebergTablePath
                                 + " WHERE " + escapedFieldName + " IS NOT NULL AND TRIM(" + escapedFieldName + ") <> '' ORDER BY numeric_value DESC LIMIT 1";
 
@@ -1408,7 +1409,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
 
                 // Wrap field name in double quotes
-                String fieldName = "\"" + field.getName() + "\"";
+                String fieldName = UtilityClass.addQuotesToFieldNames(field.getName());
                 String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
                 updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
 
@@ -1423,7 +1424,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
-            updateQueryBuilder.append(" WHERE \"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\" = '").append(record.getId()).append("'");
+            updateQueryBuilder.append(" WHERE ")
+                .append(UtilityClass.addQuotesToFieldNames(PARQUET_RECORD_ID_COLUMN_HEADER))
+                .append(" = '")
+                .append(record.getId())
+                .append("'");
 
             if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
                 updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
@@ -1456,12 +1461,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
 
         // Wrap field name in double quotes
-        String fieldName = "\"" + field.getName() + "\"";
+        String fieldName = UtilityClass.addQuotesToFieldNames(field.getName());
         String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
         updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
 
         // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
-        updateQueryBuilder.append(" WHERE \"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\" = '").append(recordId).append("'");
+        updateQueryBuilder.append(" WHERE ")
+            .append(UtilityClass.addQuotesToFieldNames(PARQUET_RECORD_ID_COLUMN_HEADER))
+            .append(" = '")
+            .append(recordId)
+            .append("'");
 
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
             updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
@@ -1633,7 +1642,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 List<FieldSchemaVO> fieldSchemas = tableSchemaVO.getRecordSchema().getFieldSchema();
                 String tableHeaders = constructRecordIdCreationForQuery();
-                tableHeaders += ", " + providerCode + " AS \"" + PARQUET_PROVIDER_CODE_COLUMN_HEADER + "\", ";
+                tableHeaders += ", " + providerCode + " AS " + UtilityClass.addQuotesToFieldNames(PARQUET_PROVIDER_CODE_COLUMN_HEADER) + ", ";
+
 
                 for (FieldSchemaVO fieldSchema : fieldSchemas) {
                     if (fieldSchema.getType().equals(DataType.ATTACHMENT)) {
@@ -1641,7 +1651,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         tableHeaders += " '' AS ";
                     }
                     // Wrap field names in double quotes
-                    tableHeaders += "\"" + fieldSchema.getName() + "\", ";
+                    tableHeaders += UtilityClass.addQuotesToFieldNames(fieldSchema.getName()) + ", ";
                 }
 
                 // Remove the trailing comma, if any
@@ -1869,9 +1879,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         }
 
-        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + labelFieldName + "\" as " + LABEL
-            + " FROM " + tablePathInDremio +
-            " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
+        String quotedField = UtilityClass.addQuotesToFieldNames(fieldName);
+        String quotedLabelField = UtilityClass.addQuotesToFieldNames(labelFieldName);
+
+        String selectQuery = "SELECT " + quotedField + " as " + VALUE + ", " + quotedLabelField + " as " + LABEL +
+            " FROM " + tablePathInDremio +
+            " WHERE " + quotedField + " != '' AND " + quotedField + " IS NOT NULL";
 
         if (StringUtils.isNotBlank(searchValue)) {
             searchValue = searchValue.replace("'", "''");
