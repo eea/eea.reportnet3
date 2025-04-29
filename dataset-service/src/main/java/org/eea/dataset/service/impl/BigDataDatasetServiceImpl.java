@@ -61,6 +61,7 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1307,11 +1308,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaName)) {
             //table does not exist, so we need to create it first
             StringBuilder createIcebergTable = new StringBuilder("CREATE TABLE IF NOT EXISTS " + icebergTablePath + " (");
-            createIcebergTable.append("\"" + PARQUET_RECORD_ID_COLUMN_HEADER + "\" VARCHAR, \"" + PARQUET_PROVIDER_CODE_COLUMN_HEADER + "\" VARCHAR");
+            String fieldNames = PARQUET_RECORD_ID_COLUMN_HEADER + "," + PARQUET_PROVIDER_CODE_COLUMN_HEADER;
+            String fieldsWithTypes = Arrays.stream(fieldNames.split(","))
+                .map(String::trim)
+                .filter(field -> !field.isBlank())
+                .map(field -> UtilityClass.addQuotesToFieldNames(field) + " VARCHAR")
+                .collect(Collectors.joining(", "));
+
+            createIcebergTable.append(fieldsWithTypes);
 
             for (int i = 0; i < records.get(0).getFields().size(); i++) {
                 FieldVO field = records.get(0).getFields().get(i);
-                createIcebergTable.append(", \"").append(field.getName()).append("\" ");
+                createIcebergTable.append(", ").append(UtilityClass.addQuotesToFieldNames(field.getName()));
 
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
                     createIcebergTable.append("VARBINARY");
@@ -1336,7 +1344,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             for (int i = 0; i < record.getFields().size(); i++) {
                 FieldVO field = record.getFields().get(i);
                 // Wrap the field name in double quotes
-                insertQueryBuilder.append(", \"").append(field.getName()).append("\"");
+                insertQueryBuilder.append(", ").append(UtilityClass.addQuotesToFieldNames(field.getName()));
 
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
                     String fieldValue = (field.getValue() != null) ? field.getValue() : "";
@@ -1891,12 +1899,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             String refValue = conditionalFieldName != null ? conditionalFieldName : VALUE;
             String refLabel = conditionalFieldName != null ? conditionalFieldName : LABEL;
+            String quotedRefValue = UtilityClass.addQuotesToFieldNames(refValue);
+            String quotedRefLabel = UtilityClass.addQuotesToFieldNames(refLabel);
             if (dataType.equals(DataType.NUMBER_INTEGER)) {
-                selectQuery = selectQuery + " AND " + refValue + " IN (" + valuesList + ")";
-                selectQuery = selectQuery + " ORDER BY " + refValue;
+                selectQuery = selectQuery + " AND " + quotedRefValue + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + quotedRefValue;
             } else {
-                selectQuery = selectQuery + " AND " + refLabel + " IN (" + valuesList + ")";
-                selectQuery = selectQuery + " ORDER BY " + refLabel;
+                selectQuery = selectQuery + " AND " + quotedRefLabel + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + quotedRefLabel;
             }
         }
         LOG.info("Query to execute in links: {}", selectQuery);

@@ -24,6 +24,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.utils.UtilityClass;
 import org.eea.validation.persistence.data.domain.FieldValue;
 import org.eea.validation.persistence.data.domain.RecordValue;
 import org.eea.validation.service.DremioRulesExecuteService;
@@ -141,7 +142,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
 
             query.append("select record_id");
             if (!fieldName.equals("")) {
-                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldName));
+                query.append(COMMA).append(UtilityClass.addQuotesToFieldNames(fieldName));
             }
             Map<String, String> fieldSchemaIdNameMap = new HashMap<>();
             createHeaders(datasetSchemaId, query, parameters, fieldName, headerNames, ruleVO.getWhenCondition(), fieldSchemaIdNameMap);
@@ -515,7 +516,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
             parameters = ruleExpressionDTO.getParams();
             parameters.forEach(p -> {
                 FieldSchemaVO fieldSchema = datasetSchemaControllerZuul.getFieldSchema(datasetSchemaId, (String) p);
-                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
+                query.append(COMMA).append(UtilityClass.addQuotesToFieldNames(fieldSchema.getName()));
                 fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             });
             headerNames.put(ruleMethodName, hNames);
@@ -613,7 +614,7 @@ public class DremioExpressionRulesExecuteServiceImpl implements DremioRulesExecu
                     list.add(fieldSchema.getName());
                 }
                 headerNames.put(methodName, list);
-                query.append(COMMA).append(dremioHelperService.addQuotesToFieldNames(fieldSchema.getName()));
+                query.append(COMMA).append(UtilityClass.addQuotesToFieldNames(fieldSchema.getName()));
                 fieldSchemaIdNameMap.put(fieldSchema.getId(), fieldSchema.getName());
             }
         }
