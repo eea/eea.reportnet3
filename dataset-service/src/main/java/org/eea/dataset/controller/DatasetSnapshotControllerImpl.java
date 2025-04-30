@@ -9,6 +9,7 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DatasetTableService;
+import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
@@ -72,6 +73,10 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   /** The dataset metabase service. */
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
+
+  /** The dataset snapshot service. */
+  @Autowired
+  private DatasetSnapshotServiceImpl datasetSnapshotServiceImpl;
 
   /** The reporting dataset repository. */
   @Autowired
@@ -997,5 +1002,12 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
       throw e;
     }
     return snapshotVO;
+  }
+
+  @SneakyThrows
+  @Override
+  @GetMapping(value = "/private/getSnapshotByDatasetId")
+  public List<SnapshotVO> getSnapshotByDatasetId(Long datasetId){
+    return datasetSnapshotServiceImpl.getSnapshotsByIdDataset(datasetId);
   }
 }

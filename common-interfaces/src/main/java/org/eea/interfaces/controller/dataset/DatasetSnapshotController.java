@@ -287,4 +287,8 @@ public interface DatasetSnapshotController {
   @GetMapping(value = "/private/latestReleaseSnapshot", produces = MediaType.APPLICATION_JSON_VALUE)
   SnapshotVO getLatestHistoricReleaseSnapshot(@RequestParam("datasetId") Long datasetId,
                                               @RequestParam(value = "dataflowId", required = false) Long dataflowId);
+
+  @GetMapping(value = "/private/getSnapshotByDatasetId")
+  List<SnapshotVO> getSnapshotByDatasetId(@RequestParam("datasetId") Long datasetId);
+
 }
