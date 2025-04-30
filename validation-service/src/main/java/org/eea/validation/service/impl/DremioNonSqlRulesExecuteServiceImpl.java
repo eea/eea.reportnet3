@@ -16,6 +16,7 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.DremioValidationException;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.utils.UtilityClass;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
@@ -106,7 +107,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
             String fieldName = datasetSchemaControllerZuul.getFieldName(datasetSchemaId, tableSchemaId, parameters, ruleVO.getReferenceId(), ruleVO.getReferenceFieldSchemaPKId());
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
-            query.append("select record_id,").append(fieldName != null ? fieldName : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
+            query.append("select record_id,").append(fieldName != null ? UtilityClass.addQuotesToFieldNames(fieldName) : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
             Method method = null;
