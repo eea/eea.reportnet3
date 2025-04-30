@@ -184,6 +184,10 @@ export const PaMsWebformField = ({
               !isNil(conditionalField)
                 ? conditionalField.type === 'MULTISELECT_CODELIST'
                   ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
+                  : (conditionalField.type === 'LINK' || conditionalField.fieldType === 'LINK') &&
+                    Array.isArray(conditionalField.value) &&
+                    conditionalField.value?.length > 1
+                  ? conditionalField.value?.join(';')
                   : conditionalField.value
                 : encodeURIComponent(element.value),
               localDatasetSchemaId,
