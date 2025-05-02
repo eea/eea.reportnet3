@@ -657,14 +657,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               euPath.setParquetFolder(key.split("/")[6]);
               euPath.setSnapshotId(idSnapshot);
               try {
+                String tableNameSnapshotPath = s3Service.getS3Path(euPath);
+
+                 /*Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
                 LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                 File parquetFile = s3Helper.getFileFromS3(key, filename + idDataset, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                String tableNameSnapshotPath = s3Service.getS3Path(euPath);
                 LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
                 s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
                 parquetFile.delete();
-                LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
-              } catch (IOException e) {
+                LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);*/
+
+                s3Helper.copyFileToAnotherDestination(key, tableNameSnapshotPath);
+                LOG.info("Copied file from source {} to destination {}", key, tableNameSnapshotPath);
+              } catch (Exception e) {
                 LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
               }
             }
@@ -707,9 +712,9 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       try {
                         String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
                         /* Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
-                        LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot,
+                        LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
+                        File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot,
                                 LiteralConstants.PARQUET_TYPE);
-
                         LOG.info("Uploading file to bucket parquetFile path : {} in path: {}",
                                 tableNameSnapshotPath, parquetFile.getPath());
                         s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
@@ -1828,7 +1833,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease() && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId))))) {
+        if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease()) && StringUtils.isNotBlank(processId)  && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId)))) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease, processId);
         } else {
           Map<String, Object> createSnapshot = new HashMap<>();
