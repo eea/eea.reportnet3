@@ -91,7 +91,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> finalizeInProgressReleaseJobsWithFinishedTasks(),
-                new CronTrigger("0 0 * * * *"));
+                new CronTrigger("0 */10 * * * *"));
     }
 
     /**
