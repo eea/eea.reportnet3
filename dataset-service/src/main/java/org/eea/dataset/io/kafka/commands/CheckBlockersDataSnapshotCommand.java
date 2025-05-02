@@ -289,7 +289,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         //force date to UTC and description to CET
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date dateRelease = new Date();
-        dateFormatter.setTimeZone(TimeZone.getTimeZone("CET"));
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("Europe/Paris"));
         createSnapshotVO.setDescription("Release " + dateFormatter.format(dateRelease) + " CET");
         dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 

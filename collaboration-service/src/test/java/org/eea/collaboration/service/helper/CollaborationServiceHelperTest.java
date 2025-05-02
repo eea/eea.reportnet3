@@ -1,6 +1,8 @@
 package org.eea.collaboration.service.helper;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -141,7 +143,7 @@ public class CollaborationServiceHelperTest {
     String messageContent = "New message text";
 
     Date messageCreateDate = new Date();
-    ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of("CET"));
+    ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of("Europe/Paris"));
     DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     String cetFormattedDate = cetTime.format(cetFormatter);
 

@@ -192,7 +192,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
         //force date description to CET
         DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("CET"));
+        DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("Europe/Paris"));
         String cetReleaseDate = LocalDateTime.parse(dateRelease, utcFormatter).atZone(ZoneOffset.UTC).format(cetFormatter);
         createSnapshotVO.setDescription("Release " + cetReleaseDate + " CET");
 

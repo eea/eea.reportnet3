@@ -96,7 +96,7 @@ public class ReceiptPDFGenerator {
     float spaceBetweenLines;
     float fontSize;
     String text;
-    ZoneId timeZone = ZoneId.of("CET");
+    ZoneId timeZone = ZoneId.of("Europe/Paris");
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     PDPageContentStream contentStream = new PDPageContentStream(document, page);
