@@ -95,8 +95,9 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
     }
 
     /**
-     * The job runs every hour. It finds in_progress validation jobs that have all their tasks finished and the latest finished task
-     * is in finished status for more than maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
+     * The job runs every hour. It finds in_progress release jobs that have all their processes and tasks finished
+     * and the latest finished process is in finished status for more than
+     * maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
      */
     public void finalizeInProgressReleaseJobsWithFinishedTasks() {
         try {
@@ -110,7 +111,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                 Long providerId = jobVO.getProviderId();
                 Long dataflowId = jobVO.getDataflowId();
                 DataFlowVO dataflow = dataFlowController.getMetabaseById(dataflowId);
-//                boolean isSilentRelease = Boolean.TRUE.equals(jobVO.getParameters().get("silentRelease"));
+                boolean isSilentRelease = Boolean.TRUE.equals(jobVO.getParameters().get("silentRelease"));
 
                 List<String> processIds = jobProcessService.findProcessesByJobId(jobVO.getId());
 
@@ -149,8 +150,9 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                 }
 
                 // Remove locks.
-                // datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
+                 datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
 
+                // Check that for the datasets released column is false.
                 List<ReportingDatasetVO> datasets =
                         datasetMetabaseController.findReportingDataSetIdByDataflowIdAndProviderId(dataflowId, providerId);
 
@@ -162,38 +164,46 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                         datasetMetabaseControllerZull.updateReportingDatasetMetabase(dataset);
                     }
 
-                    // Get last snapshot from reporting dataset.
-                    SnapshotVO lastSnapshot = Collections.max(
-                            datasetSnapshotController.getSnapshotByDatasetId(dataset.getId()),
-                            Comparator.comparingLong(SnapshotVO::getId));
+                    // Check Snapshot entries only if not silent release.
+                    if (!isSilentRelease) {
+                        // Get last snapshot from reporting dataset.
+                        SnapshotVO lastSnapshot = Collections.max(
+                                datasetSnapshotController.getSnapshotByDatasetId(dataset.getId()),
+                                Comparator.comparingLong(SnapshotVO::getId));
 
-//                    boolean releasedInSnapshot = lastSnapshot.getRelease() && lastSnapshot.getDateReleased() != null;
-                    if (!lastSnapshot.getRelease() || lastSnapshot.getDateReleased() == null) {
-                        LOG.error("Release pre-condition failed for jobId {} and snapshotId {} of datasetId {}",jobVO.getId(), lastSnapshot.getId(), dataset.getId());
-                        throw new IllegalStateException("Snapshot pre-condition error.");
+                        // Stops the process either field is has wrong values.
+                        if (!lastSnapshot.getRelease() || lastSnapshot.getDateReleased() == null) {
+                            LOG.error("Release pre-condition failed for jobId {} and snapshotId {} of datasetId {}",jobVO.getId(), lastSnapshot.getId(), dataset.getId());
+                            throw new IllegalStateException("Snapshot pre-condition error.");
+                        }
                     }
-
-                    String country = dataset.getDataSetName();
-                    String dataflowName = dataflow.getName();
-                    MessageVO messageVO = new MessageVO();
-                    messageVO.setProviderId(providerId);
-                    messageVO.setContent(country + " released " + dataflowName + " successfully");
-                    messageVO.setAutomatic(true);
-                    boolean sendEmail = false;
-
-                    collaborationControllerZuul.createMessage(dataflowId, messageVO, jobVO.getCreatorUsername(), jobVO.getId(), sendEmail);
-
-                    LOG.info("Automatic feedback message created of dataflow {}, datasetId {}, jobId {}, Message: {}, User: {}",
-                            dataflow.getId(), dataset.getId(), jobVO.getId(), messageVO.getContent(), jobVO.getCreatorUsername());
-
 
                     // Change Job status to FINISHED.
                     jobService.updateJobStatus(jobVO.getId(), JobStatusEnum.FINISHED);
+
+                    // Send emails and notifications only if not silent release.
+                    if (!isSilentRelease) {
+                        // Create feedback message for eash dataset.
+                        String country = dataset.getDataSetName();
+                        String dataflowName = dataflow.getName();
+                        MessageVO messageVO = new MessageVO();
+                        messageVO.setProviderId(providerId);
+                        messageVO.setContent(country + " released " + dataflowName + " successfully");
+                        messageVO.setAutomatic(true);
+                        boolean sendEmail = false;
+
+                        collaborationControllerZuul.createMessage(dataflowId, messageVO, jobVO.getCreatorUsername(), jobVO.getId(), sendEmail);
+
+                        LOG.info("Automatic feedback message created of dataflow {}, datasetId {}, jobId {}, Message: {}, User: {}",
+                                dataflow.getId(), dataset.getId(), jobVO.getId(), messageVO.getContent(), jobVO.getCreatorUsername());
+
+                        // Notification send to reporting user for dataflow release jobe completion.
                         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_COMPLETED_EVENT, null,
-                            NotificationVO.builder()
-                                    .user(jobVO.getCreatorUsername())
-                                    .dataflowId(dataflowId).dataflowName(dataflowName)
-                                    .providerId(dataset.getDataProviderId()).build());
+                                NotificationVO.builder()
+                                        .user(jobVO.getCreatorUsername())
+                                        .dataflowId(dataflowId).dataflowName(dataflowName)
+                                        .providerId(providerId).build());
+                    }
                 }
             }
         } catch (Exception e) {
