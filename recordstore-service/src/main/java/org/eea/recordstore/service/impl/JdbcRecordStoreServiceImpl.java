@@ -629,8 +629,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       LOG.info("dataset {}", dataset);
       if (dataflow.getBigData()) {
         Long dataProviderId = dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0;
-        if (DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {
-          //todo use copyFileToAnotherDestination to copy attachments
+        if (DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {  // copy to eu dataset
           LOG.info("Create data snapshot for EU dataset {}", idDataset);
           S3PathResolver dcPath = new S3PathResolver(dataflowId, idDataset, S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
 
@@ -658,14 +657,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               euPath.setParquetFolder(key.split("/")[6]);
               euPath.setSnapshotId(idSnapshot);
               try {
+                String tableNameSnapshotPath = s3Service.getS3Path(euPath);
+
+                 /*Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
                 LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                 File parquetFile = s3Helper.getFileFromS3(key, filename + idDataset, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                String tableNameSnapshotPath = s3Service.getS3Path(euPath);
                 LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameSnapshotPath, parquetFile.getPath());
                 s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
                 parquetFile.delete();
-                LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
-              } catch (IOException e) {
+                LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);*/
+
+                s3Helper.copyFileToAnotherDestination(key, tableNameSnapshotPath);
+                LOG.info("Copied file from source {} to destination {}", key, tableNameSnapshotPath);
+              } catch (Exception e) {
                 LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
               }
             }
@@ -686,7 +690,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               }
             }
           });
-        } else {
+        } else {  // release, create snapshot
           LOG.info("Create data snapshot dataset {}", idDataset);
           S3PathResolver snapshotPath = new S3PathResolver(dataflowId, dataProviderId, idDataset);
 
@@ -706,16 +710,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       snapshotPath.setParquetFolder(key.split("/")[5]);
                       snapshotPath.setSnapshotId(idSnapshot);
                       try {
+                        String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
+                        /* Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
                         LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                         File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot,
                                 LiteralConstants.PARQUET_TYPE);
-                        String tableNameSnapshotPath = s3Service.getS3Path(snapshotPath);
                         LOG.info("Uploading file to bucket parquetFile path : {} in path: {}",
                                 tableNameSnapshotPath, parquetFile.getPath());
                         s3Helper.uploadFileToBucket(tableNameSnapshotPath, parquetFile.getPath());
                         LOG.info("Uploading finished successfully for {}", tableNameSnapshotPath);
-                        parquetFile.delete();
-                      } catch (IOException e) {
+                        parquetFile.delete();*/
+
+                        s3Helper.copyFileToAnotherDestination(key, tableNameSnapshotPath);
+                        LOG.info("Copied file from source {} to destination {}", key, tableNameSnapshotPath);
+                      } catch (Exception e) {
                         LOG.error(
                                 "Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                                 idDataset, dataflowId, e);
@@ -1825,7 +1833,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease() && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId))))) {
+        if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease()) && StringUtils.isNotBlank(processId)  && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId)))) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease, processId);
         } else {
           Map<String, Object> createSnapshot = new HashMap<>();
@@ -2126,7 +2134,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
               .filter(table -> !CollectionUtils.isEmpty(table.getRecordSchema().getFieldSchema()))
               .forEach(table -> {
                 try {
-                  if (DatasetTypeEnum.REPORTING.equals(datasetType) && RELEASE_COMPLETED_EVENT.equals(successEventType)) {
+                  if (DatasetTypeEnum.REPORTING.equals(datasetType) && RELEASE_COMPLETED_EVENT.equals(successEventType)) { //release
                     //Delete old files
                     Long providerId = jobControllerZuul.findProviderIdById(finalJobId);
                     Long reportingDatasetId = finalProcessVO.getDatasetId();
@@ -2154,22 +2162,28 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                       dataCollectionPath.setTableName(key.split("/")[4]);
                       dataCollectionPath.setParquetFolder(key.split("/")[5]);
                       try {
+                        String tableNameDCPath = s3Service.getS3Path(dataCollectionPath);
+
+                        /* Ticket #287184 instead of storing the file to the disk, uploading it to s3 and removing it we replaced this code with copying the file to another destination using the s3Client
                         LOG.info("Getting file from S3 with key : {} and filename : {}", key, filename);
                         File parquetFile = s3Helper.getFileFromS3(key, filename, pathSnapshot, LiteralConstants.PARQUET_TYPE);
-                        String tableNameDCPath = s3Service.getS3Path(dataCollectionPath);
+
                         LOG.info("Uploading file to bucket parquetFile path : {} in path: {}", tableNameDCPath, parquetFile.getPath());
                         s3Helper.uploadFileToBucket(tableNameDCPath, parquetFile.getPath());
-                        LOG.info("Uploading finished successfully for {}", tableNameDCPath);
+                        LOG.info("Uploading finished successfully for {}", tableNameDCPath);*/
+
+                        s3Helper.copyFileToAnotherDestination(key, tableNameDCPath);
+                        LOG.info("Copied file from source {} to destination {}", key, tableNameDCPath);
                         //promote folder
                         checkAndPromoteFolder(dataCollectionPath, S3_TABLE_NAME_DC_QUERY_PATH);
-                      } catch (IOException e) {
+                      } catch (Exception e) {
                         LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}",
                                 reportingDatasetId, dataflowId, e);
                       }
                     });
                   } else if (DatasetTypeEnum.REPORTING.equals(datasetType)
                           && (RESTORE_DATASET_SCHEMA_SNAPSHOT_COMPLETED_EVENT.equals(successEventType)
-                          || RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT.equals(successEventType) )) {
+                          || RESTORE_DATASET_SNAPSHOT_COMPLETED_EVENT.equals(successEventType) )) {  // restore snapshot
 
                     LOG.info("Restore data snapshot dataset {}", datasetId);
                     Long providerId = dataset.getDataProviderId();
