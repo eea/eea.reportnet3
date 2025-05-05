@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.math.BigInteger;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -144,6 +145,24 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final String QUERY_ORDER = "ORDER BY orden";
 
+  private static String COUNT_QUERY(Long datasetId, long limit, long currentOffset) {
+    return new StringBuilder().append("SELECT count(*) FROM dataset_").append(datasetId).append(".field_value fv ")
+            .append("WHERE fv.type IN ('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON', 'GEOMETRYCOLLECTION') ")
+//            .append("ORDER BY id ")
+//            .append("LIMIT ").append(limit)
+//            .append(" OFFSET ").append(currentOffset)
+            .append(";")
+            .toString();
+  }
+
+  private static String INSERT_GEOMETRY_FUNCTION_NO_TRIGGER_EEA(Long datasetId, long limit, long currentOffset) {
+    return new StringBuilder().append("SELECT public.insert_geometry_function_notrigger_EAA( ")
+            .append(datasetId).append(", ")
+            .append(limit).append(", ")
+            .append(currentOffset).append(");")
+            .toString();
+  }
+
   /**
    * The enum SortQueryType
    */
@@ -161,6 +180,50 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   public List<Object[]> queryExecutionList(String generatedQuery) {
     Query query = entityManager.createNativeQuery(generatedQuery);
     return query.getResultList();
+  }
+
+  /**
+   * Query execution list.
+   *
+   * @return the list
+   */
+  @Override
+  public Long countGeometries(Long datasetId, long limit, long currentOffset, ConnectionDataVO connectionDataVO) {
+//    try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
+//            connectionDataVO.getUser(), connectionDataVO.getPassword());
+//         PreparedStatement pstmt = connection.prepareStatement(
+//                 entityManager.createNativeQuery(
+//                         COUNT_QUERY(datasetId, limit, currentOffset)
+//                 ).toString()
+//         );
+//
+//         ResultSet rs = pstmt.executeQuery()) {
+//      LOG.info("[UPDATE-GEOMETRIES] rs: {}", rs.toString());
+//    } catch (Exception e) {
+//      LOG.info("[UPDATE-GEOMETRIES] Geometry field: Geometry update failed for queryExecutionSingle.", e);
+//    }
+//
+    try {
+      LOG.info("[UPDATE-GEOMETRIES] countGeometries method called for datasetId {}, limit {}, currentOffset {}", datasetId, limit, currentOffset);
+      Query query = entityManager.createNativeQuery(COUNT_QUERY(datasetId, limit, currentOffset));
+      LOG.info("[UPDATE-GEOMETRIES] countGeometries query created datasetId {}, limit {}, currentOffset {}, query: {}", datasetId, limit, currentOffset, query.toString());
+      return ((BigInteger) query.getSingleResult()).longValue() ;
+    } catch (Exception e) {
+      LOG.info("[UPDATE-GEOMETRIES] error: {}", e.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Query execution list.
+   *
+   * @return the list
+   */
+  @Override
+  public void updateGeometryFields(Long datasetId, long limit, long currentOffset) {
+    LOG.info("[UPDATE-GEOMETRIES] Method updateGeometryFields called. Function will be triggered for datasetId {}, limit {}, currentOffset {}", datasetId, limit, currentOffset);
+    Query query = entityManager.createNativeQuery(INSERT_GEOMETRY_FUNCTION_NO_TRIGGER_EEA(datasetId, limit, currentOffset));
+    query.getSingleResult();
   }
 
   /**

@@ -112,7 +112,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.zip.*;
 
@@ -1180,6 +1182,42 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     /**
+     * Update geomety.
+     *
+     * @param datasetId     the dataset id
+     * @param datasetSchema the dataset schema
+     */
+    @Async
+    public void updateGeometryV2(Long datasetId, DataSetSchema datasetSchema) {
+        // check schema has geometry and check field Value has geometry
+        if (checkSchemaGeometry(datasetSchema)) {
+            LOG.info("[UPDATE-GEOMETRIES] Updating geometries for dataset {}", datasetId);
+            // update geometries (native)
+            long limit = 3L;
+            long offset = 0L;
+
+            ConnectionDataVO connectionDataVO = recordStoreControllerZuul
+                    .getConnectionToDataset(LiteralConstants.DATASET_PREFIX + datasetId);
+            Long updatesCount = fieldRepository.countGeometries(datasetId, limit, offset, connectionDataVO);
+            LOG.info("[UPDATE-GEOMETRIES] updatesCount {}", updatesCount);
+
+            for (;offset < updatesCount; offset += limit) {
+                LOG.info("[UPDATE-GEOMETRIES] Current offset is {}", offset);
+                boolean updated = getFieldValueGeometryV2(datasetId, limit, offset, connectionDataVO);
+                if (updated) {
+                    LOG.info("[UPDATE-GEOMETRIES] updated for offset {}", offset);
+                } else {
+                    LOG.info("[UPDATE-GEOMETRIES] Did not update for offset {}", offset);
+                }
+            }
+//            while (getFieldValueGeometryV2(datasetId, limit, offset, connectionDataVO)) {
+//                offset += limit;
+//            }
+            LOG.info("[UPDATE-GEOMETRIES] Finished updating geometries for dataset {}", datasetId);
+        }
+    }
+
+    /**
      * Check schema geometry.
      *
      * @param datasetSchema the dataset schema
@@ -1221,27 +1259,39 @@ public class FileTreatmentHelper implements DisposableBean {
      * @return the field value geometry
      */
     private boolean getFieldValueGeometry(Long datasetId, long limit, long currentOffset, ConnectionDataVO connectionDataVO) {
-        String query = "SELECT id, value FROM dataset_" + datasetId +
-            ".field_value fv " +
-            "WHERE fv.type IN " +
-            "('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION')" +
-            " ORDER BY id" +
-            " LIMIT " + limit + " OFFSET " + currentOffset;
+        StringBuilder query = new StringBuilder();
+        query.append("SELECT id, value FROM dataset_")
+                .append(datasetId)
+                .append(".field_value fv ")
+                .append("WHERE fv.type IN ")
+                .append("('POINT','LINESTRING','POLYGON','MULTIPOINT','MULTILINESTRING','MULTIPOLYGON','GEOMETRYCOLLECTION') ")
+                .append("ORDER BY id ")
+                .append("LIMIT ").append(limit).append(" OFFSET ").append(currentOffset);
+
         boolean moreRecords = false;
         try {
-            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query);
+            List<Object[]> resultQuery = fieldRepository.queryExecutionList(query.toString());
             moreRecords = !resultQuery.isEmpty();
 
-            String queryGeometry = "select public.insert_geometry_function_noTrigger(" + datasetId + ", cast(array[";
-            while (!resultQuery.isEmpty()) {
-                queryGeometry += "row('" + resultQuery.get(0)[0].toString() + "', '" + resultQuery.get(0)[1].toString() + "'),";
-                resultQuery.remove(resultQuery.get(0));
-            }
             if (moreRecords) {
-                queryGeometry = queryGeometry.substring(0, queryGeometry.length() - 1);
-                queryGeometry += "] as public.geom_update[]));";
+                StringBuilder queryGeometry = new StringBuilder();
+                queryGeometry.append("select public.insert_geometry_function_noTrigger(")
+                        .append(datasetId)
+                        .append(", cast(array[");
 
-                fieldRepository.queryExecutionSingle(queryGeometry, connectionDataVO);
+                for (Object[] row : resultQuery) {
+                    queryGeometry.append("row('")
+                            .append(row[0].toString())
+                            .append("', '")
+                            .append(row[1].toString())
+                            .append("'),");
+                }
+
+                // Remove last comma
+                queryGeometry.setLength(queryGeometry.length() - 1);
+                queryGeometry.append("] as public.geom_update[]));");
+
+                fieldRepository.queryExecutionSingle(queryGeometry.toString(), connectionDataVO);
             }
             return moreRecords;
 
@@ -1252,6 +1302,29 @@ public class FileTreatmentHelper implements DisposableBean {
 
     }
 
+    /**
+     * Gets the field value geometry.
+     *
+     * @param datasetId the dataset id
+     * @param limit the limit
+     * @param currentOffset the offset
+     * @return the field value geometry
+     */
+    private boolean getFieldValueGeometryV2(Long datasetId, long limit, long currentOffset, ConnectionDataVO connectionDataVO) {
+        Predicate<Long> moreRecords = (pageRecordsCount) -> pageRecordsCount == limit;
+        try {
+        // count how many updates there are for database
+        Long updatesCount = fieldRepository.countGeometries(datasetId, limit, currentOffset, connectionDataVO);
+        if (updatesCount == null || updatesCount == 0 ) return false; // if current page has no records break the loop
+
+        fieldRepository.updateGeometryFields(datasetId, limit, currentOffset); // run the function at the database
+
+        return moreRecords.test(updatesCount); // return if page was full so we can loop over again and find the next records.
+        } catch (Exception ex) {
+            LOG.info("Geometry field: Geometry update failed for dataset id {}", datasetId, ex);
+        }
+        return false;
+    }
 
     /**
      * Release lock.

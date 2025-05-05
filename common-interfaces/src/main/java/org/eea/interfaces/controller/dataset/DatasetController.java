@@ -863,6 +863,14 @@ public interface DatasetController {
   @PutMapping("/{datasetId}/updateGeometry")
   void updateGeometry(@PathVariable("datasetId") Long datasetId);
 
+  /**
+   * Update geometry field
+   * @param datasetId
+   * @return
+   */
+  @PutMapping("/v2/{datasetId}/updateGeometry")
+  void updateGeometryV2(@PathVariable("datasetId") Long datasetId);
+
 
 
   /**

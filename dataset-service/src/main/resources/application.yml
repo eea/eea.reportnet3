@@ -4,6 +4,11 @@ spring:
   application:
     name: dataset
 
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+
 #restricting logs
 logging:
   level:
@@ -11,3 +16,7 @@ logging:
     cdjd.com.dremio.sabot.rpc.user: ERROR
     org.springframework.cloud.netflix.zuul.filters.route.support: ERROR
     org.apache.kafka.clients.consumer.internals: ERROR
+
+    # Hibernate SQL and parameter logging
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

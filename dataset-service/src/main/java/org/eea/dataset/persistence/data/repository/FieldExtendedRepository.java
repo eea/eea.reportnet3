@@ -77,4 +77,20 @@ public interface FieldExtendedRepository {
    */
   List<Object[]> queryExecutionList(String generatedQuery);
 
+  /**
+   * Query execution list.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  Long countGeometries(Long datasetId, long limit, long currentOffset, ConnectionDataVO connectionDataVO);
+
+  /**
+   * Query execution list.
+   *
+   * @param generatedQuery the generated query
+   * @return the list
+   */
+  void updateGeometryFields(Long datasetId, long limit, long currentOffset);
+
 }
