@@ -44,9 +44,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -192,7 +189,7 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
 
         //force date description to CET
         DateTimeFormatter utcFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of("CET"));
+        DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.of(LiteralConstants.EUROPE_ZONE_ID));
         String cetReleaseDate = LocalDateTime.parse(dateRelease, utcFormatter).atZone(ZoneOffset.UTC).format(cetFormatter);
         createSnapshotVO.setDescription("Release " + cetReleaseDate + " CET");
 
@@ -329,8 +326,16 @@ public class ReleaseDataSnapshotsCommand extends AbstractEEAEventHandlerCommand 
       emailVO.setBbc(emails);
       emailVO.setSubject(String.format(LiteralConstants.RELEASESUBJECT, dataset.getDataSetName(),
               dataflowVO.getName()));
+
+      //force date description to CET
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+      LocalDateTime utcDateTime = LocalDateTime.parse(dateRelease, formatter);
+      ZonedDateTime utcZoned = utcDateTime.atZone(ZoneOffset.UTC);
+      ZonedDateTime cetZoned = utcZoned.withZoneSameInstant(ZoneId.of(LiteralConstants.EUROPE_ZONE_ID));
+      String cetDate = cetZoned.format(formatter);
+
       emailVO.setText(String.format(LiteralConstants.RELEASEMESSAGE, dataset.getDataSetName(),
-              dataflowVO.getName(), dateRelease));
+              dataflowVO.getName(), cetDate));
       emailControllerZuul.sendMessage(emailVO);
     } catch (Exception e) {
       Long dataflowId = (dataflowVO != null) ? dataflowVO.getId() : null;
