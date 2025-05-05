@@ -68,8 +68,6 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
     @Autowired
     private JobService jobService;
     @Autowired
-    private ValidationControllerZuul validationControllerZuul;
-    @Autowired
     private DatasetSnapshotController datasetSnapshotController;
     @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
