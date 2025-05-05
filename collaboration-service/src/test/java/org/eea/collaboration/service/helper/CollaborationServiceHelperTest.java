@@ -1,8 +1,6 @@
 package org.eea.collaboration.service.helper;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -13,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eea.interfaces.controller.dataflow.RepresentativeController;
 import org.eea.utils.LiteralConstants;
 import java.util.Set;
 
@@ -40,7 +37,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -143,7 +139,7 @@ public class CollaborationServiceHelperTest {
     String messageContent = "New message text";
 
     Date messageCreateDate = new Date();
-    ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of("Europe/Paris"));
+    ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of(LiteralConstants.EUROPE_ZONE_ID));
     DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     String cetFormattedDate = cetTime.format(cetFormatter);
 

@@ -194,7 +194,7 @@ public class CollaborationServiceHelper {
    */
   private void sendMail(Set<String> emailSet, String providerLabel, Long dataflowId, String dataflowName, String messageContent, Date messageCreateDate) {
     try {
-      ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of("Europe/Paris"));
+      ZonedDateTime cetTime = messageCreateDate.toInstant().atZone(ZoneId.of(LiteralConstants.EUROPE_ZONE_ID));
       DateTimeFormatter cetFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
       String cetFormattedDate = cetTime.format(cetFormatter);
       String emailText = String.format(
