@@ -93,7 +93,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
     }
 
     /**
-     * The job runs every hour. It finds in_progress release jobs that have all their processes and tasks finished
+     * The job runs every thirty minutes. It finds in_progress release jobs that have all their processes and tasks finished
      * and the latest finished process is in finished status for more than
      * maxTimeInMinutesForFinishedTasksOfInProgressValidationJobs minutes
      */
