@@ -74,10 +74,6 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Autowired
   private DatasetSnapshotService datasetSnapshotService;
 
-  /** The dataset snapshot service. */
-  @Autowired
-  private DatasetSnapshotServiceImpl datasetSnapshotServiceImpl;
-
   /** The reporting dataset repository. */
   @Autowired
   private ReportingDatasetRepository reportingDatasetRepository;
@@ -1008,6 +1004,6 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @GetMapping(value = "/private/getSnapshotByDatasetId")
   public List<SnapshotVO> getSnapshotByDatasetId(Long datasetId){
-    return datasetSnapshotServiceImpl.getSnapshotsByIdDataset(datasetId);
+    return datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
   }
 }
