@@ -626,7 +626,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
       Long dataflowId = dataset.getDataflowId();
       DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataflowId);
 
-      LOG.info("dataset {}", dataset);
+      LOG.info("In createDataSnapshot dataset {}", dataset);
       if (dataflow.getBigData()) {
         Long dataProviderId = dataset.getDataProviderId()!=null ? dataset.getDataProviderId() : 0;
         if (DatasetTypeEnum.COLLECTION.equals(dataset.getDatasetTypeEnum())) {  // copy to eu dataset
@@ -636,12 +636,20 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           List<EUDatasetVO> euDatasets = euDatasetControllerZuul.findEUDatasetByDataflowId(dataflowId);
           Long euDatasetId = 0L;
           for (EUDatasetVO euDataset: euDatasets) {
-            LOG.info("euDataset {}", euDataset);
+            LOG.info("In createDataSnapshot euDataset {}", euDataset);
             if (euDataset.getDatasetSchema().equals(dataset.getDatasetSchema())) {
               euDatasetId = euDataset.getId();
             }
           }
           S3PathResolver euPath = new S3PathResolver(dataflowId, euDatasetId);
+
+          //Delete table name EU folder if exists
+          euPath.setPath(S3_EU_SNAPSHOT_ROOT_PATH);
+          if (s3Helper.checkFolderExist(euPath, S3_EU_SNAPSHOT_ROOT_PATH)) {
+            String pathOfEuDataset = s3Service.getTableAsFolderQueryPath(euPath, S3_EU_SNAPSHOT_ROOT_PATH);
+            s3Helper.deleteFolder(euPath, S3_EU_SNAPSHOT_ROOT_PATH);
+            LOG.info("Successfully deleted files in path: {}", pathOfEuDataset);
+          }
 
           LOG.info("Getting tableNameFilenames for path resolver {}", dcPath);
           List<S3Object> tableNameFilenames = s3Helper.getFilenamesFromTableNames(dcPath);
@@ -669,6 +677,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
 
                 s3Helper.copyFileToAnotherDestination(key, tableNameSnapshotPath);
                 LOG.info("Copied file from source {} to destination {}", key, tableNameSnapshotPath);
+                //promote folder
+                checkAndPromoteFolder(euPath, S3_TABLE_NAME_EU_QUERY_PATH);
               } catch (Exception e) {
                 LOG.error("Error in getFileFromS3 process for reportingDatasetId {}, dataflowId {}", idDataset, dataflowId, e);
               }
