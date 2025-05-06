@@ -160,6 +160,10 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         if(BooleanUtils.isTrue(etlExportV4)){
             //if we use etlExportV4 we need to keep record id in the csv
             headersToExclude.remove(RECORD_ID);
+            LOG.info("Exporting table {} in dataset {} but keeping recordId. etlExportV4: {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExclude);
+        }
+        else{
+            LOG.info("Exporting table {} in dataset {} without recordId. etlExportV4: {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExclude);
         }
         int counter = 0;
         for (S3Object obj : exportFilenames) {
