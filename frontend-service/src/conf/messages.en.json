@@ -26,7 +26,7 @@
     "addedDuplicateNationalCoordinatorsError": "The national coordinator already exists in this country",
     "addEntity": "Add entity",
     "addEntityId": "Add Entity Id",
-    "addEntityIdMessage": "The <strong>Entity Ids</strong> in this webform are not added automatically. Please type an <strong>Entity Id</strong>. <br>It must start with a letter ( a-z and A-Z ), a number ( 0-9 ), ' - ' or ' _ ' and contain letters, numbers, ' - ' and ' _ '.",
+    "addEntityIdMessage": "The <strong>Entity Ids</strong> in this webform are not added automatically. Please type an <strong>Entity Id</strong>. <br>It can contain letters ( a-z and A-Z ), numbers ( 0-9 ), colon ( : ), forward slash ( / ), dot ( . ), dash ( - ) or underscore ( _ ).",
     "addGroup": "Add group",
     "addNationalCoordinatorsDialogHeader": "Add national coordinator",
     "addNewRelation": "Add new relation",
@@ -1770,6 +1770,5 @@
     "ruleId": "Rule id",
     "hideCancelledValidations": "Hide cancelled validations",
     "noCancelledTasks": "There are no cancelled validations for this job"
-
   }
 }
