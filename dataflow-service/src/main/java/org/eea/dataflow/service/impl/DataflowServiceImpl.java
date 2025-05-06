@@ -1526,7 +1526,7 @@ public class DataflowServiceImpl implements DataflowService {
     if (result != null) {
       dataflowVO = dataflowMapper.entityToClass(result);
 
-      // Set additional properties for BUSINESS and CITIZEN_SCIENCE types
+      // Set additional properties for BUSINESS REPORING and CITIZEN_SCIENCE types
       if (TypeDataflowEnum.BUSINESS.equals(dataflowVO.getType())) {
         dataflowVO.setDataProviderGroupName(
                 dataProviderGroupRepository.findById(dataflowVO.getDataProviderGroupId())
@@ -1539,6 +1539,14 @@ public class DataflowServiceImpl implements DataflowService {
         dataflowVO.setDataProviderGroupName(
                 dataProviderGroupRepository.findById(dataflowVO.getDataProviderGroupId())
                         .orElse(new DataProviderGroup()).getName());
+      }
+
+      if(TypeDataflowEnum.REPORTING.equals(dataflowVO.getType())){
+        if(dataflowVO.getDataProviderGroupId() != null){
+          dataflowVO.setDataProviderGroupName(
+                  dataProviderGroupRepository.findById(dataflowVO.getDataProviderGroupId())
+                          .orElse(new DataProviderGroup()).getName());
+        }
       }
 
       boolean isAdmin = isAdmin();
