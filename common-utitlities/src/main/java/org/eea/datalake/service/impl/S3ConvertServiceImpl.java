@@ -157,13 +157,15 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
                                      CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) throws IOException {
 
+        Set<String> headersToExcludeTemp = new HashSet<>(headersToExclude);
+
         if(BooleanUtils.isTrue(etlExportV4)){
             //if we use etlExportV4 we need to keep record id in the csv
-            headersToExclude.remove(RECORD_ID);
-            LOG.info("Exporting table {} in dataset {} but keeping recordId. etlExportV4: {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExclude);
+            headersToExcludeTemp.remove(RECORD_ID);
+            LOG.info("Exporting table {} in dataset {} but keeping recordId. etlExportV4: {} headersToExcludeTemp {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExcludeTemp, headersToExclude);
         }
         else{
-            LOG.info("Exporting table {} in dataset {} without recordId. etlExportV4: {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExclude);
+            LOG.info("Exporting table {} in dataset {} without recordId. etlExportV4: {} headersToExcludeTemp {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExcludeTemp, headersToExclude);
         }
         int counter = 0;
         for (S3Object obj : exportFilenames) {
@@ -179,14 +181,14 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         boolean canExcludeHeaders = canExcludeHeaders(datasetTypeEnum);
                         long size;
                         if (canExcludeHeaders) {
-                            size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t ->  !headersToExclude.contains(t)).count();
+                            size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t ->  !headersToExcludeTemp.contains(t)).count();
                         } else {
                             size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
                         }
                         if (counter == 0) {
                             if (canExcludeHeaders) {
                                 csvWriter.writeNext(record.getSchema().getFields().stream()
-                                    .map(Schema.Field::name).filter(t -> !headersToExclude.contains(t)).toArray(String[]::new), false);
+                                    .map(Schema.Field::name).filter(t -> !headersToExcludeTemp.contains(t)).toArray(String[]::new), false);
                             } else {
                                 csvWriter.writeNext(record.getSchema().getFields().stream()
                                     .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
@@ -197,7 +199,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         int index = 0;
                         List<Schema.Field> filteredFields = new ArrayList<>();
                         if (canExcludeHeaders) {
-                            filteredFields = record.getSchema().getFields().stream().filter( t -> !headersToExclude.contains(t.name())).collect(Collectors.toList());
+                            filteredFields = record.getSchema().getFields().stream().filter( t -> !headersToExcludeTemp.contains(t.name())).collect(Collectors.toList());
                         } else {
                              filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
                         }
