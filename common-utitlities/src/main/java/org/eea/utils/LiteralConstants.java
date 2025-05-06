@@ -487,6 +487,11 @@ public final class LiteralConstants {
   public static final String LAST_IMPORT_FILE_EXTENSION = "lastImportFileExtension";
 
   /**
+   * Zone id
+   */
+  public static final String EUROPE_ZONE_ID = "Europe/Paris";
+
+  /**
    * Instantiates a new literal constants.
    */
   private LiteralConstants() {
