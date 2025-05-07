@@ -201,7 +201,7 @@ const useBigButtonListRepresentative = ({
         technicalAcceptanceStatus: technicalAcceptanceStatus,
         visibility: true
       };
-    });
+    }).sort((a, b) => a.caption.localeCompare(b.caption));
 
   const onBuildReceiptButton = () => [
     {

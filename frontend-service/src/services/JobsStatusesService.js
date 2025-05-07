@@ -82,6 +82,24 @@ export const JobsStatusesService = {
     return response.data;
   },
 
+  getCancelledValidations: async ({ 
+    jobId,
+    pageNum,
+    numberRows,
+    sortOrder,
+    sortField
+  }) => {
+    const parsedSortField = JobsStatusesUtils.parseSortField(sortField);
+    const response = await JobsStatusesRepository.getCancelledValidations({
+      jobId,
+      pageNum,
+      numberRows,
+      sortOrder: ServiceUtils.getSortOrder(sortOrder),
+      sortField: parsedSortField
+    });
+    return response.data;
+  },
+
   cancelJob: async (jobId, dataflowId, datasetId) => {
     await JobsStatusesRepository.cancelJob(jobId, dataflowId, datasetId);
   }

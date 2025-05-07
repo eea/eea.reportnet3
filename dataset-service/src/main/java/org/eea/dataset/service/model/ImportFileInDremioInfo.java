@@ -23,9 +23,10 @@ public class ImportFileInDremioInfo {
     private Long integrationId;
     private String delimiter;
     private String errorMessage;
-    private Set<String> warningMessages;
+    private List<String> warningMessages;
     private String dataProviderCode;
     private Boolean updateReferenceFolder;
+    private Boolean hasCorrectHeaders;
 
     public ImportFileInDremioInfo(Long jobId, Long datasetId, Long dataflowId, Long providerId, String tableSchemaId, String fileName, Boolean replaceData,
                                   String delimiter, Long integrationId, String dataProviderCode) {

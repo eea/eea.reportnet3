@@ -36,7 +36,8 @@ export const Webforms = ({
   const [rootTableId, setRootTableId] = useState();
   const [rootTableName, setRootTableName] = useState();
 
-  const { datasetSchemaAllTables } = state;
+  const { datasetSchema } = state;
+  const datasetSchemaAllTables = datasetSchema?.tables || [];
 
   useEffect(() => {
     getWebformConfiguration();
@@ -93,6 +94,8 @@ export const Webforms = ({
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
           datasetId={datasetId}
+          hideEntities={selectedConfiguration?.hideEntities}
+          hideTabularData={selectedConfiguration?.hideTabularData}
           isIcebergCreated={isIcebergCreated}
           isLoadingIceberg={isLoadingIceberg}
           isReleasing={isReleasing}

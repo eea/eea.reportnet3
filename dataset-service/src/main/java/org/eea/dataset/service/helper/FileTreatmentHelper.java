@@ -9,6 +9,7 @@ import com.opencsv.CSVWriter;
 import feign.FeignException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BOMInputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.bson.types.ObjectId;
@@ -32,6 +33,7 @@ import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseR
 import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
+import org.eea.dataset.persistence.schemas.domain.RecordSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -87,6 +89,7 @@ import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
+import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -106,6 +109,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -113,6 +117,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.*;
 
@@ -227,6 +232,12 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Value("${exportDLPath}")
     private String exportDLPath;
+
+    /**
+     * The delimiter.
+     */
+    @Value("${loadDataDelimiter}")
+    private char loadDataDelimiter;
 
     /**
      * The file export factory.
@@ -707,7 +718,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     createCsvWithFiltersDL(headers, csvFile, rs, includeCountryCode);
                 }
             } else {
-                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName);
+                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName, false, null);
             }
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT, null, notificationVO);
             LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
@@ -789,7 +800,7 @@ public class FileTreatmentHelper implements DisposableBean {
         return dataQuery;
     }
 
-    private void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName) {
+    public void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName, Boolean etlExportV4, Long jobId) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
 
@@ -799,7 +810,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
-                convertParquetToCSV(exportFilenames, tableName, datasetId, tableSchemaId, dataset.getDatasetTypeEnum());
+                convertParquetToCSV(exportFilenames, tableName, datasetId, tableSchemaId, dataset.getDatasetTypeEnum(), etlExportV4, jobId);
             } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
                 convertParquetToJSON(exportFilenames, tableName, datasetId, dataset.getDatasetTypeEnum());
             }/*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
@@ -820,7 +831,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId, DatasetTypeEnum datasetTypeEnum) {
+    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
 
@@ -831,7 +842,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Exporting table data with exportFilenames {}", exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
-                convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, tableSchemaId, out, datasetTypeEnum);
+                convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, tableSchemaId, out, datasetTypeEnum, etlExportV4);
             } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;
@@ -1117,7 +1128,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                         LOG.info("Exporting tableSchema {}", tableSchema);
-                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum());
+                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum(), false);
                     }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
                 } catch (Exception e) {
@@ -1460,6 +1471,18 @@ public class FileTreatmentHelper implements DisposableBean {
         }
 
         /**
+         * Detect the encoding of the provided file
+         *
+         * @param filePath The path of the file
+         * @return The current file encoding
+         *
+         * @throws IOException ioException
+         */
+        private String detectEncoding(String filePath) throws IOException {
+            return UniversalDetector.detectCharset(new File(filePath));
+        }
+
+        /**
          * Queue import process.
          *
          * @param datasetId the dataset id
@@ -1478,23 +1501,27 @@ public class FileTreatmentHelper implements DisposableBean {
         private void queueImportProcess(Long datasetId,String processId, String tableSchemaId, DataSetSchema schema,
                                         List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
                                         String delimiter, String mimeType,Long jobId) throws IOException, EEAException {
+
+            List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
+
             int workingThreads =
-                ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) importExecutorService)
-                    .getDelegateExecutorService()).getActiveCount();
+                    ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) importExecutorService)
+                            .getDelegateExecutorService()).getActiveCount();
             LOG.info("Queueing import process for datasetId {} tableSchemaId {} and file {}. Working import threads {}, Available import threads {}",
-                datasetId, tableSchemaId, originalFileName, workingThreads, maxRunningTasks - workingThreads);
+                    datasetId, tableSchemaId, originalFileName, workingThreads, maxRunningTasks - workingThreads);
 
             if (null != integrationVO) {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
                         replace,jobId);
             } else {
+                List<File> finalFiles = validatedList;
                 importExecutorService.submit(() -> {
                     try {
                         if(this.enableTaskBasedAsynchronousImport){
-                            rn3FileProcessIntoTasks(datasetId, processId, tableSchemaId, schema, files, originalFileName, replace,
+                            rn3FileProcessIntoTasks(datasetId, processId, tableSchemaId, schema, finalFiles, originalFileName, replace,
                                     delimiter);
                         }else{
-                                 rn3FileProcess(datasetId,processId, tableSchemaId, schema, files, originalFileName, replace,
+                                 rn3FileProcess(datasetId,processId, tableSchemaId, schema, finalFiles, originalFileName, replace,
                                          delimiter);
                         }
 
@@ -1510,8 +1537,162 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Finished queueing import process for datasetId {} tableSchemaId {} and file {}", datasetId, tableSchemaId, originalFileName);
         }
 
+    /**
+     * Validates CSV files by checking headers and removes any invalid files from the list.
+     *
+     * @param tableSchemaId the table schema id
+     * @param schema the dataset schema
+     * @param originalFileName the original file name
+     * @param files the list of files to validate; invalid files will be removed from this list
+     * @param delimiter the delimiter to use when reading CSV files
+     * @param datasetId the dataset id
+     * @throws IOException if an I/O error occurs during file reading
+     * @throws EEAException if all CSV files are invalid
+     */
+    public List<File> validateFileHeaders(String tableSchemaId, DataSetSchema schema, String originalFileName, List<File> files, String delimiter, String processId, Long datasetId, Long jobId)
+            throws IOException, EEAException {
+        String error = null;
+        int filesCount = files.size();
+        List<String> warningList = new ArrayList<>();
+        Iterator<File> fileIterator = files.iterator();
 
-        /**
+        while (fileIterator.hasNext()) {
+            File file = fileIterator.next();
+            String fileName = file.getName();
+            boolean removeFile = false;
+            String findTableSchemaId = tableSchemaId == null ? getTableSchemaIdFromFileName(schema, fileName, true) : tableSchemaId;
+            String fileType = datasetService.getMimetype(fileName);
+
+            if (!fileType.equalsIgnoreCase("csv")) {
+                continue;
+            }
+
+            String detectedCharset = detectEncoding(file.getAbsolutePath());
+
+            try (Reader reader = new InputStreamReader(new BOMInputStream(new FileInputStream(file)), Charset.forName(detectedCharset))) {
+                BufferedReader bufferedReader = new BufferedReader(reader);
+                String headerLine = bufferedReader.readLine();
+                String usedDelimiter = (delimiter != null) ? delimiter : String.valueOf(loadDataDelimiter);
+                List<String> csvHeaders = Pattern.compile(Pattern.quote(usedDelimiter), Pattern.CASE_INSENSITIVE)
+                        .splitAsStream(headerLine.replace("\"", ""))
+                        .collect(Collectors.toList());
+                RecordSchema recordSchema = getRecordSchema(findTableSchemaId, schema);
+
+                if (csvHeaders.size() == recordSchema.getFieldSchema().size()) {
+                    for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
+                        if (!csvHeaders.contains(fieldSchema.getHeaderName())) {
+                            if(filesCount > 1){
+                                warningList.add(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null));
+                            } else {
+                                error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
+                            }
+                            removeFile = true;
+                            break;
+                        }
+                    }
+                } else {
+                    if(filesCount > 1){
+                        warningList.add(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null));
+                    } else {
+                        error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
+                    }
+
+                    removeFile = true;
+
+                }
+
+            } catch (Exception e) {
+                LOG.error("Unexpected error reading file {}: {}", file.getName(), e.getMessage());
+            }
+
+            if (removeFile) {
+                fileIterator.remove();
+            }
+        }
+
+        if (filesCount == warningList.size()) {
+            error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
+            warningList.clear();
+        }
+
+        if (error != null || !warningList.isEmpty()) {
+            assignJobNotifications(tableSchemaId, originalFileName, processId, datasetId, jobId, error, warningList);
+        }
+
+        return files;
+
+    }
+
+    private void assignJobNotifications(String tableSchemaId,String originalFileName, String processId, Long datasetId, Long jobId, String error, List<String> warningList) {
+        try {
+            Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+            Map<String, Object> value = new HashMap<>();
+            value.put(LiteralConstants.DATASET_ID, datasetId);
+            value.put(LiteralConstants.USER,
+                    SecurityContextHolder.getContext().getAuthentication().getName());
+            NotificationVO notificationVO = NotificationVO.builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .datasetId(datasetId).tableSchemaId(tableSchemaId).fileName(originalFileName).error(error)
+                    .build();
+
+            EventType eventType;
+            DatasetTypeEnum type = datasetService.getDatasetType(datasetId);
+
+            if (error != null) {
+
+                if (EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(error)) {
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+                    eventType = EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
+                } else {
+                    eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                            ? EventType.IMPORT_REPORTING_FAILED_EVENT
+                            : EventType.IMPORT_DESIGN_FAILED_EVENT;
+                }
+
+                datasetMetabaseService.updateDatasetRunningStatus(datasetId,
+                        DatasetRunningStatusEnum.ERROR_IN_IMPORT);
+
+                processControllerZuul.updateProcess(datasetId, dataflowId,
+                        ProcessStatusEnum.CANCELED, ProcessTypeEnum.IMPORT, processId,
+                        SecurityContextHolder.getContext().getAuthentication().getName(), defaultImportProcessPriority, null);
+
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.CANCELED);
+
+                kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+
+            }
+            if (warningList.size() > 0) {
+                if(warningList.contains(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null))) {
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+                    NotificationVO notificationWarning = NotificationVO.builder()
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                            .datasetId(datasetId).fileName(originalFileName).build();
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
+                            value, notificationWarning);
+                }
+            }
+
+        } catch (EEAException e) {
+            LOG.error("RN3-Import file error for datasetId {}", datasetId, e);
+        }
+
+    }
+
+    private static RecordSchema getRecordSchema(String tableSchemaId, DataSetSchema schema) {
+        List<TableSchema> tablesSchema = schema.getTableSchemas();
+        TableSchema recordSchemas = null;
+
+        for (TableSchema tableSchema : tablesSchema) {
+            if (tableSchema.getIdTableSchema().toString().equalsIgnoreCase(tableSchemaId)) {
+                recordSchemas = tableSchema;
+            }
+        }
+        RecordSchema recordSchema = null != recordSchemas ? recordSchemas.getRecordSchema() : null;
+        return recordSchema;
+    }
+
+
+    /**
          * Fme file process.
          *
          * @param datasetId the dataset id
@@ -2811,7 +2992,7 @@ public class FileTreatmentHelper implements DisposableBean {
             try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                 for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                     LOG.info("Exporting tableSchema {}", tableSchema);
-                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), datasetType);
+                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), datasetType, false);
                 }
             } catch (Exception e) {
                 LOG.error("Error creating zip file for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
@@ -2869,14 +3050,14 @@ public class FileTreatmentHelper implements DisposableBean {
             return isProcessStarted;
         }
 
-        private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out, DatasetTypeEnum datasetTypeEnum) {
+        private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) {
             try {
                 File csvFile;
                 List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
+                    csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, null);
                 } else {
-                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers);
+                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, null);
                 }
 
                 s3ConvertService.convertParquetToCSVinZIP(csvFile, tableName, out);
@@ -2886,13 +3067,13 @@ public class FileTreatmentHelper implements DisposableBean {
             }
         }
 
-        private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, DatasetTypeEnum datasetTypeEnum) {
+        private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4, Long jobId) {
             try {
                 List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
+                    s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId);
                 } else {
-                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers);
+                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, jobId);
                 }
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in convertParquetToCSV for datasetId {} and tableName {}", datasetId, tableName, e);

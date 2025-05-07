@@ -64,7 +64,6 @@ export const WebformRecord = ({
   dataProviderId,
   datasetId,
   datasetSchemaId,
-  entitiesRecords,
   hasFields,
   isAddingMultiple,
   isFixedNumber = true,
@@ -73,7 +72,6 @@ export const WebformRecord = ({
   onAddMultipleWebform,
   onRefresh,
   onTabChange,
-  onUpdateEntitiesValue,
   record,
   referencedTableSchemaId,
   rootPkFieldId,
@@ -262,7 +260,6 @@ export const WebformRecord = ({
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
                       element={element}
-                      entitiesRecords={entitiesRecords}
                       hasErrors={!isNil(element.validations)}
                       isConditional={
                         !isNil(webformRecordState.record) &&
@@ -276,7 +273,6 @@ export const WebformRecord = ({
                       isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
-                      onUpdateEntitiesValue={onUpdateEntitiesValue}
                       record={record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
@@ -412,7 +408,6 @@ export const WebformRecord = ({
                     dataProviderId={dataProviderId}
                     datasetId={datasetId}
                     datasetSchemaId={datasetSchemaId}
-                    entitiesRecords={entitiesRecords}
                     isAddingMultiple={isAddingMultiple}
                     key={i}
                     multipleRecords={element.multipleRecords}
@@ -420,7 +415,6 @@ export const WebformRecord = ({
                     onAddMultipleWebform={onAddMultipleWebform}
                     onRefresh={onRefresh}
                     onTabChange={onTabChange}
-                    onUpdateEntitiesValue={onUpdateEntitiesValue}
                     record={record}
                     referencedTableSchemaId={element?.tableSchemaId}
                     rootPkFieldId={rootPkFieldId}

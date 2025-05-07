@@ -3,8 +3,6 @@ import lowerFirst from 'lodash/lowerFirst';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 
-const requiredFields = ['Id', 'ShortDescription', 'Title'];
-
 const getFieldSchemaId = (data = [], selectedTableSchemaId, rootPkFieldId, rootTableName) => {
   if (!isEmpty(data)) {
     const table = data.filter(table => table.tableSchemaId === selectedTableSchemaId);
@@ -27,14 +25,17 @@ const getTypeList = (records = []) => {
     let data = {};
 
     record.elements.forEach(
-      element => (data = { ...data, [lowerFirst(element.name)]: element.value, recordId: record.recordId })
+      element =>
+        (data = {
+          ...data,
+          [element.pk === true ? 'id' : lowerFirst(element.name)]: element.value,
+          recordId: record.recordId
+        })
     );
     return data;
   });
 
-  return {
-    single: typeList.sort((a, b) => a.id - b.id)
-  };
+  return typeList.sort((a, b) => a.id - b.id);
 };
 
 const checkErrors = (data, rootPkFieldId) => {
@@ -46,11 +47,12 @@ const checkErrors = (data, rootPkFieldId) => {
   const restTables = data.filter(table => !(table.isRootTable === true));
 
   rootTable.forEach(table => {
-    const fields = requiredFields.map(field => {
-      const filteredField = table.elements.filter(element => TextUtils.areEquals(element.name, field))[0];
+    const requiredFields = table.elements.filter(element => element.required);
 
-      return { name: field, isMissing: !filteredField.hasOwnProperty('fieldId') };
-    });
+    const fields = requiredFields.map(
+      requiredField =>
+        (requiredField = { name: requiredField.name, isMissing: !requiredField.hasOwnProperty('fieldId') })
+    );
 
     errors = {
       ...errors,
@@ -75,14 +77,6 @@ const checkErrors = (data, rootPkFieldId) => {
   return errors || {};
 };
 
-const getSingleRecordOption = singleRecord => {
-  if (singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value === '') {
-    return `${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
-  }
-
-  return `${singleRecord.elements.find(el => TextUtils.areEquals(el.name, 'Id')).value}`;
-};
-
 const hasErrors = (data, rootPkFieldId) => {
   const errors = [];
 
@@ -90,10 +84,10 @@ const hasErrors = (data, rootPkFieldId) => {
   const restTables = data.filter(table => !(table.isRootTable === true));
 
   rootTable.forEach(table => {
-    requiredFields.forEach(field => {
-      const filteredField = table.elements.filter(element => TextUtils.areEquals(element.name, field))[0];
+    const requiredFields = table.elements.filter(element => element.required);
 
-      errors.push(!filteredField.hasOwnProperty('fieldId'), !table.hasOwnProperty('tableSchemaId'));
+    requiredFields.forEach(field => {
+      errors.push(!field.hasOwnProperty('fieldId'), !table.hasOwnProperty('tableSchemaId'));
     });
   });
 
@@ -107,25 +101,9 @@ const hasErrors = (data, rootPkFieldId) => {
   return errors.includes(true);
 };
 
-const parseListOfSingleEntities = (records = []) => {
-  const options = [];
-  records.forEach(record => {
-    if (
-      record.elements.find(el => TextUtils.areEquals(el.name, 'IsGroup'))?.value === 'Single' &&
-      record.elements.find(el => TextUtils.areEquals(el.name, 'Id')) &&
-      record.elements.find(el => TextUtils.areEquals(el.name, 'Title'))
-    ) {
-      options.push(getSingleRecordOption(record));
-    }
-  });
-
-  return options.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
-};
-
 export const EntitiesWebformUtils = {
   checkErrors,
   getFieldSchemaId,
   getTypeList,
-  hasErrors,
-  parseListOfSingleEntities
+  hasErrors
 };

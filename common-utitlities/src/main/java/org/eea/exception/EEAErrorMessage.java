@@ -573,6 +573,12 @@ public final class EEAErrorMessage {
   public static final String EXPORTING_FILE_INTEGRATION =
       "An unknown error happenned while exporting a file through integration.";
 
+  /** The Constant EXPORTING_FILE_ICEBERG: {@value}. */
+  public static final String EXPORTING_FILE_ICEBERG = "Can not export because a table is iceberg";
+
+  /** The Constant ERROR_ETL_EXPORTING_FILE_CITUS: {@value}. */
+  public static final String ERROR_ETL_EXPORTING_FILE_CITUS = "Can not use etl export v4 for citus dataflows.";
+
   /** The Constant INSERTING_TABLE_DATA: {@value}. */
   public static final String INSERTING_DATASCHEMA =
       "An unknown error happenned while inserting a dataschema.";
@@ -848,6 +854,13 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_DELETING_UNIQUE_CONSTRAINS: {@value}. */
   public static final String ERROR_DELETING_UNIQUE_CONSTRAINS =
           "An unknown error happenned while deleting Unique Constrains.";
+
+  /** The Constant JOB_NOT_FOUND: {@value}. */
+  public static final String JOB_NOT_FOUND =
+          "JOB not found for Job ID %s.";
+
+  /** The Constant ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS */
+  public static final String ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS = "Import files contain wrong headers.";
 
   /**
    * Instantiates a new EEA error message.

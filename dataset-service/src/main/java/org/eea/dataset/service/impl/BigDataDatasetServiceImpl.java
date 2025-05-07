@@ -23,6 +23,7 @@ import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
+import org.eea.dataset.service.file.ZipUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
@@ -66,6 +67,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,6 +87,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -98,64 +101,55 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Value("${importPath}")
     private String importPath;
 
+    /**  The path export DL */
+    @Value("${exportDLPath}")
+    private String exportDLPath;
+
+    private int defaultFileExportProcessPriority = 20;
+
     private static final int defaultImportProcessPriority = 20;
 
-    @Autowired
-    DatasetService datasetService;
     ParquetConverterService parquetConverterService;
 
-    @Autowired
-    JobControllerZuul jobControllerZuul;
+    private final JobControllerZuul jobControllerZuul;
 
-    @Autowired
-    JobProcessControllerZuul jobProcessControllerZuul;
+    private final JobProcessControllerZuul jobProcessControllerZuul;
 
-    @Autowired
-    DatasetMetabaseService datasetMetabaseService;
+    private final DatasetMetabaseService datasetMetabaseService;
 
-    @Autowired
-    ProcessControllerZuul processControllerZuul;
+    private final ProcessControllerZuul processControllerZuul;
 
     private FileTreatmentHelper fileTreatmentHelper;
 
-    @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
 
-    @Autowired
     public RepresentativeControllerZuul representativeControllerZuul;
 
-    @Autowired
-    FileCommonUtils fileCommonUtils;
+    private final FileCommonUtils fileCommonUtils;
 
-    @Autowired
-    DatasetSchemaService datasetSchemaService;
+    private final DatasetSchemaService datasetSchemaService;
 
-    @Autowired
-    SpatialDataHandling  spatialDataHandling;
+    private final SpatialDataHandling  spatialDataHandling;
 
-    @Autowired
-    DatasetTableService datasetTableService;
+    private final DatasetTableService datasetTableService;
 
-    @Autowired
-    DataFlowControllerZuul dataFlowControllerZuul;
+    private final DataFlowControllerZuul dataFlowControllerZuul;
 
-    @Autowired
     private CreateEmptyTables createEmptyTables;
 
     /** The pk catalogue repository. */
-    @Autowired
     private PkCatalogueRepository pkCatalogueRepository;
 
-    @Autowired
     private DatasetSnapshotService datasetSnapshotService;
 
-    @Autowired
     private TableDataRetriever tableDataRetriever;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
     private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
+    private final DatasetService datasetService;
+
     private final DremioHelperService dremioHelperService;
     private JdbcTemplate dremioJdbcTemplate;
 
@@ -172,7 +166,24 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
-                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository) {
+                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
+                                     JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
+                                     FileCommonUtils fileCommonUtils, @Lazy DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
+                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever) {
+        this.jobControllerZuul =  jobControllerZuul;
+        this.jobProcessControllerZuul = jobProcessControllerZuul;
+        this.datasetMetabaseService = datasetMetabaseService;
+        this.processControllerZuul = processControllerZuul;
+        this.kafkaSenderUtils = kafkaSenderUtils;
+        this.representativeControllerZuul  = representativeControllerZuul;
+        this.fileCommonUtils = fileCommonUtils;
+        this.datasetSchemaService = datasetSchemaService;
+        this.spatialDataHandling = spatialDataHandling;
+        this.datasetTableService = datasetTableService;
+        this.dataFlowControllerZuul = dataFlowControllerZuul;
+        this.createEmptyTables = createEmptyTables;
+        this.pkCatalogueRepository = pkCatalogueRepository;
+        this.tableDataRetriever = tableDataRetriever;
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
@@ -182,6 +193,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.fileTreatmentHelper = parquetConverterService.getFileTreatmentHelper();
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.schemasRepository = schemasRepository;
+        this.datasetSnapshotService = datasetSnapshotService;
+        this.datasetService = datasetService;
     }
 
 
@@ -398,6 +411,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         } else {
             List<File> correctFilesForImport = checkCsvFiles(importFileInDremioInfo, schema, filesToImport, integrationVO, mimeType);
             parquetConverterService.convertCsvFilesToParquetFiles(importFileInDremioInfo, correctFilesForImport, schema);
+
         }
     }
 
@@ -464,7 +478,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
         }
         if(sendWrongFileNameWarning){
-//            importFileInDremioInfo.setWarningMessage(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
+            //initialize warning message
+            importFileInDremioInfo.setWarningMessages(new ArrayList<>());
             importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
             jobControllerZuul.updateJobInfo(importFileInDremioInfo.getJobId(), JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
         }
@@ -692,6 +707,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             } else if(EEAErrorMessage.DREMIO_ENDPOINT_ERROR_RESPONSE.equals(importFileInDremioInfo.getErrorMessage())){
                 jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_DREMIO_ENDPOINT_RESPONSE, null);
                 eventType = EventType.DREMIO_ENDPOINT_ERROR_RESPONSE;
+            } else if(EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(importFileInDremioInfo.getErrorMessage())){
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+                eventType = EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
@@ -734,7 +752,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
 
         if(importFileInDremioInfo.getWarningMessages() != null && !importFileInDremioInfo.getWarningMessages().isEmpty()) {
-            for(String warningMessage : importFileInDremioInfo.getWarningMessages()) {
+            Set <String> warningMessages = new HashSet<>(importFileInDremioInfo.getWarningMessages());
+            for(String warningMessage : warningMessages) {
                 if(warningMessage.equals(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
@@ -743,7 +762,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))){
+                if (warningMessage.equals(JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_EMPTY_FILES.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILES_ARE_EMPTY, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -751,7 +771,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_EMPTY_FILES_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_FIXED_NUM_WITHOUT_REPLACE_DATA, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -759,7 +780,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_WRONG_NUM_OF_RECORDS.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_WRONG_NUM_OF_RECORDS, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -767,7 +789,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_NUM_OF_RECORDS_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_ONLY_READ_ONLY_FIELDS, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -775,7 +798,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_ONLY_READ_ONLY_FIELDS_WARNING_EVENT,
                         value, notificationWarning);
                 }
-                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))){
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FAILED_READ_ONLY_TABLES.equals(importFileInDremioInfo.getErrorMessage())){
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FAILED_READ_ONLY_TABLES, null);
                     NotificationVO notificationWarning = NotificationVO.builder()
                         .user(SecurityContextHolder.getContext().getAuthentication().getName())
@@ -790,6 +814,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_MISMATCH_OF_DATA_WARNING_EVENT,
                         value, notificationWarning);
+                }
+                if(warningMessage.equals(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null))
+                        && !EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(importFileInDremioInfo.getErrorMessage())){
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
+                    NotificationVO notificationWarning = NotificationVO.builder()
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                            .datasetId(importFileInDremioInfo.getDatasetId()).fileName(importFileInDremioInfo.getFileName()).build();
+                    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
+                            value, notificationWarning);
                 }
             }
         }
@@ -2066,5 +2099,90 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         return releasedDatasetDataInfoVO;
+    }
+
+    @Override
+    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException {
+        try {
+            // the path of the parent folder which will be zipped
+            String folderToZipPath = exportDLPath + "/dataset-" + datasetId + "/etlExportV4_" + jobId;
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            if (jobId!=null) {
+                JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+                jobProcessControllerZuul.save(jobProcessVO);
+            }
+            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+            if (StringUtils.isNotBlank(tableSchemaId)) {
+                String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId);
+                if(includeAttachments){
+                    //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_TABLE_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_TABLE_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_EU_TABLE_PATH;
+                     }
+                     S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, path);
+                    if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                        String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                        s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                    }
+                }
+            } else {
+                List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
+                for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
+                    fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId);
+                }
+                 if(includeAttachments){
+                     //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_FOLDER_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
+                     }
+                    S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, path);
+                     if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                         String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                         s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                     }
+                }
+            }
+
+            //zip the folder
+            File folderToZip = new File(folderToZipPath);
+            File zipOutput = new File(folderToZipPath + ".zip");
+            try {
+                ZipUtils.zipFolder(folderToZip, zipOutput);
+            } catch (Exception e) {
+               LOG.error("There was an error when zipping the files for etl export v4 jobId {} folderToZipPath {}", jobId, folderToZipPath);
+               throw e;
+            }
+            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            if (jobId !=null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+            }
+        }
+        catch (Exception e) {
+            LOG.error("EtlExportV4 failed for jobId {} Error: {}", jobId, e.getMessage());
+            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+                    processUUID, user, defaultFileExportProcessPriority, false);
+            if (jobId != null) {
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            }
+        }
     }
 }

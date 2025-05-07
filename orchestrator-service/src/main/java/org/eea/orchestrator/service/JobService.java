@@ -77,7 +77,7 @@ public interface JobService {
 
     void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback);
 
-    File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException;
+    File downloadEtlExportedFile(JobVO job, String fileName) throws EEAException;
 
     void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber);
 

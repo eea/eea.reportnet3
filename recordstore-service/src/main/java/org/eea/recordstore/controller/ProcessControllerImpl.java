@@ -10,7 +10,9 @@ import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
 import org.eea.recordstore.service.ProcessService;
+import org.eea.recordstore.service.impl.TaskServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,9 @@ public class ProcessControllerImpl implements ProcessController {
   /** The valid headers. */
   List<String> validHeaders = Arrays.asList("name", "dataset_name", "username", "status",
       "queued_date", "date_start", "date_finish", "priority");
+
+    @Autowired
+    private TaskServiceImpl taskServiceImpl;
 
 
   /**
@@ -250,5 +255,20 @@ public class ProcessControllerImpl implements ProcessController {
   public void deleteProcessByProcessId(@RequestParam("processId") String processId){
     processService.deleteProcessByProcessId(processId);
   }
+
+  /**
+   * Finds canceled tasks by processIds
+   * @param processIds
+   * @return
+   */
+  @Override
+  @GetMapping("/private/findCanceledTasksByProcessIds")
+  public JobCanceledValidationTasksVO findTasksByProcessIdsAndStatus(
+          @RequestParam(name = "processIds") List<String> processIds,
+          @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
+          @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
+
+      return taskServiceImpl.findTasksByProcessIdsAndStatus(processIds, ProcessStatusEnum.CANCELED, pageNum, pageSize);  }
+
 
 }
