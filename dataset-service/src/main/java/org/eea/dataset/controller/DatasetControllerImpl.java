@@ -2882,7 +2882,7 @@ public class DatasetControllerImpl implements DatasetController {
   @PostMapping("/createPublicFiles")
   public void createPublicFiles(@RequestParam(value = "dataflowId", required=true) Long dataflowId, @RequestParam(value = "providerId", required=false) Long providerId
           , @RequestParam(value = "createReferenceDataset", required=false) Boolean createReferenceDataset){
-    DataFlowVO dataflowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+    DataFlowVO dataflowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
     if (dataflowVO.isShowPublicInfo()) {
       try {
         if(providerId!=null) {
