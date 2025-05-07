@@ -60,7 +60,6 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
 
-
   useEffect(() => {
     getOrganizations();
   }, [pagination, sort]);
@@ -104,32 +103,36 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
 
   const groupOptions = [
     {
-      label: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
+      label: resourcesContext.messages[config.providerGroupDev.EEA_MEMBER_COUNTRIES.label],
       group: 1
     },
     {
-      label: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
+      label: resourcesContext.messages[config.providerGroupDev.ALL_COUNTRIES.label],
       group: 2
     },
     {
-      label: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
+      label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_1.label],
       group: 3
     },
     {
-      label: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
+      label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_2.label],
       group: 4
     },
     {
-      label: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
+      label: resourcesContext.messages[config.providerGroupDev.MAP_MY_TREE_PROVIDERS.label],
       group: 5
     },
     {
-      label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
+      label: resourcesContext.messages[config.providerGroupDev.COUNTRIES.label],
       group: 6
     },
     {
-      label: resourcesContext.messages[config.providerGroup.HDV_MANUFACTURERS.label],
+      label: resourcesContext.messages[config.providerGroupDev.HDV_MANUFACTURERS.label],
       group: 7
+    },
+    {
+      label: resourcesContext.messages[config.providerGroupDev.EUROPEAN_ENVIRONMENT_AGENCY.label],
+      group: 8
     }
   ];
 
@@ -147,32 +150,36 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       label: resourcesContext.messages['group'],
       dropdownOptions: [
         {
-          label: resourcesContext.messages[config.providerGroup.EEA_MEMBER_COUNTRIES.label],
+          label: resourcesContext.messages[config.providerGroupDev.EEA_MEMBER_COUNTRIES.label],
           value: 1
         },
         {
-          label: resourcesContext.messages[config.providerGroup.ALL_COUNTRIES.label],
+          label: resourcesContext.messages[config.providerGroupDev.ALL_COUNTRIES.label],
           value: 2
         },
         {
-          label: resourcesContext.messages[config.providerGroup.MAP_MY_TREE_PROVIDERS.label],
+          label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_1.label],
           value: 3
         },
         {
-          label: resourcesContext.messages[config.providerGroup.COMPANY_GROUP_1.label],
+          label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_2.label],
           value: 4
         },
         {
-          label: resourcesContext.messages[config.providerGroup.LDV_MANUFACTURERS.label],
+          label: resourcesContext.messages[config.providerGroupDev.MAP_MY_TREE_PROVIDERS.label],
           value: 5
         },
         {
-          label: resourcesContext.messages[config.providerGroup.COUNTRIES.label],
+          label: resourcesContext.messages[config.providerGroupDev.COUNTRIES.label],
           value: 6
         },
         {
-          label: resourcesContext.messages[config.providerGroup.HDV_MANUFACTURERS.label],
+          label: resourcesContext.messages[config.providerGroupDev.HDV_MANUFACTURERS.label],
           value: 7
+        },
+        {
+          label: resourcesContext.messages[config.providerGroupDev.EUROPEAN_ENVIRONMENT_AGENCY.label],
+          value: 8
         }
       ],
       template: 'groupId',
@@ -231,21 +238,13 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const getProviderGroupTemplate = provider => {
     let groupKey;
 
-    if (window.location.href.indexOf('sanbox') !== -1 || window.location.href.indexOf('dev') !== -1) {
-      groupKey = Object.keys(config.providerGroupDev)[provider.groupId - 1];
-      return groupKey ? <p>{resourcesContext.messages[config.providerGroupDev[groupKey].label]}</p> : '';
-    } else if (window.location.href.indexOf('test') !== -1) {
-      groupKey = Object.keys(config.providerGroupTest)[provider.groupId - 1];
-      return groupKey ? <p>{resourcesContext.messages[config.providerGroupTest[groupKey].label]}</p> : '';
-    } else {
-      groupKey = Object.keys(config.providerGroup)[provider.groupId - 1];
-      return groupKey ? <p>{resourcesContext.messages[config.providerGroup[groupKey].label]}</p> : '';
-    }
+    groupKey = Object.keys(config.providerGroupDev)[provider.groupId - 1];
+    return groupKey ? <p>{resourcesContext.messages[config.providerGroupDev[groupKey].label]}</p> : '';
   };
 
   const renderAddOrganizationForm = () => {
     const hasError = !isEmpty(organizationName) && (isRepeatedOrganization() || !isValidOrganizationName());
-    const hasCodeError = !isEmpty(organizationCode) && (!isValidOrganizationCode());
+    const hasCodeError = !isEmpty(organizationCode) && !isValidOrganizationCode();
 
     return (
       <div className={styles.addDialog}>
@@ -268,13 +267,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
             {resourcesContext.messages['code']}
           </label>
           <InputText
+            className={hasCodeError ? styles.error : ''}
             disabled={false}
             id="codeInput"
-            className={hasCodeError ? styles.error : ''}
+            onChange={event =>
+              setOrganizationCode(event.target.value?.replaceAll(' ', '').substring(0, 20).toUpperCase())
+            }
             placeholder={resourcesContext.messages['organizationCodeDots']}
             style={{ margin: '0.3rem 0' }}
             value={organizationCode}
-            onChange={(event)=>setOrganizationCode(event.target.value?.replaceAll(' ', '').substring(0, 20).toUpperCase())}
           />
         </div>
         <div className={styles.inputWrapper}>
@@ -308,7 +309,7 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
   const onResetAll = () => {
     setIsRefreshing(true);
     setOrganizationName(null);
-    setOrganizationCode('')
+    setOrganizationCode('');
     setGroup(null);
 
     getOrganizations();
@@ -478,7 +479,13 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
         <ConfirmDialog
           confirmTooltip={getTooltipMessage()}
           dialogStyle={{ minWidth: '400px', maxWidth: '600px' }}
-          disabledConfirm={hasEmptyData() || isLoadingButton || isRepeatedOrganization() || !isValidOrganizationName() || !isValidOrganizationCode()}
+          disabledConfirm={
+            hasEmptyData() ||
+            isLoadingButton ||
+            isRepeatedOrganization() ||
+            !isValidOrganizationName() ||
+            !isValidOrganizationCode()
+          }
           header={resourcesContext.messages['addOrganization']}
           iconConfirm={isLoadingButton ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['cancel']}

@@ -605,6 +605,7 @@
     "errorTypePlaceholder": "Select an error type",
     "euDataset": "EU dataset",
     "euDatasetLockedError": "The process is locked because EU datasets are opened in exclusive use",
+    "europeanEnvironmentAgency": "European Environment Agency (EEA)",
     "evaluateSql": "Evaluate SQL",
     "evaluateSqlSentenceError": "Error evaluating SQL sentence",
     "events": "Events",

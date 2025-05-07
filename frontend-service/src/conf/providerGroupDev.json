@@ -7,5 +7,7 @@
   "COMPANY_GROUP_1": { "key": "COMPANY_GROUP_1", "label": "companyGroup1" },
   "COMPANY_GROUP_2": { "key": "COMPANY_GROUP_2", "label": "companyGroup2" },
   "MAP_MY_TREE_PROVIDERS": { "key": "MAP_MY_TREE_PROVIDERS", "label": "mapMyTreeProviders" },
-  "COUNTRIES": { "key": "COUNTRIES", "label": "countriesGroup" }
+  "COUNTRIES": { "key": "COUNTRIES", "label": "countriesGroup" },
+  "HDV_MANUFACTURERS": { "key": "HDV_MANUFACTURERS", "label": "hdvManufacturers" },
+  "EUROPEAN_ENVIRONMENT_AGENCY": { "key": "EUROPEAN_ENVIRONMENT_AGENCY", "label": "europeanEnvironmentAgency" }
 }

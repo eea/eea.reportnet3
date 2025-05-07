@@ -6,10 +6,12 @@ import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController;
 import org.eea.interfaces.vo.dataflow.enums.IntegrationOperationTypeEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
@@ -92,6 +94,10 @@ public class DeleteHelper {
   @Autowired
   private RecordRepository recordRepository;
 
+  /** The job controller zuul */
+  @Autowired
+  private JobController.JobControllerZuul jobControllerZuul;
+
 
   /**
    * Instantiates a new file loader helper.
@@ -107,16 +113,55 @@ public class DeleteHelper {
    * @param tableSchemaId the table schema id
    */
   @Async
-  public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId) {
-    LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
-    datasetService.deleteTableBySchema(tableSchemaId, datasetId);
-    // now the view is not updated, update the check to false
-    datasetService.updateCheckView(datasetId, false);
-    // delete the temporary table from etlExport
-    datasetService.deleteTempEtlExport(datasetId);
+  public void executeDeleteTableProcess(final Long datasetId, String tableSchemaId, Long jobId) {
+    try {
+      LOG.info("Deleting table {} from dataset {}", tableSchemaId, datasetId);
+      datasetService.deleteTableBySchema(tableSchemaId, datasetId);
+      // now the view is not updated, update the check to false
+      datasetService.updateCheckView(datasetId, false);
+      // delete the temporary table from etlExport
+      datasetService.deleteTempEtlExport(datasetId);
+      EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
+        ? EventType.DELETE_TABLE_COMPLETED_EVENT
+        : EventType.DELETE_TABLE_SCHEMA_COMPLETED_EVENT;
 
-    //remove locks and send notification
-    releaseDeleteTableDataLocksAndSendNotification(datasetId, tableSchemaId);
+      // after the table has been deleted, an event is sent to notify it
+      Map<String, Object> value = new HashMap<>();
+      NotificationVO notificationVO = NotificationVO.builder()
+        .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+        .tableSchemaId(tableSchemaId).build();
+      DataSetMetabaseVO datasetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
+      notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+      notificationVO.setDataflowName(
+        dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
+
+      value.put(LiteralConstants.DATASET_ID, datasetId);
+
+      try {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value, notificationVO);
+      } catch (EEAException e) {
+        LOG.error("Error releasing notification for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage(), e);
+      }
+
+      if (jobId != null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+      }
+      LOG.info("Successfully deleted table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+    } catch (Exception e) {
+      if (jobId != null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+      }
+
+      throw e;
+    } finally {
+      // Release the lock manually
+      Map<String, Object> deleteImportTable = new HashMap<>();
+      deleteImportTable.put(LiteralConstants.SIGNATURE, LockSignature.DELETE_IMPORT_TABLE.getValue());
+      deleteImportTable.put(LiteralConstants.DATASETID, datasetId);
+      deleteImportTable.put(LiteralConstants.TABLESCHEMAID, tableSchemaId);
+      lockService.removeLockByCriteria(deleteImportTable);
+    }
   }
 
   public void releaseDeleteTableDataLocksAndSendNotification(final Long datasetId, String tableSchemaId){
@@ -159,7 +204,7 @@ public class DeleteHelper {
    */
   @Async
   public void executeDeleteDatasetProcess(final Long datasetId, Boolean deletePrefilledTables,
-      boolean technicallyAccepted) {
+      boolean technicallyAccepted, Long jobId) {
     LOG.info("Deleting data from dataset {}", datasetId);
     datasetService.deleteImportData(datasetId, deletePrefilledTables);
     // now the view is not updated, update the check to false
@@ -167,10 +212,10 @@ public class DeleteHelper {
     // delete the temporary table from etlExport
     datasetService.deleteTempEtlExport(datasetId);
 
-    releaseDeleteDatasetDataLocksAndSendNotification(datasetId, technicallyAccepted);
+    releaseDeleteDatasetDataLocksAndSendNotification(datasetId, technicallyAccepted, jobId);
   }
 
-  public void releaseDeleteDatasetDataLocksAndSendNotification(final Long datasetId, boolean technicallyAccepted){
+  public void releaseDeleteDatasetDataLocksAndSendNotification(final Long datasetId, boolean technicallyAccepted, Long jobId){
     EventType eventType = DatasetTypeEnum.REPORTING.equals(datasetService.getDatasetType(datasetId))
             ? EventType.DELETE_DATASET_DATA_COMPLETED_EVENT
             : EventType.DELETE_DATASET_SCHEMA_COMPLETED_EVENT;
@@ -202,6 +247,11 @@ public class DeleteHelper {
       } catch (EEAException e) {
         LOG_ERROR.error("Error releasing notification for datasetId {} Message: {}", datasetId, e.getMessage());
       }
+
+      if (jobId != null) {
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+      }
+      LOG.info("Successfully deleted table data for datasetId {}", datasetId);
     }
   }
 
