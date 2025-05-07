@@ -1981,10 +1981,10 @@ public class DatasetControllerImpl implements DatasetController {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         providerId = dataset.getDataProviderId();
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       byte[] file = null;
       String filename = null;
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+      if(Boolean.TRUE.equals(isBigDataflow)){
         AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode);
         file = attachment.getContent();
         filename = attachment.getFileName();
@@ -2096,8 +2096,8 @@ public class DatasetControllerImpl implements DatasetController {
 
 
       LOG.info("Updating attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         //check if table is read only
         String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
         if(StringUtils.isNotBlank(fieldSchemaId)){
@@ -2225,8 +2225,8 @@ public class DatasetControllerImpl implements DatasetController {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         providerId = dataset.getDataProviderId();
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         //check if table is read only
         String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
         if(StringUtils.isNotBlank(fieldSchemaId)){
