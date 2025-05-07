@@ -634,9 +634,8 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       LOG.info("Updating records for datasetId {}", datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -701,9 +700,8 @@ public class DatasetControllerImpl implements DatasetController {
 
       LOG.info("Deleting record with id {} for datasetId {}", recordId, datasetId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         if (!DatasetTypeEnum.DESIGN.equals(datasetMetabaseService.getDatasetType(datasetId))
                 && Boolean.TRUE.equals(tableSchemaVO.getFixedNumber())) {
           LOG.error(
@@ -789,9 +787,8 @@ public class DatasetControllerImpl implements DatasetController {
       }
       LOG.info("Inserting records for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
@@ -919,9 +916,8 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataflowId == null) {
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-
-      if (dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         LOG.info("Deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
         bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, providerId, deletePrefilledTables, false, jobId);
       }
@@ -991,9 +987,8 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataflowId == null) {
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-
-      if (dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         LOG.info("Privately deleting dataset data for big data dataflowId {} and datasetId {} ", dataflowId, datasetId);
         bigDataDatasetService.deleteDatasetData(datasetId, dataflowId, null, false, technicallyAccepted, null);
       }
@@ -1112,8 +1107,8 @@ public class DatasetControllerImpl implements DatasetController {
       if (dataflowId == null) {
         dataflowId = datasetService.getDataFlowIdById(datasetId);
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-      if (dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         LOG.info("Deleting table data for big data dataflowId {}, datasetId {} and tableSchemaId {}", dataflowId, datasetId, tableSchemaId);
         bigDataDatasetService.deleteTableData(datasetId, dataflowId, providerId, tableSchemaId, jobId);
       }
@@ -1402,9 +1397,8 @@ public class DatasetControllerImpl implements DatasetController {
     }
     try {
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -1468,9 +1462,8 @@ public class DatasetControllerImpl implements DatasetController {
 
     try {
       Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, null);
-
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
         Long providerId = datasetService.getDataProviderIdById(datasetId);
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
@@ -1525,8 +1518,8 @@ public class DatasetControllerImpl implements DatasetController {
     List<FieldVO> fieldVOs;
     try {
       Long dataflowId = datasetService.getDataFlowIdById(datasetIdOrigin);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData())){
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         fieldVOs = bigDataDatasetService.getFieldValuesReferencedDL(datasetIdOrigin, datasetSchemaId,
                 fieldSchemaId, conditionalValue, searchValue, resultsNumber);
       }
@@ -1928,10 +1921,10 @@ public class DatasetControllerImpl implements DatasetController {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         providerId = dataset.getDataProviderId();
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
       byte[] file = null;
       String filename = null;
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+      if(Boolean.TRUE.equals(isBigDataflow)){
         AttachmentDLVO attachment = bigDataDatasetService.getAttachmentDL(datasetId, dataflowId, providerId, tableSchemaName, fieldName, fileName, recordId, providerCode);
         file = attachment.getContent();
         filename = attachment.getFileName();
@@ -2043,8 +2036,8 @@ public class DatasetControllerImpl implements DatasetController {
 
 
       LOG.info("Updating attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         //check if table is read only
         String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
         if(StringUtils.isNotBlank(fieldSchemaId)){
@@ -2172,8 +2165,8 @@ public class DatasetControllerImpl implements DatasetController {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         providerId = dataset.getDataProviderId();
       }
-      DataFlowVO dataFlowVO = dataFlowControllerZuul.findById(dataflowId, providerId);
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+      Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         //check if table is read only
         String fieldSchemaId = datasetSchemaService.getFieldSchemaIdByDatasetIdTableNameAndFieldName(datasetId, tableSchemaName, fieldName);
         if(StringUtils.isNotBlank(fieldSchemaId)){
