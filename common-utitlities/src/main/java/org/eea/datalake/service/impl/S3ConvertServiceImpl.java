@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import com.opencsv.CSVWriter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.parquet.Preconditions;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
@@ -84,29 +85,49 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     @Override
-    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers) {
-        File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+    public File createCSVFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum , List<String> headers, Boolean etlExportV4, Long jobId) {
+        File csvFile = null;
+        if(BooleanUtils.isTrue(etlExportV4)){
+            String etlExportFolderName = (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
+            csvFile = new File(new File(new File(exportDLPath, "dataset-" + datasetId), etlExportFolderName), tableName + CSV_TYPE);
+        }
+        else{
+            csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        }
+        // Ensure the directories exist
+        csvFile.getParentFile().mkdirs();
         LOG.info("Creating file for export: {}", csvFile);
 
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
             CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
             CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
 
-            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum);
+            convertParquetToCSV(exportFilenames, tableName, datasetId, csvWriter, datasetTypeEnum, etlExportV4);
         } catch (Exception e) {
             LOG.error("Error in convert method for csvOutputFile {} and tableName {}", csvFile, tableName, e);
         }
 
         if (csvFile.length() == 0) {
-            return createEmptyCSVFile(tableName, datasetId, headers);
+            return createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId);
         }
 
         return csvFile;
     }
 
     @Override
-    public File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers) {
-        File csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+    public File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId) {
+        File csvFile = null;
+        if(BooleanUtils.isTrue(etlExportV4)){
+            //we need to add the record is as a first element
+            if(!headers.contains(RECORD_ID)){
+                headers.add(0, RECORD_ID);
+            }
+            String etlExportFolderName = (jobId != null) ? "etlExportV4_" + jobId : "etlExportV4";
+            csvFile = new File(new File(new File(exportDLPath, "dataset-" + datasetId), etlExportFolderName), tableName + CSV_TYPE);
+        }
+        else{
+            csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
+        }
         LOG.info("Creating file for export: {}", csvFile);
 
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
@@ -134,7 +155,18 @@ public class S3ConvertServiceImpl implements S3ConvertService {
     }
 
     private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId,
-                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum) throws IOException {
+                                     CSVWriter csvWriter, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) throws IOException {
+
+        Set<String> headersToExcludeTemp = new HashSet<>(headersToExclude);
+
+        if(BooleanUtils.isTrue(etlExportV4)){
+            //if we use etlExportV4 we need to keep record id in the csv
+            headersToExcludeTemp.remove(RECORD_ID);
+            LOG.info("Exporting table {} in dataset {} but keeping recordId. etlExportV4: {} headersToExcludeTemp {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExcludeTemp, headersToExclude);
+        }
+        else{
+            LOG.info("Exporting table {} in dataset {} without recordId. etlExportV4: {} headersToExcludeTemp {} headersToExclude {}", tableName, datasetId, etlExportV4, headersToExcludeTemp, headersToExclude);
+        }
         int counter = 0;
         for (S3Object obj : exportFilenames) {
             File parquetFile = s3Helper.getFileFromS3Export(obj.key(), tableName, exportDLPath, PARQUET_TYPE, datasetId);
@@ -149,14 +181,14 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         boolean canExcludeHeaders = canExcludeHeaders(datasetTypeEnum);
                         long size;
                         if (canExcludeHeaders) {
-                            size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t ->  !headersToExclude.contains(t)).count();
+                            size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t ->  !headersToExcludeTemp.contains(t)).count();
                         } else {
                             size = record.getSchema().getFields().stream().map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).count();
                         }
                         if (counter == 0) {
                             if (canExcludeHeaders) {
                                 csvWriter.writeNext(record.getSchema().getFields().stream()
-                                    .map(Schema.Field::name).filter(t -> !headersToExclude.contains(t)).toArray(String[]::new), false);
+                                    .map(Schema.Field::name).filter(t -> !headersToExcludeTemp.contains(t)).toArray(String[]::new), false);
                             } else {
                                 csvWriter.writeNext(record.getSchema().getFields().stream()
                                     .map(Schema.Field::name).filter(t -> !t.equals(DIR_0)).toArray(String[]::new), false);
@@ -167,7 +199,7 @@ public class S3ConvertServiceImpl implements S3ConvertService {
                         int index = 0;
                         List<Schema.Field> filteredFields = new ArrayList<>();
                         if (canExcludeHeaders) {
-                            filteredFields = record.getSchema().getFields().stream().filter( t -> !headersToExclude.contains(t.name())).collect(Collectors.toList());
+                            filteredFields = record.getSchema().getFields().stream().filter( t -> !headersToExcludeTemp.contains(t.name())).collect(Collectors.toList());
                         } else {
                              filteredFields = record.getSchema().getFields().stream().filter( t -> !t.name().equals(DIR_0)).collect(Collectors.toList());
                         }

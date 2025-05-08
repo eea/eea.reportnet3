@@ -1751,7 +1751,7 @@ public class DatasetControllerImpl implements DatasetController {
               String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, false, false);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -1762,6 +1762,59 @@ public class DatasetControllerImpl implements DatasetController {
       return result;
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in v3 etlExportDataset for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
+      throw e;
+    }
+  }
+
+  /**
+   * V4 Etl export dataset. Exports zip which include csv with record id
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param includeAttachments includeAttachments if true, returns attachments in the zip
+   * @return a hashmap
+   */
+  @Override
+  @GetMapping("/v4/etlExport/{datasetId}")
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  @PreAuthorize("checkApiKey(#dataflowId,#providerId,#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','EUDATASET_STEWARD','DATACOLLECTION_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','DATACOLLECTION_CUSTODIAN','DATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','TESTDATASET_STEWARD','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT','REFERENCEDATASET_OBSERVER','REFERENCEDATASET_STEWARD_SUPPORT') OR hasAnyRole('ADMIN')")
+  @ApiOperation(value = "Export data by dataset id",
+          notes = "Allowed roles: \n\n Reporting dataset: CUSTODIAN, STEWARD, OBSERVER, REPORTER WRITE, REPORTER READ, LEAD REPORTER, STEWARD SUPPORT \n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE, EDITOR READ\n\n EU dataset: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT\n\n Data collection: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully exported"),
+          @ApiResponse(code = 500, message = "Error exporting data"),
+          @ApiResponse(code = 403, message = "Error dataset not belong dataflow")})
+  public Map<String, Object> etlExportZipCsv(@ApiParam(type = "Long", value = "Dataset id",
+                                              example = "0") @PathVariable("datasetId") Long datasetId,
+                                      @ApiParam(type = "Long", value = "Dataflow id",
+                                              example = "0") @RequestParam("dataflowId") Long dataflowId,
+                                      @ApiParam(type = "Long", value = "Provider id",
+                                              example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+                                      @ApiParam(type = "String", value = "Table schema id",
+                                              example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+                                              required = false) String tableSchemaId,
+                                      @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments){
+    if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
+      String errorMessage =
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId);
+      LOG.error(errorMessage);
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
+    }
+    try {
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, null, true, includeAttachments);
+      Map<String, Object> result = new HashMap<>();
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if(providerId != null){
+        pollingUrl+= "&providerId=" + providerId;
+      }
+      result.put("pollingUrl", pollingUrl);
+      result.put("status", "Preparing file");
+      return result;
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error in v4 etlExportDataset for datasetId {} and tableSchemaId {} Message: {}", datasetId, tableSchemaId, e.getMessage());
       throw e;
     }
   }
@@ -2959,6 +3012,10 @@ public class DatasetControllerImpl implements DatasetController {
                   value = "columnName", required = false) String columnName,
           @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                   value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @ApiParam(type = "Boolean", value = "Csv will be exported", example = "true") @RequestParam(
+                  value = "exportCsv", required = false) Boolean exportCsv,
+          @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
+                  value = "includeAttachments", required = false) Boolean includeAttachments,
           @ApiParam(type = "Long", value = "Job id", example = "1") @RequestParam(
                   name = "jobId", required = false) Long jobId) throws Exception {
 
@@ -2980,7 +3037,43 @@ public class DatasetControllerImpl implements DatasetController {
 
     try {
       LOG.info("Creating etlExport File for dataflowId {} and datasetId {}", dataflowId, datasetId);
-      datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user);
+      DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        if (StringUtils.isNotBlank(tableSchemaId)) {
+          TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+            LOG.error("Can not import for datasetId {} because the table is iceberg", datasetId);
+            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
+          }
+        } else {
+          List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
+          for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
+            if (tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
+              LOG.error("Can not import zip file for datasetId {} because a table is iceberg", datasetId);
+              jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.EXPORTING_FILE_ICEBERG);
+            }
+          }
+        }
+      }
+      else{
+        if(BooleanUtils.isTrue(exportCsv)){
+          jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ETL_EXPORT_V4_CITUS, null);
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_ETL_EXPORTING_FILE_CITUS);
+        }
+      }
+      if (BooleanUtils.isTrue(exportCsv)) {
+        String processUUID = UUID.randomUUID().toString();
+        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+      }
+      else {
+        datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
+      }
       LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and jobId {} Message: ", datasetId, jobId, e);

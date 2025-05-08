@@ -3811,7 +3811,8 @@ public class DatasetServiceImpl implements DatasetService {
   @Override
   public void createFileForEtlExport(@DatasetId Long datasetId, String tableSchemaId,
                                      Integer limit, Integer offset, String filterValue, String columnName,
-                                     String dataProviderCodes, Long jobId, Long dataflowId, String user) throws EEAException, IOException, SQLException {
+                                     String dataProviderCodes, Long jobId, Long dataflowId, String user,
+                                     Boolean exportCsv, Boolean includeAttachments) throws EEAException, IOException, SQLException {
     String processUUID = UUID.randomUUID().toString();
     try {
       LOG.info("Initiating FILE_EXPORT process for datasetId: {} and jobId {}", datasetId, jobId);

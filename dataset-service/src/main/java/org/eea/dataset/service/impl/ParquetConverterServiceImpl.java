@@ -129,7 +129,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      S3Helper s3Helper,
                                      JobControllerZuul jobControllerZuul,
                                      DatasetMetabaseService datasetMetabaseService,
-                                     DatasetSchemaService datasetSchemaService,
+                                     @Lazy DatasetSchemaService datasetSchemaService,
                                      SpatialDataHandling spatialDataHandling,
                                      @Lazy FileTreatmentHelper fileTreatmentHelper,
                                      JdbcTemplate dremioJdbcTemplate,

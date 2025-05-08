@@ -851,6 +851,7 @@ public class DatasetControllerImplTest {
    */
   @Test
   public void testUpdateAttachment() throws Exception {
+    when(dataFlowControllerZuul.isBigDataflow(anyLong())).thenReturn(false);
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setName("test");
     fieldSchemaVO.setId("id");

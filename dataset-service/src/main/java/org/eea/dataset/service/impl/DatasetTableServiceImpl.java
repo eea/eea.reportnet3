@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.DatasetTableVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ public class DatasetTableServiceImpl implements DatasetTableService {
     @Autowired
     private DatasetMetabaseService datasetMetabaseService;
 
+    @Lazy
     @Autowired
     private DatasetSchemaService datasetSchemaService;
 

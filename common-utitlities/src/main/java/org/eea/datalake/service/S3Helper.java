@@ -1,6 +1,7 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 
@@ -163,4 +164,6 @@ public interface S3Helper {
      * @throws Exception exception
      */
     void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver, DremioHelperService dremioHelperService) throws Exception;
+
+    void getAttachmentsFromS3Locally(String attachmentsPathInS3, String parentFolderInDiskPath);
 }

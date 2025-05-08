@@ -70,10 +70,10 @@ export const EntitiesWebform = ({
     rootPkInput: '',
     selectedTableName: null,
     selectedTableSchemaId: null,
-    tableList: { single: [] },
+    entitiesList: [],
     view: 'overview'
   });
-  const { isDataUpdated, isLoading, entitiesRecords, selectedTable, selectedTableName, tableList, view } =
+  const { isDataUpdated, isLoading, entitiesRecords, selectedTable, selectedTableName, entitiesList, view } =
     entitiesWebformState;
 
   const addEntityInputRef = useRef(null);
@@ -92,7 +92,7 @@ export const EntitiesWebform = ({
 
   useEffect(() => {
     setIsAddingEntityRecord(false);
-  }, [tableList]);
+  }, [entitiesList]);
 
   useEffect(() => {
     const { fieldId, fieldSchema } = getFieldSchemaId(
@@ -312,7 +312,7 @@ export const EntitiesWebform = ({
 
           entitiesWebformDispatch({
             type: 'ON_LOAD_ENTITIES_DATA',
-            payload: { records, group: list['group'], single: list['single'] }
+            payload: { records, list }
           });
         }
       }
@@ -321,13 +321,6 @@ export const EntitiesWebform = ({
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const onUpdateEntitiesValue = (recordId, entitiesValue, fieldId, isEntityTitle = false) => {
-    entitiesWebformDispatch({
-      type: 'UPDATE_ENTITIES_RECORDS',
-      payload: { fieldId, entitiesValue, recordId, dataUpdated: !isDataUpdated, isEntityTitle }
-    });
   };
 
   const onSelectEditTable = (entityNumberId, tableName) => {
@@ -398,13 +391,11 @@ export const EntitiesWebform = ({
           datasetId={datasetId}
           datasetSchema={datasetSchema}
           datasetSchemaId={datasetSchema.datasetSchemaId}
-          entitiesRecords={entitiesRecords}
           getFieldSchemaId={getFieldSchemaId}
           isAddingRootTableId={entitiesWebformState.isAddingEntityRecord}
           isIcebergCreated={isIcebergCreated}
           isRefresh={entitiesWebformState.isRefresh}
           isReporting={isReporting}
-          onUpdateEntitiesValue={onUpdateEntitiesValue}
           rootPkFieldId={rootPkFieldId}
           rootTableName={rootTableName}
           selectedTable={selectedTable}
@@ -549,53 +540,51 @@ export const EntitiesWebform = ({
       ) : (
         !hideEntities && (
           <ul className={styles.tableList}>
-            {Object.keys(tableList).map(list => (
-              <li className={styles.tableListItem} key={uniqueId()}>
-                <div className={styles.tableListTitleWrapper}>
-                  <span className={styles.tableListTitle}>{resourcesContext.messages['entitiesLabel']}:</span>
-                </div>
-                <div className={styles.tableListContentWrapper}>
-                  {tableList[list].map(items => (
-                    <span
-                      className={`${styles.tableListId} ${
-                        items.recordId === selectedTable.recordId ? styles.selected : null
-                      }`}
-                      key={uniqueId()}
-                      onClick={() => {
-                        if (!(bigData && !isIcebergCreated)) {
-                          entitiesWebformDispatch({
-                            type: 'ON_REFRESH',
-                            payload: { value: !entitiesWebformState.isRefresh }
-                          });
-                          onSelectRecord(items.recordId, items.id);
-                          onToggleView('details');
-                        }
-                      }}>
-                      {items.id || '-'}
-                    </span>
-                  ))}
-                </div>
-                <div className={styles.addButtonWrapper}>
-                  <Button
-                    className={styles.addButton}
-                    disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
-                    icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
-                    label={resourcesContext.messages['addEntity']}
+            <li className={styles.tableListItem} key={uniqueId()}>
+              <div className={styles.tableListTitleWrapper}>
+                <span className={styles.tableListTitle}>{resourcesContext.messages['entitiesLabel']}:</span>
+              </div>
+              <div className={styles.tableListContentWrapper}>
+                {entitiesList.map(items => (
+                  <span
+                    className={`${styles.tableListId} ${
+                      items.recordId === selectedTable.recordId ? styles.selected : null
+                    }`}
+                    key={uniqueId()}
                     onClick={() => {
-                      const manualRootId = tables
-                        .filter(table => table?.isRootTable === true)[0]
-                        .elements.some(element => element?.autoIncrement === false && element?.isPrimary === true);
-
-                      if (manualRootId) {
-                        manageDialogs('isAddEntityIdDialogVisible', true);
-                      } else {
-                        onAddEntitiesRecord();
+                      if (!(bigData && !isIcebergCreated)) {
+                        entitiesWebformDispatch({
+                          type: 'ON_REFRESH',
+                          payload: { value: !entitiesWebformState.isRefresh }
+                        });
+                        onSelectRecord(items.recordId, items.id);
+                        onToggleView('details');
                       }
-                    }}
-                  />
-                </div>
-              </li>
-            ))}
+                    }}>
+                    {items.id || '-'}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.addButtonWrapper}>
+                <Button
+                  className={styles.addButton}
+                  disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
+                  icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
+                  label={resourcesContext.messages['addEntity']}
+                  onClick={() => {
+                    const manualRootId = tables
+                      .filter(table => table?.isRootTable === true)[0]
+                      .elements.some(element => element?.autoIncrement === false && element?.isPrimary === true);
+
+                    if (manualRootId) {
+                      manageDialogs('isAddEntityIdDialogVisible', true);
+                    } else {
+                      onAddEntitiesRecord();
+                    }
+                  }}
+                />
+              </div>
+            </li>
           </ul>
         )
       )}
