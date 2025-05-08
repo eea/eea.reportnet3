@@ -6,6 +6,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { HTTPRequester } from 'repositories/_utils/HTTPRequester';
 
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
+import { showSessionExpiredDialog } from 'services/_utils/SessionDialogUtils';
 
 axios.interceptors.request.use(
   config => {
@@ -48,6 +49,11 @@ axios.interceptors.response.use(
 
           return axios(originalRequest);
         }
+      })
+      .catch(() => {
+        console.error('Error during token refresh:', error.response?.data);
+        showSessionExpiredDialog();
+        return Promise.reject(error);
       });
     }
 
@@ -58,5 +64,5 @@ axios.interceptors.response.use(
 
     // return Error object with Promise
     return Promise.reject(error);
-  }
+  } 
 );
