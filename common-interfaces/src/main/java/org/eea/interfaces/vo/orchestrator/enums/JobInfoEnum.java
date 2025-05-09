@@ -59,7 +59,9 @@ public enum JobInfoEnum {
 
     ERROR_RELEASE_CANCELED_BLOCKERS("There are canceled tasks for blocker errors"),
 
-    ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The materialized views have not been created successfully");
+    ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The materialized views have not been created successfully"),
+
+    IMPORT_JOB_FAILED_STUCK_QUEUED("The import job failed because it was stuck in status QUEUED for a long time");
 
 
     /** The value. */

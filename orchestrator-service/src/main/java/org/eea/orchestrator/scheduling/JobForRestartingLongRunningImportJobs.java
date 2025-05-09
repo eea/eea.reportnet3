@@ -1,7 +1,10 @@
 package org.eea.orchestrator.scheduling;
 
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
-import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
+import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,17 +15,17 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Component
-public class JobForRestartingLongRunningImportTasks {
+public class JobForRestartingLongRunningImportJobs {
 
     /**
      * The Constant LOG.
      */
-    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingLongRunningImportTasks.class);
+    private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingLongRunningImportJobs.class);
 
     @Value(value = "${scheduling.inProgress.import.task.max.ms.restart}")
     private long maxTimeForInProgressImportTasks;
@@ -34,7 +37,7 @@ public class JobForRestartingLongRunningImportTasks {
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
-        scheduler.schedule(() -> restartLongRunningImportTasks(),
+        scheduler.schedule(() -> restartLongRunningImportJobs(),
                 new CronTrigger("0 0 * * * *"));
     }
 
@@ -43,8 +46,42 @@ public class JobForRestartingLongRunningImportTasks {
      * and changes their status to IN_QUEUE so that they are picked up by the ImportFileTasksScheduler.scheduledConsumer() method
      */
     //For now this scheduled task will not do anything but log the cases because this use case might already be resolved
-    public void restartLongRunningImportTasks() {
+    public void restartLongRunningImportJobs() {
         try {
+            List<JobVO> longRunningQueuedJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS);
+            for (JobVO job: longRunningQueuedJobs){
+                Long durationOfJob = new Timestamp(System.currentTimeMillis()).getTime() - job.getDateStatusChanged().getTime();
+                if(durationOfJob > maxTimeForQueuedImportJob){
+                    LOG.info("Canceling stuck QUEUED import job with jobId {}", job.getId());
+                    jobService.updateJobInfo(job.getId(), JobInfoEnum.IMPORT_JOB_FAILED_STUCK_QUEUED, null);
+                    jobService.updateJobStatus(job.getId(), JobStatusEnum.FAILED);
+                }
+            }
+            /*
+            big data/citus
+
+            if replaceData = true
+
+           call again the endpoint importBigFileData
+
+
+check what happens with restart task
+
+make sure we don't end up with loop of restarting job
+make sure other scheduled tasks don't interfere with this one
+             */
+
+
+
+
+
+
+
+
+
+
+
+
             List<TaskVO> tasks = recordStoreControllerZuul.findImportTasksInProgress();
             String tasksWithEmptyStartingDates = "";
             String tasksWithMaxDuration = "";

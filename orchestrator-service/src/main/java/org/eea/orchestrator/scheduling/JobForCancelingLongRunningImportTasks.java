@@ -5,6 +5,7 @@ import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.controller.ums.UserManagementController;
 import org.eea.interfaces.controller.validation.ValidationController.ValidationControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +43,10 @@ public class JobForCancelingLongRunningImportTasks {
     /* The maximum time in milliseconds for which an import task can be in progress */
     @Value(value = "${scheduling.inProgress.import.task.max.ms.fail}")
     private long maxTimeForInProgressImportTasks;
+
+    /* The maximum time in milliseconds for which an import job can be in status QUEUED */
+    @Value(value = "${scheduling.queued.import.job.max.ms.fail}")
+    private long maxTimeForQueuedImportJob;
 
     /**
      * The admin user.
@@ -83,19 +89,30 @@ public class JobForCancelingLongRunningImportTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> cancelLongRunningImportTasks(),
-                new CronTrigger("0 0 * * * *"));
+                new CronTrigger("0 */30 * * * *"));
     }
 
     /**
-     * The job runs every hour. It finds import jobs that have tasks with status=IN_PROGRESS for more than maxTimeForInProgressImportTasks
+     * The job runs every thirty minutes. It finds import jobs that have tasks with status=IN_PROGRESS for more than maxTimeForInProgressImportTasks
      * and changes the status of the tasks and processes to CANCELED and the job status to FAILED. Then it removes the locks
      */
     public void cancelLongRunningImportTasks() {
         try {
             LOG.info("Running scheduled job cancelLongRunningImportTasks");
 
-            List<JobVO> longRunningJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS);
-            for (JobVO job: longRunningJobs){
+            List<JobVO> longRunningQueuedJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.QUEUED);
+            for (JobVO job: longRunningQueuedJobs){
+                Long durationOfJob = new Timestamp(System.currentTimeMillis()).getTime() - job.getDateStatusChanged().getTime();
+                if(durationOfJob > maxTimeForQueuedImportJob){
+                    LOG.info("Canceling stuck QUEUED import job with jobId {}", job.getId());
+                    jobService.updateJobInfo(job.getId(), JobInfoEnum.IMPORT_JOB_FAILED_STUCK_QUEUED, null);
+                    jobService.updateJobStatus(job.getId(), JobStatusEnum.FAILED);
+                }
+            }
+
+
+            List<JobVO> longRunningInProgressJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS);
+            for (JobVO job: longRunningInProgressJobs){
                 Boolean longRunningTasksExist = false;
                 //get job processes
                 List<String> processIds = jobProcessService.findProcessesByJobId(job.getId());
