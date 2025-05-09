@@ -17,6 +17,7 @@ import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.poi.util.IOUtils;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
 import org.eea.interfaces.vo.metabase.ReleaseReceiptInfoVO;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -96,7 +97,7 @@ public class ReceiptPDFGenerator {
     float spaceBetweenLines;
     float fontSize;
     String text;
-    ZoneId timeZone = ZoneId.of("CET");
+    ZoneId timeZone = ZoneId.of(LiteralConstants.EUROPE_ZONE_ID);
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     PDPageContentStream contentStream = new PDPageContentStream(document, page);

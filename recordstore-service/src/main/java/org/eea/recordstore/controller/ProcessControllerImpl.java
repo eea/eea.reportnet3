@@ -11,6 +11,7 @@ import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.recordstore.service.ProcessService;
 import org.eea.recordstore.service.impl.TaskServiceImpl;
 import org.slf4j.Logger;
@@ -269,6 +270,17 @@ public class ProcessControllerImpl implements ProcessController {
           @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize) {
 
       return taskServiceImpl.findTasksByProcessIdsAndStatus(processIds, ProcessStatusEnum.CANCELED, pageNum, pageSize);  }
+
+  /**
+   * Finds tasks by processIds
+   * @param processId
+   * @return
+   */
+  @Override
+  @GetMapping("/private/findTasksByProcessId")
+  public List<TaskVO> findTasksByProcessId(String processId) {
+    return taskServiceImpl.findTaskByProcessId(processId);
+  }
 
 
 }

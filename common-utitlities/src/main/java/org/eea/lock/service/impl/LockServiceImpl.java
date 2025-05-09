@@ -1,6 +1,8 @@
 package org.eea.lock.service.impl;
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -221,4 +223,10 @@ public class LockServiceImpl implements LockService {
     LOG.warn("Lock removed by scheduler: {} - {}", lockId, isRemoved);
   }
 
+  @Override
+  public int deletePreviousDayLocks() {
+    LocalDate today = LocalDate.now(ZoneId.systemDefault());
+    Timestamp cutoff = Timestamp.valueOf(today.atStartOfDay());
+    return lockRepository.deleteOldLocks(cutoff);
+  }
 }

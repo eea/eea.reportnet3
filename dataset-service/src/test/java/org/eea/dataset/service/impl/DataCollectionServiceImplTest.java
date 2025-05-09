@@ -1,7 +1,6 @@
 package org.eea.dataset.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -435,10 +434,6 @@ public class DataCollectionServiceImplTest {
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
 
-    DataFlowVO mockDataflow = new DataFlowVO();
-    mockDataflow.setBigData(false);
-    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
-
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(any(), any(),
@@ -532,10 +527,6 @@ public class DataCollectionServiceImplTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    DataFlowVO mockDataflow = new DataFlowVO();
-    mockDataflow.setBigData(false);
-    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
-
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), false, false, false,
         false, true);
     Mockito.verify(recordStoreControllerZuul, times(1)).createSchemas(any(), any(),
@@ -560,9 +551,6 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    DataFlowVO mockDataflow = new DataFlowVO();
-    mockDataflow.setBigData(false);
-    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
     Mockito.verify(lockService, times(1)).removeLockByCriteria(any());
@@ -577,12 +565,6 @@ public class DataCollectionServiceImplTest {
         .thenReturn(designs);
     DataSetSchemaVO schema = new DataSetSchemaVO();
     schema.setReferenceDataset(false);
-
-    DataFlowVO mockDataflow = new DataFlowVO();
-    mockDataflow.setBigData(false);
-    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
-
-
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
@@ -625,9 +607,6 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    DataFlowVO mockDataflow = new DataFlowVO();
-    mockDataflow.setBigData(false);
-    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
     Mockito.verify(connection, times(1)).rollback();
@@ -681,9 +660,6 @@ public class DataCollectionServiceImplTest {
     Mockito.when(authentication.getName()).thenReturn("name");
     Mockito.when(datasetSchemaService.getDataSchemaById(Mockito.anyString()))
         .thenReturn(new DataSetSchemaVO());
-    DataFlowVO mockDataflow = new DataFlowVO();
-    mockDataflow.setBigData(false);
-    Mockito.when(dataflowControllerZuul.findById(1L, null)).thenReturn(mockDataflow);
     dataCollectionService.createEmptyDataCollection(1L, LocalDateTime.now(), true, false, false,
         false, true);
     Mockito.verify(connection, times(1)).rollback();

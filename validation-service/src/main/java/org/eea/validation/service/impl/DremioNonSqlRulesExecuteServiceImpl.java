@@ -20,6 +20,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSche
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
+import org.eea.utils.UtilityClass;
 import org.eea.validation.service.DremioRulesExecuteService;
 import org.eea.validation.service.DremioRulesService;
 import org.eea.validation.service.RulesService;
@@ -144,7 +145,7 @@ public class DremioNonSqlRulesExecuteServiceImpl implements DremioRulesExecuteSe
 
             String fileName = datasetId + UNDERSCORE + tableName + UNDERSCORE + ruleVO.getShortCode();
 
-            query.append("select record_id,").append(fieldName != null ? dremioHelperService.addQuotesToFieldNames(fieldName) : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
+            query.append("select record_id,").append(fieldName != null ? UtilityClass.addQuotesToFieldNames(fieldName) : "").append(" from ").append(s3Service.getTableAsFolderQueryPath(dataTableResolver, path));
             SqlRowSet rs = dremioJdbcTemplate.queryForRowSet(query.toString());
 
             Method method = null;

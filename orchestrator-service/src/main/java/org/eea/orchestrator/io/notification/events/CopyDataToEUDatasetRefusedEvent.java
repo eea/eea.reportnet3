@@ -41,7 +41,7 @@ public class CopyDataToEUDatasetRefusedEvent implements NotificableEventHandler 
     @Override
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
         Long dataflowId = notificationVO.getDataflowId();
-        DataFlowVO dataflow = dataFlowControllerZuul.findById(dataflowId, null);
+        DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());
