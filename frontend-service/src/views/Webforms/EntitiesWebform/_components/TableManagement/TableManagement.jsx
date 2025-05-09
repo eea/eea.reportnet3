@@ -286,60 +286,6 @@ export const TableManagement = ({
     }
   };
 
-  const addTableTemplate = (rowData, colData) => {
-    let hasRecord = false;
-    let hasTable = false;
-    rowData.dataRow.forEach(row =>
-      row.fieldData.tableSchemas.forEach(tableSchema => {
-        if (tableSchema.tableSchemaName === colData.field) {
-          hasRecord = tableSchema.hasRecord;
-          hasTable = true;
-        }
-      })
-    );
-
-    const entitiesIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns);
-    const entitiesFieldSchemaValue = RecordUtils.getCellValue({ rowData: rowData }, entitiesIdFieldSchemaId);
-
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button
-          className="p-button-secondary"
-          disabled={(bigData && !isIcebergCreated) || !hasTable || isSaving}
-          icon={hasRecord ? 'edit' : 'add'}
-          label={
-            hasRecord
-              ? resourcesContext.messages['webformTableEdit']
-              : resourcesContext.messages['webformTableCreation']
-          }
-          onClick={async () => {
-            if (hasRecord) {
-              onSelectEditTable(entitiesFieldSchemaValue, colData.field);
-            } else {
-              tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
-              const configParentTables = Object.keys(
-                getWebformTabs(
-                  tables.map(table => table.name),
-                  schemaTables,
-                  tables
-                )
-              );
-              await onAddTableRecord(
-                schemaTables.filter(
-                  schemaTable =>
-                    configParentTables.includes(colData.field) &&
-                    TextUtils.areEquals(schemaTable.tableSchemaName, colData.field)
-                )[0],
-                entitiesFieldSchemaValue
-              );
-              tableManagementDispatch({ type: 'SET_IS_SAVING', payload: false });
-            }
-          }}
-        />
-      </div>
-    );
-  };
-
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.fieldSchemaId)[0];
     if (!isNil(field) && !isNil(field.fieldData)) {
