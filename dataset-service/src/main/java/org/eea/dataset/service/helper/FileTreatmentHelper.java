@@ -1191,6 +1191,57 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
     /**
+     * Update geometry version 2.
+     *
+     * @param datasetId     the dataset id
+     * @param datasetSchema the dataset schema
+     */
+    @Async
+    public void updateGeometryV2(Long datasetId, DataSetSchema datasetSchema) {
+        // check schema has geometry and check field Value has geometry
+        if (checkSchemaGeometry(datasetSchema)) {
+            LOG.info("Updating geometries for dataset {}", datasetId);
+            // set limit and offset
+            long limit = 1000L;
+            long offset = 0L;
+
+            Long updatesCount = fieldRepository.countGeometries(datasetId, limit, offset);
+            LOG.info("Updating geometries for dataset {}. updatesCount {}", datasetId, updatesCount);
+
+            Long updatedCount = 0L;
+            // iterate based on the count of geometries, the limit and the offset
+            for (;offset < updatesCount; offset += limit) {
+                LOG.info("Updating geometries for dataset {}. Current offset is {}", datasetId, offset);
+                updatedCount += getFieldValueGeometryV2(datasetId, limit, offset);
+                if (updatedCount > 0) {
+                    LOG.info("Updating geometries for dataset {}. Updated for offset {}", datasetId, offset);
+                } else {
+                    LOG.info("Updating geometries for dataset {}. Did not update for offset {}", datasetId, offset);
+                }
+            }
+            LOG.info("Updating geometries for dataset {} finished. Total geometries updated: {}", datasetId, updatedCount);
+        }
+    }
+
+    /**
+     * Gets the field value geometry v2.
+     *
+     * @param datasetId the dataset id
+     * @param limit the limit
+     * @param currentOffset the offset
+     * @return the field value geometry
+     */
+    private Long getFieldValueGeometryV2(Long datasetId, long limit, long currentOffset) {
+        try {
+            // count how many records to be updated exist at the database
+            return fieldRepository.updateGeometryFields(datasetId, limit, currentOffset);
+        } catch (Exception ex) {
+            LOG.info("Geometry field: Geometry update v2 didn't update for dataset id {}", datasetId, ex);
+        }
+        return 0L;
+    }
+
+    /**
      * Check schema geometry.
      *
      * @param datasetSchema the dataset schema
