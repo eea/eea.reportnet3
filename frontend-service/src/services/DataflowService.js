@@ -62,8 +62,8 @@ export const DataflowService = {
     });
   },
 
-  create: async (name, description, obligationId, type, bigData, dataProviderGroupId) =>
-    await DataflowRepository.create(name, description, obligationId, type, bigData, dataProviderGroupId),
+  create: async (name, description, obligationId, type, bigData) =>
+    await DataflowRepository.create(name, description, obligationId, type, bigData),
 
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
     await DataflowRepository.cloneSchemas(sourceDataflowId, targetDataflowId),

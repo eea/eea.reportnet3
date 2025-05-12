@@ -731,7 +731,6 @@ export const Dataflow = () => {
         label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs('isManageRolesDialogVisible', false);
-          onLoadReportingDataflow();
           resetManageLeadReportersState();
         }}
       />
@@ -1430,7 +1429,6 @@ export const Dataflow = () => {
             onHide={() => {
               manageDialogs('isManageRolesDialogVisible', false);
               resetManageLeadReportersState();
-              onLoadReportingDataflow();
             }}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>

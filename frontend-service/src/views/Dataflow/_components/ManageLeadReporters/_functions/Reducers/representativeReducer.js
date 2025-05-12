@@ -38,12 +38,6 @@ export const reducer = (state, { type, payload }) => {
         allPossibleDataProvidersNoSelect: payload.providersNoSelect
       };
 
-    case 'GET_REPORTING_GROUPS':
-      return {
-        ...state,
-        reportingGroups: payload.reportingGroups
-      };
-
     case 'GET_PROVIDERS_TYPES_LIST':
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
