@@ -77,4 +77,17 @@ public interface FieldExtendedRepository {
    */
   List<Object[]> queryExecutionList(String generatedQuery);
 
+  /**
+   * Count Geometries that are not null at this page.
+   *
+   * @return the count
+   */
+  Long countGeometries(Long datasetId, long limit, long currentOffset);
+
+  /**
+   * Converts geometries from "value" field to "geometry" field at "field_value" table
+   *
+   * @return the updated geometries count
+   */
+  Long updateGeometryFields(Long datasetId, long limit, long currentOffset);
 }
