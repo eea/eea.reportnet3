@@ -1502,7 +1502,7 @@ public class FileTreatmentHelper implements DisposableBean {
                                         List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
                                         String delimiter, String mimeType,Long jobId) throws IOException, EEAException {
 
-            List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
+
 
             int workingThreads =
                     ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) importExecutorService)
@@ -1514,6 +1514,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
                         replace,jobId);
             } else {
+                List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
                 List<File> finalFiles = validatedList;
                 importExecutorService.submit(() -> {
                     try {
