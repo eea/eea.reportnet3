@@ -37,6 +37,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { DataflowService } from 'services/DataflowService';
+import { Dropdown } from 'views/_components/Dropdown';
+import { AddOrganizationsService } from 'services/AddOrganizationsService';
 
 export const ManageLeadReporters = ({
   dataflowId,
@@ -65,6 +68,7 @@ export const ManageLeadReporters = ({
     leadReporters: {},
     leadReportersErrors: {},
     refresher: false,
+    reportingGroups: [],
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
@@ -115,6 +119,12 @@ export const ManageLeadReporters = ({
   }, [representativesImport]);
 
   useEffect(() => {
+    if (dataflowType === 'REPORTING' && isNil(selectedDataProviderGroup?.dataProviderGroupId)) {
+      getReportingGroups();
+    }
+  }, []);
+
+  useEffect(() => {
     if (leadReportersDeleted) getInitialData(true);
   }, [leadReportersDeleted]);
 
@@ -123,7 +133,10 @@ export const ManageLeadReporters = ({
   }, [dataflowType, formState.refresher]);
 
   useEffect(() => {
-    if (!isNull(formState.selectedDataProviderGroup)) {
+    if (
+      !isNull(formState.selectedDataProviderGroup) &&
+      !isNil(formState.selectedDataProviderGroup?.dataProviderGroupId)
+    ) {
       getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     }
     setDataProviderSelected(formState.selectedDataProviderGroup);
@@ -188,6 +201,22 @@ export const ManageLeadReporters = ({
 
   const getDataProviderGroup = async () =>
     formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
+
+  const getReportingGroups = async () => {
+    try {
+      const allProviderGroups = await AddOrganizationsService.getProviderGroups();
+
+      const reportingGroups = allProviderGroups.filter(
+        group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8
+      );
+      formDispatcher({
+        type: 'GET_REPORTING_GROUPS',
+        payload: { reportingGroups }
+      });
+    } catch (error) {
+      console.error('ManageDataflowForm - getReportingGroups.', error);
+    }
+  };
 
   const getInitialData = async reportersDeleted => {
     try {
@@ -388,6 +417,17 @@ export const ManageLeadReporters = ({
     }
   };
 
+  const updateProviderGroupId = async dataProviderGroup => {
+    try {
+      await DataflowService.updateGroupId({
+        dataflowId,
+        dataProviderGroupId: dataProviderGroup?.dataProviderGroupId
+      });
+    } catch (error) {
+      console.error('ManageLeadReporters - updateProviderGroupId.', error);
+    }
+  };
+
   const setIsDeleting = value => formDispatcher({ type: 'SET_IS_DELETING', payload: { isDeleting: value } });
 
   const setFocusedInputId = focusedInputId =>
@@ -530,6 +570,27 @@ export const ManageLeadReporters = ({
     );
   };
 
+  const renderRepresentativesDropdown = () => {
+    if (TextUtils.areEquals(dataflowType, config.dataflowType.REPORTING.value)) {
+      return (
+        <Dropdown
+          ariaLabel="dataProviders"
+          className={styles.dataProvidersDropdown}
+          disabled={formState.representatives.length > 1}
+          name="dataProvidersDropdown"
+          onChange={event => {
+            formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value });
+            updateProviderGroupId(event.target.value);
+          }}
+          optionLabel="label"
+          options={formState.reportingGroups}
+          placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
+          value={formState.selectedDataProviderGroup}
+        />
+      );
+    }
+  };
+
   const renderFilter = () => {
     if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
       return null;
@@ -606,7 +667,12 @@ export const ManageLeadReporters = ({
         <div>
           <label>
             {resourcesContext.messages['manageRolesDialogDropdownLabel']}
-            <strong>{selectedDataProviderGroup?.label}</strong>
+            {selectedDataProviderGroup?.dataProviderGroupId ||
+            formState.selectedDataProviderGroup?.dataProviderGroupId ? (
+              <strong>{selectedDataProviderGroup?.label || formState.selectedDataProviderGroup?.label} </strong>
+            ) : (
+              renderRepresentativesDropdown()
+            )}
           </label>
         </div>
       </div>
