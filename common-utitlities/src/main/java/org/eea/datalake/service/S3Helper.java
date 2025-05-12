@@ -167,7 +167,22 @@ public interface S3Helper {
 
     void getAttachmentsFromS3Locally(String attachmentsPathInS3, String parentFolderInDiskPath);
 
-    void downloadParquetFromS3Locally(String s3Path, String localPath, DownloadFilter filter);
+    /**
+     * Downloads file or files from S3 locally
+     *
+     * @param s3Path The S3 path ex: "df-0001212/collections/dc-0003333/"
+     * @param localPath The local path to be stored
+     * @param filter The filtering (exclusions, inclusions)
+     */
+    void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter);
 
-    DownloadFilter getParquetFilters(String s3Path, boolean includeAttachments, String tableName);
+    /**
+     * Build the parquet filtering
+     *
+     * @param s3Path The S3 path
+     * @param includeAttachments filter attachments
+     * @param tableName Filter the table name
+     * @return The object filtering
+     */
+    DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName);
 }

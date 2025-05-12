@@ -479,13 +479,8 @@ public class S3HelperImpl implements S3Helper {
         }
     }
 
-    /**
-     *
-     * @param s3Path The S3 path. ex: "df-0001212/collections/dc-0003333/"
-     * @param localPath The local path
-     */
     @Override
-    public void downloadParquetFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
+    public void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
         DirectoryDownload directoryDownload;
         try (S3TransferManager transferManager = S3TransferManager.builder()
             .s3Client(s3AsyncClient)
@@ -503,7 +498,7 @@ public class S3HelperImpl implements S3Helper {
     }
 
     @Override
-    public DownloadFilter getParquetFilters(String s3Path, boolean includeAttachments, String tableName) {
+    public DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName) {
         return s3Object -> {
             String key = s3Object.key();
 

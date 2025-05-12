@@ -2198,8 +2198,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             if (StringUtils.isNotBlank(tableSchemaId)) {
                 tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             }
-            DownloadFilter filter = s3HelperPrivate.getParquetFilters(s3Path, includeAttachments, tableName);
-            s3HelperPrivate.downloadParquetFromS3Locally(s3Path, localPath, filter);
+            DownloadFilter filter = s3HelperPrivate.buildParquetFilters(s3Path, includeAttachments, tableName);
+            s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
 
             zipFolder(jobId, localPath);
             finishJob(datasetId, dataflowId, jobId, user, processUUID);
