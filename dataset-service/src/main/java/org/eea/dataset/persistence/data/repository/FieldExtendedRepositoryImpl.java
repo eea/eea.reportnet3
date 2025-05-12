@@ -145,16 +145,19 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
    */
   private static final String QUERY_ORDER = "ORDER BY orden";
 
+  /**
+   * The total count of all geometries in "value" field (either their null of empty) checked only by type of field
+   */
   private static String COUNT_QUERY(Long datasetId, long limit, long currentOffset) {
     return new StringBuilder().append("SELECT count(*) FROM dataset_").append(datasetId).append(".field_value fv ")
             .append("WHERE fv.type IN ('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON', 'GEOMETRYCOLLECTION') ")
-//            .append("ORDER BY id ")
-//            .append("LIMIT ").append(limit)
-//            .append(" OFFSET ").append(currentOffset)
             .append(";")
             .toString();
   }
 
+  /**
+   * The trigger of function that inserts geometries at "geometry" field using the "value" field at "field value" table
+   */
   private static String INSERT_GEOMETRY_FUNCTION_NO_TRIGGER_EEA(Long datasetId, long limit, long currentOffset) {
     return new StringBuilder().append("SELECT public.insert_geometry_function_notrigger_EAA( ")
             .append(datasetId).append(", ")
@@ -183,26 +186,12 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   }
 
   /**
-   * Query execution list.
+   * Count Geometries that are not null at this page.
    *
-   * @return the list
+   * @return the count
    */
   @Override
   public Long countGeometries(Long datasetId, long limit, long currentOffset, ConnectionDataVO connectionDataVO) {
-//    try (Connection connection = DriverManager.getConnection(connectionDataVO.getConnectionString(),
-//            connectionDataVO.getUser(), connectionDataVO.getPassword());
-//         PreparedStatement pstmt = connection.prepareStatement(
-//                 entityManager.createNativeQuery(
-//                         COUNT_QUERY(datasetId, limit, currentOffset)
-//                 ).toString()
-//         );
-//
-//         ResultSet rs = pstmt.executeQuery()) {
-//      LOG.info("[UPDATE-GEOMETRIES] rs: {}", rs.toString());
-//    } catch (Exception e) {
-//      LOG.info("[UPDATE-GEOMETRIES] Geometry field: Geometry update failed for queryExecutionSingle.", e);
-//    }
-//
     try {
       LOG.info("[UPDATE-GEOMETRIES] countGeometries method called for datasetId {}, limit {}, currentOffset {}", datasetId, limit, currentOffset);
       Query query = entityManager.createNativeQuery(COUNT_QUERY(datasetId, limit, currentOffset));
@@ -215,15 +204,15 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   }
 
   /**
-   * Query execution list.
+   * Converts geometries from "value" field to "geometry" field at "field_value" table
    *
-   * @return the list
+   * @return the updated geometries count
    */
   @Override
-  public void updateGeometryFields(Long datasetId, long limit, long currentOffset) {
+  public Long updateGeometryFields(Long datasetId, long limit, long currentOffset) {
     LOG.info("[UPDATE-GEOMETRIES] Method updateGeometryFields called. Function will be triggered for datasetId {}, limit {}, currentOffset {}", datasetId, limit, currentOffset);
     Query query = entityManager.createNativeQuery(INSERT_GEOMETRY_FUNCTION_NO_TRIGGER_EEA(datasetId, limit, currentOffset));
-    query.getSingleResult();
+    return Long.valueOf( (String) query.getSingleResult() );
   }
 
   /**
