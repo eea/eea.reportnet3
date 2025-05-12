@@ -2,7 +2,6 @@ import { React, useContext } from 'react';
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
-import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { UserService } from 'services/UserService';
 
 
@@ -11,7 +10,6 @@ import styles from './SessionExpireDialog.module.scss';
 
 export const SessionExpireDialog = ({ visible }) => {
   const resourcesContext = useContext(ResourcesContext);
-  const notificationContext = useContext(NotificationContext);
 
   const handleLogoutAndRedirect = async () => {
     try {
