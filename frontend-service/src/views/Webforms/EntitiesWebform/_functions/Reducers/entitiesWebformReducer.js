@@ -20,7 +20,7 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
       return {
         ...state,
         entitiesRecords: payload.records,
-        tableList: { ...state.tableList, single: payload.single },
+        entitiesList: payload.list,
         isDataUpdated: true
       };
 
@@ -66,45 +66,6 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
 
     case 'HAS_ERRORS':
       return { ...state, hasErrors: payload.value };
-
-    case 'UPDATE_ENTITIES_RECORDS':
-      const inmTableList = { ...state.tableList };
-      Object.values(inmTableList).forEach(element => {
-        element.forEach(entity => {
-          if (entity.recordId === payload.recordId) {
-            if (!payload.isEntityTitle) {
-              entity.id = payload.entitiesValue;
-            } else {
-              entity.title = payload.entitiesValue;
-            }
-          }
-        });
-      });
-      inmTableList.single.sort((a, b) => a.id - b.id);
-
-      const inmEntitiesRecords = [...state.entitiesRecords];
-      inmEntitiesRecords.forEach(entityRecord => {
-        if (entityRecord.recordId === payload.recordId) {
-          entityRecord.fields.forEach(field => {
-            if (field.fieldId === payload.fieldId) {
-              field.value = payload.entitiesValue;
-            }
-          });
-        }
-      });
-
-      const inmSelectedTable = { ...state.selectedTable };
-      if (!payload.isEntityTitle) {
-        inmSelectedTable.rootTableId = payload.entitiesValue;
-      }
-
-      return {
-        ...state,
-        entitiesRecords: inmEntitiesRecords,
-        tableList: inmTableList,
-        // selectedTable: inmSelectedTable,
-        isDataUpdated: payload.dataUpdated
-      };
 
     case 'UPDATE_DATA':
       return { ...state, data: payload.data };

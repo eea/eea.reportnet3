@@ -222,17 +222,29 @@ public final class LiteralConstants {
   /** The Constant S3_ATTACHMENTS_TABLE_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_TABLE_PATH = "%s/%s/%s/current/attachments/%s";
 
+  /** The Constant S3_ATTACHMENTS_PARENT_FOLDER_PATH: {@value}. */
+  public static final String S3_ATTACHMENTS_PARENT_FOLDER_PATH = "%s/%s/%s/current/attachments";
+
   /** The Constant S3_ATTACHMENTS_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_PATH = "%s/%s/%s/current/attachments/%s/%s";
 
   /** The Constant S3_ATTACHMENTS_DC_FOLDER_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_DC_FOLDER_PATH = "%s/collections/%s/current/attachments";
 
+  /** The Constant S3_ATTACHMENTS_DC_TABLE_PATH: {@value}. */
+  public static final String S3_ATTACHMENTS_DC_TABLE_PATH = "%s/collections/%s/current/attachments/%s";
+
   /** The Constant S3_ATTACHMENTS_DC_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_DC_PATH = "%s/collections/%s/current/attachments/%s/%s/%s";
 
   /** The Constant S3_ATTACHMENTS_EU_PATH: {@value}. */
+  public static final String S3_ATTACHMENTS_EU_TABLE_PATH = "%s/collections/%s/attachments/%s";
+
+  /** The Constant S3_ATTACHMENTS_EU_PATH: {@value}. */
   public static final String S3_ATTACHMENTS_EU_PATH = "%s/collections/%s/attachments/%s/%s/%s";
+
+  /** The Constant S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH: {@value}. */
+  public static final String S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH = "%s/collections/%s/attachments";
 
   /** The Constant S3_SUPPORTING_DOCUMENTS_FILE_PATH: {@value}. */
   public static final String S3_SUPPORTING_DOCUMENTS_FILE_PATH= "%s/supportingDocuments/%s";
@@ -485,6 +497,11 @@ public final class LiteralConstants {
 
   /** The Constant LAST_IMPORT_FILE_EXTENSION: {@value}. */
   public static final String LAST_IMPORT_FILE_EXTENSION = "lastImportFileExtension";
+
+  /**
+   * Zone id
+   */
+  public static final String EUROPE_ZONE_ID = "Europe/Paris";
 
   /**
    * Instantiates a new literal constants.

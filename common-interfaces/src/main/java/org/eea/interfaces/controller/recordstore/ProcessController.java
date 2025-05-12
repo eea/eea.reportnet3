@@ -5,6 +5,7 @@ import org.eea.interfaces.vo.recordstore.ProcessesVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.orchestrator.JobCanceledValidationTasksVO;
+import org.eea.interfaces.vo.validation.TaskVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -162,4 +163,11 @@ public interface ProcessController {
           @RequestParam(value = "pageNum", defaultValue = "0", required = false) Integer pageNum,
           @RequestParam(value = "pageSize", defaultValue = "10", required = false) Integer pageSize);
 
+  /**
+   * Finds tasks by processIds
+   * @param processIds
+   * @return
+   */
+  @GetMapping("/private/findTasksByProcessId")
+  List<TaskVO> findTasksByProcessId(@RequestParam(name = "processId") String processIds);
 }

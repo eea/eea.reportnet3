@@ -3,20 +3,17 @@
 
   .toolbar {
     border: var(--general-border-style);
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
 
     .headerButton {
       border-radius: 5px;
-      margin: 0 0.5rem;
+      margin: 0.3rem ;
+      padding: 0.1rem;
+      font-size: 1.2rem !important;
+      text-align: center; 
+      display: inline-block;
 
-      &:first-child {
-        margin-left: 0;
-      }
-
-      &:last-child {
-        margin-right: 0;
-      }
     }
   }
 }

@@ -355,4 +355,6 @@ public interface DatasetMetabaseController {
   @GetMapping("/private/getDatasetIdsAndGroups/{dataflowId}")
   Map<Long, String> getDatasetIdsAndGroups(@PathVariable Long dataflowId);
 
+  @PutMapping(value = "/private/updateReportingDatasetMetabase")
+  void updateReportingDatasetMetabase(@RequestBody ReportingDatasetVO reportingDatasetVO);
 }

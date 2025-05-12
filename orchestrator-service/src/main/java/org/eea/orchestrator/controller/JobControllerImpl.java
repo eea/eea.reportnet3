@@ -3,8 +3,10 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -95,6 +97,8 @@ public class JobControllerImpl implements JobController {
     private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
     @Autowired
     private JobProcessServiceImpl jobProcessServiceImpl;
+
+    private static final String FILE_PATTERN_NAME_V4 = "etlExportV4_%s";
 
 
     @Override
@@ -521,7 +525,11 @@ public class JobControllerImpl implements JobController {
                                   @ApiParam(type = "String", value = "Filter column name", example = "column") @RequestParam(
                                           value = "columnName", required = false) String columnName,
                                   @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
-                                          value = "dataProviderCodes", required = false) String dataProviderCodes) {
+                                          value = "dataProviderCodes", required = false) String dataProviderCodes,
+                                  @ApiParam(type = "Boolean", value = "Csv will be exported", example = "true") @RequestParam(
+                                          value = "exportCsv", required = false) Boolean exportCsv,
+                                  @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
+                                          value = "includeAttachments", required = false) Boolean includeAttachments) {
 
         ThreadPropertiesManager.setVariable("user", SecurityContextHolder.getContext().getAuthentication().getName());
         String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
@@ -537,6 +545,8 @@ public class JobControllerImpl implements JobController {
         parameters.put("filterValue", filterValue);
         parameters.put("columnName", columnName);
         parameters.put("dataProviderCodes", dataProviderCodes);
+        parameters.put("exportCsv", exportCsv);
+        parameters.put("includeAttachments", includeAttachments);
         parameters.put("userId", userId);
 
         String dataflowName = null;
@@ -749,10 +759,18 @@ public class JobControllerImpl implements JobController {
                                         @ApiParam(type = "Long", value = "Provider id",
                                                 example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
                                         @ApiParam(value = "response") HttpServletResponse response) throws Exception {
-        String fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
+
+        String fileName = null;
         try {
+            JobVO job = jobService.findById(jobId);
+            if(job.getParameters().get("exportCsv") != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportCsv"))){
+                fileName = String.format(FILE_PATTERN_NAME_V4, jobId) + ".zip";
+            }
+            else{
+                fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
+            }
             LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);
-            File file = jobService.downloadEtlExportedFile(jobId, fileName);
+            File file = jobService.downloadEtlExportedFile(job, fileName);
             LOG.info("Successfully downloaded file generated from v3 etl export for jobId {}", jobId);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
@@ -760,8 +778,8 @@ public class JobControllerImpl implements JobController {
             try (FileInputStream in = new FileInputStream(file)) {
                 // copy from in to out
                 IOUtils.copyLarge(in, out);
-                // delete the file after downloading it ?
-                //FileUtils.forceDelete(file);
+                // delete the file after downloading it
+                FileUtils.forceDelete(file);
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
                 throw e;
