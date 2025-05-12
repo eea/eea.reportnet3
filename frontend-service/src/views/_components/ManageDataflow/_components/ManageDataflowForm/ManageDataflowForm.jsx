@@ -186,7 +186,14 @@ export const ManageDataflowForm = forwardRef(
                   bigData,
                   selectedGroup.dataProviderGroupId
                 )
-              : await DataflowService.create(name, description, metadata.obligation.id, undefined, bigData);
+              : await DataflowService.create(
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  undefined,
+                  bigData,
+                  selectedGroup.dataProviderGroupId
+                );
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
