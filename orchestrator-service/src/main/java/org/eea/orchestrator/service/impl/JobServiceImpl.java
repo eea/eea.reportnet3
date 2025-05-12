@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -53,8 +54,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Stream;
 
-import static org.eea.utils.LiteralConstants.CSV_TYPE;
+import static org.eea.utils.LiteralConstants.*;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -357,10 +359,11 @@ public class JobServiceImpl implements JobService {
         String filterValue = (parameters.get("filterValue") != null) ? (String) parameters.get("filterValue") : null;
         String columnName = (parameters.get("columnName") != null) ? (String) parameters.get("columnName") : null;
         String dataProviderCodes = (parameters.get("dataProviderCodes") != null) ? (String) parameters.get("dataProviderCodes") : null;
-        Boolean exportCsv = (parameters.get("exportCsv") != null) ? (Boolean) parameters.get("exportCsv") : false;
+        Boolean exportCsv = (parameters.get(EXPORT_CSV) != null) ? (Boolean) parameters.get(EXPORT_CSV) : false;
+        Boolean exportParquet = (parameters.get(EXPORT_PARQUET) != null) ? (Boolean) parameters.get(EXPORT_PARQUET) : false;
         Boolean includeAttachments = (parameters.get("includeAttachments") != null) ? (Boolean) parameters.get("includeAttachments") : false;
 
-        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, includeAttachments, jobVO.getId());
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, exportParquet ,includeAttachments, jobVO.getId());
     }
 
     @Transactional
@@ -623,24 +626,13 @@ public class JobServiceImpl implements JobService {
         // we compound the route and create the file
 
         File file;
-        if(job.getParameters().get("exportCsv") != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportCsv"))){
-            String folderToZipPath = exportDLPath + "/dataset-" + job.getDatasetId() + "/etlExportV4_" + job.getId();
-            File parentFolder = new File(folderToZipPath);
-            file = new File(folderToZipPath + ".zip");
-
-            try {
-                //remove everything from the folder
-                Files.walk(parentFolder.toPath())
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            }
-            catch (Exception e){
-                LOG.error("Could not remove files from parent folder {}", folderToZipPath);
-            }
-
-        }
-        else{
+        if(job.getParameters().get(EXPORT_CSV) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_CSV))){
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + "/etlExportV4_" + job.getId();
+            file = getFile(folderToZipPath);
+        } else if (job.getParameters().get(EXPORT_PARQUET) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_PARQUET))) {
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + LiteralConstants.PARQUET_EXPORT_NAME + job.getId();
+            file = getFile(folderToZipPath);
+        } else{
             file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
         }
         // we compound the route and create the file
@@ -649,6 +641,11 @@ public class JobServiceImpl implements JobService {
             throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
         }
         return file;
+    }
+
+
+    private File getFile(String folderToZipPath) {
+      return new File(folderToZipPath + ".zip");
     }
 
     @Override

@@ -182,6 +182,7 @@ public interface JobController {
                                   @RequestParam(value = "columnName", required = false) String columnName,
                                   @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
                                   @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
+                                  @RequestParam(value = "exportParquet", required = false) Boolean exportParquet,
                                   @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
 
     /**

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -22,6 +23,11 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
+import software.amazon.awssdk.transfer.s3.model.CompletedDirectoryDownload;
+import software.amazon.awssdk.transfer.s3.model.DirectoryDownload;
+import software.amazon.awssdk.transfer.s3.model.DownloadDirectoryRequest;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,6 +51,7 @@ public class S3HelperImpl implements S3Helper {
 
     private final S3Service s3Service;
     private final S3Client s3Client;
+    private final S3AsyncClient s3AsyncClient;
     private final S3Presigner s3Presigner;
     private final String S3_DEFAULT_BUCKET_NAME;
 
@@ -54,6 +61,7 @@ public class S3HelperImpl implements S3Helper {
     public S3HelperImpl(S3Service s3Service, @Qualifier("s3PrivateConfiguration") S3Configuration s3Configuration) {
         this.s3Service = s3Service;
         this.s3Client = s3Configuration.getS3Client();
+        this.s3AsyncClient = s3Configuration.getS3AsyncClient();
         this.s3Presigner = s3Configuration.getS3Presigner();
         this.S3_DEFAULT_BUCKET_NAME = s3Configuration.getS3DefaultBucketName();
         this.S3_ICEBERG_BUCKET_NAME = s3Configuration.getS3IcebergBucketName();
@@ -469,5 +477,53 @@ public class S3HelperImpl implements S3Helper {
         catch (Exception e){
             LOG.error("Could not download attachments from path {} to {} Error: ", attachmentsPathInS3, parentFolderInDiskPath, e);
         }
+    }
+
+    /**
+     *
+     * @param s3Path The S3 path. ex: "df-0001212/collections/dc-0003333/"
+     * @param localPath The local path
+     */
+    @Override
+    public void downloadParquetFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
+        DirectoryDownload directoryDownload;
+        try (S3TransferManager transferManager = S3TransferManager.builder()
+            .s3Client(s3AsyncClient)
+            .build()) {
+            directoryDownload = transferManager.downloadDirectory(DownloadDirectoryRequest.builder()
+                .destination(Paths.get(localPath))
+                .bucket(s3Service.getS3DefaultBucketName())
+                .filter(filter)
+                .build());
+            CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
+            completedDirectoryDownload.failedTransfers().forEach(failedFileDownload -> LOG.error(failedFileDownload.exception().getMessage()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public DownloadFilter getParquetFilters(String s3Path, boolean includeAttachments, String tableName) {
+        return s3Object -> {
+            String key = s3Object.key();
+
+            //exclude those folders
+            boolean baseCondition = key.startsWith(s3Path)
+                && !key.contains("/validation/")
+                && !key.contains("/snapshots/")
+                && !key.contains("/import/");
+
+            //include or not attachments folder
+            if (!includeAttachments && key.contains("/attachments/")) {
+                return false;
+            }
+
+            // If tableName is provided, only include keys that contain the table name (as folder or file name)
+            if (tableName != null && !key.contains("/" + tableName + "/")) {
+                return false;
+            }
+
+            return baseCondition;
+        };
     }
 }

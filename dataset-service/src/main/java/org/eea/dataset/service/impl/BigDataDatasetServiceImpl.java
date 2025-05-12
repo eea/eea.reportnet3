@@ -65,7 +65,6 @@ import org.eea.utils.LiteralConstants;
 import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -80,6 +79,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.*;
 import java.util.*;
@@ -88,7 +88,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -2128,16 +2127,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException {
         try {
             // the path of the parent folder which will be zipped
-            String folderToZipPath = exportDLPath + "/dataset-" + datasetId + "/etlExportV4_" + jobId;
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/etlExportV4_" + jobId;
             DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
-            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
-            if (jobId!=null) {
-                JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
-                jobProcessControllerZuul.save(jobProcessVO);
-            }
-            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
+            updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
             Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
             if (StringUtils.isNotBlank(tableSchemaId)) {
@@ -2184,28 +2176,148 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
 
-            //zip the folder
-            File folderToZip = new File(folderToZipPath);
-            File zipOutput = new File(folderToZipPath + ".zip");
-            try {
-                ZipUtils.zipFolder(folderToZip, zipOutput);
-            } catch (Exception e) {
-               LOG.error("There was an error when zipping the files for etl export v4 jobId {} folderToZipPath {}", jobId, folderToZipPath);
-               throw e;
-            }
-            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
-            if (jobId !=null) {
-                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-            }
+            zipFolder(jobId, folderToZipPath);
+            finishJob(datasetId, dataflowId, jobId, user, processUUID);
         }
         catch (Exception e) {
-            LOG.error("EtlExportV4 failed for jobId {} Error: {}", jobId, e.getMessage());
-            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
-            if (jobId != null) {
-                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    @Override
+    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) {
+        try {
+            String localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
+            updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
+
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            S3PathResolver s3PathResolver = new S3PathResolver(dataflowId);
+            String s3Path = getS3KeyPath(datasetId, dataSetMetabaseVO, s3PathResolver);
+
+            String tableName = null;
+            if (StringUtils.isNotBlank(tableSchemaId)) {
+                tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             }
+            DownloadFilter filter = s3HelperPrivate.getParquetFilters(s3Path, includeAttachments, tableName);
+            s3HelperPrivate.downloadParquetFromS3Locally(s3Path, localPath, filter);
+
+            zipFolder(jobId, localPath);
+            finishJob(datasetId, dataflowId, jobId, user, processUUID);
+        }
+        catch (Exception e) {
+            exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    /**
+     * Updating the job process
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     */
+    private void updateJobProcess(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID) {
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId !=null) {
+            JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+            jobProcessControllerZuul.save(jobProcessVO);
+        }
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+    }
+
+    /**
+     * Handle the exceptions
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     * @param e The exception
+     */
+    private void exceptionHandling(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID, Exception e) {
+        LOG.error("EtlExport failed for jobId {} Error: {}", jobId, e.getMessage());
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId != null) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+    }
+
+    /**
+     * Finish the process
+     *
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     */
+    private void finishJob(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID) {
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId !=null) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        }
+    }
+
+    /***
+     * Zipping the folder and deleting unzipped folder
+     *
+     * @param jobId The job id
+     * @param localPath The folder to zip path
+     * @throws IOException The Exception
+     */
+    private void zipFolder(Long jobId, String localPath) throws IOException {
+        File unZippedFile = new File(localPath);
+        File zippedFile = new File(localPath + ".zip");
+        try {
+            ZipUtils.zipFolder(unZippedFile, zippedFile);
+            FileUtils.deleteDirectory(unZippedFile);
+        } catch (Exception e) {
+            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath);
+            throw e;
+        }
+    }
+
+    /**
+     * Calculate the S3 path for each case
+     *
+     * @param datasetId The dataset id
+     * @param dataset The Dataset metabase object
+     * @param s3PathResolver The S3 path resolver object
+     * @return The String S3 path
+     */
+    private String getS3KeyPath(Long datasetId, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver) {
+        switch (dataset.getDatasetTypeEnum()) {
+            case REPORTING:
+                s3PathResolver.setPath(S3_PROVIDER_PATH);
+                s3PathResolver.setDataProviderId(dataset.getDataProviderId());
+                s3PathResolver.setDatasetId(datasetId);
+                return s3ServicePrivate.getS3Path(s3PathResolver);
+            case TEST:
+            case DESIGN:
+                s3PathResolver.setPath(S3_PROVIDER_PATH);
+                s3PathResolver.setDataProviderId(0L);
+                s3PathResolver.setDatasetId(datasetId);
+                return s3ServicePrivate.getS3Path(s3PathResolver);
+            case COLLECTION:
+                s3PathResolver.setPath(S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
+                s3PathResolver.setDatasetId(datasetId);
+                return s3ServicePrivate.getS3Path(s3PathResolver);
+            case EUDATASET:
+                s3PathResolver.setPath(S3_EU_SNAPSHOT_ROOT_PATH);
+                s3PathResolver.setDatasetId(datasetId);
+                return s3ServicePrivate.getS3Path(s3PathResolver);
+            case REFERENCE:
+                s3PathResolver.setPath(S3_REFERENCE_FOLDER_PATH);
+                return s3ServicePrivate.getS3Path(s3PathResolver);
+            default:
+                LOG.info("Dataset Type does not exist!");
+                return null;
         }
     }
 }
