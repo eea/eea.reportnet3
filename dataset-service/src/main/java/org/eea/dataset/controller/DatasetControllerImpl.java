@@ -3102,6 +3102,19 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  @Override
+  @HystrixCommand
+  @PutMapping("/v2/{datasetId}/updateGeometry")
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD', 'TESTDATASET_STEWARD')")
+  public void updateGeometryV2(@PathVariable("datasetId") Long datasetId) {
+    try {
+      LOG.info("Updating geometries v2 for datasetId {} started. This method is asynchronous.", datasetId);
+      updateRecordHelper.executeGeometryUpdateProcessV2(datasetId);
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error updating geometries v2 for datasetId {}", datasetId, e);
+    }
+  }
+
   /**
    * Generate s3 presigned Url for import
    *
