@@ -1574,12 +1574,13 @@ public class FileTreatmentHelper implements DisposableBean {
                 String usedDelimiter = (delimiter != null) ? delimiter : String.valueOf(loadDataDelimiter);
                 List<String> csvHeaders = Pattern.compile(Pattern.quote(usedDelimiter), Pattern.CASE_INSENSITIVE)
                         .splitAsStream(headerLine.replace("\"", ""))
+                        .map(s -> s.toLowerCase(Locale.ROOT))
                         .collect(Collectors.toList());
                 RecordSchema recordSchema = getRecordSchema(findTableSchemaId, schema);
 
                 if (csvHeaders.size() == recordSchema.getFieldSchema().size()) {
                     for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
-                        if (!csvHeaders.contains(fieldSchema.getHeaderName())) {
+                        if (!csvHeaders.contains(fieldSchema.getHeaderName().toLowerCase())) {
                             if(filesCount > 1){
                                 warningList.add(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null));
                             } else {
