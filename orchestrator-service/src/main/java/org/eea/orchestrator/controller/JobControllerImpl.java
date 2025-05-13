@@ -3,8 +3,6 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
@@ -31,6 +29,7 @@ import org.eea.orchestrator.service.impl.JobProcessServiceImpl;
 import org.eea.orchestrator.utils.JobUtils;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +46,6 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -779,50 +775,16 @@ public class JobControllerImpl implements JobController {
             else{
                 fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
             }
-            LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);
+            LOG.info("Downloading file generated from etl export for jobId {}", jobId);
             File file = jobService.downloadEtlExportedFile(job, fileName);
-            LOG.info("Successfully downloaded file generated from v3 etl export for jobId {}", jobId);
+            LOG.info("Successfully downloaded file generated from etl export for jobId {}", jobId);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
-            copyFromInToOut(jobId, response, file, fileName);
+            UtilityClass.copyFromInToOutAndDelete(jobId, response, file, fileName);
         }
         catch (Exception e) {
-            LOG.error("Unexpected error! Error downloading file {} from v3 etl export for jobId {} Message: {}", fileName, jobId, e.getMessage());
+            LOG.error("Unexpected error! Error downloading file {} from etl export for jobId {} Message: {}", fileName, jobId, e.getMessage());
             throw e;
-        }
-    }
-
-    /****
-     * Copy file from in to out
-     *
-     * @param jobId the job id
-     * @param response The response
-     * @param file The file
-     * @param fileName The file name
-     * @throws IOException The exception
-     */
-    private void copyFromInToOut(Long jobId, HttpServletResponse response, File file, String fileName) throws IOException {
-        try (FileInputStream in = new FileInputStream(file); OutputStream out = response.getOutputStream()) {
-            IOUtils.copyLarge(in, out);
-        } catch (Exception e) {
-            LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
-            throw e;
-        }
-        finally {
-            deleteFile(file, fileName);
-        }
-    }
-
-    /**
-     * Delete the file after it's being downloaded
-     * @param file The file
-     * @param fileName The file name
-     */
-    private void deleteFile(File file, String fileName) {
-        try {
-            FileUtils.forceDelete(file);
-        } catch (IOException deleteEx) {
-            LOG.error("Failed to delete file {} after stream close. Message: {}", fileName, deleteEx.getMessage());
         }
     }
 

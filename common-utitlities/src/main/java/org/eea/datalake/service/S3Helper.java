@@ -175,14 +175,4 @@ public interface S3Helper {
      * @param filter The filtering (exclusions, inclusions)
      */
     void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter);
-
-    /**
-     * Build the parquet filtering
-     *
-     * @param s3Path The S3 path
-     * @param includeAttachments filter attachments
-     * @param tableName Filter the table name
-     * @return The object filtering
-     */
-    DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName);
 }

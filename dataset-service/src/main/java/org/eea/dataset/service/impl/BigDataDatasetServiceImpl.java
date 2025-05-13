@@ -149,6 +149,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
     private final DatasetService datasetService;
+    private final EtlExportV5Service etlExportV5Service;
 
     private final DremioHelperService dremioHelperService;
     private JdbcTemplate dremioJdbcTemplate;
@@ -169,7 +170,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                                      ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
                                      JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
                                      FileCommonUtils fileCommonUtils, @Lazy DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
-                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever) {
+                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever, EtlExportV5Service etlExportV5Service) {
         this.jobControllerZuul =  jobControllerZuul;
         this.jobProcessControllerZuul = jobProcessControllerZuul;
         this.datasetMetabaseService = datasetMetabaseService;
@@ -195,6 +196,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.schemasRepository = schemasRepository;
         this.datasetSnapshotService = datasetSnapshotService;
         this.datasetService = datasetService;
+        this.etlExportV5Service = etlExportV5Service;
     }
 
 
@@ -2191,14 +2193,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-            S3PathResolver s3PathResolver = new S3PathResolver(dataflowId);
-            String s3Path = getS3KeyPath(datasetId, dataSetMetabaseVO, s3PathResolver);
+
+            String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate);
 
             String tableName = null;
             if (StringUtils.isNotBlank(tableSchemaId)) {
                 tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             }
-            DownloadFilter filter = s3HelperPrivate.buildParquetFilters(s3Path, includeAttachments, tableName);
+            DownloadFilter filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName);
             s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
 
             zipFolder(jobId, localPath);
@@ -2280,44 +2282,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         } catch (Exception e) {
             LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath);
             throw e;
-        }
-    }
-
-    /**
-     * Calculate the S3 path for each case
-     *
-     * @param datasetId The dataset id
-     * @param dataset The Dataset metabase object
-     * @param s3PathResolver The S3 path resolver object
-     * @return The String S3 path
-     */
-    private String getS3KeyPath(Long datasetId, DataSetMetabaseVO dataset, S3PathResolver s3PathResolver) {
-        switch (dataset.getDatasetTypeEnum()) {
-            case REPORTING:
-                s3PathResolver.setPath(S3_PROVIDER_PATH);
-                s3PathResolver.setDataProviderId(dataset.getDataProviderId());
-                s3PathResolver.setDatasetId(datasetId);
-                return s3ServicePrivate.getS3Path(s3PathResolver);
-            case TEST:
-            case DESIGN:
-                s3PathResolver.setPath(S3_PROVIDER_PATH);
-                s3PathResolver.setDataProviderId(0L);
-                s3PathResolver.setDatasetId(datasetId);
-                return s3ServicePrivate.getS3Path(s3PathResolver);
-            case COLLECTION:
-                s3PathResolver.setPath(S3_TABLE_NAME_ROOT_DC_FOLDER_PATH);
-                s3PathResolver.setDatasetId(datasetId);
-                return s3ServicePrivate.getS3Path(s3PathResolver);
-            case EUDATASET:
-                s3PathResolver.setPath(S3_EU_SNAPSHOT_ROOT_PATH);
-                s3PathResolver.setDatasetId(datasetId);
-                return s3ServicePrivate.getS3Path(s3PathResolver);
-            case REFERENCE:
-                s3PathResolver.setPath(S3_REFERENCE_FOLDER_PATH);
-                return s3ServicePrivate.getS3Path(s3PathResolver);
-            default:
-                LOG.info("Dataset Type does not exist!");
-                return null;
         }
     }
 }

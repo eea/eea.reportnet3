@@ -487,7 +487,7 @@ public class S3HelperImpl implements S3Helper {
             .build()) {
             directoryDownload = transferManager.downloadDirectory(DownloadDirectoryRequest.builder()
                 .destination(Paths.get(localPath))
-                .bucket(s3Service.getS3DefaultBucketName())
+                .bucket(S3_DEFAULT_BUCKET_NAME)
                 .filter(filter)
                 .build());
             CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
@@ -495,30 +495,5 @@ public class S3HelperImpl implements S3Helper {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName) {
-        return s3Object -> {
-            String key = s3Object.key();
-
-            //exclude those folders
-            boolean baseCondition = key.startsWith(s3Path)
-                && !key.contains("/validation/")
-                && !key.contains("/snapshots/")
-                && !key.contains("/import/");
-
-            //include or not attachments folder
-            if (!includeAttachments && key.contains("/attachments/")) {
-                return false;
-            }
-
-            // If tableName is provided, only include keys that contain the table name (as folder or file name)
-            if (tableName != null && !key.contains("/" + tableName + "/")) {
-                return false;
-            }
-
-            return baseCondition;
-        };
     }
 }
