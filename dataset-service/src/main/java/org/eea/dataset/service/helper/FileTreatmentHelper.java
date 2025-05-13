@@ -1552,9 +1552,7 @@ public class FileTreatmentHelper implements DisposableBean {
         private void queueImportProcess(Long datasetId,String processId, String tableSchemaId, DataSetSchema schema,
                                         List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
                                         String delimiter, String mimeType,Long jobId) throws IOException, EEAException {
-
-            List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
-
+            
             int workingThreads =
                     ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) importExecutorService)
                             .getDelegateExecutorService()).getActiveCount();
@@ -1565,6 +1563,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
                         replace,jobId);
             } else {
+                List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
                 List<File> finalFiles = validatedList;
                 importExecutorService.submit(() -> {
                     try {
@@ -1626,12 +1625,13 @@ public class FileTreatmentHelper implements DisposableBean {
                 String usedDelimiter = (delimiter != null) ? delimiter : String.valueOf(loadDataDelimiter);
                 List<String> csvHeaders = Pattern.compile(Pattern.quote(usedDelimiter), Pattern.CASE_INSENSITIVE)
                         .splitAsStream(headerLine.replace("\"", ""))
+                        .map(s -> s.toLowerCase(Locale.ROOT))
                         .collect(Collectors.toList());
                 RecordSchema recordSchema = getRecordSchema(findTableSchemaId, schema);
 
                 if (csvHeaders.size() == recordSchema.getFieldSchema().size()) {
                     for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
-                        if (!csvHeaders.contains(fieldSchema.getHeaderName())) {
+                        if (!csvHeaders.contains(fieldSchema.getHeaderName().toLowerCase())) {
                             if(filesCount > 1){
                                 warningList.add(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null));
                             } else {
