@@ -1825,7 +1825,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
-        if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease() && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId))))) {
+        if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease()) && StringUtils.isNotBlank(processId)  && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId)))) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease, processId);
         } else {
           Map<String, Object> createSnapshot = new HashMap<>();
