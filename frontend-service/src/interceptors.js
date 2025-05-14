@@ -62,6 +62,11 @@ axios.interceptors.response.use(
       return;
     }
 
+    // Handle 500 from refreshToken endpoint
+    if (error?.response?.status === 500 && originalRequest.url && originalRequest.url.includes('/refreshToken')) {
+      showSessionExpiredDialog();
+      return Promise.reject(error);
+    }
     // return Error object with Promise
     return Promise.reject(error);
   } 
