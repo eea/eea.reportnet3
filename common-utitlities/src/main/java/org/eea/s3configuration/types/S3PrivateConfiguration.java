@@ -6,6 +6,7 @@ import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.SdkHttpConfigurationOption;
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
@@ -67,6 +68,9 @@ public class S3PrivateConfiguration implements S3Configuration {
   @Override
   public S3AsyncClient getS3AsyncClient() {
     return S3AsyncClient.builder()
+        .httpClient(NettyNioAsyncHttpClient.builder()
+            .maxConcurrency(64)
+            .build())
         .endpointOverride(URI.create(s3Endpoint))
         .region(s3Region)
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
