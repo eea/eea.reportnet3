@@ -1,5 +1,6 @@
 package org.eea.s3configuration.types;
 
+import org.eea.utils.TrustAllManagersProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -69,6 +70,7 @@ public class S3PrivateConfiguration implements S3Configuration {
   public S3AsyncClient getS3AsyncClient() {
     return S3AsyncClient.builder()
         .httpClient(NettyNioAsyncHttpClient.builder()
+            .tlsTrustManagersProvider(new TrustAllManagersProvider())
             .maxConcurrency(64)
             .build())
         .endpointOverride(URI.create(s3Endpoint))
