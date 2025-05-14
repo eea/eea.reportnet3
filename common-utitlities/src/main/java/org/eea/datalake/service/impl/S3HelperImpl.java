@@ -493,6 +493,7 @@ public class S3HelperImpl implements S3Helper {
             CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
             completedDirectoryDownload.failedTransfers().forEach(failedFileDownload -> LOG.error(failedFileDownload.exception().getMessage()));
         } catch (Exception e) {
+            LOG.error("Error while trying to download file from S3 to local NFS", e);
             throw new RuntimeException(e);
         }
     }
