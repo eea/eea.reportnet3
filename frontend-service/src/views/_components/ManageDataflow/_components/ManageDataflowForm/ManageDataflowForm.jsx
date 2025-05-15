@@ -170,6 +170,7 @@ export const ManageDataflowForm = forwardRef(
                   metadata.isReleasable,
                   metadata.showPublicInfo,
                   bigData,
+                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
                   isDataflowOpen && deliveryDate
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
                     : undefined
