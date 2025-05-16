@@ -135,8 +135,29 @@ public class PostgresBulkImporter implements Closeable {
       CopyManager copyManager = new CopyManager((BaseConnection) connection);
       copyManager.copyIn(query, inputStream);
     } catch (Exception e) {
+      delete();
       LOG.error("Unexpected error! Error in copy. Message: {}", e.getMessage());
       throw e;
+    }
+  }
+
+  /**
+   * Deletes the temporary file.
+   *
+   * @throws IOException if an I/O error occurs during closing or deletion.
+   */
+  public void delete() throws IOException {
+    if (outputStream != null) outputStream.close();
+
+    if (temporaryFile != null) {
+      try {
+        Files.deleteIfExists(temporaryFile.toPath());
+      } catch (IOException | SecurityException e) {
+        LOG.error("Failed to delete temporary file: {}", temporaryFile.getAbsolutePath(), e);
+        throw e;
+      }
+    } else {
+      LOG.warn("Temporary file is null; nothing to delete.");
     }
   }
 

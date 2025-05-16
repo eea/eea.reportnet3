@@ -13,21 +13,21 @@
   <packaging>pom</packaging>
   <version>3.0.0</version>
   <properties>
-      <api-gateway.version>v3.4</api-gateway.version>
-      <communication.version>v3.4</communication.version>
-      <collaboration.version>v3.4</collaboration.version>
-      <dataflow.version>v3.4</dataflow.version>
-      <dataset.version>v3.4</dataset.version>
-      <document.version>v3.4</document.version>
-      <frontend.version>v3.4</frontend.version>
-      <indexsearch.version>v3.4</indexsearch.version>
-      <inspire.version>v3.4</inspire.version>
-      <recordstore.version>v3.4</recordstore.version>
-      <ums.version>v3.4</ums.version>
-      <validation.version>v3.4</validation.version>
-      <common-interfaces.version>v3.4</common-interfaces.version>
-      <common-utitlities.version>v3.4</common-utitlities.version>
-      <rod.version>v3.4</rod.version>
-      <orchestrator.version>v3.4</orchestrator.version>
+      <api-gateway.version>v3.4-DELETE-TEMP-BIN-FILES</api-gateway.version>
+      <communication.version>v3.4-DELETE-TEMP-BIN-FILES</communication.version>
+      <collaboration.version>v3.4-DELETE-TEMP-BIN-FILES</collaboration.version>
+      <dataflow.version>v3.4-DELETE-TEMP-BIN-FILES</dataflow.version>
+      <dataset.version>v3.4-DELETE-TEMP-BIN-FILES</dataset.version>
+      <document.version>v3.4-DELETE-TEMP-BIN-FILES</document.version>
+      <frontend.version>v3.4-DELETE-TEMP-BIN-FILES</frontend.version>
+      <indexsearch.version>v3.4-DELETE-TEMP-BIN-FILES</indexsearch.version>
+      <inspire.version>v3.4-DELETE-TEMP-BIN-FILES</inspire.version>
+      <recordstore.version>v3.4-DELETE-TEMP-BIN-FILES</recordstore.version>
+      <ums.version>v3.4-DELETE-TEMP-BIN-FILES</ums.version>
+      <validation.version>v3.4-DELETE-TEMP-BIN-FILES</validation.version>
+      <common-interfaces.version>v3.4-DELETE-TEMP-BIN-FILES</common-interfaces.version>
+      <common-utitlities.version>v3.4-DELETE-TEMP-BIN-FILES</common-utitlities.version>
+      <rod.version>v3.4-DELETE-TEMP-BIN-FILES</rod.version>
+      <orchestrator.version>v3.4-DELETE-TEMP-BIN-FILES</orchestrator.version>
   </properties>
 </project>
