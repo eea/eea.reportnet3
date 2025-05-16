@@ -1610,7 +1610,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     } else {
                         error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
                     }
-
+                    LOG.info("Wrong number of headers. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",jobId, datasetId, schemaHeaders, csvHeaders);
                     removeFile = true;
 
                 }

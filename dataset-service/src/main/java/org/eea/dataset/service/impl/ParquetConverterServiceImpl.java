@@ -582,7 +582,14 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private static Boolean checkHeaders(ImportFileInDremioInfo importFileInDremioInfo, String tableSchemaId, DataSetSchema dataSetSchema, CSVParser csvParser) {
     RecordSchema recordSchema = getRecordSchema(tableSchemaId, dataSetSchema);
 
+    // Schema header list.
+    List<String> schemaHeaders = recordSchema.getFieldSchema()
+            .stream()
+            .map(FieldSchema::getHeaderName)
+            .collect(Collectors.toList());
+
     if (csvParser.getHeaderNames().size() != recordSchema.getFieldSchema().size()) {
+      LOG.info("Wrong number of headers. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDatasetId(),schemaHeaders, csvParser.getHeaderNames());
       return true;
     }
 
@@ -590,12 +597,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     List<String> csvHeaders = csvParser.getHeaderNames()
             .stream()
             .map(String::toLowerCase)
-            .collect(Collectors.toList());
-
-    // Schema header list.
-    List<String> schemaHeaders = recordSchema.getFieldSchema()
-            .stream()
-            .map(FieldSchema::getHeaderName)   // original case
             .collect(Collectors.toList());
 
     for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
