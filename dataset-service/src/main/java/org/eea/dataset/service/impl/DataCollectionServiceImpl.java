@@ -404,8 +404,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
       boolean stopAndNotifySQLErrors, boolean manualCheck, boolean showPublicInfo,
       boolean referenceDataflow, boolean stopAndNotifyPKError) {
 
-    DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
-    if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+    Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
+    if(Boolean.TRUE.equals(isBigDataflow)){
       //check if there are tables converted to Iceberg and convert them back to Parquet
       List<DataSetMetabaseVO> datasets = datasetMetabaseService.findDataSetByDataflowIds(Collections.singletonList(dataflowId));
       for (DataSetMetabaseVO dataset : datasets) {
@@ -818,8 +818,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             testDatasetIds.add(testDatasetId);
             datasetIdsAndSchemaIds.put(testDatasetId, design.getDatasetSchema());
 
-            DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
-            if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+            Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
+            if(Boolean.TRUE.equals(isBigDataflow)){
               //create prefilled tables for test dataset if needed
               bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), testDatasetId, 0L, null);
             }
@@ -1035,8 +1035,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
       }
 
-      DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
-      if(BooleanUtils.isTrue(dataFlowVO.getBigData())) {
+      Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         //create prefilled tables for reporting dataset if needed
         bigDataDatasetService.createPrefilledTables(design.getId(), design.getDatasetSchema(), datasetId, representative.getDataProviderId(), null);
       }

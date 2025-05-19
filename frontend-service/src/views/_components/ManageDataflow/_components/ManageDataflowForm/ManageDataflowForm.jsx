@@ -26,6 +26,7 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { Dropdown } from 'views/_components/Dropdown';
+import { AddOrganizationsService } from 'services/AddOrganizationsService';
 
 export const ManageDataflowForm = forwardRef(
   (
@@ -70,7 +71,7 @@ export const ManageDataflowForm = forwardRef(
       name: { message: '', hasErrors: false },
       obligation: { message: '', hasErrors: false }
     });
-    const [groupOfCompanies, setGroupOfCompanies] = useState([]);
+    const [providerGroups, setProviderGroups] = useState([]);
     const [name, setName] = useState(metadata.name);
     const [selectedGroup, setSelectedGroup] = useState();
 
@@ -87,8 +88,17 @@ export const ManageDataflowForm = forwardRef(
 
     const getDropdownsOptions = async () => {
       try {
-        const responseGroupOfCompanies = await RepresentativeService.getGroupOrganizations();
-        setGroupOfCompanies(responseGroupOfCompanies.data);
+        let availableProviderGroups = null;
+        isCitizenScienceDataflow
+          ? (availableProviderGroups = await RepresentativeService.getGroupOrganizations())
+          : (availableProviderGroups = await AddOrganizationsService.getProviderGroups());
+        let filteredGroups;
+        if (!isCitizenScienceDataflow) {
+          filteredGroups = availableProviderGroups.filter(
+            group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8
+          );
+        }
+        setProviderGroups(isCitizenScienceDataflow ? availableProviderGroups.data : filteredGroups);
       } catch (error) {
         console.error('ManageDataflowForm - getDropdownsOptions.', error);
       }
@@ -160,6 +170,7 @@ export const ManageDataflowForm = forwardRef(
                   metadata.isReleasable,
                   metadata.showPublicInfo,
                   bigData,
+                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
                   isDataflowOpen && deliveryDate
                     ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
                     : undefined
@@ -176,7 +187,14 @@ export const ManageDataflowForm = forwardRef(
                   bigData,
                   selectedGroup.dataProviderGroupId
                 )
-              : await DataflowService.create(name, description, metadata.obligation.id, undefined, bigData);
+              : await DataflowService.create(
+                  name,
+                  description,
+                  metadata.obligation.id,
+                  undefined,
+                  bigData,
+                  selectedGroup.dataProviderGroupId
+                );
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
@@ -286,20 +304,35 @@ export const ManageDataflowForm = forwardRef(
             </div>
           </div>
 
-          {isCitizenScienceDataflow && (
+          {isCitizenScienceDataflow ? (
             <div className={styles.dropdownsWrapper}>
               <Dropdown
                 appendTo={document.body}
-                ariaLabel="groupOfCompanies"
-                className={styles.groupOfCompaniesWrapper}
+                ariaLabel="providerGroups"
                 disabled={isEditing && !isDesign}
-                name="groupOfCompanies"
+                name="providerGroups"
                 onChange={event => onSelectGroup(event.target.value)}
-                onFocus={() => handleErrors({ field: 'groupOfCompanies', hasErrors: false, message: '' })}
+                onFocus={() => handleErrors({ field: 'providerGroups', hasErrors: false, message: '' })}
                 optionLabel="label"
-                options={groupOfCompanies}
+                options={providerGroups}
                 placeholder={resourcesContext.messages['selectGroupOfCompanies']}
-                tooltip={isDesign ? resourcesContext.messages['groupOfCompaniesDisabledTooltip'] : ''}
+                tooltip={isDesign ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
+                value={selectedGroup ? selectedGroup : dataProviderGroup}
+              />
+            </div>
+          ) : (
+            <div className={styles.dropdownsWrapper}>
+              <Dropdown
+                appendTo={document.body}
+                ariaLabel="providerGroups"
+                disabled={isEditing && !isDesign}
+                name="providerGroups"
+                onChange={event => onSelectGroup(event.target.value)}
+                onFocus={() => handleErrors({ field: 'providerGroups', hasErrors: false, message: '' })}
+                optionLabel="label"
+                options={providerGroups}
+                placeholder={resourcesContext.messages['selectGroupOfReportingEntities']}
+                tooltip={isDesign ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
                 value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>

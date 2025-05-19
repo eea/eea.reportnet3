@@ -710,10 +710,9 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
             bw.write(",\"tableName\":\"" + tableSchema.getNameTableSchema() + "\"");
           }
         }
-        if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-                || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-          bw.write(",\"totalRecords\":" + totalRecords);
-        }
+
+        bw.write(",\"totalRecords\":" + totalRecords);
+
         if (i == tableSchemaList.size() - 1) {
           bw.write("}");
         } else {
@@ -2051,12 +2050,11 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
         bw.write("{\n\"tables\": [\n");
       }
       bw.write("{");
-      if (StringUtils.isNotBlank(tableSchemaId) || StringUtils.isNotBlank(columnName)
-              || StringUtils.isNotBlank(filterValue) || StringUtils.isNotBlank(dataProviderCodes)) {
-        bw.write("\"totalRecords\":");
-        bw.write(totalRecords.toString());
-        bw.write(",\n");
-      }
+
+      bw.write("\"totalRecords\":");
+      bw.write(totalRecords.toString());
+      bw.write(",\n");
+
       bw.write("\"tableName\":");
       bw.write("\"" + tableName + "\"");
       bw.write(",\n");

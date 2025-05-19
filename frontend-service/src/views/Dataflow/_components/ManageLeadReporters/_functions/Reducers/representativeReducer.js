@@ -38,6 +38,12 @@ export const reducer = (state, { type, payload }) => {
         allPossibleDataProvidersNoSelect: payload.providersNoSelect
       };
 
+    case 'GET_REPORTING_GROUPS':
+      return {
+        ...state,
+        reportingGroups: payload.reportingGroups
+      };
+
     case 'GET_PROVIDERS_TYPES_LIST':
       return { ...state, dataProvidersTypesList: payload.providerTypes };
 
@@ -66,6 +72,7 @@ export const reducer = (state, { type, payload }) => {
         let selectedGroup = null;
         if (isNil(state.selectedDataProviderGroup)) {
           selectedGroup = isNil(group[0]) ? null : group[0];
+          if (payload.dataProviderGroup) selectedGroup = payload.dataProviderGroup;
         } else {
           selectedGroup = state.selectedDataProviderGroup;
         }

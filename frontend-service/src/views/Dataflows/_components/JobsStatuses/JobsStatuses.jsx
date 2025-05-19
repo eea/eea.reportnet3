@@ -81,7 +81,6 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [showValidationTable, setShowValidationTable] = useState(false);
   const [paginationInfo, setPaginationInfo] = useState({ recordsPerPage: 10, firstPageRecord: 0 });
-  const [columns, setColumns] = useState([]);
   const [cancelledValidations, setCancelledValidations] = useState([]);
   const [totalCancelledValidations, setTotalCancelledValidations] = useState(0);
   const [isLoadingCancelledValidations, setIsLoadingCancelledValidations] = useState(false);
@@ -265,13 +264,13 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         sortField: sortOption?.sortField || sortCancelled.field, 
         jobId: jobStatus?.jobId ?? jobStatus?.id
       });
-      console.log('Cancelled tasks data:', data); // Debugging line
       setCancelledValidations(data.tasksList || []);
       setTotalCancelledValidations(data.totalRecords);
     } catch (error) {
       console.error('JobsStatus - getCancelledTasks.', error);
       setLoadingStatus('error');
       notificationContext.add({ type: 'GET_CANCELLED_TASKS_ERROR' }, true);
+      setShowValidationTable(false);
     } finally {
       setIsLoadingCancelledValidations(false);
     }
@@ -867,10 +866,9 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
                       }
                       rowClassName={newCancelledTasksClassName}
                       rows={paginationInfo.recordsPerPage}
-                      rowsPerPageOptions={[5, 10, 15, 50]}
+                      rowsPerPageOptions={[5, 10, 15]}
                       totalRecords={totalCancelledValidations}
                       value={cancelledValidations}>
-                      {/* {columns} */}
                       {getCancelledValidationsColumns()}
                     </DataTable>
                   ) : (

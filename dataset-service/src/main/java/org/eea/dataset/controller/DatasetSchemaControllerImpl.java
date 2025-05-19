@@ -558,8 +558,8 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
 
     try {
       Boolean updateMaterializedViews = true;
-      DataFlowVO dataFlowVO = dataflowControllerZuul.findById(dataflowId, null);
-      if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()) {
+      Boolean isBigDataflow = dataflowControllerZuul.isBigDataflow(dataflowId);
+      if(Boolean.TRUE.equals(isBigDataflow)){
         updateMaterializedViews = false;
       }
       dataschemaService.updateTableSchema(datasetId, tableSchemaVO, updateMaterializedViews);

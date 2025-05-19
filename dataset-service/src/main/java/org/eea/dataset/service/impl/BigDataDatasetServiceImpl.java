@@ -23,6 +23,7 @@ import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.*;
 import org.eea.dataset.service.file.FileCommonUtils;
+import org.eea.dataset.service.file.ZipUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAErrorMessage;
@@ -61,11 +62,12 @@ import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,6 +79,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.*;
 import java.util.*;
@@ -98,64 +101,56 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Value("${importPath}")
     private String importPath;
 
+    /**  The path export DL */
+    @Value("${exportDLPath}")
+    private String exportDLPath;
+
+    private int defaultFileExportProcessPriority = 20;
+
     private static final int defaultImportProcessPriority = 20;
 
-    @Autowired
-    DatasetService datasetService;
     ParquetConverterService parquetConverterService;
 
-    @Autowired
-    JobControllerZuul jobControllerZuul;
+    private final JobControllerZuul jobControllerZuul;
 
-    @Autowired
-    JobProcessControllerZuul jobProcessControllerZuul;
+    private final JobProcessControllerZuul jobProcessControllerZuul;
 
-    @Autowired
-    DatasetMetabaseService datasetMetabaseService;
+    private final DatasetMetabaseService datasetMetabaseService;
 
-    @Autowired
-    ProcessControllerZuul processControllerZuul;
+    private final ProcessControllerZuul processControllerZuul;
 
     private FileTreatmentHelper fileTreatmentHelper;
 
-    @Autowired
     private KafkaSenderUtils kafkaSenderUtils;
 
-    @Autowired
     public RepresentativeControllerZuul representativeControllerZuul;
 
-    @Autowired
-    FileCommonUtils fileCommonUtils;
+    private final FileCommonUtils fileCommonUtils;
 
-    @Autowired
-    DatasetSchemaService datasetSchemaService;
+    private final DatasetSchemaService datasetSchemaService;
 
-    @Autowired
-    SpatialDataHandling  spatialDataHandling;
+    private final SpatialDataHandling  spatialDataHandling;
 
-    @Autowired
-    DatasetTableService datasetTableService;
+    private final DatasetTableService datasetTableService;
 
-    @Autowired
-    DataFlowControllerZuul dataFlowControllerZuul;
+    private final DataFlowControllerZuul dataFlowControllerZuul;
 
-    @Autowired
     private CreateEmptyTables createEmptyTables;
 
     /** The pk catalogue repository. */
-    @Autowired
     private PkCatalogueRepository pkCatalogueRepository;
 
-    @Autowired
     private DatasetSnapshotService datasetSnapshotService;
 
-    @Autowired
     private TableDataRetriever tableDataRetriever;
 
     private final S3Service s3ServicePrivate;
     private final S3Service s3ServicePublic;
     private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
+    private final DatasetService datasetService;
+    private final EtlExportV5Service etlExportV5Service;
+
     private final DremioHelperService dremioHelperService;
     private JdbcTemplate dremioJdbcTemplate;
 
@@ -172,7 +167,24 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
 
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
-                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository) {
+                                     ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
+                                     JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
+                                     FileCommonUtils fileCommonUtils, @Lazy DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
+                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever, EtlExportV5Service etlExportV5Service) {
+        this.jobControllerZuul =  jobControllerZuul;
+        this.jobProcessControllerZuul = jobProcessControllerZuul;
+        this.datasetMetabaseService = datasetMetabaseService;
+        this.processControllerZuul = processControllerZuul;
+        this.kafkaSenderUtils = kafkaSenderUtils;
+        this.representativeControllerZuul  = representativeControllerZuul;
+        this.fileCommonUtils = fileCommonUtils;
+        this.datasetSchemaService = datasetSchemaService;
+        this.spatialDataHandling = spatialDataHandling;
+        this.datasetTableService = datasetTableService;
+        this.dataFlowControllerZuul = dataFlowControllerZuul;
+        this.createEmptyTables = createEmptyTables;
+        this.pkCatalogueRepository = pkCatalogueRepository;
+        this.tableDataRetriever = tableDataRetriever;
         this.s3HelperPrivate = s3HelperPrivate;
         this.s3HelperPublic = s3HelperPublic;
         this.s3ServicePublic = s3HelperPublic.getS3Service();
@@ -182,6 +194,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.fileTreatmentHelper = parquetConverterService.getFileTreatmentHelper();
         this.dremioJdbcTemplate = dremioJdbcTemplate;
         this.schemasRepository = schemasRepository;
+        this.datasetSnapshotService = datasetSnapshotService;
+        this.datasetService = datasetService;
+        this.etlExportV5Service = etlExportV5Service;
     }
 
 
@@ -1327,11 +1342,18 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH) || !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaName)) {
             //table does not exist, so we need to create it first
             StringBuilder createIcebergTable = new StringBuilder("CREATE TABLE IF NOT EXISTS " + icebergTablePath + " (");
-            createIcebergTable.append("\"" + PARQUET_RECORD_ID_COLUMN_HEADER + "\" VARCHAR, \"" + PARQUET_PROVIDER_CODE_COLUMN_HEADER + "\" VARCHAR");
+            String fieldNames = PARQUET_RECORD_ID_COLUMN_HEADER + "," + PARQUET_PROVIDER_CODE_COLUMN_HEADER;
+            String fieldsWithTypes = Arrays.stream(fieldNames.split(","))
+                .map(String::trim)
+                .filter(field -> !field.isBlank())
+                .map(field -> UtilityClass.addQuotesToFieldNames(field) + " VARCHAR")
+                .collect(Collectors.joining(", "));
+
+            createIcebergTable.append(fieldsWithTypes);
 
             for (int i = 0; i < records.get(0).getFields().size(); i++) {
                 FieldVO field = records.get(0).getFields().get(i);
-                createIcebergTable.append(", \"").append(field.getName()).append("\" ");
+                createIcebergTable.append(", ").append(UtilityClass.addQuotesToFieldNames(field.getName()));
 
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
                     createIcebergTable.append("VARBINARY");
@@ -1348,7 +1370,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         for (RecordVO record : records) {
             StringBuilder insertQueryBuilder = new StringBuilder().append("INSERT INTO ").append(icebergTablePath).append(" (");
-            insertQueryBuilder.append("\"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\", \"").append(PARQUET_PROVIDER_CODE_COLUMN_HEADER).append("\"");
+            String fieldNames = PARQUET_RECORD_ID_COLUMN_HEADER + "," + PARQUET_PROVIDER_CODE_COLUMN_HEADER;
+            insertQueryBuilder.append(UtilityClass.addQuotesToFieldNames(fieldNames));
 
             String recordId = UUID.randomUUID().toString();
             StringBuilder insertQueryValuesBuilder = new StringBuilder().append(") VALUES ('").append(recordId).append("', ").append(dataProviderCode);
@@ -1356,7 +1379,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             for (int i = 0; i < record.getFields().size(); i++) {
                 FieldVO field = record.getFields().get(i);
                 // Wrap the field name in double quotes
-                insertQueryBuilder.append(", \"").append(field.getName()).append("\"");
+                insertQueryBuilder.append(", ").append(UtilityClass.addQuotesToFieldNames(field.getName()));
 
                 if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
                     String fieldValue = (field.getValue() != null) ? field.getValue() : "";
@@ -1366,7 +1389,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     String fieldValue = "";
                     if(BooleanUtils.isTrue(field.getAutoIncrement())){
                         //set up autoincrement value
-                        String escapedFieldName = "\"" + field.getName() + "\"";
+                        String escapedFieldName = UtilityClass.addQuotesToFieldNames(field.getName());
                         String getPreviousMaxFieldValueQuery =  "SELECT CAST( " + escapedFieldName + "  AS BIGINT) AS numeric_value FROM " + icebergTablePath
                                 + " WHERE " + escapedFieldName + " IS NOT NULL AND TRIM(" + escapedFieldName + ") <> '' ORDER BY numeric_value DESC LIMIT 1";
 
@@ -1420,7 +1443,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
 
                 // Wrap field name in double quotes
-                String fieldName = "\"" + field.getName() + "\"";
+                String fieldName = UtilityClass.addQuotesToFieldNames(field.getName());
                 String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
                 updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
 
@@ -1435,7 +1458,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
-            updateQueryBuilder.append(" WHERE \"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\" = '").append(record.getId()).append("'");
+            updateQueryBuilder.append(" WHERE ")
+                .append(UtilityClass.addQuotesToFieldNames(PARQUET_RECORD_ID_COLUMN_HEADER))
+                .append(" = '")
+                .append(record.getId())
+                .append("'");
 
             if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
                 updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
@@ -1468,12 +1495,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         StringBuilder updateQueryBuilder = new StringBuilder().append("UPDATE ").append(icebergTablePath).append(" SET ");
 
         // Wrap field name in double quotes
-        String fieldName = "\"" + field.getName() + "\"";
+        String fieldName = UtilityClass.addQuotesToFieldNames(field.getName());
         String fieldValue = (field.getValue() != null) ? field.getValue().replace("'", "''") : "";
         updateQueryBuilder.append(fieldName).append(" = '").append(fieldValue).append("'");
 
         // Wrap PARQUET_RECORD_ID_COLUMN_HEADER in double quotes
-        updateQueryBuilder.append(" WHERE \"").append(PARQUET_RECORD_ID_COLUMN_HEADER).append("\" = '").append(recordId).append("'");
+        updateQueryBuilder.append(" WHERE ")
+            .append(UtilityClass.addQuotesToFieldNames(PARQUET_RECORD_ID_COLUMN_HEADER))
+            .append(" = '")
+            .append(recordId)
+            .append("'");
 
         if (spatialDataHandling.geoJsonHeadersAreNotEmpty(tableSchemaVO)) {
             updateQueryBuilder = spatialDataHandling.fixQueryForUpdateSpatialData(updateQueryBuilder.toString(), true, tableSchemaVO, 0);
@@ -1645,7 +1676,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
                 List<FieldSchemaVO> fieldSchemas = tableSchemaVO.getRecordSchema().getFieldSchema();
                 String tableHeaders = constructRecordIdCreationForQuery();
-                tableHeaders += ", " + providerCode + " AS \"" + PARQUET_PROVIDER_CODE_COLUMN_HEADER + "\", ";
+                tableHeaders += ", " + providerCode + " AS " + UtilityClass.addQuotesToFieldNames(PARQUET_PROVIDER_CODE_COLUMN_HEADER) + ", ";
+
 
                 for (FieldSchemaVO fieldSchema : fieldSchemas) {
                     if (fieldSchema.getType().equals(DataType.ATTACHMENT)) {
@@ -1653,7 +1685,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         tableHeaders += " '' AS ";
                     }
                     // Wrap field names in double quotes
-                    tableHeaders += "\"" + fieldSchema.getName() + "\", ";
+                    tableHeaders += UtilityClass.addQuotesToFieldNames(fieldSchema.getName()) + ", ";
                 }
 
                 // Remove the trailing comma, if any
@@ -1881,9 +1913,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             tablePathInDremio = s3ServicePrivate.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
         }
 
-        String selectQuery = "SELECT \"" + fieldName + "\" as " + VALUE + ", \"" + labelFieldName + "\" as " + LABEL
-            + " FROM " + tablePathInDremio +
-            " WHERE \"" + fieldName + "\" != '' AND \"" + fieldName + "\" IS NOT NULL";
+        String quotedField = UtilityClass.addQuotesToFieldNames(fieldName);
+        String quotedLabelField = UtilityClass.addQuotesToFieldNames(labelFieldName);
+
+        String selectQuery = "SELECT " + quotedField + " as " + VALUE + ", " + quotedLabelField + " as " + LABEL +
+            " FROM " + tablePathInDremio +
+            " WHERE " + quotedField + " != '' AND " + quotedField + " IS NOT NULL";
 
         if (StringUtils.isNotBlank(searchValue)) {
             searchValue = searchValue.replace("'", "''");
@@ -1911,12 +1946,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             String refValue = conditionalFieldName != null ? conditionalFieldName : VALUE;
             String refLabel = conditionalFieldName != null ? conditionalFieldName : LABEL;
+            String quotedRefValue = UtilityClass.addQuotesToFieldNames(refValue);
+            String quotedRefLabel = UtilityClass.addQuotesToFieldNames(refLabel);
             if (dataType.equals(DataType.NUMBER_INTEGER)) {
-                selectQuery = selectQuery + " AND " + refValue + " IN (" + valuesList + ")";
-                selectQuery = selectQuery + " ORDER BY " + refValue;
+                selectQuery = selectQuery + " AND " + quotedRefValue + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + quotedRefValue;
             } else {
-                selectQuery = selectQuery + " AND " + refLabel + " IN (" + valuesList + ")";
-                selectQuery = selectQuery + " ORDER BY " + refLabel;
+                selectQuery = selectQuery + " AND " + quotedRefLabel + " IN (" + valuesList + ")";
+                selectQuery = selectQuery + " ORDER BY " + quotedRefLabel;
             }
         }
         LOG.info("Query to execute in links: {}", selectQuery);
@@ -2086,5 +2123,165 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         return releasedDatasetDataInfoVO;
+    }
+
+    @Override
+    public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException {
+        try {
+            // the path of the parent folder which will be zipped
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/etlExportV4_" + jobId;
+            DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+            updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
+            if (StringUtils.isNotBlank(tableSchemaId)) {
+                String tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+                fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaId, tableName, true, jobId);
+                if(includeAttachments){
+                    //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_TABLE_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_TABLE_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_EU_TABLE_PATH;
+                     }
+                     S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, tableName, tableName, path);
+                    if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                        String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                        s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                    }
+                }
+            } else {
+                List<TableSchemaIdNameVO> tableSchemaIdNameVOS = datasetSchemaService.getTableSchemasIds(datasetId);
+                for (TableSchemaIdNameVO tableSchemaIdNameVO : tableSchemaIdNameVOS) {
+                    fileTreatmentHelper.convertParquetFile(datasetId, CSV, tableSchemaIdNameVO.getIdTableSchema(), tableSchemaIdNameVO.getNameTableSchema(), true, jobId);
+                }
+                 if(includeAttachments){
+                     //get attachments if they exist
+                     String path = null;
+                     if(datasetType.equals(DatasetTypeEnum.DESIGN) || datasetType.equals(DatasetTypeEnum.TEST) || datasetType.equals(DatasetTypeEnum.REPORTING) || datasetType.equals(DatasetTypeEnum.REFERENCE)){
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_PATH;
+                     }
+                     else if(datasetType.equals(DatasetTypeEnum.COLLECTION)){
+                         path = S3_ATTACHMENTS_DC_FOLDER_PATH;
+                     } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
+                         path = S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
+                     }
+                    S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, null, null, path);
+                     if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
+                         String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
+                         s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, folderToZipPath);
+                     }
+                }
+            }
+
+            zipFolder(jobId, folderToZipPath);
+            finishJob(datasetId, dataflowId, jobId, user, processUUID);
+        }
+        catch (Exception e) {
+            exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    @Override
+    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) {
+        try {
+            String localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
+            updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
+
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+            String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate);
+
+            String tableName = null;
+            if (StringUtils.isNotBlank(tableSchemaId)) {
+                tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+            }
+            DownloadFilter filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName);
+            s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
+
+            zipFolder(jobId, localPath);
+            finishJob(datasetId, dataflowId, jobId, user, processUUID);
+        }
+        catch (Exception e) {
+            exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    /**
+     * Updating the job process
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     */
+    private void updateJobProcess(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID) {
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId !=null) {
+            JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+            jobProcessControllerZuul.save(jobProcessVO);
+        }
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+    }
+
+    /**
+     * Handle the exceptions
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     * @param e The exception
+     */
+    private void exceptionHandling(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID, Exception e) {
+        LOG.error("EtlExport failed for jobId {} Error: {}", jobId, e.getMessage());
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId != null) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+    }
+
+    /**
+     * Finish the process
+     *
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     */
+    private void finishJob(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID) {
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId !=null) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        }
+    }
+
+    /***
+     * Zipping the folder and deleting unzipped folder
+     *
+     * @param jobId The job id
+     * @param localPath The folder to zip path
+     * @throws IOException The Exception
+     */
+    private void zipFolder(Long jobId, String localPath) throws IOException {
+        File unZippedFile = new File(localPath);
+        File zippedFile = new File(localPath + ".zip");
+        try {
+            ZipUtils.zipFolder(unZippedFile, zippedFile);
+            FileUtils.deleteDirectory(unZippedFile);
+        } catch (Exception e) {
+            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath);
+            throw e;
+        }
     }
 }

@@ -184,6 +184,10 @@ export const PaMsWebformField = ({
               !isNil(conditionalField)
                 ? conditionalField.type === 'MULTISELECT_CODELIST'
                   ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
+                  : (conditionalField.type === 'LINK' || conditionalField.fieldType === 'LINK') &&
+                    Array.isArray(conditionalField.value) &&
+                    conditionalField.value?.length > 1
+                  ? conditionalField.value?.join(';')
                   : conditionalField.value
                 : encodeURIComponent(element.value),
               localDatasetSchemaId,
@@ -262,8 +266,8 @@ export const PaMsWebformField = ({
         conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
         ((conditionalField.fieldType === 'LINK' || conditionalField.fieldType === 'EXTERNAL_LINK') &&
           Array.isArray(conditionalField.value))
-          ? conditionalField.value.join(';')
-          : conditionalField.value
+          ? { ...conditionalField, value: conditionalField.value.join(';') }
+          : { ...conditionalField }
       );
     }
 
@@ -278,7 +282,7 @@ export const PaMsWebformField = ({
         if (!isNil(conditionalFields) && !isNil(parsedValues)) {
           await DatasetService.updateConditionalFieldsWebform(
             datasetId,
-            conditionalFields,
+            parsedValues,
             record.recordId,
             bigData ? (referencedTableSchemaId ? referencedTableSchemaId : tableSchemaId) : tableSchemaId
           );

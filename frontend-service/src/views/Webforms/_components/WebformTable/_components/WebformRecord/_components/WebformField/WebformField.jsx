@@ -43,14 +43,12 @@ export const WebformField = ({
   datasetSchemaId,
   element,
   hasErrors,
-  entitiesRecords,
   isConditional,
   isConditionalChanged,
   isSubTableCreated,
   newRecord,
   onFillField,
   onSaveField,
-  onUpdateEntitiesValue,
   record,
   referencedTableSchemaId,
   rootPkFieldId,
@@ -339,16 +337,6 @@ export const WebformField = ({
     }
   };
 
-  const renderSinglePamsTemplate = option => {
-    const pams = entitiesRecords.find(pamRecord => pamRecord.elements.find(element => element.value === option.value));
-
-    if (!isNil(pams)) {
-      return `#${option.label} - ${pams.elements.find(element => TextUtils.areEquals(element.name, 'Title')).value}`;
-    } else {
-      return option.label;
-    }
-  };
-
   const changeDatePickerPosition = inputLeftPosition => {
     const datePickerElements = document.getElementsByClassName('p-datepicker');
     for (let index = 0; index < datePickerElements.length; index++) {
@@ -475,7 +463,6 @@ export const WebformField = ({
             appendTo={document.body}
             disabled={field?.readOnly}
             id={field.fieldId}
-            itemTemplate={TextUtils.areEquals(field.name, 'ListOfSinglePams') ? renderSinglePamsTemplate : null}
             maxSelectedLabels={10}
             onChange={() => {
               if (isNil(field.recordId)) onSaveField(option, field.value);

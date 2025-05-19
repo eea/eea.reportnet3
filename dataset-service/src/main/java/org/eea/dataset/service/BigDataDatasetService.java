@@ -248,4 +248,32 @@ public interface BigDataDatasetService {
      */
     ReleasedDatasetDataInfoVO getReleasedDatasetDataInfoDL(DataSetMetabaseVO collectionDataset, DataSetMetabaseVO reportingDataset, Long dataflowId,
                                                            DataProviderVO dataProviderVO, String tableSchemaId, DatasetTypeEnum datasetType) throws Exception;
+
+    /***
+     * ETL export for csv
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param tableSchemaId The table schema id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     * @param includeAttachments include attachments boolean
+     * @throws EEAException The exception
+     */
+    void etlExportCsv(Long datasetId, Long dataflowId ,String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
+
+    /**
+     * ETL export for parquet
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param tableSchemaId The table schema id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     * @param includeAttachments include attachments boolean
+     * @throws EEAException The exception
+     */
+    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
 }

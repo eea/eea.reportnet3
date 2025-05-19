@@ -550,6 +550,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
+    @Async
     public void createReferenceDatasetPublicFiles(Long referenceDatasetId, DataFlowVO dataflowVO) throws EEAException, IOException {
         DataSetMetabase datasetMetabase = dataSetMetabaseRepository.findById(referenceDatasetId)
                 .orElseThrow(() -> new EEAException("DatasetMetabase not found for ID: " + referenceDatasetId));
@@ -569,7 +570,7 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     @Async
     public void createReferenceDatasetFiles(DataSetMetabase dataset) throws IOException {
-
+        LOG.info("Creating reference dataset files for  dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
         ExportFilterVO filters = new ExportFilterVO();
         List<DesignDataset> desingDataset =
                 designDatasetRepository.findByDataflowId(dataset.getDataflowId());
@@ -606,6 +607,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
     @Async
     public void createReferenceDatasetFilesDL(DataSetMetabase dataset) throws EEAException {
+        LOG.info("Creating reference dataset files for big data dataflowId {} and datasetId {}", dataset.getDataflowId(), dataset.getId());
         String nameFileUnique = String.format("%s", dataset.getDataSetName());
 
         createFilesAndZipDL(dataset, importPath + "/dataflow-" + dataset.getDataflowId(), nameFileUnique);
@@ -716,7 +718,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     createCsvWithFiltersDL(headers, csvFile, rs, includeCountryCode);
                 }
             } else {
-                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName);
+                convertParquetFile(datasetId, mimeType, tableSchemaId, tableName, false, null);
             }
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_TABLE_DATA_COMPLETED_EVENT, null, notificationVO);
             LOG.info("Successfully exported table data for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
@@ -798,7 +800,7 @@ public class FileTreatmentHelper implements DisposableBean {
         return dataQuery;
     }
 
-    private void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName) {
+    public void convertParquetFile(Long datasetId, String mimeType, String tableSchemaId, String tableName, Boolean etlExportV4, Long jobId) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
 
@@ -808,7 +810,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Exporting table data for S3PathResolver {} with exportFilenames {}", s3PathResolver, exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
-                convertParquetToCSV(exportFilenames, tableName, datasetId, tableSchemaId, dataset.getDatasetTypeEnum());
+                convertParquetToCSV(exportFilenames, tableName, datasetId, tableSchemaId, dataset.getDatasetTypeEnum(), etlExportV4, jobId);
             } else if (mimeType.equalsIgnoreCase(FileTypeEnum.JSON.getValue())) {
                 convertParquetToJSON(exportFilenames, tableName, datasetId, dataset.getDatasetTypeEnum());
             }/*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
@@ -829,7 +831,7 @@ public class FileTreatmentHelper implements DisposableBean {
         }
     }
 
-    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId, DatasetTypeEnum datasetTypeEnum) {
+    private void convertParquetFileZip(Long datasetId, String mimeType, String tableName, ZipOutputStream out, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) {
         DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
         S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), tableName);
 
@@ -840,7 +842,7 @@ public class FileTreatmentHelper implements DisposableBean {
             LOG.info("Exporting table data with exportFilenames {}", exportFilenames);
 
             if (mimeType.equalsIgnoreCase(CSV.getValue())) {
-                convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, tableSchemaId, out, datasetTypeEnum);
+                convertParquetToCSVinZIP(exportFilenames, tableName, datasetId, tableSchemaId, out, datasetTypeEnum, etlExportV4);
             } /*else if (mimeType.equalsIgnoreCase(FileTypeEnum.XLSX.getValue())) {
                 File parquetFile = s3Helper.getFileFromS3(key, nameDataset, exportDLPath, LiteralConstants.PARQUET_TYPE);
                 nameDataset = nameDataset + XLSX_TYPE;
@@ -1126,7 +1128,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                     for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                         LOG.info("Exporting tableSchema {}", tableSchema);
-                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum());
+                        convertParquetFileZip(datasetId, extension, tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), dataset.getDatasetTypeEnum(), false);
                     }
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
                 } catch (Exception e) {
@@ -2990,7 +2992,7 @@ public class FileTreatmentHelper implements DisposableBean {
             try (ZipOutputStream out = new ZipOutputStream(new FileOutputStream(fileWriteZip.toString()))) {
                 for (TableSchema tableSchema : dataSetSchema.getTableSchemas()) {
                     LOG.info("Exporting tableSchema {}", tableSchema);
-                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), datasetType);
+                    convertParquetFileZip(dataset.getId(), FileTypeEnum.CSV.getValue(), tableSchema.getNameTableSchema(), out, tableSchema.getIdTableSchema().toString(), datasetType, false);
                 }
             } catch (Exception e) {
                 LOG.error("Error creating zip file for datasetId {}. Message: {}", dataset.getId(), e.getMessage(), e);
@@ -3048,14 +3050,14 @@ public class FileTreatmentHelper implements DisposableBean {
             return isProcessStarted;
         }
 
-        private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out, DatasetTypeEnum datasetTypeEnum) {
+        private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) {
             try {
                 File csvFile;
                 List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
+                    csvFile = s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, null);
                 } else {
-                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers);
+                    csvFile = s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, null);
                 }
 
                 s3ConvertService.convertParquetToCSVinZIP(csvFile, tableName, out);
@@ -3065,13 +3067,13 @@ public class FileTreatmentHelper implements DisposableBean {
             }
         }
 
-        private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, DatasetTypeEnum datasetTypeEnum) {
+        private void convertParquetToCSV(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4, Long jobId) {
             try {
                 List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
                 if (CollectionUtils.isEmpty(exportFilenames)) {
-                    s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers);
+                    s3ConvertService.createEmptyCSVFile(tableName, datasetId, headers, etlExportV4, jobId);
                 } else {
-                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers);
+                    s3ConvertService.createCSVFile(exportFilenames, tableName, datasetId, datasetTypeEnum, headers, etlExportV4, jobId);
                 }
             } catch (Exception e) {
                 LOG.error("Unexpected error! Error in convertParquetToCSV for datasetId {} and tableName {}", datasetId, tableName, e);

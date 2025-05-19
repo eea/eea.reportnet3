@@ -412,7 +412,7 @@ public interface DatasetController {
    * @param filterValue the filter value
    * @param columnName the column name
    * @param dataProviderCodes the data provider codes
-   * @return the a hashmap
+   * @return a hashmap
    */
   @GetMapping("/v3/etlExport/{datasetId}")
   Map<String, Object> etlExportDatasetWithJob(@PathVariable("datasetId") Long datasetId,
@@ -424,6 +424,30 @@ public interface DatasetController {
                                               @RequestParam(value = "filterValue", required = false) String filterValue,
                                               @RequestParam(value = "columnName", required = false) String columnName,
                                               @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes);
+
+  /**
+   * V4 Etl export dataset. Exports zip which include csv with record id
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param includeAttachments includeAttachments if true, returns attachments in the zip
+   * @return a hashmap
+   */
+  @GetMapping("/v4/etlExport/{datasetId}")
+  Map<String, Object> etlExportZipCsv(@PathVariable("datasetId") Long datasetId,
+                                              @RequestParam("dataflowId") Long dataflowId,
+                                              @RequestParam(value = "providerId", required = false) Long providerId,
+                                              @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                              @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+
+  @GetMapping("/v5/etlExport/{datasetId}")
+  Map<String, Object> etlExportZipParquet(@PathVariable("datasetId") Long datasetId,
+                                      @RequestParam("dataflowId") Long dataflowId,
+                                      @RequestParam(value = "providerId", required = false) Long providerId,
+                                      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                      @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
 
   /**
    * Etl import dataset.
@@ -840,6 +864,8 @@ public interface DatasetController {
    * @param filterValue
    * @param columnName
    * @param dataProviderCodes
+   * @param exportCsv
+   * @param includeAttachments
    * @param jobId
    * @return
    */
@@ -853,6 +879,9 @@ public interface DatasetController {
           @RequestParam(value = "filterValue", required = false) String filterValue,
           @RequestParam(value = "columnName", required = false) String columnName,
           @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
+          @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
+          @RequestParam(value = "exportParquet", required = false) Boolean exportParquet,
+          @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
           @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
 
   /**
@@ -1042,4 +1071,7 @@ public interface DatasetController {
   @GetMapping("/getReleasedDatasetDataInfo")
   ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode,
                                                        @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
+
+  @PostMapping("/private/clearOldLocks")
+  int clearOldLocks();
 }

@@ -6,6 +6,7 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
+import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.s3configuration.types.S3Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -21,6 +23,11 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
+import software.amazon.awssdk.transfer.s3.model.CompletedDirectoryDownload;
+import software.amazon.awssdk.transfer.s3.model.DirectoryDownload;
+import software.amazon.awssdk.transfer.s3.model.DownloadDirectoryRequest;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,6 +51,7 @@ public class S3HelperImpl implements S3Helper {
 
     private final S3Service s3Service;
     private final S3Client s3Client;
+    private final S3AsyncClient s3AsyncClient;
     private final S3Presigner s3Presigner;
     private final String S3_DEFAULT_BUCKET_NAME;
 
@@ -53,6 +61,7 @@ public class S3HelperImpl implements S3Helper {
     public S3HelperImpl(S3Service s3Service, @Qualifier("s3PrivateConfiguration") S3Configuration s3Configuration) {
         this.s3Service = s3Service;
         this.s3Client = s3Configuration.getS3Client();
+        this.s3AsyncClient = s3Configuration.getS3AsyncClient();
         this.s3Presigner = s3Configuration.getS3Presigner();
         this.S3_DEFAULT_BUCKET_NAME = s3Configuration.getS3DefaultBucketName();
         this.S3_ICEBERG_BUCKET_NAME = s3Configuration.getS3IcebergBucketName();
@@ -434,5 +443,58 @@ public class S3HelperImpl implements S3Helper {
 
         ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(objectRequest);
         return objectBytes.asByteArray();
+    }
+
+    @Override
+    public void getAttachmentsFromS3Locally(String attachmentsPathInS3, String parentFolderInDiskPath){
+        try {
+            ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                    .bucket(S3_DEFAULT_BUCKET_NAME) //attachments are only kept in the parquet bucket and never in the iceberg bucket
+                    .prefix(attachmentsPathInS3)
+                    .build();
+
+            ListObjectsV2Response listResponse = s3Client.listObjectsV2(listRequest);
+            List<S3Object> objects = listResponse.contents();
+
+            for (S3Object obj : objects) {
+                String key = obj.key();
+                if (!key.contains("attachments/") || key.endsWith("/")) {
+                    continue;
+                }
+
+                String relativePath = key.substring(key.indexOf("attachments/"));
+                Path targetPath = Paths.get(parentFolderInDiskPath, relativePath);
+
+                Files.createDirectories(targetPath.getParent());
+                s3Client.getObject(GetObjectRequest.builder()
+                        .bucket(S3_DEFAULT_BUCKET_NAME)
+                        .key(key)
+                        .build(), targetPath);
+
+            }
+            LOG.info("Downloaded attachments from s3 path {} to local path {}", attachmentsPathInS3, parentFolderInDiskPath);
+        }
+        catch (Exception e){
+            LOG.error("Could not download attachments from path {} to {} Error: ", attachmentsPathInS3, parentFolderInDiskPath, e);
+        }
+    }
+
+    @Override
+    public void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
+        DirectoryDownload directoryDownload;
+        try (S3TransferManager transferManager = S3TransferManager.builder()
+            .s3Client(s3AsyncClient)
+            .build()) {
+            directoryDownload = transferManager.downloadDirectory(DownloadDirectoryRequest.builder()
+                .destination(Paths.get(localPath))
+                .bucket(S3_DEFAULT_BUCKET_NAME)
+                .filter(filter)
+                .build());
+            CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
+            completedDirectoryDownload.failedTransfers().forEach(failedFileDownload -> LOG.error(failedFileDownload.exception().getMessage()));
+        } catch (Exception e) {
+            LOG.error("Error while trying to download file from S3 to local NFS", e);
+            throw new RuntimeException(e);
+        }
     }
 }

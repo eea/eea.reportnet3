@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -49,8 +50,13 @@ import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Stream;
+
+import static org.eea.utils.LiteralConstants.*;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -74,6 +80,10 @@ public class JobServiceImpl implements JobService {
 
     @Value("${importPath}")
     private String importPath;
+
+    /**  The path export DL */
+    @Value("${exportDLPath}")
+    private String exportDLPath;
 
     /**
      * The admin user.
@@ -349,8 +359,11 @@ public class JobServiceImpl implements JobService {
         String filterValue = (parameters.get("filterValue") != null) ? (String) parameters.get("filterValue") : null;
         String columnName = (parameters.get("columnName") != null) ? (String) parameters.get("columnName") : null;
         String dataProviderCodes = (parameters.get("dataProviderCodes") != null) ? (String) parameters.get("dataProviderCodes") : null;
+        Boolean exportCsv = (parameters.get(EXPORT_CSV) != null) ? (Boolean) parameters.get(EXPORT_CSV) : false;
+        Boolean exportParquet = (parameters.get(EXPORT_PARQUET) != null) ? (Boolean) parameters.get(EXPORT_PARQUET) : false;
+        Boolean includeAttachments = (parameters.get("includeAttachments") != null) ? (Boolean) parameters.get("includeAttachments") : false;
 
-        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobVO.getId());
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, exportParquet ,includeAttachments, jobVO.getId());
     }
 
     @Transactional
@@ -602,21 +615,37 @@ public class JobServiceImpl implements JobService {
     /**
      * Download etl exported file.
      *
-     * @param jobId the job id
+     * @param job the job
      * @param fileName the file name
      * @return the file
      * @throws IOException Signals that an I/O exception has occurred.
      * @throws EEAException the EEA exception
      */
     @Override
-    public File downloadEtlExportedFile(Long jobId, String fileName) throws EEAException {
+    public File downloadEtlExportedFile(JobVO job, String fileName) throws EEAException {
         // we compound the route and create the file
-        File file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
+
+        File file;
+        if(job.getParameters().get(EXPORT_CSV) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_CSV))){
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + "/etlExportV4_" + job.getId();
+            file = getFile(folderToZipPath);
+        } else if (job.getParameters().get(EXPORT_PARQUET) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_PARQUET))) {
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + LiteralConstants.PARQUET_EXPORT_NAME + job.getId();
+            file = getFile(folderToZipPath);
+        } else{
+            file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
+        }
+        // we compound the route and create the file
         if (!file.exists()) {
-            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", jobId, fileName);
+            LOG.error( "Trying to download a file generated during the export dataset data process for jobId {} but the file {} is not found", job.getId(), fileName);
             throw new EEAException(EEAErrorMessage.FILE_NOT_FOUND);
         }
         return file;
+    }
+
+
+    private File getFile(String folderToZipPath) {
+      return new File(folderToZipPath + ".zip");
     }
 
     @Override

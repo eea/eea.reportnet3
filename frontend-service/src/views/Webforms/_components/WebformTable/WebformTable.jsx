@@ -23,19 +23,16 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformTable = ({
   bigData,
-  calculateSingle,
   dataProviderId,
   dataflowId,
   datasetId,
   datasetSchemaId,
-  entitiesRecords,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
   isIcebergCreated,
   isLoadingIceberg,
   isRefresh,
   isReporting,
   onTabChange,
-  onUpdateEntitiesValue,
   rootPkFieldId,
   rootTableName,
   selectedTable = { fieldSchemaId: null, rootTableId: undefined, recordId: null, tableName: null },
@@ -302,13 +299,11 @@ export const WebformTable = ({
     <WebformRecord
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
       bigData={bigData}
-      calculateSingle={calculateSingle}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
       dataflowId={dataflowId}
       dataProviderId={dataProviderId}
       datasetId={datasetId}
       datasetSchemaId={datasetSchemaId}
-      entitiesRecords={entitiesRecords}
       hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
       isAddingMultiple={webformTableState.isAddingMultiple}
       isFixedNumber={webformData.fixedNumber || webformData.tableSchemaFixedNumber || null}
@@ -318,7 +313,6 @@ export const WebformTable = ({
       onAddMultipleWebform={onAddMultipleWebform}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
-      onUpdateEntitiesValue={onUpdateEntitiesValue}
       record={record}
       rootPkFieldId={rootPkFieldId}
       rootTableName={rootTableName}
