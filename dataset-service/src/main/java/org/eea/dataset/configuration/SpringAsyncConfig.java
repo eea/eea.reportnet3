@@ -19,6 +19,8 @@ public class SpringAsyncConfig implements AsyncConfigurer {
     SimpleAsyncTaskExecutor executor = new SimpleAsyncTaskExecutor();
     executor.setThreadNamePrefix("asynchronous-taskExecutor-thread-");
 
+    executor.setTaskDecorator(new MdcTaskDecorator());
+
     return new DelegatingSecurityContextAsyncTaskExecutor(executor);
   }
 }

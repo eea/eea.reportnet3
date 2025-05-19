@@ -1,6 +1,9 @@
 package org.eea.dataset.configuration;
 
+import java.util.Collections;
 import java.util.concurrent.Callable;
+
+import org.eea.dataset.interceptor.RestTemplateInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.CallableProcessingInterceptor;
 import org.springframework.web.context.request.async.TimeoutCallableProcessingInterceptor;
@@ -81,6 +85,13 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
     configurer.registerCallableInterceptors(callableProcessingInterceptor());
   }
 
+  @Bean
+  public RestTemplate restTemplate() {
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.setInterceptors(Collections.singletonList(new RestTemplateInterceptor()));
+    return restTemplate;
+  }
+
   /**
    * Gets the async executor.
    *
@@ -93,6 +104,7 @@ public class DatasetMvcConfig implements WebMvcConfigurer {
     executor.setCorePoolSize(5);
     executor.setMaxPoolSize(10);
     executor.setQueueCapacity(25);
+    executor.setTaskDecorator(new MdcTaskDecorator()); // 👈 critical!
     return executor;
   }
 
