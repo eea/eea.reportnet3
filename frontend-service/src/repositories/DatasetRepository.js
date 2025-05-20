@@ -38,7 +38,7 @@ export const DatasetRepository = {
 
   deleteData: async (datasetId, deletePrefilledTables) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
-
+  
   deleteAttachment: async ({
     dataflowId,
     datasetId,
@@ -48,8 +48,9 @@ export const DatasetRepository = {
     fieldName,
     fileName,
     recordId
-  }) =>
-    await HTTPRequester.delete({
+  }) => {
+    const encodedFileName = encodeURIComponent(fileName);
+    return await HTTPRequester.delete({
       url: dataProviderId
         ? getUrl(DatasetConfig.deleteAttachmentWithProviderId, {
             dataflowId,
@@ -58,7 +59,7 @@ export const DatasetRepository = {
             providerId: dataProviderId,
             tableSchemaName,
             fieldName,
-            fileName,
+            fileName: encodedFileName,
             recordId
           })
         : getUrl(DatasetConfig.deleteAttachment, {
@@ -67,10 +68,11 @@ export const DatasetRepository = {
             fieldId,
             tableSchemaName,
             fieldName,
-            fileName,
+            fileName: encodedFileName,
             recordId
           })
-    }),
+    });
+  },
 
   deleteRecord: async ({ datasetId, selectedRecordId, tableId, updateInCascade = false }) =>
     await HTTPRequester.delete({
@@ -121,15 +123,17 @@ export const DatasetRepository = {
     tableSchemaName,
     fieldName,
     providerCode
-  }) =>
-    await HTTPRequester.download({
+  }) => {
+    const encodedFileName = encodeURIComponent(fileName);
+
+    return await HTTPRequester.download({
       url: dataProviderId
         ? getUrl(DatasetConfig.downloadFileDataWithProviderId, {
             dataflowId,
             datasetId,
             fieldId,
             providerId: dataProviderId,
-            fileName,
+            fileName: encodedFileName,
             recordId,
             tableSchemaName,
             fieldName,
@@ -145,7 +149,8 @@ export const DatasetRepository = {
             fieldName,
             providerCode
           })
-    }),
+    });
+  },
 
   downloadPublicReferenceDatasetFileData: async (dataflowId, fileName) =>
     await HTTPRequester.download({
