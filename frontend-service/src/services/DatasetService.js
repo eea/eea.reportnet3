@@ -119,7 +119,7 @@ export const DatasetService = {
 
   deleteData: async (datasetId, arePrefilledTablesDeleted) =>
     await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
-
+    
   deleteAttachment: async ({
     dataflowId,
     datasetId,
@@ -129,17 +129,19 @@ export const DatasetService = {
     fieldName,
     fileName,
     recordId
-  }) =>
-    await DatasetRepository.deleteAttachment({
+  }) => {
+    const encodedFileName = encodeURIComponent(fileName);
+    return await DatasetRepository.deleteAttachment({
       dataflowId,
       datasetId,
       fieldId,
       dataProviderId,
       tableSchemaName,
       fieldName,
-      fileName,
+      fileName: encodedFileName,
       recordId
-    }),
+    });
+  },
 
   deleteFieldDesign: async (datasetId, recordId) => await DatasetRepository.deleteFieldDesign(datasetId, recordId),
 
