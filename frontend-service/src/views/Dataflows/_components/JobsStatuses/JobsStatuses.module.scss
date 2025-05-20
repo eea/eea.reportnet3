@@ -121,6 +121,12 @@ h6 {
   filter: brightness(0.9);
 }
 
+.statusBox i {
+  margin-left: 0.1rem;
+  font-size: 1.5rem;
+  color: green;
+}
+
 .tooltip .tooltiptext {
   visibility: hidden;
   width: 120px;
@@ -155,4 +161,8 @@ h6 {
     top: 0;
     left: 0;
   }
+}
+
+.jobStatusIcon {
+
 }

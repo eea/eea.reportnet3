@@ -502,6 +502,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className={config.jobRunningStatus[job.jobStatus].label}
         type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
       />
+      {job.jobInfo && (
+      <i
+      className="pi pi-info-circle" 
+    />
+    )
+    }
     </div>
   );
 
