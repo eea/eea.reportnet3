@@ -263,12 +263,13 @@ export const DataViewer = ({
 
   const onFileDownload = async (fileName, fieldId, recordId, fieldName, dataProviderCode) => {
     try {
+      const encodedFileName = encodeURIComponent(fileName);
       const { data } = await DatasetService.downloadFileData({
         dataflowId,
         datasetId,
         fieldId,
         dataProviderId,
-        fileName,
+        fileName: encodedFileName,
         recordId,
         tableSchemaName: tableName,
         fieldName,
@@ -672,6 +673,7 @@ export const DataViewer = ({
   const onConfirmDeleteAttachment = async () => {
     try {
       setIsConfirmDeleteButtonDisabled(true);
+      const encodedFileName = encodeURIComponent(records.selectedFileName);
       await DatasetService.deleteAttachment({
         dataflowId,
         datasetId,
@@ -679,7 +681,7 @@ export const DataViewer = ({
         dataProviderId,
         tableSchemaName: tableName,
         fieldName: records.selectedFieldName,
-        fileName: records.selectedFileName,
+        fileName: encodedFileName,
         recordId: records.selectedRecordId
       });
       RecordUtils.changeRecordValue(records.selectedRecord, records.selectedFieldSchemaId, '');
@@ -1482,7 +1484,7 @@ export const DataViewer = ({
                   tableSchemaName: tableName,
                   fieldName: records.selectedFieldName,
                   recordId: records.selectedRecordId,
-                  previousFileName: records.selectedFileName
+                  previousFileName: encodeURIComponent(records.selectedFileName)
                 })
               : getUrl(DatasetConfig.uploadAttachmentWithProviderId, {
                   dataflowId,
@@ -1492,7 +1494,7 @@ export const DataViewer = ({
                   tableSchemaName: tableName,
                   fieldName: records.selectedFieldName,
                   recordId: records.selectedRecordId,
-                  previousFileName: records.selectedFileName
+                  previousFileName: encodeURIComponent(records.selectedFileName)
                 })
           }`}
         />
