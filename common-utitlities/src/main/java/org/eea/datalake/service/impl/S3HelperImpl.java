@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -204,64 +205,62 @@ public class S3HelperImpl implements S3Helper {
 
     /**
      * Gets file
-     * @param key
-     * @param fileName
-     * @param path
-     * @param fileType
-     * @return
+     * @param key The key
+     * @param fileName The fileName
+     * @param path The file path
+     * @param fileType The file type
+     *
+     * @return The local file downloaded from S3
      */
     @Override
     public File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException {
-        byte[] data = getBytesFromS3(key);
-
-        // Write the data to a local file.
-        String filePath = null;
-        if(StringUtils.isNotBlank(fileType)) {
-            filePath = path + fileName + fileType;
-        }
-        else{
-            filePath = path + fileName;
-        }
-        File file = new File(filePath);
-
-        if(file.exists()){
-            //if a file with the same name exists in the path, delete it so that it will be recreated
-            file.delete();
-        }
-        Path textFilePath = Paths.get(file.toString());
-        Files.createFile(textFilePath);
-        OutputStream os = new FileOutputStream(file);
-        os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", filePath);
-        os.close();
-        return file;
+        String fullFileName = StringUtils.isNotBlank(fileType) ? fileName + fileType : fileName;
+        Path filePath = Paths.get(path, fullFileName);
+        return streamS3FileToPath(key, filePath);
     }
 
     /**
      * Gets file for export
-     * @param key
-     * @param fileName
-     * @param path
-     * @param fileType
-     * @return
+     * @param key The key
+     * @param fileName The fileName
+     * @param path The file path
+     * @param fileType The file type
+     *
+     * @return The local file downloaded from S3
      */
     @Override
     public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
-        byte[] data = getBytesFromS3(key);
+        Path filePath = Paths.get(path, "dataset-" + datasetId, fileName + fileType);
+        return streamS3FileToPath(key, filePath);
+    }
 
-        // Write the data to a local file.
-        File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
+    /**
+     * Stream file from S3 to a local path
+     * @param key The key
+     * @param filePath file path
+     *
+     * @return The file that has been streamed
+     * @throws IOException IoException
+     */
+    private File streamS3FileToPath(String key, Path filePath) throws IOException {
+        // Ensure parent directories exist
+        Files.createDirectories(filePath.getParent());
 
-        if(file.exists()){
-            //if a file with the same name exists in the path, delete it so that it will be recreated
+        // Delete existing file if needed
+        File file = filePath.toFile();
+        if (file.exists()) {
             file.delete();
         }
-        Path textFilePath = Paths.get(file.toString());
-        Files.createFile(textFilePath);
-        OutputStream os = new FileOutputStream(file);
-        os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
-        os.close();
+
+        // Stream directly from S3 to file
+        GetObjectRequest objectRequest = GetObjectRequest.builder()
+            .key(key)
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .build();
+
+        s3Client.getObject(objectRequest, ResponseTransformer.toFile(filePath));
+
+        LOG.info("Successfully streamed file from S3 to: {}", filePath);
         return file;
     }
 
