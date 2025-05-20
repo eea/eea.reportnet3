@@ -263,12 +263,13 @@ export const DataViewer = ({
 
   const onFileDownload = async (fileName, fieldId, recordId, fieldName, dataProviderCode) => {
     try {
+      const encodedFileName = encodeURIComponent(fileName);
       const { data } = await DatasetService.downloadFileData({
         dataflowId,
         datasetId,
         fieldId,
         dataProviderId,
-        fileName,
+        fileName: encodedFileName,
         recordId,
         tableSchemaName: tableName,
         fieldName,
