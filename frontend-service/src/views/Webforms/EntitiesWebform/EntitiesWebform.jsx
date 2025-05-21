@@ -205,13 +205,22 @@ export const EntitiesWebform = ({
           ))
     );
 
+    let filteredOptionalTables;
+    const optionalTables = tables.filter(table => table?.isOptional);
+
+    if (!isEmpty(optionalTables)) {
+      filteredOptionalTables = filteredTables.filter(tab =>
+        isEmpty(optionalTables.find(optionalTable => optionalTable.name === tab.tableSchemaName))
+      );
+    }
+
     const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
 
     try {
       const entitiesTableRecords = await getEntitiesTableRecords(tableSchemaId);
       await WebformService.addEntityRecord(
         datasetId,
-        filteredTables,
+        !isEmpty(filteredOptionalTables) ? filteredOptionalTables : filteredTables,
         manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
         rootPkFieldId,
         !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
