@@ -266,6 +266,14 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
             break;
           }
         }
+
+        // If none canceled tasks with blocker errors were found check for any canceled tasks and write a warning to Release Job
+        if (!haveBlockers){
+          Task jobHasCanceledTask = taskRepository.findFirstByProcessIdInAndStatus(processIds, ProcessStatusEnum.CANCELED);
+          if (jobHasCanceledTask != null) {
+            LOG.info("Found canceled task(s) without blockers for validationJobId {}", validationJobId);
+            jobControllerZuul.updateJobInfo(releaseJob.getId(), JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
+          }}
       }
 
       // If none blocker errors has found, we have to release datasets one by one

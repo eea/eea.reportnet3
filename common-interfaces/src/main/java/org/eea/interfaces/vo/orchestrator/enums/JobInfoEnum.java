@@ -61,7 +61,9 @@ public enum JobInfoEnum {
 
     ERROR_RELEASE_CANCELED_BLOCKERS("There are canceled tasks for blocker errors"),
 
-    ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The materialized views have not been created successfully");
+    ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The materialized views have not been created successfully"),
+
+    WARNING_HAS_CANCELED_VALIDATION_TASKS("There are canceled validation tasks");
 
 
     /** The value. */
