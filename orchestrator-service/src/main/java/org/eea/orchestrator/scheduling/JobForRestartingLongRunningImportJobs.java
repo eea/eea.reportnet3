@@ -1,11 +1,12 @@
 package org.eea.orchestrator.scheduling;
 
-import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
+import org.apache.commons.lang3.BooleanUtils;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.vo.orchestrator.JobVO;
-import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.orchestrator.service.JobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class JobForRestartingLongRunningImportJobs {
@@ -28,10 +30,14 @@ public class JobForRestartingLongRunningImportJobs {
     private static final Logger LOG = LoggerFactory.getLogger(JobForRestartingLongRunningImportJobs.class);
 
     @Value(value = "${scheduling.inProgress.import.task.max.ms.restart}")
-    private long maxTimeForInProgressImportTasks;
+    private long maxTimeForInProgressImportJobs;
 
     @Autowired
-    private RecordStoreControllerZuul recordStoreControllerZuul;
+    private JobService jobService;
+
+    @Autowired
+    DataFlowControllerZuul dataFlowControllerZuul;
+
 
     @PostConstruct
     private void init() {
@@ -51,10 +57,12 @@ public class JobForRestartingLongRunningImportJobs {
             List<JobVO> longRunningQueuedJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS);
             for (JobVO job: longRunningQueuedJobs){
                 Long durationOfJob = new Timestamp(System.currentTimeMillis()).getTime() - job.getDateStatusChanged().getTime();
-                if(durationOfJob > maxTimeForQueuedImportJob){
-                    LOG.info("Canceling stuck QUEUED import job with jobId {}", job.getId());
-                    jobService.updateJobInfo(job.getId(), JobInfoEnum.IMPORT_JOB_FAILED_STUCK_QUEUED, null);
-                    jobService.updateJobStatus(job.getId(), JobStatusEnum.FAILED);
+                if(durationOfJob > maxTimeForInProgressImportJobs){
+                    Boolean jobRestarted = jobService.restartImportJob(job.getId());
+                    LOG.info("When restarting import jobId {} jobRestarted={}", job.getId(), jobRestarted);
+                    if(!jobRestarted){
+                        //fail job
+                    }
                 }
             }
             /*
@@ -69,6 +77,8 @@ check what happens with restart task
 
 make sure we don't end up with loop of restarting job
 make sure other scheduled tasks don't interfere with this one
+if restarted add parameter restarts and increase it
+if restarts != null && restarts >0 fail the job
              */
 
 
@@ -81,7 +91,7 @@ make sure other scheduled tasks don't interfere with this one
 
 
 
-
+/*
             List<TaskVO> tasks = recordStoreControllerZuul.findImportTasksInProgress();
             String tasksWithEmptyStartingDates = "";
             String tasksWithMaxDuration = "";
@@ -101,7 +111,7 @@ make sure other scheduled tasks don't interfere with this one
             }
             if(tasksWithMaxDuration.length() > 0 ){
                 LOG.info("Found tasks that are in status IN_PROGRESS for more than {} ms. The tasks ids are: {}", maxTimeForInProgressImportTasks, tasksWithMaxDuration);
-            }
+            }*/
 
         } catch (Exception e) {
             LOG.error("Unexpected error! Error while running scheduled task restartLongRunningImportTasks.", e);

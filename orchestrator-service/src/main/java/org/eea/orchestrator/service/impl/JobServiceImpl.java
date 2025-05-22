@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service.impl;
 
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -27,6 +28,7 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.annotation.LockCriteria;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
@@ -44,6 +46,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.File;
@@ -657,5 +662,46 @@ public class JobServiceImpl implements JobService {
         LOG.info("Found provider id {} for job {}", providerId, jobId);
 
         return providerId;
+    }
+
+    @Override
+    public Boolean restartImportJob(Long jobId) throws Exception {
+        Boolean jobRestarted = false;
+        JobVO job = findById(jobId);
+        Boolean isBigData = dataFlowControllerZuul.isBigDataflow(job.getDataflowId());
+
+        Map<String, Object> insertedParameters = job.getParameters();
+        Boolean replaceData = (insertedParameters.get("replace") != null ) ? (Boolean) insertedParameters.get("replace") : false;
+        String tableSchemaId = (insertedParameters.get("tableSchemaId") != null ) ? (String) insertedParameters.get("tableSchemaId") : null;
+        String integrationIdStr = (insertedParameters.get("integrationId") != null ) ? (String) insertedParameters.get("integrationId") : null;
+        Long integrationId = (integrationIdStr != null) ? Long.valueOf(integrationIdStr) : null;
+        String delimiter = (insertedParameters.get("delimiter") != null ) ? (String) insertedParameters.get("delimiter") : null;
+        String filePathInS3 = (insertedParameters.get("filePathInS3") != null ) ? (String) insertedParameters.get("filePathInS3") : null;
+
+        if(BooleanUtils.isTrue(replaceData)){
+            if(BooleanUtils.isTrue(isBigData)){
+                if(filePathInS3 != null) {
+                    LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
+                    //todo fix authentication
+                    dataSetControllerZuul.importBigFileData(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
+                }
+                else{
+                    LOG.info("Can not restart import jobId {} because filePathInS3 is null", jobId);
+                }
+            }
+            else{
+
+            }
+        }
+        else{
+            if(BooleanUtils.isTrue(isBigData)){
+
+            }
+            else{
+
+            }
+        }
+
+        return jobRestarted;
     }
 }

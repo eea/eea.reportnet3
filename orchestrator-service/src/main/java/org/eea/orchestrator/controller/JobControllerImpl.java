@@ -984,6 +984,25 @@ public class JobControllerImpl implements JobController {
         }
         return false;
     }
+
+    /*
+     * restarts import job if possible
+     *
+     * @param jobId the job id
+     * @return if updated
+     */
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN')") //todo change this?
+    @PostMapping(value = "/restartImportJob/{jobId}")
+    public Boolean restartImportJob(@PathVariable("jobId") Long jobId) throws Exception{
+        try{
+            return jobService.restartImportJob(jobId);
+        }
+        catch (Exception e){
+            LOG.error("Could not restart import job with jobId {} Error: {}", jobId, e.getMessage());
+            throw e;
+        }
+    }
 }
 
 

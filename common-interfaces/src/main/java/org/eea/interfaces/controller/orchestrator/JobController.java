@@ -331,6 +331,15 @@ public interface JobController {
      */
     @GetMapping(value = "/private/isSilentRelease/{processId}")
     Boolean isSilentRelease(@PathVariable("processId") String processId) ;
+
+    /*
+     * restarts import job if possible
+     *
+     * @param jobId the job id
+     * @return if updated
+     */
+    @PostMapping(value = "/restartImportJob/{jobId}")
+    Boolean restartImportJob(@PathVariable("jobId") Long jobId) throws Exception;
 }
 
 
