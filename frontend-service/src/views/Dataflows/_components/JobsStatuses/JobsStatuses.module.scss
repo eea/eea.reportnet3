@@ -116,15 +116,19 @@ h6 {
   }
 }
 
-.statusBox:hover {
-  cursor: pointer;
-  filter: brightness(0.9);
-}
+.statusBox {
+  position: relative;
+  :hover {
+    cursor: pointer;
+    filter: brightness(0.9);
+  }
 
-.statusBox i {
-  margin-left: 0.1rem;
-  font-size: 1.5rem;
-  color: green;
+  i {
+    position: absolute;
+    margin-left: 0.5rem;
+    font-size: 1.5rem !important;
+    color: green;
+  }
 }
 
 .tooltip .tooltiptext {
