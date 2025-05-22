@@ -442,6 +442,13 @@ public interface DatasetController {
                                               @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
                                               @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
 
+  @GetMapping("/v5/etlExport/{datasetId}")
+  Map<String, Object> etlExportZipParquet(@PathVariable("datasetId") Long datasetId,
+                                      @RequestParam("dataflowId") Long dataflowId,
+                                      @RequestParam(value = "providerId", required = false) Long providerId,
+                                      @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                      @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
+
   /**
    * Etl import dataset.
    *
@@ -873,6 +880,7 @@ public interface DatasetController {
           @RequestParam(value = "columnName", required = false) String columnName,
           @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
           @RequestParam(value = "exportCsv", required = false) Boolean exportCsv,
+          @RequestParam(value = "exportParquet", required = false) Boolean exportParquet,
           @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments,
           @RequestParam(name = "jobId", required = false) Long jobId) throws Exception;
 

@@ -1,13 +1,16 @@
 package org.eea.s3configuration.types;
 
+import org.eea.utils.TrustAllManagersProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.SdkHttpConfigurationOption;
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.utils.AttributeMap;
@@ -42,9 +45,9 @@ public class S3PrivateConfiguration implements S3Configuration {
 
 
 
-  private static AwsBasicCredentials awsCredentials;
+  private AwsBasicCredentials awsCredentials;
 
-  private final static Region s3Region = Region.US_EAST_1;
+  private static final Region s3Region = Region.US_EAST_1;
 
   @PostConstruct
   public void getCredentials() {
@@ -61,6 +64,19 @@ public class S3PrivateConfiguration implements S3Configuration {
         .httpClient(httpClient)
         .region(s3Region)
         .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).build();
+  }
+
+  @Override
+  public S3AsyncClient getS3AsyncClient() {
+    return S3AsyncClient.builder()
+        .httpClient(NettyNioAsyncHttpClient.builder()
+            .tlsTrustManagersProvider(new TrustAllManagersProvider())
+            .maxConcurrency(64)
+            .build())
+        .endpointOverride(URI.create(s3Endpoint))
+        .region(s3Region)
+        .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+        .build();
   }
 
   @Override

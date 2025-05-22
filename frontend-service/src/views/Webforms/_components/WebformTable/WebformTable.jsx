@@ -26,6 +26,7 @@ export const WebformTable = ({
   dataProviderId,
   dataflowId,
   datasetId,
+  datasetSchema,
   datasetSchemaId,
   getFieldSchemaId = () => ({ fieldSchema: undefined, fieldId: undefined }),
   isIcebergCreated,
@@ -62,6 +63,7 @@ export const WebformTable = ({
 
   const [isSticky, setIsSticky] = useState(false);
   const [allManualCheck, setAllManualCheck] = useState(true);
+  const [optionalAddRecordEnabled, setOptionalAddRecordEnabled] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -159,7 +161,23 @@ export const WebformTable = ({
     }
 
     if (mainTable) {
-      newEmptyRecord = parseNewEntityTableRecordTable(webformData, selectedTable.rootTableId, rootPkFieldId);
+      let fkRootField;
+      let webformDataWithFkRootField;
+      if (webformData?.isOptional) {
+        fkRootField = datasetSchema.tables
+          .find(datasetTable => datasetTable.tableSchemaName === webformData.name)
+          ?.records?.[0]?.fields?.find(tableField => tableField?.referencedField?.idPk === rootPkFieldId);
+
+        webformDataWithFkRootField = fkRootField
+          ? { ...webformData, elements: [...webformData.elements, ((fkRootField.type = 'FIELD'), fkRootField)] }
+          : undefined;
+      }
+
+      newEmptyRecord = parseNewEntityTableRecordTable(
+        webformData?.isOptional && fkRootField && webformDataWithFkRootField ? webformDataWithFkRootField : webformData,
+        selectedTable.rootTableId,
+        rootPkFieldId
+      );
     }
 
     if (!isEmpty(newEmptyRecord)) {
@@ -266,6 +284,12 @@ export const WebformTable = ({
           rootPkFieldId
         );
 
+        if (webform?.isOptional && isEmpty(data.records)) {
+          setOptionalAddRecordEnabled(true);
+        } else {
+          setOptionalAddRecordEnabled(false);
+        }
+
         webformTableDispatch({ type: 'ON_LOAD_DATA', payload: { records } });
       }
     } catch (error) {
@@ -362,7 +386,7 @@ export const WebformTable = ({
 
   return (
     <div className={styles.contentWrap}>
-      {webform?.multipleRecords ? (
+      {webform?.multipleRecords || (webform?.isOptional && optionalAddRecordEnabled) ? (
         <>
           <h3 className={styles.title}>
             <Button

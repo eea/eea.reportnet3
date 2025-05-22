@@ -62,8 +62,8 @@ export const DataflowService = {
     });
   },
 
-  create: async (name, description, obligationId, type, bigData) =>
-    await DataflowRepository.create(name, description, obligationId, type, bigData),
+  create: async (name, description, obligationId, type, bigData, dataProviderGroupId) =>
+    await DataflowRepository.create(name, description, obligationId, type, bigData, dataProviderGroupId),
 
   cloneSchemas: async (sourceDataflowId, targetDataflowId) =>
     await DataflowRepository.cloneSchemas(sourceDataflowId, targetDataflowId),
@@ -448,7 +448,7 @@ export const DataflowService = {
 
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData, deadlineDate) =>
+  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData, dataProviderGroupId,deadlineDate) =>
     await DataflowRepository.update(
       dataflowId,
       name,
@@ -457,6 +457,7 @@ export const DataflowService = {
       isReleasable,
       showPublicInfo,
       bigData,
+      dataProviderGroupId,
       deadlineDate
     ),
 

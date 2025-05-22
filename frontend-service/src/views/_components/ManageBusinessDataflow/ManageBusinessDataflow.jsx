@@ -448,7 +448,7 @@ export const ManageBusinessDataflow = ({
             placeholder={resourcesContext.messages['selectGroupOfCompanies']}
             tooltip={
               isAdmin && isDesign && hasRepresentatives
-                ? resourcesContext.messages['groupOfCompaniesDisabledTooltip']
+                ? resourcesContext.messages['providerGroupsDisabledTooltip']
                 : ''
             }
             value={selectedGroup}

@@ -212,6 +212,7 @@ public class S3ServiceImpl implements S3Service {
             case S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH:
                 path = String.format(path, dataflowFolder, euDatasetFolder);
                 break;
+            case S3_REFERENCE_FOLDER_PATH:
             case S3_ROOT_DATAFLOW_FOLDER_PATH:
                 path = String.format(path, dataflowFolder);
                 break;

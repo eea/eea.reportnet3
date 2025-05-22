@@ -5,9 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import lombok.SneakyThrows;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -42,6 +40,7 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.UtilityClass;
 import org.eea.validation.persistence.data.metabase.repository.TaskRepository;
 import org.eea.validation.service.ValidationService;
 import org.eea.validation.service.impl.LoadValidationsHelper;
@@ -64,9 +63,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -543,14 +540,7 @@ public class ValidationControllerImpl implements ValidationController {
       response.setHeader(HttpHeaders.CONTENT_DISPOSITION,
           "attachment; filename=" + FilenameUtils.getName(fileName));
 
-      OutputStream out = response.getOutputStream();
-      FileInputStream in = new FileInputStream(file);
-      // copy from in to out
-      IOUtils.copyLarge(in, out);
-      out.close();
-      in.close();
-      // delete the file after downloading it
-      FileUtils.forceDelete(file);
+      UtilityClass.copyFromInToOutAndDelete(null, response, file, fileName);
     } catch (IOException | ResponseStatusException e) {
       LOG.error(
           "Error downloading file generated from export from the datasetId {}. Filename {}. Message: {}",

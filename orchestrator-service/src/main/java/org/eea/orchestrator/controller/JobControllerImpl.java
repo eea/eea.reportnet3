@@ -3,8 +3,6 @@ package org.eea.orchestrator.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import io.swagger.annotations.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.exception.EEAErrorMessage;
@@ -31,6 +29,7 @@ import org.eea.orchestrator.service.impl.JobProcessServiceImpl;
 import org.eea.orchestrator.utils.JobUtils;
 import org.eea.security.jwt.utils.AuthenticationDetails;
 import org.eea.thread.ThreadPropertiesManager;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,14 +46,15 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.eea.utils.LiteralConstants.EXPORT_CSV;
+import static org.eea.utils.LiteralConstants.EXPORT_PARQUET;
 
 @RestController
 @RequestMapping("/jobs")
@@ -99,6 +99,7 @@ public class JobControllerImpl implements JobController {
     private JobProcessServiceImpl jobProcessServiceImpl;
 
     private static final String FILE_PATTERN_NAME_V4 = "etlExportV4_%s";
+    private static final String FILE_PATTERN_NAME_V5 = "etlExportV5_%s";
 
 
     @Override
@@ -527,7 +528,9 @@ public class JobControllerImpl implements JobController {
                                   @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
                                           value = "dataProviderCodes", required = false) String dataProviderCodes,
                                   @ApiParam(type = "Boolean", value = "Csv will be exported", example = "true") @RequestParam(
-                                          value = "exportCsv", required = false) Boolean exportCsv,
+                                          value = EXPORT_CSV, required = false) Boolean exportCsv,
+                                  @ApiParam(type = "Boolean", value = "Csv will be exported", example = "true") @RequestParam(
+                                      value = EXPORT_PARQUET, required = false) Boolean exportParquet,
                                   @ApiParam(type = "Boolean", value = "Attachments are included", example = "true") @RequestParam(
                                           value = "includeAttachments", required = false) Boolean includeAttachments) {
 
@@ -545,7 +548,8 @@ public class JobControllerImpl implements JobController {
         parameters.put("filterValue", filterValue);
         parameters.put("columnName", columnName);
         parameters.put("dataProviderCodes", dataProviderCodes);
-        parameters.put("exportCsv", exportCsv);
+        parameters.put(EXPORT_CSV, exportCsv);
+        parameters.put(EXPORT_PARQUET, exportParquet);
         parameters.put("includeAttachments", includeAttachments);
         parameters.put("userId", userId);
 
@@ -763,37 +767,26 @@ public class JobControllerImpl implements JobController {
         String fileName = null;
         try {
             JobVO job = jobService.findById(jobId);
-            if(job.getParameters().get("exportCsv") != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportCsv"))){
+            if(job.getParameters().get(EXPORT_CSV) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_CSV))){
                 fileName = String.format(FILE_PATTERN_NAME_V4, jobId) + ".zip";
+            } else if (job.getParameters().get(EXPORT_PARQUET) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportParquet"))) {
+                fileName = String.format(FILE_PATTERN_NAME_V5, jobId) + ".zip";
             }
             else{
                 fileName = String.format(FILE_PATTERN_NAME_V2, jobId) + ".zip";
             }
-            LOG.info("Downloading file generated from v3 etl export for jobId {}", jobId);
+            LOG.info("Downloading file generated from etl export for jobId {}", jobId);
             File file = jobService.downloadEtlExportedFile(job, fileName);
-            LOG.info("Successfully downloaded file generated from v3 etl export for jobId {}", jobId);
+            LOG.info("Successfully downloaded file generated from etl export for jobId {}", jobId);
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
-            OutputStream out = response.getOutputStream();
-            try (FileInputStream in = new FileInputStream(file)) {
-                // copy from in to out
-                IOUtils.copyLarge(in, out);
-                // delete the file after downloading it
-                FileUtils.forceDelete(file);
-            } catch (Exception e) {
-                LOG.error("Unexpected error! Error in copying large etl exported file {} for jobId {}. Message: {}", fileName, jobId, e.getMessage());
-                throw e;
-            }
-            finally {
-                out.close();
-            }
+            UtilityClass.copyFromInToOutAndDelete(jobId, response, file, fileName);
         }
         catch (Exception e) {
-            LOG.error("Unexpected error! Error downloading file {} from v3 etl export for jobId {} Message: {}", fileName, jobId, e.getMessage());
+            LOG.error("Unexpected error! Error downloading file {} from etl export for jobId {} Message: {}", fileName, jobId, e.getMessage());
             throw e;
         }
     }
-
 
 
     /**

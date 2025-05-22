@@ -3360,10 +3360,14 @@ public class DatasetServiceImpl implements DatasetService {
         }
       }
       LOG.info("RN3-Import file: Temporary binary files CREATED for datasetId={}", datasetId);
+
       recordsImporter.copy();
       fieldsImporter.copy();
-
       LOG.info("RN3-Import file: Temporary binary files IMPORTED for datasetId={}", datasetId);
+
+      recordsImporter.delete();
+      fieldsImporter.delete();
+      LOG.info("RN3-Import file: Temporary binary files deleted for datasetId={}", datasetId);
     } catch (SQLException e) {
       if( isRecoveryProcess &&
       e.getClass().getCanonicalName().equals("org.postgresql.util.PSQLException") && e.getMessage().contains("ERROR: duplicate")){

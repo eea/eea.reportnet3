@@ -1501,9 +1501,7 @@ public class FileTreatmentHelper implements DisposableBean {
         private void queueImportProcess(Long datasetId,String processId, String tableSchemaId, DataSetSchema schema,
                                         List<File> files, String originalFileName, IntegrationVO integrationVO, boolean replace,
                                         String delimiter, String mimeType,Long jobId) throws IOException, EEAException {
-
-            List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
-
+            
             int workingThreads =
                     ((ThreadPoolExecutor) ((EEADelegatingSecurityContextExecutorService) importExecutorService)
                             .getDelegateExecutorService()).getActiveCount();
@@ -1514,6 +1512,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
                         replace,jobId);
             } else {
+                List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
                 List<File> finalFiles = validatedList;
                 importExecutorService.submit(() -> {
                     try {
@@ -1573,19 +1572,34 @@ public class FileTreatmentHelper implements DisposableBean {
                 BufferedReader bufferedReader = new BufferedReader(reader);
                 String headerLine = bufferedReader.readLine();
                 String usedDelimiter = (delimiter != null) ? delimiter : String.valueOf(loadDataDelimiter);
+
+                // Original CSV header list.
                 List<String> csvHeaders = Pattern.compile(Pattern.quote(usedDelimiter), Pattern.CASE_INSENSITIVE)
                         .splitAsStream(headerLine.replace("\"", ""))
                         .collect(Collectors.toList());
+
+                // Lower case Csv header list for checking.
+                List<String> csvHeadersToLower = csvHeaders.stream()
+                        .map(s -> s.toLowerCase(Locale.ROOT))
+                        .collect(Collectors.toList());
+
                 RecordSchema recordSchema = getRecordSchema(findTableSchemaId, schema);
+
+                // Schema header list.
+                List<String> schemaHeaders = recordSchema.getFieldSchema()
+                        .stream()
+                        .map(FieldSchema::getHeaderName)   // original case
+                        .collect(Collectors.toList());
 
                 if (csvHeaders.size() == recordSchema.getFieldSchema().size()) {
                     for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
-                        if (!csvHeaders.contains(fieldSchema.getHeaderName())) {
+                        if (!csvHeadersToLower.contains(fieldSchema.getHeaderName().toLowerCase())) {
                             if(filesCount > 1){
                                 warningList.add(JobInfoEnum.WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS.getValue(null));
                             } else {
                                 error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
                             }
+                            LOG.info("Mismatch with header:{}. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",fieldSchema.getHeaderName(), jobId, datasetId, schemaHeaders, csvHeaders);
                             removeFile = true;
                             break;
                         }
@@ -1596,7 +1610,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     } else {
                         error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
                     }
-
+                    LOG.info("Wrong number of headers. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",jobId, datasetId, schemaHeaders, csvHeaders);
                     removeFile = true;
 
                 }
