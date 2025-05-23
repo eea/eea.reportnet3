@@ -989,6 +989,7 @@ public class JobControllerImpl implements JobController {
     @PostMapping(value = "/restartImportJob/{jobId}")
     public Boolean restartImportJob(@PathVariable("jobId") Long jobId) throws Exception{
         try{
+            //todo should it be async?
             return jobService.restartImportJob(jobId);
         }
         catch (Exception e){

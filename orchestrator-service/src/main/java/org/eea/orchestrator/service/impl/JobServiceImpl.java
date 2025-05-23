@@ -682,11 +682,12 @@ public class JobServiceImpl implements JobService {
                     dataSetControllerZuul.importBigFileData(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
                 }
                 else{
-                    LOG.info("Can not restart import jobId {} because filePathInS3 is null", jobId);
+                    LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
                 }
             }
             else{
-
+                LOG.error("Can not restart import jobId {} because it is a citus dataflow", jobId);
+                //todo check what happens if you restart process and tasks
             }
         }
         else{

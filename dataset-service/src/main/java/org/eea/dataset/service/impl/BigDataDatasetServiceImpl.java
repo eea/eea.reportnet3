@@ -303,7 +303,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             //remove file from public S3 if job is finished
             if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
-                s3HelperPublic.deleteFileFromS3(getFilePath(datasetId, dataflowId, providerId, fileName, true));
+                //todo uncomment
+                //s3HelperPublic.deleteFileFromS3(getFilePath(datasetId, dataflowId, providerId, fileName, true));
             }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {
