@@ -111,15 +111,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
       group: 2
     },
     {
-      label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_1.label],
+      label: resourcesContext.messages[config.providerGroupDev.MAP_MY_TREE_PROVIDERS.label],
       group: 3
     },
     {
-      label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_2.label],
+      label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_1.label],
       group: 4
     },
     {
-      label: resourcesContext.messages[config.providerGroupDev.MAP_MY_TREE_PROVIDERS.label],
+      label: resourcesContext.messages[config.providerGroupDev.LDV_MANUFACTURERS.label],
       group: 5
     },
     {
@@ -158,15 +158,15 @@ export const AddOrganizations = ({ isDialogVisible, onCloseDialog }) => {
           value: 2
         },
         {
-          label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_1.label],
+          label: resourcesContext.messages[config.providerGroupDev.MAP_MY_TREE_PROVIDERS.label],
           value: 3
         },
         {
-          label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_2.label],
+          label: resourcesContext.messages[config.providerGroupDev.COMPANY_GROUP_1.label],
           value: 4
         },
         {
-          label: resourcesContext.messages[config.providerGroupDev.MAP_MY_TREE_PROVIDERS.label],
+          label: resourcesContext.messages[config.providerGroupDev.LDV_MANUFACTURERS.label],
           value: 5
         },
         {
