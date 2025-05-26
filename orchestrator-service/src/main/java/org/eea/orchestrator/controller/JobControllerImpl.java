@@ -987,10 +987,10 @@ public class JobControllerImpl implements JobController {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN')") //todo change this?
     @PostMapping(value = "/restartImportJob/{jobId}")
-    public Boolean restartImportJob(@PathVariable("jobId") Long jobId) throws Exception{
+    public Boolean restartImportJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification) throws Exception{
         try{
             //todo should it be async?
-            return jobService.restartImportJob(jobId);
+            return jobService.restartImportJob(jobId, sendRestartNotification);
         }
         catch (Exception e){
             LOG.error("Could not restart import job with jobId {} Error: {}", jobId, e.getMessage());

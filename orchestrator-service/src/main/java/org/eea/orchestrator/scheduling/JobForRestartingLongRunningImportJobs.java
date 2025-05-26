@@ -58,7 +58,7 @@ public class JobForRestartingLongRunningImportJobs {
             for (JobVO job: longRunningQueuedJobs){
                 Long durationOfJob = new Timestamp(System.currentTimeMillis()).getTime() - job.getDateStatusChanged().getTime();
                 if(durationOfJob > maxTimeForInProgressImportJobs){
-                    Boolean jobRestarted = jobService.restartImportJob(job.getId());
+                    Boolean jobRestarted = jobService.restartImportJob(job.getId(), false);
                     LOG.info("When restarting import jobId {} jobRestarted={}", job.getId(), jobRestarted);
                     if(!jobRestarted){
                         //fail job

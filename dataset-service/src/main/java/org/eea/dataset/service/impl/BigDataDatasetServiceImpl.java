@@ -208,7 +208,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String filePathInS3 = null;
         String fileName = helperMultipartFileMapper.getOriginalFilename();
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, delimiter, integrationId, null);
         File s3File = null;
         JobVO job = null;
         try {
@@ -285,7 +285,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 replace = (Boolean) job.getParameters().get("replace");
             }
 
-            importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, delimiter, integrationId, providerCode);
+            importFileInDremioInfo.setProviderId(providerId);
+            importFileInDremioInfo.setFileName(fileName);
+            importFileInDremioInfo.setReplaceData(replace);
+            importFileInDremioInfo.setDelimiter(delimiter);
+            importFileInDremioInfo.setDataProviderCode(providerCode);
 
             DatasetTypeEnum datasetType = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
             if (DatasetTypeEnum.REFERENCE.equals(datasetType) && dataflowVO.getStatus() == TypeStatusEnum.DRAFT) {
@@ -303,8 +307,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             //remove file from public S3 if job is finished
             if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
-                //todo uncomment
-                //s3HelperPublic.deleteFileFromS3(getFilePath(datasetId, dataflowId, providerId, fileName, true));
+                s3HelperPublic.deleteFileFromS3(getFilePath(datasetId, dataflowId, providerId, fileName, true));
             }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {

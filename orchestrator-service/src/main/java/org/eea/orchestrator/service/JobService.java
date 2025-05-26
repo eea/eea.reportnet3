@@ -85,5 +85,5 @@ public interface JobService {
 
     Long findProviderIdById(Long jobId);
 
-    Boolean restartImportJob(Long jobId) throws Exception;
+    Boolean restartImportJob(Long jobId, Boolean sendRestartNotification) throws Exception;
 }

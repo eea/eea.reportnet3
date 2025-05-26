@@ -661,41 +661,55 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Boolean restartImportJob(Long jobId) throws Exception {
+    public Boolean restartImportJob(Long jobId, Boolean sendRestartNotification) throws Exception {
         Boolean jobRestarted = false;
         JobVO job = findById(jobId);
-        Boolean isBigData = dataFlowControllerZuul.isBigDataflow(job.getDataflowId());
+        try {
+            Boolean isBigData = dataFlowControllerZuul.isBigDataflow(job.getDataflowId());
 
-        Map<String, Object> insertedParameters = job.getParameters();
-        Boolean replaceData = (insertedParameters.get("replace") != null ) ? (Boolean) insertedParameters.get("replace") : false;
-        String tableSchemaId = (insertedParameters.get("tableSchemaId") != null ) ? (String) insertedParameters.get("tableSchemaId") : null;
-        String integrationIdStr = (insertedParameters.get("integrationId") != null ) ? (String) insertedParameters.get("integrationId") : null;
-        Long integrationId = (integrationIdStr != null) ? Long.valueOf(integrationIdStr) : null;
-        String delimiter = (insertedParameters.get("delimiter") != null ) ? (String) insertedParameters.get("delimiter") : null;
-        String filePathInS3 = (insertedParameters.get("filePathInS3") != null ) ? (String) insertedParameters.get("filePathInS3") : null;
+            Map<String, Object> insertedParameters = job.getParameters();
+            Boolean replaceData = (insertedParameters.get("replace") != null) ? (Boolean) insertedParameters.get("replace") : false;
+            String tableSchemaId = (insertedParameters.get("tableSchemaId") != null) ? (String) insertedParameters.get("tableSchemaId") : null;
+            String integrationIdStr = (insertedParameters.get("integrationId") != null) ? (String) insertedParameters.get("integrationId") : null;
+            Long integrationId = (integrationIdStr != null) ? Long.valueOf(integrationIdStr) : null;
+            String delimiter = (insertedParameters.get("delimiter") != null) ? (String) insertedParameters.get("delimiter") : null;
+            String filePathInS3 = (insertedParameters.get("filePathInS3") != null) ? (String) insertedParameters.get("filePathInS3") : null;
 
-        if(BooleanUtils.isTrue(replaceData)){
-            if(BooleanUtils.isTrue(isBigData)){
-                if(filePathInS3 != null) {
-                    LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
-                    //todo fix authentication
-                    dataSetControllerZuul.importBigFileData(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
+            if (BooleanUtils.isTrue(replaceData)) {
+                if (BooleanUtils.isTrue(isBigData)) {
+                    if (filePathInS3 != null) {
+                        LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
+                        //todo fix authentication
+                        dataSetControllerZuul.importBigFileData(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
+                        jobRestarted = true;
+                    } else {
+                        LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
+                        //todo if file exists and has the same file name call the method
+                    }
+                } else {
+                    LOG.error("Can not restart import jobId {} because it is a citus dataflow", jobId);
+                    //todo if file exists and has the same file name call the method
                 }
-                else{
-                    LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
-                }
+            } else {
+                LOG.error("Can not restart import jobId {} because replace data is false", jobId);
             }
-            else{
-                LOG.error("Can not restart import jobId {} because it is a citus dataflow", jobId);
-                //todo check what happens if you restart process and tasks
-            }
+
+
         }
-        else{
-            if(BooleanUtils.isTrue(isBigData)){
+        catch(Exception e){
+            LOG.error("Could not restart jobId {} Error {}", jobId, e.getMessage());
+            jobRestarted = false;
+        }
 
+
+        if(BooleanUtils.isTrue(sendRestartNotification)) {
+            if (BooleanUtils.isTrue(jobRestarted)) {
+                //send successful restart notification
+                jobUtils.sendKafkaImportNotification(job, EventType.IMPORT_RESTART_COMPLETED_EVENT, "job Id " + jobId);
             }
             else{
-
+                //send failed restart notification
+                jobUtils.sendKafkaImportNotification(job, EventType.IMPORT_RESTART_FAILED_EVENT, "job Id " + jobId);
             }
         }
 
