@@ -48,7 +48,7 @@ public class ReleaseRefusedEvent implements NotificableEventHandler {
         Long dataflowId = notificationVO.getDataflowId();
         Long providerId = notificationVO.getProviderId();
 
-        DataFlowVO dataflow = dataFlowControllerZuul.findById(dataflowId, providerId);
+        DataFlowVO dataflow = dataFlowControllerZuul.getMetabaseById(dataflowId);
 
         String dataProviderLabel = "";
         if (null != providerId) {

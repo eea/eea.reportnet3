@@ -184,6 +184,10 @@ export const PaMsWebformField = ({
               !isNil(conditionalField)
                 ? conditionalField.type === 'MULTISELECT_CODELIST'
                   ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
+                  : (conditionalField.type === 'LINK' || conditionalField.fieldType === 'LINK') &&
+                    Array.isArray(conditionalField.value) &&
+                    conditionalField.value?.length > 1
+                  ? conditionalField.value?.join(';')
                   : conditionalField.value
                 : encodeURIComponent(element.value),
               localDatasetSchemaId,
@@ -199,7 +203,6 @@ export const PaMsWebformField = ({
                     : referencedField.value,
                 value: referencedField.value
               }))
-              .sort((a, b) => a.value.localeCompare(b.value));
           },
           {
             staleTime: 5 * 60 * 1000 // Example stale time

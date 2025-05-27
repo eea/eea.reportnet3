@@ -473,17 +473,4 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         String processId = executeSqlStatement(createNewTableQuery);
         checkIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId, null);
     }
-
-    @Override
-    public String addQuotesToFieldNames(String fieldNames) {
-        if (fieldNames != null && !fieldNames.isBlank()) {
-            fieldNames = Arrays.stream(fieldNames.split(",")) // Split by commas
-                    .map(String::trim)                        // Remove spaces around field names
-                    .filter(field -> !field.isBlank())        // Filter out empty or invalid field names
-                    .filter(field -> !field.contains("\"")) // Skip fields that already contain double quotes
-                    .map(field -> "\"" + field + "\"")  // Wrap each field in double quotes
-                    .collect(Collectors.joining(","));      // Join them back with commas
-        }
-        return fieldNames;
-    }
 }

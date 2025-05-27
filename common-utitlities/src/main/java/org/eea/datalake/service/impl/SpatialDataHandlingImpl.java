@@ -7,6 +7,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.utils.UtilityClass;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKBReader;
@@ -121,7 +122,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         result.append(", ");
       }
 
-      String fieldName = "\"" + fieldSchemaVO.getName() + "\""; // Wrap field names in double quotes
+      String fieldName = UtilityClass.addQuotesToFieldNames(fieldSchemaVO.getName());
 
       if (geoJsonEnums.contains(fieldSchemaVO.getType())) {
         result.append(FROM_XEX).append("(").append(fieldName).append(") AS ").append(fieldName);
@@ -161,19 +162,21 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
     return spatialDataHelper.getFieldSchemas(tableSchemaVO).stream()
         .filter(header -> isGeoJsonHeaders == geoJsonEnums.contains(header.getType()))
-        .filter(name -> name.getName().equalsIgnoreCase(headerInput)).findAny().map(fieldSchemaVO -> fieldSchemaVO.getType().getValue());
+        .filter(name -> name.getName().equalsIgnoreCase(headerInput))
+        .findAny()
+        .map(fieldSchemaVO -> fieldSchemaVO.getType().getValue());
   }
 
   @Override
   public StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO, long lineNumber) {
-    String regex = "\\b([a-zA-Z0-9_]+)\\b\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
+    String regex = "(\"[^\"]+\"|[a-zA-Z0-9_]+)\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
 
     StringBuilder resultQuery = new StringBuilder(inputQuery);
 
     while (matcher.find()) {
-      String columnName = matcher.group(1);
+      String columnName = spatialDataHelper.unEscapeJsonString(matcher.group(1));
       String value = matcher.group(3);
 
       Optional<String> header = getHeaderType(isGeoJsonHeaders, columnName, tableSchemaVO);

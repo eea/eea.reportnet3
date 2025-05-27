@@ -53,6 +53,7 @@ import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.utils.LiteralConstants;
+import org.eea.utils.UtilityClass;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -1091,7 +1092,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           if(BooleanUtils.isTrue(field.getReadOnly())){
             //construct where statement
             String value = csvRecord.get(expectedHeaderName);
-            whereStatementBuilder.append(" " + expectedHeaderName + " = '" + value + "' AND");
+            whereStatementBuilder.append(" " + UtilityClass.addQuotesToFieldNames(expectedHeaderName) + " = '" + value + "' AND");
           }
           else if (expectedHeaderName.equals(LiteralConstants.PARQUET_RECORD_ID_COLUMN_HEADER) || expectedHeaderName.equals(LiteralConstants.PARQUET_PROVIDER_CODE_COLUMN_HEADER) ||
                     fieldType == DataType.ATTACHMENT){
@@ -1099,12 +1100,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
               continue;
           } else if (csvRecord.isMapped(expectedHeaderName)) {
             String value = csvRecord.get(expectedHeaderName);
-            updateQueryBuilder.append(" " + expectedHeaderName + " = '" + value + "' ,");
+            updateQueryBuilder.append(" " + UtilityClass.addQuotesToFieldNames(expectedHeaderName) + " = '" + value + "' ,");
 
           } else {
             String headerWithBom = "\uFEFF" + expectedHeaderName;
             String value = csvRecord.isMapped(headerWithBom) ? csvRecord.get(headerWithBom) : "";
-            updateQueryBuilder.append(" " + expectedHeaderName + " = '" + value + "' ,");
+            updateQueryBuilder.append(" " + UtilityClass.addQuotesToFieldNames(expectedHeaderName) + " = '" + value + "' ,");
           }
         }
 

@@ -755,4 +755,13 @@ public class DatasetMetabaseControllerImpl implements DatasetMetabaseController 
   public Map<Long, String> getDatasetIdsAndGroups(@PathVariable Long dataflowId) {
     return datasetMetabaseService.getDatasetIdsAndGroupsByDataflowId(dataflowId);
   }
+
+  @Override
+  @PutMapping(value = "/private/updateReportingDatasetMetabase")
+  public void updateReportingDatasetMetabase(@RequestBody ReportingDatasetVO reportingDatasetVO){
+    if (reportingDatasetVO != null) {
+      reportingDatasetService.updateReportingDatasetMetabase(reportingDatasetVO);
+    }
+  }
+
 }

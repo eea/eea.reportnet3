@@ -56,6 +56,14 @@ public class SpatialDataHelperImpl implements SpatialDataHelper {
   }
 
   @Override
+  public String unEscapeJsonString(String str) {
+    if (str.startsWith("\"") && str.endsWith("\"")) {
+      return str.substring(1, str.length() - 1);
+    }
+    return str;
+  }
+
+  @Override
   public List<FieldSchemaVO> getFieldSchemas(TableSchemaVO tableSchemaVO) {
     List<FieldSchemaVO> fieldSchemas = new ArrayList<>();
     FieldSchemaVO recordId = new FieldSchemaVO();

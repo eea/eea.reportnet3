@@ -884,7 +884,13 @@ public interface DatasetController {
   @PutMapping("/{datasetId}/updateGeometry")
   void updateGeometry(@PathVariable("datasetId") Long datasetId);
 
-
+  /**
+   * Update geometry field
+   * @param datasetId
+   * @return
+   */
+  @PutMapping("/v2/{datasetId}/updateGeometry")
+  void updateGeometryV2(@PathVariable("datasetId") Long datasetId);
 
   /**
    * Generate s3 presigned Url for import
@@ -1063,4 +1069,7 @@ public interface DatasetController {
   @GetMapping("/getReleasedDatasetDataInfo")
   ReleasedDatasetDataInfoVO getReleasedDatasetDataInfo(@RequestParam("collectionDatasetId") Long collectionDatasetId, @RequestParam(value = "providerCode") String providerCode,
                                                        @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
+
+  @PostMapping("/private/clearOldLocks")
+  int clearOldLocks();
 }

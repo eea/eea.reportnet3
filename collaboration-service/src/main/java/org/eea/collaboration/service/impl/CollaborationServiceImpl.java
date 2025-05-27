@@ -169,7 +169,8 @@ public class CollaborationServiceImpl implements CollaborationService {
     String eventType = EventType.RECEIVED_MESSAGE.toString();
     collaborationServiceHelper.notifyNewMessages(dataflowId, providerId, null, null, null, null, eventType);
     if (emailNotification){
-      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, eventType, messageContent, messageCreateDate);}
+      collaborationServiceHelper.emailNewMessages(dataflowId, providerId, null, eventType, messageContent, messageCreateDate);
+    }
 
     LOG.info("Message created: message={}", message);
     return messageMapper.entityToClass(message);

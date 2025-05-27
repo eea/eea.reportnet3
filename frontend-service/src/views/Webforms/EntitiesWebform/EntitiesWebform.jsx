@@ -114,7 +114,7 @@ export const EntitiesWebform = ({
   }, [isDataUpdated]);
 
   const checkInvalidCharacters = () => {
-    const invalidCharsRegex = new RegExp(/^[^a-zA-Z0-9_-]|[^a-zA-Z0-9_-]/);
+    const invalidCharsRegex = new RegExp(/^[^a-zA-Z0-9:/._-]|[^a-zA-Z0-9:/._-]/);
     return isEmpty(entitiesWebformState.rootPkInput) ? true : invalidCharsRegex.test(entitiesWebformState.rootPkInput);
   };
 

@@ -38,7 +38,6 @@ export const TableManagement = ({
   isAddingRootTableId = false,
   isIcebergCreated,
   loading,
-  onAddTableRecord,
   onRefresh,
   onSelectEditTable,
   overview,
@@ -60,7 +59,7 @@ export const TableManagement = ({
   const [tableManagementState, tableManagementDispatch] = useReducer(tableManagementReducer, {
     initialSelectedRecord: {},
     isDeletingRow: false,
-    isDialogVisible: { delete: false, manageRows: false },
+    isDialogVisible: { delete: false, doubleDelete: false, manageRows: false },
     isLoading: true,
     isSaving: false,
     parentTablesWithData: [],
@@ -178,7 +177,7 @@ export const TableManagement = ({
       }
     } finally {
       tableManagementDispatch({ type: 'DELETE_ROW', payload: false });
-      manageDialogs('delete', false);
+      manageDialogs('doubleDelete', false);
     }
   };
 
@@ -287,60 +286,6 @@ export const TableManagement = ({
     }
   };
 
-  const addTableTemplate = (rowData, colData) => {
-    let hasRecord = false;
-    let hasTable = false;
-    rowData.dataRow.forEach(row =>
-      row.fieldData.tableSchemas.forEach(tableSchema => {
-        if (tableSchema.tableSchemaName === colData.field) {
-          hasRecord = tableSchema.hasRecord;
-          hasTable = true;
-        }
-      })
-    );
-
-    const entitiesIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns);
-    const entitiesFieldSchemaValue = RecordUtils.getCellValue({ rowData: rowData }, entitiesIdFieldSchemaId);
-
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <Button
-          className="p-button-secondary"
-          disabled={(bigData && !isIcebergCreated) || !hasTable || isSaving}
-          icon={hasRecord ? 'edit' : 'add'}
-          label={
-            hasRecord
-              ? resourcesContext.messages['webformTableEdit']
-              : resourcesContext.messages['webformTableCreation']
-          }
-          onClick={async () => {
-            if (hasRecord) {
-              onSelectEditTable(entitiesFieldSchemaValue, colData.field);
-            } else {
-              tableManagementDispatch({ type: 'SET_IS_SAVING', payload: true });
-              const configParentTables = Object.keys(
-                getWebformTabs(
-                  tables.map(table => table.name),
-                  schemaTables,
-                  tables
-                )
-              );
-              await onAddTableRecord(
-                schemaTables.filter(
-                  schemaTable =>
-                    configParentTables.includes(colData.field) &&
-                    TextUtils.areEquals(schemaTable.tableSchemaName, colData.field)
-                )[0],
-                entitiesFieldSchemaValue
-              );
-              tableManagementDispatch({ type: 'SET_IS_SAVING', payload: false });
-            }
-          }}
-        />
-      </div>
-    );
-  };
-
   const dataTemplate = (rowData, column) => {
     let field = rowData.dataRow.filter(row => Object.keys(row.fieldData)[0] === column.fieldSchemaId)[0];
     if (!isNil(field) && !isNil(field.fieldData)) {
@@ -372,16 +317,30 @@ export const TableManagement = ({
       style={{ width: '100px' }}
     />
   );
+  const renderActionsTemplate = rowData => {
+    const entitiesIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
+    const entitiesFieldSchemaValue = RecordUtils.getCellValue({ rowData }, entitiesIdFieldSchemaId);
 
-  const renderActionsTemplate = () => (
-    <ActionsColumn
-      bigData={bigData}
-      isIcebergCreated={isIcebergCreated}
-      isWebform={true}
-      onDeleteClick={() => manageDialogs('delete', true)}
-      onEditClick={() => manageDialogs('manageRows', true)}
-    />
-  );
+    let tableName;
+    rowData.dataRow.forEach(row =>
+      row.fieldData.tableSchemas.forEach((tableSchema, index) => {
+        if (index === 0) {
+          tableName = tableSchema.tableSchemaName;
+        }
+      })
+    );
+
+    return (
+      <ActionsColumn
+        bigData={bigData}
+        isIcebergCreated={isIcebergCreated}
+        onDeleteClick={() => manageDialogs('delete', true)}
+        onEditClick={() => {
+          onSelectEditTable(entitiesFieldSchemaValue, tableName);
+        }}
+      />
+    );
+  };
 
   const validationsTemplate = recordData => {
     return (
@@ -411,9 +370,7 @@ export const TableManagement = ({
     if (isNil(overview)) {
       const data = tableColumns.map(col => (
         <Column
-          body={
-            !['TableSchemas', 'Table_1', 'Table_2', 'Table_3'].includes(col.field) ? dataTemplate : addTableTemplate
-          }
+          body={dataTemplate}
           className={col.field === 'TableSchemas' ? styles.invisibleHeader : ''}
           field={col.field}
           fieldSchemaId={col.fieldSchemaId}
@@ -430,7 +387,7 @@ export const TableManagement = ({
 
     const data = tableColumns.map(col => (
       <Column
-        body={col.type === 'TABLE' ? addTableTemplate : dataTemplate}
+        body={dataTemplate}
         className={col.type === 'TABLE' ? styles.tableColumn : ''}
         field={col.field}
         fieldSchemaId={col.fieldSchemaId}
@@ -487,10 +444,27 @@ export const TableManagement = ({
           iconConfirm={tableManagementState.isDeletingRow ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
-          onConfirm={onDeleteRow}
+          onConfirm={() => {
+            manageDialogs('delete', false);
+            manageDialogs('doubleDelete', true);
+          }}
           onHide={() => manageDialogs('delete', false)}
           visible={isDialogVisible.delete}>
           {resourcesContext.messages['confirmDeleteRow']}
+        </ConfirmDialog>
+      )}
+
+      {isDialogVisible.doubleDelete && (
+        <ConfirmDialog
+          classNameConfirm={'p-button-danger'}
+          header={resourcesContext.messages['deleteTabHeaderConfirm']}
+          iconConfirm={tableManagementState.isDeletingRow ? 'spinnerAnimate' : 'check'}
+          labelCancel={resourcesContext.messages['no']}
+          labelConfirm={resourcesContext.messages['yes']}
+          onConfirm={onDeleteRow}
+          onHide={() => manageDialogs('doubleDelete', false)}
+          visible={isDialogVisible.doubleDelete}>
+          <strong>{resourcesContext.messages['doubleConfirmDeleteRow']}</strong>
         </ConfirmDialog>
       )}
 

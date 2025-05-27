@@ -731,6 +731,7 @@ export const Dataflow = () => {
         label={resourcesContext.messages['close']}
         onClick={() => {
           manageDialogs('isManageRolesDialogVisible', false);
+          onLoadReportingDataflow();
           resetManageLeadReportersState();
         }}
       />
@@ -1429,6 +1430,7 @@ export const Dataflow = () => {
             onHide={() => {
               manageDialogs('isManageRolesDialogVisible', false);
               resetManageLeadReportersState();
+              onLoadReportingDataflow();
             }}
             visible={dataflowState.isManageRolesDialogVisible}>
             <div className={styles.dialog}>
@@ -1796,6 +1798,7 @@ export const Dataflow = () => {
         {dataflowState.isReportingDataflowDialogVisible && (
           <ManageDataflow
             dataflowId={dataflowId}
+            dataProviderGroup={dataflowState.dataProviderGroup}
             deliveryDate={
               dataflowState.dataCollectionDueDate
                 ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)

@@ -36,5 +36,4 @@ public interface DremioHelperService {
 
     void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception;
 
-    String addQuotesToFieldNames(String fieldNames);
 }

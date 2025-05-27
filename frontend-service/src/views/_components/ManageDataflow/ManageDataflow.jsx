@@ -350,7 +350,7 @@ export const ManageDataflow = ({
               : ''
           }`}
           disabled={
-            (isCitizenScienceDataflow && isEmpty(reportingDataflowState.providerGroup) && isEmpty(dataProviderGroup)) ||
+            (isEmpty(reportingDataflowState.providerGroup) && isEmpty(dataProviderGroup)) ||
             isEmpty(reportingDataflowState.name) ||
             isEmpty(reportingDataflowState.description) ||
             isNil(reportingDataflowState.obligation?.id) ||

@@ -1,8 +1,12 @@
 package org.eea.lock.persistence.repository;
 
 import org.eea.lock.persistence.domain.Lock;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.Timestamp;
 
 /**
  * The Interface LockRepository.
@@ -42,4 +46,14 @@ public interface LockRepository extends CrudRepository<Lock, Integer> {
     deleteById(id);
     return true;
   }
+
+  /**
+   * Cleaning up the locks of the previous days
+   * @param cutoff The date from starting cleaning the locks
+   * @return The number of locks (records) that have been deleted
+   */
+  @Modifying
+  @Transactional
+  @Query("DELETE FROM Lock l WHERE l.createDate < :cutoff")
+  int deleteOldLocks(Timestamp cutoff);
 }

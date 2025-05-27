@@ -1,7 +1,5 @@
 package org.eea.dataset.io.kafka.commands;
 
-import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
@@ -289,7 +287,7 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         //force date to UTC and description to CET
         SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date dateRelease = new Date();
-        dateFormatter.setTimeZone(TimeZone.getTimeZone("CET"));
+        dateFormatter.setTimeZone(TimeZone.getTimeZone(LiteralConstants.EUROPE_ZONE_ID));
         createSnapshotVO.setDescription("Release " + dateFormatter.format(dateRelease) + " CET");
         dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 

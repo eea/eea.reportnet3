@@ -157,6 +157,8 @@ export const FieldEditor = ({
           ? Array.isArray(conditionalValue)
             ? conditionalValue.join('; ')
             : conditionalValue.replace('; ', ';').replace(';', '; ')
+          : referencedFieldInfo?.type === 'LINK' && Array.isArray(conditionalValue) && conditionalValue?.length > 1
+          ? conditionalValue.join(';')
           : conditionalValue,
         datasetSchemaId,
         100

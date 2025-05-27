@@ -18,14 +18,12 @@ import { Button } from 'views/_components/Button';
 import { Column } from 'primereact/column';
 import { ConfirmDialog } from 'views/_components/ConfirmDialog';
 import { DataTable } from 'views/_components/DataTable';
-import { Dropdown } from 'views/_components/Dropdown';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { InputText } from 'views/_components/InputText';
 import { MyFilters } from 'views/_components/MyFilters';
 import { Spinner } from 'views/_components/Spinner';
 import ReactTooltip from 'react-tooltip';
 
-import { DataflowService } from 'services/DataflowService';
 import { RepresentativeService } from 'services/RepresentativeService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
@@ -39,6 +37,9 @@ import { useCheckNotifications } from 'views/_functions/Hooks/useCheckNotificati
 import { useFilters } from 'views/_functions/Hooks/useFilters';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { DataflowService } from 'services/DataflowService';
+import { Dropdown } from 'views/_components/Dropdown';
+import { AddOrganizationsService } from 'services/AddOrganizationsService';
 
 export const ManageLeadReporters = ({
   dataflowId,
@@ -67,6 +68,7 @@ export const ManageLeadReporters = ({
     leadReporters: {},
     leadReportersErrors: {},
     refresher: false,
+    reportingGroups: [],
     representativeIdToDelete: '',
     representatives: [],
     selectedDataProviderGroup: null,
@@ -117,6 +119,12 @@ export const ManageLeadReporters = ({
   }, [representativesImport]);
 
   useEffect(() => {
+    if (dataflowType === 'REPORTING' && isNil(selectedDataProviderGroup?.dataProviderGroupId)) {
+      getReportingGroups();
+    }
+  }, []);
+
+  useEffect(() => {
     if (leadReportersDeleted) getInitialData(true);
   }, [leadReportersDeleted]);
 
@@ -125,7 +133,10 @@ export const ManageLeadReporters = ({
   }, [dataflowType, formState.refresher]);
 
   useEffect(() => {
-    if (!isNull(formState.selectedDataProviderGroup)) {
+    if (
+      !isNull(formState.selectedDataProviderGroup) &&
+      !isNil(formState.selectedDataProviderGroup?.dataProviderGroupId)
+    ) {
       getAllDataProviders(formState.selectedDataProviderGroup, formState.representatives, formDispatcher);
     }
     setDataProviderSelected(formState.selectedDataProviderGroup);
@@ -191,6 +202,22 @@ export const ManageLeadReporters = ({
   const getDataProviderGroup = async () =>
     formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: selectedDataProviderGroup });
 
+  const getReportingGroups = async () => {
+    try {
+      const allProviderGroups = await AddOrganizationsService.getProviderGroups();
+
+      const reportingGroups = allProviderGroups.filter(
+        group => group.dataProviderGroupId === 2 || group.dataProviderGroupId === 8
+      );
+      formDispatcher({
+        type: 'GET_REPORTING_GROUPS',
+        payload: { reportingGroups }
+      });
+    } catch (error) {
+      console.error('ManageDataflowForm - getReportingGroups.', error);
+    }
+  };
+
   const getInitialData = async reportersDeleted => {
     try {
       formDispatcher({ type: 'SET_IS_LOADING', payload: { isLoading: true } });
@@ -227,7 +254,11 @@ export const ManageLeadReporters = ({
 
       formDispatcher({
         type: 'INITIAL_LOAD',
-        payload: { response: responseRepresentatives, parsedLeadReporters }
+        payload: {
+          response: responseRepresentatives,
+          parsedLeadReporters,
+          dataProviderGroup: selectedDataProviderGroup
+        }
       });
     } catch (error) {
       console.error('RepresentativesList - getRepresentatives.', error);
@@ -540,45 +571,24 @@ export const ManageLeadReporters = ({
   };
 
   const renderRepresentativesDropdown = () => {
-    if (
-      TextUtils.areEquals(dataflowType, config.dataflowType.BUSINESS.value) ||
-      TextUtils.areEquals(dataflowType, config.dataflowType.CITIZEN_SCIENCE.value)
-    ) {
+    if (TextUtils.areEquals(dataflowType, config.dataflowType.REPORTING.value)) {
       return (
         <Dropdown
           ariaLabel="dataProviders"
           className={styles.dataProvidersDropdown}
-          disabled
+          disabled={formState.representatives.length > 1}
           name="dataProvidersDropdown"
+          onChange={event => {
+            formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value });
+            updateProviderGroupId(event.target.value);
+          }}
           optionLabel="label"
-          options={[formState.selectedDataProviderGroup]}
+          options={formState.reportingGroups}
+          placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
           value={formState.selectedDataProviderGroup}
         />
       );
     }
-
-    return (
-      <Dropdown
-        ariaLabel="dataProviders"
-        className={styles.dataProvidersDropdown}
-        disabled={formState.representatives.length > 1}
-        name="dataProvidersDropdown"
-        onChange={event => {
-          formDispatcher({ type: 'SELECT_PROVIDERS_TYPE', payload: event.target.value });
-          updateProviderGroupId(event.target.value);
-        }}
-        optionLabel="label"
-        options={
-          formState.selectedDataProviderGroup
-            ? formState.selectedDataProviderGroup.dataProviderGroupId === 1
-              ? formState.dataProvidersTypesList
-              : formState.dataProvidersTypesList.filter(countriesGroup => countriesGroup.dataProviderGroupId !== 1)
-            : formState.dataProvidersTypesList.filter(countriesGroup => countriesGroup.dataProviderGroupId !== 1)
-        }
-        placeholder={resourcesContext.messages['manageRolesDialogDropdownPlaceholder']}
-        value={formState.selectedDataProviderGroup}
-      />
-    );
   };
 
   const renderFilter = () => {
@@ -592,15 +602,14 @@ export const ManageLeadReporters = ({
   };
 
   const renderTable = () => {
-    if (isNil(formState.selectedDataProviderGroup) || isEmpty(formState.allPossibleDataProviders)) {
+    if (isEmpty(selectedDataProviderGroup)) {
       return (
         <p className={styles.chooseRepresentative}>
           {resourcesContext.messages['manageRolesDialogNoRepresentativesMessage']}
         </p>
       );
     }
-
-    if (isEmpty(filteredData)) {
+    if (isEmpty(filteredData) && !isEmpty(filterBy)) {
       return (
         <div className={styles.emptyFilteredData}>
           {resourcesContext.messages['noLeadReportersWithSelectedParameters']}
@@ -656,8 +665,15 @@ export const ManageLeadReporters = ({
       <div className={styles.selectWrapper}>
         <div className={styles.title}>{resourcesContext.messages['manageRolesDialogHeader']}</div>
         <div>
-          <label>{resourcesContext.messages['manageRolesDialogDropdownLabel']} </label>
-          {renderRepresentativesDropdown()}
+          <label>
+            {resourcesContext.messages['manageRolesDialogDropdownLabel']}
+            {selectedDataProviderGroup?.dataProviderGroupId ||
+            formState.selectedDataProviderGroup?.dataProviderGroupId ? (
+              <strong>{selectedDataProviderGroup?.label || formState.selectedDataProviderGroup?.label} </strong>
+            ) : (
+              renderRepresentativesDropdown()
+            )}
+          </label>
         </div>
       </div>
       {renderFilter()}
