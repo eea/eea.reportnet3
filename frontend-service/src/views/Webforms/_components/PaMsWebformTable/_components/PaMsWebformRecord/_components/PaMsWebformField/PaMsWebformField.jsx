@@ -193,16 +193,15 @@ export const PaMsWebformField = ({
               localDatasetSchemaId,
               400
             );
-            return referencedFieldValues
-              .map(referencedField => ({
-                itemType:
-                  !isNil(referencedField.label) &&
-                  referencedField.label !== '' &&
-                  referencedField.label !== referencedField.value
-                    ? `${referencedField.label}`
-                    : referencedField.value,
-                value: referencedField.value
-              }))
+            return referencedFieldValues.map(referencedField => ({
+              itemType:
+                !isNil(referencedField.label) &&
+                referencedField.label !== '' &&
+                referencedField.label !== referencedField.value
+                  ? `${referencedField.label}`
+                  : referencedField.value,
+              value: referencedField.value
+            }));
           },
           {
             staleTime: 5 * 60 * 1000 // Example stale time
@@ -256,7 +255,15 @@ export const PaMsWebformField = ({
                 element?.referencedField?.masterConditionalFieldId === field.fieldSchemaId
                 ? { ...element, value: '' }
                 : { ...element }
-              : { ...element, value: record.elements.indexOf(element) > changedElementIndex ? '' : element.value }
+              : {
+                  ...element,
+                  value:
+                    record.elements.indexOf(element) > changedElementIndex &&
+                    (element?.referencedField?.masterConditionalFieldId === field.fieldSchema ||
+                      element?.referencedField?.masterConditionalFieldId === field.fieldSchemaId)
+                      ? ''
+                      : element.value
+                }
             : { ...element, value: value }
         )
         .filter(conditionalField => conditionalField.type === 'FIELD' && conditionalField.pk !== true);
