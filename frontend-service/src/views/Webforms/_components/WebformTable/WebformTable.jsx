@@ -331,6 +331,7 @@ export const WebformTable = ({
       hasFields={isNil(webformData.records) || isEmpty(webformData.records[0].fields)}
       isAddingMultiple={webformTableState.isAddingMultiple}
       isFixedNumber={webformData.fixedNumber || webformData.tableSchemaFixedNumber || null}
+      isOptional={webformData.isOptional}
       isReporting={isReporting}
       key={index}
       multipleRecords={webformData.multipleRecords}
