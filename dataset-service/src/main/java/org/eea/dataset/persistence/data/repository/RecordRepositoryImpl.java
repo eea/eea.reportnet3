@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
@@ -1000,7 +1001,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
    * @return
    */
   private void getAllRecordsDL(String totalRecords, TableSchema tableSchema, BufferedWriter bw, Long datasetId)
-      throws IOException, EEAException {
+          throws IOException, EEAException {
 
     DremioRecordMapper recordMapper = new DremioRecordMapper();
     DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
@@ -1008,37 +1009,35 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchema.getIdTableSchema().toString(), datasetSchemaId);
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, false);
     bw.write("{\"records\":[");
     for (int i = 0; i < recordVOS.size(); i++) {
-      bw.write("{\"fields\":[");
       RecordVO recordVO = recordVOS.get(i);
+      bw.write("{\"fields\":[");
+
       int fieldsSize = recordVO.getFields().size();
-      for (int j = 0; j < recordVO.getFields().size(); j++) {
-        FieldVO fieldVO = recordVO.getFields().get(j);
-        bw.write("{\"fieldName\":\"" + StringEscapeUtils.escapeJson(fieldVO.getName()) + "\",");
-        if (fieldVO.getValue().contains("\"")) {
-          String noQuotes = StringEscapeUtils.escapeJson(fieldVO.getValue()).replaceAll("\"", "");
-          noQuotes = "\\\"" + noQuotes + "\\\"";
-          bw.write("\"value\":\"" + noQuotes + "\",");
-        } else {
-          bw.write("\"value\":\"" + StringEscapeUtils.escapeJson(fieldVO.getValue()) + "\",");
-        }
-        bw.write("\"field_value_id\":\"" + fieldVO.getIdFieldSchema() + "\"");
-        if (j == fieldsSize - 1) {
-          bw.write("}");
-        } else {
-          bw.write("},");
-        }
+      for (int j = 0; j < fieldsSize; j++) {
+        FieldVO f = recordVO.getFields().get(j);
+
+        bw.write("{\"fieldName\":");
+        bw.write(mapper.writeValueAsString(f.getName()));
+
+        bw.write(",\"value\":");
+        bw.write(mapper.writeValueAsString(f.getValue()));
+
+        bw.write(",\"field_value_id\":\"");
+        bw.write(f.getIdFieldSchema());
+        bw.write("\"");
+
+        bw.write(j == fieldsSize - 1 ? "}" : "},");
       }
+
       bw.write("],");
       bw.write("\"id_table_schema\":\"" + tableSchemaVO.getIdTableSchema() + "\",");
       bw.write("\"id_record\":\"" + recordVO.getId() + "\",");
       bw.write("\"countryCode\":\"" + recordVO.getDataProviderCode() + "\"");
-      if (i == recordVOS.size() - 1) {
-        bw.write("}");
-      } else {
-        bw.write("},");
-      }
+      bw.write(i == recordVOS.size() - 1 ? "}" : "},");
     }
   }
 
