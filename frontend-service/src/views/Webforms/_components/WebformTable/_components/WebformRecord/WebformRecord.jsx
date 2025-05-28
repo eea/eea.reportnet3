@@ -82,7 +82,6 @@ export const WebformRecord = ({
   tableName,
   webformType
 }) => {
-  console.log(isOptional);
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
