@@ -67,6 +67,7 @@ export const WebformRecord = ({
   hasFields,
   isAddingMultiple,
   isFixedNumber = true,
+  isOptional,
   isReporting,
   multipleRecords,
   onAddMultipleWebform,
@@ -450,7 +451,7 @@ export const WebformRecord = ({
 
     return (
       <div className={styles.content}>
-        {multipleRecords && !isEmpty(content.elements) && (
+        {(multipleRecords || isOptional) && !isEmpty(content.elements) && (
           <div className={styles.actionButtons}>
             {validationsTemplate(parseRecordValidations(webformRecordState.record))}
             <Button
