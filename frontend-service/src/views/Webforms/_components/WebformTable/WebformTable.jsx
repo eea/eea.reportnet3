@@ -163,7 +163,7 @@ export const WebformTable = ({
     if (mainTable) {
       let fkRootField;
       let webformDataWithFkRootField;
-      if (webformData?.isOptional) {
+      if (webformData?.isOptional || webformData?.multipleRecords) {
         fkRootField = datasetSchema.tables
           .find(datasetTable => datasetTable.tableSchemaName === webformData.name)
           ?.records?.[0]?.fields?.find(tableField => tableField?.referencedField?.idPk === rootPkFieldId);
@@ -174,7 +174,9 @@ export const WebformTable = ({
       }
 
       newEmptyRecord = parseNewEntityTableRecordTable(
-        webformData?.isOptional && fkRootField && webformDataWithFkRootField ? webformDataWithFkRootField : webformData,
+        (webformData?.isOptional || webformData?.multipleRecords) && fkRootField && webformDataWithFkRootField
+          ? webformDataWithFkRootField
+          : webformData,
         selectedTable.rootTableId,
         rootPkFieldId
       );
