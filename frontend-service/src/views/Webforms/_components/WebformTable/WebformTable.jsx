@@ -169,7 +169,13 @@ export const WebformTable = ({
           ?.records?.[0]?.fields?.find(tableField => tableField?.referencedField?.idPk === rootPkFieldId);
 
         webformDataWithFkRootField = fkRootField
-          ? { ...webformData, elements: [...webformData.elements, ((fkRootField.type = 'FIELD'), fkRootField)] }
+          ? {
+              ...webformData,
+              elements: [
+                ...webformData.elements.filter(el => el.type === 'FIELD'),
+                ((fkRootField.type = 'FIELD'), fkRootField)
+              ]
+            }
           : undefined;
       }
 
