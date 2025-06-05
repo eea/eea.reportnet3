@@ -1554,13 +1554,13 @@ public class FileTreatmentHelper implements DisposableBean {
         int filesCount = files.size();
         List<String> warningList = new ArrayList<>();
         Iterator<File> fileIterator = files.iterator();
-
         while (fileIterator.hasNext()) {
             File file = fileIterator.next();
             String fileName = file.getName();
             boolean removeFile = false;
             String findTableSchemaId = tableSchemaId == null ? getTableSchemaIdFromFileName(schema, fileName, true) : tableSchemaId;
             String fileType = datasetService.getMimetype(fileName);
+            String tableName = datasetSchemaService.getTableSchemaName(String.valueOf(schema.getIdDataSetSchema()), findTableSchemaId);
 
             if (!fileType.equalsIgnoreCase("csv")) {
                 continue;
@@ -1588,7 +1588,7 @@ public class FileTreatmentHelper implements DisposableBean {
                 // Schema header list.
                 List<String> schemaHeaders = recordSchema.getFieldSchema()
                         .stream()
-                        .map(FieldSchema::getHeaderName)   // original case
+                        .map(FieldSchema::getHeaderName)
                         .collect(Collectors.toList());
 
                 if (csvHeaders.size() == recordSchema.getFieldSchema().size()) {
@@ -1599,7 +1599,7 @@ public class FileTreatmentHelper implements DisposableBean {
                             } else {
                                 error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
                             }
-                            LOG.info("Mismatch with header:{}. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",fieldSchema.getHeaderName(), jobId, datasetId, schemaHeaders, csvHeaders);
+                            LOG.info("Mismatch with header:{}. For Job ID:{}. Dataset ID:{} and Table name:{}. Schema headers are:{}, csv headers are:{}.",fieldSchema.getHeaderName(), jobId, datasetId, tableName, schemaHeaders, csvHeaders);
                             removeFile = true;
                             break;
                         }
@@ -1610,7 +1610,7 @@ public class FileTreatmentHelper implements DisposableBean {
                     } else {
                         error = EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS;
                     }
-                    LOG.info("Wrong number of headers. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",jobId, datasetId, schemaHeaders, csvHeaders);
+                    LOG.info("Wrong number of headers. For Job ID:{}. Dataset ID:{} and Table name:{}. Schema headers are:{}, csv headers are:{}.",jobId, datasetId, tableName, schemaHeaders, csvHeaders);
                     removeFile = true;
 
                 }
