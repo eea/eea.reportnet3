@@ -338,10 +338,10 @@ public interface JobController {
      *
      * @param jobId the job id
      * @param sendRestartNotification
-     * @return if updated
+     * @return
      */
     @PostMapping(value = "/restartImportJob/{jobId}")
-    Boolean restartImportJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification) throws Exception;
+    void restartImportJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification);
 }
 
 

@@ -79,11 +79,13 @@ public interface JobService {
 
     void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback);
 
+    void updateNumOfRestartsJobParameter(Long jobId);
+
     File downloadEtlExportedFile(JobVO job, String fileName) throws EEAException;
 
     void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber);
 
     Long findProviderIdById(Long jobId);
 
-    Boolean restartImportJob(Long jobId, Boolean sendRestartNotification) throws Exception;
+    void restartImportJob(Long jobId, Boolean sendRestartNotification);
 }

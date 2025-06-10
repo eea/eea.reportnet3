@@ -313,6 +313,7 @@ public class JobControllerImpl implements JobController {
         parameters.put("delimiter", delimiter);
         parameters.put("fmeCallback", false);
         parameters.put("filePathInS3", filePathInS3);
+        parameters.put("numOfRestarts", 0);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
@@ -982,15 +983,15 @@ public class JobControllerImpl implements JobController {
      * restarts import job if possible
      *
      * @param jobId the job id
-     * @return if updated
+     * @return
      */
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN')") //todo change this?
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping(value = "/restartImportJob/{jobId}")
-    public Boolean restartImportJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification) throws Exception{
+    public void restartImportJob(@PathVariable("jobId") Long jobId,
+                                 @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification){
         try{
-            //todo should it be async?
-            return jobService.restartImportJob(jobId, sendRestartNotification);
+            jobService.restartImportJob(jobId, sendRestartNotification);
         }
         catch (Exception e){
             LOG.error("Could not restart import job with jobId {} Error: {}", jobId, e.getMessage());

@@ -484,6 +484,165 @@ public class DatasetControllerImpl implements DatasetController {
   }
 
   /**
+   * Import file data private. This is a code duplication in order to resolve authentication issues in JobForRestartingLongRunningImportJobs
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   * @param jobId the jobId
+   * @param fmeJobId the fmeJobId
+   */
+  @SneakyThrows
+  @Override
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
+  @PostMapping("/private/importFileData/{datasetId}")
+  @ApiOperation(value = "Import file to dataset data (Large files)",
+          notes = "Allowed roles: \n\n Reporting dataset: LEAD REPORTER, REPORTER WRITE, NATIONAL COORDINATOR \n\n Data collection: CUSTODIAN, STEWARD\n\n Test dataset: CUSTODIAN, STEWARD, STEWARD SUPPORT\n\n Reference dataset: CUSTODIAN, STEWARD\n\n Design dataset: CUSTODIAN, STEWARD, EDITOR WRITE\n\n EU dataset: CUSTODIAN, STEWARD")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
+          @ApiResponse(code = 400, message = "Error importing file"),
+          @ApiResponse(code = 500, message = "Error importing file")})
+  public void importBigFileDataPrivate(
+          @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
+                  name = "datasetId") @PathVariable("datasetId") Long datasetId,
+          @ApiParam(type = "Long", value = "Dataflow id",
+                  example = "0") @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+          @ApiParam(type = "Long", value = "Provider id",
+                  example = "0") @RequestParam(value = "providerId", required = false) Long providerId,
+          @ApiParam(type = "String", value = "Table schema id",
+                  example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
+                  required = false) String tableSchemaId,
+          @ApiParam(value = "File to upload") @RequestParam(value = "file", required = false) MultipartFile file,
+          @ApiParam(type = "boolean", value = "Replace current data",
+                  example = "true") @RequestParam(value = "replace", required = false) boolean replace,
+          @ApiParam(type = "Long", value = "Integration id", example = "0") @RequestParam(
+                  value = "integrationId", required = false) Long integrationId,
+          @ApiParam(type = "String", value = "File delimiter",
+                  example = ",") @RequestParam(value = "delimiter", required = false) String delimiter,
+          @ApiParam(type = "Long", value = "Job Id",
+                  example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
+          @ApiParam(type = "String", value = "Fme Job Id",
+                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+
+    String originalFilename = (file != null) ? file.getOriginalFilename() : null;
+    LOG.info("Private Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
+
+    if (dataflowId == null){
+      dataflowId = datasetService.getDataFlowIdById(datasetId);
+    }
+    if(providerId == null){
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      providerId = dataSetMetabaseVO.getDataProviderId();
+    }
+    DataFlowVO dataFlowVO = dataFlowControllerZuul.getMetabaseById(dataflowId);
+    if(dataFlowVO.getBigData() != null && dataFlowVO.getBigData()){
+      try {
+        String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+        if(StringUtils.isNotBlank(tableSchemaId)){
+          TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+          if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                  && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+            LOG.error("Can not private import for datasetId {} because the table is iceberg", datasetId);
+            datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+          }
+        }
+        else{
+          List<TableSchemaIdNameVO> tableSchemaIdNameVOS =  datasetSchemaService.getTableSchemasIds(datasetId);
+          for(TableSchemaIdNameVO tableSchemaIdNameVO: tableSchemaIdNameVOS){
+            TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaIdNameVO.getIdTableSchema(), datasetSchemaId);
+            if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
+                    && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))){
+              LOG.error("Can not private import zip file for datasetId {} because a table is iceberg", datasetId);
+              datasetService.failImportJob(jobId, datasetId, EventType.IMPORT_FAILED_EVENT_ICEBERG_EXISTS, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS);
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.IMPORTING_FILE_ICEBERG);
+            }
+          }
+        }
+
+        HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
+        if (file != null) {
+          helperMultipartFileMapper.setBytes(file.getBytes());
+          helperMultipartFileMapper.setInputStream(file.getInputStream());
+          helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
+          helperMultipartFileMapper.setFileNull(false);
+        }
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper);
+      } catch (Exception e) {
+        LOG.error("Error when privately importing data to Dremio for datasetId {}", datasetId, e);
+        throw e;
+      }
+    }
+    else{
+      JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
+      jobId = null;
+      try {
+        if(file == null){
+          throw new EEAException("Empty file and file path");
+        }
+
+        JobVO job = null;
+        if (fmeJobId!=null) {
+          jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
+          job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+          if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
+            LOG.info("Job {} is cancelled. Exiting private import!", job.getId());
+            return;
+          }
+        }
+        if(job!=null){
+          jobId = job.getId();
+          LOG.info("Private incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
+        }else{
+          //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+          List<Long> datasetIds = new ArrayList<>();
+          datasetIds.add(datasetId);
+          jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
+          jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, file.getOriginalFilename(), replace, integrationId, delimiter, jobStatus, fmeJobId, null);
+          if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+            LOG.info("Added private import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
+            datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, file.getOriginalFilename());
+            throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
+          }
+        }
+
+        LOG.info("Privately importing big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData is {}", dataflowId, datasetId, tableSchemaId, replace);
+        fileTreatmentHelper.importFileData(datasetId,dataflowId, tableSchemaId, file, replace, integrationId, delimiter, jobId);
+        LOG.info("Successfully privately imported big file for dataflowId {}, datasetId {} and tableSchemaId {}. ReplaceData was {}", dataflowId, datasetId, tableSchemaId, replace);
+      } catch (EEAException e) {
+        LOG.error(
+                "File private import failed: dataflowId={} datasetId={}, tableSchemaId={}, fileName={}. Message: {}", dataflowId, datasetId,
+                tableSchemaId, file.getOriginalFilename(), e.getMessage(), e);
+        if (jobId!=null) {
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                EEAErrorMessage.IMPORTING_FILE_DATASET);
+      } catch (Exception e) {
+        String fileName = (file != null) ? file.getName() : null;
+        LOG.error("Unexpected error! Error privately importing big file {} for datasetId {} providerId {} and tableSchemaId {} Message: {}", fileName, datasetId, providerId, tableSchemaId, e.getMessage());
+        if (jobId!=null && jobStatus != JobStatusEnum.REFUSED) {
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+        Map<String, Object> importFileData = new HashMap<>();
+        importFileData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_BIG_FILE_DATA.getValue());
+        importFileData.put(LiteralConstants.DATASETID, datasetId);
+        lockService.removeLockByCriteria(importFileData);
+        throw e;
+      }
+    }
+  }
+
+  /**
    * Import file data.
    *
    * @param datasetId the dataset id

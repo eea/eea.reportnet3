@@ -267,7 +267,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
-                s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+                try {
+                    s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+                }
+                catch (Exception e){
+                    LOG.error("For jobId {} could not find file {} in public s3. Error: {}", jobId, filePathInS3, e.getMessage());
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_FILE_IN_S3, null);
+                    throw e;
+                }
                 fileName = s3File.getName();
             }
 
@@ -307,7 +314,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             //remove file from public S3 if job is finished
             if (jobControllerZuul.findJobById(jobId).getJobStatus() == JobStatusEnum.FINISHED) {
-                s3HelperPublic.deleteFileFromS3(getFilePath(datasetId, dataflowId, providerId, fileName, true));
+               // s3HelperPublic.deleteFileFromS3(getFilePath(datasetId, dataflowId, providerId, fileName, true));
             }
             LOG.info("Successfully imported file to s3 {}", importFileInDremioInfo);
         } catch (EEAException e) {

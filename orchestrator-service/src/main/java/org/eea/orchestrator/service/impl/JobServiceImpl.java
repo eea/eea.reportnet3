@@ -570,7 +570,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber){
-        jobRepository.updateJobInfo(jobId, jobInfo.getValue(lineNumber));
+        String jobInfoStr = null;
+        if(jobInfo != null) {
+            jobInfoStr = jobInfo.getValue(lineNumber);
+        }
+        jobRepository.updateJobInfo(jobId, jobInfoStr);
         jobHistoryService.updateJobInfoOfLastHistoryEntry(jobId, jobInfo, lineNumber);
     }
 
@@ -612,6 +616,21 @@ public class JobServiceImpl implements JobService {
         if(job.isPresent()){
             Map<String, Object> insertedParameters = job.get().getParameters();
             insertedParameters.put("fmeCallback", fmeCallback);
+            jobRepository.save(job.get());
+        }
+    }
+
+    @Transactional
+    @Override
+    public void updateNumOfRestartsJobParameter(Long jobId){
+        Optional<Job> job = jobRepository.findById(jobId);
+        if(job.isPresent()){
+            Map<String, Object> insertedParameters = job.get().getParameters();
+            Integer numOfRestarts = 0;
+            if(insertedParameters.get("numOfRestarts") != null){
+                numOfRestarts = (Integer) insertedParameters.get("numOfRestarts");
+            }
+            insertedParameters.put("numOfRestarts", numOfRestarts + 1);
             jobRepository.save(job.get());
         }
     }
@@ -660,8 +679,9 @@ public class JobServiceImpl implements JobService {
         return providerId;
     }
 
+    @Async
     @Override
-    public Boolean restartImportJob(Long jobId, Boolean sendRestartNotification) throws Exception {
+    public void restartImportJob(Long jobId, Boolean sendRestartNotification){
         Boolean jobRestarted = false;
         JobVO job = findById(jobId);
         try {
@@ -674,27 +694,31 @@ public class JobServiceImpl implements JobService {
             Long integrationId = (integrationIdStr != null) ? Long.valueOf(integrationIdStr) : null;
             String delimiter = (insertedParameters.get("delimiter") != null) ? (String) insertedParameters.get("delimiter") : null;
             String filePathInS3 = (insertedParameters.get("filePathInS3") != null) ? (String) insertedParameters.get("filePathInS3") : null;
+            Integer numOfRestarts = (insertedParameters.get("numOfRestarts") != null) ? (Integer) insertedParameters.get("numOfRestarts") : 0;
 
-            if (BooleanUtils.isTrue(replaceData)) {
-                if (BooleanUtils.isTrue(isBigData)) {
-                    if (filePathInS3 != null) {
-                        LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
-                        //todo fix authentication
-                        dataSetControllerZuul.importBigFileData(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
-                        jobRestarted = true;
+            if(numOfRestarts > 0) {
+                LOG.info("Can not restart job {} because it has {} restarts. Failing the job", jobId, numOfRestarts);
+                cancelJob(jobId, JobInfoEnum.IMPORT_JOB_RESTART_FAILED, true);
+            }
+            else {
+                if (BooleanUtils.isTrue(replaceData)) {
+                    if (BooleanUtils.isTrue(isBigData)) {
+                        if (filePathInS3 != null) {
+                            LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
+                            updateNumOfRestartsJobParameter(jobId);
+                            updateJobInfo(jobId, null, null);
+                            dataSetControllerZuul.importBigFileDataPrivate(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
+                            jobRestarted = true;
+                        } else {
+                            LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
+                        }
                     } else {
-                        LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
-                        //todo if file exists and has the same file name call the method
+                        LOG.error("Can not restart import jobId {} because it is a citus dataflow", jobId);
                     }
                 } else {
-                    LOG.error("Can not restart import jobId {} because it is a citus dataflow", jobId);
-                    //todo if file exists and has the same file name call the method
+                    LOG.error("Can not restart import jobId {} because replace data is false", jobId);
                 }
-            } else {
-                LOG.error("Can not restart import jobId {} because replace data is false", jobId);
             }
-
-
         }
         catch(Exception e){
             LOG.error("Could not restart jobId {} Error {}", jobId, e.getMessage());
@@ -713,6 +737,5 @@ public class JobServiceImpl implements JobService {
             }
         }
 
-        return jobRestarted;
     }
 }
