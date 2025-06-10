@@ -63,7 +63,13 @@ public enum JobInfoEnum {
 
     ERROR_MATERIALIZED_VIEWS_ARE_NOT_CORRECT("The materialized views have not been created successfully"),
 
-    WARNING_HAS_CANCELED_VALIDATION_TASKS("There are canceled validation tasks");
+    WARNING_HAS_CANCELED_VALIDATION_TASKS("There are canceled validation tasks"),
+    
+    IMPORT_JOB_FAILED_STUCK_QUEUED("The import job failed because it was stuck in status QUEUED for a long time"),
+
+    IMPORT_JOB_RESTART_FAILED("The import job failed, because it was stuck after already been restarted"),
+
+    ERROR_NO_FILE_IN_S3("The import job failed because no imported file was found in the public s3 storage.");
 
 
     /** The value. */

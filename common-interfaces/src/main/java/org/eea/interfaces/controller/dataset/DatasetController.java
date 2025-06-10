@@ -652,7 +652,6 @@ public interface DatasetController {
    * @param delimiter the delimiter
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
-   * @param filePathInS3 the filePathInS3
    */
   @PostMapping("/v2/importFileData/{datasetId}")
   void importBigFileData(@PathVariable("datasetId") Long datasetId,
@@ -665,6 +664,32 @@ public interface DatasetController {
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
       @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+
+  /**
+   * Import big file data private.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param providerId the provider id
+   * @param tableSchemaId the table schema id
+   * @param file the file
+   * @param replace the replace
+   * @param integrationId the integration id
+   * @param delimiter the delimiter
+   * @param jobId the jobId
+   * @param fmeJobId the fmeJobId
+   */
+  @PostMapping("/private/importFileData/{datasetId}")
+  void importBigFileDataPrivate(@PathVariable("datasetId") Long datasetId,
+                         @RequestParam(value = "dataflowId", required = false) Long dataflowId,
+                         @RequestParam(value = "providerId", required = false) Long providerId,
+                         @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                         @RequestParam("file") MultipartFile file,
+                         @RequestParam(value = "replace", required = false) boolean replace,
+                         @RequestParam(value = "integrationId", required = false) Long integrationId,
+                         @RequestParam(value = "delimiter", required = false) String delimiter,
+                         @RequestParam(value = "jobId", required = false) Long jobId,
+                         @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
 
 
   /**
