@@ -15,6 +15,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -22,6 +24,11 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
+import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
+import software.amazon.awssdk.transfer.s3.model.CompletedDirectoryDownload;
+import software.amazon.awssdk.transfer.s3.model.DirectoryDownload;
+import software.amazon.awssdk.transfer.s3.model.DownloadDirectoryRequest;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -45,6 +52,7 @@ public class S3HelperImpl implements S3Helper {
 
     private final S3Service s3Service;
     private final S3Client s3Client;
+    private final S3AsyncClient s3AsyncClient;
     private final S3Presigner s3Presigner;
     private final String S3_DEFAULT_BUCKET_NAME;
 
@@ -54,6 +62,7 @@ public class S3HelperImpl implements S3Helper {
     public S3HelperImpl(S3Service s3Service, @Qualifier("s3PrivateConfiguration") S3Configuration s3Configuration) {
         this.s3Service = s3Service;
         this.s3Client = s3Configuration.getS3Client();
+        this.s3AsyncClient = s3Configuration.getS3AsyncClient();
         this.s3Presigner = s3Configuration.getS3Presigner();
         this.S3_DEFAULT_BUCKET_NAME = s3Configuration.getS3DefaultBucketName();
         this.S3_ICEBERG_BUCKET_NAME = s3Configuration.getS3IcebergBucketName();
@@ -196,64 +205,62 @@ public class S3HelperImpl implements S3Helper {
 
     /**
      * Gets file
-     * @param key
-     * @param fileName
-     * @param path
-     * @param fileType
-     * @return
+     * @param key The key
+     * @param fileName The fileName
+     * @param path The file path
+     * @param fileType The file type
+     *
+     * @return The local file downloaded from S3
      */
     @Override
     public File getFileFromS3(String key, String fileName, String path, String fileType) throws IOException {
-        byte[] data = getBytesFromS3(key);
-
-        // Write the data to a local file.
-        String filePath = null;
-        if(StringUtils.isNotBlank(fileType)) {
-            filePath = path + fileName + fileType;
-        }
-        else{
-            filePath = path + fileName;
-        }
-        File file = new File(filePath);
-
-        if(file.exists()){
-            //if a file with the same name exists in the path, delete it so that it will be recreated
-            file.delete();
-        }
-        Path textFilePath = Paths.get(file.toString());
-        Files.createFile(textFilePath);
-        OutputStream os = new FileOutputStream(file);
-        os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", filePath);
-        os.close();
-        return file;
+        String fullFileName = StringUtils.isNotBlank(fileType) ? fileName + fileType : fileName;
+        Path filePath = Paths.get(path, fullFileName);
+        return streamS3FileToPath(key, filePath);
     }
 
     /**
      * Gets file for export
-     * @param key
-     * @param fileName
-     * @param path
-     * @param fileType
-     * @return
+     * @param key The key
+     * @param fileName The fileName
+     * @param path The file path
+     * @param fileType The file type
+     *
+     * @return The local file downloaded from S3
      */
     @Override
     public File getFileFromS3Export(String key, String fileName, String path, String fileType, Long datasetId) throws IOException {
-        byte[] data = getBytesFromS3(key);
+        Path filePath = Paths.get(path, "dataset-" + datasetId, fileName + fileType);
+        return streamS3FileToPath(key, filePath);
+    }
 
-        // Write the data to a local file.
-        File file = new File(new File(path, "dataset-" + datasetId), fileName + fileType);
+    /**
+     * Stream file from S3 to a local path
+     * @param key The key
+     * @param filePath file path
+     *
+     * @return The file that has been streamed
+     * @throws IOException IoException
+     */
+    private File streamS3FileToPath(String key, Path filePath) throws IOException {
+        // Ensure parent directories exist
+        Files.createDirectories(filePath.getParent());
 
-        if(file.exists()){
-            //if a file with the same name exists in the path, delete it so that it will be recreated
+        // Delete existing file if needed
+        File file = filePath.toFile();
+        if (file.exists()) {
             file.delete();
         }
-        Path textFilePath = Paths.get(file.toString());
-        Files.createFile(textFilePath);
-        OutputStream os = new FileOutputStream(file);
-        os.write(data);
-        LOG.info("Successfully obtained bytes from file: {}", fileName + fileType);
-        os.close();
+
+        // Stream directly from S3 to file
+        GetObjectRequest objectRequest = GetObjectRequest.builder()
+            .key(key)
+            .bucket(S3_DEFAULT_BUCKET_NAME)
+            .build();
+
+        s3Client.getObject(objectRequest, ResponseTransformer.toFile(filePath));
+
+        LOG.info("Successfully streamed file from S3 to: {}", filePath);
         return file;
     }
 
@@ -468,6 +475,25 @@ public class S3HelperImpl implements S3Helper {
         }
         catch (Exception e){
             LOG.error("Could not download attachments from path {} to {} Error: ", attachmentsPathInS3, parentFolderInDiskPath, e);
+        }
+    }
+
+    @Override
+    public void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
+        DirectoryDownload directoryDownload;
+        try (S3TransferManager transferManager = S3TransferManager.builder()
+            .s3Client(s3AsyncClient)
+            .build()) {
+            directoryDownload = transferManager.downloadDirectory(DownloadDirectoryRequest.builder()
+                .destination(Paths.get(localPath))
+                .bucket(S3_DEFAULT_BUCKET_NAME)
+                .filter(filter)
+                .build());
+            CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
+            completedDirectoryDownload.failedTransfers().forEach(failedFileDownload -> LOG.error(failedFileDownload.exception().getMessage()));
+        } catch (Exception e) {
+            LOG.error("Error while trying to download file from S3 to local NFS", e);
+            throw new RuntimeException(e);
         }
     }
 }

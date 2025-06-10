@@ -504,6 +504,20 @@ public final class LiteralConstants {
   public static final String EUROPE_ZONE_ID = "Europe/Paris";
 
   /**
+   * The parquet export file name
+   */
+  public static final String PARQUET_EXPORT_NAME = "/etlExportV5_";
+
+  /**
+   * The dataset prefix for export
+   */
+  public static final String DATASET_PREFIX_FOR_EXPORT = "/dataset-";
+
+  public static final String EXPORT_PARQUET = "exportParquet";
+
+  public static final String EXPORT_CSV = "exportCsv";
+
+  /**
    * Instantiates a new literal constants.
    */
   private LiteralConstants() {

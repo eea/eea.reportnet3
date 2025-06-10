@@ -136,7 +136,7 @@ public class JobUtils {
                     NotificationVO.builder().datasetId(job.getDatasetId()).dataflowId(job.getDataflowId()).tableSchemaId(tableSchemaId).fileName(fileName)
                             .dataflowName(dataflowName).datasetName(datasetName).tableSchemaName(tableSchemaName)
                             .user(user).error(error).build());
-        } catch (EEAException e) {
+        } catch (Exception e) {
             LOG.error("Error while releasing {} notification for jobId {} and datasetId {} ", eventType.getKey(), job.getId(), job.getDatasetId(), e);
         }
     }

@@ -8,6 +8,7 @@ import software.amazon.awssdk.http.SdkHttpClient;
 import software.amazon.awssdk.http.SdkHttpConfigurationOption;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutBucketEncryptionRequest;
 import software.amazon.awssdk.services.s3.model.ServerSideEncryptionByDefault;
@@ -40,9 +41,9 @@ public class S3PublicConfiguration implements S3Configuration {
   @Value("${s3.default.public.bucket.path}")
   private String S3_DEFAULT_BUCKET_PATH;
 
-  private final static Region s3Region = Region.EU_WEST_1;
+  private static final Region s3Region = Region.EU_WEST_1;
 
-  private static AwsBasicCredentials awsCredentials;
+  private AwsBasicCredentials awsCredentials;
 
   @PostConstruct
   public void getCredentials() {
@@ -76,6 +77,11 @@ public class S3PublicConfiguration implements S3Configuration {
     }
 
     return s3Client;
+  }
+
+  @Override
+  public S3AsyncClient getS3AsyncClient() {
+    return null;
   }
 
   @Override

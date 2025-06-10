@@ -16,15 +16,23 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigInteger;
-import java.util.ArrayList;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class JobForRestartingDelayedValidationTasks {
 
     @Value(value = "${scheduling.inProgress.validation.task.max.time}")
     private long maxTimeInMinutesForInProgressTasks;
+
+    @Value(value = "${scheduling.inProgress.validation.task.mid.time}")
+    private long midTimeInMinutesForInProgressTasks;
+
+    @Value(value = "${scheduling.inProgress.validation.task.min.time}")
+    private long minTimeInMinutesForInProgressTasks;
+
 
     /**
      * The admin user.
@@ -68,7 +76,7 @@ public class JobForRestartingDelayedValidationTasks {
      */
     public void restartDelayedTasks() {
         try {
-            List<BigInteger> tasksInProgress = validationControllerZuul.listInProgressValidationTasksThatExceedTime(maxTimeInMinutesForInProgressTasks);
+            List<BigInteger> tasksInProgress = validationControllerZuul.listInProgressValidationTasksThatExceedTime(minTimeInMinutesForInProgressTasks);
             if (tasksInProgress.size() > 0) {
                 TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
                 UsernamePasswordAuthenticationToken authentication =
@@ -78,8 +86,13 @@ public class JobForRestartingDelayedValidationTasks {
                     try {
                         TaskVO taskVO = validationControllerZuul.findTaskById(taskId.longValue());
                         if (taskVO!=null) {
-                            LOG.info("Restarting task {}", taskVO);
-                            validationControllerZuul.restartTask(taskId.longValue());
+                            long taskAgeMinutes = computeAgeMinutesForInProgressTask(taskVO.getStartingDate());
+                            long taskMaxAllowedMinutes = getMaxAllowedTimeForInProgressTaskVersion(taskVO.getVersion());
+
+                            if (taskAgeMinutes > taskMaxAllowedMinutes) {
+                                LOG.info("Restarting delayed task {} (version: {}, age: {}m)", taskVO, taskVO.getVersion(), taskAgeMinutes);
+                                validationControllerZuul.restartTask(taskId.longValue());
+                            }
                         }
                     } catch (Exception e) {
                         LOG.error("Error while running scheduled task restartDelayedTasks for task id {}", taskId);
@@ -89,6 +102,20 @@ public class JobForRestartingDelayedValidationTasks {
         } catch (Exception e) {
             LOG.error("Error while running scheduled task restartDelayedTasks {}", e);
         }
+    }
+
+    private long computeAgeMinutesForInProgressTask(Date inProgressTaskStartingDate) {
+        if (inProgressTaskStartingDate == null) {
+            LOG.warn("Task startingDate is null, assuming 0 minutes in progress.");
+            return 0;
+        }
+        return Duration.between(inProgressTaskStartingDate.toInstant(), Instant.now()).toMinutes();
+    }
+
+    private long getMaxAllowedTimeForInProgressTaskVersion(Integer version) {
+        if (version == null || version < 2) return minTimeInMinutesForInProgressTasks;
+        if (version <= 4) return midTimeInMinutesForInProgressTasks;
+        return maxTimeInMinutesForInProgressTasks;
     }
 }
 

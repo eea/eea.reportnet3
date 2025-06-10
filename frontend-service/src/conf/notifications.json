@@ -1050,6 +1050,14 @@
           }
         },
         {
+          "key": "IMPORT_RESTART_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "IMPORT_CANCELED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
@@ -1167,6 +1175,13 @@
         },
         {
           "key": "IMPORT_DESIGN_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "IMPORT_RESTART_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"]

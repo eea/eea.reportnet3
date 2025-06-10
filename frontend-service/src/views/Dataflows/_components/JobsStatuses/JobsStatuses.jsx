@@ -502,6 +502,12 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
         className={config.jobRunningStatus[job.jobStatus].label}
         type={resourcesContext.messages[config.jobRunningStatus[job.jobStatus].label]}
       />
+      {job.jobInfo && (
+      <i
+      className="pi pi-info-circle" 
+    />
+    )
+    }
     </div>
   );
 
@@ -843,23 +849,20 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
                 }}
               />
               {showValidationTable && (
-                <>
-                  {isLoadingCancelledValidations ? (
+                  isLoadingCancelledValidations ? (
                     <div className={styles.noCancelledTasksContent}>
                       <Spinner className={styles.spinnerPosition} />
                     </div>
                   ) : cancelledValidations.length > 0 ? (
                     <DataTable
-                      className={styles.cancelledValidationsTable}
                       autoLayout={true}
+                      className={styles.cancelledValidationsTable}
                       first={paginationInfo.firstPageRecord}
                       hasDefaultCurrentPage={true}
                       lazy={true}
                       loading={isLoadingCancelledValidations}
                       onPage={onChangePage}
                       onSort={onSortCancelledTasks}
-                      sortField={sortCancelled.field}
-                      sortOrder={sortCancelled.order}
                       paginator={true}
                       paginatorRight={
                         <span>{`${resourcesContext.messages['totalRecords']} ${totalCancelledValidations}`}</span>
@@ -867,14 +870,15 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
                       rowClassName={newCancelledTasksClassName}
                       rows={paginationInfo.recordsPerPage}
                       rowsPerPageOptions={[5, 10, 15]}
+                      sortField={sortCancelled.field}
+                      sortOrder={sortCancelled.order}
                       totalRecords={totalCancelledValidations}
                       value={cancelledValidations}>
                       {getCancelledValidationsColumns()}
                     </DataTable>
                   ) : (
                     <p className={styles.emptyArrayMessage}>{resourcesContext.messages['noCancelledTasks']}</p>
-                  )}
-                </>
+                  )
               )}
             </>
           )}

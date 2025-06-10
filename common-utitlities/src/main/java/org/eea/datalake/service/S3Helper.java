@@ -1,9 +1,9 @@
 package org.eea.datalake.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
-import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.File;
 import java.io.IOException;
@@ -166,4 +166,13 @@ public interface S3Helper {
     void deleteTableIfEmpty(String tableSchemaName, S3PathResolver tablePathResolver, DremioHelperService dremioHelperService) throws Exception;
 
     void getAttachmentsFromS3Locally(String attachmentsPathInS3, String parentFolderInDiskPath);
+
+    /**
+     * Downloads file or files from S3 locally
+     *
+     * @param s3Path The S3 path ex: "df-0001212/collections/dc-0003333/"
+     * @param localPath The local path to be stored
+     * @param filter The filtering (exclusions, inclusions)
+     */
+    void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter);
 }

@@ -101,6 +101,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
   List<Task> findAllByTaskTypeAndStatusOrderByIdAsc(TaskType taskType, ProcessStatusEnum status);
 
+  Task findFirstByProcessIdInAndStatus(List<String> processIds, ProcessStatusEnum status);
+
   List<Task> findAllByProcessIdAndStatus(String processId,ProcessStatusEnum status);
 
   List<Task> findAllByProcessIdAndStatusIn(String processId,List<ProcessStatusEnum> status);

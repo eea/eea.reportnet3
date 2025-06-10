@@ -1,5 +1,6 @@
 package org.eea.orchestrator.service.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -27,6 +28,7 @@ import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.annotation.LockCriteria;
 import org.eea.orchestrator.mapper.JobMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.repository.JobRepository;
@@ -44,6 +46,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.File;
@@ -53,8 +58,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Stream;
 
-import static org.eea.utils.LiteralConstants.CSV_TYPE;
+import static org.eea.utils.LiteralConstants.*;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -357,10 +363,11 @@ public class JobServiceImpl implements JobService {
         String filterValue = (parameters.get("filterValue") != null) ? (String) parameters.get("filterValue") : null;
         String columnName = (parameters.get("columnName") != null) ? (String) parameters.get("columnName") : null;
         String dataProviderCodes = (parameters.get("dataProviderCodes") != null) ? (String) parameters.get("dataProviderCodes") : null;
-        Boolean exportCsv = (parameters.get("exportCsv") != null) ? (Boolean) parameters.get("exportCsv") : false;
+        Boolean exportCsv = (parameters.get(EXPORT_CSV) != null) ? (Boolean) parameters.get(EXPORT_CSV) : false;
+        Boolean exportParquet = (parameters.get(EXPORT_PARQUET) != null) ? (Boolean) parameters.get(EXPORT_PARQUET) : false;
         Boolean includeAttachments = (parameters.get("includeAttachments") != null) ? (Boolean) parameters.get("includeAttachments") : false;
 
-        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, includeAttachments, jobVO.getId());
+        dataSetControllerZuul.createFileForEtlExport(datasetId, dataflowId, dataProviderId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, exportCsv, exportParquet ,includeAttachments, jobVO.getId());
     }
 
     @Transactional
@@ -563,7 +570,11 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber){
-        jobRepository.updateJobInfo(jobId, jobInfo.getValue(lineNumber));
+        String jobInfoStr = null;
+        if(jobInfo != null) {
+            jobInfoStr = jobInfo.getValue(lineNumber);
+        }
+        jobRepository.updateJobInfo(jobId, jobInfoStr);
         jobHistoryService.updateJobInfoOfLastHistoryEntry(jobId, jobInfo, lineNumber);
     }
 
@@ -609,6 +620,21 @@ public class JobServiceImpl implements JobService {
         }
     }
 
+    @Transactional
+    @Override
+    public void updateNumOfRestartsJobParameter(Long jobId){
+        Optional<Job> job = jobRepository.findById(jobId);
+        if(job.isPresent()){
+            Map<String, Object> insertedParameters = job.get().getParameters();
+            Integer numOfRestarts = 0;
+            if(insertedParameters.get("numOfRestarts") != null){
+                numOfRestarts = (Integer) insertedParameters.get("numOfRestarts");
+            }
+            insertedParameters.put("numOfRestarts", numOfRestarts + 1);
+            jobRepository.save(job.get());
+        }
+    }
+
     /**
      * Download etl exported file.
      *
@@ -623,24 +649,13 @@ public class JobServiceImpl implements JobService {
         // we compound the route and create the file
 
         File file;
-        if(job.getParameters().get("exportCsv") != null && BooleanUtils.isTrue((Boolean) job.getParameters().get("exportCsv"))){
-            String folderToZipPath = exportDLPath + "/dataset-" + job.getDatasetId() + "/etlExportV4_" + job.getId();
-            File parentFolder = new File(folderToZipPath);
-            file = new File(folderToZipPath + ".zip");
-
-            try {
-                //remove everything from the folder
-                Files.walk(parentFolder.toPath())
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-            }
-            catch (Exception e){
-                LOG.error("Could not remove files from parent folder {}", folderToZipPath);
-            }
-
-        }
-        else{
+        if(job.getParameters().get(EXPORT_CSV) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_CSV))){
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + "/etlExportV4_" + job.getId();
+            file = getFile(folderToZipPath);
+        } else if (job.getParameters().get(EXPORT_PARQUET) != null && BooleanUtils.isTrue((Boolean) job.getParameters().get(EXPORT_PARQUET))) {
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + job.getDatasetId() + LiteralConstants.PARQUET_EXPORT_NAME + job.getId();
+            file = getFile(folderToZipPath);
+        } else{
             file = new File(new File(importPath, ETL_EXPORT), FilenameUtils.getName(fileName));
         }
         // we compound the route and create the file
@@ -651,11 +666,76 @@ public class JobServiceImpl implements JobService {
         return file;
     }
 
+
+    private File getFile(String folderToZipPath) {
+      return new File(folderToZipPath + ".zip");
+    }
+
     @Override
     public Long findProviderIdById(Long jobId) {
         Long providerId = jobRepository.findProviderIdByJobId(jobId);
         LOG.info("Found provider id {} for job {}", providerId, jobId);
 
         return providerId;
+    }
+
+    @Async
+    @Override
+    public void restartImportJob(Long jobId, Boolean sendRestartNotification){
+        Boolean jobRestarted = false;
+        JobVO job = findById(jobId);
+        try {
+            Boolean isBigData = dataFlowControllerZuul.isBigDataflow(job.getDataflowId());
+
+            Map<String, Object> insertedParameters = job.getParameters();
+            Boolean replaceData = (insertedParameters.get("replace") != null) ? (Boolean) insertedParameters.get("replace") : false;
+            String tableSchemaId = (insertedParameters.get("tableSchemaId") != null) ? (String) insertedParameters.get("tableSchemaId") : null;
+            String integrationIdStr = (insertedParameters.get("integrationId") != null) ? (String) insertedParameters.get("integrationId") : null;
+            Long integrationId = (integrationIdStr != null) ? Long.valueOf(integrationIdStr) : null;
+            String delimiter = (insertedParameters.get("delimiter") != null) ? (String) insertedParameters.get("delimiter") : null;
+            String filePathInS3 = (insertedParameters.get("filePathInS3") != null) ? (String) insertedParameters.get("filePathInS3") : null;
+            Integer numOfRestarts = (insertedParameters.get("numOfRestarts") != null) ? (Integer) insertedParameters.get("numOfRestarts") : 0;
+
+            if(numOfRestarts > 0) {
+                LOG.info("Can not restart job {} because it has {} restarts. Failing the job", jobId, numOfRestarts);
+                cancelJob(jobId, JobInfoEnum.IMPORT_JOB_RESTART_FAILED, true);
+            }
+            else {
+                if (BooleanUtils.isTrue(replaceData)) {
+                    if (BooleanUtils.isTrue(isBigData)) {
+                        if (filePathInS3 != null) {
+                            LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
+                            updateNumOfRestartsJobParameter(jobId);
+                            updateJobInfo(jobId, null, null);
+                            dataSetControllerZuul.importBigFileDataPrivate(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
+                            jobRestarted = true;
+                        } else {
+                            LOG.error("Can not restart import jobId {} because filePathInS3 is null", jobId);
+                        }
+                    } else {
+                        LOG.error("Can not restart import jobId {} because it is a citus dataflow", jobId);
+                    }
+                } else {
+                    LOG.error("Can not restart import jobId {} because replace data is false", jobId);
+                }
+            }
+        }
+        catch(Exception e){
+            LOG.error("Could not restart jobId {} Error {}", jobId, e.getMessage());
+            jobRestarted = false;
+        }
+
+
+        if(BooleanUtils.isTrue(sendRestartNotification)) {
+            if (BooleanUtils.isTrue(jobRestarted)) {
+                //send successful restart notification
+                jobUtils.sendKafkaImportNotification(job, EventType.IMPORT_RESTART_COMPLETED_EVENT, "job Id " + jobId);
+            }
+            else{
+                //send failed restart notification
+                jobUtils.sendKafkaImportNotification(job, EventType.IMPORT_RESTART_FAILED_EVENT, "job Id " + jobId);
+            }
+        }
+
     }
 }

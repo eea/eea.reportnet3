@@ -541,8 +541,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
         String tableSchemaId = importFileInDremioInfo.getTableSchemaId() != null ? importFileInDremioInfo.getTableSchemaId() : fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+        String tableName = datasetSchemaService.getTableSchemaName(String.valueOf(dataSetSchema.getIdDataSetSchema()), tableSchemaId);
 
-        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(importFileInDremioInfo, tableSchemaId, dataSetSchema, csvParser));
+        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(importFileInDremioInfo, tableSchemaId, tableName, dataSetSchema, csvParser));
         if (importFileInDremioInfo.getHasCorrectHeaders()) {
           return null;
         }
@@ -580,8 +581,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     return modifiedCsvFiles;
   }
 
-  private static Boolean checkHeaders(ImportFileInDremioInfo importFileInDremioInfo, String tableSchemaId, DataSetSchema dataSetSchema, CSVParser csvParser) {
+  private static Boolean checkHeaders(ImportFileInDremioInfo importFileInDremioInfo, String tableSchemaId, String tableName, DataSetSchema dataSetSchema, CSVParser csvParser) {
     RecordSchema recordSchema = getRecordSchema(tableSchemaId, dataSetSchema);
+
 
     // Schema header list.
     List<String> schemaHeaders = recordSchema.getFieldSchema()
@@ -590,7 +592,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             .collect(Collectors.toList());
 
     if (csvParser.getHeaderNames().size() != recordSchema.getFieldSchema().size()) {
-      LOG.info("Wrong number of headers. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDatasetId(),schemaHeaders, csvParser.getHeaderNames());
+      LOG.info("Wrong number of headers. For Job ID:{}, Dataset ID:{} and Table name:{}. Schema headers are:{}, csv headers are:{}.",importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDatasetId(), tableName, schemaHeaders, csvParser.getHeaderNames());
       return true;
     }
 
@@ -602,7 +604,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     for (FieldSchema fieldSchema : recordSchema.getFieldSchema()) {
       if (!csvHeaders.contains(fieldSchema.getHeaderName().toLowerCase())) {
-        LOG.info("Mismatch with header:{}. For Job ID:{} and Dataset ID:{}, Schema headers are:{}, csv headers are:{}.",fieldSchema.getHeaderName(), importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDatasetId(),schemaHeaders, csvParser.getHeaderNames());
+        LOG.info("Mismatch with header:{}. For Job ID:{}, Dataset ID:{} and Table name:{}. Schema headers are:{}, csv headers are:{}.",fieldSchema.getHeaderName(), importFileInDremioInfo.getJobId(), importFileInDremioInfo.getDatasetId(), tableName, schemaHeaders, csvParser.getHeaderNames());
         return true;
       }
     }
@@ -661,8 +663,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
         CsvHeaderMapping typeMapping = getHeaderTypeMapping(csvFile, dataSetSchema, importFileInDremioInfo, csvParser);
         String tableSchemaId = importFileInDremioInfo.getTableSchemaId() != null ? importFileInDremioInfo.getTableSchemaId() : fileTreatmentHelper.getTableSchemaIdFromFileName(dataSetSchema, csvFile.getName(), false);
+        String tableName = datasetSchemaService.getTableSchemaName(String.valueOf(dataSetSchema.getIdDataSetSchema()), tableSchemaId);
 
-        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(importFileInDremioInfo, tableSchemaId, dataSetSchema, csvParser));
+        importFileInDremioInfo.setHasCorrectHeaders(checkHeaders(importFileInDremioInfo, tableSchemaId, tableName, dataSetSchema, csvParser));
         if (importFileInDremioInfo.getHasCorrectHeaders()) {
           return null;
         }
