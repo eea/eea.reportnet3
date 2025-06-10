@@ -89,7 +89,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> finalizeInProgressReleaseJobsWithFinishedTasks(),
-                new CronTrigger("0 */10 * * * *"));
+                new CronTrigger("0 */30 * * * *"));
     }
 
     /**
@@ -105,6 +105,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            jobLoop:
             for (JobVO jobVO : jobs) {
                 Long providerId = jobVO.getProviderId();
                 Long dataflowId = jobVO.getDataflowId();
@@ -148,7 +149,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                 }
 
                 // Remove locks.
-                 datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
+                datasetSnapshotController.releaseLocksFromReleaseDatasets(dataflowId, providerId);
 
                 // Check that for the datasets released column is false.
                 List<ReportingDatasetVO> datasets =
@@ -171,8 +172,8 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
 
                         // Stops the process either field is has wrong values.
                         if (!lastSnapshot.getRelease() || lastSnapshot.getDateReleased() == null) {
-                            LOG.error("Release pre-condition failed for jobId {} and snapshotId {} of datasetId {}",jobVO.getId(), lastSnapshot.getId(), dataset.getId());
-                            throw new IllegalStateException("Snapshot pre-condition error.");
+                            LOG.error("Snapshot pre-condition error. Release failed for jobId {} and snapshotId {} of datasetId {}",jobVO.getId(), lastSnapshot.getId(), dataset.getId());
+                            continue jobLoop;
                         }
                     }
 

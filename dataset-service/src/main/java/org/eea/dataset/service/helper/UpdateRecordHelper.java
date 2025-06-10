@@ -256,4 +256,19 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     fileTreatmentHelper.updateGeometry(datasetId, datasetSchema);
   }
 
+  /**
+   * Execute geometry fields update process v2.
+   *
+   * @param datasetId the dataset id\
+   * @throws EEAException the EEA exception
+   */
+  public void executeGeometryUpdateProcessV2(Long datasetId) throws EEAException {
+    LOG.info("Geometry fields will be updated for datasetId {}", datasetId);
+    String datasetSchemaId = datasetMetabaseService.findDatasetSchemaIdById(datasetId);
+    DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
+            .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
+
+    LOG.info("Geometry fields will be updated for datasetSchema {}", datasetId, datasetSchema);
+    fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
+  }
 }

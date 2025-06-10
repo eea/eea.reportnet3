@@ -82,7 +82,7 @@ public class JobForCancellingJobsWithoutProcess {
     private void init() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
-        scheduler.schedule(() -> cancelInProgressJobsWithoutProcess(),
+        scheduler.schedule(this::cancelInProgressJobsWithoutProcess,
                 new CronTrigger("0 */30 * * * *"));
     }
 
@@ -101,10 +101,10 @@ public class JobForCancellingJobsWithoutProcess {
             for (BigInteger id : jobs) {
                 try {
                     List<String> processes = jobProcessService.findProcessesByJobId(id.longValue());
-                    if (processes.size()==0) {
+                    JobVO job = jobService.findById(id.longValue());
+                    if (processes.isEmpty() && !job.getJobType().equals(JobTypeEnum.ETL_IMPORT)) {
                         LOG.info("Setting job {} without process to canceled", id);
                         jobService.updateJobStatus(id.longValue(), JobStatusEnum.CANCELED);
-                        JobVO job = jobService.findById(id.longValue());
                         Map<String, Object> value = new HashMap<>();
                         String user = job.getCreatorUsername();
                         value.put(LiteralConstants.USER, user);

@@ -193,17 +193,15 @@ export const PaMsWebformField = ({
               localDatasetSchemaId,
               400
             );
-            return referencedFieldValues
-              .map(referencedField => ({
-                itemType:
-                  !isNil(referencedField.label) &&
-                  referencedField.label !== '' &&
-                  referencedField.label !== referencedField.value
-                    ? `${referencedField.label}`
-                    : referencedField.value,
-                value: referencedField.value
-              }))
-              .sort((a, b) => a.value.localeCompare(b.value));
+            return referencedFieldValues.map(referencedField => ({
+              itemType:
+                !isNil(referencedField.label) &&
+                referencedField.label !== '' &&
+                referencedField.label !== referencedField.value
+                  ? `${referencedField.label}`
+                  : referencedField.value,
+              value: referencedField.value
+            }));
           },
           {
             staleTime: 5 * 60 * 1000 // Example stale time
@@ -257,7 +255,15 @@ export const PaMsWebformField = ({
                 element?.referencedField?.masterConditionalFieldId === field.fieldSchemaId
                 ? { ...element, value: '' }
                 : { ...element }
-              : { ...element, value: record.elements.indexOf(element) > changedElementIndex ? '' : element.value }
+              : {
+                  ...element,
+                  value:
+                    record.elements.indexOf(element) > changedElementIndex &&
+                    (element?.referencedField?.masterConditionalFieldId === field.fieldSchema ||
+                      element?.referencedField?.masterConditionalFieldId === field.fieldSchemaId)
+                      ? ''
+                      : element.value
+                }
             : { ...element, value: value }
         )
         .filter(conditionalField => conditionalField.type === 'FIELD' && conditionalField.pk !== true);
@@ -605,7 +611,7 @@ export const PaMsWebformField = ({
           !isEmpty(field.value) &&
           (!isEmpty(field?.dependency) || !isEmpty(field.referencedField?.masterConditionalFieldId))
         ) {
-          const emptyValue = [];
+          const emptyValue = '';
           if (
             (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
             !isEmpty(field.referencedField?.masterConditionalFieldId)
@@ -614,7 +620,8 @@ export const PaMsWebformField = ({
               record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData)) &&
               onFillField(field, option, emptyValue, isConditional);
           } else {
-            onFillField(field, option, emptyValue, isConditional);
+            changedConditionalFieldData?.name === field?.dependency?.field &&
+              onFillField(field, option, emptyValue, isConditional);
           }
         }
         return (

@@ -193,7 +193,6 @@ export const WebformField = ({
                     : referencedField.value,
                 value: referencedField.value
               }))
-              .sort((a, b) => a.value.localeCompare(b.value));
           },
           {
             staleTime: 5 * 60 * 1000 // Example stale time

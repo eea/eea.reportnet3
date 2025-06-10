@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import java.math.BigInteger;
 import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -152,6 +153,27 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
   }
 
   /**
+   * The total count of all geometries in "value" field (either their null of empty) checked only by type of field
+   */
+  private static String COUNT_QUERY(Long datasetId, long limit, long currentOffset) {
+    return new StringBuilder().append("SELECT count(*) FROM dataset_").append(datasetId).append(".field_value fv ")
+            .append("WHERE fv.type IN ('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON', 'GEOMETRYCOLLECTION') ")
+            .append(";")
+            .toString();
+  }
+
+  /**
+   * The trigger of function that inserts geometries at "geometry" field using the "value" field at "field value" table
+   */
+  private static String INSERT_GEOMETRY_FUNCTION_NO_TRIGGER_EEA(Long datasetId, long limit, long currentOffset) {
+    return new StringBuilder().append("SELECT public.insert_geometry_function_notrigger_EAA( ")
+            .append(datasetId).append(", ")
+            .append(limit).append(", ")
+            .append(currentOffset).append(");")
+            .toString();
+  }
+
+  /**
    * Query execution list.
    *
    * @param generatedQuery the generated query
@@ -182,6 +204,33 @@ public class FieldExtendedRepositoryImpl implements FieldExtendedRepository {
       }
   }
 
+  /**
+   * Count Geometries that are not null at this page.
+   *
+   * @return the count
+   */
+  @Override
+  public Long countGeometries(Long datasetId, long limit, long currentOffset) {
+    try {
+      Query query = entityManager.createNativeQuery(COUNT_QUERY(datasetId, limit, currentOffset));
+      return ((BigInteger) query.getSingleResult()).longValue() ;
+    } catch (Exception e) {
+      LOG.info("error: {}", e.getMessage());
+      return null;
+    }
+  }
+
+  /**
+   * Converts geometries from "value" field to "geometry" field at "field_value" table
+   *
+   * @return the updated geometries count
+   */
+  @Override
+  public Long updateGeometryFields(Long datasetId, long limit, long currentOffset) {
+    LOG.info("Insert function EEA will be triggered for datasetId {}, limit {}, currentOffset {}", datasetId, limit, currentOffset);
+    Query query = entityManager.createNativeQuery(INSERT_GEOMETRY_FUNCTION_NO_TRIGGER_EEA(datasetId, limit, currentOffset));
+    return Long.valueOf( (String) query.getSingleResult() );
+  }
 
   /**
    * Find by id field schema with tag ordered.
