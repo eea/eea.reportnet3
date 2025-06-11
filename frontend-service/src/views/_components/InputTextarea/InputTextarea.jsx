@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
+import './InputTextarea.scss';
 
 export class InputTextarea extends Component {
   static defaultProps = {
@@ -170,7 +171,7 @@ export class InputTextarea extends Component {
   }
 
   render() {
-    const className = classNames('p-inputtext p-inputtextarea p-component', this.props.className, {
+    const className = classNames('p-inputtext p-inputtextarea p-component infoButtonWrapper', this.props.className, {
       'p-disabled': this.props.disabled,
       'p-webformfielderror': this.props.hasErrors,
       'p-filled':
