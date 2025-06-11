@@ -47,7 +47,7 @@ public class JobForRestartingLongRunningImportJobs {
      * and changes their status to IN_QUEUE so that they are picked up by the ImportFileTasksScheduler.scheduledConsumer() method
      */
     public void restartLongRunningImportJobs() {
-        try {
+       /* try {
             List<JobVO> longRunningJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS);
             for (JobVO job: longRunningJobs){
                 Long durationOfJob = new Timestamp(System.currentTimeMillis()).getTime() - job.getDateStatusChanged().getTime();
@@ -58,5 +58,6 @@ public class JobForRestartingLongRunningImportJobs {
         } catch (Exception e) {
             LOG.error("Unexpected error! Error while running scheduled task restartLongRunningImportTasks.", e);
         }
+        */
     }
 }
