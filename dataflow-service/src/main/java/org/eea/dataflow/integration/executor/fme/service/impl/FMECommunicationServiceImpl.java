@@ -276,8 +276,10 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
     String token = fmeToken;
     FileSubmitResult result = new FileSubmitResult();
     try {
+      /* //FME Basic auth replacement with token
       if (null != dataset.getDataflowId()) {
         dataflowVO = dataflowService.getMetabaseById(dataset.getDataflowId());
+
         if (null != dataflowVO && null != dataflowVO.getFmeUserId()) {
           FMEUser fmeUser = fmeUserRepository.findById(dataflowVO.getFmeUserId()).orElse(null);
           if (null != fmeUser) {
@@ -285,7 +287,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
             token = "Basic " + Base64.getEncoder().encodeToString(userPass.getBytes());
           }
         }
-      }
+      }*/
       String result2 = "";
       String url = uriComponentsBuilder.scheme(fmeScheme).host(fmeHost).path(auxURL)
           .buildAndExpand(uriParams).toString();
@@ -321,7 +323,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
           }
         }
       }
-    } catch (EEAException | ResourceAccessException e) {
+    } catch (ResourceAccessException e) {
       LOG.error("Error getting the file to send it to FME. File {}, datasetId {}",
           file.getName(), dataset.getId(), e);
     }
@@ -629,6 +631,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
       Map<String, String> headerInfo, Long dataflowId) {
     DataFlowVO dataflowVO = null;
     String token = fmeToken;
+    /* //FME Basic auth replacement with token
     if (null != dataflowId) {
       try {
         dataflowVO = dataflowService.getMetabaseById(dataflowId);
@@ -642,6 +645,7 @@ public class FMECommunicationServiceImpl implements FMECommunicationService {
         }
       }
     }
+    */
     headerInfo.put(LiteralConstants.AUTHORIZATION_HEADER, token);
     HttpHeaders headers = createBasicHeaders(headerInfo);
     return new HttpEntity<>(body, headers);
