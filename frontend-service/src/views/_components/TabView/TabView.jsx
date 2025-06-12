@@ -257,11 +257,9 @@ export const TabView = ({
           onTabEditingHeader={onTabEditingHeader}
           onTabHasErrors={onTabHasErrors}
           onTabHeaderClick={event => {
-            if ((isCustodian || isAdmin) && isDataflowCustodian) {
-              onTabHeaderClick(event, tab, index);
-              if (!isUndefined(onTabEditingHeader)) {
-                onTabEditingHeader(false);
-              }
+            onTabHeaderClick(event, tab, index);
+            if (!isUndefined(onTabEditingHeader)) {
+              onTabEditingHeader(false);
             }
           }}
           onTabMouseWheel={onTabMouseWheel}
