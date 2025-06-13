@@ -4,6 +4,8 @@ import org.eea.dataset.persistence.data.domain.RecordValue;
 import org.eea.dataset.persistence.data.repository.RecordRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
+import org.eea.dataset.service.ParquetConverterService;
+import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController;
@@ -94,6 +96,8 @@ public class DeleteHelper {
   /** The job controller zuul */
   @Autowired
   private JobController.JobControllerZuul jobControllerZuul;
+  @Autowired
+  private ParquetConverterService parquetConverterService;
 
 
   /**
@@ -235,13 +239,31 @@ public class DeleteHelper {
   @Async
   public void executeDeleteImportDataAsyncBeforeReplacing(Long datasetId, Long integrationId,
       IntegrationOperationTypeEnum operation) {
-    datasetService.deleteImportData(datasetId, false);
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    boolean isBigData = dataflowControllerZuul.isBigDataflow(dataflowId);
+    if (isBigData) {
+      DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+      String datasetSchemaId = dataset.getDatasetSchema();
+      Long providerId = datasetService.getDataProviderIdById(datasetId);
+      ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(null, datasetId, dataflowId, providerId, null, null, true, null, integrationId, null);
+      try {
+        parquetConverterService.deleteAllDataBeforeImport(importFileInDremioInfo, datasetSchemaId);
+      } catch (Exception e) {
+        LOG.error("Error while trying to delete data from dataset {}", datasetId, e);
+        return;
+      }
+    } else {
+      datasetService.deleteImportData(datasetId, false);
+    }
+
     LOG.info("All data value deleted from datasetId {}. Next step call the FME by the kafka event",
         datasetId);
     // now the view is not updated, update the check to false
     datasetService.updateCheckView(datasetId, false);
     // delete the temporary table from etlExport
-    datasetService.deleteTempEtlExport(datasetId);
+    if (!isBigData)  {
+      datasetService.deleteTempEtlExport(datasetId);
+    }
     // Send the kafka event after deleting to call FME
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);

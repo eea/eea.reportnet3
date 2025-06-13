@@ -2191,7 +2191,7 @@ public class FileTreatmentHelper implements DisposableBean {
          * @param jobId the job id
          */
         @Async
-        private void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
+        public void wipeDataAsync (Long datasetId, String tableSchemaId, File file,
                 IntegrationVO integrationVO, Long jobId){
             if (null != tableSchemaId) {
                 datasetService.deleteTableBySchema(tableSchemaId, datasetId, false);
