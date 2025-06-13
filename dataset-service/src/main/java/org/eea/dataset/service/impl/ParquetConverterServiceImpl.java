@@ -1140,7 +1140,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     return recordCounter;
   }
 
-  private void deleteAllDataBeforeImport (ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId) throws Exception {
+  @Override
+  public void deleteAllDataBeforeImport (ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId) throws Exception {
     DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(importFileInDremioInfo.getDatasetId());
     if(StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())){
       TableSchema tableSchema = datasetSchemaService.getTableSchema(importFileInDremioInfo.getTableSchemaId(), datasetSchemaId);
@@ -1156,13 +1157,13 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   private void deleteTableDataBeforeImport(ImportFileInDremioInfo importFileInDremioInfo, String datasetSchemaId, TableSchema tableSchema, DatasetTypeEnum datasetType, Boolean removeFixedNumberData) throws Exception {
-    Boolean allReadOnlyFields = tableSchema.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchema::getReadOnly);
+    boolean allReadOnlyFields = tableSchema.getRecordSchema().getFieldSchema().stream().allMatch(FieldSchema::getReadOnly);
     if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && (allReadOnlyFields || (tableSchema.getFixedNumber() && !removeFixedNumberData))){
       //we shouldn't remove data from tables that have all of their fields read only or are fixed number of records
       return;
     }
 
-    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && tableSchema.getReadOnly()){
+    if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && Boolean.TRUE.equals(tableSchema.getReadOnly())){
       //we shouldn't remove data from tables that are not reference and are read only
       return;
     }
@@ -1176,7 +1177,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     LOG.info("Removing csv files for job {}", importFileInDremioInfo);
     removeCsvFilesThatWillBeReplaced(s3ImportPathResolver, tableSchema.getNameTableSchema(), s3PathForCsvFolder, importFileInDremioInfo.getDatasetId());
 
-    Boolean readOnlyFieldsExist = tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
+    boolean readOnlyFieldsExist = tableSchema.getRecordSchema().getFieldSchema().stream().anyMatch(FieldSchema::getReadOnly);
     if(!datasetType.equals(DatasetTypeEnum.DESIGN) && !datasetType.equals(DatasetTypeEnum.REFERENCE) && BooleanUtils.isTrue(tableSchema.getToPrefill()) && readOnlyFieldsExist){
       //restore prefilled data
       DesignDataset designDataset = datasetMetabaseService.getDesignDatasetByDataflowIdAndDatasetSchemaId(importFileInDremioInfo.getDataflowId(), datasetSchemaId);
@@ -1190,7 +1191,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     }
 
     //demote table folder
-    if (importFileInDremioInfo.getReplaceData()) {
+    if (Boolean.TRUE.equals(importFileInDremioInfo.getReplaceData())) {
       LOG.info("Removing parquet files for job {}", importFileInDremioInfo);
       //remove folders that contain the previous parquet files because data will be replaced
       if (s3Helper.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
