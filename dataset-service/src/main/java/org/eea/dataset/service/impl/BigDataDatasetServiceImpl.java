@@ -222,6 +222,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
                     if (job != null) {
                         jobId = job.getId();
+                        importFileInDremioInfo.setJobId(jobId);
                         LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
                     }
                 }
