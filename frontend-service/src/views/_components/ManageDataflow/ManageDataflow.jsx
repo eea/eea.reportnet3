@@ -19,6 +19,7 @@ import { InputTextarea } from '../InputTextarea';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DataflowService } from 'services/DataflowService';
+import { RepresentativeService } from 'services/RepresentativeService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -203,7 +204,13 @@ export const ManageDataflow = ({
   const onDeleteInputChange = value =>
     reportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
-  const onSave = () => {
+  const onSave = async () => {
+    try {
+      await RepresentativeService.deleteAllLeadReporters(dataflowId);
+    } catch (error) {
+      console.error('Dataflow - onDeleteAllLeadReporters.', error);
+      notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
+    }
     if (formRef.current)
       formRef.current.handleSubmit(reportingDataflowState.pinDataflow, reportingDataflowState.bigDataStorage);
     resetObligations();

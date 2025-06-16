@@ -106,7 +106,13 @@ export const ManageDataflowForm = forwardRef(
 
     useEffect(() => {
       getDropdownsOptions();
+      console.log(providerGroups);
     }, []);
+
+    useEffect(() => {
+      console.log(selectedGroup);
+      console.log(dataProviderGroup);
+    }, [selectedGroup]);
 
     const handleErrors = ({ field, hasErrors, message }) => {
       setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
