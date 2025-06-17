@@ -104,9 +104,6 @@ export const WebformField = ({
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
   }, [newRecord, isConditionalChanged]);
 
-  useEffect(() => {
-    console.log(webformType);
-  }, []);
 
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
