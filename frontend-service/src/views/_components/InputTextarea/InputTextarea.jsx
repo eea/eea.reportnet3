@@ -171,7 +171,7 @@ export class InputTextarea extends Component {
   }
 
   render() {
-    const className = classNames('p-inputtext p-inputtextarea p-component infoButtonWrapper', this.props.className, {
+    const className = classNames('p-inputtext p-inputtextarea p-component', this.props.className, {
       'p-disabled': this.props.disabled,
       'p-webformfielderror': this.props.hasErrors,
       'p-filled':
