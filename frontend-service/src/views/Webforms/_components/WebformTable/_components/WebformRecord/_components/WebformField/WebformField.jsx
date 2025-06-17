@@ -104,7 +104,6 @@ export const WebformField = ({
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
   }, [newRecord, isConditionalChanged]);
 
-
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
     onToggleDialogVisible(false);
