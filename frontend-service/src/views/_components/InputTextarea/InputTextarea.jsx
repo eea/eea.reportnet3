@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
+import './InputTextarea.scss';
 
 export class InputTextarea extends Component {
   static defaultProps = {

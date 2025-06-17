@@ -278,6 +278,7 @@ export const WebformRecord = ({
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
+                      webformType={webformType}
                     />
                   }
                 </div>

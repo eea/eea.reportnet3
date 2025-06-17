@@ -52,7 +52,8 @@ export const WebformField = ({
   record,
   referencedTableSchemaId,
   rootPkFieldId,
-  tableSchemaId
+  tableSchemaId,
+  webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -548,7 +549,7 @@ export const WebformField = ({
         return (
           <Fragment>
             <InputTextarea
-              className={field.required ? styles.required : undefined}
+              className={`${field.required ? styles.required : undefined} ${webformType==='ENTITIES' ? `resizable` : ""}`}
               collapsedHeight={150}
               disabled={field?.readOnly}
               hasErrors={hasErrors}
