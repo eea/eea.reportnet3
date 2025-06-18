@@ -109,10 +109,10 @@ export const ManageDataflowForm = forwardRef(
       console.log(providerGroups);
     }, []);
 
-    useEffect(() => {
-      console.log(selectedGroup);
-      console.log(dataProviderGroup);
-    }, [selectedGroup]);
+    /*    useEffect(() => {
+          console.log(selectedGroup);
+          console.log(dataProviderGroup);
+        }, [selectedGroup]);*/
 
     const handleErrors = ({ field, hasErrors, message }) => {
       setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
@@ -145,6 +145,23 @@ export const ManageDataflowForm = forwardRef(
     };
 
     const onConfirm = async (pinned, bigData) => {
+      console.log(selectedGroup);
+      //console.log(dataProviderGroup.dataProviderGroupId);
+      if (selectedGroup) {
+        if (selectedGroup.dataProviderGroupId === dataProviderGroup.dataProviderGroupId) {
+          console.log("same");
+        } else {
+          // This is the 'different' case, where you want to perform the async action
+          try {
+            await RepresentativeService.deleteAllLeadReporters(dataflowId);
+            // Optional: add a success notification here
+            notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_SUCCESS' }, true);
+          } catch (error) {
+            console.error('Dataflow - onDeleteAllLeadReporters.', error);
+            notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
+          }
+        }
+      }
       checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
@@ -156,51 +173,51 @@ export const ManageDataflowForm = forwardRef(
           if (isEditing) {
             isCitizenScienceDataflow
               ? await CitizenScienceDataflowService.update(
-                  dataflowId,
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  metadata.isReleasable,
-                  metadata.showPublicInfo,
-                  bigData,
-                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
-                  isDataflowOpen && deliveryDate
-                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
-                    : undefined
-                )
+                dataflowId,
+                name,
+                description,
+                metadata.obligation.id,
+                metadata.isReleasable,
+                metadata.showPublicInfo,
+                bigData,
+                selectedGroup ? selectedGroup.dataProviderGroupId : null,
+                isDataflowOpen && deliveryDate
+                  ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                  : undefined
+              )
               : await DataflowService.update(
-                  dataflowId,
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  metadata.isReleasable,
-                  metadata.showPublicInfo,
-                  bigData,
-                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
-                  isDataflowOpen && deliveryDate
-                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
-                    : undefined
-                );
+                dataflowId,
+                name,
+                description,
+                metadata.obligation.id,
+                metadata.isReleasable,
+                metadata.showPublicInfo,
+                bigData,
+                selectedGroup ? selectedGroup.dataProviderGroupId : null,
+                isDataflowOpen && deliveryDate
+                  ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                  : undefined
+              );
 
             onEdit(name, description, metadata.obligation.id);
           } else {
             const creationResponse = isCitizenScienceDataflow
               ? await CitizenScienceDataflowService.create(
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  undefined,
-                  bigData,
-                  selectedGroup.dataProviderGroupId
-                )
+                name,
+                description,
+                metadata.obligation.id,
+                undefined,
+                bigData,
+                selectedGroup.dataProviderGroupId
+              )
               : await DataflowService.create(
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  undefined,
-                  bigData,
-                  selectedGroup.dataProviderGroupId
-                );
+                name,
+                description,
+                metadata.obligation.id,
+                undefined,
+                bigData,
+                selectedGroup.dataProviderGroupId
+              );
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
