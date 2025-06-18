@@ -488,15 +488,20 @@ public class PaMServiceImpl implements PaMService {
               getValue(fields, schemaIds.get(PaMConstants.PROJECTION_SCENARIOS)));
           singlePaMVO.setOtherPolicyInstrument(
               getValue(fields, schemaIds.get(PaMConstants.OTHER_POLICY_INSTRUMENT)));
+          singlePaMVO.setOtherPolicyInstrument(
+                  getValue(fields, schemaIds.get(PaMConstants.OTHER_RELEVANT_PROVISION)));
           singlePaMVO.setUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_T1)));
           String unionPolicyList = getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_LIST));
           String typePolicyInstrumentList =
               getValue(fields, schemaIds.get(PaMConstants.TYPE_POLICY_INSTRUMENT));
+          String relevantProvisionList =
+                  getValue(fields, schemaIds.get(PaMConstants.RELEVANT_PROVISION));
           String ghgAffectedList = getValue(fields, schemaIds.get(PaMConstants.GHG_AFFECTED));
           List<String> unionPolicyIdList = getListSplit(unionPolicyList);
           List<String> unionPolicy = getUnionPolicyListValue(otherDatasetFields, unionPolicyIdList);
           singlePaMVO.setUnionPolicyList(unionPolicy);
           singlePaMVO.setTypePolicyInstrument(getListSplit(typePolicyInstrumentList));
+          singlePaMVO.setTypePolicyInstrument(getListSplit(relevantProvisionList));
           singlePaMVO.setGhgAffected(getListSplit(ghgAffectedList));
         }
       }
@@ -593,8 +598,12 @@ public class PaMServiceImpl implements PaMService {
         fileCommonUtils.findIdFieldSchema(PaMConstants.GHG_AFFECTED, table1Id, schema)));
     schemaIds.put(PaMConstants.OTHER_POLICY_INSTRUMENT, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER_POLICY_INSTRUMENT, table1Id, schema)));
+    schemaIds.put(PaMConstants.OTHER_RELEVANT_PROVISION, isFieldSchemaNull(
+            fileCommonUtils.findIdFieldSchema(PaMConstants.OTHER_RELEVANT_PROVISION, table1Id, schema)));
     schemaIds.put(PaMConstants.UNION_POLICY_T1, isFieldSchemaNull(
         fileCommonUtils.findIdFieldSchema(PaMConstants.UNION_POLICY, table1Id, schema)));
+    schemaIds.put(PaMConstants.RELEVANT_PROVISION, isFieldSchemaNull(
+            fileCommonUtils.findIdFieldSchema(PaMConstants.RELEVANT_PROVISION, table1Id, schema)));
 
     // ENTITIES
     schemaIds.put(PaMConstants.FK_PAMS_ENTITIES, isFieldSchemaNull(
