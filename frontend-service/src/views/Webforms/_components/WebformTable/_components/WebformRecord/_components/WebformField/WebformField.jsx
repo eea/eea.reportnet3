@@ -549,6 +549,7 @@ export const WebformField = ({
         return (
           <Fragment>
             <InputTextarea
+              autoResize={true}
               className={`${field.required ? styles.required : undefined} ${webformType==='ENTITIES' ? `resizable` : ""}`}
               collapsedHeight={150}
               disabled={field?.readOnly}
