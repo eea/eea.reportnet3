@@ -204,7 +204,7 @@ export const ManageDataflow = ({
   const onDeleteInputChange = value =>
     reportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
-  const onSave = async () => {
+  const onSave = () => {
     if (formRef.current)
       formRef.current.handleSubmit(reportingDataflowState.pinDataflow, reportingDataflowState.bigDataStorage);
     resetObligations();
