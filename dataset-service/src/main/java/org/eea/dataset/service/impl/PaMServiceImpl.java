@@ -488,7 +488,7 @@ public class PaMServiceImpl implements PaMService {
               getValue(fields, schemaIds.get(PaMConstants.PROJECTION_SCENARIOS)));
           singlePaMVO.setOtherPolicyInstrument(
               getValue(fields, schemaIds.get(PaMConstants.OTHER_POLICY_INSTRUMENT)));
-          singlePaMVO.setOtherPolicyInstrument(
+          singlePaMVO.setOtherRelevantProvision(
                   getValue(fields, schemaIds.get(PaMConstants.OTHER_RELEVANT_PROVISION)));
           singlePaMVO.setUnionPolicy(getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_T1)));
           String unionPolicyList = getValue(fields, schemaIds.get(PaMConstants.UNION_POLICY_LIST));
@@ -501,7 +501,7 @@ public class PaMServiceImpl implements PaMService {
           List<String> unionPolicy = getUnionPolicyListValue(otherDatasetFields, unionPolicyIdList);
           singlePaMVO.setUnionPolicyList(unionPolicy);
           singlePaMVO.setTypePolicyInstrument(getListSplit(typePolicyInstrumentList));
-          singlePaMVO.setTypePolicyInstrument(getListSplit(relevantProvisionList));
+          singlePaMVO.setRelevantProvision(getListSplit(relevantProvisionList));
           singlePaMVO.setGhgAffected(getListSplit(ghgAffectedList));
         }
       }
