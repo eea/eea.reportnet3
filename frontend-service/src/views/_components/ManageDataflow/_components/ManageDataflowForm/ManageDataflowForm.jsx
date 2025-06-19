@@ -107,7 +107,6 @@ export const ManageDataflowForm = forwardRef(
 
     useEffect(() => {
       getDropdownsOptions();
-      console.log(providerGroups);
     }, []);
 
     useEffect(() => {
