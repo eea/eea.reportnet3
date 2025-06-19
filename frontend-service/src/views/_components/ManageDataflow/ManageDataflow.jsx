@@ -205,12 +205,6 @@ export const ManageDataflow = ({
     reportingDataflowDispatch({ type: 'ON_DELETE_INPUT_CHANGE', payload: { deleteInput: value } });
 
   const onSave = async () => {
-    /*try {
-      await RepresentativeService.deleteAllLeadReporters(dataflowId);
-    } catch (error) {
-      console.error('Dataflow - onDeleteAllLeadReporters.', error);
-      notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
-    }*/
     if (formRef.current)
       formRef.current.handleSubmit(reportingDataflowState.pinDataflow, reportingDataflowState.bigDataStorage);
     resetObligations();
@@ -391,6 +385,7 @@ export const ManageDataflow = ({
             isCitizenScienceDataflow={isCitizenScienceDataflow}
             isDataflowOpen={isDataflowOpen}
             isEditing={isEditing}
+            manageDialogs={manageDialogs}
             metadata={reportingDataflowState}
             onChangeDate={() => manageDialogs('isDeliveryDateDialogVisible', true)}
             onCreate={onCreateDataflow}

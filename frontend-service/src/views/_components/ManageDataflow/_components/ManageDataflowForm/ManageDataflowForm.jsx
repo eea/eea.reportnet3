@@ -40,6 +40,7 @@ export const ManageDataflowForm = forwardRef(
       isCitizenScienceDataflow,
       isDataflowOpen,
       isEditing,
+      manageDialogs,
       metadata,
       onChangeDate,
       onCreate,
@@ -109,10 +110,13 @@ export const ManageDataflowForm = forwardRef(
       console.log(providerGroups);
     }, []);
 
-    /*    useEffect(() => {
-          console.log(selectedGroup);
-          console.log(dataProviderGroup);
-        }, [selectedGroup]);*/
+    useEffect(() => {
+      if (selectedGroup && isDesign) {
+        if (selectedGroup.dataProviderGroupId !== dataProviderGroup.dataProviderGroupId) {
+          manageDialogs('isOnGroupChangeDeleteAllLeadReporters', true)
+        }
+      }
+    }, [selectedGroup]);
 
     const handleErrors = ({ field, hasErrors, message }) => {
       setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
@@ -145,13 +149,10 @@ export const ManageDataflowForm = forwardRef(
     };
 
     const onConfirm = async (pinned, bigData) => {
-      console.log(selectedGroup);
-      //console.log(dataProviderGroup.dataProviderGroupId);
       if (selectedGroup) {
         if (selectedGroup.dataProviderGroupId === dataProviderGroup.dataProviderGroupId) {
           console.log("same");
         } else {
-          // This is the 'different' case, where you want to perform the async action
           try {
             await RepresentativeService.deleteAllLeadReporters(dataflowId);
             // Optional: add a success notification here
