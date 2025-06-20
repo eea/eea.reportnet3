@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
 
 import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
@@ -27,10 +27,10 @@ import { DataViewerUtils } from 'views/_components/DataViewer/_functions/Utils/D
 import { MetadataUtils, RecordUtils } from 'views/_functions/Utils';
 import { TableManagementUtils } from './_functions/Utils/TableManagementUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
-import { ErrorUtils } from 'views/_functions/Utils/ErrorUtils';
 import { useState } from 'react';
 import { sortReducer } from './_functions/Reducers/sortReducer';
-import { Spinner } from 'views/_components/Spinner';
+import { TooltipButton } from 'views/_components/TooltipButton';
+import ReactDOMServer from 'react-dom/server';
 
 export const TableManagement = ({
   bigData,
@@ -52,18 +52,13 @@ export const TableManagement = ({
     TableManagementUtils;
 
   const { getWebformTabs } = WebformsUtils;
-  const [levelErrorValidations, setLevelErrorValidations] = useState([
-    'CORRECT',
-    'INFO',
-    'WARNING',
-    'ERROR',
-    'BLOCKER'
-  ]);
+  const didInitialParentFetch = useRef(false);
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [valueFilter, setValueFilter] = useState('');
+  const [fetchFilter, setFetchFilter] = useState('');
 
   const [records, dispatchRecords] = useReducer(tableManagementReducer, {
     totalRecords: 0,
@@ -106,11 +101,18 @@ export const TableManagement = ({
   } = tableManagementState;
 
   useEffect(() => {
-    onLoadParentTablesData();
-  }, [records]);
+    onLoadParentTablesData(fetchFilter);
+  }, [
+    records,
+    fetchFilter,
+    sort.sortField,
+    sort.sortOrder,
+    tableManagementState.firstPageRecord,
+    tableManagementState.recordsPerPage
+  ]);
 
   useEffect(() => {
-    if (!isEmpty(parentTablesWithData)) {
+    if (!isEmpty(parentTablesWithData) && !didInitialParentFetch.current) {
       initialLoad();
     }
   }, [parentTablesWithData]);
@@ -203,6 +205,7 @@ export const TableManagement = ({
     } finally {
       tableManagementDispatch({ type: 'DELETE_ROW', payload: false });
       manageDialogs('doubleDelete', false);
+      onLoadParentTablesData();
     }
   };
 
@@ -237,44 +240,57 @@ export const TableManagement = ({
       );
     });
 
-    const parentTablesDataPromises = parentTables.map(async parentTable => {
-      const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns);
-      const sortField = sort.sortField;
-      const sortOrder = sort.sortOrder === 1 ? '1' : '-1';
-      let referencedFieldSchemaId;
+    const tablesToFetch = didInitialParentFetch.current
+      ? parentTables.filter(t => t.tableSchemaId === rootTableId)
+      : parentTables;
 
-      /*Gets the fieldSchemaId of the field that has a referencedField with idPk equal to sortFieldSchemaId*/
-      if (bigData) {
-        referencedFieldSchemaId = parentTable?.records[0]?.fields.find(
-          field => field?.referencedField?.idPk === getFieldSchemaColumnIdByHeader(tableSchemaColumns)
-        )?.fieldSchema;
-      }
+    const parentTablesDataPromises = tablesToFetch.map(async parentTable => {
+      // const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns);
+      const sortFieldSchemaId = sort.sortField
+        ? getFieldSchemaColumnIdByHeader(tableSchemaColumns, sort.sortField)
+        : undefined;
+      const sortField = sortFieldSchemaId;
+
+      const sortOrder = sort.sortOrder === 1 ? '1' : '-1';
+      // let referencedFieldSchemaId;
+
+      // /*Gets the fieldSchemaId of the field that has a referencedField with idPk equal to sortFieldSchemaId*/
+      // if (bigData) {
+      //   referencedFieldSchemaId = parentTable?.records[0]?.fields.find(
+      //     field => field?.referencedField?.idPk === getFieldSchemaColumnIdByHeader(tableSchemaColumns)
+      //   )?.fieldSchema;
+      // }
 
       let data;
+      let fields;
       const fRow = tableManagementState.firstPageRecord;
       const nRows = tableManagementState.recordsPerPage;
+
+      if (!isUndefined(sortField) && sortField !== null) {
+        fields = `${sortField}:${sortOrder}`;
+      }
 
       if (bigData) {
         data = await DatasetService.getTableDataDL({
           datasetId,
           tableSchemaId: parentTable.tableSchemaId,
+          pageSize: nRows,
           pageNum: Math.floor(fRow / nRows),
-          pagesize: nRows,
-          value: filterValue,
-          fields: sortField ? `${sortField}:${sortOrder}` : undefined,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
+          fields,
+          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER'],
+          value: filterValue
         });
       } else {
         data = await DatasetService.getTableData({
           datasetId,
           tableSchemaId: parentTable.tableSchemaId,
           pageSize: nRows,
+          pageNum: Math.floor(fRow / nRows),
           value: filterValue,
-          fields: sortField ? `${sortField}:${sortOrder}` : undefined,
+          fields,
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
         });
       }
-
       return { data, tableSchemaId: parentTable.tableSchemaId, tableSchemaName: parentTable.tableSchemaName };
     });
     Promise.all(parentTablesDataPromises)
@@ -283,7 +299,7 @@ export const TableManagement = ({
 
         const mainTableData = parentTableData.find(t => t.tableSchemaId === rootTableId);
 
-        if (mainTableData && mainTableData.data) {
+        if (mainTableData?.data) {
           tableManagementDispatch({
             type: 'SET_TABLE_DATA',
             payload: {
@@ -294,7 +310,10 @@ export const TableManagement = ({
           });
         }
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        didInitialParentFetch.current = true;
+        setIsLoading(false);
+      });
   };
 
   const onSaveRecord = async record => {
@@ -375,45 +394,25 @@ export const TableManagement = ({
         })
       );
     }
+    if (isUndefined(tableName)) {
+      tableName = rootTableName;
+    }
 
     return (
       <ActionsColumn
         bigData={bigData}
         isIcebergCreated={isIcebergCreated}
-        onDeleteClick={() => manageDialogs('delete', true)}
+        onDeleteClick={() => {
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
+          manageDialogs('delete', true);
+        }}
         onEditClick={() => {
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
           onSelectEditTable(entitiesFieldSchemaValue, tableName);
         }}
       />
     );
   };
-
-  const validationsTemplate = recordData => {
-    if (!recordData || !Array.isArray(recordData.dataRow)) {
-      return null;
-    }
-    return (
-      <div className={styles.iconTooltipWrapper}>
-        {ErrorUtils.getValidationsTemplate(recordData, {
-          blockers: resourcesContext.messages['recordBlockers'],
-          errors: resourcesContext.messages['recordErrors'],
-          warnings: resourcesContext.messages['recordWarnings'],
-          infos: resourcesContext.messages['recordInfos']
-        })}
-      </div>
-    );
-  };
-
-  const renderValidationColumn = (
-    <Column
-      body={validationsTemplate}
-      field="validations"
-      header={resourcesContext.messages['validationsDataColumn']}
-      key="recordValidation"
-      sortable={false}
-      style={{ width: '100px' }}
-    />
-  );
 
   const renderTableColumns = () => {
     if (isNil(overview)) {
@@ -428,7 +427,6 @@ export const TableManagement = ({
         />
       ));
 
-      data.unshift(renderValidationColumn);
       data.unshift(renderActionButtonsColumn);
 
       return data;
@@ -446,35 +444,36 @@ export const TableManagement = ({
       />
     ));
 
-    data.unshift(renderValidationColumn);
     data.unshift(renderActionButtonsColumn);
 
     return data;
   };
 
-  const onPage = event => {
+  const onChangePage = event => {
     tableManagementDispatch({
       type: 'SET_PAGINATION',
       payload: { firstPageRecord: event.first, recordsPerPage: event.rows }
     });
-
-    onLoadParentTablesData();
   };
 
   const onSort = event => {
-    dispatchSort({ type: 'SORT_TABLE', payload: { order: event.sortOrder, field: event.sortField } });
+    dispatchSort({
+      type: 'SORT_TABLE',
+      payload: { order: event.sortOrder, field: event.sortField }
+    });
 
     tableManagementDispatch({
       type: 'SET_PAGINATION',
       payload: { firstPageRecord: 0, recordsPerPage: tableManagementState.recordsPerPage }
     });
-
-    onLoadParentTablesData();
   };
 
   const onSelectRecord = record => {
     tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: record });
   };
+  const getTooltipMessage = () => (
+    <span style={{ fontStyle: 'italic' }}>{resourcesContext.messages['valueFilterTooltipCaseSensitiveNote']}</span>
+  );
 
   const renderPaginatorRecordsCount = () => {
     const renderFilteredRowsLabel = () => {
@@ -516,57 +515,67 @@ export const TableManagement = ({
   };
 
   const renderFilters = () => {
-    const handleFilter = (filterValue = '') => {
-      setValueFilter(filterValue);
-      onLoadParentTablesData(filterValue);
+    const onFilterSubmit = () => {
+      tableManagementDispatch({
+        type: 'SET_PAGINATION',
+        payload: {
+          firstPageRecord: 0,
+          recordsPerPage: tableManagementState.recordsPerPage
+        }
+      });
+      setFetchFilter(valueFilter);
     };
 
-    const handleReset = () => {
-      handleFilter('');
+    const onReset = () => {
+      setValueFilter('');
+      setFetchFilter('');
+      tableManagementDispatch({
+        type: 'SET_PAGINATION',
+        payload: {
+          firstPageRecord: 0,
+          recordsPerPage: tableManagementState.recordsPerPage
+        }
+      });
     };
 
     return (
       <div className={styles.filtersContainer}>
         <InputText
           className={styles.filterInput}
-          value={valueFilter}
           onChange={e => setValueFilter(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter') {
+              onFilterSubmit();
+            }
+          }}
           placeholder={resourcesContext.messages['valueFilter']}
+          value={valueFilter}
         />
+        <TooltipButton
+          className={styles.tooltipButton}
+          getContent={() => ReactDOMServer.renderToStaticMarkup(<div>{getTooltipMessage()}</div>)}
+          uniqueIdentifier="valueFilter"
+        />
+
         <Button
           className={styles.filterButton}
+          disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
-          onClick={() => handleFilter(valueFilter)}
-          disabled={isLoading}
+          onClick={onFilterSubmit}
         />
         <Button
           className={styles.resetButton}
+          disabled={isLoading || !valueFilter}
           icon="refresh"
           label={resourcesContext.messages['reset']}
-          onClick={handleReset}
-          disabled={isLoading || !valueFilter}
+          onClick={onReset}
         />
       </div>
     );
   };
 
   const renderTable = () => {
-    if (isEmpty(tableManagementState.records)) {
-      return (
-        <Fragment>
-          {renderFilters()}
-          <DataTable
-            className={styles.table}
-            summary={resourcesContext.messages['overviewEmptyTableHeader']}
-            loading={isLoading}
-            value={[{ emptyContent: resourcesContext.messages['noDataInDataTable'] }]}>
-            <Column field={'emptyContent'} header={resourcesContext.messages['overviewEmptyTableHeader']} />
-          </DataTable>
-        </Fragment>
-      );
-    }
-
     return (
       <Fragment>
         {renderFilters()}
@@ -574,31 +583,32 @@ export const TableManagement = ({
           autoLayout={true}
           className={styles.table}
           first={tableManagementState.firstPageRecord}
+          lazy={true}
           loading={isLoading}
+          onPage={onChangePage}
+          onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
+          onSort={onSort}
           paginator={true}
           paginatorRight={renderPaginatorRecordsCount()}
+          reorderableColumns={true}
+          resizableColumns={true}
           rows={tableManagementState.recordsPerPage}
-          rowsPerPageOptions={[10, 50, 100, 300, 500]}
-          onRowSelect={e => onSelectRecord(Object.assign({}, e.data))}
-          onPage={onPage}
-          onSort={onSort}
+          rowsPerPageOptions={[10, 20, 50, 100, 300]}
           scrollable={true}
           sortField={sort.sortField}
           sortOrder={sort.sortOrder}
           summary={resourcesContext.messages['webformEntitiesTitle']}
-          reorderableColumns={true}
-          resizableColumns={true}
-          totalRecords={tableManagementState.totalRecords}
+          totalRecords={
+            valueFilter && valueFilter !== ''
+              ? tableManagementState.totalFilteredRecords
+              : tableManagementState.totalRecords
+          }
           value={tableManagementState.records}>
           {renderTableColumns()}
         </DataTable>
       </Fragment>
     );
   };
-
-  // if (isLoading || isAddingRootTableId) {
-  //   return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
-  // }
 
   return (
     <Fragment>

@@ -29,12 +29,14 @@ export const tableManagementReducer = (state, { type, payload }) => {
     case 'SET_PARENT_TABLES_DATA':
       return { ...state, parentTablesWithData: payload };
 
-    case 'SET_SELECTED_RECORD':
+    case 'SET_SELECTED_RECORD': {
+      const record = payload.selectedRecord ?? payload;
       return {
         ...state,
-        initialSelectedRecord: cloneDeep(payload.selectedRecord),
-        selectedRecord: payload.selectedRecord
+        initialSelectedRecord: cloneDeep(record),
+        selectedRecord: record
       };
+    }
 
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
@@ -42,7 +44,7 @@ export const tableManagementReducer = (state, { type, payload }) => {
       return {
         ...state,
         firstPageRecord: payload.first,
-        recordsPerPage: payload.rowsPerPage
+        recordsPerPage: payload.rows
       };
     case 'SET_RECORDS':
       return {
@@ -63,6 +65,12 @@ export const tableManagementReducer = (state, { type, payload }) => {
         records: payload.records,
         totalRecords: payload.totalRecords,
         totalFilteredRecords: payload.totalFilteredRecords
+      };
+    case 'SET_RECORDS_AND_TOTAL':
+      return {
+        ...state,
+        records: payload.records,
+        totalRecords: payload.totalRecords
       };
     case 'SET_PAGINATION':
       return {
