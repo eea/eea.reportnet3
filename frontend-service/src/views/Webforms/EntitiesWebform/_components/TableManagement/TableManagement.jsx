@@ -52,8 +52,10 @@ export const TableManagement = ({
     TableManagementUtils;
 
   const { getWebformTabs } = WebformsUtils;
-  const didInitialParentFetch = useRef(false);
-
+  const didInitialParentFetch = useRef({
+    hasLoaded: false,
+    initialTableName: null
+  });
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -112,7 +114,7 @@ export const TableManagement = ({
   ]);
 
   useEffect(() => {
-    if (!isEmpty(parentTablesWithData) && !didInitialParentFetch.current) {
+    if (!isEmpty(parentTablesWithData) && !didInitialParentFetch.current.hasLoaded) {
       initialLoad();
     }
   }, [parentTablesWithData]);
@@ -240,7 +242,7 @@ export const TableManagement = ({
       );
     });
 
-    const tablesToFetch = didInitialParentFetch.current
+    const tablesToFetch = didInitialParentFetch.current.hasLoaded
       ? parentTables.filter(t => t.tableSchemaId === rootTableId)
       : parentTables;
 
@@ -311,7 +313,7 @@ export const TableManagement = ({
         }
       })
       .finally(() => {
-        didInitialParentFetch.current = true;
+        didInitialParentFetch.current.hasLoaded = true;
         setIsLoading(false);
       });
   };
@@ -390,12 +392,16 @@ export const TableManagement = ({
         row.fieldData.tableSchemas?.forEach((tableSchema, index) => {
           if (index === 0) {
             tableName = tableSchema.tableSchemaName;
+            if (!didInitialParentFetch.current.hasLoaded) {
+              didInitialParentFetch.current.initialTableName = tableSchema.tableSchemaName;
+            }
           }
         })
       );
     }
+
     if (isUndefined(tableName)) {
-      tableName = rootTableName;
+      tableName = didInitialParentFetch.current.initialTableName || rootTableName;
     }
 
     return (
