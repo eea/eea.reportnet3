@@ -1585,7 +1585,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     <div className={!isDataflowOpen && styles.configureWebformFooter}>
       <Button
         className="p-button-secondary p-button-animated-blink p-button-right-aligned"
-        disabled={designerState.isDownloadingWebform}
+        disabled={
+          designerState.isDownloadingWebform ||
+          isEmpty(designerState?.webform?.name) ||
+          (!isUndefined(designerState.selectedWebform) &&
+            designerState?.selectedWebform?.value !== designerState?.webform?.name)
+        }
         icon={designerState.isDownloadingWebform ? 'spinnerAnimate' : 'export'}
         label={resourcesContext.messages['downloadWebform']}
         onClick={onDownloadWebform}
@@ -1599,7 +1604,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           } ${styles.saveButton}`}
           disabled={
             isUndefined(designerState.selectedWebform) ||
-            designerState?.selectedWebform?.value === designerState?.webform?.value
+            designerState?.selectedWebform?.value === designerState?.webform?.name
           }
           icon="check"
           label={resourcesContext.messages['save']}
