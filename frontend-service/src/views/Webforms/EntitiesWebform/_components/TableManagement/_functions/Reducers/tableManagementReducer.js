@@ -29,16 +29,55 @@ export const tableManagementReducer = (state, { type, payload }) => {
     case 'SET_PARENT_TABLES_DATA':
       return { ...state, parentTablesWithData: payload };
 
-    case 'SET_SELECTED_RECORD':
+    case 'SET_SELECTED_RECORD': {
+      const record = payload.selectedRecord ?? payload;
       return {
         ...state,
-        initialSelectedRecord: cloneDeep(payload.selectedRecord),
-        selectedRecord: payload.selectedRecord
+        initialSelectedRecord: cloneDeep(record),
+        selectedRecord: record
       };
+    }
 
     case 'IS_LOADING':
       return { ...state, isLoading: payload.value };
-
+    case 'ON_CHANGE_PAGE':
+      return {
+        ...state,
+        firstPageRecord: payload.first,
+        recordsPerPage: payload.rows
+      };
+    case 'SET_RECORDS':
+      return {
+        ...state,
+        records: payload
+      };
+    case 'SET_RECORDS_PER_PAGE':
+      return { ...state, recordsPerPage: payload.recordsPerPage };
+    case 'SET_TOTAL':
+      return { ...state, totalRecords: payload.totalRecords };
+    case 'SET_FILTERED':
+      return { ...state, totalFilteredRecords: payload.totalFilteredRecords };
+    case 'SET_FIRST_PAGE_RECORD':
+      return { ...state, firstPageRecord: payload.firstPageRecord };
+    case 'SET_TABLE_DATA':
+      return {
+        ...state,
+        records: payload.records,
+        totalRecords: payload.totalRecords,
+        totalFilteredRecords: payload.totalFilteredRecords
+      };
+    case 'SET_RECORDS_AND_TOTAL':
+      return {
+        ...state,
+        records: payload.records,
+        totalRecords: payload.totalRecords
+      };
+    case 'SET_PAGINATION':
+      return {
+        ...state,
+        firstPageRecord: payload.firstPageRecord,
+        recordsPerPage: payload.recordsPerPage
+      };
     default:
       return state;
   }

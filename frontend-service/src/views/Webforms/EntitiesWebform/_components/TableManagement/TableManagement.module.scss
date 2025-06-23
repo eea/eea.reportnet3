@@ -20,3 +20,44 @@
     min-width: 150px;
   }
 }
+
+.filtersContainer {
+  display: flex;
+  justify-content: flex-end; 
+  align-items: center;
+  gap: 0.5rem; 
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+}
+
+.filterInput {
+  width: 200px; 
+  padding: 0.5rem;
+  border: 1px solid var(--general-border-color);
+  border-radius: 4px;
+}
+
+.filterButton {
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.filterButton:hover {
+  background-color: var(--primary-color-dark);
+}
+
+.resetButton {
+  background-color: var(--secondary-color);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.resetButton:hover {
+  background-color: var(--secondary-color-dark);
+}
