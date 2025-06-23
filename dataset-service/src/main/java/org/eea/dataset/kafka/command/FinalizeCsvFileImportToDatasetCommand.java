@@ -89,7 +89,7 @@ public class FinalizeCsvFileImportToDatasetCommand extends AbstractEEAEventHandl
             if (this.shouldMarkCommandFailedBecauseImportTasksFailed(processId, taskId)) {
                 fileTreatmentHelper.finishImportProcessV2(taskId, dataflowId, datasetId, processId, idTableSchema, fileName, "Error in import process subtasks", false);
             } else {
-                fileTreatmentHelper.updateGeometry(datasetId, dataSetSchema);
+                fileTreatmentHelper.updateGeometryV2(datasetId, dataSetSchema);
                 fileTreatmentHelper.finishImportProcessV2(taskId, dataflowId, datasetId, processId, idTableSchema, fileName, null, false);
 
             }
