@@ -548,7 +548,19 @@ export const TableManagement = ({
       <div className={styles.filtersContainer}>
         <InputText
           className={styles.filterInput}
-          onChange={e => setValueFilter(e.target.value)}
+          onChange={e => {
+            setValueFilter(e.target.value);
+            if (e.target.value === '') {
+              setFetchFilter('');
+              tableManagementDispatch({
+                type: 'SET_PAGINATION',
+                payload: {
+                  firstPageRecord: 0,
+                  recordsPerPage: tableManagementState.recordsPerPage
+                }
+              });
+            }
+          }}
           onKeyDown={e => {
             if (e.key === 'Enter') {
               onFilterSubmit();
