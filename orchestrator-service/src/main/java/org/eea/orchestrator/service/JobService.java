@@ -9,6 +9,8 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.PathVariable;
+
 import java.io.File;
 import java.math.BigInteger;
 import java.util.List;
@@ -77,9 +79,13 @@ public interface JobService {
 
     void updateFmeCallbackJobParameter(String fmeJobId, Boolean fmeCallback);
 
+    void updateNumOfRestartsJobParameter(Long jobId);
+
     File downloadEtlExportedFile(JobVO job, String fileName) throws EEAException;
 
     void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber);
 
     Long findProviderIdById(Long jobId);
+
+    void restartImportJob(Long jobId, Boolean sendRestartNotification);
 }

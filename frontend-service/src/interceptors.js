@@ -28,33 +28,46 @@ axios.interceptors.response.use(
   error => {
     const originalRequest = error.config;
 
-    if (error?.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-      const tokens = LocalUserStorageUtils.getTokens();
+    // Handle 401 Unauthorized
+    if (error?.response?.status === 401) {
 
-      if (isNil(tokens)) {
-        return;
-      }
-
-      const { refreshToken } = tokens;
-
-      return HTTPRequester.post({
-        url: getUrl(UserConfig.refreshToken, { refreshToken })
-      }).then(res => {
-        const { accessToken, refreshToken } = res.data;
-
-        if (res.status >= 200 && res.status <= 299) {
-          LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
-          axios.defaults.headers.common['Authorization'] = 'Bearer ' + LocalUserStorageUtils.getTokens().accessToken;
-
-          return axios(originalRequest);
-        }
-      })
-      .catch(() => {
+      if (originalRequest.url && originalRequest.url.includes('/refreshToken')) {
         console.error('Error during token refresh:', error.response?.data);
         showSessionExpiredDialog();
         return Promise.reject(error);
-      });
+      }
+      if (!originalRequest._retry) {
+        originalRequest._retry = true;
+        const tokens = LocalUserStorageUtils.getTokens();
+
+        if (isNil(tokens)) {
+          return Promise.reject(error);
+        }
+
+        const { refreshToken } = tokens;
+
+        return HTTPRequester.post({
+          url: getUrl(UserConfig.refreshToken, { refreshToken })
+        })
+          .then(res => {
+            const { accessToken, refreshToken } = res.data;
+
+            if (res.status >= 200 && res.status <= 299) {
+              LocalUserStorageUtils.setPropertyToSessionStorage({ accessToken, refreshToken });
+              axios.defaults.headers.common['Authorization'] =
+                'Bearer ' + LocalUserStorageUtils.getTokens().accessToken;
+
+              return axios(originalRequest);
+            }
+          })
+          .catch(refreshError => {
+            if (originalRequest.url.includes('/refreshToken')) {
+              console.error('Error during token refresh:', refreshError.response?.data);
+              showSessionExpiredDialog();
+            }
+            return Promise.reject(refreshError);
+          });
+      }
     }
 
     if (error?.response?.status === 403) {
@@ -69,5 +82,5 @@ axios.interceptors.response.use(
     }
     // return Error object with Promise
     return Promise.reject(error);
-  } 
+  }
 );

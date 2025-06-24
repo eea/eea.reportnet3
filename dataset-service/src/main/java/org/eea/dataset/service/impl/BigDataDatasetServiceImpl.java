@@ -65,7 +65,6 @@ import org.eea.utils.LiteralConstants;
 import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -80,6 +79,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.*;
 import java.util.*;
@@ -88,7 +88,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -150,6 +149,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private final S3Helper s3HelperPrivate;
     private final S3Helper s3HelperPublic;
     private final DatasetService datasetService;
+    private final EtlExportV5Service etlExportV5Service;
 
     private final DremioHelperService dremioHelperService;
     private JdbcTemplate dremioJdbcTemplate;
@@ -170,7 +170,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                                      ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
                                      JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
                                      FileCommonUtils fileCommonUtils, @Lazy DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
-                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever) {
+                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever, EtlExportV5Service etlExportV5Service) {
         this.jobControllerZuul =  jobControllerZuul;
         this.jobProcessControllerZuul = jobProcessControllerZuul;
         this.datasetMetabaseService = datasetMetabaseService;
@@ -196,6 +196,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.schemasRepository = schemasRepository;
         this.datasetSnapshotService = datasetSnapshotService;
         this.datasetService = datasetService;
+        this.etlExportV5Service = etlExportV5Service;
     }
 
 
@@ -207,7 +208,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String filePathInS3 = null;
         String fileName = helperMultipartFileMapper.getOriginalFilename();
         JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo();
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, delimiter, integrationId, null);
         File s3File = null;
         JobVO job = null;
         try {
@@ -221,6 +222,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
                     if (job != null) {
                         jobId = job.getId();
+                        importFileInDremioInfo.setJobId(jobId);
                         LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
                     }
                 }
@@ -245,6 +247,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 datasetIds.add(datasetId);
                 jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
                 jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId, null);
+                importFileInDremioInfo.setJobId(jobId);
                 if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
                     LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
                     datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, fileName);
@@ -266,7 +269,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if (!folder.exists()) {
                     folder.mkdir();
                 }
-                s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+                try {
+                    s3File = s3HelperPublic.getFileFromS3(filePathInS3, filePathStructure.replace(fileExtension, ""), importPath, fileExtension);
+                }
+                catch (Exception e){
+                    LOG.error("For jobId {} could not find file {} in public s3. Error: {}", jobId, filePathInS3, e.getMessage());
+                    jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_NO_FILE_IN_S3, null);
+                    throw e;
+                }
                 fileName = s3File.getName();
             }
 
@@ -284,7 +294,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 replace = (Boolean) job.getParameters().get("replace");
             }
 
-            importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, delimiter, integrationId, providerCode);
+            importFileInDremioInfo.setProviderId(providerId);
+            importFileInDremioInfo.setFileName(fileName);
+            importFileInDremioInfo.setReplaceData(replace);
+            importFileInDremioInfo.setDelimiter(delimiter);
+            importFileInDremioInfo.setDataProviderCode(providerCode);
 
             DatasetTypeEnum datasetType = datasetService.getDatasetType(importFileInDremioInfo.getDatasetId());
             if (DatasetTypeEnum.REFERENCE.equals(datasetType) && dataflowVO.getStatus() == TypeStatusEnum.DRAFT) {
@@ -2128,16 +2142,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void etlExportCsv(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException {
         try {
             // the path of the parent folder which will be zipped
-            String folderToZipPath = exportDLPath + "/dataset-" + datasetId + "/etlExportV4_" + jobId;
+            String folderToZipPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + "/etlExportV4_" + jobId;
             DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
-            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
-            if (jobId!=null) {
-                JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
-                jobProcessControllerZuul.save(jobProcessVO);
-            }
-            processControllerZuul.updateProcess(datasetId,dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
+            updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
             Long providerId = (dataSetMetabaseVO.getDataProviderId() != null) ? dataSetMetabaseVO.getDataProviderId() : 0L;
             if (StringUtils.isNotBlank(tableSchemaId)) {
@@ -2184,28 +2191,110 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
 
-            //zip the folder
-            File folderToZip = new File(folderToZipPath);
-            File zipOutput = new File(folderToZipPath + ".zip");
-            try {
-                ZipUtils.zipFolder(folderToZip, zipOutput);
-            } catch (Exception e) {
-               LOG.error("There was an error when zipping the files for etl export v4 jobId {} folderToZipPath {}", jobId, folderToZipPath);
-               throw e;
-            }
-            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
-            if (jobId !=null) {
-                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
-            }
+            zipFolder(jobId, folderToZipPath);
+            finishJob(datasetId, dataflowId, jobId, user, processUUID);
         }
         catch (Exception e) {
-            LOG.error("EtlExportV4 failed for jobId {} Error: {}", jobId, e.getMessage());
-            processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
-                    processUUID, user, defaultFileExportProcessPriority, false);
-            if (jobId != null) {
-                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    @Override
+    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) {
+        try {
+            String localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
+            updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
+
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+            String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate);
+
+            String tableName = null;
+            if (StringUtils.isNotBlank(tableSchemaId)) {
+                tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             }
+            DownloadFilter filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName);
+            s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
+
+            zipFolder(jobId, localPath);
+            finishJob(datasetId, dataflowId, jobId, user, processUUID);
+        }
+        catch (Exception e) {
+            exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    /**
+     * Updating the job process
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     */
+    private void updateJobProcess(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID) {
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId !=null) {
+            JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, processUUID);
+            jobProcessControllerZuul.save(jobProcessVO);
+        }
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+    }
+
+    /**
+     * Handle the exceptions
+     *
+     * @param datasetId The dataset id
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     * @param e The exception
+     */
+    private void exceptionHandling(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID, Exception e) {
+        LOG.error("EtlExport failed for jobId {} Error: {}", jobId, e.getMessage());
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId != null) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+    }
+
+    /**
+     * Finish the process
+     *
+     * @param dataflowId The dataflow id
+     * @param jobId The job id
+     * @param user The user id
+     * @param processUUID The process UUID
+     */
+    private void finishJob(Long datasetId, Long dataflowId, Long jobId, String user, String processUUID) {
+        processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.FILE_EXPORT,
+            processUUID, user, defaultFileExportProcessPriority, false);
+        if (jobId !=null) {
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+        }
+    }
+
+    /***
+     * Zipping the folder and deleting unzipped folder
+     *
+     * @param jobId The job id
+     * @param localPath The folder to zip path
+     * @throws IOException The Exception
+     */
+    private void zipFolder(Long jobId, String localPath) throws IOException {
+        File unZippedFile = new File(localPath);
+        File zippedFile = new File(localPath + ".zip");
+        try {
+            ZipUtils.zipFolder(unZippedFile, zippedFile);
+            FileUtils.deleteDirectory(unZippedFile);
+        } catch (Exception e) {
+            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath);
+            throw e;
         }
     }
 }

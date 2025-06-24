@@ -104,7 +104,15 @@ public enum EventType {
 
   /** The import design failed event. */
   IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "import_design_failed_event",
-      true),
+          true),
+
+  /** The import restart completed event. */
+  IMPORT_RESTART_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_restart_completed_event", true),
+
+  /** The import restart failed event. */
+  IMPORT_RESTART_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_restart_failed_event", true),
 
   /** The import design failed no headers matching event. */
   IMPORT_DESIGN_FAILED_NO_HEADERS_MATCHING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
