@@ -578,14 +578,12 @@ export const TableManagement = ({
         />
 
         <Button
-          className={styles.filterButton}
           disabled={isLoading}
           icon="filter"
           label={resourcesContext.messages['filter']}
           onClick={onFilterSubmit}
         />
         <Button
-          className={styles.resetButton}
           disabled={isLoading || !valueFilter}
           icon="refresh"
           label={resourcesContext.messages['reset']}
