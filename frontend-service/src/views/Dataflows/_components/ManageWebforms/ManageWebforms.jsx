@@ -422,9 +422,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
       />
       <Button
         icon="search"
-        className="p-button-primary"
         onClick={filterData}
-        label={resourcesContext.messages['filter']}
+        label={resourcesContext.messages['search']}
       />
       <Button
         icon="refresh"
