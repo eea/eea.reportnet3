@@ -421,6 +421,7 @@ export const EntitiesWebform = ({
         bigData={bigData}
         dataflowId={dataflowId}
         datasetId={datasetId}
+        disableActionButtons={!isIcebergCreated}
         isAddingRootTableId={entitiesWebformState.isAddingEntityRecord}
         isIcebergCreated={isIcebergCreated}
         loading={isLoading}

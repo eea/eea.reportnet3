@@ -36,6 +36,7 @@ export const TableManagement = ({
   bigData,
   dataflowId,
   datasetId,
+  disableActionButtons = false,
   isAddingRootTableId = false,
   isIcebergCreated,
   loading,
@@ -407,6 +408,7 @@ export const TableManagement = ({
     return (
       <ActionsColumn
         bigData={bigData}
+        disabledButtons={disableActionButtons}
         isIcebergCreated={isIcebergCreated}
         onDeleteClick={() => {
           tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
