@@ -107,9 +107,6 @@ export const ManageDataflowForm = forwardRef(
 
     useEffect(() => {
       getDropdownsOptions();
-      console.log(hasRepresentatives);
-      console.log(isEditing);
-      console.log(!isDesign);
     }, []);
 
 
