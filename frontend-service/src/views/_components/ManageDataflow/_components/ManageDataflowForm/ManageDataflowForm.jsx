@@ -109,7 +109,6 @@ export const ManageDataflowForm = forwardRef(
       getDropdownsOptions();
     }, []);
 
-
     const handleErrors = ({ field, hasErrors, message }) => {
       setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));
     };
@@ -140,22 +139,6 @@ export const ManageDataflowForm = forwardRef(
       return hasErrors;
     };
 
-    const deleteProviders = async () => {
-      if (selectedGroup) {
-        if (selectedGroup.dataProviderGroupId === dataProviderGroup.dataProviderGroupId) {
-          console.log("same");
-        } else {
-          try {
-            await RepresentativeService.deleteAllLeadReporters(dataflowId);
-            notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_SUCCESS' }, true);
-          } catch (error) {
-            console.error('Dataflow - onDeleteAllLeadReporters.', error);
-            notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
-          }
-        }
-      }
-    }
-
     const onConfirm = async (pinned, bigData) => {
       checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
@@ -163,7 +146,6 @@ export const ManageDataflowForm = forwardRef(
 
       if (!errors.obligation.hasErrors && !errors.name.hasErrors && !errors.description.hasErrors) {
         onSubmit(true);
-        deleteProviders();
 
         try {
           if (isEditing) {
