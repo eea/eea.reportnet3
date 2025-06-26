@@ -1174,8 +1174,6 @@
     "oblTitle": "Title",
     "of": "of",
     "ok": "OK",
-    "OnGroupChangeDeleteAllLeadReportersHeader": "Representative Group Change",
-    "OnGroupChangeDeleteAllLeadReportersMessage": "Changing representative group and saving will result in the deletion of all reporters and providers of this dataflow",
     "onlyReadPermissions": "Read",
     "onlyReleasedCheckboxLabel": "Only released",
     "onlyReleasedDataCollectionCheckboxLabel": "Only released to Data Collection",

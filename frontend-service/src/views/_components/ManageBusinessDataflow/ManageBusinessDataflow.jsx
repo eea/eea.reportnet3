@@ -91,14 +91,6 @@ export const ManageBusinessDataflow = ({
     }
   }, [groupOfCompanies]);
 
-  useLayoutEffect(() => {
-    if (selectedGroup && isDesign) {
-      if (selectedGroup.dataProviderGroupId !== state.dataProviderGroupId) {
-        manageDialogs('isOnGroupChangeDeleteAllLeadReporters', true)
-      }
-    }
-  }, [selectedGroup]);
-
   const getDropdownsOptions = async () => {
     setIsLoading(true);
     try {

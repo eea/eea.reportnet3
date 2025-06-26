@@ -41,7 +41,6 @@ export const ManageDataflowForm = forwardRef(
       isCitizenScienceDataflow,
       isDataflowOpen,
       isEditing,
-      manageDialogs,
       metadata,
       onChangeDate,
       onCreate,
@@ -113,13 +112,6 @@ export const ManageDataflowForm = forwardRef(
       console.log(!isDesign);
     }, []);
 
-    useEffect(() => {
-      if (selectedGroup && isDesign) {
-        if (selectedGroup.dataProviderGroupId !== dataProviderGroup.dataProviderGroupId) {
-          manageDialogs('isOnGroupChangeDeleteAllLeadReporters', true)
-        }
-      }
-    }, [selectedGroup]);
 
     const handleErrors = ({ field, hasErrors, message }) => {
       setErrors(prevState => ({ ...prevState, [field]: { message, hasErrors } }));

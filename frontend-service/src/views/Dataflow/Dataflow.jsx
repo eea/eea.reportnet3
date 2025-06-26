@@ -105,7 +105,6 @@ export const Dataflow = () => {
     isDatasetsInfoDialogVisible: false,
     isDataUpdated: false,
     isDeleteAllLeadReportersDialogVisible: false,
-    isOnGroupChangeDeleteAllLeadReporters: false,
     isDeleteDialogVisible: false,
     isDeletingAllReporters: false,
     isDownloadingUsers: false,
@@ -1567,18 +1566,6 @@ export const Dataflow = () => {
             onHide={() => manageDialogs('isDeleteAllLeadReportersDialogVisible', false)}
             visible={dataflowState.isDeleteAllLeadReportersDialogVisible}>
             {resourcesContext.messages['deleteAllLeadReportersDialogMessage']}
-          </ConfirmDialog>
-        )}
-
-        {dataflowState.isOnGroupChangeDeleteAllLeadReporters && (
-          <ConfirmDialog
-            showCancelButton = {false}
-            header={resourcesContext.messages['OnGroupChangeDeleteAllLeadReportersHeader']}
-            labelConfirm={resourcesContext.messages['ok']}
-            onConfirm={() => manageDialogs('isOnGroupChangeDeleteAllLeadReporters', false)}
-            onHide={() => manageDialogs('isOnGroupChangeDeleteAllLeadReporters', false)}
-            visible={dataflowState.isOnGroupChangeDeleteAllLeadReporters}>
-            {resourcesContext.messages['OnGroupChangeDeleteAllLeadReportersMessage']}
           </ConfirmDialog>
         )}
 
