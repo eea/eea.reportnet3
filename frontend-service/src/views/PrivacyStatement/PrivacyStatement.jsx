@@ -103,9 +103,8 @@ export const PrivacyStatement = () => {
               </p>
               <p>
                 With regard to the personal data collected for logging in purposes, processing operations are under the
-                responsibility of the DIS1 (Information Systems and ICT) group under DIS (Data and Information Services)
-                programme of the EEA acting as data controller, regarding the collection and processing of personal
-                data.
+                responsibility of the ICT Unit (DTL1) under Digital Department (DTL) of the EEA acting as data
+                controller, regarding the collection and processing of personal data.
               </p>
               <p>
                 This privacy statement explains the reason for the processing of your personal data, the way we collect,
