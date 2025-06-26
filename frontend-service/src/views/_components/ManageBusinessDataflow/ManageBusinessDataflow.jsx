@@ -225,20 +225,6 @@ export const ManageBusinessDataflow = ({
   };
 
   const onManageBusinessDataflow = async () => {
-    if (selectedGroup) {
-      if (selectedGroup.dataProviderGroupId === state.dataProviderGroupId) {
-        console.log("same");
-      } else {
-        try {
-          await RepresentativeService.deleteAllLeadReporters(dataflowId);
-          // Optional: add a success notification here
-          notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_SUCCESS' }, true);
-        } catch (error) {
-          console.error('Dataflow - onDeleteAllLeadReporters.', error);
-          notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_ERROR' }, true);
-        }
-      }
-    }
     if (checkErrors()) return;
 
     try {
