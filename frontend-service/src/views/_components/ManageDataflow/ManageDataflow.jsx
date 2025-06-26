@@ -33,6 +33,7 @@ export const ManageDataflow = ({
   dataflowId,
   dataProviderGroup,
   deliveryDate,
+  hasRepresentatives,
   isAdmin,
   isCitizenScienceDataflow,
   isCustodian,
@@ -380,6 +381,7 @@ export const ManageDataflow = ({
             deliveryDate={deliveryDate}
             dialogName={dialogName}
             getData={onLoadData}
+            hasRepresentatives={hasRepresentatives}
             isAdmin={isAdmin}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
             isDataflowOpen={isDataflowOpen}

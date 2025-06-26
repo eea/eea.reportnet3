@@ -798,7 +798,7 @@
     "groupBy": "Group by",
     "grouped": "Grouped",
     "groupId": "Group id",
-    "providerGroupsDisabledTooltip": "There are assigned representatives already",
+    "providerGroupsDisabledTooltip": "There are assigned representatives already. Changing group requires deleting representatives from Manage lead reporters",
     "groupValidationsError": "Failed group validation at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "hasUpdatesAfterReleaseDataflowTooltip": "One or more datasets for this provider have been updated after release",
     "hasUpdatesAfterReleaseDatasetTooltip": "Dataset has been updated after release",
