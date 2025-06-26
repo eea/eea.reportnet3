@@ -19,7 +19,6 @@ import { InputTextarea } from '../InputTextarea';
 import { TooltipButton } from 'views/_components/TooltipButton';
 
 import { DataflowService } from 'services/DataflowService';
-import { RepresentativeService } from 'services/RepresentativeService';
 
 import { NotificationContext } from 'views/_functions/Contexts/NotificationContext';
 import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
@@ -34,6 +33,7 @@ export const ManageDataflow = ({
   dataflowId,
   dataProviderGroup,
   deliveryDate,
+  hasRepresentatives,
   isAdmin,
   isCitizenScienceDataflow,
   isCustodian,
@@ -381,6 +381,7 @@ export const ManageDataflow = ({
             deliveryDate={deliveryDate}
             dialogName={dialogName}
             getData={onLoadData}
+            hasRepresentatives={hasRepresentatives}
             isAdmin={isAdmin}
             isCitizenScienceDataflow={isCitizenScienceDataflow}
             isDataflowOpen={isDataflowOpen}

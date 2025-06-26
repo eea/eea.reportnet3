@@ -36,6 +36,7 @@ export const ManageDataflowForm = forwardRef(
       deliveryDate,
       dialogName,
       getData,
+      hasRepresentatives,
       isAdmin,
       isCitizenScienceDataflow,
       isDataflowOpen,
@@ -107,6 +108,9 @@ export const ManageDataflowForm = forwardRef(
 
     useEffect(() => {
       getDropdownsOptions();
+      console.log(hasRepresentatives);
+      console.log(isEditing);
+      console.log(!isDesign);
     }, []);
 
     useEffect(() => {
@@ -147,14 +151,13 @@ export const ManageDataflowForm = forwardRef(
       return hasErrors;
     };
 
-    const onConfirm = async (pinned, bigData) => {
+    const deleteProviders = async () => {
       if (selectedGroup) {
         if (selectedGroup.dataProviderGroupId === dataProviderGroup.dataProviderGroupId) {
           console.log("same");
         } else {
           try {
             await RepresentativeService.deleteAllLeadReporters(dataflowId);
-            // Optional: add a success notification here
             notificationContext.add({ type: 'DELETE_ALL_LEAD_REPORTERS_SUCCESS' }, true);
           } catch (error) {
             console.error('Dataflow - onDeleteAllLeadReporters.', error);
@@ -162,12 +165,16 @@ export const ManageDataflowForm = forwardRef(
           }
         }
       }
+    }
+
+    const onConfirm = async (pinned, bigData) => {
       checkIsCorrectInputValue(metadata.obligation.title, 'obligation');
       checkIsCorrectInputValue(name, 'name');
       checkIsCorrectInputValue(description, 'description');
 
       if (!errors.obligation.hasErrors && !errors.name.hasErrors && !errors.description.hasErrors) {
         onSubmit(true);
+        deleteProviders();
 
         try {
           if (isEditing) {
@@ -332,7 +339,7 @@ export const ManageDataflowForm = forwardRef(
               <Dropdown
                 appendTo={document.body}
                 ariaLabel="providerGroups"
-                disabled={isEditing && !isDesign}
+                disabled={isEditing && (!isDesign || hasRepresentatives)}
                 name="providerGroups"
                 onChange={event => onSelectGroup(event.target.value)}
                 onFocus={() => handleErrors({ field: 'providerGroups', hasErrors: false, message: '' })}
@@ -348,7 +355,7 @@ export const ManageDataflowForm = forwardRef(
               <Dropdown
                 appendTo={document.body}
                 ariaLabel="providerGroups"
-                disabled={isEditing && !isDesign}
+                disabled={isEditing && (!isDesign || hasRepresentatives)}
                 name="providerGroups"
                 onChange={event => onSelectGroup(event.target.value)}
                 onFocus={() => handleErrors({ field: 'providerGroups', hasErrors: false, message: '' })}
