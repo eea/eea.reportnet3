@@ -386,7 +386,6 @@ export const ManageDataflow = ({
             isCitizenScienceDataflow={isCitizenScienceDataflow}
             isDataflowOpen={isDataflowOpen}
             isEditing={isEditing}
-            manageDialogs={manageDialogs}
             metadata={reportingDataflowState}
             onChangeDate={() => manageDialogs('isDeliveryDateDialogVisible', true)}
             onCreate={onCreateDataflow}
