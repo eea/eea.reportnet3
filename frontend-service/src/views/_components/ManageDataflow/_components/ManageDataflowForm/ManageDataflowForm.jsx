@@ -317,7 +317,7 @@ export const ManageDataflowForm = forwardRef(
                 optionLabel="label"
                 options={providerGroups}
                 placeholder={resourcesContext.messages['selectGroupOfCompanies']}
-                tooltip={isDesign ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
+                tooltip={isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
                 value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>
@@ -333,7 +333,7 @@ export const ManageDataflowForm = forwardRef(
                 optionLabel="label"
                 options={providerGroups}
                 placeholder={resourcesContext.messages['selectGroupOfReportingEntities']}
-                tooltip={isDesign ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
+                tooltip={isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
                 value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>
