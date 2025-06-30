@@ -1,7 +1,9 @@
 package org.eea.dataset.service.file.interfaces;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
 import org.eea.dataset.exception.InvalidFileException;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
@@ -43,4 +45,15 @@ public interface IFileExportContext {
    */
   List<byte[]> fileListWriter(Long dataflowId, Long datasetId, String includeCountryCode,
       boolean includeValidations) throws InvalidFileException, IOException, EEAException;
+
+  void writeAllTablesToSingleFileStreaming(OutputStream out, Long dataflowId, Long datasetId, String includeCountryCode,
+                                           boolean b, ExportFilterVO filters);
+
+  void writeEachTableToZipEntryStreaming(ZipOutputStream zipOut,
+                                         Long dataflowId,
+                                         Long datasetId,
+                                         String includeCountryCode,
+                                         boolean includeValidations,
+                                         ExportFilterVO filters) throws EEAException ;
+
 }
