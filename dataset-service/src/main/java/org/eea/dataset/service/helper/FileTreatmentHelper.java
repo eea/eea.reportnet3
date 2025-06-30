@@ -67,6 +67,7 @@ import org.eea.interfaces.vo.dataset.*;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
@@ -1084,7 +1085,75 @@ public class FileTreatmentHelper implements DisposableBean {
                         datasetId, e.getMessage(), ex);
             }
         }
+    }
 
+    @Async
+    public void exportDatasetFileByStreaming(Long datasetId, String mimeType) {
+
+        Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+        ExportFilterVO filters = new ExportFilterVO();
+        filters.setLevelError(new ErrorTypeEnum[]{
+                ErrorTypeEnum.CORRECT, ErrorTypeEnum.INFO,
+                ErrorTypeEnum.WARNING, ErrorTypeEnum.BLOCKER, ErrorTypeEnum.ERROR
+        });
+
+        DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
+        String includeCountryCode = getCode(dataflowId, datasetType);
+
+        String[] type = mimeType.split(" ");
+        String extension = (type.length > 1) ? type[1] : type[0];
+        boolean includeZip = (type.length > 1 && extension.equalsIgnoreCase(FileTypeEnum.CSV.getValue()));
+
+        IFileExportContext context = fileExportFactory.createContext(extension);
+
+        File folder = new File(pathPublicFile, "dataset-" + datasetId);
+        folder.mkdirs();
+
+        try {
+            DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+            String nameDataset = dataset.getDataSetName().replaceAll("[/\\\\]", "_");
+            String fileName = nameDataset + (includeZip ? ".zip" : ".csv");
+            File file = new File(folder, fileName);
+
+            if (includeZip) {
+                try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(file))) {
+                    context.writeEachTableToZipEntryStreaming(zipOut, dataflowId, datasetId,
+                            includeCountryCode, false, filters);
+                }
+            } else {
+                try (OutputStream out = new FileOutputStream(file)) {
+                    context.writeAllTablesToSingleFileStreaming(out, dataflowId, datasetId,
+                            includeCountryCode, false, filters);
+                }
+            }
+
+            NotificationVO notificationVO = NotificationVO.builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .datasetId(datasetId)
+                    .datasetName(fileName)
+                    .datasetType(datasetType)
+                    .build();
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_COMPLETED_EVENT, null, notificationVO);
+            LOG.info("Streaming export completed for datasetId {}", datasetId);
+
+        } catch (Exception e) {
+            LOG.error("Streaming export failed for datasetId {}. Error: {}", datasetId, e.getMessage(), e);
+
+            NotificationVO notificationVO = NotificationVO.builder()
+                    .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .dataflowId(dataflowId)
+                    .datasetId(datasetId)
+                    .datasetType(datasetType)
+                    .error("Error exporting dataset data")
+                    .build();
+
+            try {
+                kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_DATASET_FAILED_EVENT, null, notificationVO);
+            } catch (EEAException ex) {
+                LOG.error("Failed to send error notification for datasetId {}", datasetId, ex);
+            }
+        }
     }
 
     @Async

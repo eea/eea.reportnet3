@@ -1,11 +1,18 @@
 package org.eea.dataset.service.file;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
@@ -16,6 +23,7 @@ import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
+import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
@@ -127,6 +135,100 @@ public class CSVWriterStrategy implements WriterStrategy {
     return byteList;
 
   }
+
+
+
+  public void writeAllTablesToSingleFileStreaming(OutputStream out,
+                                                  Long dataflowId,
+                                                  Long datasetId,
+                                                  String includeCountryCode,
+                                                  boolean includeValidations,
+                                                  ExportFilterVO filters) {
+
+      DataSetSchemaVO schema = null;
+      try {
+          schema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
+      } catch (EEAException e) {
+          throw new RuntimeException(e);
+      }
+
+      try (
+            OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+            CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                    CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)
+    ) {
+      for (TableSchemaVO table : schema.getTableSchemas()) {
+        setLines(table.getIdTableSchema(), schema, csvWriter, datasetId, includeCountryCode, filters);
+      }
+      writer.flush();
+    } catch (IOException e) {
+        try {
+            throw new EEAException("Streaming full CSV export failed", e);
+        } catch (EEAException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+  }
+
+  /**
+   * @param zipOut
+   * @param dataflowId
+   * @param datasetId
+   * @param includeCountryCode
+   * @param includeValidations
+   * @param filters
+   * @throws EEAException
+   */
+  @Override
+  public void writeEachTableToZipEntryStreaming(ZipOutputStream zipOut,
+                                                Long dataflowId,
+                                                Long datasetId,
+                                                String includeCountryCode,
+                                                boolean includeValidations,
+                                                ExportFilterVO filters) throws EEAException {
+    DataSetSchemaVO schema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
+
+    for (TableSchemaVO table : schema.getTableSchemas()) {
+      String entryName = table.getNameTableSchema().replaceAll("[/\\\\]", "_") + ".csv";
+      try {
+        zipOut.putNextEntry(new ZipEntry(entryName));
+
+        writeSingleTableToCsvStreaming(zipOut, dataflowId, datasetId,
+                table.getIdTableSchema(), includeCountryCode, includeValidations, filters);
+
+        zipOut.closeEntry();
+      } catch (IOException e) {
+        throw new EEAException("Failed to write ZIP entry for table " + table.getNameTableSchema(), e);
+      }
+    }
+  }
+
+
+  public void writeSingleTableToCsvStreaming(OutputStream out,
+                                             Long dataflowId,
+                                             Long datasetId,
+                                             String tableSchemaId,
+                                             String includeCountryCode,
+                                             boolean includeValidations,
+                                             ExportFilterVO filters) throws EEAException {
+
+    DataSetSchemaVO schema = fileCommon.getDataSetSchemaVO(dataflowId, datasetId);
+
+    OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
+    CSVWriter csvWriter = new CSVWriter(writer, delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+            CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
+
+    try {
+      setLines(tableSchemaId, schema, csvWriter, datasetId, includeCountryCode, filters);
+      writer.flush(); // Only flush, do NOT close
+    } catch (IOException e) {
+      throw new EEAException("Streaming single CSV export failed", e);
+    }
+  }
+
+
+
+
 
   /**
    * Sets the lines.

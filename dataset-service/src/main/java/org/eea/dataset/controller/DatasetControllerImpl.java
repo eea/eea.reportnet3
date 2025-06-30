@@ -74,6 +74,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
+import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_PARQUET;
 
@@ -2505,7 +2506,16 @@ public class DatasetControllerImpl implements DatasetController {
             userNotificationContentVO);
 
     try {
-      fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+      String[] parts = mimeType.trim().toLowerCase().split(" ");
+
+      if (Arrays.asList(parts).contains(CSV.getValue())) {
+        // Use streaming version for csv and zip csv
+        fileTreatmentHelper.exportDatasetFileByStreaming(datasetId, mimeType);
+      } else {
+        // xlsx, validations
+         fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+      }
+
       LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());

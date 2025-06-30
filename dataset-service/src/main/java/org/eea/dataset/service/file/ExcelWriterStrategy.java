@@ -23,12 +23,14 @@ import org.springframework.data.domain.PageRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.ZipOutputStream;
 
 /**
  * The Class ExcelWriterStrategy.
@@ -211,6 +213,35 @@ public class ExcelWriterStrategy implements WriterStrategy {
     byteList.add(out.toByteArray());
 
     return byteList;
+  }
+
+  /**
+   * @param out
+   * @param dataflowId
+   * @param datasetId
+   * @param includeCountryCode
+   * @param includeValidations
+   * @param filters
+   */
+  @Override
+  public void writeAllTablesToSingleFileStreaming(OutputStream out, Long dataflowId, Long datasetId, String includeCountryCode,
+                                                  boolean includeValidations, ExportFilterVO filters) {
+    throw new UnsupportedOperationException("Csv file creation streaming is not supported for XLSX");
+  }
+
+  /**
+   * @param zipOut
+   * @param dataflowId
+   * @param datasetId
+   * @param includeCountryCode
+   * @param includeValidations
+   * @param filters
+   * @throws EEAException
+   */
+  @Override
+  public void writeEachTableToZipEntryStreaming(ZipOutputStream zipOut, Long dataflowId, Long datasetId, String includeCountryCode,
+                                                boolean includeValidations, ExportFilterVO filters) throws EEAException {
+    throw new UnsupportedOperationException("ZIP-per-table streaming is not supported for XLSX");
   }
 
   /**
