@@ -1481,6 +1481,8 @@
     "sortFieldDesignFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
     "sortFieldFailedEvent": "Invalid values from field <strong title='{:fieldSchemaName}'>{:shortFieldSchemaName}</strong> of table <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}.</a> Please check it",
     "sound": "Sound",
+    "sqlErrorDialogHeader": "Error in SQL sentence",
+    "sqlErrorMessage": "LIMIT and OFFSET are not allowed at the end of an SQL sentence.",
     "sqlErrorMessageCopy": "Click to copy the SQL error.",
     "sqlSentence": "SQL sentence",
     "sqlSentenceBigData": "SQL sentence (Big Data)",
