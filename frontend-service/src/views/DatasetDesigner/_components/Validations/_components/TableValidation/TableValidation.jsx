@@ -51,6 +51,7 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
 
   const [clickedFields, setClickedFields] = useState([]);
   const [relationsErrors, setRelationsErrors] = useState({});
+  const [isSqlErrorDialogVisible, setIsSqlErrorDialogVisible] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [showErrorOnRelationsTab, setShowErrorOnRelationsTab] = useState(false);
   const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
@@ -583,7 +584,11 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
             icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
             id={`${componentName}__update`}
             label={resourcesContext.messages['update']}
-            onClick={() => onUpdateValidationRule()}
+            onClick={() => {
+              const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence);
+
+              invalidSql ? setIsSqlErrorDialogVisible(true) : onUpdateValidationRule();
+            }}
             type="button"
           />
         </span>
@@ -599,7 +604,11 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
             icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
             id={`${componentName}__create`}
             label={resourcesContext.messages['create']}
-            onClick={() => onCreateValidationRule()}
+            onClick={() => {
+              const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence);
+
+              invalidSql ? setIsSqlErrorDialogVisible(true) : onCreateValidationRule();
+            }}
             type="button"
           />
         </span>
@@ -638,19 +647,31 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
 
   const dialogLayout = children =>
     validationContext.isVisible && (
-      <Dialog
-        className={styles.dialog}
-        footer={renderDialogFooter}
-        header={
-          validationContext.ruleEdit
-            ? resourcesContext.messages['editTableConstraint']
-            : resourcesContext.messages['createTableConstraint']
-        }
-        onHide={() => onHide()}
-        style={{ width: '975px' }}
-        visible={validationContext.isVisible}>
-        {children}
-      </Dialog>
+      <>
+        <Dialog
+          className={styles.dialog}
+          footer={renderDialogFooter}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages['editTableConstraint']
+              : resourcesContext.messages['createTableConstraint']
+          }
+          onHide={() => onHide()}
+          style={{ width: '975px' }}
+          visible={validationContext.isVisible}>
+          {children}
+        </Dialog>
+        {isSqlErrorDialogVisible && (
+          <Dialog
+            className={styles.dialog}
+            header={resourcesContext.messages['sqlErrorDialogHeader']}
+            onHide={() => setIsSqlErrorDialogVisible(false)}
+            style={{ width: '600px' }}
+            visible={isSqlErrorDialogVisible}>
+            {resourcesContext.messages['sqlErrorMessage']}
+          </Dialog>
+        )}
+      </>
     );
 
   return dialogLayout(
