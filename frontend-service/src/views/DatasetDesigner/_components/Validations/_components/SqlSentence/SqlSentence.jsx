@@ -252,7 +252,9 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
               icon={isValidatingQuery ? 'spinnerAnimate' : 'play'}
               label={resourcesContext.messages['runSql']}
               onClick={() => {
-                const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence);
+                const invalidSql = /\b(limit|offset)\s*\d*$/i.test(
+                  creationFormState?.candidateRule?.sqlSentence?.trim()
+                );
 
                 invalidSql ? setIsSqlErrorDialogVisible(true) : runSqlSentence();
               }}
@@ -267,7 +269,9 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
               iconClasses={styles.validateSqlSentenceIcon}
               label={resourcesContext.messages['evaluateSql']}
               onClick={() => {
-                const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence);
+                const invalidSql = /\b(limit|offset)\s*\d*$/i.test(
+                  creationFormState?.candidateRule?.sqlSentence?.trim()
+                );
 
                 invalidSql ? setIsSqlErrorDialogVisible(true) : onEvaluateSqlSentence();
               }}
