@@ -665,7 +665,7 @@ export const RowValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
       id: ''
     };
 
-    const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence);
+    const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence?.trim());
 
     if (validationContext.ruleEdit && !isNil(creationFormState.candidateRule?.id)) {
       options.onClick = () => (invalidSql ? setIsSqlErrorDialogVisible(true) : onUpdateValidationRule());
