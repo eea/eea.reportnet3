@@ -585,7 +585,9 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
             id={`${componentName}__update`}
             label={resourcesContext.messages['update']}
             onClick={() => {
-              const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence?.trim());
+              const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                creationFormState?.candidateRule?.sqlSentence?.trim()
+              );
 
               invalidSql ? setIsSqlErrorDialogVisible(true) : onUpdateValidationRule();
             }}
@@ -605,7 +607,9 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
             id={`${componentName}__create`}
             label={resourcesContext.messages['create']}
             onClick={() => {
-              const invalidSql = /\b(limit|offset)\s*\d*$/i.test(creationFormState?.candidateRule?.sqlSentence?.trim());
+              const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                creationFormState?.candidateRule?.sqlSentence?.trim()
+              );
 
               invalidSql ? setIsSqlErrorDialogVisible(true) : onCreateValidationRule();
             }}
