@@ -476,7 +476,7 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
                 id={`${componentName}__update`}
                 label={resourcesContext.messages['update']}
                 onClick={() => {
-                  const invalidSql = /\b(limit|offset)\s*\d*$/i.test(
+                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
                     creationFormState?.candidateRule?.sqlSentence?.trim()
                   );
 
@@ -496,7 +496,7 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
                 id={`${componentName}__create`}
                 label={resourcesContext.messages['create']}
                 onClick={() => {
-                  const invalidSql = /\b(limit|offset)\s*\d*$/i.test(
+                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
                     creationFormState?.candidateRule?.sqlSentence?.trim()
                   );
 
