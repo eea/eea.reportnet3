@@ -441,6 +441,9 @@ public final class LiteralConstants {
   /** The Constant QC_CODE: {@value}. */
   public static final String QC_CODE = "qc_code";
 
+  /** The Constant ID_RULE: {@value}. */
+  public static final String ID_RULE = "id_rule";
+
   /** The Constant PK_NOT_USED: {@value}. */
   public static final String PK_NOT_USED = "pkNotUsed";
 
