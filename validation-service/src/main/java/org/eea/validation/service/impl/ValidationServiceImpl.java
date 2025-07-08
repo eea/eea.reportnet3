@@ -920,7 +920,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
-    setRuleMessageDL(schema.getIdDataSetSchema(), errors);
+    //setRuleMessageDL(schema.getIdDataSetSchema(), errors);
     validations.setErrors(errors);
 
     validations.setTotalRecords((long) errors.size());
