@@ -452,9 +452,11 @@ export const PaMsWebformField = ({
               (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
               !isEmpty(field.referencedField?.masterConditionalFieldId)
             ) {
-              (field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
-                record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData)) &&
-                onFillField(field, option, emptyValue, isConditional);
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+                (record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData) &&
+                  record.elements.indexOf(field) > 0 &&
+                  record.elements.indexOf(changedConditionalFieldData) > 0 &&
+                  onFillField(field, option, emptyValue, isConditional));
             } else {
               onFillField(field, option, emptyValue, isConditional);
             }
@@ -498,9 +500,11 @@ export const PaMsWebformField = ({
               (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
               !isEmpty(field.referencedField?.masterConditionalFieldId)
             ) {
-              (field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
-                record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData)) &&
-                onFillField(field, option, emptyValue, isConditional);
+              field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+                (record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData) &&
+                  record.elements.indexOf(field) > 0 &&
+                  record.elements.indexOf(changedConditionalFieldData) > 0 &&
+                  onFillField(field, option, emptyValue, isConditional));
             } else {
               onFillField(field, option, emptyValue, isConditional);
             }
@@ -616,9 +620,11 @@ export const PaMsWebformField = ({
             (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
             !isEmpty(field.referencedField?.masterConditionalFieldId)
           ) {
-            (field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
-              record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData)) &&
-              onFillField(field, option, emptyValue, isConditional);
+            field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+              (record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData) &&
+                record.elements.indexOf(field) > 0 &&
+                record.elements.indexOf(changedConditionalFieldData) > 0 &&
+                onFillField(field, option, emptyValue, isConditional));
           } else {
             changedConditionalFieldData?.name === field?.dependency?.field &&
               onFillField(field, option, emptyValue, isConditional);

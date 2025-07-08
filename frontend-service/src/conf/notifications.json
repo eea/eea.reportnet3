@@ -42,6 +42,13 @@
           }
         },
         {
+          "key": "IMPORT_FILENAME_CONTAINS_NON_LATIN_CHARACTERS_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId", "filename", "nonLatinCharacters"]
+          }
+        },
+        {
           "key": "IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT",
           "navigateTo": {
             "section": "DATASET",

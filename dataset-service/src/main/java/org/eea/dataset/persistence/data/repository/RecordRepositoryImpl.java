@@ -2084,7 +2084,7 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
                 bw.write(",");
               }
               bw.write("\n");
-              bw.write(new String(buffer, StandardCharsets.UTF_8));
+              bw.write(new String(buffer, StandardCharsets.UTF_8).replace("\\\\", "\\"));
               if (recordCount==0) {
                 recordCount++;
               }

@@ -43,6 +43,8 @@ import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -105,6 +107,9 @@ public class DatasetControllerImpl implements DatasetController {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The dataset schema service. */
   @Autowired
@@ -2293,6 +2298,19 @@ public class DatasetControllerImpl implements DatasetController {
       String fileName = file.getOriginalFilename();
       fileName = StringUtils.isNotBlank(fileName) ? fileName.replace(",", "") : "";
 
+      if (!containsOnlyLatinCharacters(fileName)) {
+        LOG.info("Update attachment filename for dataflowId {} datasetId {} and fieldId {}. File is denied because filename contains non-Latin letters: {}", dataflowId, datasetId, idField, fileName);
+
+        EventType eventType = EventType.IMPORT_FILENAME_CONTAINS_NON_LATIN_CHARACTERS_ERROR_EVENT;
+        NotificationVO notificationVO = new NotificationVO();
+        notificationVO.setDataflowId(dataflowId);
+        notificationVO.setDatasetId(datasetId);
+        notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+        notificationVO.setFileName(fileName);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILENAME_CONTAINS_NON_LATIN_CHARACTERS);
+      }
 
       LOG.info("Updating attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
       Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
@@ -3030,6 +3048,21 @@ public class DatasetControllerImpl implements DatasetController {
       return null;
     }
     return datasetService.truncateDataset(datasetId);
+  }
+
+  private boolean containsOnlyLatinCharacters(String filename) {
+    if (filename == null) {
+      return false;
+    }
+
+    for (char c : filename.toCharArray()) {
+      Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
+      if (block != Character.UnicodeBlock.BASIC_LATIN) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**

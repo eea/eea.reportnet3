@@ -258,6 +258,9 @@ public final class EEAErrorMessage {
   /** The Constant TABLE_READ_ONLY: {@value}. */
   public static final String TABLE_READ_ONLY = "The table is marked as read only";
 
+  /** The Constant FILENAME_CONTAINS_NON_LATIN_CHARACTERS: {@value}. */
+  public static final String FILENAME_CONTAINS_NON_LATIN_CHARACTERS = "Filename contains non-Latin characters";
+
   /** The Constant FIELD_READ_ONLY: {@value}. */
   public static final String FIELD_READ_ONLY = "The field is marked as read only";
 
