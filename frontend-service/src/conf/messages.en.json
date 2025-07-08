@@ -846,6 +846,7 @@
     "importNamefileWarningEvent": "Some tables have not imported data: table and file name were different.",
     "importEmptyFilesWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: empty files were provided.",
     "importEmptyFilesErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all import files were empty.",
+    "importFilenameContainsNonLatinCharactersErrorEvent": "Cannot import file <strong title='{:fileName}'>{:fileName}</strong> because it contains non-Latin characters, which are not allowed:<strong title='{:nonLatinCharacters}'>{:nonLatinCharacters}</strong>.",
     "importFixedNumWithoutReplaceDataErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: all tables have fixed number of records and replace data option was not selected.",
     "importFixedNumWithoutReplaceDataWarningEvent": "Some tables have not imported data for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: some tables have fixed number of records and replace data option was not selected.",
     "importWrongHeadersErrorEvent": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: wrong headers.",

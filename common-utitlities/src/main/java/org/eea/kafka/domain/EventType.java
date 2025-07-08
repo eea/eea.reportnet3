@@ -58,6 +58,10 @@ public enum EventType {
   IMPORT_EMPTY_FILES_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_emptyFiles_error_event", true),
 
+  /** The import empty files error event. */
+  IMPORT_FILENAME_CONTAINS_NON_LATIN_CHARACTERS_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_filename_contains_non_latin_characters_error_event", true),
+
   /** The import to fixed number of records table without replace data error event. */
   IMPORT_FIXED_NUM_WITHOUT_REPLACE_DATA_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_fixedNumWithoutReplaceData_error_event", true),
