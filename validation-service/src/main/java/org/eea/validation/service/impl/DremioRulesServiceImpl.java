@@ -73,6 +73,7 @@ public class DremioRulesServiceImpl implements DremioRulesService {
         headerMap.put(FIELD_NAME, fieldName);
         headerMap.put(DATASET_ID, datasetId.toString());
         headerMap.put(QC_CODE, ruleVO.getShortCode());
+        headerMap.put(ID_RULE, ruleVO.getRuleId());
         return headerMap;
     }
 }
