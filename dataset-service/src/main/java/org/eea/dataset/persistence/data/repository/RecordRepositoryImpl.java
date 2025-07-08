@@ -1,5 +1,6 @@
 package org.eea.dataset.persistence.data.repository;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
@@ -998,33 +999,35 @@ public class RecordRepositoryImpl implements RecordExtendedQueriesRepository {
     recordMapper.setRecordSchemaVO(tableSchemaVO.getRecordSchema()).setDatasetSchemaId(datasetSchemaId).setTableSchemaId(tableSchemaVO.getIdTableSchema());
     List<RecordVO> recordVOS = dremioJdbcTemplate.query(totalRecords, recordMapper);
     spatialDataHandling.decodeSpatialData(recordVOS);
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.configure(JsonGenerator.Feature.ESCAPE_NON_ASCII, false);
     bw.write("{\"records\":[");
     for (int i = 0; i < recordVOS.size(); i++) {
-      bw.write("{\"fields\":[");
       RecordVO recordVO = recordVOS.get(i);
-      int fieldsSize = recordVO.getFields().size();
-      for (int j = 0; j < recordVO.getFields().size(); j++) {
-        FieldVO fieldVO = recordVO.getFields().get(j);
-        bw.write("{\"fieldName\":\"" + StringEscapeUtils.escapeJson(fieldVO.getName()) + "\",");
-        //A change has been made due to ticket #283535
-        bw.write("\"value\":\"" + StringEscapeUtils.escapeJson(fieldVO.getValue()) + "\",");
+      bw.write("{\"fields\":[");
 
-        bw.write("\"field_value_id\":\"" + fieldVO.getIdFieldSchema() + "\"");
-        if (j == fieldsSize - 1) {
-          bw.write("}");
-        } else {
-          bw.write("},");
-        }
+      int fieldsSize = recordVO.getFields().size();
+      for (int j = 0; j < fieldsSize; j++) {
+        FieldVO f = recordVO.getFields().get(j);
+
+        bw.write("{\"fieldName\":");
+        bw.write(mapper.writeValueAsString(f.getName()));
+
+        bw.write(",\"value\":");
+        bw.write(mapper.writeValueAsString(f.getValue()));
+
+        bw.write(",\"field_value_id\":\"");
+        bw.write(f.getIdFieldSchema());
+        bw.write("\"");
+
+        bw.write(j == fieldsSize - 1 ? "}" : "},");
       }
+
       bw.write("],");
       bw.write("\"id_table_schema\":\"" + tableSchemaVO.getIdTableSchema() + "\",");
       bw.write("\"id_record\":\"" + recordVO.getId() + "\",");
       bw.write("\"countryCode\":\"" + recordVO.getDataProviderCode() + "\"");
-      if (i == recordVOS.size() - 1) {
-        bw.write("}");
-      } else {
-        bw.write("},");
-      }
+      bw.write(i == recordVOS.size() - 1 ? "}" : "},");
     }
   }
 
