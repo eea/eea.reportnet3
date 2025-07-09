@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.utils.UtilityClass;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -2092,7 +2093,7 @@ public class DatasetControllerImpl implements DatasetController {
       String fileName = file.getOriginalFilename();
       fileName = StringUtils.isNotBlank(fileName) ? fileName.replace(",", "") : "";
 
-      if (!containsOnlyLatinCharacters(fileName)) {
+      if (!UtilityClass.containsOnlyLatinCharacters(fileName)) {
         LOG.info("Update attachment filename for dataflowId {} datasetId {} and fieldId {}. File is denied because filename contains non-Latin letters: {}", dataflowId, datasetId, idField, fileName);
 
         EventType eventType = EventType.IMPORT_FILENAME_CONTAINS_NON_LATIN_CHARACTERS_ERROR_EVENT;
@@ -2101,6 +2102,7 @@ public class DatasetControllerImpl implements DatasetController {
         notificationVO.setDatasetId(datasetId);
         notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
         notificationVO.setFileName(fileName);
+        notificationVO.setNonLatinCharacters(UtilityClass.extractNonLatinCharacters(fileName));
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
 
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILENAME_CONTAINS_NON_LATIN_CHARACTERS);
@@ -2833,21 +2835,6 @@ public class DatasetControllerImpl implements DatasetController {
       return null;
     }
     return datasetService.truncateDataset(datasetId);
-  }
-
-  private boolean containsOnlyLatinCharacters(String filename) {
-    if (filename == null) {
-      return false;
-    }
-
-    for (char c : filename.toCharArray()) {
-      Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
-      if (block != Character.UnicodeBlock.BASIC_LATIN) {
-        return false;
-      }
-    }
-
-    return true;
   }
 
   /**

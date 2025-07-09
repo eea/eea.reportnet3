@@ -24,11 +24,7 @@ public class ImportFilenameContainsNonLatinCharactersErrorEvent implements Notif
         Long datasetId = notificationVO.getDatasetId();
         String user = notificationVO.getUser();
         String filename = notificationVO.getFileName();
-        String nonLatinCharacters = filename.chars()
-                .mapToObj(c -> (char) c)
-                .filter(c -> Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN)
-                .map(c -> "\"" + c + "\"")
-                .reduce("", String::concat);
+        String nonLatinCharacters = notificationVO.getNonLatinCharacters();
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("dataflowId", dataflowId);
