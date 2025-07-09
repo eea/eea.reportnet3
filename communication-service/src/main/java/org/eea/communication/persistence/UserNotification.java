@@ -83,6 +83,10 @@ public class UserNotification {
   @Field(value = "fileName")
   private String fileName;
 
+  /** The file name. */
+  @Field(value = "nonLatinCharacters")
+  private String nonLatinCharacters;
+
   /** The short code. */
   @Field(value = "shortCode")
   private String shortCode;

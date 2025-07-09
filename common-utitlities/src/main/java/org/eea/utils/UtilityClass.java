@@ -66,6 +66,33 @@ public final class UtilityClass {
     }
   }
 
+  public static boolean containsOnlyLatinCharacters(String filename) {
+    if (filename == null) {
+      return false;
+    }
+
+    for (char c : filename.toCharArray()) {
+      Character.UnicodeBlock block = Character.UnicodeBlock.of(c);
+      if (block != Character.UnicodeBlock.BASIC_LATIN) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  public static String extractNonLatinCharacters(String input) {
+    if (input == null) {
+      return "";
+    }
+
+    return input.chars()
+            .mapToObj(c -> (char) c)
+            .filter(c -> Character.UnicodeBlock.of(c) != Character.UnicodeBlock.BASIC_LATIN)
+            .map(String::valueOf)
+            .collect(Collectors.joining(", "));
+  }
+
   /**
    * Delete the file after it's being downloaded
    * @param file The file
@@ -78,5 +105,4 @@ public final class UtilityClass {
       LOG.error("Failed to delete file {} after stream close. Message: {}", fileName, deleteEx.getMessage());
     }
   }
-
 }

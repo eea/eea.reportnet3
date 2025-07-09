@@ -46,6 +46,9 @@ public class UserNotificationContentVO {
   /** The file name. */
   private String fileName;
 
+  /** The file name. */
+  private String nonLatinCharacters;
+
   /** The custom content. */
   private Map<String, String> customContent;
 
