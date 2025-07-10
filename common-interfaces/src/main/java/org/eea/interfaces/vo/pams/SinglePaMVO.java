@@ -58,5 +58,11 @@ public class SinglePaMVO {
   /** The union policy. */
   private String unionPolicy;
 
+  /** The relevant provision. */
+  private List<String> relevantProvision;
+
+  /** The other relevant provision. */
+  private String otherRelevantProvision;
+
   private List<DimensionVO> dimensions;
 }

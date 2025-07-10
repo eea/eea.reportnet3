@@ -22,6 +22,7 @@ import { DatasetDeleteDataDialog } from 'views/_components/DatasetDeleteDataDial
 import { DatasetsInfo } from 'views/_components/DatasetsInfo';
 import { DatasetValidateDialog } from 'views/_components/DatasetValidateDialog';
 import { Dialog } from 'views/_components/Dialog';
+import { DownloadFile } from 'views/_components/DownloadFile';
 import { Dropdown } from 'views/_components/Dropdown';
 import { InputTextarea } from 'views/_components/InputTextarea';
 import { Integrations } from './_components/Integrations';
@@ -159,6 +160,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isDataUpdated: false,
     isDownloadingQCRules: false,
     isDownloadingValidations: false,
+    isDownloadingWebform: false,
     isDuplicatedToManageUnique: false,
     isExportTableSchemaDialogVisible: false,
     isHistoryDialogVisible: false,
@@ -171,6 +173,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     isLoadingFile: false,
     isManageUniqueConstraintDialogVisible: false,
     isRefreshHighlighted: false,
+    isShowWebformConfigurationDialogVisible: false,
     isTableCreated: false,
     isUniqueConstraintCreating: false,
     isUniqueConstraintsListDialogVisible: false,
@@ -682,6 +685,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   };
 
   const onCloseConfigureWebformModal = () => manageDialogs('isConfigureWebformDialogVisible', false);
+
+  const onCloseShowWebformConfigurationModal = () => manageDialogs('isShowWebformConfigurationDialogVisible', false);
 
   const onConfirmValidate = async () => {
     const action = 'DATASET_VALIDATE';
@@ -1440,6 +1445,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     designerDispatch({ type: 'SET_IS_DOWNLOADING_VALIDATIONS', payload: { isDownloadingValidations } });
   }
 
+  function setIsDownloadingWebform(isDownloadingWebform) {
+    designerDispatch({ type: 'SET_IS_DOWNLOADING_WEBFORM', payload: { isDownloadingWebform } });
+  }
+
   function setIsValidationsTabularView(isValidationsTabularView) {
     designerDispatch({ type: 'SET_IS_VALIDATIONS_TABULAR_VIEW', payload: { isValidationsTabularView } });
   }
@@ -1473,6 +1482,26 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         notificationContext.add({ type: 'DOWNLOAD_VALIDATIONS_ERROR' }, true);
       }
       setIsDownloadingValidations(false);
+    }
+  };
+
+  const onDownloadWebform = async () => {
+    setIsDownloadingWebform(true);
+
+    const webform = webformOptions.find(option => option.name === designerState.webform?.name);
+
+    try {
+      const { data } = await WebformService.download(webform.id);
+
+      if (!isNil(data)) {
+        DownloadFile(data, `${webform.name}.json`);
+      }
+
+      setIsDownloadingWebform(false);
+    } catch (error) {
+      setIsDownloadingWebform(false);
+      console.error('ManageWebforms - onDownload.', error);
+      notificationContext.add({ type: 'DOWNLOAD_WEBFORM_CONFIGURATION_ERROR' }, true);
     }
   };
 
@@ -1553,36 +1582,41 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     );
 
   const renderConfigureWebformFooter = (
-    <Fragment>
+    <div className={!isDataflowOpen && styles.configureWebformFooter}>
       <Button
-        className={`${
-          !isUndefined(designerState.selectedWebform) &&
-          designerState?.selectedWebform?.value !== designerState?.webform?.value &&
-          'p-button-animated-blink'
-        } ${styles.saveButton}`}
+        className="p-button-secondary p-button-animated-blink p-button-right-aligned"
         disabled={
-          isUndefined(designerState.selectedWebform) ||
-          designerState?.selectedWebform?.value === designerState?.webform?.value
+          designerState.isDownloadingWebform ||
+          isEmpty(designerState?.webform?.name) ||
+          (!isUndefined(designerState.selectedWebform) &&
+            designerState?.selectedWebform?.value !== designerState?.webform?.name)
         }
-        icon="check"
-        label={resourcesContext.messages['save']}
-        onClick={() => {
-          onUpdateWebform();
-          if (isNil(designerState?.selectedWebform?.value)) {
-            changeMode('design');
+        icon={designerState.isDownloadingWebform ? 'spinnerAnimate' : 'export'}
+        label={resourcesContext.messages['downloadWebform']}
+        onClick={onDownloadWebform}
+      />
+      {!isDataflowOpen && (
+        <Button
+          className={`${
+            !isUndefined(designerState.selectedWebform) &&
+            designerState?.selectedWebform?.value !== designerState?.webform?.value &&
+            'p-button-animated-blink'
+          } ${styles.saveButton}`}
+          disabled={
+            isUndefined(designerState.selectedWebform) ||
+            designerState?.selectedWebform?.value === designerState?.webform?.name
           }
-        }}
-      />
-      <Button
-        className="p-button-secondary p-button-right-aligned"
-        icon="cancel"
-        label={resourcesContext.messages['cancel']}
-        onClick={() => {
-          designerDispatch({ type: 'RESET_SELECTED_WEBFORM' });
-          onCloseConfigureWebformModal();
-        }}
-      />
-    </Fragment>
+          icon="check"
+          label={resourcesContext.messages['save']}
+          onClick={() => {
+            onUpdateWebform();
+            if (isNil(designerState?.selectedWebform?.value)) {
+              changeMode('design');
+            }
+          }}
+        />
+      )}
+    </div>
   );
 
   const renderUniqueConstraintsFooter = (
@@ -1824,17 +1858,28 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
                   </label>
                 </div>
               )}
-              <Button
-                className={`p-button-secondary ${
-                  !isDataflowOpen && !isDesignDatasetEditorRead && !designerState.referenceDataset
-                    ? 'p-button-animated-blink'
-                    : null
-                } datasetSchema-uniques-help-step`}
-                disabled={isDataflowOpen || isDesignDatasetEditorRead || designerState.referenceDataset}
-                icon="table"
-                label={resourcesContext.messages['configureWebform']}
-                onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
-              />
+              {!isDataflowOpen && (
+                <Button
+                  className={`p-button-secondary ${
+                    !isDesignDatasetEditorRead && !designerState.referenceDataset ? 'p-button-animated-blink' : null
+                  } datasetSchema-uniques-help-step`}
+                  disabled={isDesignDatasetEditorRead || designerState.referenceDataset}
+                  icon="table"
+                  label={resourcesContext.messages['configureWebform']}
+                  onClick={() => manageDialogs('isConfigureWebformDialogVisible', true)}
+                />
+              )}
+              {isDataflowOpen && (
+                <Button
+                  className={`p-button-secondary ${
+                    !isDesignDatasetEditorRead && !designerState.referenceDataset ? 'p-button-animated-blink' : null
+                  } datasetSchema-uniques-help-step`}
+                  disabled={!designerState.webform?.name || isDesignDatasetEditorRead || designerState.referenceDataset}
+                  icon="table"
+                  label={resourcesContext.messages['showWebformConfiguration']}
+                  onClick={() => manageDialogs('isShowWebformConfigurationDialogVisible', true)}
+                />
+              )}
               {designerState?.bigData && (
                 <Button
                   className={styles.openWebformButton}
@@ -2145,6 +2190,24 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             style={{ width: '30%' }}
             visible={designerState.isConfigureWebformDialogVisible}>
             {renderWebformOptionsContent()}
+          </Dialog>
+        )}
+
+        {designerState.isShowWebformConfigurationDialogVisible && (
+          <Dialog
+            footer={renderConfigureWebformFooter}
+            header={resourcesContext.messages['showWebformConfiguration']}
+            onHide={() => {
+              onCloseShowWebformConfigurationModal();
+            }}
+            style={{ width: '30%' }}
+            visible={designerState.isShowWebformConfigurationDialogVisible}>
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['webformName'], {
+                  webformName: designerState.webform?.name
+                })
+              }}></p>
           </Dialog>
         )}
 

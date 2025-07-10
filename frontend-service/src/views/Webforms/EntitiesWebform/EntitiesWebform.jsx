@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
@@ -54,6 +54,7 @@ export const EntitiesWebform = ({
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const [refreshTableTrigger, setRefreshTableTrigger] = useState(0);
 
   const [entitiesWebformState, entitiesWebformDispatch] = useReducer(entitiesWebformReducer, {
     data: [],
@@ -229,6 +230,7 @@ export const EntitiesWebform = ({
       onUpdateData();
       setIsAddingEntityRecord(false);
       setIsAddEntityIdDialogVisible(false);
+      setRefreshTableTrigger(prev => prev + 1);
     } catch (error) {
       if (error.response.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
@@ -248,6 +250,7 @@ export const EntitiesWebform = ({
       }
       setIsAddingEntityRecord(false);
       setIsAddEntityIdDialogVisible(false);
+      setRefreshTableTrigger(prev => prev + 1);
     }
   };
 
@@ -421,6 +424,7 @@ export const EntitiesWebform = ({
         bigData={bigData}
         dataflowId={dataflowId}
         datasetId={datasetId}
+        disableActionButtons={bigData && !isIcebergCreated}
         isAddingRootTableId={entitiesWebformState.isAddingEntityRecord}
         isIcebergCreated={isIcebergCreated}
         loading={isLoading}
@@ -429,6 +433,7 @@ export const EntitiesWebform = ({
         onSelectEditTable={onSelectEditTable}
         overview={overview}
         records={entitiesRecords}
+        refreshTrigger={refreshTableTrigger}
         rootPkFieldId={rootPkFieldId}
         rootTableId={rootTableId}
         rootTableName={rootTableName}

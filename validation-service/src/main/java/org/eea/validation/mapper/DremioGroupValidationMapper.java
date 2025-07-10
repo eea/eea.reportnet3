@@ -21,6 +21,7 @@ public class DremioGroupValidationMapper implements RowMapper<GroupValidationVO>
         groupValidationVO.setShortCode(resultSet.getString("shortCode"));
         groupValidationVO.setNameFieldSchema(resultSet.getString("fieldName"));
         groupValidationVO.setMessage(resultSet.getString("message"));
+        groupValidationVO.setIdRule(resultSet.getString("idRule"));
         return groupValidationVO;
     }
 }

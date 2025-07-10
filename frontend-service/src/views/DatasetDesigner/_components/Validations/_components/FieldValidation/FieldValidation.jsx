@@ -55,6 +55,7 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
 
   const [clickedFields, setClickedFields] = useState([]);
   const [expressionsErrors, setExpressionsErrors] = useState({});
+  const [isSqlErrorDialogVisible, setIsSqlErrorDialogVisible] = useState(false);
   const [isSubmitDisabled, setIsSubmitDisabled] = useState(false);
   const [showErrorOnExpressionTab, setShowErrorOnExpressionTab] = useState(false);
   const [showErrorOnInfoTab, setShowErrorOnInfoTab] = useState(true);
@@ -451,11 +452,12 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
   };
 
   const onSetSqlSentence = value => {
+    const replacedSemicolonValue = value.replace(/;/g, 'CHR(59)');
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
         key: 'sqlSentence',
-        value
+        value: replacedSemicolonValue
       }
     });
   };
@@ -474,7 +476,13 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__update`}
                 label={resourcesContext.messages['update']}
-                onClick={onUpdateValidationRule}
+                onClick={() => {
+                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                    creationFormState?.candidateRule?.sqlSentence?.trim()
+                  );
+
+                  invalidSql ? setIsSqlErrorDialogVisible(true) : onUpdateValidationRule();
+                }}
                 type="button"
               />
             </span>
@@ -488,7 +496,13 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
                 icon={isSubmitDisabled ? 'spinnerAnimate' : 'check'}
                 id={`${componentName}__create`}
                 label={resourcesContext.messages['create']}
-                onClick={onCreateValidationRule}
+                onClick={() => {
+                  const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                    creationFormState?.candidateRule?.sqlSentence?.trim()
+                  );
+
+                  invalidSql ? setIsSqlErrorDialogVisible(true) : onCreateValidationRule();
+                }}
                 type="button"
               />
             </span>
@@ -514,19 +528,31 @@ export const FieldValidation = ({ bigData, dataflowType, datasetId, tabs }) => {
 
   const dialogLayout = children =>
     validationContext.isVisible && (
-      <Dialog
-        className={styles.dialog}
-        footer={renderFieldQCsFooter}
-        header={
-          validationContext.ruleEdit
-            ? resourcesContext.messages['editFieldConstraint']
-            : resourcesContext.messages['createFieldConstraintTitle']
-        }
-        onHide={() => onHide()}
-        style={{ width: '975px' }}
-        visible={validationContext.isVisible}>
-        {children}
-      </Dialog>
+      <>
+        <Dialog
+          className={styles.dialog}
+          footer={renderFieldQCsFooter}
+          header={
+            validationContext.ruleEdit
+              ? resourcesContext.messages['editFieldConstraint']
+              : resourcesContext.messages['createFieldConstraintTitle']
+          }
+          onHide={() => onHide()}
+          style={{ width: '975px' }}
+          visible={validationContext.isVisible}>
+          {children}
+        </Dialog>
+        {isSqlErrorDialogVisible && (
+          <Dialog
+            className={styles.dialog}
+            header={resourcesContext.messages['sqlErrorDialogHeader']}
+            onHide={() => setIsSqlErrorDialogVisible(false)}
+            style={{ width: '600px' }}
+            visible={isSqlErrorDialogVisible}>
+            {resourcesContext.messages['sqlErrorMessage']}
+          </Dialog>
+        )}
+      </>
     );
 
   return dialogLayout(

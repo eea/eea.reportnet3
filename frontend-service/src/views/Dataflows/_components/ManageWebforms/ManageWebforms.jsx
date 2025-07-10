@@ -28,6 +28,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
   const resourcesContext = useContext(ResourcesContext);
   const notificationContext = useContext(NotificationContext);
+  const [filterValue, setFilterValue] = useState('');
 
   const [errors, setErrors] = useState({
     name: { hasErrors: false, message: '' },
@@ -110,6 +111,25 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const resetWebformConfiguration = () => setWebformConfiguration({ id: null, name: '', type: '', content: '' });
 
+  const filterData = () => {
+    if (!filterValue.trim()) {
+      return;
+    }
+
+    const filteredList = webformsList.filter(webform => {
+      const searchValue = filterValue.toLowerCase();
+      const nameMatch = webform.name.toLowerCase().includes(searchValue);
+      const typeMatch = typesKeyValues[webform.type].toLowerCase().includes(searchValue);
+      return nameMatch || typeMatch;
+    });
+
+    setWebformsConfigurationsList(filteredList);
+  };
+
+  const resetFilter = () => {
+    setFilterValue('');
+    getWebformList();
+  };
   const onDownload = async (id, name) => {
     setLoadingStatus('pending');
 
@@ -196,8 +216,8 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
   const getTableColumns = () => {
     const columns = [
-      { key: 'name', header: resourcesContext.messages['name'] },
-      { key: 'type', header: resourcesContext.messages['type'], template: getTypeTemplate },
+      { key: 'name', header: resourcesContext.messages['name'], sortable: true },
+      { key: 'type', header: resourcesContext.messages['type'], sortable: true, template: getTypeTemplate },
       {
         key: 'actions',
         header: resourcesContext.messages['actions'],
@@ -214,6 +234,7 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
         field={column.key}
         header={column.header}
         key={column.key}
+        sortable={column.sortable}
       />
     ));
   };
@@ -381,6 +402,38 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
     setErrors(prevErrors => ({ ...prevErrors, [field]: { hasErrors, message } }));
   };
+  const renderFilterControls = () => (
+    <div className={styles.filterControls}>
+      <InputText
+        className={styles.filterInput}
+        placeholder={resourcesContext.messages['search']}
+        value={filterValue}
+        onChange={e => {
+          setFilterValue(e.target.value);
+          if (e.target.value === '') {
+            getWebformList();
+          }
+        }}
+        onKeyPress={e => {
+          if (e.key === 'Enter') {
+            filterData();
+          }
+        }}
+      />
+      <Button
+        icon="search"
+        onClick={filterData}
+        label={resourcesContext.messages['search']}
+      />
+      <Button
+        icon="refresh"
+        className="p-button-secondary"
+        onClick={resetFilter}
+        label={resourcesContext.messages['reset']}
+        disabled={!filterValue}
+      />
+    </div>
+  );
 
   const renderTooltip = () => {
     if (isNil(webformConfiguration.id) && getIsDisabledConfirmBtn() && isEmpty(webformConfiguration.content)) {
@@ -428,14 +481,18 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
 
     if (isEmpty(webformsList)) {
       return (
-        <div className={styles.noDataContent}>
-          <span>{resourcesContext.messages['noData']}</span>
+        <div>
+          {renderFilterControls()}
+          <div className={styles.noDataContent}>
+            <span>{resourcesContext.messages['noData']}</span>
+          </div>
         </div>
       );
     }
 
     return (
       <div className={styles.dialogContent}>
+        {renderFilterControls()}
         <DataTable
           autoLayout
           hasDefaultCurrentPage

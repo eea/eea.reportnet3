@@ -1804,6 +1804,7 @@ export const Dataflow = () => {
                 ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
                 : dayjs(dataflowState?.data?.expirationDate).format(userContext.userProps.dateFormat)
             }
+            hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={isAdmin}
             isCustodian={isLeadDesigner}
             isDataflowOpen={isOpenStatus}
@@ -1833,6 +1834,7 @@ export const Dataflow = () => {
                 ? dayjs(dataflowState.dataCollectionDueDate).format(userContext.userProps.dateFormat)
                 : dayjs(dataflowState?.data?.expirationDate).format(userContext.userProps.dateFormat)
             }
+            hasRepresentatives={dataflowState.data.representatives.length !== 0}
             isAdmin={isAdmin}
             isCitizenScienceDataflow={dataflowState.dataflowType === 'CITIZEN_SCIENCE'}
             isCustodian={isLeadDesigner}

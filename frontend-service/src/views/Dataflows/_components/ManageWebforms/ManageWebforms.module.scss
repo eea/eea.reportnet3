@@ -2,7 +2,7 @@
 
 .dialogContent,
 .noDataContent {
-  height: 58vh;
+  height: 68vh;
 }
 
 .noDataContent {
@@ -69,4 +69,15 @@
 
 .errorMessage {
   padding-top: 3px;
+}
+
+.filterControls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+
+  .filterInput {
+    min-width: 200px;
+  }
 }

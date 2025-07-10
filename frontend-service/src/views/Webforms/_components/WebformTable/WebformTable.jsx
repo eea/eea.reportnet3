@@ -146,7 +146,11 @@ export const WebformTable = ({
         )[0];
 
         const primaryFkFieldId = filteredTable.records[0].fields.filter(
-          field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+          field =>
+            !isNil(field?.referencedField?.idPk) &&
+            (selectedTable.fieldSchemaId === rootPkFieldId
+              ? field?.referencedField?.idPk === rootPkFieldId
+              : field?.referencedField?.idPk !== rootPkFieldId)
         )[0]?.referencedField?.idPk;
 
         newEmptyRecord = parseNewEntitiesTableRecord(

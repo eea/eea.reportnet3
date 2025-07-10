@@ -96,6 +96,9 @@ public final class PaMConstants {
   /** The Constant UNION_POLICY: {@value}. */
   public static final String UNION_POLICY = "UnionPolicy";
 
+  /** The Constant RELEVANT_PROVISION: {@value}. */
+  public static final String RELEVANT_PROVISION = "RelevantProvision";
+
   /** The Constant UNION_POLICY_T1: {@value}. */
   public static final String UNION_POLICY_T1 = "UnionPolicyT1";
 
@@ -131,6 +134,9 @@ public final class PaMConstants {
 
   /** The Constant TYPE_POLICY_INSTRUMENT: {@value}. */
   public static final String TYPE_POLICY_INSTRUMENT = "TypePolicyInstrument";
+
+  /** The Constant OTHER_RELEVANT_PROVISION: {@value}. */
+  public static final String OTHER_RELEVANT_PROVISION = "OtherRelevantProvision";
 
   /** The Constant SEPARATOR: {@value}. */
   public static final String SEPARATOR = "; ";

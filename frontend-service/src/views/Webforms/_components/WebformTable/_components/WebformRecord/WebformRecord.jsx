@@ -278,6 +278,7 @@ export const WebformRecord = ({
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
+                      webformType={webformType}
                     />
                   }
                 </div>
@@ -320,10 +321,16 @@ export const WebformRecord = ({
           field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
         )[0]?.referencedField?.idPk;
 
-        const referencePkValue = record.elements.find(
+        let referencePkValue = record.elements.find(
           elementField =>
             elementField.fieldSchema === referencePkFieldId || elementField.fieldSchemaId === referencePkFieldId
         )?.value;
+
+        if (isEmpty(referencePkValue) && !isNil(referencePkFieldId)) {
+          referencePkValue = record.elements.find(
+            elementField => elementField.fieldSchema === rootPkFieldId || elementField.fieldSchemaId === rootPkFieldId
+          )?.value;
+        }
 
         const fkFields = element?.elements
           .filter(element => !isNil(element.referenceParentField))

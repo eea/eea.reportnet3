@@ -145,6 +145,10 @@ public class KafkaSenderUtils {
       String fileName =
               (notificationMap.get("fileName") != null) ? notificationMap.get("fileName").toString()
                       : null;
+      String nonLatinCharacters =
+              (notificationMap.get("nonLatinCharacters") != null) ? notificationMap.get("nonLatinCharacters").toString()
+                      : null;
+
       String shortCode =
               (notificationMap.get("shortCode") != null) ? notificationMap.get("shortCode").toString()
                       : null;
@@ -176,6 +180,7 @@ public class KafkaSenderUtils {
               : null);
       content.setTableSchemaName(tableSchemaName);
       content.setFileName(fileName);
+      content.setNonLatinCharacters(nonLatinCharacters);
       content.setShortCode(shortCode);
       content.setInvalidRules(invalidRules);
       content.setDisabledRules(disabledRules);

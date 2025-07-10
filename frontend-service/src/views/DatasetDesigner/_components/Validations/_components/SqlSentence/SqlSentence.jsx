@@ -28,6 +28,7 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
   const [columns, setColumns] = useState();
   const [hasValidationError, setHasValidationError] = useState(false);
   const [isEvaluateSqlSentenceLoading, setIsEvaluateSqlSentenceLoading] = useState(false);
+  const [isSqlErrorDialogVisible, setIsSqlErrorDialogVisible] = useState(false);
   const [isSqlErrorVisible, setIsSqlErrorVisible] = useState(false);
   const [isValidatingQuery, setIsValidatingQuery] = useState(false);
   const [isVisibleInfoDialog, setIsVisibleInfoDialog] = useState(false);
@@ -250,7 +251,13 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
               }
               icon={isValidatingQuery ? 'spinnerAnimate' : 'play'}
               label={resourcesContext.messages['runSql']}
-              onClick={runSqlSentence}
+              onClick={() => {
+                const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                  creationFormState?.candidateRule?.sqlSentence?.trim()
+                );
+
+                invalidSql ? setIsSqlErrorDialogVisible(true) : runSqlSentence();
+              }}
             />
             <Button
               className={`${styles.validateButton} p-button-rounded p-button-secondary-transparent`}
@@ -261,7 +268,13 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
               icon="clock"
               iconClasses={styles.validateSqlSentenceIcon}
               label={resourcesContext.messages['evaluateSql']}
-              onClick={onEvaluateSqlSentence}
+              onClick={() => {
+                const invalidSql = /\b(limit|offset)\s*\d*$|--.*$/i.test(
+                  creationFormState?.candidateRule?.sqlSentence?.trim()
+                );
+
+                invalidSql ? setIsSqlErrorDialogVisible(true) : onEvaluateSqlSentence();
+              }}
             />
             {renderSqlSentenceCost()}
           </h3>
@@ -302,6 +315,10 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
           />
           <p
             className={styles.levelHelp}
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSemicolonReplacementNote'] }}
+          />
+          <p
+            className={styles.levelHelp}
             dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialTypesNote'] }}
           />
           <p
@@ -314,6 +331,17 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
               )
             }}
           />
+        </Dialog>
+      )}
+
+      {isSqlErrorDialogVisible && (
+        <Dialog
+          className={styles.dialog}
+          header={resourcesContext.messages['sqlErrorDialogHeader']}
+          onHide={() => setIsSqlErrorDialogVisible(false)}
+          style={{ width: '600px' }}
+          visible={isSqlErrorDialogVisible}>
+          {resourcesContext.messages['sqlErrorMessage']}
         </Dialog>
       )}
 

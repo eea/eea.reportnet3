@@ -50,6 +50,9 @@ public class NotificationVO implements Serializable {
   /** The file name. */
   private String fileName;
 
+  /** The non latin characters. */
+  private String nonLatinCharacters;
+
   /** The error. */
   private String error;
 

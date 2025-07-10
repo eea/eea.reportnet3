@@ -115,6 +115,8 @@ export const WebformView = ({
           'implementationperiodcomment'
         ]);
       case 'projectionscenarios':
+      case 'relevantprovision':
+      case 'otherrelevantprovision':
       case 'typepolicyinstrument':
       case 'unionpolicylist':
         return tableFieldRender(field.name, []);
