@@ -273,7 +273,7 @@ public interface ValidationService {
    * @param schema The schema
    * @param errors The errors list
    */
-  void setRuleMessageDL(DataSetSchemaVO schema , List<GroupValidationVO> errors);
+  void setRuleMessageDL(String schemaId, List<GroupValidationVO> errors);
   /**
    * Gets the number of records in a specific table (citus)
    * @param datasetId
