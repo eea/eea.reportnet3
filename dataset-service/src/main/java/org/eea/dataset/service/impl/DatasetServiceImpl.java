@@ -1780,7 +1780,7 @@ public class DatasetServiceImpl implements DatasetService {
         if (!attachments.isEmpty()) {
           attachmentRepository.saveAll(attachments);
         }
-        fileTreatmentHelper.updateGeometry(targetDataset.getId(), datasetSchema);
+        fileTreatmentHelper.updateGeometryV2(targetDataset.getId(), datasetSchema);
       }
     }
   }
