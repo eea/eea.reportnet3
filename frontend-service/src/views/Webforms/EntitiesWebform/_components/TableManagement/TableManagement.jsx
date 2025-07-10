@@ -43,6 +43,7 @@ export const TableManagement = ({
   onRefresh,
   onSelectEditTable,
   overview,
+  refreshTrigger,
   rootPkFieldId,
   rootTableId,
   rootTableName,
@@ -108,6 +109,7 @@ export const TableManagement = ({
   }, [
     records,
     fetchFilter,
+    refreshTrigger,
     sort.sortField,
     sort.sortOrder,
     tableManagementState.firstPageRecord,
