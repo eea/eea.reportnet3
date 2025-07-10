@@ -1588,6 +1588,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         disabled={
           designerState.isDownloadingWebform ||
           isEmpty(designerState?.webform?.name) ||
+          isUndefined(webformOptions.find(option => option.name === designerState.webform?.name)) ||
           (!isUndefined(designerState.selectedWebform) &&
             designerState?.selectedWebform?.value !== designerState?.webform?.name)
         }
