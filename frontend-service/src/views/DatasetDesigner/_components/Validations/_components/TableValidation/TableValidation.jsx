@@ -550,11 +550,12 @@ export const TableValidation = ({ bigData, dataflowType, datasetId, datasetSchem
   };
 
   const onSetSqlSentence = value => {
+    const replacedSemicolonValue = value.replace(/;/g, 'CHR(59)');
     creationFormDispatch({
       type: 'SET_FORM_FIELD',
       payload: {
         key: 'sqlSentence',
-        value
+        value: replacedSemicolonValue
       }
     });
   };

@@ -1500,6 +1500,7 @@
     "sqlSentenceHelpTable": "<p>SELECT * FROM <strong>tableName</strong></p><p>SELECT * FROM <strong>table1</strong> <br />&nbsp;&nbsp&nbsp;&nbsp;JOIN <strong>table2</strong> ON <strong>table2.fieldName</strong> = <strong>table1.fieldName</strong></p>",
     "sqlSentenceInfoTooltip": "Click to show detailed help info",
     "sqlSentenceOrganizationCodeNote": "<i>Note: You can include the keyword {%R3_ORGANIZATION_CODE%} to use the organization code in the SQL sentence.</i>",
+    "sqlSentenceSemicolonReplacementNote": "Note: Semicolons <strong>( ; )</strong> are automatically replaced by <strong>CHR(59)</strong>.",
     "sqlSentenceSpatialNote": "<i>Note: Spatial QC functions must contain <strong>public.</strong> before the function:</i><br />&nbsp;&nbsp&nbsp;&nbsp;SELECT * FROM <strong>tableName</strong> WHERE public.ST_Distance (field1, field2) > X ",
     "sqlSentenceSpatialTypesNote": "<i>Note: You can see the different GIS operations with the following <a href='https://postgis.net/docs/reference.html#Spatial_Relationships' target='_blank'>link</a></i>",
     "sqlSentenceValidationDialogTitle": "SQL sentence validation",

@@ -315,6 +315,10 @@ export const SqlSentence = ({ bigData, creationFormState, dataflowType, datasetI
           />
           <p
             className={styles.levelHelp}
+            dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSemicolonReplacementNote'] }}
+          />
+          <p
+            className={styles.levelHelp}
             dangerouslySetInnerHTML={{ __html: resourcesContext.messages['sqlSentenceSpatialTypesNote'] }}
           />
           <p
