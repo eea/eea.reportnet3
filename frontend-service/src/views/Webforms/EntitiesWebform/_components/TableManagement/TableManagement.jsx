@@ -36,6 +36,7 @@ export const TableManagement = ({
   bigData,
   dataflowId,
   datasetId,
+  refreshTrigger,
   isAddingRootTableId = false,
   isIcebergCreated,
   loading,
@@ -107,6 +108,7 @@ export const TableManagement = ({
   }, [
     records,
     fetchFilter,
+    refreshTrigger,
     sort.sortField,
     sort.sortOrder,
     tableManagementState.firstPageRecord,
