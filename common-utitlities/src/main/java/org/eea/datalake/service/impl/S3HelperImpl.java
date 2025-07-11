@@ -479,7 +479,7 @@ public class S3HelperImpl implements S3Helper {
     }
 
     @Override
-    public void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
+    public File downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter) {
         DirectoryDownload directoryDownload;
         try (S3TransferManager transferManager = S3TransferManager.builder()
             .s3Client(s3AsyncClient)
@@ -491,6 +491,7 @@ public class S3HelperImpl implements S3Helper {
                 .build());
             CompletedDirectoryDownload completedDirectoryDownload = directoryDownload.completionFuture().join();
             completedDirectoryDownload.failedTransfers().forEach(failedFileDownload -> LOG.error(failedFileDownload.exception().getMessage()));
+            return new File(localPath);
         } catch (Exception e) {
             LOG.error("Error while trying to download file from S3 to local NFS", e);
             throw new RuntimeException(e);

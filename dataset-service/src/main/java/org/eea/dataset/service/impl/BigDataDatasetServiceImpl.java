@@ -2219,9 +2219,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             }
             DownloadFilter filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName);
-            s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
+            File filePath = s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
 
-            zipFolder(jobId, localPath);
+            if (filePath.exists()) {
+                zipFolder(jobId, localPath);
+            }
             finishJob(datasetId, dataflowId, jobId, user, processUUID);
         }
         catch (Exception e) {
@@ -2315,7 +2317,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             ZipUtils.zipFolder(unZippedFile, zippedFile);
             FileUtils.deleteDirectory(unZippedFile);
         } catch (Exception e) {
-            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath);
+            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath, e);
             throw e;
         }
     }
