@@ -88,6 +88,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -2223,6 +2224,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             if (filePath.exists()) {
                 zipFolder(jobId, localPath);
+            } else {
+                LOG.warn("Creating an empty zip file because path:  {} does not exist", localPath);
+                // Create an empty ZIP file
+                File emptyZip = new File(localPath + ".zip");
+                try (FileOutputStream fos = new FileOutputStream(emptyZip);
+                     ZipOutputStream zos = new ZipOutputStream(fos)) {
+                }
             }
             finishJob(datasetId, dataflowId, jobId, user, processUUID);
         }
