@@ -208,7 +208,7 @@ export const WebformRecord = ({
           return (
             <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
               {element.elementsRecords
-                .filter(record => elements.some(el => el.recordId === record.recordId))
+                .filter(elementsRecord => elementsRecord.recordId === record.recordId)
                 .map(record => renderElements(record.elements, true))}
             </div>
           );
