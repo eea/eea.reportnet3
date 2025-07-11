@@ -514,7 +514,7 @@ public final class LiteralConstants {
   /**
    * The dataset prefix for export
    */
-  public static final String DATASET_PREFIX_FOR_EXPORT = "/dataset-";
+  public static final String DATASET_PREFIX_FOR_EXPORT = "dataset-";
 
   public static final String EXPORT_PARQUET = "exportParquet";
 

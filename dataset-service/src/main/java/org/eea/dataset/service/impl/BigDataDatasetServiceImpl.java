@@ -2202,6 +2202,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) {
         try {
+            String folderPathStr =  exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId;
+            File folderPath = new File(folderPathStr);
+
+            createLocalPathIfNotExists(jobId, folderPath);
+
             String localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
@@ -2221,6 +2226,23 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         catch (Exception e) {
             exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    /**
+     * Ensure the folder path exists
+     * @param jobId The job id
+     * @param folderPath The folder path
+     *
+     * @throws IOException The exception
+     */
+    private void createLocalPathIfNotExists(Long jobId, File folderPath) throws IOException {
+        if (!folderPath.exists()) {
+            LOG.info("Folder {} does not exist. Creating it.", folderPath);
+            if (!folderPath.mkdirs()) {
+                LOG.error("Failed to create the folder for jobId {} at {}", jobId, folderPath);
+                throw new IOException("Failed to create directory: " + folderPath);
+            }
         }
     }
 
