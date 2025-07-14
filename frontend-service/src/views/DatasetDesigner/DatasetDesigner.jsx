@@ -1884,12 +1884,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               {designerState?.bigData && (
                 <Button
                   className={styles.openWebformButton}
-                  disabled={
-                    (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
-                    isDataflowOpen ||
-                    isLoadingIceberg ||
-                    noEditableCheck
-                  }
+                  // disabled={
+                  //   (isAdmin && (!isCustodian || !isDataflowCustodian)) ||
+                  //   isDataflowOpen ||
+                  //   isLoadingIceberg ||
+                  //   noEditableCheck
+                  // }
                   helpClassName={!isIcebergCreated ? 'p-button-reverse' : 'p-button-copy'}
                   icon={!isIcebergCreated ? 'lock' : 'unlock'}
                   isLoading={isLoadingIceberg}

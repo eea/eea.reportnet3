@@ -66,6 +66,7 @@ export const FieldDesigner = ({
   isDataflowOpen,
   isDesignDatasetEditorRead,
   isLoading = false,
+  isIcebergCreated,
   isReferenceDataset,
   markedForDeletion,
   onBulkCheck,
@@ -931,6 +932,7 @@ export const FieldDesigner = ({
               (hasPK && (!fieldDesignerState.fieldPKValue || fieldDesignerState.fieldPKReferencedValue)) ||
               isDataflowOpen ||
               isDesignDatasetEditorRead ||
+              isIcebergCreated ||
               isLoading
             }
             id={`${fieldId}_check_pk`}
@@ -959,7 +961,11 @@ export const FieldDesigner = ({
               isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled} `}
             disabled={
-              Boolean(fieldDesignerState.fieldPKValue) || isDataflowOpen || isDesignDatasetEditorRead || isLoading
+              Boolean(fieldDesignerState.fieldPKValue) ||
+              isDataflowOpen ||
+              isDesignDatasetEditorRead ||
+              isIcebergCreated ||
+              isLoading
             }
             id={`${fieldId}_check_required`}
             inputId={`${fieldId}_check_required`}
@@ -983,7 +989,7 @@ export const FieldDesigner = ({
             className={`datasetSchema-readOnly-help-step ${
               isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             } ${isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled}`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || isLoading}
             id={`${fieldId}_check_readOnly`}
             inputId={`${fieldId}_check_readOnly`}
             label="Default"
@@ -1012,7 +1018,7 @@ export const FieldDesigner = ({
               className={`${styles.codelistButton} p-button-secondary-transparent ${
                 isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               }`}
-              disabled={isDataflowOpen || isDesignDatasetEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || isLoading}
               label={
                 !isUndefined(fieldDesignerState.codelistItems) && !isEmpty(fieldDesignerState.codelistItems)
                   ? `${fieldDesignerState.codelistItems.join('; ')}`
@@ -1090,7 +1096,7 @@ export const FieldDesigner = ({
               className={`${styles.codelistButton} p-button-secondary-transparent ${
                 isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               }`}
-              disabled={isDataflowOpen || isDesignDatasetEditorRead}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || isLoading}
               label={`${resourcesContext.messages['validExtensions']} ${
                 !isUndefined(fieldDesignerState.fieldFileProperties.validExtensions) &&
                 !isEmpty(fieldDesignerState.fieldFileProperties.validExtensions)
@@ -1129,7 +1135,7 @@ export const FieldDesigner = ({
                 className={`${styles.button} ${styles.deleteButton} ${
                   fieldPKReferenced ? styles.disabledDeleteButton : ''
                 } ${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
-                  isDataflowOpen || isDesignDatasetEditorRead ? styles.linkDisabled : ''
+                  isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated ? styles.linkDisabled : ''
                 }`}
                 draggable={true}
                 href="#"
@@ -1160,7 +1166,9 @@ export const FieldDesigner = ({
                 className={`${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive} ${
                   isDataflowOpen && isDesignDatasetEditorRead && styles.checkboxDisabled
                 }`}
-                disabled={fieldPKReferenced || isDataflowOpen || isDesignDatasetEditorRead || isLoading}
+                disabled={
+                  fieldPKReferenced || isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || isLoading
+                }
                 id={`${fieldDesignerState.fieldValue}_mark_to_delete`}
                 inputId={`${fieldDesignerState.fieldValue}_mark_to_delete`}
                 onChange={e => {
@@ -1219,7 +1227,7 @@ export const FieldDesigner = ({
         className={styles.moveArrows}
         icon={AwesomeIcons(icon)}
         onClick={() => onMoveFieldUpDown(order)}
-        style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+        style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated ? 0.5 : 1 }}
       />
     );
 
@@ -1231,7 +1239,7 @@ export const FieldDesigner = ({
             aria-label={resourcesContext.messages['moveField']}
             className={styles.dragAndDropIcon}
             icon={AwesomeIcons('move')}
-            style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead ? 0.5 : 1 }}
+            style={{ opacity: isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated ? 0.5 : 1 }}
           />
           {renderArrows('arrowUp', -1, 'moveUp')}
           {renderArrows('arrowDown', 2, 'moveDown')}
@@ -1259,7 +1267,9 @@ export const FieldDesigner = ({
             <div
               className={`${styles.button} ${styles.duplicateButton} ${
                 isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
-              } ${isDataflowOpen || isLoading || isDesignDatasetEditorRead ? styles.linkDisabled : ''}`}
+              } ${
+                isDataflowOpen || isLoading || isDesignDatasetEditorRead || isIcebergCreated ? styles.linkDisabled : ''
+              }`}
               data-for={duplicateButtonTooltipName}
               data-tip
               href="#"
@@ -1306,7 +1316,7 @@ export const FieldDesigner = ({
             className={`${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
               isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             }`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || isLoading}
             id={fieldName !== '' ? fieldName : 'newField'}
             maxLength={60}
             name={resourcesContext.messages['newFieldPlaceHolder']}
@@ -1348,7 +1358,7 @@ export const FieldDesigner = ({
             autoFocus={false}
             className={`${isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive}`}
             collapsedHeight={33}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || isLoading}
             expandableOnClick={true}
             id={`${fieldName}_description`}
             key={fieldId}
@@ -1382,7 +1392,7 @@ export const FieldDesigner = ({
             className={`${styles.dropdownFieldType} ${isCodelistOrLink ? styles.withCodeListOrLink : ''} ${
               isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
             }`}
-            disabled={isDataflowOpen || isDesignDatasetEditorRead || isLoading}
+            disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated || isLoading}
             inputId={`${fieldName}_fieldType`}
             itemTemplate={fieldTypeTemplate}
             name={resourcesContext.messages['newFieldTypePlaceHolder']}
@@ -1467,7 +1477,8 @@ export const FieldDesigner = ({
                     fieldDesignerState.fieldTypeValue.value.toLowerCase()
                   )) ||
                 isDesignDatasetEditorRead ||
-                (isDataflowOpen && isReferenceDataset)
+                (isDataflowOpen && isReferenceDataset) ||
+                isIcebergCreated
               }
               icon="horizontalSliders"
               label={resourcesContext.messages['createFieldQC']}
@@ -1565,6 +1576,9 @@ export const FieldDesigner = ({
     if (isDesignDatasetEditorRead) {
       return resourcesContext.messages['disabledEditorRead'];
     }
+    if (isIcebergCreated) {
+      return resourcesContext.messages['disableEditingBeforeSchemaChange'];
+    }
   };
 
   const renderTooltipLink = () => {
@@ -1595,7 +1609,7 @@ export const FieldDesigner = ({
         className={`${styles.draggableFieldDiv} ${isDragging ? styles.disablePointerEvent : ''} ${
           isDragging && styles.fieldSeparatorDragging
         } fieldRow datasetSchema-fieldDesigner-help-step`}
-        draggable={isDataflowOpen || isDesignDatasetEditorRead ? false : !addField}
+        draggable={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated ? false : !addField}
         onDragEnd={onFieldDragEnd}
         onDragEnter={onFieldDragEnter}
         onDragLeave={onFieldDragLeave}
