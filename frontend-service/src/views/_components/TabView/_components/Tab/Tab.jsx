@@ -37,6 +37,7 @@ export const Tab = ({
   checkEditingTabs,
   className,
   closeIcon,
+  deleteTooltip,
   description = '',
   designMode = false,
   divScrollTabsRef,
@@ -50,6 +51,7 @@ export const Tab = ({
   id,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isIcebergCreated,
   index,
   initialTabIndexDrag,
   isNavigationHidden,
@@ -402,7 +404,7 @@ export const Tab = ({
   };
 
   const onTabDoubleClick = () => {
-    if (editable) {
+    if (editable && !isIcebergCreated) {
       if (!isUndefined(onTabEditingHeader)) {
         setEditingHeader(true);
         onTabEditingHeader(true);
@@ -469,6 +471,35 @@ export const Tab = ({
         </ReactTooltip>
       );
     }
+  };
+
+  const renderIcebergTooltip = () => {
+    return (
+      <div
+        className={styles.cancelIconWrapper}
+        data-for={`iceberg-tab-tooltip-${tableSchemaId}`}
+        data-tip
+        style={{
+          position: 'absolute',
+          top: '33%',
+          right: '6px'
+        }}>
+        <Icon
+          icon="cancel"
+          style={{
+            fontSize: '1rem',
+            opacity: '0.7'
+          }}
+        />
+        <ReactTooltip
+          className={styles.tabEditTooltip}
+          effect="solid"
+          id={`iceberg-tab-tooltip-${tableSchemaId}`}
+          place="left">
+          {resourcesContext.messages['disableEditingBeforeSchemaChange']}
+        </ReactTooltip>
+      </div>
+    );
   };
 
   const renderTableInfo = () => {
@@ -699,23 +730,25 @@ export const Tab = ({
               uniqueIdentifier={uniqueId('table_more_info_')}
             />
           )}
-          {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
-            <div
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isUndefined(checkEditingTabs)) {
-                  if (!checkEditingTabs()) {
-                    if (!isUndefined(onTabDeleteClick)) {
-                      onTabDeleteClick(tableSchemaId);
+          {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab && !newTab ? (
+            deleteTooltip ? null : (
+              <div
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!isUndefined(checkEditingTabs)) {
+                    if (!checkEditingTabs()) {
+                      if (!isUndefined(onTabDeleteClick)) {
+                        onTabDeleteClick(tableSchemaId);
+                      }
                     }
                   }
-                }
-              }}
-              onMouseOut={() => setIconToShow('cancel')}
-              onMouseOver={() => setIconToShow('errorCircle')}>
-              {renderRightIcon()}
-            </div>
+                }}
+                onMouseOut={() => setIconToShow('cancel')}
+                onMouseOver={() => setIconToShow('errorCircle')}>
+                {renderRightIcon()}
+              </div>
+            )
           ) : null}
         </a>
       </li>
