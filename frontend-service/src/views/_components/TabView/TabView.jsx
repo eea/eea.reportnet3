@@ -30,9 +30,7 @@ export const TabView = ({
   maxLength,
   name,
   initialTabIndexDrag,
-  isAdmin,
-  isCustodian,
-  isDataflowCustodian,
+  isIcebergCreated,
   isDatasetReleased,
   isErrorDialogVisible,
   isDataflowOpen,
@@ -216,6 +214,11 @@ export const TabView = ({
     );
     const id = `${idx}_header_${index}`;
     const ariaControls = `${idx}_content_${index}`;
+
+    const tableHasIceberg = designMode && isIcebergCreated;
+    const deleteTooltip = tableHasIceberg
+      ? resourcesContext.messages['disableEditingBeforeSchemaChange']
+      : undefined;
     return (
       !(isDataflowOpen && isDesignDatasetEditorRead && tab.props.addTab) && (
         <Tab
@@ -226,6 +229,7 @@ export const TabView = ({
           checkEditingTabs={checkEditingTabs}
           children={tab.props.children}
           className={classNamed}
+          deleteTooltip={deleteTooltip}
           description={tab.props.description}
           designMode={designMode}
           disabled={tab.props.disabled}
@@ -241,6 +245,7 @@ export const TabView = ({
           initialTabIndexDrag={initialTabIndexDrag}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
+          isIcebergCreated={isIcebergCreated}
           isNavigationHidden={isNavigationHidden}
           key={id}
           leftIcon={tab.props.leftIcon}
@@ -251,7 +256,7 @@ export const TabView = ({
           numberOfFields={tab.props.numberOfFields}
           onTabAddCancel={onTabAddCancel}
           onTabBlur={onTabBlur}
-          onTabDeleteClick={onTabDeleteClicked}
+          onTabDeleteClick={!tableHasIceberg ? onTabDeleteClicked : undefined}
           onTabDragAndDrop={onTabDragAndDrop}
           onTabDragAndDropStart={onTabDragAndDropStart}
           onTabEditingHeader={onTabEditingHeader}
