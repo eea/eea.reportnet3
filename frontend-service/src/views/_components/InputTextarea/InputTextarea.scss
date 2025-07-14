@@ -4,3 +4,8 @@
   overflow:auto!important;
   max-height:1200px;
 }
+
+.p-inputtextarea[ondblclick]:not(.p-disabled):not(:focus):hover {
+  cursor: pointer;
+  border-bottom: 2px dashed var(--primary-color-light);
+}
