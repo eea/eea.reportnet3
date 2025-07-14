@@ -224,7 +224,6 @@ export class InputTextarea extends Component {
         (this.props.value != null && this.props.value.toString().length > 0) ||
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0),
       'p-inputtextarea-resizable': this.props.autoResize,
-      'p-inputtextarea-expanded': this.state.expanded,
       'p-disabled p-filled':
         (this.props.disabled && this.props.value != null && this.props.value.toString().length > 0) ||
         (this.props.defaultValue != null && this.props.defaultValue.toString().length > 0)
