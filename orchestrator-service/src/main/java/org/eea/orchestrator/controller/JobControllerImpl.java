@@ -314,6 +314,8 @@ public class JobControllerImpl implements JobController {
         parameters.put("fmeCallback", false);
         parameters.put("filePathInS3", filePathInS3);
         parameters.put("numOfRestarts", 0);
+        String userId = ((Map<String, String>) SecurityContextHolder.getContext().getAuthentication().getDetails()).get(AuthenticationDetails.USER_ID);
+        parameters.put("userId", userId);
         JobStatusEnum statusToInsert = JobStatusEnum.IN_PROGRESS;
         if(jobStatus != null){
             statusToInsert = jobStatus;
@@ -690,7 +692,7 @@ public class JobControllerImpl implements JobController {
     public void updateJobInfo(@PathVariable("jobId") Long jobId,  @RequestParam(value = "jobInfo") JobInfoEnum jobInfo,
                               @RequestParam(value = "lineNumber", required = false) Integer lineNumber){
         try {
-            jobService.updateJobInfo(jobId, jobInfo, lineNumber);
+            jobService.updateJobInfo(jobId, jobInfo, lineNumber, true);
         } catch (Exception e) {
             LOG.error("Error while updating job info for jobId {} and jobInfo {}", jobId, jobInfo.getValue(lineNumber), e);
             throw e;

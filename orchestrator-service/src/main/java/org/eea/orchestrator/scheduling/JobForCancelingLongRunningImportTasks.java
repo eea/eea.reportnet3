@@ -105,7 +105,7 @@ public class JobForCancelingLongRunningImportTasks {
                 Long durationOfJob = new Timestamp(System.currentTimeMillis()).getTime() - job.getDateStatusChanged().getTime();
                 if(durationOfJob > maxTimeForQueuedImportJob){
                     LOG.info("Canceling stuck QUEUED import job with jobId {}", job.getId());
-                    jobService.updateJobInfo(job.getId(), JobInfoEnum.IMPORT_JOB_FAILED_STUCK_QUEUED, null);
+                    jobService.updateJobInfo(job.getId(), JobInfoEnum.IMPORT_JOB_FAILED_STUCK_QUEUED, null, false);
                     jobService.updateJobStatus(job.getId(), JobStatusEnum.FAILED);
                 }
             }

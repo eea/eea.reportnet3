@@ -536,7 +536,7 @@ public class JobServiceImpl implements JobService {
             }
         }
         if(jobInfo != null) {
-            updateJobInfo(jobId, jobInfo, null);
+            updateJobInfo(jobId, jobInfo, null, false);
         }
         updateJobStatus(jobId, jobStatus);
         LOG.info("Updated job {} to status CANCELED_BY_ADMIN", jobId);
@@ -569,13 +569,15 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber){
+    public void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber, Boolean updateJobHistory){
         String jobInfoStr = null;
         if(jobInfo != null) {
             jobInfoStr = jobInfo.getValue(lineNumber);
         }
         jobRepository.updateJobInfo(jobId, jobInfoStr);
-        jobHistoryService.updateJobInfoOfLastHistoryEntry(jobId, jobInfo, lineNumber);
+        if (BooleanUtils.isTrue(updateJobHistory)) {
+            jobHistoryService.updateJobInfoOfLastHistoryEntry(jobId, jobInfo, lineNumber);
+        }
     }
 
     private void removeLocksAndSendNotification(JobVO jobVO, Map<String, Object> value, String user) throws EEAException {
@@ -706,7 +708,7 @@ public class JobServiceImpl implements JobService {
                         if (filePathInS3 != null) {
                             LOG.info("Restarting import jobId {} for big data dataflow with replace data true", jobId);
                             updateNumOfRestartsJobParameter(jobId);
-                            updateJobInfo(jobId, null, null);
+                            updateJobInfo(jobId, null, null, false);
                             dataSetControllerZuul.importBigFileDataPrivate(job.getDatasetId(), job.getDataflowId(), job.getProviderId(), tableSchemaId, null, replaceData, integrationId, delimiter, jobId, null);
                             jobRestarted = true;
                         } else {
