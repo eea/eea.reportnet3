@@ -365,7 +365,7 @@ export const WebformRecord = ({
                     )}
                   </h3>
 
-                  {element.multipleRecords && (
+                  {(element.multipleRecords || (!element.multipleRecords && element.elementsRecords.length === 0)) && (
                     <Button
                       disabled={
                         fkHasEmptyValues ||
