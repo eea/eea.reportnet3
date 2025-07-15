@@ -152,6 +152,9 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseControllerZuul;
 
+  @Autowired
+  private DatasetController datasetController;
+
   /** The rules repository. */
   @Autowired
   private RulesRepository rulesRepository;
@@ -362,6 +365,7 @@ public class ValidationHelper implements DisposableBean {
       //delete previous validation folder
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
         s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
+        datasetController.updateStatistics(datasetId, true);
       }
 
       List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);

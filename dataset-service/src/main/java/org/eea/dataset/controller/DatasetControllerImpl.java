@@ -330,6 +330,19 @@ public class DatasetControllerImpl implements DatasetController {
     }
   }
 
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/updateStatistics/{id}")
+  public void updateStatistics(@PathVariable("id") Long datasetId, @RequestParam("isBigDataflow") Boolean isBigDataflow) {
+    try {
+      datasetService.saveStatistics(datasetId, isBigDataflow);
+    } catch (EEAException e) {
+      LOG.error(
+          "Error saving statistics. Error message: {}",
+          e.getMessage(), e);
+    }
+  }
+
   /**
    * Import file data.
    *
