@@ -194,21 +194,21 @@ export const EntitiesWebform = ({
       .filter(table => !isEmpty(table))
       .flat();
 
-    /*Filters the Root table and the tables that have only foreign keys linked
-    to the Root table primary key*/
-
     const fieldSchemasList = [];
 
-    datasetSchema.tables.forEach(table => {
-      table.records.forEach(record => {
-        record.fields.forEach(field => {
-          const fieldSchema = field.fieldSchema;
+    datasetSchema?.tables?.forEach(table => {
+      table?.records?.forEach(record => {
+        record?.fields?.forEach(field => {
+          const fieldSchema = field?.fieldSchema;
           if (fieldSchema !== undefined && !fieldSchemasList.includes(fieldSchema)) {
             fieldSchemasList.push(fieldSchema);
           }
         });
       });
     });
+
+    /*Filters the Root table and the tables that have only foreign keys linked
+      to the Root table primary key*/
 
     const filteredTables = datasetSchema.tables.filter(
       table =>
