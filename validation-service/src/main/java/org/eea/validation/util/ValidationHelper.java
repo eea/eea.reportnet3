@@ -365,8 +365,8 @@ public class ValidationHelper implements DisposableBean {
       //delete previous validation folder
       if (s3Helper.checkFolderExist(s3PathResolver, S3_VALIDATION_TABLE_PATH)) {
         s3Helper.deleteFolder(s3PathResolver, S3_VALIDATION_TABLE_PATH);
-        datasetController.updateStatistics(datasetId, true);
       }
+      datasetController.updateStatistics(datasetId, true);
 
       List<DataSetMetabaseVO> combinedDatasets = getCombinedDatasets(dataset);
       combinedDatasets.forEach(dataSetMetabaseVO -> {
