@@ -248,7 +248,7 @@ export const EntitiesWebform = ({
       setIsAddEntityIdDialogVisible(false);
       setRefreshTableTrigger(prev => prev + 1);
     } catch (error) {
-      if (error.response.status === 423) {
+      if (error?.response?.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('EntitiesWebform - onAddEntitiesRecord.', error);
