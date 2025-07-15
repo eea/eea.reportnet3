@@ -167,6 +167,8 @@ export const WebformTable = ({
     if (mainTable) {
       let fkRootField;
       let webformDataWithFkRootField;
+
+      // Add the FK field that is linked to root table PK in table elements if it is missing
       if (webformData?.isOptional || webformData?.multipleRecords) {
         fkRootField = datasetSchema.tables
           .find(datasetTable => datasetTable.tableSchemaName === webformData.name)
@@ -176,7 +178,9 @@ export const WebformTable = ({
           ? {
               ...webformData,
               elements: [
-                ...webformData.elements.filter(el => el.type === 'FIELD'),
+                ...webformData.elements.filter(
+                  el => el.type === 'FIELD' && el?.fieldSchema !== fkRootField?.fieldSchema
+                ),
                 ((fkRootField.type = 'FIELD'), fkRootField)
               ]
             }

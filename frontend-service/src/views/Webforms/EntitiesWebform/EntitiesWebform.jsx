@@ -197,12 +197,28 @@ export const EntitiesWebform = ({
     /*Filters the Root table and the tables that have only foreign keys linked
     to the Root table primary key*/
 
+    const fieldSchemasList = [];
+
+    datasetSchema.tables.forEach(table => {
+      table.records.forEach(record => {
+        record.fields.forEach(field => {
+          const fieldSchema = field.fieldSchema;
+          if (fieldSchema !== undefined && !fieldSchemasList.includes(fieldSchema)) {
+            fieldSchemasList.push(fieldSchema);
+          }
+        });
+      });
+    });
+
     const filteredTables = datasetSchema.tables.filter(
       table =>
         table.tableSchemaNotEmpty &&
         (table.tableSchemaName === rootTableName ||
           !table.records[0].fields.some(
-            field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+            field =>
+              !isNil(field?.referencedField?.idPk) &&
+              field?.referencedField?.idPk !== rootPkFieldId &&
+              fieldSchemasList.includes(field?.referencedField?.idPk)
           ))
     );
 
