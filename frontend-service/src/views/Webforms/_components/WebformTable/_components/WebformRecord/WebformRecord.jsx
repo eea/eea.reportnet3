@@ -198,32 +198,36 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
 
-  const renderElements = (elements = [], fieldsBlock = false) => {
+  const renderElements = (elements = [], isLabelFieldBlock = false) => {
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
+        const isLabelFieldBlock =
+          element.elements.length === 2 &&
+          element.elements.some(el => el.type === 'LABEL') &&
+          element.elements.some(el => el.type === 'FIELD');
         const isSubTable = () => element.elementsRecords.length > 1;
         if (isSubTable()) {
           return (
-            <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
+            <div className={isLabelFieldBlock ? styles.labelFieldBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
               {element.elementsRecords
                 .filter(elementsRecord => elementsRecord.recordId === record.recordId)
-                .map(record => renderElements(record.elements, true))}
+                .map(record => renderElements(record.elements))}
             </div>
           );
         }
 
         return (
-          <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
-            {element.elementsRecords.map(record => renderElements(record.elements))}
+          <div className={isLabelFieldBlock ? styles.labelFieldBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
+            {element.elementsRecords.map(record => renderElements(record.elements, isLabelFieldBlock))}
           </div>
         );
       }
 
       if (element.type === 'FIELD') {
         const fieldStyle = { width: '100%' };
-        if (fieldsBlock) {
+        if (isLabelFieldBlock) {
           const elementCount = elements.length;
           const elementGap = 5 * elementCount;
           const elementWidth = (100 - elementGap) / elementCount;
@@ -234,15 +238,26 @@ export const WebformRecord = ({
           !isFieldVisible &&
           element.isVisible !== false &&
           onToggleFieldVisibility(element.referenceParentField, elements, element) && (
-            <div className={styles.field} key={element.fieldId || element.fieldSchemaId} style={fieldStyle}>
+            <div
+              className={isLabelFieldBlock ? styles.tableField : styles.field}
+              key={element.fieldId || element.fieldSchemaId}
+              style={fieldStyle}>
               {(element.required || element.title) && isNil(element.customType) && (
-                <label>
+                <label className={isLabelFieldBlock ? styles.fieldLabel : undefined}>
                   {element.title}
                   {<span className={styles.requiredMark}>{checkShowRequired(element, elements) ? ' *' : ''}</span>}
+                  {isLabelFieldBlock && element.tooltip && isNil(element.customType) && (
+                    <Button
+                      className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
+                      icon="infoCircle"
+                      tooltip={element.tooltip}
+                      tooltipOptions={{ position: 'top' }}
+                    />
+                  )}
                 </label>
               )}
 
-              {element.tooltip && isNil(element.customType) && (
+              {!isLabelFieldBlock && element.tooltip && isNil(element.customType) && (
                 <Button
                   className={`${styles.infoCircle} p-button-rounded p-button-secondary-transparent`}
                   icon="infoCircle"
