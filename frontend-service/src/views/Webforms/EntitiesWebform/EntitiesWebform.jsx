@@ -194,15 +194,31 @@ export const EntitiesWebform = ({
       .filter(table => !isEmpty(table))
       .flat();
 
+    const fieldSchemasList = [];
+
+    datasetSchema?.tables?.forEach(table => {
+      table?.records?.forEach(record => {
+        record?.fields?.forEach(field => {
+          const fieldSchema = field?.fieldSchema;
+          if (fieldSchema !== undefined && !fieldSchemasList.includes(fieldSchema)) {
+            fieldSchemasList.push(fieldSchema);
+          }
+        });
+      });
+    });
+
     /*Filters the Root table and the tables that have only foreign keys linked
-    to the Root table primary key*/
+      to the Root table primary key*/
 
     const filteredTables = datasetSchema.tables.filter(
       table =>
         table.tableSchemaNotEmpty &&
         (table.tableSchemaName === rootTableName ||
           !table.records[0].fields.some(
-            field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+            field =>
+              !isNil(field?.referencedField?.idPk) &&
+              field?.referencedField?.idPk !== rootPkFieldId &&
+              fieldSchemasList.includes(field?.referencedField?.idPk)
           ))
     );
 
@@ -232,7 +248,7 @@ export const EntitiesWebform = ({
       setIsAddEntityIdDialogVisible(false);
       setRefreshTableTrigger(prev => prev + 1);
     } catch (error) {
-      if (error.response.status === 423) {
+      if (error?.response?.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('EntitiesWebform - onAddEntitiesRecord.', error);

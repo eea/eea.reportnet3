@@ -88,6 +88,7 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.eea.utils.LiteralConstants.*;
 
@@ -2202,6 +2203,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Override
     public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) {
         try {
+            String folderPathStr =  exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId;
+            File folderPath = new File(folderPathStr);
+
+            createLocalPathIfNotExists(jobId, folderPath);
+
             String localPath = exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId + PARQUET_EXPORT_NAME + jobId;
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
@@ -2214,13 +2220,39 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             }
             DownloadFilter filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName);
-            s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
+            File filePath = s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
 
-            zipFolder(jobId, localPath);
+            if (filePath.exists()) {
+                zipFolder(jobId, localPath);
+            } else {
+                LOG.warn("Creating an empty zip file because path:  {} does not exist", localPath);
+                // Create an empty ZIP file
+                File emptyZip = new File(localPath + ".zip");
+                try (FileOutputStream fos = new FileOutputStream(emptyZip);
+                     ZipOutputStream zos = new ZipOutputStream(fos)) {
+                }
+            }
             finishJob(datasetId, dataflowId, jobId, user, processUUID);
         }
         catch (Exception e) {
             exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
+        }
+    }
+
+    /**
+     * Ensure the folder path exists
+     * @param jobId The job id
+     * @param folderPath The folder path
+     *
+     * @throws IOException The exception
+     */
+    private void createLocalPathIfNotExists(Long jobId, File folderPath) throws IOException {
+        if (!folderPath.exists()) {
+            LOG.info("Folder {} does not exist. Creating it.", folderPath);
+            if (!folderPath.mkdirs()) {
+                LOG.error("Failed to create the folder for jobId {} at {}", jobId, folderPath);
+                throw new IOException("Failed to create directory: " + folderPath);
+            }
         }
     }
 
@@ -2293,7 +2325,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             ZipUtils.zipFolder(unZippedFile, zippedFile);
             FileUtils.deleteDirectory(unZippedFile);
         } catch (Exception e) {
-            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath);
+            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath, e);
             throw e;
         }
     }
