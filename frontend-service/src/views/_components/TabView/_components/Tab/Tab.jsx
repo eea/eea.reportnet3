@@ -37,7 +37,6 @@ export const Tab = ({
   checkEditingTabs,
   className,
   closeIcon,
-  deleteTooltip,
   description = '',
   designMode = false,
   divScrollTabsRef,
@@ -473,34 +472,6 @@ export const Tab = ({
     }
   };
 
-  const renderIcebergTooltip = () => {
-    return (
-      <div
-        className={styles.cancelIconWrapper}
-        data-for={`iceberg-tab-tooltip-${tableSchemaId}`}
-        data-tip
-        style={{
-          position: 'absolute',
-          top: '33%',
-          right: '6px'
-        }}>
-        <Icon
-          icon="cancel"
-          style={{
-            fontSize: '1rem',
-            opacity: '0.7'
-          }}
-        />
-        <ReactTooltip
-          className={styles.tabEditTooltip}
-          effect="solid"
-          id={`iceberg-tab-tooltip-${tableSchemaId}`}
-          place="left">
-          {resourcesContext.messages['disableEditingBeforeSchemaChange']}
-        </ReactTooltip>
-      </div>
-    );
-  };
 
   const renderTableInfo = () => {
     if (isTableInfoVisible) {
@@ -731,7 +702,7 @@ export const Tab = ({
             />
           )}
           {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab && !newTab ? (
-            deleteTooltip ? null : (
+            isIcebergCreated ? null : (
               <div
                 onClick={e => {
                   e.preventDefault();

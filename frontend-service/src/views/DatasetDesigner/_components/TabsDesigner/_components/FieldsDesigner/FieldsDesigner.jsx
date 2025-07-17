@@ -680,8 +680,8 @@ export const FieldsDesigner = ({
           isCodelistOrLink={isCodelistOrLink}
           isDataflowOpen={isDataflowOpen}
           isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-          isLoading={isLoading}
           isIcebergCreated={isIcebergCreated}
+          isLoading={isLoading}
           isReferenceDataset={isReferenceDataset}
           onCheckPkCheckbox={onCheckPk}
           onCodelistAndLinkShow={onCodelistAndLinkShow}
@@ -746,8 +746,8 @@ export const FieldsDesigner = ({
               isCodelistOrLink={isCodelistOrLink}
               isDataflowOpen={isDataflowOpen}
               isDesignDatasetEditorRead={isDesignDatasetEditorRead}
-              isLoading={isLoading}
               isIcebergCreated={isIcebergCreated}
+              isLoading={isLoading}
               isReferenceDataset={isReferenceDataset}
               key={field.fieldId}
               markedForDeletion={markedForDeletion}
@@ -929,7 +929,9 @@ export const FieldsDesigner = ({
           />
           <Button
             className={`p-button-secondary-transparent ${
-              !isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset) || !isIcebergCreated ? 'p-button-animated-blink' : null
+              (!isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset)) || !isIcebergCreated
+                ? 'p-button-animated-blink'
+                : null
             } datasetSchema-uniques-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset) || isIcebergCreated}
             icon="key"
@@ -945,7 +947,9 @@ export const FieldsDesigner = ({
           />
           <Button
             className={`p-button-secondary-transparent ${
-              (!isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset)) || !isIcebergCreated ? 'p-button-animated-blink' : null
+              (!isDesignDatasetEditorRead && (!isDataflowOpen || !isReferenceDataset)) || !isIcebergCreated
+                ? 'p-button-animated-blink'
+                : null
             } datasetSchema-rowConstraint-help-step`}
             disabled={isDesignDatasetEditorRead || (isDataflowOpen && isReferenceDataset) || isIcebergCreated}
             icon="horizontalSliders"
@@ -1077,7 +1081,7 @@ export const FieldsDesigner = ({
               <span
                 className={styles.switchTextInput}
                 id={`${table.tableSchemaId}_check_manual_edit_label`}
-                style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen || isIcebergCreated? 0.5 : 1 }}>
+                style={{ opacity: isDesignDatasetEditorRead || isDataflowOpen || isIcebergCreated ? 0.5 : 1 }}>
                 {resourcesContext.messages['manualEdit']}
               </span>
               <Checkbox
