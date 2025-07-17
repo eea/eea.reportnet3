@@ -309,7 +309,7 @@
     "dataflowRequesterDraftHelp": "Here you can see the data collections data and manage the EU Datasets",
     "dataflows": "Dataflows",
     "dataflowsList": "Dataflows",
-    "disableEditingBeforeSchemaChange": "Disable editing to edit the schema.",
+    "disableEditingBeforeSchemaChange": "If you want to edit the table schema, you must disable editing first.",
     "dataflowsNotMatchingFilter": "There are no dataflows with the selected parameters",
     "dataflowStatus": "Dataflow status",
     "dataflowUnpinnedInit": "You have unpinned the dataflow <strong>{:dataflowName}</strong>",
