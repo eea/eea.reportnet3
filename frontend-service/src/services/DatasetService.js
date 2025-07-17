@@ -92,11 +92,13 @@ export const DatasetService = {
         newField.idFieldSchema = dataTableFieldDTO.fieldData.fieldSchemaId;
         newField.name = dataTableFieldDTO.fieldData.name;
         newField.type = dataTableFieldDTO.fieldData.type;
-        newField.value = DatasetUtils.parseValue({
-          type: dataTableFieldDTO.fieldData.type,
-          value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
-          splitSRID: true
-        });
+        newField.value = encodeURIComponent(
+          DatasetUtils.parseValue({
+            type: dataTableFieldDTO.fieldData.type,
+            value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
+            splitSRID: true
+          })
+        );
 
         return newField;
       });
@@ -119,7 +121,7 @@ export const DatasetService = {
 
   deleteData: async (datasetId, arePrefilledTablesDeleted) =>
     await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
-    
+
   deleteAttachment: async ({
     dataflowId,
     datasetId,
