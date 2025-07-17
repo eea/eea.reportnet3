@@ -57,12 +57,12 @@ export const IconTooltip = ({ className = '', levelError, message, style }) => {
         <Dialog
           className={styles.dialog}
           header={levelError}
-          onHide={closeDialog}
-          visible={isDialogOpen}
           isIconTooltip={true}
-        >
-          <p>{message} ({levelError})</p>
-
+          onHide={closeDialog}
+          visible={isDialogOpen}>
+          <p>
+            {message} ({levelError})
+          </p>
         </Dialog>
       )}
     </>
