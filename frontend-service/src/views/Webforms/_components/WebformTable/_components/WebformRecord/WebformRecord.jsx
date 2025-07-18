@@ -356,7 +356,7 @@ export const WebformRecord = ({
                 referenceFieldName: field?.referenceParentField,
                 value: record.elements.filter(element =>
                   TextUtils.areEquals(field?.referenceParentField, element.name)
-                )[0].value
+                )[0]?.value
               })
           );
 

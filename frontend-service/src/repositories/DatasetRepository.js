@@ -38,7 +38,7 @@ export const DatasetRepository = {
 
   deleteData: async (datasetId, deletePrefilledTables) =>
     await HTTPRequester.delete({ url: getUrl(DatasetConfig.deleteData, { datasetId, deletePrefilledTables }) }),
-  
+
   deleteAttachment: async ({
     dataflowId,
     datasetId,
@@ -413,8 +413,9 @@ export const DatasetRepository = {
     qcCodes,
     fieldSchemaId,
     value
-  ) =>
-    await HTTPRequester.get({
+  ) => {
+    const encodedFieldValue = encodeURIComponent(value);
+    return await HTTPRequester.get({
       url: getUrl(DatasetConfig.getTableDataDL, {
         datasetId,
         fields,
@@ -424,9 +425,10 @@ export const DatasetRepository = {
         pageNum,
         pageSize,
         tableSchemaId,
-        value
+        value: encodeURIComponent(encodedFieldValue)
       })
-    }),
+    });
+  },
 
   importTableFileWithS3: async ({
     datasetId,
