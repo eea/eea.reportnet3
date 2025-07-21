@@ -238,7 +238,7 @@ export const EntitiesWebform = ({
       await WebformService.addEntityRecord(
         datasetId,
         !isEmpty(filteredOptionalTables) ? filteredOptionalTables : filteredTables,
-        manualRootPk ? encodeURIComponent(entitiesWebformState.rootPkInput) : generateEntityId(entitiesTableRecords),
+        manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
         rootPkFieldId,
         !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
       );

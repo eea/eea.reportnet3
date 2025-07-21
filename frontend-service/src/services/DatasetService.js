@@ -94,9 +94,7 @@ export const DatasetService = {
         newField.type = dataTableFieldDTO.fieldData.type;
         newField.value = DatasetUtils.parseValue({
           type: dataTableFieldDTO.fieldData.type,
-          value: isEmpty(dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId])
-            ? dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId]
-            : encodeURIComponent(dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId]),
+          value: dataTableFieldDTO.fieldData[dataTableFieldDTO.fieldData.fieldSchemaId],
           splitSRID: true
         });
 
@@ -716,9 +714,7 @@ export const DatasetService = {
           type: DataTableFieldDTO.type,
           value: DatasetUtils.parseValue({
             type: DataTableFieldDTO.type,
-            value: isEmpty(DataTableFieldDTO.value)
-              ? DataTableFieldDTO.value
-              : decodeURIComponent(DataTableFieldDTO.value)
+            value: DataTableFieldDTO.value
           })
         });
 
