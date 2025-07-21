@@ -414,7 +414,6 @@ export const DatasetRepository = {
     fieldSchemaId,
     value
   ) => {
-    const encodedFieldValue = encodeURIComponent(value);
     return await HTTPRequester.get({
       url: getUrl(DatasetConfig.getTableDataDL, {
         datasetId,
@@ -425,7 +424,7 @@ export const DatasetRepository = {
         pageNum,
         pageSize,
         tableSchemaId,
-        value: encodeURIComponent(encodedFieldValue)
+        value
       })
     });
   },
