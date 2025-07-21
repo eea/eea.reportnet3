@@ -232,6 +232,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
             }
             if(job != null){
+                LOG.info("For import {} found job with id {}", importFileInDremioInfo, jobId);
                 if(job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN)) {
                     LOG.info("Job {} is cancelled. Exiting import!", job.getId());
                     return;
@@ -243,6 +244,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     filePathInS3 = job.getParameters().get("filePathInS3").toString();
                 }
             }else{
+                LOG.info("For import {} could not find job with id {}", importFileInDremioInfo, jobId);
                 //check if there is already an import job with status IN_PROGRESS for the specific datasetId
                 List<Long> datasetIds = new ArrayList<>();
                 datasetIds.add(datasetId);
