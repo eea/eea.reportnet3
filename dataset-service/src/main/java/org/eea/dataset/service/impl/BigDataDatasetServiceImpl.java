@@ -221,6 +221,12 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 if (fmeJobId != null){
                     jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
                     job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+                    if(job == null){
+                        //wait for 3 seconds and try again.
+                        Thread.sleep(3000);
+                        LOG.info("Retrying finding job with fmeJobId {}", fmeJobId);
+                        job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+                    }
                     if (job != null) {
                         jobId = job.getId();
                         importFileInDremioInfo.setJobId(jobId);
@@ -229,8 +235,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
                 else{
                     job = jobControllerZuul.findJobById(jobId);
+                    if(job == null){
+                        //wait for 3 seconds and try again.
+                        Thread.sleep(3000);
+                        LOG.info("Retrying finding job with id {}", jobId);
+                        job = jobControllerZuul.findJobById(jobId);
+                    }
                 }
             }
+
             if(job != null){
                 LOG.info("For import {} found job with id {}", importFileInDremioInfo, jobId);
                 if(job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN)) {
