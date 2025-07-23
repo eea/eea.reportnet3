@@ -204,9 +204,7 @@ export const WebformRecord = ({
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
         const isLabelFieldBlock =
-          element.elements.length === 2 &&
-          element.elements.some(el => el.type === 'LABEL') &&
-          element.elements.some(el => el.type === 'FIELD');
+          element.elements.some(el => el.type === 'LABEL') && element.elements.some(el => el.type === 'FIELD');
         const isSubTable = () => element.elementsRecords.length > 1;
         if (isSubTable()) {
           return (
