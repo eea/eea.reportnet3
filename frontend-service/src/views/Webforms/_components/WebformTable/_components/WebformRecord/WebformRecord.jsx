@@ -220,7 +220,7 @@ export const WebformRecord = ({
 
         return (
           <div className={isLabelFieldBlock ? styles.labelFieldBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
-            {element.elementsRecords.map(record => renderElements(record.elements, isLabelFieldBlock))}
+            {element.elementsRecords.map(record => renderElements(record.elements))}
           </div>
         );
       }
