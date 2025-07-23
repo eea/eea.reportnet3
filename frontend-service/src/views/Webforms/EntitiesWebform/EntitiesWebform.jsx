@@ -351,18 +351,18 @@ export const EntitiesWebform = ({
     }
   };
 
-  const onSelectEditTable = (entityNumberId, tableName) => {
+  const onSelectEditTable = (entityNumberId, tableName, recordId) => {
     const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
 
-    let recordId = '';
+    // let recordId = '';
 
-    entitiesRecords.forEach(entitiesRecord => {
-      entitiesRecord.fields.forEach(field => {
-        if (field.fieldSchemaId === rootPkFieldId && parseInt(field.value) === parseInt(entityNumberId)) {
-          recordId = entitiesRecord.recordId;
-        }
-      });
-    });
+    // entitiesRecords.forEach(entitiesRecord => {
+    //   entitiesRecord.fields.forEach(field => {
+    //     if (field.fieldSchemaId === rootPkFieldId && parseInt(field.value) === parseInt(entityNumberId)) {
+    //       recordId = entitiesRecord.recordId;
+    //     }
+    //   });
+    // });
 
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, entityNumberId);

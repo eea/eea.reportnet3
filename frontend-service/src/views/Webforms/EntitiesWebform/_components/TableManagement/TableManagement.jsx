@@ -64,7 +64,7 @@ export const TableManagement = ({
   const [valueFilter, setValueFilter] = useState('');
   const [fetchFilter, setFetchFilter] = useState('');
 
-  const [records, dispatchRecords] = useReducer(tableManagementReducer, {
+  const [records] = useReducer(tableManagementReducer, {
     totalRecords: 0,
     totalFilteredRecords: 0,
     recordsPerPage: 10,
@@ -385,11 +385,13 @@ export const TableManagement = ({
     />
   );
   const renderActionsTemplate = rowData => {
-    const entitiesIdFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns, 'Id');
+    const entitiesIdFieldSchemaId = rootPkFieldId;
+
     const entitiesFieldSchemaValue =
       rowData && rowData.dataRow ? RecordUtils.getCellValue({ rowData }, entitiesIdFieldSchemaId) : undefined;
 
-    let tableName;
+    let tableName = rootTableName;
+
     if (rowData && rowData.dataRow) {
       rowData.dataRow.forEach(row =>
         row.fieldData.tableSchemas?.forEach((tableSchema, index) => {
@@ -417,8 +419,8 @@ export const TableManagement = ({
           manageDialogs('delete', true);
         }}
         onEditClick={() => {
-          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
-          onSelectEditTable(entitiesFieldSchemaValue, tableName);
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData, });
+          onSelectEditTable(entitiesFieldSchemaValue, tableName,  rowData.recordId);
         }}
       />
     );
