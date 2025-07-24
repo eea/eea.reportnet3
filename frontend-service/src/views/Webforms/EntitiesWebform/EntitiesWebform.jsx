@@ -194,40 +194,20 @@ export const EntitiesWebform = ({
       .filter(table => !isEmpty(table))
       .flat();
 
-    const fieldSchemasList = [];
+    /*Filters the webform main tables and leaves out the subtables*/
 
-    datasetSchema?.tables?.forEach(table => {
-      table?.records?.forEach(record => {
-        record?.fields?.forEach(field => {
-          const fieldSchema = field?.fieldSchema;
-          if (fieldSchema !== undefined && !fieldSchemasList.includes(fieldSchema)) {
-            fieldSchemasList.push(fieldSchema);
-          }
-        });
-      });
-    });
-
-    /*Filters the Root table and the tables that have only foreign keys linked
-      to the Root table primary key*/
-
-    const filteredTables = datasetSchema.tables.filter(
-      table =>
-        table.tableSchemaNotEmpty &&
-        (table.tableSchemaName === rootTableName ||
-          !table.records[0].fields.some(
-            field =>
-              !isNil(field?.referencedField?.idPk) &&
-              field?.referencedField?.idPk !== rootPkFieldId &&
-              fieldSchemasList.includes(field?.referencedField?.idPk)
-          ))
+    const filteredMainTables = datasetSchema.tables.filter(
+      table => table.tableSchemaNotEmpty && tables.some(webformTable => webformTable?.name === table?.tableSchemaName)
     );
 
-    let filteredOptionalTables;
+    /*Filters the tables that are not optional*/
+
+    let filteredNotOptionalTables;
     const optionalTables = tables.filter(table => table?.isOptional);
 
     if (!isEmpty(optionalTables)) {
-      filteredOptionalTables = filteredTables.filter(tab =>
-        isEmpty(optionalTables.find(optionalTable => optionalTable.name === tab.tableSchemaName))
+      filteredNotOptionalTables = filteredMainTables.filter(
+        mainTable => !optionalTables.some(optionalTable => optionalTable.name === mainTable.tableSchemaName)
       );
     }
 
@@ -237,7 +217,7 @@ export const EntitiesWebform = ({
       const entitiesTableRecords = await getEntitiesTableRecords(tableSchemaId);
       await WebformService.addEntityRecord(
         datasetId,
-        !isEmpty(filteredOptionalTables) ? filteredOptionalTables : filteredTables,
+        !isEmpty(filteredNotOptionalTables) ? filteredNotOptionalTables : filteredMainTables,
         manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
         rootPkFieldId,
         !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
