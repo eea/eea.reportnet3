@@ -194,22 +194,13 @@ export const EntitiesWebform = ({
       .filter(table => !isEmpty(table))
       .flat();
 
-    /*Filters the webform main tables and leaves out the subtables*/
+    /*Filters the webform main tables that are not optional and leaves out the subtables*/
 
     const filteredMainTables = datasetSchema.tables.filter(
-      table => table.tableSchemaNotEmpty && tables.some(webformTable => webformTable?.name === table?.tableSchemaName)
+      table =>
+        table.tableSchemaNotEmpty &&
+        tables.some(webformTable => webformTable?.name === table?.tableSchemaName && !webformTable?.isOptional)
     );
-
-    /*Filters the tables that are not optional*/
-
-    let filteredNotOptionalTables;
-    const optionalTables = tables.filter(table => table?.isOptional);
-
-    if (!isEmpty(optionalTables)) {
-      filteredNotOptionalTables = filteredMainTables.filter(
-        mainTable => !optionalTables.some(optionalTable => optionalTable.name === mainTable.tableSchemaName)
-      );
-    }
 
     const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
 
@@ -217,7 +208,7 @@ export const EntitiesWebform = ({
       const entitiesTableRecords = await getEntitiesTableRecords(tableSchemaId);
       await WebformService.addEntityRecord(
         datasetId,
-        !isEmpty(filteredNotOptionalTables) ? filteredNotOptionalTables : filteredMainTables,
+        filteredMainTables,
         manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
         rootPkFieldId,
         !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
