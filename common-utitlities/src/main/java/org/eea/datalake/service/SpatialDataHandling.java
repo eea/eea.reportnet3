@@ -1,6 +1,7 @@
 package org.eea.datalake.service;
 
 
+import org.eea.datalake.service.model.FieldMetaData;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
@@ -12,7 +13,7 @@ import java.util.List;
 public interface SpatialDataHandling {
   boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO);
 
-  String convertToHEX(String value, long lineNumber);
+  String convertToHEX(String value, long lineNumber, List<FieldMetaData> listOfFieldMetaData);
 
   StringBuilder getHeaders(TableSchemaVO tableSchemaVO);
 
