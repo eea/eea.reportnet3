@@ -194,42 +194,13 @@ export const EntitiesWebform = ({
       .filter(table => !isEmpty(table))
       .flat();
 
-    const fieldSchemasList = [];
+    /*Filters the webform main tables that are not optional and leaves out the subtables*/
 
-    datasetSchema?.tables?.forEach(table => {
-      table?.records?.forEach(record => {
-        record?.fields?.forEach(field => {
-          const fieldSchema = field?.fieldSchema;
-          if (fieldSchema !== undefined && !fieldSchemasList.includes(fieldSchema)) {
-            fieldSchemasList.push(fieldSchema);
-          }
-        });
-      });
-    });
-
-    /*Filters the Root table and the tables that have only foreign keys linked
-      to the Root table primary key*/
-
-    const filteredTables = datasetSchema.tables.filter(
+    const filteredMainTables = datasetSchema.tables.filter(
       table =>
         table.tableSchemaNotEmpty &&
-        (table.tableSchemaName === rootTableName ||
-          !table.records[0].fields.some(
-            field =>
-              !isNil(field?.referencedField?.idPk) &&
-              field?.referencedField?.idPk !== rootPkFieldId &&
-              fieldSchemasList.includes(field?.referencedField?.idPk)
-          ))
+        tables.some(webformTable => webformTable?.name === table?.tableSchemaName && !webformTable?.isOptional)
     );
-
-    let filteredOptionalTables;
-    const optionalTables = tables.filter(table => table?.isOptional);
-
-    if (!isEmpty(optionalTables)) {
-      filteredOptionalTables = filteredTables.filter(tab =>
-        isEmpty(optionalTables.find(optionalTable => optionalTable.name === tab.tableSchemaName))
-      );
-    }
 
     const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
 
@@ -237,7 +208,7 @@ export const EntitiesWebform = ({
       const entitiesTableRecords = await getEntitiesTableRecords(tableSchemaId);
       await WebformService.addEntityRecord(
         datasetId,
-        !isEmpty(filteredOptionalTables) ? filteredOptionalTables : filteredTables,
+        filteredMainTables,
         manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
         rootPkFieldId,
         !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
@@ -353,16 +324,6 @@ export const EntitiesWebform = ({
 
   const onSelectEditTable = (entityNumberId, tableName, recordId) => {
     const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
-
-    // let recordId = '';
-
-    // entitiesRecords.forEach(entitiesRecord => {
-    //   entitiesRecord.fields.forEach(field => {
-    //     if (field.fieldSchemaId === rootPkFieldId && parseInt(field.value) === parseInt(entityNumberId)) {
-    //       recordId = entitiesRecord.recordId;
-    //     }
-    //   });
-    // });
 
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, entityNumberId);
