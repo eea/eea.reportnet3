@@ -36,6 +36,7 @@ export const ManageDataflowForm = forwardRef(
       deliveryDate,
       dialogName,
       getData,
+      hasRepresentatives,
       isAdmin,
       isCitizenScienceDataflow,
       isDataflowOpen,
@@ -150,51 +151,51 @@ export const ManageDataflowForm = forwardRef(
           if (isEditing) {
             isCitizenScienceDataflow
               ? await CitizenScienceDataflowService.update(
-                  dataflowId,
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  metadata.isReleasable,
-                  metadata.showPublicInfo,
-                  bigData,
-                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
-                  isDataflowOpen && deliveryDate
-                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
-                    : undefined
-                )
+                dataflowId,
+                name,
+                description,
+                metadata.obligation.id,
+                metadata.isReleasable,
+                metadata.showPublicInfo,
+                bigData,
+                selectedGroup ? selectedGroup.dataProviderGroupId : null,
+                isDataflowOpen && deliveryDate
+                  ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                  : undefined
+              )
               : await DataflowService.update(
-                  dataflowId,
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  metadata.isReleasable,
-                  metadata.showPublicInfo,
-                  bigData,
-                  selectedGroup ? selectedGroup.dataProviderGroupId : null,
-                  isDataflowOpen && deliveryDate
-                    ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
-                    : undefined
-                );
+                dataflowId,
+                name,
+                description,
+                metadata.obligation.id,
+                metadata.isReleasable,
+                metadata.showPublicInfo,
+                bigData,
+                selectedGroup ? selectedGroup.dataProviderGroupId : null,
+                isDataflowOpen && deliveryDate
+                  ? new Date(dayjs(deliveryDate).utc(true).endOf('day').valueOf()).getTime()
+                  : undefined
+              );
 
             onEdit(name, description, metadata.obligation.id);
           } else {
             const creationResponse = isCitizenScienceDataflow
               ? await CitizenScienceDataflowService.create(
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  undefined,
-                  bigData,
-                  selectedGroup.dataProviderGroupId
-                )
+                name,
+                description,
+                metadata.obligation.id,
+                undefined,
+                bigData,
+                selectedGroup.dataProviderGroupId
+              )
               : await DataflowService.create(
-                  name,
-                  description,
-                  metadata.obligation.id,
-                  undefined,
-                  bigData,
-                  selectedGroup.dataProviderGroupId
-                );
+                name,
+                description,
+                metadata.obligation.id,
+                undefined,
+                bigData,
+                selectedGroup.dataProviderGroupId
+              );
 
             if (pinned) {
               const inmUserProperties = { ...userContext.userProps };
@@ -309,14 +310,14 @@ export const ManageDataflowForm = forwardRef(
               <Dropdown
                 appendTo={document.body}
                 ariaLabel="providerGroups"
-                disabled={isEditing && !isDesign}
+                disabled={isEditing && (!isDesign || hasRepresentatives)}
                 name="providerGroups"
                 onChange={event => onSelectGroup(event.target.value)}
                 onFocus={() => handleErrors({ field: 'providerGroups', hasErrors: false, message: '' })}
                 optionLabel="label"
                 options={providerGroups}
                 placeholder={resourcesContext.messages['selectGroupOfCompanies']}
-                tooltip={isDesign ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
+                tooltip={isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
                 value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>
@@ -325,14 +326,14 @@ export const ManageDataflowForm = forwardRef(
               <Dropdown
                 appendTo={document.body}
                 ariaLabel="providerGroups"
-                disabled={isEditing && !isDesign}
+                disabled={isEditing && (!isDesign || hasRepresentatives)}
                 name="providerGroups"
                 onChange={event => onSelectGroup(event.target.value)}
                 onFocus={() => handleErrors({ field: 'providerGroups', hasErrors: false, message: '' })}
                 optionLabel="label"
                 options={providerGroups}
                 placeholder={resourcesContext.messages['selectGroupOfReportingEntities']}
-                tooltip={isDesign ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
+                tooltip={isDesign && hasRepresentatives ? resourcesContext.messages['providerGroupsDisabledTooltip'] : ''}
                 value={selectedGroup ? selectedGroup : dataProviderGroup}
               />
             </div>

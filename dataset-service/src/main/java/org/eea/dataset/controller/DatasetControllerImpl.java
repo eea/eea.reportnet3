@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.utils.UtilityClass;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
@@ -43,6 +44,8 @@ import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -74,6 +77,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
 
+import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_PARQUET;
 
@@ -104,6 +108,9 @@ public class DatasetControllerImpl implements DatasetController {
   /** The dataset metabase service. */
   @Autowired
   private DatasetMetabaseService datasetMetabaseService;
+
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /** The dataset schema service. */
   @Autowired
@@ -320,6 +327,19 @@ public class DatasetControllerImpl implements DatasetController {
       Long datasetId = (dataset != null) ? dataset.getId() : null;
       LOG.error("Unexpected error! Error updating dataset for datasetId {} Message: {}", datasetId, e.getMessage());
       throw e;
+    }
+  }
+
+  @Override
+  @HystrixCommand
+  @PutMapping("/private/updateStatistics/{id}")
+  public void updateStatistics(@PathVariable("id") Long datasetId, @RequestParam("isBigDataflow") Boolean isBigDataflow) {
+    try {
+      datasetService.saveStatistics(datasetId, isBigDataflow);
+    } catch (EEAException e) {
+      LOG.error(
+          "Error saving statistics. Error message: {}",
+          e.getMessage(), e);
     }
   }
 
@@ -981,7 +1001,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param tableRecords the table records
    */
   @Override
-  @HystrixCommand
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "120000")})
   @PostMapping("/{datasetId}/insertRecordsMultiTable")
   @LockMethod
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_STEWARD','DATASCHEMA_STEWARD','DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','EUDATASET_CUSTODIAN','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
@@ -2292,6 +2312,20 @@ public class DatasetControllerImpl implements DatasetController {
       String fileName = file.getOriginalFilename();
       fileName = StringUtils.isNotBlank(fileName) ? fileName.replace(",", "") : "";
 
+      if (!UtilityClass.containsOnlyLatinCharacters(fileName)) {
+        LOG.info("Update attachment filename for dataflowId {} datasetId {} and fieldId {}. File is denied because filename contains non-Latin letters: {}", dataflowId, datasetId, idField, fileName);
+
+        EventType eventType = EventType.IMPORT_FILENAME_CONTAINS_NON_LATIN_CHARACTERS_ERROR_EVENT;
+        NotificationVO notificationVO = new NotificationVO();
+        notificationVO.setDataflowId(dataflowId);
+        notificationVO.setDatasetId(datasetId);
+        notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
+        notificationVO.setFileName(fileName);
+        notificationVO.setNonLatinCharacters(UtilityClass.extractNonLatinCharacters(fileName));
+        kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FILENAME_CONTAINS_NON_LATIN_CHARACTERS);
+      }
 
       LOG.info("Updating attachment for dataflowId {} and datasetId {}", dataflowId, datasetId);
       Boolean isBigDataflow = dataFlowControllerZuul.isBigDataflow(dataflowId);
@@ -2664,7 +2698,16 @@ public class DatasetControllerImpl implements DatasetController {
             userNotificationContentVO);
 
     try {
-      fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+      String[] parts = mimeType.trim().toLowerCase().split(" ");
+
+      if (Arrays.asList(parts).contains(CSV.getValue())) {
+        // Use streaming version for csv and zip csv
+        fileTreatmentHelper.exportDatasetFileByStreaming(datasetId, mimeType);
+      } else {
+        // xlsx, validations
+         fileTreatmentHelper.exportDatasetFile(datasetId, mimeType);
+      }
+
       LOG.info("Successfully exported dataset data from datasetId {}, with type {}", datasetId, mimeType);
     } catch (Exception e) {
       LOG.error("Unexpected error! Error exporting dataset file for datasetId {} Message: {}", datasetId, e.getMessage());

@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer, useRef, useState } from 'react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEmpty from 'lodash/isEmpty';
@@ -54,6 +54,7 @@ export const EntitiesWebform = ({
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
+  const [refreshTableTrigger, setRefreshTableTrigger] = useState(0);
 
   const [entitiesWebformState, entitiesWebformDispatch] = useReducer(entitiesWebformReducer, {
     data: [],
@@ -193,15 +194,31 @@ export const EntitiesWebform = ({
       .filter(table => !isEmpty(table))
       .flat();
 
+    const fieldSchemasList = [];
+
+    datasetSchema?.tables?.forEach(table => {
+      table?.records?.forEach(record => {
+        record?.fields?.forEach(field => {
+          const fieldSchema = field?.fieldSchema;
+          if (fieldSchema !== undefined && !fieldSchemasList.includes(fieldSchema)) {
+            fieldSchemasList.push(fieldSchema);
+          }
+        });
+      });
+    });
+
     /*Filters the Root table and the tables that have only foreign keys linked
-    to the Root table primary key*/
+      to the Root table primary key*/
 
     const filteredTables = datasetSchema.tables.filter(
       table =>
         table.tableSchemaNotEmpty &&
         (table.tableSchemaName === rootTableName ||
           !table.records[0].fields.some(
-            field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
+            field =>
+              !isNil(field?.referencedField?.idPk) &&
+              field?.referencedField?.idPk !== rootPkFieldId &&
+              fieldSchemasList.includes(field?.referencedField?.idPk)
           ))
     );
 
@@ -229,8 +246,9 @@ export const EntitiesWebform = ({
       onUpdateData();
       setIsAddingEntityRecord(false);
       setIsAddEntityIdDialogVisible(false);
+      setRefreshTableTrigger(prev => prev + 1);
     } catch (error) {
-      if (error.response.status === 423) {
+      if (error?.response?.status === 423) {
         notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
       } else {
         console.error('EntitiesWebform - onAddEntitiesRecord.', error);
@@ -248,6 +266,7 @@ export const EntitiesWebform = ({
       }
       setIsAddingEntityRecord(false);
       setIsAddEntityIdDialogVisible(false);
+      setRefreshTableTrigger(prev => prev + 1);
     }
   };
 
@@ -332,18 +351,8 @@ export const EntitiesWebform = ({
     }
   };
 
-  const onSelectEditTable = (entityNumberId, tableName) => {
+  const onSelectEditTable = (entityNumberId, tableName, recordId) => {
     const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
-
-    let recordId = '';
-
-    entitiesRecords.forEach(entitiesRecord => {
-      entitiesRecord.fields.forEach(field => {
-        if (field.fieldSchemaId === rootPkFieldId && parseInt(field.value) === parseInt(entityNumberId)) {
-          recordId = entitiesRecord.recordId;
-        }
-      });
-    });
 
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, entityNumberId);
@@ -421,6 +430,7 @@ export const EntitiesWebform = ({
         bigData={bigData}
         dataflowId={dataflowId}
         datasetId={datasetId}
+        disableActionButtons={bigData && !isIcebergCreated}
         isAddingRootTableId={entitiesWebformState.isAddingEntityRecord}
         isIcebergCreated={isIcebergCreated}
         loading={isLoading}
@@ -429,6 +439,7 @@ export const EntitiesWebform = ({
         onSelectEditTable={onSelectEditTable}
         overview={overview}
         records={entitiesRecords}
+        refreshTrigger={refreshTableTrigger}
         rootPkFieldId={rootPkFieldId}
         rootTableId={rootTableId}
         rootTableName={rootTableName}

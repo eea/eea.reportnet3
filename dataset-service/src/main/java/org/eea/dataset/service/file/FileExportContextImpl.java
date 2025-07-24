@@ -1,7 +1,10 @@
 package org.eea.dataset.service.file;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
+
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
 import org.eea.dataset.service.file.interfaces.WriterStrategy;
 import org.eea.exception.EEAException;
@@ -62,5 +65,40 @@ public class FileExportContextImpl implements IFileExportContext {
     return writerStrategy.writeFileList(dataflowId, partitionId, includeCountryCode,
         includeValidations);
   }
+
+  @Override
+  /**
+   * @param zipOut
+   * @param dataflowId
+   * @param datasetId
+   * @param includeCountryCode
+   * @param includeValidations
+   * @param filters
+   * @throws EEAException
+   */
+  public void writeAllTablesToSingleFileStreaming(OutputStream out,
+                                                  Long dataflowId,
+                                                  Long datasetId,
+                                                  String includeCountryCode,
+                                                  boolean includeValidations,
+                                                  ExportFilterVO filters) {
+    writerStrategy.writeAllTablesToSingleFileStreaming(out, dataflowId, datasetId, includeCountryCode, includeValidations, filters);
+  }
+
+  /**
+   * @param zipOut
+   * @param dataflowId
+   * @param datasetId
+   * @param includeCountryCode
+   * @param includeValidations
+   * @param filters
+   * @throws EEAException
+   */
+  @Override
+  public void writeEachTableToZipEntryStreaming(ZipOutputStream zipOut, Long dataflowId, Long datasetId, String includeCountryCode,
+                                                boolean includeValidations, ExportFilterVO filters) throws EEAException {
+    writerStrategy.writeEachTableToZipEntryStreaming(zipOut, dataflowId, datasetId, includeCountryCode, includeValidations, filters);
+  }
+
 
 }

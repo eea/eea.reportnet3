@@ -52,7 +52,8 @@ export const WebformField = ({
   record,
   referencedTableSchemaId,
   rootPkFieldId,
-  tableSchemaId
+  tableSchemaId,
+  webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -183,16 +184,15 @@ export const WebformField = ({
               localDatasetSchemaId,
               400
             );
-            return referencedFieldValues
-              .map(referencedField => ({
-                itemType:
-                  !isNil(referencedField.label) &&
-                  referencedField.label !== '' &&
-                  referencedField.label !== referencedField.value
-                    ? `${referencedField.label}`
-                    : referencedField.value,
-                value: referencedField.value
-              }))
+            return referencedFieldValues.map(referencedField => ({
+              itemType:
+                !isNil(referencedField.label) &&
+                referencedField.label !== '' &&
+                referencedField.label !== referencedField.value
+                  ? `${referencedField.label}`
+                  : referencedField.value,
+              value: referencedField.value
+            }));
           },
           {
             staleTime: 5 * 60 * 1000 // Example stale time
@@ -548,9 +548,14 @@ export const WebformField = ({
         return (
           <Fragment>
             <InputTextarea
-              className={field.required ? styles.required : undefined}
+              autoResize={true}
+              className={`${field.required ? styles.required : undefined} ${
+                webformType === 'ENTITIES' ? `resizable` : ''
+              }`}
               collapsedHeight={150}
               disabled={field?.readOnly}
+              displayedHeight={1200}
+              expandableOnDoubleClick={true}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
               onBlur={event => {
@@ -559,7 +564,11 @@ export const WebformField = ({
               }}
               onChange={event => onFillField(field, option, event.target.value)}
               onFocus={event => onFocusField(event.target.value)}
-              onKeyDown={event => onEditorKeyChange(event, field, option)}
+              onKeyDown={event => {
+                if (!(event.key === 'Enter' && !event.target._expanded)) {
+                  onEditorKeyChange(event, field, option);
+                }
+              }}
               value={field.value}
             />
             <CharacterCounter

@@ -55,7 +55,7 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
                                                             String tableFilter, String fieldValueFilter, String shortCode, Pageable pageable, String headerField, Boolean asc, boolean paged) {
         s3PathResolver.setTableName(S3_VALIDATION);
         StringBuilder validationQuery = new StringBuilder();
-        validationQuery.append("SELECT MIN(v.validation_level) as levelError, MIN(v.validation_area) as typeEntity, MIN(table_name) as tableName, qc_code as shortCode, MIN(field_name) as fieldName, MIN(message) as message, count(*) as numberOfRecords FROM ");
+        validationQuery.append("SELECT  MIN(v.id_rule) as idRule, MIN(v.validation_level) as levelError, MIN(v.validation_area) as typeEntity, MIN(table_name) as tableName, qc_code as shortCode, MIN(field_name) as fieldName, MIN(message) as message, count(*) as numberOfRecords FROM ");
         validationQuery.append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
         validationQuery.append(" v where v.pk is not null ");
         String shortCodeFilter = shortCodeFilter(shortCode);
@@ -64,7 +64,7 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
         String partTableFilter = originFilterDL(tableFilter, TABLE);
         String partFieldFilter = originFilterDL(fieldValueFilter, FIELD);
         validationQuery.append(shortCodeFilter).append(partLevelError).append(partTypeEntities).append(partTableFilter).append(partFieldFilter);
-        validationQuery.append(" group by v.qc_code, v.table_name, v.field_name ");
+        validationQuery.append(" group by v.id_rule, v.qc_code, v.table_name, v.field_name ");
         String orderPart = addOrderByDL(headerField, asc);
         validationQuery.append(orderPart);
         String page = paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";

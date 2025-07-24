@@ -4,6 +4,7 @@ import classNames from 'classnames';
 import Tooltip from 'primereact/tooltip';
 import DomHandler from 'views/_functions/PrimeReact/DomHandler';
 import ObjectUtils from 'views/_functions/PrimeReact/ObjectUtils';
+import './InputTextarea.scss';
 
 export class InputTextarea extends Component {
   static defaultProps = {
@@ -14,6 +15,7 @@ export class InputTextarea extends Component {
     disabled: false,
     displayedHeight: 100,
     expandableOnClick: false,
+    expandableOnDoubleClick: false,
     hasErrors: false,
     maxLength: null,
     moveCaretToEnd: false,
@@ -27,6 +29,7 @@ export class InputTextarea extends Component {
   static propTypes = {
     autoResize: PropTypes.bool,
     expandableOnClick: PropTypes.bool,
+    expandableOnDoubleClick: PropTypes.bool,
     hasErrors: PropTypes.bool,
     maxLength: PropTypes.number,
     moveCaretToEnd: PropTypes.bool,
@@ -44,6 +47,11 @@ export class InputTextarea extends Component {
     this.onBlur = this.onBlur.bind(this);
     this.onKeyUp = this.onKeyUp.bind(this);
     this.onInput = this.onInput.bind(this);
+    this.onDoubleClick = this.onDoubleClick.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
+    this.state = {
+      expanded: false
+    };
   }
 
   onFocus(e) {
@@ -66,6 +74,28 @@ export class InputTextarea extends Component {
     }
   }
 
+  onDoubleClick(e) {
+    // If Double click is pressed, textarea is either expanding or collapsing
+    if (this.props.expandableOnDoubleClick) {
+      const newExpandedState = !this.state.expanded;
+      this.setState({ expanded: newExpandedState });
+
+      if (newExpandedState) {
+        // Expand
+        this.element.style.height = `${this.props.displayedHeight}px`;
+        this.element.style.boxShadow = 'var(--inputtextarea-box-shadow)';
+      } else {
+        // Collapse
+        this.element.style.height = `${this.props.collapsedHeight}px`;
+        this.element.style.boxShadow = '0px 0px';
+      }
+    }
+
+    if (this.props.onDoubleClick) {
+      this.props.onDoubleClick(e);
+    }
+  }
+
   onBlur(e) {
     if (this.props.autoResize) {
       this.resize();
@@ -79,6 +109,23 @@ export class InputTextarea extends Component {
       this.element.style.height = `${this.props.collapsedHeight}px`;
       this.element.style.position = 'relative';
       this.element.style.boxShadow = '0px 0px';
+    }
+  }
+
+  onKeyDown(e) {
+    // If Enter is pressed, textarea is resizable, and not expanded yet
+    if (e.key === 'Enter' && this.props.autoResize && !this.state.expanded) {
+      e.preventDefault();
+      this.setState({ expanded: true });
+
+      this.element.style.height = `${this.props.displayedHeight}px`;
+      this.element.style.boxShadow = 'var(--inputtextarea-box-shadow)';
+
+      if (this.props.onKeyDown) {
+        this.props.onKeyDown(e);
+      }
+    } else if (this.props.onKeyDown) {
+      this.props.onKeyDown(e);
     }
   }
 
@@ -194,8 +241,10 @@ export class InputTextarea extends Component {
           id={this.props.id}
           maxLength={this.props.maxLength}
           onBlur={this.onBlur}
+          onDoubleClick={this.onDoubleClick}
           onFocus={this.onFocus}
           onInput={this.onInput}
+          onKeyDown={this.onKeyDown}
           onKeyUp={this.onKeyUp}
           ref={input => (this.element = input)}
           rows={this.props.rows}

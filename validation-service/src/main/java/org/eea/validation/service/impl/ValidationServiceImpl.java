@@ -71,6 +71,7 @@ import javax.transaction.Transactional;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import static org.eea.utils.LiteralConstants.S3_VALIDATION;
 import static org.eea.utils.LiteralConstants.S3_VALIDATION_TABLE_PATH;
@@ -919,10 +920,10 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     DataSetSchemaVO schema = datasetSchemaController.findDataSchemaByDatasetId(dataSetMetabaseVO.getId());
-    setRuleMessageDL(schema, errors);
+    //setRuleMessageDL(schema.getIdDataSetSchema(), errors);
     validations.setErrors(errors);
 
-    validations.setTotalRecords(Long.valueOf(errors.size()));
+    validations.setTotalRecords((long) errors.size());
 
     return validations;
   }
@@ -953,32 +954,22 @@ public class ValidationServiceImpl implements ValidationService {
 
   /**
    * Sets the rule message.
+   * Setting the rule message to display it like this : <dynamic_value>
    *
-   * @param schema The schema
+   * @param schemaId The schemaId
    * @param validationErrorRecords the errors
    */
   @Override
-  public void setRuleMessageDL(DataSetSchemaVO schema, List<GroupValidationVO> validationErrorRecords) {
-    for (TableSchemaVO tableSchemaVO : schema.getTableSchemas()) {
-      String nameTableSchema = tableSchemaVO.getNameTableSchema();
-      ObjectId idRecordSchema = new ObjectId(tableSchemaVO.getRecordSchema().getIdRecordSchema());
-      RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(schema.getIdDataSetSchema()));
-
-      Optional<Rule> ruleObj = Optional.ofNullable(rulesSchema)
-          .map(RulesSchema::getRules)
-          .orElse(Collections.emptyList())
-          .stream()
-          .filter(rule -> rule.getReferenceId().equals(idRecordSchema))
-          .findFirst();
-
-      if (ruleObj.isPresent()) {
-        for (GroupValidationVO validationErrorRecord : validationErrorRecords) {
-          if ((EntityTypeEnum.FIELD == validationErrorRecord.getTypeEntity()
-              || EntityTypeEnum.RECORD == validationErrorRecord.getTypeEntity()
-              || EntityTypeEnum.TABLE == validationErrorRecord.getTypeEntity())
-              && validationErrorRecord.getShortCode().equals(ruleObj.get().getShortCode())
-              && validationErrorRecord.getNameTableSchema().equalsIgnoreCase(nameTableSchema)) {
-            validationErrorRecord.setMessage(replacePlaceHolders(ruleObj.get().getThenCondition().get(0)));
+  public void setRuleMessageDL(String schemaId, List<GroupValidationVO> validationErrorRecords) {
+    RulesSchema rules =
+        rulesRepository.findByIdDatasetSchema(new ObjectId(schemaId));
+    if (null != rules && null != rules.getRules()) {
+      for (GroupValidationVO validation : validationErrorRecords) {
+        for (Rule rule : rules.getRules()) {
+          if ((EntityTypeEnum.FIELD == validation.getTypeEntity()
+              || EntityTypeEnum.RECORD == validation.getTypeEntity())
+              && validation.getShortCode().equals(rule.getShortCode())) {
+            validation.setMessage(replacePlaceHolders(rule.getThenCondition().get(0)));
           }
         }
       }
@@ -1001,7 +992,6 @@ public class ValidationServiceImpl implements ValidationService {
    * Fill validation error data.
    *
    * @param error the error
-   * @param dataset the dataset
    * @param nHeaders the n headers
    * @return the string[]
    */

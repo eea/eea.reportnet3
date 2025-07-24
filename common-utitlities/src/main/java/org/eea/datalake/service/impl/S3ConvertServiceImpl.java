@@ -128,6 +128,8 @@ public class S3ConvertServiceImpl implements S3ConvertService {
         else{
             csvFile = new File(new File(exportDLPath, "dataset-" + datasetId), tableName + CSV_TYPE);
         }
+        // Ensure the directories exist
+        csvFile.getParentFile().mkdirs();
         LOG.info("Creating file for export: {}", csvFile);
 
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),

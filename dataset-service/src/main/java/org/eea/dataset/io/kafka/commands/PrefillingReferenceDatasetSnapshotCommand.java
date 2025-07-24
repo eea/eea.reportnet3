@@ -81,7 +81,7 @@ public class PrefillingReferenceDatasetSnapshotCommand extends AbstractEEAEventH
       try {
         DataSetSchema schema =
             datasetSchemaRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
-        fileTreatmentHelper.updateGeometry(datasetId, schema);
+        fileTreatmentHelper.updateGeometryV2(datasetId, schema);
 
         Thread.sleep(10000);
 

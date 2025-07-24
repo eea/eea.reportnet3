@@ -1,6 +1,9 @@
 package org.eea.dataset.service.file.interfaces;
 
+import java.io.OutputStream;
 import java.util.List;
+import java.util.zip.ZipOutputStream;
+
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.ExportFilterVO;
 
@@ -37,4 +40,14 @@ public interface WriterStrategy {
    */
   List<byte[]> writeFileList(Long dataflowId, Long partitionId, String includeCountryCode,
       boolean includeValidations) throws EEAException;
+
+  void writeAllTablesToSingleFileStreaming(OutputStream out, Long dataflowId, Long datasetId, String includeCountryCode,
+                                           boolean includeValidations, ExportFilterVO filters);
+
+  void writeEachTableToZipEntryStreaming(ZipOutputStream zipOut,
+                                         Long dataflowId,
+                                         Long datasetId,
+                                         String includeCountryCode,
+                                         boolean includeValidations,
+                                         ExportFilterVO filters) throws EEAException ;
 }

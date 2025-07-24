@@ -121,7 +121,7 @@ public class ImportExcelFileToDatasetCommand extends AbstractEEAEventHandlerComm
     ExcelReaderStrategy excelReaderStrategy =  new ExcelReaderStrategy(fileCommon, datasetId, fieldMaxLength, provider.getCode());
     excelReaderStrategy.parseFile(inputStream,dataflowId,partitionId,idTableSchema,datasetId,fileName,replacebool,dataSetSchema,connectionDataVO);
 
-      fileTreatmentHelper.updateGeometry(datasetId, dataSetSchema);
+      fileTreatmentHelper.updateGeometryV2(datasetId, dataSetSchema);
       fileTreatmentHelper.finishImportProcessV2(taskId, dataflowId, datasetId, processId, idTableSchema, fileName, null, false);
 
       fileTreatmentHelper.updateTask(taskId, ProcessStatusEnum.FINISHED,new Date());

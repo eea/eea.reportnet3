@@ -174,5 +174,5 @@ public interface S3Helper {
      * @param localPath The local path to be stored
      * @param filter The filtering (exclusions, inclusions)
      */
-    void downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter);
+    File downloadFileFromS3Locally(String s3Path, String localPath, DownloadFilter filter);
 }

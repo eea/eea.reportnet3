@@ -265,7 +265,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
             }
         } else {
             //Defining schema
-            List<String> parquetHeaders = Arrays.asList(PK, PARQUET_RECORD_ID_COLUMN_HEADER, VALIDATION_LEVEL, VALIDATION_AREA, MESSAGE, TABLE_NAME, FIELD_NAME, DATASET_ID, QC_CODE);
+            List<String> parquetHeaders = Arrays.asList(PK, PARQUET_RECORD_ID_COLUMN_HEADER, VALIDATION_LEVEL, VALIDATION_AREA, MESSAGE, TABLE_NAME, FIELD_NAME, DATASET_ID, QC_CODE, ID_RULE);
             List<Schema.Field> fields = new ArrayList<>();
             for (String header : parquetHeaders) {
                 fields.add(new Schema.Field(header, Schema.create(Schema.Type.STRING), null, null));
