@@ -3,6 +3,7 @@ package org.eea.datalake.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.SpatialDataHelper;
+import org.eea.datalake.service.model.FieldMetaData;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -15,6 +16,7 @@ import org.locationtech.jts.io.WKBWriter;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.wololo.geojson.Feature;
 import org.wololo.jts2geojson.GeoJSONWriter;
@@ -31,6 +33,12 @@ import java.util.stream.Collectors;
 
 @Component
 public class SpatialDataHandlingImpl implements SpatialDataHandling {
+
+  /**
+   * Max field size in MB
+   */
+  @Value(value = "${maximum.field.size}")
+  private Long maximumFieldSize;
 
   private static final Logger LOG = LoggerFactory.getLogger(SpatialDataHandlingImpl.class);
   private static final String FROM_XEX = "FROM_HEX";
@@ -53,7 +61,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public String convertToHEX(String value, long lineNumber) {
+  public String convertToHEX(String value, long lineNumber, List<FieldMetaData> listOfFieldMetaData) {
     try {
       if (!value.isBlank() && spatialDataHelper.isValidJSON(value)) {
         Geometry geometry = geoJsonReader.read(value);
@@ -65,6 +73,9 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         byte[] geomByteArray = new WKBWriter(2, true).write(geometry);
         geometry = null;
         String HexString = spatialDataHelper.bytesToHex(geomByteArray);
+        if (listOfFieldMetaData != null && fieldExceedsMaxSize(lineNumber, listOfFieldMetaData, geomByteArray)) {
+          return "";
+        }
         geomByteArray = null;
         return HexString;
       }
@@ -183,7 +194,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
       if (header.isPresent() && getGeoJsonEnums().contains(DataType.valueOf(header.get().toUpperCase()))) {
         String escValue = spatialDataHelper.escapeJsonString(value);
         if (StringUtils.isNotBlank(escValue) && spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
-          String hexStr = convertToHEX(escValue, lineNumber);
+          String hexStr = convertToHEX(escValue, lineNumber, null);
           String binaryStr = FROM_XEX + "('" + hexStr + "')";
           int valueStart = matcher.start(3);
           int valueEnd = matcher.end(3);
@@ -199,11 +210,30 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
     if (!geoJsonValue.isEmpty() ) {
       String escValue = spatialDataHelper.escapeJsonString(geoJsonValue);
       if (StringUtils.isNotBlank(escValue) && spatialDataHelper.coordinatesAreNotEmpty(escValue)) {
-        String hexStr = convertToHEX(escValue, lineNumber);
+        String hexStr = convertToHEX(escValue, lineNumber, null);
         return FROM_XEX + "('" + hexStr + "')";
       }
     }
     return "''";
+  }
+
+  /**
+   * Checks if the field of spatial data size exceeds 70MB
+   *
+   * @param lineNumber The line number of record
+   * @param listOfFieldMetaData The list of field metadata
+   * @param geomByteArray The WKB to calculate
+   */
+  private boolean fieldExceedsMaxSize(long lineNumber, List<FieldMetaData> listOfFieldMetaData, byte[] geomByteArray) {
+    long maxFieldSize = maximumFieldSize * 1024 * 1024L;
+    if (geomByteArray.length > maxFieldSize) {
+      FieldMetaData fieldMetaData = new FieldMetaData();
+      fieldMetaData.setFieldHasExceededSize(true);
+      fieldMetaData.setRecordLine(lineNumber);
+      listOfFieldMetaData.add(fieldMetaData);
+      return true;
+    }
+    return false;
   }
 
 }
