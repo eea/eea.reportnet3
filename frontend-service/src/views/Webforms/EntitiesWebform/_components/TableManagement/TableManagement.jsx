@@ -419,8 +419,8 @@ export const TableManagement = ({
           manageDialogs('delete', true);
         }}
         onEditClick={() => {
-          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData, });
-          onSelectEditTable(entitiesFieldSchemaValue, tableName,  rowData.recordId);
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
+          onSelectEditTable(entitiesFieldSchemaValue, tableName, rowData.recordId);
         }}
       />
     );
