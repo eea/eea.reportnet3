@@ -50,9 +50,6 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
-import org.eea.kafka.domain.EventType;
-import org.eea.kafka.domain.NotificationVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.UtilityClass;
 import org.mozilla.universalchardet.UniversalDetector;
@@ -120,7 +117,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private TableSchemaMapper tableSchemaMapper;
   private final StatisticsService statisticsService;
   private JdbcTemplate dremioJdbcTemplate;
-  private final KafkaSenderUtils kafkaSenderUtils;
+  private final ReleaseFieldLimitWarningComponentImpl releaseFieldLimitWarningComponent;
 
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
@@ -137,7 +134,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      TableSchemaMapper tableSchemaMapper,
                                      DataSetMetabaseMapper dataSetMetabaseMapper,
                                      StatisticsService statisticsService,
-                                     KafkaSenderUtils kafkaSenderUtils) {
+                                     ReleaseFieldLimitWarningComponentImpl releaseFieldLimitWarningComponent) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -153,7 +150,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.s3ConvertService = s3ConvertService;
     this.dataSetMetabaseMapper = dataSetMetabaseMapper;
     this.statisticsService = statisticsService;
-    this.kafkaSenderUtils = kafkaSenderUtils;
+    this.releaseFieldLimitWarningComponent = releaseFieldLimitWarningComponent;
   }
 
   @Override
@@ -567,7 +564,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           String[] rowArray = row.toArray(new String[0]);
           csvWriter.writeNext(rowArray);
         }
-        releaseFieldSizeNotification(recordLines, importFileInDremioInfo);
+        releaseFieldLimitWarningComponent.releaseFieldSizeNotification(recordLines, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
 
         csvWriter.flush();
         modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
@@ -712,7 +709,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           }
         }
 
-        releaseFieldSizeNotification(recordLines, importFileInDremioInfo);
+        releaseFieldLimitWarningComponent.releaseFieldSizeNotification(recordLines, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
 
         if (fileIsEmpty) {
           LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
@@ -735,21 +732,6 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
 
     LOG.info(MEASUREMENTS + " with job {} modifyCsvFile finished", importFileInDremioInfo);
     return modifiedCsvFiles;
-  }
-
-  private void releaseFieldSizeNotification(List<Long> recordLines, ImportFileInDremioInfo importFileInDremioInfo) throws EEAException {
-    if (!recordLines.isEmpty()) {
-      NotificationVO notificationVO = NotificationVO.builder()
-          .dataflowId(importFileInDremioInfo.getDataflowId())
-          .datasetId(importFileInDremioInfo.getDatasetId())
-          .build();
-      String result = recordLines.stream()
-          .map(String::valueOf)
-          .collect(Collectors.joining(","));
-      notificationVO.setRecordLines(result);
-
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SIZE_EXCEEDS_LIMIT_WARNING_EVENT, null, notificationVO);
-    }
   }
 
   private void checkForEmptyValues(CSVRecord csvRecord, String s, File csvFile, ImportFileInDremioInfo importFileInDremioInfo) throws InvalidFileException {

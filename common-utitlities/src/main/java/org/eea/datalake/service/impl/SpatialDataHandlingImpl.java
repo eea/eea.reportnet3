@@ -36,8 +36,8 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   /**
    * Max field size in MB
    */
-  @Value(value = "${maximum.field.size}")
-  private Long maximumFieldSize;
+  @Value(value = "${maximum.spatial.field.size}")
+  private Long maximumSpatialFieldSize;
 
   private static final Logger LOG = LoggerFactory.getLogger(SpatialDataHandlingImpl.class);
   private static final String FROM_XEX = "FROM_HEX";
@@ -220,16 +220,15 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   /**
-   * Checks if the field of spatial data size exceeds 70MB
+   * Checks if the field of spatial data size exceeds consul property in MB
    *
    * @param lineNumber The line number of record
    * @param recordLines The list of field metadata
    * @param geomByteArray The WKB to calculate
    */
   private boolean fieldExceedsMaxSize(long lineNumber, List<Long> recordLines, byte[] geomByteArray) {
-    long maxFieldSize = maximumFieldSize * 1024 * 1024L;
     LOG.info("WKB Size after conversion is :  {} bytes ", geomByteArray.length);
-    if (geomByteArray.length > maxFieldSize) {
+    if (UtilityClass.spatialFieldExceedsMaxSize(geomByteArray, maximumSpatialFieldSize)) {
       recordLines.add(++lineNumber);
       return true;
     }

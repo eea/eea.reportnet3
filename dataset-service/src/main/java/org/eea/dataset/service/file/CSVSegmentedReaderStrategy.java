@@ -15,10 +15,12 @@ import org.eea.dataset.persistence.data.domain.TableValue;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.service.ReleaseFieldLimitWarningComponent;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.CsvFileChunkRecoveryDetails;
 import org.eea.interfaces.vo.recordstore.ConnectionDataVO;
+import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -66,19 +68,20 @@ public class CSVSegmentedReaderStrategy {
      */
     private String providerCode;
 
-    /**
-     * The batch record save.
-     */
-    private int batchRecordSave;
+    private long maximumSpatialFieldSize;
+
+    private ReleaseFieldLimitWarningComponent releaseFieldLimitWarningComponent;
+
 
     public CSVSegmentedReaderStrategy(char delimiter, FileCommonUtils fileCommon, Long datasetId,
-                                      int fieldMaxLength, String providerCode, int batchRecordSave) {
+                                      int fieldMaxLength, String providerCode, long maximumSpatialFieldSize, ReleaseFieldLimitWarningComponent releaseFieldLimitWarningComponent) {
         this.delimiter = delimiter;
         this.fileCommon = fileCommon;
         this.datasetId = datasetId;
         this.fieldMaxLength = fieldMaxLength;
         this.providerCode = providerCode;
-        this.batchRecordSave = batchRecordSave;
+        this.maximumSpatialFieldSize = maximumSpatialFieldSize;
+        this.releaseFieldLimitWarningComponent = releaseFieldLimitWarningComponent;
     }
 
 
@@ -188,12 +191,14 @@ public class CSVSegmentedReaderStrategy {
                 numLines++;
                reader.readNext();
             }
+            List<Long> recordLines = new ArrayList<>();
             while ((line = reader.readNext()) != null && numLines < endLine) {
                 final List<String> values = Arrays.asList(line);
                 sanitizeAndCreateDataSet(partitionId, table, tables, values, headers, idTableSchema,
-                        idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords,numLines);
+                        idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords,numLines, recordLines);
                 numLines++;
             }
+            releaseFieldLimitWarningComponent.releaseFieldSizeNotification(recordLines, dataSetSchema.getIdDataFlow(), datasetId);
             dataset.setTableValues(tables);
             // Set the dataSetSchemaId of MongoDB
             dataset.setIdDatasetSchema(dataSetSchema.getIdDataSetSchema().toString());
@@ -240,11 +245,11 @@ public class CSVSegmentedReaderStrategy {
     private void sanitizeAndCreateDataSet(final Long partitionId, TableValue table,
                                           final List<TableValue> tables, final List<String> values, List<FieldSchema> headers,
                                           final String idTableSchema, final String idRecordSchema, final List<FieldSchema> fieldSchemas,
-                                          boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine) {
+                                          boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine,List<Long> recordLines) {
         // if the line is white then skip it
         if (null != values && !values.isEmpty() && !(values.size() == 1 && "".equals(values.get(0)))) {
             addRecordToTable(table, tables, values, partitionId, headers, idTableSchema, idRecordSchema,
-                    fieldSchemas, isDesignDataset, isFixedNumberOfRecords,currentCsvLine);
+                    fieldSchemas, isDesignDataset, isFixedNumberOfRecords,currentCsvLine,recordLines);
         }
     }
 
@@ -344,18 +349,18 @@ public class CSVSegmentedReaderStrategy {
     private void addRecordToTable(TableValue table, final List<TableValue> tables,
                                   final List<String> values, final Long partitionId, List<FieldSchema> headers,
                                   final String idTableSchema, final String idRecordSchema, List<FieldSchema> fieldSchemas,
-                                  boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine) {
+                                  boolean isDesignDataset, boolean isFixedNumberOfRecords,int currentCsvLine,List<Long> recordLines) {
         // Create object Table and set the attributes
         if (null == table.getIdTableSchema()) {
             table.setIdTableSchema(idTableSchema);
 
             table.setRecords(createRecords(values, partitionId, table.getIdTableSchema(), headers,
-                    idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine));
+                    idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine,recordLines));
             tables.add(table);
 
         } else {
             table.getRecords().addAll(createRecords(values, partitionId, table.getIdTableSchema(),
-                    headers, idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine));
+                    headers, idRecordSchema, fieldSchemas, isDesignDataset, isFixedNumberOfRecords, table,currentCsvLine,recordLines));
         }
     }
 
@@ -376,14 +381,14 @@ public class CSVSegmentedReaderStrategy {
     private List<RecordValue> createRecords(final List<String> values, final Long partitionId,
                                             final String idTableSchema, List<FieldSchema> headers, final String idRecordSchema,
                                             List<FieldSchema> fieldSchemas, boolean isDesignDataset, boolean isFixedNumberOfRecords,
-                                            TableValue tableValue,int currentCsvLine) {
+                                            TableValue tableValue,int currentCsvLine,List<Long> recordLines) {
         final List<RecordValue> records = new ArrayList<>();
         final RecordValue record = new RecordValue();
         if (null != idTableSchema) {
             record.setIdRecordSchema(idRecordSchema);
         }
         record.setFields(createFields(values, headers, fieldSchemas, isDesignDataset,
-                isFixedNumberOfRecords, record));
+                isFixedNumberOfRecords, record,recordLines,currentCsvLine));
         record.setDatasetPartitionId(partitionId);
         record.setDataProviderCode(this.providerCode);
         record.setTableValue(tableValue);
@@ -405,7 +410,7 @@ public class CSVSegmentedReaderStrategy {
      */
     private List<FieldValue> createFields(final List<String> values, List<FieldSchema> headers,
                                           List<FieldSchema> headersSchema, boolean isDesignDataset, boolean isFixedNumberOfRecords,
-                                          RecordValue record) {
+                                          RecordValue record, List<Long> recordLines, int currentCsvLine) {
         final List<FieldValue> fields = new ArrayList<>();
         List<String> idSchema = new ArrayList<>();
         int contAux = 0;
@@ -429,18 +434,16 @@ public class CSVSegmentedReaderStrategy {
                                 field.setValue("");
                                 break;
                             case POINT:
-                                break;
                             case LINESTRING:
-                                break;
                             case POLYGON:
-                                break;
                             case MULTIPOINT:
-                                break;
                             case MULTILINESTRING:
-                                break;
                             case MULTIPOLYGON:
-                                break;
                             case GEOMETRYCOLLECTION:
+                                if (UtilityClass.spatialFieldExceedsMaxSize(field.getValue().getBytes(), maximumSpatialFieldSize)) {
+                                    field.setValue("");
+                                    recordLines.add((long) currentCsvLine + 1);
+                                }
                                 break;
                             default:
                                 if (value.length() >= fieldMaxLength) {
