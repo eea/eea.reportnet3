@@ -3,7 +3,6 @@ package org.eea.datalake.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.SpatialDataHelper;
-import org.eea.datalake.service.model.FieldMetaData;
 import org.eea.interfaces.vo.dataset.RecordVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -61,8 +60,11 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   @Override
-  public String convertToHEX(String value, long lineNumber, List<FieldMetaData> listOfFieldMetaData) {
+  public String convertToHEX(String value, long lineNumber, List<Long> recordLines) {
     try {
+      long sizeInBytes = value.getBytes().length;
+
+      LOG.info("Size before conversion is :  {} bytes ", sizeInBytes);
       if (!value.isBlank() && spatialDataHelper.isValidJSON(value)) {
         Geometry geometry = geoJsonReader.read(value);
         String srid = spatialDataHelper.extractSRID(value);
@@ -73,7 +75,7 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
         byte[] geomByteArray = new WKBWriter(2, true).write(geometry);
         geometry = null;
         String HexString = spatialDataHelper.bytesToHex(geomByteArray);
-        if (listOfFieldMetaData != null && fieldExceedsMaxSize(lineNumber, listOfFieldMetaData, geomByteArray)) {
+        if (recordLines != null && fieldExceedsMaxSize(lineNumber, recordLines, geomByteArray)) {
           return "";
         }
         geomByteArray = null;
@@ -221,16 +223,14 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
    * Checks if the field of spatial data size exceeds 70MB
    *
    * @param lineNumber The line number of record
-   * @param listOfFieldMetaData The list of field metadata
+   * @param recordLines The list of field metadata
    * @param geomByteArray The WKB to calculate
    */
-  private boolean fieldExceedsMaxSize(long lineNumber, List<FieldMetaData> listOfFieldMetaData, byte[] geomByteArray) {
+  private boolean fieldExceedsMaxSize(long lineNumber, List<Long> recordLines, byte[] geomByteArray) {
     long maxFieldSize = maximumFieldSize * 1024 * 1024L;
+    LOG.info("WKB Size after conversion is :  {} bytes ", geomByteArray.length);
     if (geomByteArray.length > maxFieldSize) {
-      FieldMetaData fieldMetaData = new FieldMetaData();
-      fieldMetaData.setFieldHasExceededSize(true);
-      fieldMetaData.setRecordLine(lineNumber);
-      listOfFieldMetaData.add(fieldMetaData);
+      recordLines.add(++lineNumber);
       return true;
     }
     return false;
