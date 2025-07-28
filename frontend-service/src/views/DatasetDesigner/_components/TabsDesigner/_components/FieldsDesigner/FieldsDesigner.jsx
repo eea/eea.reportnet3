@@ -896,7 +896,7 @@ export const FieldsDesigner = ({
 
   return (
     <Fragment>
-      {isIcebergCreated && (
+      {isIcebergCreated && !viewType['tabularData'] && (
         <div className={styles.icebergWarning} role="alert">
           <strong>{resourcesContext.messages['info']}: </strong>
           {resourcesContext.messages['disableEditingBeforeSchemaChange']}
