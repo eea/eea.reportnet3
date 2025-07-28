@@ -113,11 +113,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           providerId: filterBy.providerId,
           datasetId: filterBy.datasetId,
           datasetName: filterBy.datasetName,
-          creatorUsername: !isAdmin
-            ? isProvider
-              ? userContext.preferredUsername
-              : filterBy.creatorUsername
-            : undefined,
+          creatorUsername: filterBy.creatorUsername,
           jobStatus: filterBy.jobStatus?.join()
         });
         setData(data.jobsList);
@@ -141,11 +137,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
               providerId: providerTabChange ? undefined : filterBy.providerId,
               datasetId: providerTabChange ? undefined : filterBy.datasetId,
               datasetName: providerTabChange ? undefined : filterBy.datasetName,
-              creatorUsername: !isAdmin
-                ? isProvider
-                  ? userContext.preferredUsername
-                  : filterBy.creatorUsername
-                : undefined,
+              creatorUsername: providerTabChange ? undefined : filterBy.creatorUsername,
               jobStatus: filterBy.jobStatus?.join()
             });
           }
@@ -247,11 +239,10 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
 
   const onSortCancelledTasks = event => {
     setSortCancelled({ field: event.sortField, order: event.sortOrder });
-    getCancelledTasks(
-      paginationInfo.firstPageRecord / paginationInfo.recordsPerPage,
-      paginationInfo.recordsPerPage,
-      { sortField: event.sortField, sortOrder: event.sortOrder }
-    );
+    getCancelledTasks(paginationInfo.firstPageRecord / paginationInfo.recordsPerPage, paginationInfo.recordsPerPage, {
+      sortField: event.sortField,
+      sortOrder: event.sortOrder
+    });
   };
 
   const getCancelledTasks = async (page, rows, sortOption) => {
@@ -260,8 +251,8 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
       const data = await JobsStatusesService.getCancelledValidations({
         pageNum: page !== undefined ? page : pageNum,
         numberRows: rows !== undefined ? rows : numberRows,
-        sortOrder: sortOption?.sortOrder || sortCancelled.order, 
-        sortField: sortOption?.sortField || sortCancelled.field, 
+        sortOrder: sortOption?.sortOrder || sortCancelled.order,
+        sortField: sortOption?.sortField || sortCancelled.field,
         jobId: jobStatus?.jobId ?? jobStatus?.id
       });
       setCancelledValidations(data.tasksList || []);
@@ -831,7 +822,7 @@ export const JobsStatuses = ({ onCloseDialog, isDialogVisible }) => {
           visible={isStatusInfoDialogVisible}>
           {jobStatus.jobInfo ? jobStatus.jobInfo : resourcesContext.messages['noJobStatusInfo']}
           <br />
-          {(jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && (
+          {((jobStatus?.jobType === 'VALIDATION' || jobStatus?.jobType === 'RELEASE') && jobStatus?.jobInfo !== null)  && (
             <>
               <Button
                 className={`p-button-secondary ${styles.buttonPushDown}`}
