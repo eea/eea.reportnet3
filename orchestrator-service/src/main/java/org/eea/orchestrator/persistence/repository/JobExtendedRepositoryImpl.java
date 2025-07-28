@@ -9,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -175,5 +176,24 @@ public class JobExtendedRepositoryImpl implements JobExtendedRepository{
         if(StringUtils.isNotBlank(jobStatuses)){
             query.setParameter("jobStatus", Arrays.asList(jobStatuses.split(",")));
         }
+    }
+
+    /**
+     * Save and commit changes to db
+     * @param job
+     * @return the saved job
+     */
+    @Override
+    @Transactional
+    public Job saveAndFlushJobManually(Job job){
+        Job savedJob;
+        if (job.getId() == null) {
+            entityManager.persist(job);
+            savedJob = job;
+        } else {
+            savedJob = entityManager.merge(job);
+        }
+        entityManager.flush();
+        return savedJob;
     }
 }
