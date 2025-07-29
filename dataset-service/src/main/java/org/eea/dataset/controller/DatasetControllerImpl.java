@@ -2692,7 +2692,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "mime type (extension file)",
                   example = "csv") @RequestParam("mimeType") String mimeType) {
     LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
             userNotificationContentVO);
@@ -2733,7 +2735,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "mime type (extension file)", example = "csv")
           @RequestParam("mimeType") String mimeType) {
     LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
             userNotificationContentVO);
