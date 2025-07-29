@@ -119,7 +119,7 @@ export const DatasetService = {
 
   deleteData: async (datasetId, arePrefilledTablesDeleted) =>
     await DatasetRepository.deleteData(datasetId, arePrefilledTablesDeleted),
-    
+
   deleteAttachment: async ({
     dataflowId,
     datasetId,

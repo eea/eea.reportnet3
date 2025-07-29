@@ -73,14 +73,13 @@ public class JobForRestartingLongRunningImportJobs {
             TokenVO tokenVo = null;
             List<JobVO> longRunningJobs = jobService.getJobsByTypeAndStatus(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS);
             if(longRunningJobs != null && !longRunningJobs.isEmpty()){
-                List<Long> jobIds = longRunningJobs.stream().map(JobVO::getId).collect(Collectors.toList());
-                LOG.info("Trying to restart import jobs {}", jobIds);
                 tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
             }
             for (JobVO job: longRunningJobs){
                 adminUserAuthorization.setAdminSecurityContextAuthenticationWithJobUserRoles(tokenVo, job);
                 Long durationOfJob = new Timestamp(System.currentTimeMillis()).getTime() - job.getDateStatusChanged().getTime();
                 if(durationOfJob > maxTimeForInProgressImportJobs){
+                    LOG.info("Trying to restart import job {}", job.getId());
                     jobService.restartImportJob(job.getId(), false);
                 }
             }

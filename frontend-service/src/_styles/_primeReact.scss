@@ -3266,3 +3266,8 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 .responsiveCardsGrid {
   @include responsiveCardsGrid;
 }
+
+.p-multiselect-label.p-multiselect-label.p-multiselect-label,
+.p-dropdown-label.p-dropdown-label.p-dropdown-label{
+  margin-bottom:0;
+}
