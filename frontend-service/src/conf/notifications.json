@@ -1027,7 +1027,7 @@
         { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" },
         { "key": "GET_VALIDATIONS_STATUSES_ERROR" },
         { "key": "GET_JOBS_STATUSES_ERROR" },
-        { "key": "GET_CANCELLED_TASKS_ERROR"},
+        { "key": "GET_CANCELLED_TASKS_ERROR" },
         { "key": "UPLOAD_TO_S3_ERROR" },
         { "key": "IMPORT_S3_TO_DLH_ERROR" },
         { "key": "GET_ORGANIZATIONS_ERROR" },
@@ -1419,7 +1419,13 @@
         { "key": "CLONE_DATASET_SCHEMAS_INIT" },
         { "key": "COPY_TO_EU_DATASET_INIT" },
         { "key": "EXPORT_EU_DATASET_INIT" },
-        { "key": "EXPORT_DATASET_DATA" },
+        {
+          "key": "EXPORT_DATASET_DATA",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
         { "key": "DOWNLOAD_VALIDATIONS_START" },
         { "key": "DOWNLOAD_QC_RULES_START" },
         { "key": "DATASET_IMPORT_INIT" },
