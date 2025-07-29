@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import javax.persistence.Id;
 import org.bson.types.ObjectId;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import lombok.Getter;
@@ -27,6 +28,10 @@ public class RulesSchema {
   @Field(value = "idDatasetSchema")
   private ObjectId idDatasetSchema;
 
+  /** Default level error for automatic QCs. */
+  @Field(value = "automaticQCsDefaultLevelError")
+  private ErrorTypeEnum automaticQCsDefaultLevelError = ErrorTypeEnum.BLOCKER;
+
   /** The rules dataset. */
   @Field(value = "rules")
   private List<Rule> rules;
@@ -38,7 +43,7 @@ public class RulesSchema {
    */
   @Override
   public int hashCode() {
-    return Objects.hash(rulesSchemaId, idDatasetSchema, rules);
+    return Objects.hash(rulesSchemaId, idDatasetSchema, automaticQCsDefaultLevelError, rules);
   }
 
   /**
@@ -58,6 +63,7 @@ public class RulesSchema {
     RulesSchema other = (RulesSchema) obj;
     return Objects.equals(rulesSchemaId, other.rulesSchemaId)
         && Objects.equals(idDatasetSchema, other.idDatasetSchema)
+        && Objects.equals(automaticQCsDefaultLevelError, other.automaticQCsDefaultLevelError)
         && Objects.equals(rules, other.rules);
   }
 }

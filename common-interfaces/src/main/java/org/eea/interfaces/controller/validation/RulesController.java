@@ -10,6 +10,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
@@ -128,6 +129,20 @@ public interface RulesController {
    */
   @PutMapping("/createNewRule")
   void createNewRule(@RequestParam("datasetId") long datasetId, @RequestBody RuleVO ruleVO);
+
+  /**
+   * Updates the automatic QC default level error for a dataset schema.
+   *
+   * @param datasetId the dataset ID used for authorization
+   * @param datasetSchemaId the dataset schema id
+   * @param automaticQCsDefaultLevelError the new automatic QC default level error
+   */
+  @PutMapping("/updateAutomaticQCsDefaultLevelError")
+  void updateAutomaticQCsDefaultLevelError(
+          @RequestParam("datasetId") long datasetId,
+          @RequestParam("idDatasetSchema") String datasetSchemaId,
+          @RequestParam("automaticQCsDefaultLevelError") ErrorTypeEnum automaticQCsDefaultLevelError
+  );
 
   /**
    * Creates the automatic rule.
