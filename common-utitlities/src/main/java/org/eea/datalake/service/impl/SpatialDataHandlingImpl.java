@@ -62,9 +62,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   @Override
   public String convertToHEX(String value, long lineNumber, List<Long> recordLines) {
     try {
-      long sizeInBytes = value.getBytes().length;
-
-      LOG.info("Size before conversion is :  {} bytes ", sizeInBytes);
       if (!value.isBlank() && spatialDataHelper.isValidJSON(value)) {
         Geometry geometry = geoJsonReader.read(value);
         String srid = spatialDataHelper.extractSRID(value);
@@ -220,14 +217,13 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
   }
 
   /**
-   * Checks if the field of spatial data size exceeds consul property in MB
+   * Checks if the field of spatial data size exceeds consul property
    *
    * @param lineNumber The line number of record
    * @param recordLines The list of field metadata
    * @param geomByteArray The WKB to calculate
    */
   private boolean fieldExceedsMaxSize(long lineNumber, List<Long> recordLines, byte[] geomByteArray) {
-    LOG.info("WKB Size after conversion is :  {} bytes ", geomByteArray.length);
     if (UtilityClass.spatialFieldExceedsMaxSize(geomByteArray, maximumSpatialFieldSize)) {
       recordLines.add(++lineNumber);
       return true;
