@@ -1551,7 +1551,7 @@
           "key": "IMPORT_FIELD_SIZE_EXCEEDS_LIMIT_WARNING_EVENT",
           "navigateTo": {
             "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId", "recordLines"]
+            "parameters": ["dataflowId", "datasetId", "recordLines", "tableName", "fieldName"]
           }
         }
       ]

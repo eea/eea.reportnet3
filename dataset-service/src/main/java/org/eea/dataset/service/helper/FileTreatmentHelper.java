@@ -2220,8 +2220,8 @@ public class FileTreatmentHelper implements DisposableBean {
     }
 
         public void reinitializeCsvSegmentedReaderStrategy ( char delimiter, FileCommonUtils fileCommon, Long datasetId,
-        int fieldMaxLength, String providerCode,int batchRecordSave){
-            this.csvSegmentedReaderStrategy = new CSVSegmentedReaderStrategy(delimiter, fileCommon, datasetId, fieldMaxLength, providerCode, maximumSpatialFieldSize, releaseFieldLimitWarningComponent);
+        int fieldMaxLength, String providerCode,String tableName){
+            this.csvSegmentedReaderStrategy = new CSVSegmentedReaderStrategy(delimiter, fileCommon, datasetId, fieldMaxLength, providerCode, maximumSpatialFieldSize, releaseFieldLimitWarningComponent, tableName);
         }
 
         @Transactional

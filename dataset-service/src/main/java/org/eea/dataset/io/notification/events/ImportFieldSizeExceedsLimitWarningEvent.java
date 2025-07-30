@@ -25,6 +25,8 @@ public class ImportFieldSizeExceedsLimitWarningEvent implements NotificableEvent
     notification.put("dataflowId", dataflowId);
     notification.put("datasetId", datasetId);
     notification.put("recordLines", notificationVO.getRecordLines());
+    notification.put("tableName", notificationVO.getTableName());
+    notification.put("fieldName", notificationVO.getFieldName());
 
     return notification;
   }

@@ -74,4 +74,8 @@ public class UserNotificationContentVO {
    * The record lines
    */
   private String recordLines;
+
+  private String tableName;
+
+  private String fieldName;
 }
