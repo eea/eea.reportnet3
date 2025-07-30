@@ -41,6 +41,7 @@ import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetService;
 import org.eea.dataset.service.DatasetTableService;
 import org.eea.dataset.service.ParquetConverterService;
+import org.eea.dataset.service.ReleaseFieldLimitWarningComponent;
 import org.eea.dataset.service.file.CSVSegmentedReaderStrategy;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.file.interfaces.IFileExportContext;
@@ -362,6 +363,12 @@ public class FileTreatmentHelper implements DisposableBean {
 
     @Autowired
     private DataSetMetabaseMapper dataSetMetabaseMapper;
+
+    @Value(value = "${maximum.spatial.field.size}")
+    private Long maximumSpatialFieldSize;
+
+    @Autowired
+    private ReleaseFieldLimitWarningComponent releaseFieldLimitWarningComponent;
 
     /**
      * Initialize the executor service.
@@ -2214,7 +2221,7 @@ public class FileTreatmentHelper implements DisposableBean {
 
         public void reinitializeCsvSegmentedReaderStrategy ( char delimiter, FileCommonUtils fileCommon, Long datasetId,
         int fieldMaxLength, String providerCode,int batchRecordSave){
-            this.csvSegmentedReaderStrategy = new CSVSegmentedReaderStrategy(delimiter, fileCommon, datasetId, fieldMaxLength, providerCode, batchRecordSave);
+            this.csvSegmentedReaderStrategy = new CSVSegmentedReaderStrategy(delimiter, fileCommon, datasetId, fieldMaxLength, providerCode, maximumSpatialFieldSize, releaseFieldLimitWarningComponent);
         }
 
         @Transactional

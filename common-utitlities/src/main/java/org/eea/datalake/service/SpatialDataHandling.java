@@ -12,7 +12,7 @@ import java.util.List;
 public interface SpatialDataHandling {
   boolean geoJsonHeadersAreNotEmpty(TableSchemaVO tableSchemaVO);
 
-  String convertToHEX(String value, long lineNumber);
+  String convertToHEX(String value, long lineNumber, List<Long> listOfFieldMetaData);
 
   StringBuilder getHeaders(TableSchemaVO tableSchemaVO);
 
