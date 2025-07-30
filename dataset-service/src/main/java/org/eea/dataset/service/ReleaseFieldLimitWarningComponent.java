@@ -1,9 +1,8 @@
 package org.eea.dataset.service;
 
+import org.eea.datalake.service.model.SpatialFieldInfo;
 import org.eea.exception.EEAException;
 
-import java.util.List;
-
 public interface ReleaseFieldLimitWarningComponent {
-  void releaseFieldSizeNotification(List<Long> recordLines, Long dataflowId, Long datasetId) throws EEAException;
+  void releaseFieldSizeNotification(SpatialFieldInfo spatialFieldInfo, Long dataflowId, Long datasetId) throws EEAException;
 }

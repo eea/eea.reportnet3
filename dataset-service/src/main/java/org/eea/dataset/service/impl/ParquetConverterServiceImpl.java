@@ -39,6 +39,7 @@ import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.dataset.service.model.FileWithRecordNum;
 import org.eea.dataset.service.model.ImportFileInDremioInfo;
+import org.eea.datalake.service.model.SpatialFieldInfo;
 import org.eea.exception.DremioApiException;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -546,7 +547,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           return null;
         }
 
-        List<Long> recordLines = new ArrayList<>();
+        SpatialFieldInfo spatialFieldInfo = new SpatialFieldInfo();
+        spatialFieldInfo.setTableName(tableName);
         for (CSVRecord csvRecord : csvParser) {
           checkForEmptyValues(csvRecord, "Empty first line in CSV file {}. {}", csvFile, importFileInDremioInfo);
           recordCounter++;
@@ -560,11 +562,11 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
           }
 
-          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, recordLines);
+          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, spatialFieldInfo);
           String[] rowArray = row.toArray(new String[0]);
           csvWriter.writeNext(rowArray);
         }
-        releaseFieldLimitWarningComponent.releaseFieldSizeNotification(recordLines, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
+        releaseFieldLimitWarningComponent.releaseFieldSizeNotification(spatialFieldInfo, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
 
         csvWriter.flush();
         modifiedCsvFiles.add(new FileWithRecordNum(csvFileWithAddedColumns, recordCounter));
@@ -670,7 +672,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           return null;
         }
 
-        List<Long> recordLines = new ArrayList<>();
+        SpatialFieldInfo spatialFieldInfo = new SpatialFieldInfo();
+        spatialFieldInfo.setTableName(tableName);
         for (CSVRecord csvRecord : csvParser) {
           fileIsEmpty = false;
           checkForEmptyValues(csvRecord, "Empty first line in csv file {}. {}", csvFile, importFileInDremioInfo);
@@ -688,7 +691,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
             importFileInDremioInfo.getWarningMessages().add(JobInfoEnum.WARNING_SOME_IMPORT_MISMATCH_OF_DATA.getValue(null));
           }
 
-          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, recordLines);
+          List<String> row = generateRow(csvRecord, typeMapping.getExpectedHeaders(), typeMapping.getFieldNameAndTypeMap(), importFileInDremioInfo, datasetType, recordCounter, spatialFieldInfo);
           String[] rowArray = row.toArray(new String[0]);
           csvWriter.writeNext(rowArray);
           row.clear();
@@ -709,7 +712,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           }
         }
 
-        releaseFieldLimitWarningComponent.releaseFieldSizeNotification(recordLines, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
+        releaseFieldLimitWarningComponent.releaseFieldSizeNotification(spatialFieldInfo, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getDatasetId());
 
         if (fileIsEmpty) {
           LOG.info("For job {} file {} contains only headers", importFileInDremioInfo, csvFile.getName());
@@ -792,7 +795,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   }
 
   private List<String> generateRow(CSVRecord csvRecord, List<FieldSchema> expectedHeaders, Map<String, DataType> fieldNameAndTypeMap,
-                                   ImportFileInDremioInfo importFileInDremioInfo, DatasetTypeEnum datasetType, long lineNumber, List<Long> recordLines) {
+                                   ImportFileInDremioInfo importFileInDremioInfo, DatasetTypeEnum datasetType, long lineNumber, SpatialFieldInfo spatialFieldInfo) {
     List<String> row = new ArrayList<>();
     String recordIdValue = UUID.randomUUID().toString();
 
@@ -809,12 +812,12 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
         row.add(importFileInDremioInfo.getDataProviderCode() != null ? importFileInDremioInfo.getDataProviderCode() : "");
       } else if (csvRecord.isMapped(expectedHeaderName)) {
         row.add(spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
-            spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName), lineNumber, recordLines) : csvRecord.get(expectedHeaderName));
+            spatialDataHandling.convertToHEX(csvRecord.get(expectedHeaderName), lineNumber, spatialFieldInfo, expectedHeaderName) : csvRecord.get(expectedHeaderName));
       } else {
         String headerWithBom = "\uFEFF" + expectedHeaderName;
         if(csvRecord.isMapped(headerWithBom)){
           row.add(spatialDataHandling.getGeoJsonEnums().contains(fieldType) ?
-                  spatialDataHandling.convertToHEX(csvRecord.get(headerWithBom), lineNumber, recordLines) : csvRecord.get(headerWithBom));
+                  spatialDataHandling.convertToHEX(csvRecord.get(headerWithBom), lineNumber, spatialFieldInfo, expectedHeaderName) : csvRecord.get(headerWithBom));
         }
         else{
           row.add("");

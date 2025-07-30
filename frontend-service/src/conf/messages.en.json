@@ -1766,7 +1766,7 @@
     "importCanceledEvent": "Import canceled for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
     "importRestartFailedEvent": "Import restart failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
     "importFailedEventIcebergExists": "Import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is a manually editable table in the dataflow",
-    "importFieldSizeExceedsLimitWarningEvent": "Those lines have not been imported due to size limitation of the geoSpatial data field : <strong title='{:recordLines}'>{:recordLines}</strong>",
+    "importFieldSizeExceedsLimitWarningEvent": "For <strong title='{:tableName}'>{:tableName}</strong>, and field : <strong title='{:fieldName}'>{:fieldName}</strong>, those lines have not been imported due to size limitation of the geoSpatial data field : <strong title='{:recordLines}'>{:recordLines}</strong> ",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "fmeImportJobFailedEvent": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
