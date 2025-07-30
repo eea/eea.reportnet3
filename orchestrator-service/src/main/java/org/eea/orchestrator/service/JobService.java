@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.orchestrator.persistence.domain.Job;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -88,4 +89,6 @@ public interface JobService {
     Long findProviderIdById(Long jobId);
 
     void restartImportJob(Long jobId, Boolean sendRestartNotification);
+
+    List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, Long dataflowId, Long providerId);
 }

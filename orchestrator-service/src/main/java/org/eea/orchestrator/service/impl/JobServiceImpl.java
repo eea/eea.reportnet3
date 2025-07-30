@@ -746,4 +746,15 @@ public class JobServiceImpl implements JobService {
         }
 
     }
+
+    @Override
+    public List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, Long dataflowId, Long providerId){
+        List<Job> jobs = jobRepository.findAllByDatasetIdAndJobStatusIn(datasetId, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+
+        if(dataflowId != null && providerId != null && providerId != 0L){
+            List<Job> jobsByDataflowAndProvider = jobRepository.findAllByDataflowIdAndProviderIdAndJobStatusIn(dataflowId, providerId, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+            jobs.addAll(jobsByDataflowAndProvider);
+        }
+        return jobMapper.entityListToClass(jobs);
+    }
 }

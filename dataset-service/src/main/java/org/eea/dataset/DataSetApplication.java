@@ -1,6 +1,7 @@
 package org.eea.dataset;
 
 import org.eea.lock.annotation.EnableLockAspect;
+import org.eea.lock.redis.EnableRedisLock;
 import org.eea.security.jwt.configuration.EeaEnableSecurity;
 import org.eea.swagger.EnableEEASwagger;
 import org.eea.s3configuration.EnableS3Configuration;
@@ -21,6 +22,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @EnableLockAspect
 @EnableCaching
 @EnableS3Configuration
+@EnableRedisLock
 public class DataSetApplication {
 
 

@@ -6,7 +6,9 @@ import lombok.Getter;
 public enum LockEnum {
 
   NATIONAL_COORDINATOR("NATIONAL_COORDINATOR"),
-  TASK_SCHEDULER("TASK_SCHEDULER");
+  TASK_SCHEDULER("TASK_SCHEDULER"),
+
+  PARQUET_CONVERSION("PARQUET_CONVERSION");
 
   private final String value;
 

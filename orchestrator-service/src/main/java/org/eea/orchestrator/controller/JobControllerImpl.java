@@ -46,12 +46,7 @@ import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.eea.utils.LiteralConstants.EXPORT_CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_PARQUET;
@@ -97,6 +92,8 @@ public class JobControllerImpl implements JobController {
     private static final String FILE_PATTERN_NAME_V2 = "etlExport_%s";
     @Autowired
     private JobProcessServiceImpl jobProcessServiceImpl;
+
+
 
     private static final String FILE_PATTERN_NAME_V4 = "etlExportV4_%s";
     private static final String FILE_PATTERN_NAME_V5 = "etlExportV5_%s";
@@ -997,6 +994,18 @@ public class JobControllerImpl implements JobController {
         }
         catch (Exception e){
             LOG.error("Could not restart import job with jobId {} Error: {}", jobId, e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
+    public List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId){
+        try {
+            return jobService.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+        }
+        catch (Exception e){
+            LOG.error("Could not retrieve active jobs for dataflowId {} datasetId {} and providerId {} Error: {}", dataflowId, datasetId, providerId, e.getMessage());
             throw e;
         }
     }

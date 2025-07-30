@@ -10,6 +10,8 @@ import org.eea.kafka.domain.EEAEventVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 /**
- * The Class EventHandlerCommand. Event Handler Command where we are encapsulating both
- * Object[EventHandlerReceiver] and the operation[Close] together as command.
+ * The Class IcebergToParquetConversionCommand. Handles the conversion from Iceberg to Parquet.
  */
 @Component
 public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCommand {
@@ -36,6 +37,10 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
 
   @Autowired
   private KafkaSenderUtils kafkaSenderUtils;
+
+  @Autowired
+  private RedisLockService redisLockService;
+
 
   @Override
   public EventType getEventType() {
@@ -56,10 +61,13 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
 
     Long datasetId = null;
     Long dataflowId = null;
+    String lockValue = null;
 
     try {
       datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
       dataflowId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataflowId")));
+      lockValue = (String) eeaEventVO.getData().get("lockValue");
+
       Long providerId = eeaEventVO.getData().get("providerId") != null
           ? Long.parseLong(String.valueOf(eeaEventVO.getData().get("providerId")))
           : null;
@@ -71,7 +79,7 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
 
         if (tableSchemaVO != null) {
-          bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId);
+          bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId, lockValue);
         } else {
           LOG.error("TableSchemaVO not found for tableSchemaId: {}", tableSchemaId);
         }
@@ -88,11 +96,15 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
               .build()
       );
 
-      LOG.info("Successfully completed Iceberg to Parquet conversion for datasetId: {}", datasetId);
+      LOG.info("Successfully completed Iceberg to Parquet conversion for datasetId: {} and user {}", datasetId, user);
 
 
     } catch (Exception e) {
-      LOG.error("Error processing Kafka event for converting Iceberg to Parquet: {}", e.getMessage());
+      LOG.error("Error processing Kafka event for converting Iceberg to Parquet for datasetId: {} and user {} : {}", datasetId, user, e.getMessage());
+
+      String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+      redisLockService.releaseLock(lockKey, lockValue);
+      LOG.info("Released lock {} with value {}", lockKey, lockValue);
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT,

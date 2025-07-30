@@ -288,7 +288,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !DatasetTypeEnum.REFERENCE.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()) {
         //convert old table to iceberg
         Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
-        bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
+        bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
         try {
@@ -296,7 +296,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           return numberOfRecordsUpdated;
         } finally {
           //after all updates convert iceberg to parquet
-          bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
+          bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
         }
       }
 
