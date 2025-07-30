@@ -471,6 +471,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception {
         String createNewTableQuery = "CREATE TABLE " + newTablePathInDremio + " AS SELECT * FROM " + oldTablePathInDremio;
         String processId = executeSqlStatement(createNewTableQuery);
+        LOG.info("Executing query with processId {} in dremio. Query: {}", processId, createNewTableQuery);
         checkIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId, null);
     }
 }

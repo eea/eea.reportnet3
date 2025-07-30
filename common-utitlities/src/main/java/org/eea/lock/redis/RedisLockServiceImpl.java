@@ -3,6 +3,8 @@ package org.eea.lock.redis;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -26,5 +28,11 @@ public class RedisLockServiceImpl implements RedisLockService {
     if (value.equals(storedValue)) {
       redisTemplate.delete(lockKey);
     }
+  }
+
+  @Override
+  public Set<String> listActiveLocks(String prefix){
+    Set<String> activeLockKeys = redisTemplate.keys(prefix);
+    return activeLockKeys;
   }
 }

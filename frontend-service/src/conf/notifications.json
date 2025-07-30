@@ -1095,6 +1095,20 @@
             "parameters": ["dataflowId", "datasetId"],
             "hasQueryString": true
           }
+        },
+        {
+          "key": "PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
         }
       ]
     },

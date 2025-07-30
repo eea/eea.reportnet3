@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** The Interface JobController. */
 public interface JobController {
@@ -342,6 +343,9 @@ public interface JobController {
      */
     @PostMapping(value = "/restartImportJob/{jobId}")
     void restartImportJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification);
+
+    @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
+    List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId);
 }
 
 

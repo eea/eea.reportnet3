@@ -1,0 +1,46 @@
+package org.eea.dataset.io.notification.events;
+
+import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.notification.event.NotificableEventHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * The Class IcebergToParquetFailedActiveJobsEvent.
+ */
+@Component
+public class IcebergToParquetFailedActiveJobsEvent implements NotificableEventHandler {
+
+    @Autowired
+    private DatasetMetabaseService datasetMetabaseService;
+
+
+    @Override
+    public EventType getEventType() {
+        return EventType.ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT;
+    }
+
+    @Override
+    public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
+        DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(notificationVO.getDatasetId());
+
+        String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
+                : datasetVO.getDataSetName();
+
+
+        Map<String, Object> notification = new HashMap<>();
+        notification.put("user", notificationVO.getUser());
+        notification.put("datasetId", notificationVO.getDatasetId());
+        notification.put("dataflowId", notificationVO.getDataflowId());
+        notification.put("datasetName", datasetName);
+        notification.put("message", "Iceberg το Parquet conversion failed because there are queued or in progress jobs for the same datasetId.");
+        return notification;
+    }
+}
