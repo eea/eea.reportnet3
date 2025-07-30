@@ -1,14 +1,19 @@
 package org.eea.orchestrator.service.impl;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.eea.interfaces.vo.orchestrator.JobsHistoryVO;
 import org.eea.interfaces.vo.orchestrator.JobHistoryVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.orchestrator.mapper.JobHistoryMapper;
 import org.eea.orchestrator.persistence.domain.Job;
 import org.eea.orchestrator.persistence.domain.JobHistory;
+import org.eea.orchestrator.persistence.domain.JobStatsDTO;
 import org.eea.orchestrator.persistence.repository.JobHistoryRepository;
 import org.eea.orchestrator.service.JobHistoryService;
 import org.eea.orchestrator.utils.JobUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,4 +81,36 @@ public class JobHistoryServiceImpl implements JobHistoryService {
             jobHistoryRepository.save(optionalJobHistory.get());
         }
     }
+
+    @Override
+    public String getJobStatsForYesterday() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M-d");
+
+        JSONArray daysArray = new JSONArray();
+
+        LocalDate day = LocalDate.now().minusDays(1);
+        String formattedDay = day.format(formatter);
+
+        JSONObject dayObject = new JSONObject();
+        dayObject.put("day", formattedDay);
+        dayObject.put("data", new JSONObject(jobHistoryRepository.getJobStatsForPreviousDay(1).toString())); // Deep copy
+
+        daysArray.put(dayObject);
+
+        JSONObject dayObjectMinus2 = new JSONObject();
+        day = LocalDate.now().minusDays(2);
+        formattedDay = day.format(formatter);
+
+        dayObjectMinus2.put("day", formattedDay);
+        dayObjectMinus2.put("data", new JSONObject(jobHistoryRepository.getJobStatsForPreviousDay(2).toString())); // Deep copy
+
+        daysArray.put(dayObjectMinus2);
+
+        JSONObject finalObject = new JSONObject();
+        finalObject.put("days", daysArray);
+
+        return finalObject.toString(2);
+    }
+
+
 }

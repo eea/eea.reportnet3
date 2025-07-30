@@ -342,6 +342,15 @@ public interface JobController {
      */
     @PostMapping(value = "/restartImportJob/{jobId}")
     void restartImportJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification);
+
+
+    /**
+     * Get jobs statistics
+     *
+     * @return a dto with jobs statistics
+     */
+    @GetMapping(value = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
+    String getJobsStatistics();
 }
 
 
