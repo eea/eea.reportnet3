@@ -139,8 +139,9 @@ public interface BigDataDatasetService {
      * @param tableSchemaVO the tableSchemaVO
      * @param datasetSchemaId the datasetSchemaId
      * @param lockValue the lock value
+     * @return true if table can be converted
      */
-    void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
+    Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table

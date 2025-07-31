@@ -1211,7 +1211,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
             LOG.info("Can not convert iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
-                    "because table data are not manually editable or the iceberg table has not been created", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema());
+                    "because table data are not manually editable or the iceberg table has not been created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), lockValue);
             return false;
         }
 
@@ -1243,11 +1243,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
 
         dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
+        //refresh the metadata
+        dremioHelperService.refreshTableMetadataAndPromote(null, icebergTablePath, s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
         return true;
     }
 
     @Override
-    public void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception {
+    public Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception {
         if(providerId == null) {
             providerId = datasetService.getDataProviderIdById(datasetId);
         }
@@ -1255,8 +1257,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || !BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
             LOG.info("Can not convert iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
-                    "because table data are not manually editable or the iceberg table has not been created", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema());
-            return;
+                    "because table data are not manually editable or the iceberg table has not been created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), lockValue);
+            return false;
         }
 
         DatasetTypeEnum datasetType = datasetMetabaseService.getDatasetType(datasetId);
@@ -1277,30 +1279,21 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         }
 
-        DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, tableSchemaVO.getIdTableSchema(), false);
-
-        //todo do all of them inside ifs
         Boolean icebergFolderExists = s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         Boolean icebergFolderIsPromoted = icebergFolderExists ? dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema()) : false;
         Long icebergRecordCount = (icebergFolderExists && icebergFolderIsPromoted) ? dremioHelperService.getRowCount(icebergTablePath) : 0L;
 
 
         //if table does not exist or has 0 records do not do anything
-        if (!s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) ||
-                !dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema()) || dremioHelperService.getRowCount(icebergTablePath) == 0) {
+        if (!icebergFolderExists || !icebergFolderIsPromoted || icebergRecordCount == 0) {
             //iceberg table does not exist and no parquet table should be created
-            datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
-            if(s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX) && dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema())
-                && dremioHelperService.getRowCount(icebergTablePath) == 0){
+            if(icebergFolderExists && icebergFolderIsPromoted && icebergRecordCount == 0){
                 //remove iceberg table
-                dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
                 LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
-                //remove folders that contain the previous parquet files because data will be replaced
-                if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
-                    s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
-                }
+                dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
+                s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
             }
-            return;
+            return true;
         }
 
         dremioHelperService.createTableFromAnotherTable(icebergTablePath, parquetInnerFolderQueryPath);
@@ -1312,24 +1305,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             createReferenceFolder(s3TablePathResolver);
         }
 
-        //remove iceberg table
-        dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
-        LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
-        //remove folders that contain the previous parquet files because data will be replaced
-        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
-            s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
-        }
-
-        datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
-
-        String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
-        redisLockService.releaseLock(lockKey, lockValue);
-        LOG.info("Released lock {} with value {}", lockKey, lockValue);
+        return true;
     }
 
     @Override
-    public void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue)
-        throws EEAException {
+    public void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception {
         if (tableSchemaIds == null || tableSchemaIds.isEmpty()) {
             List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
             tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());
@@ -1349,7 +1329,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Override
     public void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception {
-
         if (tableSchemaIds == null || tableSchemaIds.isEmpty()) {
             List<TableSchemaIdNameVO> tableSchemas = datasetSchemaService.getTableSchemasIds(datasetId);
             tableSchemaIds = tableSchemas.stream().map(TableSchemaIdNameVO::getIdTableSchema).collect(Collectors.toList());

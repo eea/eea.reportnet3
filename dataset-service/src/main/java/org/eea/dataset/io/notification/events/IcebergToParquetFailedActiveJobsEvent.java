@@ -29,11 +29,12 @@ public class IcebergToParquetFailedActiveJobsEvent implements NotificableEventHa
 
     @Override
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-        DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(notificationVO.getDatasetId());
+        String datasetName = notificationVO.getDatasetName();
 
-        String datasetName = notificationVO.getDatasetName() != null ? notificationVO.getDatasetName()
-                : datasetVO.getDataSetName();
-
+        if(datasetName == null){
+            DataSetMetabaseVO datasetVO = datasetMetabaseService.findDatasetMetabase(notificationVO.getDatasetId());
+            datasetName = datasetVO.getDataSetName();
+        }
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());

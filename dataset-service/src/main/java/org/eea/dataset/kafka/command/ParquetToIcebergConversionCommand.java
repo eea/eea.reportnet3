@@ -70,6 +70,7 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
     Long datasetId = null;
     Long dataflowId = null;
     String lockValue = null;
+
     try {
       datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
       dataflowId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("dataflowId")));
