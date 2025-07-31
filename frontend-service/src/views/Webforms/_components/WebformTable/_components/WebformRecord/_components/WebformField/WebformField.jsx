@@ -541,7 +541,7 @@ export const WebformField = ({
             onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
             ref={inputRef}
-            value={field.value}
+            value={field.value ?? undefined}
           />
         );
       case 'TEXTAREA':
@@ -569,10 +569,10 @@ export const WebformField = ({
                   onEditorKeyChange(event, field, option);
                 }
               }}
-              value={field.value}
+              value={field.value ?? undefined}
             />
             <CharacterCounter
-              currentLength={field.value.length}
+              currentLength={field.value?.length ?? 0}
               style={{ position: 'relative', right: '0', top: '0.25rem' }}
             />
           </Fragment>

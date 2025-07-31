@@ -158,7 +158,7 @@ export class InputText extends Component {
         ) : null}
         {this.props.hasMaxCharCounter ? (
           <CharacterCounter
-            currentLength={this.props.value.length}
+            currentLength={this.props.value?.length ?? 0}
             inputRef={el => (this.inputElement = el)}
             maxLength={this.props.maxLength}
             style={this.props.characterCounterStyles}
