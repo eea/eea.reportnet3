@@ -215,10 +215,10 @@ public class JobHistoryExtendedRepositoryImpl implements JobHistoryExtendedRepos
             "select\n" +
             "\tCOUNT(*) as totalJobs,\n" +
             "    COUNT(*) FILTER (WHERE job_type = 'IMPORT') AS importJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_type = 'VALIDATION') AS validationJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_type = 'RELEASE') AS releaseJobs,\n" +
             "    COUNT(*) FILTER (WHERE job_type = 'FILE_EXPORT') AS exportJobs,\n" +
             "    COUNT(*) FILTER (WHERE job_type = 'DELETE') AS deleteJobs,\n" +
-            "    COUNT(*) FILTER (WHERE job_type = 'RELEASE') AS releaseJobs,\n" +
-            "    COUNT(*) FILTER (WHERE job_type = 'VALIDATION') AS validationJobs,\n" +
             "    COUNT(*) FILTER (WHERE job_status = 'FINISHED') AS finishedJobs,\n" +
             "    COUNT(*) FILTER (WHERE job_status = 'FAILED') AS failedJobs,\n" +
             "    COUNT(*) FILTER (WHERE job_status = 'REFUSED') AS refusedJobs,\n" +
