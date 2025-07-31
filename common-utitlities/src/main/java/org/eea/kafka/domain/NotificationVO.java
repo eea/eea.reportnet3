@@ -91,4 +91,13 @@ public class NotificationVO implements Serializable {
 
   /** Empty dataset */
   private boolean emptyTable;
+
+  /**
+   * The record lines
+   */
+  private String recordLines;
+
+  private String tableName;
+
+  private String fieldName;
 }

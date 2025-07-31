@@ -1000,6 +1000,11 @@ public class JobControllerImpl implements JobController {
             throw e;
         }
     }
+
+    @GetMapping(value = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getJobsStatistics() {
+        return jobHistoryService.getJobStatsForYesterday();
+    }
 }
 
 
