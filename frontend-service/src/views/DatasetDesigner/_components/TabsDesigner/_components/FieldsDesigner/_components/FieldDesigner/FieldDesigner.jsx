@@ -1576,9 +1576,6 @@ export const FieldDesigner = ({
     if (isDesignDatasetEditorRead) {
       return resourcesContext.messages['disabledEditorRead'];
     }
-    if (isIcebergCreated) {
-      return resourcesContext.messages['disableEditingBeforeSchemaChange'];
-    }
   };
 
   const renderTooltipLink = () => {
