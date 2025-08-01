@@ -29,6 +29,9 @@ public class ReportingDatasetPublicVO implements Serializable {
   /** The date released. */
   private Date dateReleased;
 
+  /** The first release date. */
+  private Date firstReleaseDate;
+
   /** The data provider id. */
   private Long dataProviderId;
 
