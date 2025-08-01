@@ -5,6 +5,8 @@ import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.mapper.ReportingDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -21,6 +23,7 @@ import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -106,10 +109,29 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    */
   @Override
   public List<ReportingDatasetPublicVO> getDataSetPublicByDataflow(Long dataflowId) {
-    List<ReportingDatasetPublicVO> reportings =
-        reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
-    setRestrictFromPublic(reportings, dataflowId);
-    return reportings;
+    List<ReportingDatasetVO> entities = getDataSetIdByDataflowId(dataflowId);
+    if (entities.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    List<ReportingDatasetPublicVO> vos =
+            reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
+
+    // Set first release date for each reporting dataset.
+    for (int i = 0; i < entities.size(); i++) {
+      ReportingDatasetPublicVO vo = vos.get(i);
+      Long datasetId = entities.get(i).getId();
+
+      // First release date.
+      Snapshot first = snapshotRepository
+              .findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByDateReleasedAsc(datasetId);
+
+      vo.setFirstReleaseDate(first != null ? first.getDateReleased() : null);
+    }
+
+    setRestrictFromPublic(vos, dataflowId);
+    return vos;
+
   }
 
   /**
