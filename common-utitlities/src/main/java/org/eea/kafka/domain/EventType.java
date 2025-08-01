@@ -734,6 +734,9 @@ public enum EventType {
   ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "iceberg_to_parquet_failed_active_jobs_event", true),
 
+  ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "another_conversion_is_running_failed_event", true),
+
   PREFILLED_TABLE_HAS_NO_DATA_ERROR(LiteralConstants.DATA_REPORTING_TOPIC,
       "prefilled_table_has_no_data_error", true),
 

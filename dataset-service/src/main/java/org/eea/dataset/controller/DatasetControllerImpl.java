@@ -3431,24 +3431,19 @@ public class DatasetControllerImpl implements DatasetController {
                                            @RequestParam(value = "providerId", required = false) Long providerId,
                                            @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
-    String datasetName = null;
     String username = SecurityContextHolder.getContext().getAuthentication().getName();
     String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
     String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String datasetName = dataSetMetabaseVO.getDataSetName();
 
     if(providerId == null){
-      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       providerId = dataSetMetabaseVO.getDataProviderId();
-      datasetName = dataSetMetabaseVO.getDataSetName();
     }
 
     List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
     if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
       LOG.info("Can not convert tables from parquet to iceberg for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id", dataflowId, datasetId, providerId, username);
-      if(datasetName == null){
-        DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-        datasetName = dataSetMetabaseVO.getDataSetName();
-      }
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT, null,
               NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
       return;
@@ -3463,6 +3458,9 @@ public class DatasetControllerImpl implements DatasetController {
         Set<String> activeLock = redisLockService.listActiveLocks(lockKey);
         LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another parquet to iceberg conversion for the same dataset is in progress {}",
                 username, dataflowId, datasetId, providerId, tableSchemaIds, activeLock);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
+                NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+
       }
     } catch (Exception e) {
       LOG.error("Failed to initiate Parquet to Iceberg conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",
@@ -3480,24 +3478,20 @@ public class DatasetControllerImpl implements DatasetController {
                                            @RequestParam(value = "providerId", required = false) Long providerId,
                                            @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
-    String datasetName = null;
     String username = SecurityContextHolder.getContext().getAuthentication().getName();
     String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
     String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
 
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String datasetName = dataSetMetabaseVO.getDataSetName();
     if(providerId == null){
-      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
       providerId = dataSetMetabaseVO.getDataProviderId();
-      datasetName = dataSetMetabaseVO.getDataSetName();
+
     }
 
     List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
     if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
       LOG.info("Can not convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id", dataflowId, datasetId, providerId, username);
-      if(datasetName == null){
-        DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-        datasetName = dataSetMetabaseVO.getDataSetName();
-      }
       kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT, null,
               NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
       return;
@@ -3512,6 +3506,8 @@ public class DatasetControllerImpl implements DatasetController {
         Set<String> activeLock = redisLockService.listActiveLocks(lockKey);
         LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
                 username, dataflowId, datasetId, providerId, tableSchemaIds, activeLock);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
+                NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
       }
     } catch (Exception e) {
       LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",

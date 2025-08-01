@@ -1786,6 +1786,8 @@
     "hideCancelledValidations": "Hide canceled validations",
     "noCancelledTasks": "There are no canceled validations for this job",
     "parquetToIcebergFailedActiveJobsEvent": "Enabling editing failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: There are currently jobs running for the same dataset. You can enable editing once they are finished.",
-    "icebergToParquetFailedActiveJobsEvent": "Disabling editing failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: There are currently jobs running for the same dataset. You can disable editing once they are finished."
+    "icebergToParquetFailedActiveJobsEvent": "Disabling editing failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: There are currently jobs running for the same dataset. You can disable editing once they are finished.",
+    "anotherConversionIsRunningFailedEvent": "Failed to enable/disable editing for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: A Another user has already initiated this action."
+
   }
 }

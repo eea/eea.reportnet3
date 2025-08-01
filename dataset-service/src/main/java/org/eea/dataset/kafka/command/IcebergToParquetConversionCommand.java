@@ -116,7 +116,8 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
 
       //iceberg enabled should be updated at the end iceberg files should be deleted also at the end of the conversion to ensure that all available tables were converted.
       for (TableSchemaVO table : availableForConversionTables) {
-        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, providerId, datasetId, table.getNameTableSchema(), table.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+        Long usedProviderId = (providerId != null) ? providerId : 0L;
+        S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, usedProviderId, datasetId, table.getNameTableSchema(), table.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
