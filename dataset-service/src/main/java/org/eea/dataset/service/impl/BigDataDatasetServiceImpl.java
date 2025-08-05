@@ -1226,7 +1226,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         //remove old iceberg table because it will be recreated
         if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
-            LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
+            LOG.info("Removing iceberg files for table in path {} LockValue: {}", icebergTablePath, lockValue);
             dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
             s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         }
@@ -1234,17 +1234,45 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         s3TablePathResolver.setPath(parquetTableS3PathConstant);
         String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
 
+        Boolean parquetFolderExists = s3HelperPrivate.checkFolderExist(s3TablePathResolver, parquetTableS3PathConstant);
+        Boolean parquetFolderIsPromoted = parquetFolderExists ? dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema()) : false;
+
+        if(parquetFolderExists && !parquetFolderIsPromoted){
+            //try to promote parquet table. If table can not be promoted, stop the process.
+            try {
+                LOG.info("Parquet table {} is not promoted. Will try to promote it. LockValue: {}", parquetTablePath, lockValue);
+                dremioHelperService.refreshTableMetadataAndPromote(null, parquetTablePath, s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                parquetFolderIsPromoted = dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                if(!parquetFolderIsPromoted){
+                    throw new Exception("Promoting table failed");
+                }
+            }
+            catch (Exception e){
+                LOG.error("Could not promote parquet table {}. LockValue: {} Error: {}", parquetTablePath, lockValue, e.getMessage());
+                throw new Exception("Parquet table " + parquetTablePath + " is not promoted");
+            }
+        }
+
         //if table does not exist or has 0 records do not do anything
-        if (!s3HelperPrivate.checkFolderExist(s3TablePathResolver, parquetTableS3PathConstant) ||
-                !dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema()) || dremioHelperService.getRowCount(parquetTablePath) == 0) {
+        if (!parquetFolderExists  || dremioHelperService.getRowCount(parquetTablePath) == 0) {
             //parquet table does not exist and no iceberg table should be created
-            LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} parquet table does not exist or has 0 records so no iceberg table will be created", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema());
+            LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} parquet table does not exist or has 0 records so no iceberg table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
             return true;
         }
 
         dremioHelperService.createTableFromAnotherTable(parquetTablePath, icebergTablePath);
         //refresh the metadata
         dremioHelperService.refreshTableMetadataAndPromote(null, icebergTablePath, s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
+
+        //check iceberg table was created successfully and has the same number of records as the parquet table
+        try {
+            Long numberOfRecords = dremioHelperService.compareNumberOfRecords(icebergTablePath, parquetTablePath);
+            LOG.info("Iceberg table {} has been created successfully from parquet table {} Number of records is {}. LockValue: {}", icebergTablePath, parquetTablePath, numberOfRecords, lockValue);
+        }
+        catch (Exception e){
+            LOG.info("Iceberg table {} has not been created successfully from parquet table {}. LockValue: {}", icebergTablePath, parquetTablePath, lockValue);
+            throw e;
+        }
         return true;
     }
 
@@ -1274,8 +1302,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
             //remove old parquet table because it will be recreated
-            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());   //TODO check what will happen if the folder is already demoted
-            LOG.info("Removing parquet files for table in path {}", parquetTablePath);
+            dremioHelperService.demoteFolderOrFile(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+            LOG.info("Removing parquet files for table in path {} LockValue: {}", parquetTablePath, lockValue);
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         }
 
@@ -1289,7 +1317,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             //iceberg table does not exist and no parquet table should be created
             if(icebergFolderExists && icebergFolderIsPromoted && icebergRecordCount == 0){
                 //remove iceberg table
-                LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
+                LOG.info("Removing iceberg files for table in path {} LockValue: {}", icebergTablePath, lockValue);
                 dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
                 s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
             }
@@ -1303,6 +1331,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if(datasetType == DatasetTypeEnum.REFERENCE){
             s3TablePathResolver.setPath(S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
             createReferenceFolder(s3TablePathResolver);
+        }
+
+        //check parquet table was created successfully and has the same number of records as the iceberg table
+        try {
+            Long numberOfRecords = dremioHelperService.compareNumberOfRecords(parquetTablePath, icebergTablePath);
+            LOG.info("Parquet table {} has been created successfully from iceberg table {} Number of records is {}. LockValue: {}", parquetTablePath, icebergTablePath, numberOfRecords, lockValue);
+        }
+        catch (Exception e){
+            LOG.info("Parquet table {} has not been created successfully from iceberg table {}. LockValue: {}", parquetTablePath, icebergTablePath, lockValue);
+            throw e;
         }
 
         return true;

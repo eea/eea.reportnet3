@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface RedisLockController {
@@ -18,7 +19,7 @@ public interface RedisLockController {
     }
 
     @GetMapping(value = "/getActiveRedisLocksByKey")
-    Set<String> getActiveRedisLocksByKey(@RequestParam(value = "lockKeyPrefix", required = false) String lockKeyPrefix);
+    Map<String, String> getActiveRedisLocksByKey(@RequestParam(value = "lockKeyPrefix", required = false) String lockKeyPrefix);
 
     @DeleteMapping(value = "/releaseLock")
     void releaseLock(@RequestParam("lockKey") String lockKey, @RequestParam("lockValue") String lockValue);

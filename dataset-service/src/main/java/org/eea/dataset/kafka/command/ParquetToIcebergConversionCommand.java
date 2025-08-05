@@ -6,9 +6,11 @@ import java.util.List;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.service.BigDataDatasetService;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetTableService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
@@ -50,6 +52,10 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
   @Autowired
   private DatasetTableService datasetTableService;
 
+  @Lazy
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
   @Override
   public EventType getEventType() {
     return EventType.COMMAND_PARQUET_TO_ICEBERG_CONVERSION;
@@ -70,6 +76,7 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
     Long datasetId = null;
     Long dataflowId = null;
     String lockValue = null;
+    String datasetName = null;
 
     try {
       datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
@@ -81,7 +88,9 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
           : null;
       List<String> tableSchemaIds = (List<String>) eeaEventVO.getData().get("tableSchemaIds");
 
-      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      datasetName = dataSetMetabaseVO.getDataSetName();
+      String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
 
       List<TableSchemaVO> availableForConversionTables = new ArrayList<>();
 
@@ -98,7 +107,7 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
         }
       }
 
-      //iceberg enabled should be updated at the end of the conversion to ensure that all available tables were converted.
+      //iceberg enabled should be updated to true at the end of the conversion to ensure that all available tables were converted.
       for (TableSchemaVO table : availableForConversionTables) {
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true);
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
@@ -117,6 +126,7 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
               .dataflowId(dataflowId)
               .datasetId(datasetId)
               .providerId(providerId)
+              .datasetName(datasetName)
               .build()
       );
 
@@ -137,6 +147,7 @@ public class ParquetToIcebergConversionCommand extends AbstractEEAEventHandlerCo
               .user(user)
               .dataflowId(dataflowId)
               .datasetId(datasetId)
+              .datasetName(datasetName)
               .build()
       );
       throw new EEAException(e.getMessage());

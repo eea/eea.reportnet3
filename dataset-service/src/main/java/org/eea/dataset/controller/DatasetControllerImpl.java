@@ -3455,9 +3455,9 @@ public class DatasetControllerImpl implements DatasetController {
         bigDataDatasetService.initiateParquetToIcebergConversion(datasetId, dataflowId, providerId, tableSchemaIds, lockValue);
       }
       else {
-        Set<String> activeLock = redisLockService.listActiveLocks(lockKey);
+        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
         LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another parquet to iceberg conversion for the same dataset is in progress {}",
-                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLock);
+                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
                 NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
 
@@ -3503,9 +3503,9 @@ public class DatasetControllerImpl implements DatasetController {
         bigDataDatasetService.initiateIcebergToParquetConversion(datasetId, dataflowId, providerId, tableSchemaIds, lockValue);
       }
       else {
-        Set<String> activeLock = redisLockService.listActiveLocks(lockKey);
+        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
         LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
-                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLock);
+                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
         kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
                 NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
       }

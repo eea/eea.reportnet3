@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.Set;
 
 @RestController
@@ -26,7 +27,7 @@ public class RedisLockControllerImpl implements RedisLockController {
     @Override
     @PreAuthorize("hasAnyRole('ADMIN')")
     @GetMapping(value = "/getActiveRedisLocksByKey")
-    public Set<String> getActiveRedisLocksByKey(@RequestParam(value = "lockKeyPrefix", required = false) String lockKeyPrefix){
+    public Map<String, String> getActiveRedisLocksByKey(@RequestParam(value = "lockKeyPrefix", required = false) String lockKeyPrefix){
         try{
             lockKeyPrefix = (StringUtils.isNotBlank(lockKeyPrefix)) ? lockKeyPrefix : "*";
             return redisLockService.listActiveLocks(lockKeyPrefix);

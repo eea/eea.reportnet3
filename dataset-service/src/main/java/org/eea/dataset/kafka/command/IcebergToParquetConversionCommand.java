@@ -1,8 +1,6 @@
 package org.eea.dataset.kafka.command;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.datalake.service.impl.DremioHelperServiceImpl;
@@ -11,9 +9,11 @@ import org.eea.datalake.service.impl.S3ServiceImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.service.BigDataDatasetService;
+import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetTableService;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.kafka.commands.AbstractEEAEventHandlerCommand;
 import org.eea.kafka.domain.EEAEventVO;
@@ -22,6 +22,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
+import org.eea.utils.LiteralConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,10 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
   @Autowired
   private S3ServiceImpl s3ServicePrivate;
 
+  @Lazy
+  @Autowired
+  private DatasetMetabaseService datasetMetabaseService;
+
   @Override
   public EventType getEventType() {
     return EventType.COMMAND_ICEBERG_TO_PARQUET_CONVERSION;
@@ -86,6 +91,7 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
     Long datasetId = null;
     Long dataflowId = null;
     String lockValue = null;
+    String datasetName = null;
 
     try {
       datasetId = Long.parseLong(String.valueOf(eeaEventVO.getData().get("datasetId")));
@@ -97,7 +103,9 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
           : null;
       List<String> tableSchemaIds = (List<String>) eeaEventVO.getData().get("tableSchemaIds");
 
-      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
+      DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+      datasetName = dataSetMetabaseVO.getDataSetName();
+      String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
 
       List<TableSchemaVO> availableForConversionTables = new ArrayList<>();
 
@@ -114,7 +122,7 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
         }
       }
 
-      //iceberg enabled should be updated at the end iceberg files should be deleted also at the end of the conversion to ensure that all available tables were converted.
+      //iceberg enabled should be updated to false at the end iceberg files should be deleted also at the end of the conversion to ensure that all available tables were converted.
       for (TableSchemaVO table : availableForConversionTables) {
         Long usedProviderId = (providerId != null) ? providerId : 0L;
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, usedProviderId, datasetId, table.getNameTableSchema(), table.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
@@ -123,8 +131,10 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
 
         //remove iceberg table
         LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
-        dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, table.getNameTableSchema());
-        s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
+        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)){
+          dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, table.getNameTableSchema());
+          s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
+        }
 
         DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false);
         datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
@@ -136,12 +146,13 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
 
       kafkaSenderUtils.releaseNotificableKafkaEvent(
           EventType.ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT,
-          null,
+              null,
           NotificationVO.builder()
               .user(user)
               .dataflowId(dataflowId)
               .datasetId(datasetId)
               .providerId(providerId)
+              .datasetName(datasetName)
               .build()
       );
 
@@ -162,6 +173,7 @@ public class IcebergToParquetConversionCommand extends AbstractEEAEventHandlerCo
               .user(user)
               .dataflowId(dataflowId)
               .datasetId(datasetId)
+              .datasetName(datasetName)
               .build()
       );
 
