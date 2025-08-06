@@ -13,21 +13,21 @@
     <packaging>pom</packaging>
     <version>3.0.0</version>
     <properties>
-        <api-gateway.version>v3.4-QC-SEVERITY</api-gateway.version>
-        <communication.version>v3.4-QC-SEVERITY</communication.version>
-        <collaboration.version>v3.4-QC-SEVERITY</collaboration.version>
-        <dataflow.version>v3.4-QC-SEVERITY</dataflow.version>
-        <dataset.version>v3.4-QC-SEVERITY</dataset.version>
-        <document.version>v3.4-QC-SEVERITY</document.version>
-        <frontend.version>v3.4-QC-SEVERITY</frontend.version>
-        <indexsearch.version>v3.4-QC-SEVERITY</indexsearch.version>
-        <inspire.version>v3.4-QC-SEVERITY</inspire.version>
-        <recordstore.version>v3.4-QC-SEVERITY</recordstore.version>
-        <ums.version>v3.4-QC-SEVERITY</ums.version>
-        <validation.version>v3.4-QC-SEVERITY</validation.version>
-        <common-interfaces.version>v3.4-QC-SEVERITY</common-interfaces.version>
-        <common-utitlities.version>v3.4-QC-SEVERITY</common-utitlities.version>
-        <rod.version>v3.4-QC-SEVERITY</rod.version>
-        <orchestrator.version>v3.4-QC-SEVERITY</orchestrator.version>
+        <api-gateway.version>v3.4-SANDBOX</api-gateway.version>
+        <communication.version>v3.4-SANDBOX</communication.version>
+        <collaboration.version>v3.4-SANDBOX</collaboration.version>
+        <dataflow.version>v3.4-SANDBOX</dataflow.version>
+        <dataset.version>v3.4-SANDBOX</dataset.version>
+        <document.version>v3.4-SANDBOX</document.version>
+        <frontend.version>v3.4-SANDBOX</frontend.version>
+        <indexsearch.version>v3.4-SANDBOX</indexsearch.version>
+        <inspire.version>v3.4-SANDBOX</inspire.version>
+        <recordstore.version>v3.4-SANDBOX</recordstore.version>
+        <ums.version>v3.4-SANDBOX</ums.version>
+        <validation.version>v3.4-SANDBOX</validation.version>
+        <common-interfaces.version>v3.4-SANDBOX</common-interfaces.version>
+        <common-utitlities.version>v3.4-SANDBOX</common-utitlities.version>
+        <rod.version>v3.4-SANDBOX</rod.version>
+        <orchestrator.version>v3.4-SANDBOX</orchestrator.version>
     </properties>
 </project>
