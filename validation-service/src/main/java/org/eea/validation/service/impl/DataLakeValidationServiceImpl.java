@@ -8,6 +8,7 @@ import org.eea.interfaces.vo.dataset.GroupValidationVO;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.validation.mapper.DremioGroupValidationMapper;
+import org.eea.validation.mapper.DremioGroupValidationMapperWithoutRuleId;
 import org.eea.validation.service.DataLakeValidationService;
 import org.eea.validation.util.ValidationHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +54,31 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
     @Override
     public List<GroupValidationVO> findGroupRecordsByFilter(S3PathResolver s3PathResolver, List<ErrorTypeEnum> levelErrorsFilter, List<EntityTypeEnum> typeEntitiesFilter,
                                                             String tableFilter, String fieldValueFilter, String shortCode, Pageable pageable, String headerField, Boolean asc, boolean paged) {
+
+
+
+
+
         s3PathResolver.setTableName(S3_VALIDATION);
+
+        StringBuilder hasIdRuleQuery = new StringBuilder();
+        hasIdRuleQuery.append("SELECT count(column_name) as column_count ");
+        hasIdRuleQuery.append(" FROM INFORMATION_SCHEMA.COLUMNS ");
+        hasIdRuleQuery.append("        WHERE table_schema = '");
+        String s3path = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+        hasIdRuleQuery.append(s3path.replace("\"", "").replace(".validation",""));
+        hasIdRuleQuery.append("' AND table_name = 'validationTest' ");
+        hasIdRuleQuery.append("  AND column_name = 'id_rule'");
+
+        Integer count = dremioJdbcTemplate.queryForObject(hasIdRuleQuery.toString(), Integer.class);
+
+
         StringBuilder validationQuery = new StringBuilder();
-        validationQuery.append("SELECT  MIN(v.id_rule) as idRule, MIN(v.validation_level) as levelError, MIN(v.validation_area) as typeEntity, MIN(table_name) as tableName, qc_code as shortCode, MIN(field_name) as fieldName, MIN(message) as message, count(*) as numberOfRecords FROM ");
+        if (count != null && count > 0) {
+            validationQuery.append("SELECT  MIN(v.id_rule) as idRule, MIN(v.validation_level) as levelError, MIN(v.validation_area) as typeEntity, MIN(table_name) as tableName, qc_code as shortCode, MIN(field_name) as fieldName, MIN(message) as message, count(*) as numberOfRecords FROM ");
+        } else {
+            validationQuery.append("SELECT  MIN(v.validation_level) as levelError, MIN(v.validation_area) as typeEntity, MIN(table_name) as tableName, qc_code as shortCode, MIN(field_name) as fieldName, MIN(message) as message, count(*) as numberOfRecords FROM ");
+        }
         validationQuery.append(s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH));
         validationQuery.append(" v where v.pk is not null ");
         String shortCodeFilter = shortCodeFilter(shortCode);
@@ -64,12 +87,21 @@ public class DataLakeValidationServiceImpl implements DataLakeValidationService 
         String partTableFilter = originFilterDL(tableFilter, TABLE);
         String partFieldFilter = originFilterDL(fieldValueFilter, FIELD);
         validationQuery.append(shortCodeFilter).append(partLevelError).append(partTypeEntities).append(partTableFilter).append(partFieldFilter);
-        validationQuery.append(" group by v.id_rule, v.qc_code, v.table_name, v.field_name ");
+        if (count != null && count > 0) {
+            validationQuery.append(" group by v.id_rule, v.qc_code, v.table_name, v.field_name ");
+        } else {
+            validationQuery.append(" group by v.qc_code, v.table_name, v.field_name ");
+        }
         String orderPart = addOrderByDL(headerField, asc);
         validationQuery.append(orderPart);
         String page = paged ? " LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset() : "";
         validationQuery.append(page);
-        List<GroupValidationVO> groupValidationVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioGroupValidationMapper());
+        List<GroupValidationVO> groupValidationVOS;
+        if (count != null && count > 0) {
+            groupValidationVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioGroupValidationMapper());
+        } else {
+            groupValidationVOS = dremioJdbcTemplate.query(validationQuery.toString(), new DremioGroupValidationMapperWithoutRuleId());
+        }
         return groupValidationVOS;
     }
 
