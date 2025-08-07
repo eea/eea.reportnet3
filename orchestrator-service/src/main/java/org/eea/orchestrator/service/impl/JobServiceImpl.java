@@ -196,7 +196,6 @@ public class JobServiceImpl implements JobService {
     public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null, null);
-        //job = jobRepository.save(job);
         job = jobRepository.saveAndFlushJobManually(job);
         jobHistoryService.saveJobHistory(job);
         return job.getId();
@@ -378,7 +377,6 @@ public class JobServiceImpl implements JobService {
         if (job.isPresent()) {
             job.get().setJobStatus(status);
             job.get().setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
-            //jobRepository.save(job.get());
             jobRepository.saveAndFlushJobManually(job.get());
             jobHistoryService.saveJobHistory(job.get());
         } else {
@@ -402,7 +400,6 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobVO save(JobVO jobVO) {
         Job job = jobMapper.classToEntity(jobVO);
-        //return jobMapper.entityToClass(jobRepository.save(job));
         return jobMapper.entityToClass(jobRepository.saveAndFlushJobManually(job));
     }
 
@@ -438,7 +435,6 @@ public class JobServiceImpl implements JobService {
         Optional<Job> job = jobRepository.findById(jobId);
         if (job.isPresent()) {
             job.get().setFmeJobId(fmeJobId);
-            //jobRepository.save(job.get());
             jobRepository.saveAndFlushJobManually(job.get());
             jobHistoryService.saveJobHistory(job.get());
         } else {
@@ -622,7 +618,6 @@ public class JobServiceImpl implements JobService {
         if(job.isPresent()){
             Map<String, Object> insertedParameters = job.get().getParameters();
             insertedParameters.put("fmeCallback", fmeCallback);
-            //jobRepository.save(job.get());
             jobRepository.saveAndFlushJobManually(job.get());
         }
     }
@@ -638,7 +633,6 @@ public class JobServiceImpl implements JobService {
                 numOfRestarts = (Integer) insertedParameters.get("numOfRestarts");
             }
             insertedParameters.put("numOfRestarts", numOfRestarts + 1);
-            //jobRepository.save(job.get());
             jobRepository.saveAndFlushJobManually(job.get());
         }
     }
@@ -698,8 +692,7 @@ public class JobServiceImpl implements JobService {
             Map<String, Object> insertedParameters = job.getParameters();
             Boolean replaceData = (insertedParameters.get("replace") != null) ? (Boolean) insertedParameters.get("replace") : false;
             String tableSchemaId = (insertedParameters.get("tableSchemaId") != null) ? (String) insertedParameters.get("tableSchemaId") : null;
-            String integrationIdStr = (insertedParameters.get("integrationId") != null) ? (String) insertedParameters.get("integrationId") : null;
-            Long integrationId = (integrationIdStr != null) ? Long.valueOf(integrationIdStr) : null;
+            Long integrationId = (insertedParameters.get("integrationId") != null) ? Long.valueOf(insertedParameters.get("integrationId").toString()) : null;
             String delimiter = (insertedParameters.get("delimiter") != null) ? (String) insertedParameters.get("delimiter") : null;
             String filePathInS3 = (insertedParameters.get("filePathInS3") != null) ? (String) insertedParameters.get("filePathInS3") : null;
             Integer numOfRestarts = (insertedParameters.get("numOfRestarts") != null) ? (Integer) insertedParameters.get("numOfRestarts") : 0;

@@ -10,6 +10,7 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.DatasetHistoricRuleVO;
 import org.eea.interfaces.vo.dataset.schemas.audit.RuleHistoricInfoVO;
@@ -111,6 +112,14 @@ public interface RulesService {
    */
   void updateRule(long datasetId, RuleVO ruleVO) throws EEAException;
 
+
+  /**
+   * Update the automatic QC default level error
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param automaticQCDefaultLevelError the new automatic QC default level error
+   */
+  void updateAutomaticQCsDefaultLevelError(long datasetId, String datasetSchemaId, ErrorTypeEnum automaticQCDefaultLevelError) throws EEAException;
 
   /**
    * Creates the automatic rules.
