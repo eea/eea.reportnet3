@@ -399,6 +399,9 @@ public final class LiteralConstants {
   /** The Constant GML_TYPE: {@value}. */
   public static final String GML_TYPE = ".gml";
 
+  /** The Constant DB3_TYPE: {@value}. */
+  public static final String DB3_TYPE = ".db3";
+
   /** The Constant XLSX_TYPE: {@value}. */
   public static final String XLSX_TYPE = ".xlsx";
 
