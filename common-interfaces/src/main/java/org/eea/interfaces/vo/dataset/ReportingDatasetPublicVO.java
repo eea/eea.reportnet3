@@ -47,5 +47,6 @@ public class ReportingDatasetPublicVO implements Serializable {
   /** The status. */
   private DatasetStatusEnum status;
 
+  private Date dateStatusChanged;
 
 }
