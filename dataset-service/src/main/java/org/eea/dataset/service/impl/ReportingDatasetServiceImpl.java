@@ -109,29 +109,67 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    */
   @Override
   public List<ReportingDatasetPublicVO> getDataSetPublicByDataflow(Long dataflowId) {
+    List<ReportingDatasetPublicVO> vos =
+            reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
     List<ReportingDatasetVO> entities = getDataSetIdByDataflowId(dataflowId);
     if (entities.isEmpty()) {
       return Collections.emptyList();
     }
 
-    List<ReportingDatasetPublicVO> vos =
-            reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
-
     // Set first release date for each reporting dataset.
     for (int i = 0; i < entities.size(); i++) {
-      ReportingDatasetPublicVO vo = vos.get(i);
       Long datasetId = entities.get(i).getId();
-
-      // First release date.
       Snapshot first = snapshotRepository
               .findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByDateReleasedAsc(datasetId);
+      vos.get(i).setFirstReleaseDate(first != null ? first.getDateReleased() : null);
+    }
 
-      vo.setFirstReleaseDate(first != null ? first.getDateReleased() : null);
+    // Group vos by provider.
+    Map<Long, List<ReportingDatasetPublicVO>> byProvider =
+            vos.stream().collect(Collectors.groupingBy(ReportingDatasetPublicVO::getDataProviderId));
+
+    for (Map.Entry<Long, List<ReportingDatasetPublicVO>> entry : byProvider.entrySet()) {
+
+      List<ReportingDatasetPublicVO> voList = entry.getValue();
+
+      // Checks if all datasets are technically accepted.
+      boolean allAccepted = voList.stream()
+              .allMatch(vo -> DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(vo.getStatus()));
+
+      if (allAccepted) {
+        // Latest date status changed among the providers datasets.
+        Date latest = voList.stream()
+                .map(ReportingDatasetPublicVO::getDateStatusChanged)
+                .filter(Objects::nonNull)
+                .max(Date::compareTo)
+                .orElse(null);
+
+        // Write the same date back into every VO in the group
+        for (ReportingDatasetPublicVO vo : voList) {
+          vo.setDateStatusChanged(latest);
+        }
+      }
+
+      // Filter for correction requested status and get the latest date.
+      Date latestCorrection = voList.stream()
+              .filter(vo -> DatasetStatusEnum.CORRECTION_REQUESTED.equals(vo.getStatus()))
+              .map(ReportingDatasetPublicVO::getDateStatusChanged)
+              .filter(Objects::nonNull)
+              .max(Date::compareTo)
+              .orElse(null);
+
+      if (latestCorrection != null) {
+        // Set the latest date to all datasets with correction requested status.
+        for (ReportingDatasetPublicVO vo : voList) {
+          if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(vo.getStatus())) {
+            vo.setDateStatusChanged(latestCorrection);
+          }
+        }
+      }
     }
 
     setRestrictFromPublic(vos, dataflowId);
     return vos;
-
   }
 
   /**
