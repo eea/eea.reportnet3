@@ -692,8 +692,7 @@ public class JobServiceImpl implements JobService {
             Map<String, Object> insertedParameters = job.getParameters();
             Boolean replaceData = (insertedParameters.get("replace") != null) ? (Boolean) insertedParameters.get("replace") : false;
             String tableSchemaId = (insertedParameters.get("tableSchemaId") != null) ? (String) insertedParameters.get("tableSchemaId") : null;
-            String integrationIdStr = (insertedParameters.get("integrationId") != null) ? (String) insertedParameters.get("integrationId") : null;
-            Long integrationId = (integrationIdStr != null) ? Long.valueOf(integrationIdStr) : null;
+            Long integrationId = (insertedParameters.get("integrationId") != null) ? Long.valueOf(insertedParameters.get("integrationId").toString()) : null;
             String delimiter = (insertedParameters.get("delimiter") != null) ? (String) insertedParameters.get("delimiter") : null;
             String filePathInS3 = (insertedParameters.get("filePathInS3") != null) ? (String) insertedParameters.get("filePathInS3") : null;
             Integer numOfRestarts = (insertedParameters.get("numOfRestarts") != null) ? (Integer) insertedParameters.get("numOfRestarts") : 0;
