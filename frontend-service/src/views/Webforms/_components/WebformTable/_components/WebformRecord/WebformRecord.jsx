@@ -186,7 +186,7 @@ export const WebformRecord = ({
     if (isNil(referenceParentField)) return true;
     const filteredDependency = fields
       .filter(field => TextUtils.areEquals(field.name, referenceParentField.field))
-      .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split(/\s;\s/)));
+      .map(filtered => (Array.isArray(filtered?.value) ? filtered?.value : filtered?.value?.split(/\s*;\s*/)));
 
     return filteredDependency
       .flat()
