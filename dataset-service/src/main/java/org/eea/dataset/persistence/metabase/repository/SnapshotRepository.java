@@ -128,4 +128,7 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
   void removeHistoricRelease(@Param("datasetId") Long datasetId);
 
   Snapshot findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByCreationDateDesc(@Param("idReportingDataset") Long idDataset);
+
+  Snapshot findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByDateReleasedAsc(
+          @Param("idReportingDataset") Long idDataset);
 }

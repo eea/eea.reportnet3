@@ -62,6 +62,10 @@ public class DataSetMetabase {
   @Enumerated(EnumType.STRING)
   private DatasetStatusEnum status;
 
+  /** The technical acceptance date. */
+  @Column(name = "DATE_STATUS_CHANGED")
+  private Date dateStatusChanged;
+
   /** The dataset schema. */
   @Column(name = "DATASET_SCHEMA")
   private String datasetSchema;
@@ -95,7 +99,7 @@ public class DataSetMetabase {
   @Override
   public int hashCode() {
     return Objects.hash(dataSetName, id, creationDate, visibility, urlConnection, status,
-        partitions, publicFileName);
+        partitions, publicFileName, dateStatusChanged);
   }
 
   /**
@@ -118,6 +122,7 @@ public class DataSetMetabase {
         && Objects.equals(visibility, other.visibility)
         && Objects.equals(urlConnection, other.urlConnection)
         && Objects.equals(status, other.status) && Objects.equals(partitions, other.partitions)
-        && Objects.equals(publicFileName, other.publicFileName);
+        && Objects.equals(publicFileName, other.publicFileName)
+        && Objects.equals(dateStatusChanged, other.dateStatusChanged);
   }
 }
