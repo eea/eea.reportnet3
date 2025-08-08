@@ -203,23 +203,28 @@ export const WebformRecord = ({
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
       const isSubTableVisible = element.tableNotCreated && isReporting;
       if (element.type === 'BLOCK') {
-        const isLabelFieldBlock =
-          element.elements.some(el => el.type === 'LABEL') && element.elements.some(el => el.type === 'FIELD');
+        const isBlockVisible = element.referenceParentField
+          ? onToggleFieldVisibility(element.referenceParentField, elements)
+          : true;
         const isSubTable = () => element.elementsRecords.length > 1;
         if (isSubTable()) {
           return (
-            <div className={isLabelFieldBlock ? styles.labelFieldBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
-              {element.elementsRecords
-                .filter(elementsRecord => elementsRecord.recordId === record.recordId)
-                .map(record => renderElements(record.elements))}
-            </div>
+            isBlockVisible && (
+              <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
+                {element.elementsRecords
+                  .filter(elementsRecord => elementsRecord.recordId === record.recordId)
+                  .map(record => renderElements(record.elements))}
+              </div>
+            )
           );
         }
 
         return (
-          <div className={isLabelFieldBlock ? styles.labelFieldBlock : styles.fieldsBlock} key={`BLOCK_${i}`}>
-            {element.elementsRecords.map(record => renderElements(record.elements))}
-          </div>
+          isBlockVisible && (
+            <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
+              {element.elementsRecords.map(record => renderElements(record.elements))}
+            </div>
+          )
         );
       }
 
