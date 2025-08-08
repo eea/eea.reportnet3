@@ -1224,13 +1224,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         s3IcebergTablePathResolver.setIsIcebergTable(true);
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
-        //remove old iceberg table because it will be recreated
-        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
-            LOG.info("Removing iceberg files for table in path {} LockValue: {}", icebergTablePath, lockValue);
-            dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
-            s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
-        }
-
         s3TablePathResolver.setPath(parquetTableS3PathConstant);
         String parquetTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, parquetTableQueryPathConstant);
 
@@ -1251,6 +1244,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 LOG.error("Could not promote parquet table {}. LockValue: {} Error: {}", parquetTablePath, lockValue, e.getMessage());
                 throw new Exception("Parquet table " + parquetTablePath + " is not promoted");
             }
+        }
+
+        //remove old iceberg table because it will be recreated
+        if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
+            LOG.info("Removing iceberg files for table in path {} LockValue: {}", icebergTablePath, lockValue);
+            dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
+            s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         }
 
         //if table does not exist or has 0 records do not do anything
@@ -1299,6 +1299,25 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String parquetInnerFolderQueryPath = parquetTablePath + ".\"" + s3TablePathResolver.getFilename() + "\"";
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
+        Boolean icebergFolderExists = s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
+        Boolean icebergFolderIsPromoted = icebergFolderExists ? dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema()) : false;
+
+        if(icebergFolderExists && !icebergFolderIsPromoted){
+            //try to promote iceberg table. If table can not be promoted, stop the process.
+            try {
+                LOG.info("Iceberg table {} is not promoted. Will try to promote it. LockValue: {}", icebergTablePath, lockValue);
+                dremioHelperService.refreshTableMetadataAndPromote(null, icebergTablePath, s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
+                icebergFolderIsPromoted = dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                if(!icebergFolderIsPromoted){
+                    throw new Exception("Promoting table failed");
+                }
+            }
+            catch (Exception e){
+                LOG.error("Could not promote iceberg table {}. LockValue: {} Error: {}", icebergTablePath, lockValue, e.getMessage());
+                throw new Exception("Iceberg table " + icebergTablePath + " is not promoted");
+            }
+        }
+
 
         if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)) {
             //remove old parquet table because it will be recreated
@@ -1307,20 +1326,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         }
 
-        Boolean icebergFolderExists = s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
-        Boolean icebergFolderIsPromoted = icebergFolderExists ? dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema()) : false;
-        Long icebergRecordCount = (icebergFolderExists && icebergFolderIsPromoted) ? dremioHelperService.getRowCount(icebergTablePath) : 0L;
-
-
         //if table does not exist or has 0 records do not do anything
-        if (!icebergFolderExists || !icebergFolderIsPromoted || icebergRecordCount == 0) {
+        if (!icebergFolderExists  || dremioHelperService.getRowCount(icebergTablePath) == 0) {
             //iceberg table does not exist and no parquet table should be created
-            if(icebergFolderExists && icebergFolderIsPromoted && icebergRecordCount == 0){
-                //remove iceberg table
-                LOG.info("Removing iceberg files for table in path {} LockValue: {}", icebergTablePath, lockValue);
-                dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
-                s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
-            }
+            LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so no parquet table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
             return true;
         }
 

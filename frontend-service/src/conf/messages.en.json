@@ -1789,8 +1789,8 @@
     "icebergToParquetConversionCompletedEvent": "Disabling editing process has been completed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "parquetToIcebergConversionFailedEvent": "Enabling editing has failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "icebergToParquetConversionFailedEvent": "Disabling editing has failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
-    "parquetToIcebergFailedActiveJobsEvent": "Enabling editing failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: There are currently jobs running for the same dataset. You can enable editing once they are finished.",
-    "icebergToParquetFailedActiveJobsEvent": "Disabling editing failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: There are currently jobs running for the same dataset. You can disable editing once they are finished.",
+    "parquetToIcebergFailedActiveJobsEvent": "Enabling editing failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: There are currently jobs being executed for the same dataset. You can enable editing once they are finished.",
+    "icebergToParquetFailedActiveJobsEvent": "Disabling editing failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: There are currently jobs being executed for the same dataset. You can disable editing once they are finished.",
     "anotherConversionIsRunningFailedEvent": "Failed to enable/disable editing for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>: A Another user has already initiated this action."
   }
 }
