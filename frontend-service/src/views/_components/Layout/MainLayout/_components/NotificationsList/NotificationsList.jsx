@@ -243,13 +243,13 @@ export const NotificationsList = ({ isNotificationVisible, setIsNotificationVisi
       setTotalRecords(unparsedNotifications.totalRecords);
 
       //TODO check that the following changes do not break something
-      const filteredNotifications = notificationsArray;/*.filter(
-        notification =>
-          notification.key !== 'ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT' &&
-          notification.key !== 'PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT'
-      );*/
+    //   const filteredNotifications = notificationsArray.filter(
+    //     notification =>
+    //       notification.key !== 'ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT' &&
+    //       notification.key !== 'PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT'
+    //   );
 
-      setNotifications(filteredNotifications);
+    // setNotifications(filteredNotifications);
     } catch (error) {
       console.error('NotificationsList - onLoadNotifications.', error);
     } finally {
