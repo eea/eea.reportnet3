@@ -1852,6 +1852,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         }
         else if(filePathInS3.endsWith(GML_TYPE)){
             fileExtension = GML_TYPE;
+        } else if(filePathInS3.endsWith(DB3_TYPE)){
+            fileExtension = DB3_TYPE;
         }
         else{
             LOG.error("Found unhandled file extension for file in path {}", filePathInS3);

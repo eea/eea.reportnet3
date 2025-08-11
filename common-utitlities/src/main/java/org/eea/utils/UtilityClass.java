@@ -105,4 +105,16 @@ public final class UtilityClass {
       LOG.error("Failed to delete file {} after stream close. Message: {}", fileName, deleteEx.getMessage());
     }
   }
+
+  /**
+   * Checks if the field of spatial data size exceeds maxFieldSize
+   *
+   * @param byteArrayField the filed in byteArray
+   * @param maxFieldSize The max field size
+   * @return True if field exceeds max size
+   */
+  public static boolean spatialFieldExceedsMaxSize(byte[] byteArrayField, long maxFieldSize) {
+    return byteArrayField.length > maxFieldSize;
+  }
+
 }

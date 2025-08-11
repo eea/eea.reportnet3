@@ -42,4 +42,11 @@ public interface JobExtendedRepository {
      * @return
      */
     Long countJobsPaginated(boolean asc, String sortedColumn, Long jobId, String jobTypes, Long dataflowId, String dataflowName, Long providerId, Long datasetId, String datasetName, String creatorUsername, String jobStatuses);
+
+    /**
+     * Save and commit changes to db
+     * @param job
+     * @return the saved job
+     */
+    Job saveAndFlushJobManually(Job job);
 }

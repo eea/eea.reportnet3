@@ -5,6 +5,8 @@ import java.beans.Introspector;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.eea.dataset.mapper.ReportingDatasetMapper;
 import org.eea.dataset.mapper.ReportingDatasetPublicMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
@@ -21,6 +23,7 @@ import org.eea.interfaces.controller.dataset.DatasetController;
 import org.eea.interfaces.vo.dataflow.RepresentativeVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetPublicVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.DatasetStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -106,10 +109,67 @@ public class ReportingDatasetServiceImpl implements ReportingDatasetService {
    */
   @Override
   public List<ReportingDatasetPublicVO> getDataSetPublicByDataflow(Long dataflowId) {
-    List<ReportingDatasetPublicVO> reportings =
-        reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
-    setRestrictFromPublic(reportings, dataflowId);
-    return reportings;
+    List<ReportingDatasetPublicVO> vos =
+            reportingDatasetPublicMapper.entityListToClass(getDataSetIdByDataflowId(dataflowId));
+    List<ReportingDatasetVO> entities = getDataSetIdByDataflowId(dataflowId);
+    if (entities.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    // Set first release date for each reporting dataset.
+    for (int i = 0; i < entities.size(); i++) {
+      Long datasetId = entities.get(i).getId();
+      Snapshot first = snapshotRepository
+              .findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByDateReleasedAsc(datasetId);
+      vos.get(i).setFirstReleaseDate(first != null ? first.getDateReleased() : null);
+    }
+
+    // Group vos by provider.
+    Map<Long, List<ReportingDatasetPublicVO>> byProvider =
+            vos.stream().collect(Collectors.groupingBy(ReportingDatasetPublicVO::getDataProviderId));
+
+    for (Map.Entry<Long, List<ReportingDatasetPublicVO>> entry : byProvider.entrySet()) {
+
+      List<ReportingDatasetPublicVO> voList = entry.getValue();
+
+      // Checks if all datasets are technically accepted.
+      boolean allAccepted = voList.stream()
+              .allMatch(vo -> DatasetStatusEnum.TECHNICALLY_ACCEPTED.equals(vo.getStatus()));
+
+      if (allAccepted) {
+        // Latest date status changed among the providers datasets.
+        Date latest = voList.stream()
+                .map(ReportingDatasetPublicVO::getDateStatusChanged)
+                .filter(Objects::nonNull)
+                .max(Date::compareTo)
+                .orElse(null);
+
+        // Write the same date back into every VO in the group
+        for (ReportingDatasetPublicVO vo : voList) {
+          vo.setDateStatusChanged(latest);
+        }
+      }
+
+      // Filter for correction requested status and get the latest date.
+      Date latestCorrection = voList.stream()
+              .filter(vo -> DatasetStatusEnum.CORRECTION_REQUESTED.equals(vo.getStatus()))
+              .map(ReportingDatasetPublicVO::getDateStatusChanged)
+              .filter(Objects::nonNull)
+              .max(Date::compareTo)
+              .orElse(null);
+
+      if (latestCorrection != null) {
+        // Set the latest date to all datasets with correction requested status.
+        for (ReportingDatasetPublicVO vo : voList) {
+          if (DatasetStatusEnum.CORRECTION_REQUESTED.equals(vo.getStatus())) {
+            vo.setDateStatusChanged(latestCorrection);
+          }
+        }
+      }
+    }
+
+    setRestrictFromPublic(vos, dataflowId);
+    return vos;
   }
 
   /**

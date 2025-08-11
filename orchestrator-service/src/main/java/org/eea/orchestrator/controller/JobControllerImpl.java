@@ -998,6 +998,11 @@ public class JobControllerImpl implements JobController {
         }
     }
 
+    @GetMapping(value = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
+    public String getJobsStatistics() {
+        return jobHistoryService.getJobStatsForYesterday();
+    }
+
     @Override
     @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
     public List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId){

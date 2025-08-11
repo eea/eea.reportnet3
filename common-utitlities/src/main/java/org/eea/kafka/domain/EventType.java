@@ -744,7 +744,10 @@ public enum EventType {
           "import_wrongHeaders_error_event", true),
 
   IMPORT_WRONG_HEADERS_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
-          "import_wrongHeaders_warning_event", true);
+          "import_wrongHeaders_warning_event", true),
+
+  IMPORT_FIELD_SIZE_EXCEEDS_LIMIT_WARNING_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+         "import_field_size_exceeds_limit_warning_event", true );
 
   /** The topic. */
   private String topic;

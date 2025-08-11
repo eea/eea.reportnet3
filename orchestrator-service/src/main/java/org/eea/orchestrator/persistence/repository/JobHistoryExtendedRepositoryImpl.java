@@ -2,6 +2,7 @@ package org.eea.orchestrator.persistence.repository;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eea.orchestrator.persistence.domain.JobHistory;
+import org.eea.orchestrator.persistence.domain.JobStatsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
@@ -195,5 +196,53 @@ public class JobHistoryExtendedRepositoryImpl implements JobHistoryExtendedRepos
         if(StringUtils.isNotBlank(jobStatuses)){
             query.setParameter("jobStatus", Arrays.asList(jobStatuses.split(",")));
         }
+    }
+
+
+    public JobStatsDTO getJobStatsForPreviousDay(int minusDays) {
+        Object[] result = (Object[]) entityManager.createNativeQuery(
+          "WITH latest_jobs AS (\n" +
+            "\tSELECT *\n" +
+            "    FROM (\n" +
+            "        SELECT *,\n" +
+            "               ROW_NUMBER() OVER (PARTITION BY job_id ORDER BY date_status_changed DESC) AS rn\n" +
+            "        FROM job_history\n" +
+            "        WHERE date_status_changed IS NOT null\n" +
+            "        AND DATE(DATE_ADDED) = CURRENT_DATE - INTERVAL '" + minusDays + " day'\n" +
+            "    ) ranked\n" +
+            "    WHERE rn = 1\n" +
+            ")\n" +
+            "select\n" +
+            "\tCOUNT(*) as totalJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_type = 'IMPORT') AS importJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_type = 'VALIDATION') AS validationJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_type = 'RELEASE') AS releaseJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_type = 'FILE_EXPORT') AS exportJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_type = 'DELETE') AS deleteJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_status = 'FINISHED') AS finishedJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_status = 'FAILED') AS failedJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_status = 'REFUSED') AS refusedJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_status = 'CANCELED') AS canceledJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_status = 'CANCELED_BY_ADMIN') AS canceledByAdminJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_status = 'IN_PROGRESS') AS inProgressJobs,\n" +
+            "    COUNT(*) FILTER (WHERE job_status = 'QUEUED') AS queuedJobs    \n" +
+            "FROM latest_jobs;"
+        ).getSingleResult();
+
+        return new JobStatsDTO(
+          ((Number) result[0]).longValue(),
+          ((Number) result[1]).longValue(),
+          ((Number) result[2]).longValue(),
+          ((Number) result[3]).longValue(),
+          ((Number) result[4]).longValue(),
+          ((Number) result[5]).longValue(),
+          ((Number) result[6]).longValue(),
+          ((Number) result[7]).longValue(),
+          ((Number) result[8]).longValue(),
+          ((Number) result[9]).longValue(),
+          ((Number) result[10]).longValue(),
+          ((Number) result[11]).longValue(),
+          ((Number) result[12]).longValue()
+        );
     }
 }

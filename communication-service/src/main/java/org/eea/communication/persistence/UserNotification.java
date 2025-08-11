@@ -103,6 +103,15 @@ public class UserNotification {
   @Field(value = "datasetStatus")
   private DatasetStatusEnum datasetStatus;
 
+  @Field(value = "recordLines")
+  private String recordLines;
+
+  @Field(value = "tableName")
+  private String tableName;
+
+  @Field(value = "fieldName")
+  private String fieldName;
+
   /** The error */
   @Field(value = "error")
   private String error;

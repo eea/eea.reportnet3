@@ -50,6 +50,7 @@ export const Tab = ({
   id,
   isDataflowOpen,
   isDesignDatasetEditorRead,
+  isIcebergCreated,
   index,
   initialTabIndexDrag,
   isNavigationHidden,
@@ -402,7 +403,7 @@ export const Tab = ({
   };
 
   const onTabDoubleClick = () => {
-    if (editable) {
+    if (editable && !isIcebergCreated) {
       if (!isUndefined(onTabEditingHeader)) {
         setEditingHeader(true);
         onTabEditingHeader(true);
@@ -470,6 +471,7 @@ export const Tab = ({
       );
     }
   };
+
 
   const renderTableInfo = () => {
     if (isTableInfoVisible) {
@@ -699,23 +701,25 @@ export const Tab = ({
               uniqueIdentifier={uniqueId('table_more_info_')}
             />
           )}
-          {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead ? (
-            <div
-              onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!isUndefined(checkEditingTabs)) {
-                  if (!checkEditingTabs()) {
-                    if (!isUndefined(onTabDeleteClick)) {
-                      onTabDeleteClick(tableSchemaId);
+          {designMode && !hasPKReferenced && !isDataflowOpen && !isDesignDatasetEditorRead && !addTab && !newTab ? (
+            isIcebergCreated ? null : (
+              <div
+                onClick={e => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!isUndefined(checkEditingTabs)) {
+                    if (!checkEditingTabs()) {
+                      if (!isUndefined(onTabDeleteClick)) {
+                        onTabDeleteClick(tableSchemaId);
+                      }
                     }
                   }
-                }
-              }}
-              onMouseOut={() => setIconToShow('cancel')}
-              onMouseOver={() => setIconToShow('errorCircle')}>
-              {renderRightIcon()}
-            </div>
+                }}
+                onMouseOut={() => setIconToShow('cancel')}
+                onMouseOver={() => setIconToShow('errorCircle')}>
+                {renderRightIcon()}
+              </div>
+            )
           ) : null}
         </a>
       </li>
