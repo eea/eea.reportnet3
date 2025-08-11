@@ -28,6 +28,7 @@ import org.eea.dataset.exception.InvalidFileException;
 import org.eea.dataset.mapper.DataSetMetabaseMapper;
 import org.eea.dataset.mapper.TableSchemaMapper;
 import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.metabase.domain.Statistics;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -120,6 +121,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
   private JdbcTemplate dremioJdbcTemplate;
   private final ReleaseFieldLimitWarningComponentImpl releaseFieldLimitWarningComponent;
 
+  private DatasetTableService datasetTableService;
+
   public ParquetConverterServiceImpl(FileCommonUtils fileCommonUtils,
                                      DremioHelperService dremioHelperService,
                                      S3ServiceImpl s3Service,
@@ -135,7 +138,8 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
                                      TableSchemaMapper tableSchemaMapper,
                                      DataSetMetabaseMapper dataSetMetabaseMapper,
                                      StatisticsService statisticsService,
-                                     ReleaseFieldLimitWarningComponentImpl releaseFieldLimitWarningComponent) {
+                                     ReleaseFieldLimitWarningComponentImpl releaseFieldLimitWarningComponent,
+                                     DatasetTableService datasetTableService) {
     this.fileCommonUtils = fileCommonUtils;
     this.dremioHelperService = dremioHelperService;
     this.s3Service = s3Service;
@@ -152,6 +156,7 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     this.dataSetMetabaseMapper = dataSetMetabaseMapper;
     this.statisticsService = statisticsService;
     this.releaseFieldLimitWarningComponent = releaseFieldLimitWarningComponent;
+    this.datasetTableService = datasetTableService;
   }
 
   @Override
@@ -287,7 +292,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
       if (!DatasetTypeEnum.DESIGN.equals(datasetType) && !DatasetTypeEnum.REFERENCE.equals(datasetType) && readOnlyFieldsExist && importFileInDremioInfo.getReplaceData()) {
         //convert old table to iceberg
         Long providerId = (importFileInDremioInfo.getProviderId() != null) ? importFileInDremioInfo.getProviderId() : 0L;
-        bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
+        bigDataDatasetService.convertParquetToIcebergTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
+        DatasetTable datasetTableEntry = new DatasetTable(importFileInDremioInfo.getDatasetId(), dataSetSchema.getIdDataSetSchema().toString(), tableSchemaVO.getIdTableSchema(), true);
+        datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
         S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(importFileInDremioInfo.getDataflowId(), providerId, importFileInDremioInfo.getDatasetId(), tableSchemaVO.getNameTableSchema(), tableSchemaVO.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
         s3IcebergTablePathResolver.setIsIcebergTable(true);
         try {
@@ -295,7 +302,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
           return numberOfRecordsUpdated;
         } finally {
           //after all updates convert iceberg to parquet
-          bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString());
+          bigDataDatasetService.convertIcebergToParquetTable(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), providerId, tableSchemaVO, dataSetSchema.getIdDataSetSchema().toString(), null);
+          datasetTableEntry.setIsIcebergTableCreated(false);
+          datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
         }
       }
 

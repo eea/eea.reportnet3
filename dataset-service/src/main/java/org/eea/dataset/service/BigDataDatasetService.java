@@ -125,9 +125,10 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
      * @param datasetSchemaId the datasetSchemaId
-     *
+     * @param lockValue the lock value
+     * @return true if table can be converted
      */
-    void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception;
+    Boolean convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -137,9 +138,10 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
      * @param datasetSchemaId the datasetSchemaId
-     *
+     * @param lockValue the lock value
+     * @return true if table can be converted
      */
-    void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception;
+    Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -148,9 +150,9 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaIds the tableSchema Ids
-     *
+     * @param lockValue the lock value
      */
-    void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds) throws Exception;
+    void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -159,9 +161,9 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaIds the tableSchema Ids
-     *
+     * @param lockValue the lock value
      */
-    void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds) throws Exception;
+    void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
 
     /**
      * Insert records manually
