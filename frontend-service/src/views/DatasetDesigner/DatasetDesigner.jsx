@@ -1103,8 +1103,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
-  const onUpload = async () => {
+  const onUpload = async (e) => {
     const action = 'DATASET_IMPORT';
+    const fileName = e?.files?.[0]?.name || ' ';
     actionsContext.testProcess(datasetId, action);
     manageDialogs('isImportDatasetDialogVisible', false);
     setSelectedCustomImportIntegration({ id: null, name: null });
@@ -1124,7 +1125,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
             },
             dataflowName,
-            datasetName
+            datasetName,
+            fileName
           }
         },
         true
