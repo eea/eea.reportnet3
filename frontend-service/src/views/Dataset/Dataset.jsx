@@ -1191,8 +1191,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const onUpload = async () => {
+  const onUpload = async (e) => {
     const action = 'DATASET_IMPORT';
+    const fileName = e?.files?.[0]?.name || ' ';
+
     actionsContext.testProcess(datasetId, action);
     setIsImportDatasetDialogVisible(false);
     setSelectedCustomImportIntegration({ id: null, name: null });
@@ -1211,7 +1213,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             datasetLoading: resourcesContext.messages['datasetLoading']
           },
           dataflowName,
-          datasetName
+          datasetName,
+          fileName
         }
       },
       true
