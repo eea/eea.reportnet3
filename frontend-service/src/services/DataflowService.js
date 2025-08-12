@@ -353,24 +353,11 @@ export const DataflowService = {
     return publicDataflowsByCountryCodeResponse.data;
   },
 
-  getPublicDataflowData: async dataflowId => {
+   getPublicDataflowData: async dataflowId => {
     const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
-    const raw = publicDataflowDataDTO.data?.reportingDatasets || [];
-    const parsed = DataflowUtils.parsePublicDataflowDTO(publicDataflowDataDTO.data);
-
-    const mergedDatasets = (parsed.datasets || []).map(p => {
-      const match = raw.find(
-        r =>
-          r.dataProviderId === p.dataProviderId &&
-          r.dataSetName === p.datasetSchemaName && // country/provider
-          r.nameDatasetSchema === p.name // schema name
-      );
-      return match ? { ...match, ...p } : p;
-    });
-
-    parsed.datasets = orderBy(mergedDatasets, d => d.datasetSchemaName ?? d.nameDatasetSchema);
-
-    return parsed;
+    const publicDataflowData = DataflowUtils.parsePublicDataflowDTO(publicDataflowDataDTO.data);
+    publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
+    return publicDataflowData;
   },
   createApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.createApiKey(dataflowId, dataProviderId, isCustodian),

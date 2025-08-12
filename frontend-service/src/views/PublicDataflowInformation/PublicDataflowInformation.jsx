@@ -327,15 +327,15 @@ export const PublicDataflowInformation = () => {
       const publicFileNames = datasetsFromRepresentative
         .filter(dataset => !isNil(dataset.publicFileName))
         .map(dataset => dataset.publicFileName);
-      const firstReleaseDateFormatted = dayjs(dataset.firstReleaseDate).format('YYYY-MM-DD HH:mm');
-      const releaseDateFormatted = dayjs(dataset.releaseDate).format('YYYY-MM-DD HH:mm');
-      const showDeliveryDate = firstReleaseDateFormatted && releaseDateFormatted && firstReleaseDateFormatted === releaseDateFormatted ? null : releaseDateFormatted;
       return {
         dataProviderName: datasetSchemaName,
         dataProviderId: dataset.dataProviderId,
         dataflowType: dataflowType,
-        deliveryDate: showDeliveryDate,
-        firstReleaseDate: firstReleaseDateFormatted,
+        deliveryDate:
+          dataset.releaseDate && dataset.firstReleaseDate && dataset.releaseDate === dataset.firstReleaseDate
+            ? null
+            : dataset.releaseDate,
+        firstReleaseDate: dataset.firstReleaseDate,
         restrictFromPublic: dataset.restrictFromPublic,
         publicsFileName: publicFileNames,
         deliveryStatus: !dataset.isReleased
