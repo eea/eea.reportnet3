@@ -102,11 +102,20 @@
     display: flex;
     justify-content: space-between;
     max-width: 90%;
-    .field {
-      flex: auto;
+    align-items: flex-end;
+    > div:has(.label3){
+      align-self: flex-start;
+    }
+    > * {
       margin-left: 0.5rem;
       margin-right: 0.5rem;
       min-width:0;
+      flex:1 0 0;
+      align-items: flex-end;
+      &.field:not(:has( > label)){
+        margin-top:31px;
+        padding-bottom:21px;
+      }
       &:first-of-type {
         margin-left: 0;
       }

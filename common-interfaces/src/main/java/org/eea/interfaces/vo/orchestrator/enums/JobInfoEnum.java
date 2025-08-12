@@ -49,7 +49,7 @@ public enum JobInfoEnum {
 
     ERROR_COULD_NOT_UPLOAD_FILE_TO_PUBLIC_S3("Could not upload file to public s3"),
 
-    ERROR_ICEBERG_TABLE_EXISTS("The job failed because there is an iceberg table in the dataset"),
+    ERROR_ICEBERG_TABLE_EXISTS("The job failed because editing is currently enabled for the dataset. Please disable editing and try again."),
 
     WARNING_SOME_IMPORT_FILES_CONTAIN_WRONG_HEADERS("Some import files contain wrong headers"),
 
