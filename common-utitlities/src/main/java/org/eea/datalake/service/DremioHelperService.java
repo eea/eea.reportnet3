@@ -36,4 +36,6 @@ public interface DremioHelperService {
 
     void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception;
 
+    Long compareNumberOfRecords(String table1Path, String table2Path) throws Exception;
+
 }

@@ -50,8 +50,25 @@ const parsePublicDataflowListDTO = dataflowsDTO =>
 const parsePublicDataflowDTO = publicDataflowDTO => {
   dayjs.extend(utc);
 
+  const parsedDatasets = DatasetUtils.parseDatasetListDTO(publicDataflowDTO.reportingDatasets) || [];
+
+  const raw = publicDataflowDTO.reportingDatasets || [];
+  const rawByKey = new Map(raw.map(r => [`${r.dataProviderId}::${r.dataSetName}::${r.nameDatasetSchema}`, r]));
+
+  const mergedDatasets = parsedDatasets.map(p => {
+    const key = `${p.dataProviderId}::${p.datasetSchemaName}::${p.name}`;
+    const match = rawByKey.get(key);
+    return match
+      ? {
+          ...p,
+          firstReleaseDate: match.firstReleaseDate ? dayjs(match.firstReleaseDate).format('YYYY-MM-DD HH:mm') : null,
+          dateStatusChanged: match.dateStatusChanged ? dayjs(match.dateStatusChanged).format('YYYY-MM-DD HH:mm') : null
+        }
+      : p;
+  });
+
   return new Dataflow({
-    datasets: DatasetUtils.parseDatasetListDTO(publicDataflowDTO.reportingDatasets),
+    datasets: mergedDatasets,
     description: publicDataflowDTO.description,
     documents: DocumentUtils.parseDocumentListDTO(publicDataflowDTO.documents),
     expirationDate:

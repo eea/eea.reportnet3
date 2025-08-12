@@ -166,6 +166,15 @@ public class KafkaSenderUtils {
               ? notificationMap.get("user").toString()
               : null;
 
+      String recordLines =
+          (notificationMap.get("recordLines") != null) ? notificationMap.get("recordLines").toString() : null;
+
+      String tableName =
+          (notificationMap.get("tableName") != null) ? notificationMap.get("tableName").toString() : null;
+
+      String fieldName =
+          (notificationMap.get("fieldName") != null) ? notificationMap.get("fieldName").toString() : null;
+
       UserNotificationContentVO content = new UserNotificationContentVO();
       content.setDataflowId(dataflowId);
       content.setDataflowName(dataflowName);
@@ -187,6 +196,9 @@ public class KafkaSenderUtils {
       content.setDatasetStatus((notificationMap.get("datasetStatus") != null)
               ? DatasetStatusEnum.valueOf(notificationMap.get("datasetStatus").toString())
               : null);
+      content.setRecordLines(recordLines);
+      content.setTableName(tableName);
+      content.setFieldName(fieldName);
       content.setProviderId(providerId);
       content.setUserId(user);
       content.setError(notificationMap.get("error") != null ? notificationMap.get("error").toString() : null);

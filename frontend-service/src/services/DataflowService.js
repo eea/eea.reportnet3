@@ -21,7 +21,7 @@ import { DatasetTableRecord } from 'entities/DatasetTableRecord';
 import { CoreUtils } from 'repositories/_utils/CoreUtils';
 import { UserRoleUtils } from 'repositories/_utils/UserRoleUtils';
 import { ServiceUtils } from 'services/_utils/ServiceUtils';
-import {ObligationUtils} from "./_utils/ObligationUtils";
+import { ObligationUtils } from './_utils/ObligationUtils';
 
 export const DataflowService = {
   countByType: async () => {
@@ -353,13 +353,12 @@ export const DataflowService = {
     return publicDataflowsByCountryCodeResponse.data;
   },
 
-  getPublicDataflowData: async dataflowId => {
+   getPublicDataflowData: async dataflowId => {
     const publicDataflowDataDTO = await DataflowRepository.getPublicDataflowData(dataflowId);
     const publicDataflowData = DataflowUtils.parsePublicDataflowDTO(publicDataflowDataDTO.data);
     publicDataflowData.datasets = orderBy(publicDataflowData.datasets, 'datasetSchemaName');
     return publicDataflowData;
   },
-
   createApiKey: async (dataflowId, dataProviderId, isCustodian) =>
     await DataflowRepository.createApiKey(dataflowId, dataProviderId, isCustodian),
 
@@ -369,7 +368,7 @@ export const DataflowService = {
     return sortBy(usersList, ['dataflowName', 'role']);
   },
 
-  getDatasetsProvidersStatus: async dataflowId =>  await DataflowRepository.getDatasetsProvidersStatus(dataflowId),
+  getDatasetsProvidersStatus: async dataflowId => await DataflowRepository.getDatasetsProvidersStatus(dataflowId),
 
   getRepresentativesUsersList: async dataflowId => {
     const response = await DataflowRepository.getRepresentativesUsersList(dataflowId);
@@ -396,7 +395,7 @@ export const DataflowService = {
       numberRows,
       pageNum,
       sortByHeader
-    })
+    });
 
     const parsedObligations = publicObligations.data.obligations.map(obligation => {
       const parsedObligation = ObligationUtils.parseObligation(obligation);
@@ -444,11 +443,22 @@ export const DataflowService = {
     return icebergTables;
   },
 
-  getRepresentativeCode: async selectedRepresentatives =>  await DataflowRepository.getRepresentativeCode(selectedRepresentatives),
+  getRepresentativeCode: async selectedRepresentatives =>
+    await DataflowRepository.getRepresentativeCode(selectedRepresentatives),
 
   getSchemasValidation: async dataflowId => await DataflowRepository.getSchemasValidation(dataflowId),
 
-  update: async (dataflowId, name, description, obligationId, isReleasable, showPublicInfo, bigData, dataProviderGroupId,deadlineDate) =>
+  update: async (
+    dataflowId,
+    name,
+    description,
+    obligationId,
+    isReleasable,
+    showPublicInfo,
+    bigData,
+    dataProviderGroupId,
+    deadlineDate
+  ) =>
     await DataflowRepository.update(
       dataflowId,
       name,

@@ -7,6 +7,7 @@ import org.eea.dataset.persistence.metabase.domain.Task;
 import org.eea.dataset.persistence.metabase.repository.TaskRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.service.DatasetMetabaseService;
+import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.file.FileCommonUtils;
 import org.eea.dataset.service.helper.FileTreatmentHelper;
 import org.eea.exception.EEAErrorMessage;
@@ -67,6 +68,9 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
 
   @Autowired
   private JobProcessControllerZuul jobProcessControllerZuul;
+
+  @Autowired
+  private DatasetSchemaService datasetSchemaService;
 
   @Value("${dataset.fieldMaxLength}")
   private int fieldMaxLength;
@@ -142,8 +146,9 @@ public class ImportCsvFileChunkToDatasetCommand extends AbstractEEAEventHandlerC
         providerId = metabase.getDataProviderId();
       }
       DataProviderVO provider = representativeControllerZuul.findDataProviderById(providerId);
+      String tableName = datasetSchemaService.getTableSchemaName(String.valueOf(dataSetSchema.getIdDataSetSchema()), idTableSchema);
 
-      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter, fileCommon, datasetId, fieldMaxLength, provider.getCode(), batchRecordSave);
+      fileTreatmentHelper.reinitializeCsvSegmentedReaderStrategy(delimiter != null ? delimiter.charAt(0) : loadDataDelimiter, fileCommon, datasetId, fieldMaxLength, provider.getCode(), tableName);
       fileTreatmentHelper.importCsvFileChunk(datasetId,  fileName, inputStream,partitionId,
                idTableSchema,  replacebool,  dataSetSchema,  delimiter, startLine, endLine, csvFileChunkRecoveryDetails);
       LOG.info("Updating status of task with id {} and datasetId {} to FINISHED.", taskIdStr, datasetId);

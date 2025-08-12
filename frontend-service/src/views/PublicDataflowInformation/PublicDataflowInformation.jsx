@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { useNavigate, useLocation,useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 import ReactTooltip from 'react-tooltip';
 
@@ -67,9 +67,10 @@ export const PublicDataflowInformation = () => {
 
   const isBusinessDataflow = dataflowType === config.dataflowType.BUSINESS.value;
 
-  useBreadCrumbs(categorized === 'obligation'
-    ? { currentPage: CurrentPage.PUBLIC_DATAFLOWS_BY_OBLIGATION_DATAFLOW,dataflowId }
-    : { currentPage: CurrentPage.PUBLIC_DATAFLOW,dataflowId }
+  useBreadCrumbs(
+    categorized === 'obligation'
+      ? { currentPage: CurrentPage.PUBLIC_DATAFLOWS_BY_OBLIGATION_DATAFLOW, dataflowId }
+      : { currentPage: CurrentPage.PUBLIC_DATAFLOW, dataflowId }
   );
 
   useEffect(() => {
@@ -165,6 +166,10 @@ export const PublicDataflowInformation = () => {
         );
       case 'publicsFileName':
         return resourcesContext.messages['files'];
+      case 'deliveryDate':
+        return resourcesContext.messages['latestDeliveryDate'];
+      case 'firstReleaseDate':
+        return resourcesContext.messages['firstDeliveryDate'];
       default:
         return resourcesContext.messages[fieldHeader];
     }
@@ -185,9 +190,10 @@ export const PublicDataflowInformation = () => {
     const representativesWithPriority = [
       { id: 'id', index: 0 },
       { id: 'dataProviderName', index: 1 },
-      { id: 'deliveryDate', index: 2 },
-      { id: 'deliveryStatus', index: 3 },
-      { id: 'publicsFileName', index: 4 }
+      { id: 'firstReleaseDate', index: 2 },
+      { id: 'deliveryDate', index: 3 },
+      { id: 'deliveryStatus', index: 4 },
+      { id: 'publicsFileName', index: 5 }
     ];
 
     return representatives
@@ -325,7 +331,11 @@ export const PublicDataflowInformation = () => {
         dataProviderName: datasetSchemaName,
         dataProviderId: dataset.dataProviderId,
         dataflowType: dataflowType,
-        deliveryDate: dataset.releaseDate,
+        deliveryDate:
+          dataset.releaseDate && dataset.firstReleaseDate && dataset.releaseDate === dataset.firstReleaseDate
+            ? null
+            : dataset.releaseDate,
+        firstReleaseDate: dataset.firstReleaseDate,
         restrictFromPublic: dataset.restrictFromPublic,
         publicsFileName: publicFileNames,
         deliveryStatus: !dataset.isReleased
@@ -334,11 +344,29 @@ export const PublicDataflowInformation = () => {
           ? resourcesContext.messages[config.datasetStatus.DELIVERED.label]
           : resourcesContext.messages[
               DataflowUtils.getTechnicalAcceptanceStatus(datasetsFromRepresentative.map(dataset => dataset.status))
-            ]
+            ],
+        dateStatusChanged: dataset.dateStatusChanged
       };
     });
 
     setRepresentatives(representatives);
+  };
+
+  const deliveryStatusBodyColumn = rowData => {
+    const correctionText = resourcesContext.messages[config.datasetStatus.CORRECTION_REQUESTED.label];
+    const techAcceptedText = resourcesContext.messages[config.datasetStatus.TECHNICALLY_ACCEPTED.label];
+    const showDate = rowData.deliveryStatus === correctionText || rowData.deliveryStatus === techAcceptedText;
+
+    return (
+      <span className={styles.cellWrapper}>
+        {rowData.deliveryStatus}
+        {showDate && rowData.dateStatusChanged && (
+          <span className={styles.statusDate}>
+            <strong>{dayjs(rowData.dateStatusChanged).format('YYYY-MM-DD HH:mm')}</strong>
+          </span>
+        )}
+      </span>
+    );
   };
 
   const renderRepresentativeColumns = representatives => {
@@ -348,12 +376,14 @@ export const PublicDataflowInformation = () => {
           key.includes('dataProviderName') ||
           key.includes('publicsFileName') ||
           key.includes('deliveryDate') ||
+          key.includes('firstReleaseDate') ||
           key.includes('deliveryStatus')
       )
       .map(field => {
         let template = null;
         if (field === 'dataProviderName') template = dataProviderNameBodyColumn;
         if (field === 'publicsFileName') template = downloadFileBodyColumn;
+        if (field === 'deliveryStatus') template = deliveryStatusBodyColumn;
         return (
           <Column
             body={template}

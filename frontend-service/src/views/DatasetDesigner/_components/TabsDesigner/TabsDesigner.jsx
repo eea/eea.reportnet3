@@ -176,6 +176,11 @@ export const TabsDesigner = ({
       let checkTabs = [];
       tabsArray.forEach(a => checkTabs.push(a));
 
+      // If iceberg is created, filter out the "+" tab completely
+      if (isIcebergCreated) {
+        tabsArray = tabsArray.filter(tab => !tab.addTab);
+      }
+
       if (checkTabs.some(item => item?.header === '+')) checkTabs.pop();
 
       let length = checkTabs.length;
@@ -466,6 +471,7 @@ export const TabsDesigner = ({
         isDataflowOpen={isDataflowOpen}
         isDesignDatasetEditorRead={isDesignDatasetEditorRead}
         isErrorDialogVisible={isErrorDialogVisible}
+        isIcebergCreated={isIcebergCreated}
         isWarningDialogVisible={isWarningDialogVisible}
         maxLength={maxLength}
         name="TabsDesigner"
@@ -509,7 +515,8 @@ export const TabsDesigner = ({
                   rightIconTooltip={getRightIconTooltip(tab)}
                   tableSchemaId={tab.tableSchemaId}
                   toPrefill={tab.toPrefill}>
-                  {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead)) || tabs.length > 1 ? (
+                  {(tabs.length > 0 && (isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated)) ||
+                  tabs.length > 1 ? (
                     <FieldsDesigner
                       autoFocus={false}
                       bigData={bigData}

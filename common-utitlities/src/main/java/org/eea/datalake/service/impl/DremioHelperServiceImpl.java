@@ -322,7 +322,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             result = executeWithTokenRefresh(() -> dremioApiController.sqlQueryString(token, requestBody));
             dremioApiJob = objectMapper.readValue(result, DremioApiJob.class);
 
-            LinkedHashMap<String, Object> results = getResults(dremioApiJob);
+            LinkedHashMap<String, Object> results = getResults(dremioApiJob.getId());
             if (results == null) {
                 LOG.error("In executeSqlStatementGet {} results=null", sqlStatement);
                 throw new EEAException("Failed to fetch results within retry limit.");
@@ -336,7 +336,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         }
     }
 
-    private LinkedHashMap<String, Object> getResults(DremioApiJob dremioApiJob) throws InterruptedException, EEAException {
+    private LinkedHashMap<String, Object> getResults(String dremioJobId) throws InterruptedException, EEAException {
         int retryCount = 0;
         int maxRetries = 5;
         int pollIntervalMillis = 2000;
@@ -345,7 +345,7 @@ public class DremioHelperServiceImpl implements DremioHelperService {
         while (results == null && retryCount < maxRetries) {
             try {
                 Thread.sleep(pollIntervalMillis);
-                results = (LinkedHashMap<String, Object>) dremioApiController.sqlApiResults(token, dremioApiJob.getId());
+                results = (LinkedHashMap<String, Object>) dremioApiController.sqlApiResults(token, dremioJobId);
             } catch (FeignException e) {
                 if (e.status() == HttpStatus.ACCEPTED.value()) { // 202 Accepted indicates results are not ready
                     LOG.info("Results not ready, retrying...");
@@ -353,13 +353,13 @@ public class DremioHelperServiceImpl implements DremioHelperService {
                 } else if (e.status() == HttpStatus.UNAUTHORIZED.value()) {
                     token = getAuthToken();
                     try {
-                        results = (LinkedHashMap<String, Object>) dremioApiController.sqlApiResults(token, dremioApiJob.getId());
+                        results = (LinkedHashMap<String, Object>) dremioApiController.sqlApiResults(token, dremioJobId);
                     } catch (Exception ex) {
                         LOG.error("Retry failed after token refresh.", ex);
                         throw new EEAException("Retry failed after token refresh.");
                     }
                 } else {
-                    LOG.error("In getResults for dremio job {} status={} message={}", dremioApiJob.getId(), e.status(), e.getMessage());
+                    LOG.error("In getResults for dremio job {} status={} message={}", dremioJobId, e.status(), e.getMessage());
                     throw new EEAException("Failed to fetch results within retry limit. statusCode=" + e.status());
                 }
             }
@@ -471,6 +471,28 @@ public class DremioHelperServiceImpl implements DremioHelperService {
     public void createTableFromAnotherTable(String oldTablePathInDremio, String newTablePathInDremio) throws Exception {
         String createNewTableQuery = "CREATE TABLE " + newTablePathInDremio + " AS SELECT * FROM " + oldTablePathInDremio;
         String processId = executeSqlStatement(createNewTableQuery);
+        LOG.info("Executing query with processId {} in dremio. Query: {}", processId, createNewTableQuery);
         checkIfDremioProcessFinishedSuccessfully(createNewTableQuery, processId, null);
+    }
+
+    @Override
+    public Long compareNumberOfRecords(String table1Path, String table2Path) throws Exception{
+        String recordCountAlias = "table1_count";
+        String compareRecordsQuery = "SELECT COUNT(*) AS " + recordCountAlias + " FROM " + table1Path + " HAVING COUNT(*) = (SELECT COUNT(*) FROM " + table2Path + " );";
+        String processId = executeSqlStatement(compareRecordsQuery);
+        checkIfDremioProcessFinishedSuccessfully(compareRecordsQuery, processId, null);
+        LinkedHashMap<String, Object> queryResults = getResults(processId);
+        List<LinkedHashMap<String,Object>> rows =  (List<LinkedHashMap<String,Object>>) queryResults.get("rows");
+
+        Optional<Long> numberOfRecords = rows.stream()
+                .filter(Objects::nonNull)
+                .map(linkedHashMap -> Long.valueOf((Integer) linkedHashMap.get(recordCountAlias)))
+                .findFirst();
+
+        if(numberOfRecords.isEmpty()){
+            throw new Exception("Could not find " + recordCountAlias + " in query " + compareRecordsQuery);
+        }
+
+        return numberOfRecords.get();
     }
 }

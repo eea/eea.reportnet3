@@ -951,37 +951,7 @@ public interface DatasetController {
            @RequestParam(value = "fileName", required = false) String fileName);
 
   /**
-   * Convert Parquet To Iceberg Table
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param tableSchemaId the tableSchemaId
-   *
-   */
-  @PostMapping("/convertParquetToIcebergTable/{datasetId}")
-  void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
-                                                 @RequestParam(value = "dataflowId") Long dataflowId,
-                                                 @RequestParam(value = "providerId", required = false) Long providerId,
-                                                 @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
-
-  /**
-   * Convert Iceberg To Parquet Table
-   *
-   * @param datasetId the dataset id
-   * @param dataflowId the dataflow id
-   * @param providerId the provider id
-   * @param tableSchemaId the tableSchemaId
-   *
-   */
-  @PostMapping("/convertIcebergToParquetTable/{datasetId}")
-  void convertIcebergToParquetTable(@PathVariable("datasetId") Long datasetId,
-                                    @RequestParam(value = "dataflowId") Long dataflowId,
-                                    @RequestParam(value = "providerId", required = false) Long providerId,
-                                    @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception;
-
-  /**
-   * Convert Parquet To Iceberg Table
+   * Convert Parquet To Iceberg Tables
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
@@ -996,7 +966,7 @@ public interface DatasetController {
                                     @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception;
 
   /**
-   * Convert Iceberg To Parquet Table
+   * Convert Iceberg To Parquet Tables
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id

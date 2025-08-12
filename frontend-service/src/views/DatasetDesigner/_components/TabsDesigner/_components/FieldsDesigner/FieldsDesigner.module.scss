@@ -184,6 +184,16 @@
   width: 40vw;
   transition: 0.5s !important;
 }
+
+.icebergWarning {
+  background: #e6f4fa;
+  color: #31708f;
+  border: 1px solid #bce8f1;
+  padding: 16px;
+  margin: 16px 0;
+  border-radius: 4px;
+}
+
 .markedForDeletionList {
   margin-top: 1rem;
   max-height: 40vh;

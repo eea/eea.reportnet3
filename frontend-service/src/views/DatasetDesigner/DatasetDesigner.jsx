@@ -885,22 +885,26 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     }
   }, [notificationContext]);
 
-  useEffect(() => {
-    const conversionToParquetCompleted = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT');
-    const conversionToIcebergCompleted = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT');
-    const conversionToParquetFailed = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT');
-    const conversionToIcebergFailed = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT');
-    if (
-      conversionToParquetCompleted ||
-      conversionToIcebergCompleted ||
-      conversionToParquetFailed ||
-      conversionToIcebergFailed
-    ) {
-      setIsLoadingIceberg(false);
-    }
-  }, [notificationContext.hidden]);
+  const hasConversionNotification = list =>
+    list?.some(notification =>
+      [
+        'ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT',
+        'PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT',
+        'ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT',
+        'ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT',
+        'ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT'
+      ].includes(notification.key)
+    );
 
-  const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
+  useEffect(() => {
+    if (hasConversionNotification(notificationContext.toShow)) {
+      setIsLoadingIceberg(false);
+      onGetIcebergTables();
+      handleRefresh();
+    }
+  }, [notificationContext.toShow, notificationContext.hidden]);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
@@ -1103,8 +1107,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
-  const onUpload = async () => {
+  const onUpload = async (e) => {
     const action = 'DATASET_IMPORT';
+    const fileName = e?.files?.[0]?.name || ' ';
     actionsContext.testProcess(datasetId, action);
     manageDialogs('isImportDatasetDialogVisible', false);
     setSelectedCustomImportIntegration({ id: null, name: null });
@@ -1124,7 +1129,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
             },
             dataflowName,
-            datasetName
+            datasetName,
+            fileName
           }
         },
         true

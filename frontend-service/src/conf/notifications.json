@@ -1027,7 +1027,7 @@
         { "key": "CREATE_NATIONAL_COORDINATORS_ERROR" },
         { "key": "GET_VALIDATIONS_STATUSES_ERROR" },
         { "key": "GET_JOBS_STATUSES_ERROR" },
-        { "key": "GET_CANCELLED_TASKS_ERROR"},
+        { "key": "GET_CANCELLED_TASKS_ERROR" },
         { "key": "UPLOAD_TO_S3_ERROR" },
         { "key": "IMPORT_S3_TO_DLH_ERROR" },
         { "key": "GET_ORGANIZATIONS_ERROR" },
@@ -1038,8 +1038,22 @@
         { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" },
         { "key": "CONVERT_TABLE_ERROR" },
         { "key": "RESTORE_TABLE_DATA_ERROR" },
-        { "key": "ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT" },
-        { "key": "PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT" },
+        {
+          "key": "PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": false
+          }
+        },
+        {
+          "key": "ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": false
+          }
+        },
         {
           "key": "VALIDATION_CANCELED_EVENT",
           "navigateTo": {
@@ -1094,6 +1108,27 @@
             "section": "DATASET_SCHEMA",
             "parameters": ["dataflowId", "datasetId"],
             "hasQueryString": true
+          }
+        },
+        {
+          "key": "PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
           }
         }
       ]
@@ -1371,8 +1406,20 @@
         { "key": "VALIDATE_REPORTERS_COMPLETED_EVENT" },
         { "key": "VALIDATE_LEAD_REPORTERS_COMPLETED_EVENT" },
         { "key": "EXPORT_TABLE_DATA_COMPLETED_EVENT" },
-        { "key": "ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT" },
-        { "key": "PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT" }
+        {
+          "key": "PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
+          "key": "ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        }
       ]
     },
     {
@@ -1419,7 +1466,13 @@
         { "key": "CLONE_DATASET_SCHEMAS_INIT" },
         { "key": "COPY_TO_EU_DATASET_INIT" },
         { "key": "EXPORT_EU_DATASET_INIT" },
-        { "key": "EXPORT_DATASET_DATA" },
+        {
+          "key": "EXPORT_DATASET_DATA",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
         { "key": "DOWNLOAD_VALIDATIONS_START" },
         { "key": "DOWNLOAD_QC_RULES_START" },
         { "key": "DATASET_IMPORT_INIT" },
@@ -1548,6 +1601,20 @@
       "fixed": false,
       "types": [
         {
+          "key": "IMPORT_FIELD_SIZE_EXCEEDS_LIMIT_WARNING_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId", "recordLines", "tableName", "fieldName"]
+          }
+        }
+      ]
+    },
+    {
+      "key": "warn",
+      "lifeTime": 20000,
+      "fixed": false,
+      "types": [
+        {
           "key": "IMPORT_MISMATCH_OF_DATA_WARNING_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -1576,10 +1643,6 @@
     "EXPORT_SCHEMA_INFORMATION_FAILED_EVENT",
     "NO_ENABLED_SYSTEM_NOTIFICATIONS",
     "COMMAND_ICEBERG_TO_PARQUET_CONVERSION",
-    "COMMAND_PARQUET_TO_ICEBERG_CONVERSION",
-    "ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT",
-    "ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT",
-    "PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT",
-    "PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT"
+    "COMMAND_PARQUET_TO_ICEBERG_CONVERSION"
   ]
 }
