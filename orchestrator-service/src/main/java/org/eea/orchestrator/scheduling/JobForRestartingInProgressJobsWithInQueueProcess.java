@@ -87,13 +87,11 @@ public class JobForRestartingInProgressJobsWithInQueueProcess {
      */
     public void restartInProgressJobsWithInQueueProcess() {
         try {
-            LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess started");
+            LOG.info("Running scheduled job restartInProgressJobsWithInQueueProcess");
             List<JobVO> jobList = jobService.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.IN_PROGRESS));
             if(jobList == null || jobList.size() == 0){
                 return;
             }
-            LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess jobList size: {}", jobList.size());
-            LOG.info("Running scheduled job restartInProgressJobsWithInQueueProcess");
             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(adminUser, BEARER + tokenVo.getAccessToken(), null);
@@ -109,14 +107,10 @@ public class JobForRestartingInProgressJobsWithInQueueProcess {
                     List<ProcessVO> processVOList =
                             Optional.ofNullable(processControllerZuul.findByIds(processIds))
                                     .orElse(Collections.emptyList());
-                    LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess processVOList size: {}",
-                            processVOList.size());
 
                     long duration = new Date().getTime() - job.getDateStatusChanged().getTime();
 
                     for (ProcessVO processVO: processVOList) {
-                        LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess processVO: {}", processVO);
-
                         if(ProcessStatusEnum.IN_QUEUE.name().equalsIgnoreCase(
                                 Optional.ofNullable(processVO.getStatus()).orElse(""))
                                 && duration > maxTimeForInQueueProcessInProgressJob){

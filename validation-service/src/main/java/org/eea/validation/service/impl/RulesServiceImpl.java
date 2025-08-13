@@ -845,9 +845,6 @@ public class RulesServiceImpl implements RulesService {
     }
     if (!ruleList.isEmpty()) {
       // to be deleted
-      LOG.info("[CHRIS] creating automatic rule");
-      LOG.info("[CHRIS] datasetSchemaId {}\n referenceId: {}\n typeData: {}\n typeEntityEnum: {}\n datasetId: {}\n required: {}\n automaticQCDefaultLevelError: {}\n",
-              datasetSchemaId, referenceId, typeData, typeEntityEnum, datasetId, required, automaticQCDefaultLevelError);
       ruleList.stream()
               .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
     }
