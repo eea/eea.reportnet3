@@ -547,7 +547,6 @@ public class AutomaticRules {
     rule.setRuleId(ruleId);
     rule.setReferenceId(new ObjectId(referenceId));
     rule.setAutomatic(true);
-    System.out.println("[CHRIS-SOUT] 1 automatic");
     rule.setEnabled(true);
     rule.setVerified(true);
     rule.setRuleName(nameRule);
