@@ -331,10 +331,7 @@ export const PublicDataflowInformation = () => {
         dataProviderName: datasetSchemaName,
         dataProviderId: dataset.dataProviderId,
         dataflowType: dataflowType,
-        deliveryDate:
-          dataset.releaseDate && dataset.firstReleaseDate && dataset.releaseDate === dataset.firstReleaseDate
-            ? null
-            : dataset.releaseDate,
+        deliveryDate: dataset.releaseDate,
         firstReleaseDate: dataset.firstReleaseDate,
         restrictFromPublic: dataset.restrictFromPublic,
         publicsFileName: publicFileNames,
@@ -361,9 +358,7 @@ export const PublicDataflowInformation = () => {
       <span className={styles.cellWrapper}>
         {rowData.deliveryStatus}
         {showDate && rowData.dateStatusChanged && (
-          <span className={styles.statusDate}>
-            <strong>{dayjs(rowData.dateStatusChanged).format('YYYY-MM-DD HH:mm')}</strong>
-          </span>
+          <span className={styles.statusDate}>{dayjs(rowData.dateStatusChanged).format('YYYY-MM-DD HH:mm')}</span>
         )}
       </span>
     );
