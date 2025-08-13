@@ -20,11 +20,15 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class JobForRestartingInProgressJobsWithInQueueProcess {
@@ -74,7 +78,7 @@ public class JobForRestartingInProgressJobsWithInQueueProcess {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.initialize();
         scheduler.schedule(() -> restartInProgressJobsWithInQueueProcess(),
-                new CronTrigger("0 */10 * * * *"));
+                new CronTrigger("0 */2 * * * *"));
     }
 
     /**
@@ -83,10 +87,12 @@ public class JobForRestartingInProgressJobsWithInQueueProcess {
      */
     public void restartInProgressJobsWithInQueueProcess() {
         try {
-            List<JobVO> jobList = jobService.findByJobTypeInAndJobStatusInAndRelease(Arrays.asList(JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.IN_PROGRESS), false);
+            LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess started");
+            List<JobVO> jobList = jobService.findByJobTypeInAndJobStatusIn(Arrays.asList(JobTypeEnum.VALIDATION), Arrays.asList(JobStatusEnum.IN_PROGRESS));
             if(jobList == null || jobList.size() == 0){
                 return;
             }
+            LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess jobList size: {}", jobList.size());
             LOG.info("Running scheduled job restartInProgressJobsWithInQueueProcess");
             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
             UsernamePasswordAuthenticationToken authentication =
@@ -95,14 +101,30 @@ public class JobForRestartingInProgressJobsWithInQueueProcess {
             for (JobVO job: jobList){
                 try {
                     List<String> processIds = jobProcessService.findProcessesByJobId(job.getId());
-                    ProcessVO processVO = processControllerZuul.findById(processIds.get(0));
-                    Long duration = new Date().getTime() - job.getDateStatusChanged().getTime();
+                    if (processIds == null || processIds.isEmpty()) {
+                        LOG.info("No processes found for job {}", job.getId());
+                        continue;
+                    }
 
-                    if(processVO.getStatus().equals(ProcessStatusEnum.IN_QUEUE.toString()) && duration > maxTimeForInQueueProcessInProgressJob){
-                        validationControllerZuul.deleteLocksToReleaseProcess(job.getDatasetId());
-                        processControllerZuul.deleteProcessByProcessId(processVO.getProcessId());
-                        jobProcessService.deleteJobProcessByProcessId(processVO.getProcessId());
-                        jobService.updateJobStatus(job.getId(), JobStatusEnum.QUEUED);
+                    List<ProcessVO> processVOList =
+                            Optional.ofNullable(processControllerZuul.findByIds(processIds))
+                                    .orElse(Collections.emptyList());
+                    LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess processVOList size: {}",
+                            processVOList.size());
+
+                    long duration = new Date().getTime() - job.getDateStatusChanged().getTime();
+
+                    for (ProcessVO processVO: processVOList) {
+                        LOG.info("[CHRIS] restartInProgressJobsWithInQueueProcess processVO: {}", processVO);
+
+                        if(ProcessStatusEnum.IN_QUEUE.name().equalsIgnoreCase(
+                                Optional.ofNullable(processVO.getStatus()).orElse(""))
+                                && duration > maxTimeForInQueueProcessInProgressJob){
+                            validationControllerZuul.deleteLocksToReleaseProcess(job.getDatasetId());
+                            processControllerZuul.deleteProcessByProcessId(processVO.getProcessId());
+                            jobProcessService.deleteJobProcessByProcessId(processVO.getProcessId());
+                            jobService.updateJobStatus(job.getId(), JobStatusEnum.QUEUED);
+                        }
                     }
                 }
                 catch (Exception e){

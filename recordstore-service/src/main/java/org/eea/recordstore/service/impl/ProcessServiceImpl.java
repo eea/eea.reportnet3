@@ -188,6 +188,17 @@ public class ProcessServiceImpl implements ProcessService {
   }
 
   /**
+   * Gets the by process id.
+   *
+   * @param processIds the process id
+   * @return the by process id
+   */
+  @Override
+  public List<ProcessVO> getByProcessIds(List<String> processIds) {
+    return processMapper.entityListToClass(processRepository.findOneByProcessIds(processIds));
+  }
+
+  /**
    * Checks if is process finished.
    *
    * @param processId the process id
