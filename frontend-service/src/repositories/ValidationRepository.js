@@ -59,5 +59,14 @@ export const ValidationRepository = {
       data: { sqlRule: sqlSentence }
     }),
 
-  viewUpdated: async datasetId => await HTTPRequester.get({ url: getUrl(ValidationConfig.viewUpdated, { datasetId }) })
+  viewUpdated: async datasetId => await HTTPRequester.get({ url: getUrl(ValidationConfig.viewUpdated, { datasetId }) }),
+
+  setDefaultSeverity: async (datasetId, datasetSchema, severity) =>
+    await HTTPRequester.update({
+      url: getUrl(ValidationConfig.setDefaultSeverity, {
+        datasetId,
+        datasetSchema,
+        automaticQCsDefaultLevelError: severity
+      })
+    })
 };
