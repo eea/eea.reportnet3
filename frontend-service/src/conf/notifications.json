@@ -593,6 +593,9 @@
           "key": "COPY_DATASET_SCHEMA_FAILED_EVENT"
         },
         {
+          "key": "COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT"
+        },
+        {
           "key": "LOAD_DATAFLOWS_ERROR"
         },
         {
@@ -826,6 +829,9 @@
         },
         {
           "key": "IMPORT_DATASET_SCHEMA_FAILED_EVENT"
+        },
+        {
+          "key": "IMPORT_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT"
         },
         {
           "key": "EXPORT_DATASET_SCHEMA_FAILED_EVENT"

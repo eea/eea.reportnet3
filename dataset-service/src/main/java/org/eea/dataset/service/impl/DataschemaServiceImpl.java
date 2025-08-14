@@ -41,7 +41,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -278,6 +277,9 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   @Autowired
   WebformRepository webformRepository;
 
+  /** The data flow controller zuul. */
+  @Autowired
+  private DataFlowControllerZuul dataflowControllerZuul;
 
 
   /**
@@ -2415,6 +2417,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       for (DataSetSchema schema : importClasses.getSchemas()) {
         // Create the empty new dataset schema
+        if (dataFlowControllerZuul.isBigDataflow(dataflowId)) {
+          for (TableSchema tableSchema : schema.getTableSchemas()) {
+            for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+              if (fieldSchema.getHeaderName().chars().anyMatch(Character::isWhitespace)) {
+                throw new EEAException(EEAErrorMessage.FIELD_NAME_WHITESPACES);
+              }
+            }
+          }
+        }
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
         DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
         dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
@@ -2517,11 +2528,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
-              null,
-              NotificationVO.builder()
-                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                      .dataflowId(dataflowId).error("Error importing the schemas").build());
+      if (e instanceof EEAException && e.getMessage() != null && e.getMessage().equals(EEAErrorMessage.FIELD_NAME_WHITESPACES)) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT,
+          null,
+          NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .dataflowId(dataflowId).error("Error importing the schemas - " + EEAErrorMessage.FIELD_NAME_WHITESPACES).build());
+      } else {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
+          null,
+          NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .dataflowId(dataflowId).error("Error importing the schemas").build());
+      }
     } finally {
       Map<String, Object> importDatasetData = new HashMap<>();
       importDatasetData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_SCHEMAS.getValue());
