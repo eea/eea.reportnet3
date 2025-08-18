@@ -635,10 +635,13 @@ public enum EventType {
   CALL_FME_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "call_fme_process_failed_event", true),
 
-  /** Validation failed event */
+  /** Validation canceled event */
   VALIDATION_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_canceled_event", true),
+
+  /** Validation with iceberg failed event */
+  VALIDATION_FAILED_ICEBERG_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_failed_iceberg_exists_event", true),
   
-  /** Validation failed event */
+  /** Validation finished with canceled tasks event */
   FINISHED_VALIDATION_WITH_CANCELED_TASKS(LiteralConstants.DATA_REPORTING_TOPIC, "finished_validation_with_canceled_tasks_event", true),
 
   /** The release canceled event. */

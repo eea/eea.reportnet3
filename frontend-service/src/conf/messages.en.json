@@ -1717,6 +1717,7 @@
     "validatingDataError": "Error validating data",
     "validationDashboards": "Validation dashboards",
     "validation": "Validation",
+    "validationFailedIcebergExistsEvent": "Validation for dataset <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> failed because editing is currently enabled for the dataset. Editing needs to be disabled before validating.",
     "validationFilter": "Validation filter",
     "validationFinishedEvent": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Click <strong>Refresh</strong> to view the data.",
     "validationInProgress": "Validation in progress",
