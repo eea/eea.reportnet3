@@ -93,6 +93,8 @@ public class JobForExecutingQueuedJobs {
                     } else if (job.getJobType() == JobTypeEnum.COPY_TO_EU_DATASET) {
                         LOG.info("Job with id {} and of type {} will be executed.", job.getId(), job.getJobType().getValue());
                         jobService.prepareAndExecuteCopyToEUDatasetJob(job);
+                    } else if (job.getJobType() == JobTypeEnum.IMPORT) {
+                        LOG.info("Found QUEUED IMPORT job with id {}. Doing nothing.", job.getId());
                     } else {
                         LOG.error("Error trying to execute queued job with id {}. Job type is {}", job.getId(), job.getJobType().getValue());
                         jobService.deleteJob(job);
