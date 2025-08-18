@@ -69,22 +69,24 @@ export const QcSeverityDialog = ({ datasetId, datasetSchemaId, isVisible, onHide
         <div>
           <div className={styles.messageContainer}>
             <p>{resourcesContext.messages['defaultSeverityMessage']}</p>
-            <p><strong>{resourcesContext.messages['defaultSeverityMessage2']}</strong></p>
+            <p>
+              <strong>{resourcesContext.messages['defaultSeverityMessage2']}</strong>
+            </p>
             <p>{resourcesContext.messages['defaultSeverityMessage3']}</p>
           </div>
 
           <div className={styles.formField}>
             <label htmlFor="severityDropdown">{resourcesContext.messages['severity']}</label>
             <Dropdown
-              id="severityDropdown"
               appendTo={document.body}
-              optionLabel="label"
-              optionValue="value"
-              options={severityOptions}
-              value={selectedOption}
+              id="severityDropdown"
               onChange={e => {
                 setSeverity(e.target.value.value);
               }}
+              optionLabel="label"
+              options={severityOptions}
+              optionValue="value"
+              value={selectedOption}
             />
           </div>
         </div>
