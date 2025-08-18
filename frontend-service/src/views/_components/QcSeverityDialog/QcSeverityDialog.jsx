@@ -61,15 +61,16 @@ export const QcSeverityDialog = ({ datasetId, datasetSchemaId, isVisible, onHide
   return (
     isVisible && (
       <Dialog
-        className={styles.dialog}
         footer={renderFooter}
         header={resourcesContext.messages['defaultSeverity']}
         onHide={onHide}
         style={{ width: '500px' }}
         visible={isVisible}>
-        <div className={styles.content}>
+        <div>
           <div className={styles.messageContainer}>
             <p>{resourcesContext.messages['defaultSeverityMessage']}</p>
+            <p><strong>{resourcesContext.messages['defaultSeverityMessage2']}</strong></p>
+            <p>{resourcesContext.messages['defaultSeverityMessage3']}</p>
           </div>
 
           <div className={styles.formField}>
