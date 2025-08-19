@@ -1035,6 +1035,7 @@
         { "key": "GET_CONTROL_STATUSES_ERROR" },
         { "key": "DELETE_VALIDATION_FROM_QUEUE_ERROR" },
         { "key": "SET_VALIDATIONS_STATUS_PRIORITY_ERROR" },
+        { "key": "SET_DEFAULT_SEVERITY_ERROR" },
         { "key": "DELETE_PROVIDER_DATASET_DATA_ERROR" },
         { "key": "CONVERT_TABLE_ERROR" },
         { "key": "RESTORE_TABLE_DATA_ERROR" },
@@ -1310,6 +1311,9 @@
         },
         {
           "key": "COPY_TO_CLIPBOARD_SUCCESS"
+        },
+        {
+          "key": "SET_DEFAULT_SEVERITY_SUCCESS"
         },
         {
           "key": "DELETE_DATASET_DATA_COMPLETED_EVENT",

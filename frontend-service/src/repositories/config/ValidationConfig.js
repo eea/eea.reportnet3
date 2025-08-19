@@ -12,5 +12,6 @@ export const ValidationConfig = {
   runSqlRule: '/rules/runSqlRule?datasetId={:datasetId}&showInternalFields={:showInternalFields}',
   update: '/rules/updateRule?datasetId={:datasetId}',
   updateAutomatic: '/rules/updateAutomaticRule/{:datasetId}',
-  viewUpdated: '/dataset/{:datasetId}/viewUpdated'
+  viewUpdated: '/dataset/{:datasetId}/viewUpdated',
+  setDefaultSeverity: '/rules/updateAutomaticQCsDefaultLevelError?datasetId={:datasetId}&idDatasetSchema={:datasetSchema}&automaticQCsDefaultLevelError={:automaticQCsDefaultLevelError}',
 };
