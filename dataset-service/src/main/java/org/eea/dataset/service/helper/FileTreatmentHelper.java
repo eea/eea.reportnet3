@@ -802,7 +802,7 @@ public class FileTreatmentHelper implements DisposableBean {
         if (!filters.getQcCodes().isEmpty()) {
             qcCodes = new String[]{filters.getQcCodes()};
         }
-        StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, null, filters.getFieldValue(), fieldIdMap, filters.getLevelError(), qcCodes, validationTablePath);
+        StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, null, null, filters.getFieldValue(), fieldIdMap, filters.getLevelError(), qcCodes, validationTablePath);
         filteredQuery.append(" limit " + FILE_EXPORT_LIMIT);
         dataQuery.append(filteredQuery);
         return dataQuery;
