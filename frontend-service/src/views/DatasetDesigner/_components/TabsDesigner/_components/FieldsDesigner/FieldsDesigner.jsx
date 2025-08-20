@@ -657,6 +657,7 @@ export const FieldsDesigner = ({
       return (
         <FieldDesigner
           addField={true}
+          bigData={bigData}
           checkDuplicates={(name, fieldId) => FieldsDesignerUtils.checkDuplicates(fields, name, fieldId)}
           checkInvalidCharacters={name => FieldsDesignerUtils.checkInvalidCharacters(name)}
           codelistItems={[]}

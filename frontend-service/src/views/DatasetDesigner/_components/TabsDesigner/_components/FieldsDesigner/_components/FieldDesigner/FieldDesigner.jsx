@@ -36,6 +36,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const FieldDesigner = ({
   addField = false,
+  bigData,
   bulkDelete = false,
   checkDuplicates,
   checkInvalidCharacters,
@@ -298,7 +299,7 @@ export const FieldDesigner = ({
             if (checkInvalidCharacters(name)) {
               fieldTypeRef.current.hide();
               onShowDialogError(
-                resourcesContext.messages['invalidCharactersFieldMessage'],
+                bigData ? resourcesContext.messages['invalidCharactersFieldMessageDL'] : resourcesContext.messages['invalidCharactersFieldMessage'],
                 resourcesContext.messages['invalidCharactersFieldTitle'],
                 inputRef?.current?.element
               );
@@ -1301,7 +1302,6 @@ export const FieldDesigner = ({
       );
     }
   };
-
   const renderInputs = () => (
     <Fragment>
       <div className={`${styles.draggableFieldContentCell} ${styles.bigItems}`}>
@@ -1325,7 +1325,15 @@ export const FieldDesigner = ({
               onBlurFieldName(e.target.value.trim());
               dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value.trim() });
             }}
-            onChange={e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })}
+            onChange={
+              bigData
+                ? e => {
+                    const valueWithoutSpaces = e.target.value.replace(/\s+/g, '');
+                    dispatchFieldDesigner({ type: 'SET_NAME', payload: valueWithoutSpaces });
+                  }
+                : e => dispatchFieldDesigner({ type: 'SET_NAME', payload: e.target.value })
+            }
+            
             onFocus={e => {
               if (
                 e.target.value.trim() !== '' &&
