@@ -366,70 +366,11 @@ public class ValidationHelper implements DisposableBean {
 
     DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
     List<String> tableNames = datasetSchema.getTableSchemas().stream()
-            .map(TableSchema::getNameTableSchema)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+        .map(TableSchema::getNameTableSchema)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
 
-    List<String> failedToPromoteTables = new ArrayList<>();
-    for (String tableName : tableNames) {
-      try {
-        S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), tableName, tableName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
-        tableResolver.setIsIcebergTable(false);
-
-        // Check if the table exists on dremio.
-        boolean tableExists;
-        try {
-          tableExists = s3Helper.checkFolderExist(tableResolver, LiteralConstants.S3_TABLE_NAME_FOLDER_PATH);
-        } catch (Exception e) {
-          LOG.warn("Folder existence check failed for datasetId {}, table {}. Cause: {}", dataset.getId(), tableName, e.getMessage(), e);
-          tableExists = false;
-        }
-
-        if (!tableExists) continue;
-
-        // Check if the table is promoted.
-        boolean isPromoted;
-        try {
-          isPromoted = dremioHelperService.checkFolderPromoted(tableResolver, tableName);
-        } catch (Exception e) {
-          LOG.warn("Check for promotion failed for datasetId {}, table {}. Cause: {}", dataset.getId(), tableName, e.getMessage(), e);
-          isPromoted = false;
-        }
-
-        // If not promoted, promote.
-        if (!isPromoted) {
-          String tablePath = s3ServicePrivate.getTableAsFolderQueryPath(tableResolver, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
-
-          try {
-            LOG.info("Promoting table for dataset {} table {} (was not promoted).", dataset.getId(), tableName);
-            dremioHelperService.refreshTableMetadataAndPromote(jobId, tablePath, tableResolver, tableName);
-          } catch (Exception e) {
-            LOG.warn("Promotion attempt failed for dataset {} table {}. Cause: {}", dataset.getId(), tableName, e.getMessage(), e);
-          }
-
-          // Re-check to verify table promotion was successful.
-          try {
-            isPromoted = dremioHelperService.checkFolderPromoted(tableResolver, tableName);
-          } catch (Exception e) {
-            LOG.error("Second check for promotion failed for dataset {} table {}. Cause: {}", dataset.getId(), tableName, e.getMessage(), e);
-            isPromoted = false;
-          }
-
-          if (!isPromoted) {
-            LOG.error("Table promotion unsuccessful for dataset {} table {}", dataset.getId(), tableName);
-            failedToPromoteTables.add(tableName);
-          } else {
-            LOG.info("Table promotion successful for dataset {} table {}", dataset.getId(), tableName);
-          }
-        }
-      } catch (Exception e) {
-        LOG.error("The table promotion processs failed for datasetId {}, table {}.: {}", datasetId, tableName, e.getMessage(), e);
-      }
-
-      if (!failedToPromoteTables.isEmpty()) {
-          failDueToPromotionError(dataset, datasetId, processId, jobId, user, released,  jobVO);
-      }
-    }
+    promoteDatasetTablesToDremio(tableNames, dataset, jobId, datasetId, processId, user, released, jobVO);
 
     initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -510,6 +451,69 @@ public class ValidationHelper implements DisposableBean {
     }
   }
 
+  private void promoteDatasetTablesToDremio(List<String> tableNames, DataSetMetabaseVO dataset, Long jobId, Long datasetId, String processId, String user, boolean released, JobVO jobVO) throws EEAException {
+    List<String> failedToPromoteTables = new ArrayList<>();
+    for (String tableName : tableNames) {
+      try {
+        S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), tableName, tableName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+        tableResolver.setIsIcebergTable(false);
+
+        // Check if the table exists on dremio.
+        boolean tableExists;
+        try {
+          tableExists = s3Helper.checkFolderExist(tableResolver, LiteralConstants.S3_TABLE_NAME_FOLDER_PATH);
+        } catch (Exception e) {
+          LOG.error("Folder existence check failed for jobId {} datasetId {}, table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+          tableExists = false;
+        }
+
+        if (!tableExists) continue;
+
+        // Check if the table is promoted.
+        boolean isPromoted;
+        try {
+          isPromoted = dremioHelperService.checkFolderPromoted(tableResolver, tableName);
+        } catch (Exception e) {
+          LOG.error("Check for promotion failed for jobId {} datasetId {}, table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+          isPromoted = false;
+        }
+
+        // If not promoted, promote.
+        if (!isPromoted) {
+          String tablePath = s3ServicePrivate.getTableAsFolderQueryPath(tableResolver, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+          try {
+            LOG.info("Promoting table for jobId {} dataset {} table {} (was not promoted).", jobId, dataset.getId(), tableName);
+            dremioHelperService.refreshTableMetadataAndPromote(jobId, tablePath, tableResolver, tableName);
+          } catch (Exception e) {
+            LOG.error("Promotion attempt failed for jobId {} dataset {} table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+          }
+
+          // Re-check to verify table promotion was successful.
+          try {
+            isPromoted = dremioHelperService.checkFolderPromoted(tableResolver, tableName);
+          } catch (Exception e) {
+            LOG.error("Second check for promotion failed for jobId {} dataset {} table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+            isPromoted = false;
+          }
+
+          if (!isPromoted) {
+            LOG.error("Table promotion unsuccessful for jobId {} dataset {} table {}", jobId, dataset.getId(), tableName);
+            failedToPromoteTables.add(tableName);
+          } else {
+            LOG.info("Table promotion successful for jobId {} dataset {} table {}", jobId, dataset.getId(), tableName);
+          }
+        }
+      } catch (Exception e) {
+        LOG.error("The table promotion processs failed for jobId {}datasetId {}, table {}.: {}", jobId, datasetId, tableName, e.getMessage());
+      }
+
+      if (!failedToPromoteTables.isEmpty()) {
+        failDueToPromotionError(dataset, datasetId, processId, jobId, user, released,  jobVO);
+      }
+    }
+  }
+
   private void failDueToPromotionError(DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO) throws EEAException {
     if (jobId != null) {
       try {
@@ -517,9 +521,9 @@ public class ValidationHelper implements DisposableBean {
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
         processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
             ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processId, user, getPriority(dataset), released);
-        LOG.info("Deleted job_process link for jobId {} and processId {}", jobId, processId);
+        LOG.info("Deleted job_process link for jobId {} datasetId {} and processId {}", jobId, datasetId, processId);
       } catch (Exception e) {
-        LOG.error("Could not delete job_process for jobId {} and processId {}: {}", jobId, processId, e.getMessage(), e);
+        LOG.error("Could not update process for jobId {} datasetId {} and processId {}: {}", jobId, datasetId, processId, e.getMessage());
       }
     }
 
@@ -527,18 +531,18 @@ public class ValidationHelper implements DisposableBean {
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-            EventType.VALIDATION_FAILED_ICEBERG_EXISTS_EVENT, null,
-            NotificationVO.builder()
-                .user(jobVO != null ? jobVO.getCreatorUsername() : user)
-                .datasetId(datasetId)
-                .dataflowId(dataset.getDataflowId())
-                .build()
+          EventType.VALIDATION_FAILED_ICEBERG_EXISTS_EVENT, null,
+          NotificationVO.builder()
+              .user(jobVO != null ? jobVO.getCreatorUsername() : user)
+              .datasetId(datasetId)
+              .dataflowId(dataset.getDataflowId())
+              .build()
       );
     } catch (Exception e) {
-      LOG.warn("Could not send VALDATION_FAILED_ICEBERG_EXISTS_EVENT for datasetId {}: {}", datasetId, e.getMessage(), e);
+      LOG.warn("Could not send VALDATION_FAILED_ICEBERG_EXISTS_EVENT for jobId {} and datasetId {}: {}", jobId, datasetId, e.getMessage());
     }
 
-      throw new EEAException("Can not validate for jobId " + jobId + " because there is an iceberg table");
+    throw new EEAException("Can not validate for jobId " + jobId + " because there is an iceberg table");
   }
 
   private List<DataSetMetabaseVO> getCombinedDatasets(DataSetMetabaseVO dataset) {
