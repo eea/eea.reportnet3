@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public interface DataLakeDataRetriever {
 
-    TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) throws EEAException;
+    TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError, String[] qcCodes) throws EEAException;
 
     boolean isApplicable(String datasetType);
 

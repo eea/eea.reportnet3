@@ -292,7 +292,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
       String datasetSchemaId = dataset.getDatasetSchema();
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
-      result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
+      result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getTableResult(dataset, tableSchemaVO, pageable, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
     } catch (EEAException e) {
       LOG.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {

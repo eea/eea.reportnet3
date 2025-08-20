@@ -53,7 +53,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
     }
 
     @Override
-    public TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldValue, ErrorTypeEnum[] levelError,
+    public TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError,
                                   String[] qcCodes) throws EEAException {
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
@@ -90,7 +90,7 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             s3PathResolver.setIsIcebergTable(false);
             String validationTablePath = s3Service.getTableAsFolderQueryPath(s3PathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
             s3PathResolver.setIsIcebergTable(true);
-            StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
+            StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, validationTablePath);
             if (filteredQuery.toString().isEmpty() && levelError!=null && levelError.length==0) {
                 result.setTotalFilteredRecords(0L);
                 result.setTotalRecords(totalRecords);
