@@ -220,6 +220,11 @@ export const ValidationService = {
     return await ValidationRepository.update(datasetId, validation);
   },
 
+  setDefaultSeverity: async (datasetId, datasetSchema, severity) => {
+    const res = await ValidationRepository.setDefaultSeverity(datasetId, datasetSchema, severity);
+    return res?.data ?? res;
+  },
+
   evaluateSqlSentence: async (datasetId, sqlSentence) =>
     await ValidationRepository.evaluateSqlSentence(datasetId, sqlSentence),
 

@@ -70,6 +70,8 @@ import { DatasetUtils } from 'services/_utils/DatasetUtils';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { QcSeverityDialog } from 'views/_components/QcSeverityDialog';
+
 import dayjs from 'dayjs';
 
 export const DatasetDesigner = ({ isReferenceDataset = false }) => {
@@ -99,6 +101,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const [isLoadingIceberg, setIsLoadingIceberg] = useState(false);
   const [noEditableCheck, setNoEditableCheck] = useState(false);
   const [tableImportedMetadata, setTableImportedMetadata] = useState({});
+  const [isQcSeverityDialogVisible, setIsQcSeverityDialogVisible] = useState(false);
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -1107,7 +1110,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
-  const onUpload = async (e) => {
+  const onUpload = async e => {
     const action = 'DATASET_IMPORT';
     const fileName = e?.files?.[0]?.name || ' ';
     actionsContext.testProcess(datasetId, action);
@@ -1363,7 +1366,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       );
     }
   };
-
   const renderActionButtonsValidationDialog = (
     <div className={styles.qcDialogFooterWrapper}>
       {renderQCsHistoryButton()}
@@ -1394,6 +1396,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             icon="plus"
             label={resourcesContext.messages['createTableValidationBtn']}
             onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
+          />
+          <Button
+            className="p-button-animated-blink"
+            icon="bars"
+            label={resourcesContext.messages['setSeverityBtn']}
+            onClick={() => setIsQcSeverityDialogVisible(true)}
           />
           <Button
             className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
@@ -2251,6 +2259,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             onCloseDialog={onCloseHistoryDialog}
           />
         )}
+
+        <QcSeverityDialog
+          datasetId={datasetId}
+          datasetSchemaId={designerState.datasetSchemaId}
+          isVisible={isQcSeverityDialogVisible}
+          onHide={() => setIsQcSeverityDialogVisible(false)}
+        />
 
         {designerState.isImportDatasetDialogVisible && (
           <CustomFileUpload

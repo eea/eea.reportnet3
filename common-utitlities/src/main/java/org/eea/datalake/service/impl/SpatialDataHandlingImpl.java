@@ -227,7 +227,6 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
    * @param geomByteArray The WKB to calculate
    */
   private boolean fieldExceedsMaxSize(long lineNumber, SpatialFieldInfo spatialFieldInfo, byte[] geomByteArray) {
-    LOG.info("WKB size {}", geomByteArray.length);
     if (UtilityClass.spatialFieldExceedsMaxSize(geomByteArray, maximumSpatialFieldSize)) {
       List<Long> rl = spatialFieldInfo.getRecordLines();
       rl.add(++lineNumber);
