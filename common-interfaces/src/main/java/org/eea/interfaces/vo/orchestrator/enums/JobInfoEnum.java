@@ -69,7 +69,9 @@ public enum JobInfoEnum {
 
     IMPORT_JOB_RESTART_FAILED("The import job failed, because it was stuck after already been restarted"),
 
-    ERROR_NO_FILE_IN_S3("The import job failed because no imported file was found in the public s3 storage.");
+    ERROR_NO_FILE_IN_S3("The import job failed because no imported file was found in the public s3 storage."),
+
+    ERROR_NO_FILE_RETURNED_FROM_FME("The import job failed because no file returned from FME.");
 
 
     /** The value. */

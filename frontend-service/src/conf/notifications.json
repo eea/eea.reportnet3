@@ -1112,6 +1112,14 @@
           }
         },
         {
+          "key": "FME_IMPORT_JOB_FAILED_EVENT_NO_FILE_RETURNED",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT",
           "navigateTo": {
             "section": "DATASET",

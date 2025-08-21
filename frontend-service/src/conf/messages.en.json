@@ -1782,6 +1782,7 @@
     "importFieldSizeExceedsLimitWarningEvent": "For <strong title='{:tableName}'>{:tableName}</strong>, and field : <strong title='{:fieldName}'>{:fieldName}</strong>, those lines have not been imported due to size limitation of the geoSpatial data field : <strong title='{:recordLines}'>{:recordLines}</strong> ",
     "longRunningImportFailedEvent": "Long running import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "fmeImportJobFailedEvent": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
+    "fmeImportJobFailedEventNoFileReturned": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. FME did not returned a file.",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
     "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
     "canceled_by_admin": "Canceled by admin",

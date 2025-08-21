@@ -659,6 +659,10 @@ public enum EventType {
   FME_IMPORT_JOB_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "fme_import_job_failed_event", true),
 
+  /** The fme import job did not send a file to reportnet 3 event */
+  FME_IMPORT_JOB_FAILED_EVENT_NO_FILE_RETURNED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "fme_import_job_failed_event_no_file_returned", true),
+
   EXPORT_FILE_START_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "export_file_start_event", true),
 
