@@ -436,7 +436,6 @@ public class DatasetControllerImpl implements DatasetController {
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
         if (file != null) {
-          helperMultipartFileMapper.setBytes(file.getBytes());
           helperMultipartFileMapper.setInputStream(file.getInputStream());
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
@@ -595,7 +594,6 @@ public class DatasetControllerImpl implements DatasetController {
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
         if (file != null) {
-          helperMultipartFileMapper.setBytes(file.getBytes());
           helperMultipartFileMapper.setInputStream(file.getInputStream());
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);

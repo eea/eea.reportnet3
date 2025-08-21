@@ -536,11 +536,22 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         if (!folder.exists()) {
             folder.mkdir();
         }
-        //store zip file
-        File storedMultipartFile = new File(saveLocationPath + "/" + importFileInDremioInfo.getFileName());
-        try (OutputStream os = new FileOutputStream(storedMultipartFile)) {
-            os.write(helperMultipartFileMapper.getBytes());
+
+        if(multipartFileMimeType.equalsIgnoreCase("zip")) {
+            //store zip file
+            File storedMultipartFile = new File(saveLocationPath + "/" + importFileInDremioInfo.getFileName());
+            try (InputStream in = helperMultipartFileMapper.getInputStream();
+                 OutputStream os = new FileOutputStream(storedMultipartFile)) {
+                IOUtils.copyLarge(in, os);
+                helperMultipartFileMapper.setFile(storedMultipartFile);
+                helperMultipartFileMapper.setInputStream(null);
+                LOG.info("Stored file {} job {}", storedMultipartFile.getPath(), importFileInDremioInfo);
+            } catch (Exception e) {
+                LOG.error("Unexpected error! Error storing file {} for import job {}. Message: {}", storedMultipartFile, importFileInDremioInfo, e.getMessage());
+                throw e;
+            }
         }
+
 
         try (InputStream input = helperMultipartFileMapper.getInputStream()) {
 
@@ -593,13 +604,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 }
 
                 if (integrationVO != null && multipartFileMimeType.equalsIgnoreCase("zip")) {
-                    try {
-                        ZipFile zipFile = new ZipFile(file);
+                    try (ZipFile zipFile = new ZipFile(file)) {
                         if (zipFile.size() == 0) {
-                            zipFile.close();
                             throw new EEAException("Empty zip file for datasetId " + importFileInDremioInfo.getDatasetId() + " and jobId " + importFileInDremioInfo.getJobId());
                         }
-                        zipFile.close();
                     } catch (IOException e) {
                         throw new EEAException("Empty zip file for datasetId " + importFileInDremioInfo.getDatasetId() + " and jobId " + importFileInDremioInfo.getJobId());
                     }
