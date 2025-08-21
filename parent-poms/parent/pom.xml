@@ -13,21 +13,21 @@
     <packaging>pom</packaging>
     <version>3.0.0</version>
     <properties>
-        <api-gateway.version>v3.4-SANDBOX</api-gateway.version>
-        <communication.version>v3.4-SANDBOX</communication.version>
-        <collaboration.version>v3.4-SANDBOX</collaboration.version>
-        <dataflow.version>v3.4-SANDBOX</dataflow.version>
-        <dataset.version>v3.4-SANDBOX</dataset.version>
-        <document.version>v3.4-SANDBOX</document.version>
-        <frontend.version>v3.4-SANDBOX</frontend.version>
-        <indexsearch.version>v3.4-SANDBOX</indexsearch.version>
-        <inspire.version>v3.4-SANDBOX</inspire.version>
-        <recordstore.version>v3.4-SANDBOX</recordstore.version>
-        <ums.version>v3.4-SANDBOX</ums.version>
-        <validation.version>v3.4-SANDBOX</validation.version>
-        <common-interfaces.version>v3.4-SANDBOX</common-interfaces.version>
-        <common-utitlities.version>v3.4-SANDBOX</common-utitlities.version>
-        <rod.version>v3.4-SANDBOX</rod.version>
-        <orchestrator.version>v3.4-SANDBOX</orchestrator.version>
+        <api-gateway.version>v3.4-FME-NO-FILE-RETURNED</api-gateway.version>
+        <communication.version>v3.4-FME-NO-FILE-RETURNED</communication.version>
+        <collaboration.version>v3.4-FME-NO-FILE-RETURNED</collaboration.version>
+        <dataflow.version>v3.4-FME-NO-FILE-RETURNED</dataflow.version>
+        <dataset.version>v3.4-FME-NO-FILE-RETURNED</dataset.version>
+        <document.version>v3.4-FME-NO-FILE-RETURNED</document.version>
+        <frontend.version>v3.4-FME-NO-FILE-RETURNED</frontend.version>
+        <indexsearch.version>v3.4-FME-NO-FILE-RETURNED</indexsearch.version>
+        <inspire.version>v3.4-FME-NO-FILE-RETURNED</inspire.version>
+        <recordstore.version>v3.4-FME-NO-FILE-RETURNED</recordstore.version>
+        <ums.version>v3.4-FME-NO-FILE-RETURNED</ums.version>
+        <validation.version>v3.4-FME-NO-FILE-RETURNED</validation.version>
+        <common-interfaces.version>v3.4-FME-NO-FILE-RETURNED</common-interfaces.version>
+        <common-utitlities.version>v3.4-FME-NO-FILE-RETURNED</common-utitlities.version>
+        <rod.version>v3.4-FME-NO-FILE-RETURNED</rod.version>
+        <orchestrator.version>v3.4-FME-NO-FILE-RETURNED</orchestrator.version>
     </properties>
 </project>
