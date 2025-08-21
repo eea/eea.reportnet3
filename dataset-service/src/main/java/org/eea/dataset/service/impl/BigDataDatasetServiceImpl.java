@@ -537,7 +537,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             folder.mkdir();
         }
 
-        if(multipartFileMimeType.equalsIgnoreCase("zip")) {
+        if(integrationVO == null && multipartFileMimeType.equalsIgnoreCase("zip")) {
             //store zip file
             File storedMultipartFile = new File(saveLocationPath + "/" + importFileInDremioInfo.getFileName());
             try (InputStream in = helperMultipartFileMapper.getInputStream();
