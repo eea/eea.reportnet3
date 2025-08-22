@@ -508,7 +508,7 @@ public class ValidationHelper implements DisposableBean {
         LOG.error("The table promotion processs failed for jobId {}datasetId {}, table {}.: {}", jobId, datasetId, tableName, e.getMessage());
       }
 
-      if (failedToPromoteTables.isEmpty()) {
+      if (!failedToPromoteTables.isEmpty()) {
         failDueToPromotionError(dataset, datasetId, processId, jobId, user, released,  jobVO);
       }
     }
