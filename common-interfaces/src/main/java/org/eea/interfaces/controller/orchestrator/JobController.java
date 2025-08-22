@@ -292,6 +292,15 @@ public interface JobController {
     void sendFmeImportFailedNotification(@RequestBody JobVO jobVO);
 
     /**
+     * Sends a fme import failed no file returned notification
+     *
+     * @param jobVO the job object
+     * @return
+     */
+    @PostMapping(value = "/private/sendFmeImportFailedNoFileReturnedNotification")
+    void sendFmeImportFailedNoFileReturnedNotification(@RequestBody JobVO jobVO);
+
+    /**
      * Finds provider id by job id
      * @param jobId
      * @return
