@@ -308,7 +308,7 @@ public class DataFlowServiceImplTest {
         .thenReturn(new ArrayList<>());
     when(dataflowRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(new Dataflow()));
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L, null))
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
@@ -350,7 +350,7 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L, null))
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
@@ -679,7 +679,7 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L, null))
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
@@ -704,7 +704,7 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L, null))
         .thenReturn(new ArrayList<>());
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(new ArrayList<>());
@@ -752,7 +752,7 @@ public class DataFlowServiceImplTest {
     doThrow(EEAException.class).when(documentControllerZuul).deleteDocument(Mockito.any(),
         Mockito.any(), Mockito.any());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L, null))
         .thenReturn(new ArrayList<>());
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(new ArrayList<>());
@@ -795,8 +795,6 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
-        .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
     when(dataflowRepository.findById(Mockito.any())).thenReturn(Optional.of(new Dataflow()));
@@ -856,7 +854,7 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L, null))
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);
@@ -890,7 +888,7 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(new ArrayList<ResourceAccessVO>());
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataflowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.any()))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(new ArrayList<ReportingDatasetVO>());
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(Mockito.any()))
         .thenReturn(new ArrayList<DesignDatasetVO>());
@@ -938,7 +936,7 @@ public class DataFlowServiceImplTest {
     when(userManagementControllerZull.getResourcesByUser())
         .thenReturn(resourceList);
     when(dataflowMapper.entityToClass(Mockito.any())).thenReturn(dataFlowVO);
-    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L))
+    when(datasetMetabaseController.findReportingDataSetIdByDataflowId(1L, null))
         .thenReturn(reportingDatasetVOs);
     when(datasetMetabaseController.findDesignDataSetIdByDataflowId(1L))
         .thenReturn(designDatasetVOs);

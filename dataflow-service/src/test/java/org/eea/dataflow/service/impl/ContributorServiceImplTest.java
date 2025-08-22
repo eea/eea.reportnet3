@@ -195,7 +195,7 @@ public class ContributorServiceImplTest {
    */
   @Test
   public void deleteContributorReport() throws EEAException {
-    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(1L))
+    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(1L, 1L))
         .thenReturn(reportingDatasets);
     contributorServiceImpl.deleteContributor(1L, "reportnet@reportnet.net", "REPORTER_READ", 1L);
     Mockito.verify(userManagementControllerZull, times(1))
@@ -323,8 +323,6 @@ public class ContributorServiceImplTest {
     resourceAccessVOs.add(resourceAccessVO);
     when(userManagementControllerZull.getResourcesByUserEmail(Mockito.any()))
         .thenReturn(resourceAccessVOs);
-    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(1L))
-        .thenReturn(reportingDatasets);
     ResourceInfoVO resourceInfoVO = new ResourceInfoVO();
     resourceInfoVO.setName("name");
     contributorServiceImpl.updateContributor(1L, contributorVOWrite, 1l);
@@ -346,7 +344,7 @@ public class ContributorServiceImplTest {
   @Test
   public void findContributorsByResourceIdReporterTest() {
     reportingDatasets.get(0).setDataProviderId(2L);
-    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any()))
+    when(dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(reportingDatasets);
     when(userManagementControllerZull.getUsersByGroup(Mockito.any())).thenReturn(listUserWrite);
     assertNotNull(contributorServiceImpl.findContributorsByResourceId(1L, 1L, "REPORTER"));

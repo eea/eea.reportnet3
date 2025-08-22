@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * The Interface DataFlowWebLinkController.
@@ -102,7 +103,8 @@ public interface DataFlowWebLinkController {
    * @return the all weblinks by dataflow
    */
   @GetMapping(value = "/v1/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId);
+  List<WeblinkVO> getAllWeblinksByDataflow(@PathVariable("dataflowId") Long dataflowId,
+  @RequestParam(value = "providerId",required = false) Long providerId);
 
   /**
    * Gets the all weblinks by dataflow legacy.
@@ -111,7 +113,8 @@ public interface DataFlowWebLinkController {
    * @return the all weblinks by dataflow legacy
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  List<WeblinkVO> getAllWeblinksByDataflowLegacy(@PathVariable("dataflowId") Long dataflowId);
+  List<WeblinkVO> getAllWeblinksByDataflowLegacy(@PathVariable("dataflowId") Long dataflowId,
+                                                 @RequestParam(value = "providerId",required = false) Long providerId);
 
 }
 

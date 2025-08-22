@@ -455,7 +455,7 @@ public class DataflowWebLinkControllerImplTest {
     weblinksExpected.add(weblinkVO);
     when(dataflowWebLinkService.getAllWeblinksByDataflowId(Mockito.anyLong()))
         .thenReturn(weblinksExpected);
-    assertEquals(weblinksExpected, dataflowWebLinkControllerImpl.getAllWeblinksByDataflow(1L));
+    assertEquals(weblinksExpected, dataflowWebLinkControllerImpl.getAllWeblinksByDataflow(1L,1L));
   }
 
   /**
@@ -473,14 +473,14 @@ public class DataflowWebLinkControllerImplTest {
     when(dataflowWebLinkService.getAllWeblinksByDataflowId(Mockito.anyLong()))
         .thenReturn(weblinksExpected);
     assertEquals(weblinksExpected,
-        dataflowWebLinkControllerImpl.getAllWeblinksByDataflowLegacy(1L));
+        dataflowWebLinkControllerImpl.getAllWeblinksByDataflowLegacy(1L, 1L));
   }
 
   @Test
   public void getAllWeblinksByDataflowEEAExceptionTest() throws EEAException {
     Mockito.doThrow(EEAException.class).when(dataflowWebLinkService)
         .getAllWeblinksByDataflowId(Mockito.anyLong());
-    dataflowWebLinkControllerImpl.getAllWeblinksByDataflow(1L);
+    dataflowWebLinkControllerImpl.getAllWeblinksByDataflow(1L, 1L);
     Mockito.verify(dataflowWebLinkService, times(1)).getAllWeblinksByDataflowId(Mockito.anyLong());
   }
 

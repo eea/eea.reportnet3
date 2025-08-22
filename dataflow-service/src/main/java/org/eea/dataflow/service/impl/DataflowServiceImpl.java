@@ -1575,7 +1575,7 @@ public class DataflowServiceImpl implements DataflowService {
       if (TypeStatusEnum.DRAFT.equals(dataflowVO.getStatus())) {
       if (providerId == null) {
         dataflowVO.setReportingDatasets(
-                datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(id).stream()
+                datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(id, null).stream()
                         .filter(dataset -> isAdmin || datasetsIds.contains(dataset.getId()))
                         .collect(Collectors.toList()));
       } else {
