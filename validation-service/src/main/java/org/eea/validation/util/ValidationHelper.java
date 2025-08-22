@@ -508,7 +508,7 @@ public class ValidationHelper implements DisposableBean {
         LOG.error("The table promotion processs failed for jobId {}datasetId {}, table {}.: {}", jobId, datasetId, tableName, e.getMessage());
       }
 
-      if (!failedToPromoteTables.isEmpty()) {
+      if (failedToPromoteTables.isEmpty()) {
         failDueToPromotionError(dataset, datasetId, processId, jobId, user, released,  jobVO);
       }
     }
@@ -517,7 +517,7 @@ public class ValidationHelper implements DisposableBean {
   private void failDueToPromotionError(DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO) throws EEAException {
     if (jobId != null) {
       try {
-        jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+        jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_VALIDATION_FAILURE, null);
         jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
         processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
             ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processId, user, getPriority(dataset), released);
@@ -531,7 +531,7 @@ public class ValidationHelper implements DisposableBean {
 
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(
-          EventType.VALIDATION_FAILED_ICEBERG_EXISTS_EVENT, null,
+          EventType.VALIDATION_FAILED_SYSTEM_ERROR_EVENT, null,
           NotificationVO.builder()
               .user(jobVO != null ? jobVO.getCreatorUsername() : user)
               .datasetId(datasetId)
@@ -539,10 +539,10 @@ public class ValidationHelper implements DisposableBean {
               .build()
       );
     } catch (Exception e) {
-      LOG.warn("Could not send VALDATION_FAILED_ICEBERG_EXISTS_EVENT for jobId {} and datasetId {}: {}", jobId, datasetId, e.getMessage());
+      LOG.warn("Could not send VALIDATION_FAILED_SYSTEM_ERROR_EVENT for jobId {} and datasetId {}: {}", jobId, datasetId, e.getMessage());
     }
 
-    throw new EEAException("Can not validate for jobId " + jobId + " because there is an iceberg table");
+    throw new EEAException("Can not validate for jobId " + jobId + ". Error while promoting dataset tables.");
   }
 
   private List<DataSetMetabaseVO> getCombinedDatasets(DataSetMetabaseVO dataset) {
