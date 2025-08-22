@@ -208,77 +208,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.redisLockService = redisLockService;
     }
 
-
     @Override
     @Async
     public void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
                               Boolean replace, Long integrationId, String delimiter, Long jobId,
-                              String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception {
+                              String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper, JobVO job, ImportFileInDremioInfo importFileInDremioInfo) throws Exception {
+        JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
         String filePathInS3 = null;
         String fileName = helperMultipartFileMapper.getOriginalFilename();
-        JobStatusEnum jobStatus = JobStatusEnum.IN_PROGRESS;
-        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, delimiter, integrationId, null);
         File s3File = null;
-        JobVO job = null;
         try {
-            if (dataflowId == null){
-                dataflowId = datasetService.getDataFlowIdById(datasetId);
+            jobStatus = job.getJobStatus();
+            if(job.getParameters().get("filePathInS3") != null) {
+                filePathInS3 = job.getParameters().get("filePathInS3").toString();
             }
-
-            if (fmeJobId != null || jobId != null) {
-                if (fmeJobId != null){
-                    jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
-                    job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
-                    if(job == null){
-                        //wait for 3 seconds and try again.
-                        Thread.sleep(3000);
-                        LOG.info("Retrying finding job with fmeJobId {}", fmeJobId);
-                        job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
-                    }
-                    if (job != null) {
-                        jobId = job.getId();
-                        importFileInDremioInfo.setJobId(jobId);
-                        LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, datasetId);
-                    }
-                }
-                else{
-                    job = jobControllerZuul.findJobById(jobId);
-                    if(job == null){
-                        //wait for 3 seconds and try again.
-                        Thread.sleep(3000);
-                        LOG.info("Retrying finding job with id {}", jobId);
-                        job = jobControllerZuul.findJobById(jobId);
-                    }
-                }
-            }
-
-            if(job != null){
-                LOG.info("For import {} found job with id {}", importFileInDremioInfo, jobId);
-                if(job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN)) {
-                    LOG.info("Job {} is cancelled. Exiting import!", job.getId());
-                    return;
-                }
-                else if(job.getJobStatus().equals(JobStatusEnum.QUEUED)){
-                    jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
-                }
-                if(job.getParameters().get("filePathInS3") != null) {
-                    filePathInS3 = job.getParameters().get("filePathInS3").toString();
-                }
-            }else{
-                LOG.info("For import {} could not find job with id {}", importFileInDremioInfo, jobId);
-                //check if there is already an import job with status IN_PROGRESS for the specific datasetId
-                List<Long> datasetIds = new ArrayList<>();
-                datasetIds.add(datasetId);
-                jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, dataflowId, providerId, datasetIds);
-                jobId = jobControllerZuul.addImportJob(datasetId, dataflowId, providerId, tableSchemaId, fileName, replace, integrationId, delimiter, jobStatus, fmeJobId, null);
-                importFileInDremioInfo.setJobId(jobId);
-                if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
-                    LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, datasetId);
-                    datasetService.releaseImportRefusedNotification(datasetId, dataflowId, tableSchemaId, fileName);
-                    throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
-                }
-            }
-
             if(helperMultipartFileMapper.isFileNull()){
                 if(StringUtils.isBlank(filePathInS3)){
                     throw new EEAException("Empty file and file path");
@@ -2310,6 +2253,63 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         catch (Exception e) {
             exceptionHandling(datasetId, dataflowId, jobId, user, processUUID, e);
         }
+    }
+
+    @Override
+    public JobVO retrieveOrAddImportJob(ImportFileInDremioInfo importFileInDremioInfo, String fmeJobId, Long jobId) throws Exception {
+        JobVO job = null;
+        if (fmeJobId != null || jobId != null) {
+            if (fmeJobId != null){
+                jobControllerZuul.updateFmeCallbackJobParameter(fmeJobId, true);
+                job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+                if(job == null){
+                    //wait for 3 seconds and try again.
+                    Thread.sleep(3000);
+                    LOG.info("Retrying finding job with fmeJobId {}", fmeJobId);
+                    job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
+                }
+                if (job != null) {
+                    jobId = job.getId();
+                    importFileInDremioInfo.setJobId(jobId);
+                    LOG.info("Incoming Fme Related Import job with fmeJobId {}, jobId {} and datasetId {}", fmeJobId, jobId, importFileInDremioInfo.getDatasetId());
+                }
+            }
+            else{
+                job = jobControllerZuul.findJobById(jobId);
+                if(job == null){
+                    //wait for 3 seconds and try again.
+                    Thread.sleep(3000);
+                    LOG.info("Retrying finding job with id {}", jobId);
+                    job = jobControllerZuul.findJobById(jobId);
+                }
+            }
+        }
+
+        if(job != null){
+            LOG.info("For import {} found job with id {}", importFileInDremioInfo, jobId);
+            if(job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN)) {
+                LOG.info("Job {} is cancelled. Exiting import!", job.getId());
+                return job;
+            }
+            else if(job.getJobStatus().equals(JobStatusEnum.QUEUED)){
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.IN_PROGRESS);
+            }
+        }else{
+            LOG.info("For import {} could not find job with id {}", importFileInDremioInfo, jobId);
+            //check if there is already an import job with status IN_PROGRESS for the specific datasetId
+            List<Long> datasetIds = new ArrayList<>();
+            datasetIds.add(importFileInDremioInfo.getDatasetId());
+            JobStatusEnum jobStatus = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.IMPORT.getValue(), false, importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), datasetIds);
+            jobId = jobControllerZuul.addImportJob(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getProviderId(), importFileInDremioInfo.getTableSchemaId(), importFileInDremioInfo.getFileName(),
+                    importFileInDremioInfo.getReplaceData(), importFileInDremioInfo.getIntegrationId(), importFileInDremioInfo.getDelimiter(), jobStatus, fmeJobId, null);
+            importFileInDremioInfo.setJobId(jobId);
+            if(jobStatus.getValue().equals(JobStatusEnum.REFUSED.getValue())){
+                LOG.info("Added import job with id {} for datasetId {} with status REFUSED", jobId, importFileInDremioInfo.getDatasetId());
+                datasetService.releaseImportRefusedNotification(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getTableSchemaId(), importFileInDremioInfo.getFileName());
+                throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
+            }
+        }
+        return job;
     }
 
     /**
