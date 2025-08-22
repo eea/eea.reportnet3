@@ -71,7 +71,9 @@ public enum JobInfoEnum {
 
     ERROR_NO_FILE_IN_S3("The import job failed because no imported file was found in the cloud storage. Please try again."),
 
-    ERROR_NO_FILE_RETURNED_FROM_FME("The import job failed because no file returned from FME.");
+    ERROR_NO_FILE_RETURNED_FROM_FME("The import job failed because no file returned from FME."),
+
+    ERROR_VALIDATION_FAILURE("Validation failed due to system error. Please contact the Service Desk for support.");
 
 
     /** The value. */

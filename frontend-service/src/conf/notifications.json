@@ -970,6 +970,14 @@
           }
         },
         {
+          "key": "VALIDATION_FAILED_SYSTEM_ERROR_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "RELEASE_REFUSED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
