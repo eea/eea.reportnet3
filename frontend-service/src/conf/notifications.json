@@ -953,6 +953,13 @@
           }
         },
         {
+          "key": "IMPORT_FIELD_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
+          }
+        },
+        {
           "key": "IMPORT_REPORTING_REFUSED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",

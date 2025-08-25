@@ -839,6 +839,7 @@
     "importReportingDatasetError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importFieldSchemaCompletedEvent": "<strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> schema is loaded at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importFieldSchemaFailedEvent": "Error importing table schema definition",
+    "importFieldSchemaFailedIllegalCharsEvent": "Error importing table schema definition. Invalid characters in field names.",
     "importFromFile": "Import from file",
     "importFromOtherSystemOperationManageIntegration": "Import from other system",
     "importingData": "Importing data",

@@ -595,6 +595,10 @@ public enum EventType {
   IMPORT_FIELD_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_field_schema_failed_event", true),
 
+  /** The import field schema failed due to illegal chars event. */
+  IMPORT_FIELD_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+    "import_field_schema_failed_event", true),
+
   /** The no pk reference dataflow error event. */
   NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "no_pk_reference_dataflow_error_event", true),
