@@ -631,7 +631,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 .ifPresent(map -> {
                     map.forEach((key, value) -> {
                         if (!key.equals(RECORD_ID)) {
-                            objectWrapper.setMessage(objectWrapper.getMessage().replace("{%" + key.toLowerCase() + "%}", String.valueOf(value)));
+                            objectWrapper.setMessage(objectWrapper.getMessage().replace("{%" + key + "%}", String.valueOf(value)));
                         }
                     });
                 });
