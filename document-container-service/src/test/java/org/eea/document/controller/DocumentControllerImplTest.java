@@ -247,7 +247,7 @@ public class DocumentControllerImplTest {
   public void getDocumentExceptionNullTest() throws EEAException {
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(null);
     try {
-      documentController.getDocument(1L, 1L);
+      documentController.getDocument(1L, 1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -270,7 +270,7 @@ public class DocumentControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_NOT_FOUND)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
-      documentController.getDocument(1L, 1L);
+      documentController.getDocument(1L, 1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.NOT_FOUND, e.getStatus());
       assertEquals(EEAErrorMessage.DOCUMENT_NOT_FOUND, e.getReason());
@@ -293,7 +293,7 @@ public class DocumentControllerImplTest {
     doThrow(new EEAException(EEAErrorMessage.DOCUMENT_UPLOAD_ERROR)).when(documentService)
         .getDocument(Mockito.any(), Mockito.any());
     try {
-      documentController.getDocument(1L, 1L);
+      documentController.getDocument(1L, 1L, 1L);
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals(EEAErrorMessage.RETRIEVING_DOCUMENT, e.getReason());
@@ -316,7 +316,7 @@ public class DocumentControllerImplTest {
     when(dataFlowControllerZuul.isBigDataflow(1L)).thenReturn(false);
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
-    documentController.getDocument(1L, 1L);
+    documentController.getDocument(1L, 1L, 1L);
     Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
   }
 
@@ -338,7 +338,7 @@ public class DocumentControllerImplTest {
     when(dataFlowControllerZuul.isBigDataflow(1L)).thenReturn(false);
     when(dataflowController.getDocumentInfoById(Mockito.any())).thenReturn(document);
     when(documentService.getDocument(Mockito.any(), Mockito.any())).thenReturn(content);
-    documentController.getDocumentLegacy(1L, 1L);
+    documentController.getDocumentLegacy(1L, 1L, 1L);
     Mockito.verify(documentService, times(1)).getDocument(Mockito.any(), Mockito.any());
   }
 

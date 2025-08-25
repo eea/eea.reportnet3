@@ -74,7 +74,7 @@ public class DatasetMetabaseControllerImplTest {
   public void testFindDataSetIdByDataflowId() {
     when(reportingDatasetService.getDataSetIdByDataflowId(Mockito.anyLong()))
         .thenReturn(new ArrayList<>());
-    datasetMetabaseControllerImpl.findReportingDataSetIdByDataflowId(Mockito.anyLong());
+    datasetMetabaseControllerImpl.findReportingDataSetIdByDataflowId(1L, 1L);
     Mockito.verify(reportingDatasetService, times(1)).getDataSetIdByDataflowId(Mockito.any());
   }
 
