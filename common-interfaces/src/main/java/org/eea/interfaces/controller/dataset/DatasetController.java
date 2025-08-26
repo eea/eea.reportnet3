@@ -657,7 +657,7 @@ public interface DatasetController {
    * @param fmeJobId the fmeJobId
    */
   @PostMapping("/v2/importFileData/{datasetId}")
-  void importBigFileData(@PathVariable("datasetId") Long datasetId,
+  Map<String, Object> importBigFileData(@PathVariable("datasetId") Long datasetId,
       @RequestParam(value = "dataflowId", required = false) Long dataflowId,
       @RequestParam(value = "providerId", required = false) Long providerId,
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
