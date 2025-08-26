@@ -438,6 +438,10 @@ public enum EventType {
   COPY_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_completed_event", true),
 
+  /** The copy dataset schema failed event. */
+  COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+    "copy_dataset_schema_completed_event", true),
+
   /** The copy dataset schema not found event. */
   COPY_DATASET_SCHEMA_NOT_FOUND_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_not_found_event", true),
@@ -513,6 +517,10 @@ public enum EventType {
   IMPORT_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_dataset_schema_completed_event", true),
 
+  /** The import dataset schema failed due to illegal chars event. */
+  IMPORT_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+    "import_dataset_schema_completed_event", true),
+
   /** The import failed event iceberg exists. */
   IMPORT_FAILED_EVENT_ICEBERG_EXISTS(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_failed_event_iceberg_exists", true),
@@ -586,6 +594,10 @@ public enum EventType {
   /** The import field schema failed event. */
   IMPORT_FIELD_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_field_schema_failed_event", true),
+
+  /** The import field schema failed due to illegal chars event. */
+  IMPORT_FIELD_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+    "import_field_schema_failed_event", true),
 
   /** The no pk reference dataflow error event. */
   NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

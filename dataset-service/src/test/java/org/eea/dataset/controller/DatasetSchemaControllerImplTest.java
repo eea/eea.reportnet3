@@ -999,6 +999,7 @@ public class DatasetSchemaControllerImplTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
+    fieldSchemaVO.setName("name");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.updateFieldSchema(Mockito.any(), Mockito.any(), Mockito.any(),
         Mockito.anyBoolean())).thenReturn(DataType.TEXT);
@@ -1167,6 +1168,7 @@ public class DatasetSchemaControllerImplTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
+    fieldSchemaVO.setName("name");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(true);
@@ -1191,6 +1193,7 @@ public class DatasetSchemaControllerImplTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
+    fieldSchemaVO.setName("name");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(false);
@@ -1212,6 +1215,7 @@ public class DatasetSchemaControllerImplTest {
     FieldSchemaVO fieldSchemaVO = new FieldSchemaVO();
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
+    fieldSchemaVO.setName("name");
     fieldSchemaVO.setPk(true);
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
@@ -1240,6 +1244,7 @@ public class DatasetSchemaControllerImplTest {
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
     fieldSchemaVO.setPk(false);
+    fieldSchemaVO.setName("name");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(false);
@@ -1266,6 +1271,7 @@ public class DatasetSchemaControllerImplTest {
     FieldSchemaVO fieldSchemaVO = Mockito.mock(FieldSchemaVO.class);
     fieldSchemaVO.setRequired(true);
     fieldSchemaVO.setId("fieldSchemaId");
+    fieldSchemaVO.setName("name");
     Mockito.when(dataschemaService.getDatasetSchemaId(Mockito.any())).thenReturn("datasetSchemaId");
     Mockito.when(dataschemaService.checkPkAllowUpdate(Mockito.any(), Mockito.any()))
         .thenReturn(false);
