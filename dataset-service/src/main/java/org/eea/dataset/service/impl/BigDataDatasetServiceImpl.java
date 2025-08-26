@@ -2308,6 +2308,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 datasetService.releaseImportRefusedNotification(importFileInDremioInfo.getDatasetId(), importFileInDremioInfo.getDataflowId(), importFileInDremioInfo.getTableSchemaId(), importFileInDremioInfo.getFileName());
                 throw new ResponseStatusException(HttpStatus.LOCKED, EEAErrorMessage.IMPORTING_FILE_DATASET);
             }
+            job = jobControllerZuul.findJobById(jobId);
+            if(job == null){
+                //wait for 3 seconds and try again.
+                Thread.sleep(3000);
+                LOG.info("Retrying finding job with id {}", jobId);
+                job = jobControllerZuul.findJobById(jobId);
+            }
         }
         return job;
     }

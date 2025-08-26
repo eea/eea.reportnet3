@@ -623,9 +623,6 @@ public class DatasetControllerImpl implements DatasetController {
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        if (dataflowId == null){
-          dataflowId = datasetService.getDataFlowIdById(datasetId);
-        }
         ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
         JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
         jobId = job.getId();
