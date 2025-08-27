@@ -100,7 +100,7 @@ public interface DatasetSchemaService {
    *
    * @return the table schema VO
    */
-  TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId);
+  TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchema, Long datasetId) throws EEAException;
 
   /**
    * Update name table schema.

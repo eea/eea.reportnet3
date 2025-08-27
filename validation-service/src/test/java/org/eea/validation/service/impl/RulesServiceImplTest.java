@@ -923,6 +923,7 @@ public class RulesServiceImplTest {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -941,6 +942,7 @@ public class RulesServiceImplTest {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -960,6 +962,7 @@ public class RulesServiceImplTest {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -994,6 +997,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(new ArrayList<Rule>());
     Mockito.when(schemasRepository.findByIdDataSetSchema(Mockito.any())).thenReturn(datasetSchema);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1017,6 +1021,7 @@ public class RulesServiceImplTest {
             .thenReturn(doc);
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1039,6 +1044,7 @@ public class RulesServiceImplTest {
             .thenReturn(doc);
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1057,6 +1063,7 @@ public class RulesServiceImplTest {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1078,6 +1085,7 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1099,6 +1107,7 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1120,6 +1129,7 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1141,6 +1151,7 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1161,6 +1172,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1181,6 +1193,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     findServerPath();
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1202,6 +1215,7 @@ public class RulesServiceImplTest {
     findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
 
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1222,6 +1236,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     findServerPath();
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1242,6 +1257,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1262,6 +1278,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     findServerPath();
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1282,6 +1299,7 @@ public class RulesServiceImplTest {
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
     findServerPath();
+
 
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
@@ -1304,6 +1322,7 @@ public class RulesServiceImplTest {
     rules.add(rule);
     ruleSchema.setRules(rules);
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",
@@ -1321,6 +1340,7 @@ public class RulesServiceImplTest {
     RulesSchema ruleSchema = new RulesSchema();
     ruleSchema.setRules(new ArrayList<Rule>());
     Mockito.when(rulesSequenceRepository.updateSequence(Mockito.any())).thenReturn(1L);
+
     RulesSchema rulesSchema = new RulesSchema();
     Mockito.when(rulesRepository.findByIdDatasetSchema(Mockito.any())).thenReturn(rulesSchema);
     rulesServiceImpl.createAutomaticRules("5e44110d6a9e3a270ce13fac", "5e44110d6a9e3a270ce13fac",

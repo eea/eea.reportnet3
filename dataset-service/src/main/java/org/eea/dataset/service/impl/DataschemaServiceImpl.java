@@ -23,10 +23,12 @@ import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.*;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -118,6 +120,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
+
+  /**
+   * The rules repository.
+   */
+  @Autowired
+  private RulesRepository rulesRepository;
 
   /**
    * The resource management controller zull.
@@ -504,7 +512,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the table schema VO
    */
   @Override
-  public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) {
+  public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) throws EEAException {
 
     ObjectId tableSchemaId = new ObjectId();
     ObjectId recordSchemaId = new ObjectId();
@@ -2233,7 +2241,13 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param tableSchemaId the table schema id
    * @param datasetId the dataset id
    */
-  private void createNotEmptyRule(String tableSchemaId, Long datasetId) {
+  private void createNotEmptyRule(String tableSchemaId, Long datasetId) throws EEAException {
+    // retieve default level error if any
+    String datasetSchemaId = getDatasetSchemaId(datasetId);
+    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
+    ErrorTypeEnum automaticQCDefaultLevelError = rulesSchema.getAutomaticQCsDefaultLevelError();
+
+
     RuleVO ruleVO = new RuleVO();
     ruleVO.setReferenceId(tableSchemaId);
     ruleVO.setRuleName(LiteralConstants.RULE_TABLE_MANDATORY);
@@ -2241,7 +2255,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleVO.setType(EntityTypeEnum.TABLE);
     ruleVO.setAutomatic(true);
     ruleVO.setThenCondition(
-            Arrays.asList("Mandatory table has no records", ErrorTypeEnum.BLOCKER.getValue()));
+            Arrays.asList("Mandatory table has no records", automaticQCDefaultLevelError.getValue()));
     ruleVO
             .setDescription("When a table is marked as mandatory, checks at least one record is added");
 
@@ -2274,7 +2288,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    */
   private void updateNotEmptyRule(Boolean oldValue, Boolean newValue, String tableSchemaId,
-                                  Long datasetId) {
+                                  Long datasetId) throws EEAException {
     if (Boolean.TRUE.equals(oldValue)) {
       if (Boolean.FALSE.equals(newValue)) {
         deleteNotEmptyRule(tableSchemaId, datasetId);

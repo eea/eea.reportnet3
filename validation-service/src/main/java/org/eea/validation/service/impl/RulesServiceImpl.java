@@ -845,6 +845,8 @@ public class RulesServiceImpl implements RulesService {
     }
     if (!ruleList.isEmpty()) {
       // to be deleted
+      LOG.info("Creating automatic rules for datasetSchemaId {}\n referenceId {}\n typeData {}\n typeEntityEnum {}\n datasetId {}\n required {}\n automaticQCDefaultLevelError {}\n",
+              datasetSchemaId, referenceId, typeData, typeEntityEnum, datasetId, required, automaticQCDefaultLevelError);
       ruleList.stream()
               .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
     }
@@ -1003,6 +1005,21 @@ public class RulesServiceImpl implements RulesService {
    */
   @Override
   public void updateAutomaticQCsDefaultLevelError(long datasetId, String datasetSchemaId, ErrorTypeEnum automaticQCDefaultLevelError) throws EEAException {
+    // check that datasetSchemaId is a valid ObjectId at mongo database
+    ObjectId schemaObjectId;
+    try {
+      schemaObjectId = new ObjectId(datasetSchemaId);
+    } catch (IllegalArgumentException e) {
+      throw new EEAException("Invalid datasetSchemaId: " + datasetSchemaId);
+    }
+
+    // check if schema exists with this id
+    Query existsQuery = new Query(Criteria.where("idDatasetSchema").is(schemaObjectId));
+    boolean schemaExists = mongoTemplate.exists(existsQuery, RulesSchema.class);
+    if (!schemaExists) {
+      throw new EEAException("Dataset schema not found for id: " + datasetSchemaId);
+    }
+
     DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
     DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
     if (!dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
