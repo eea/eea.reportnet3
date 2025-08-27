@@ -69,9 +69,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const [hideTabularData, setHideTabularData] = useState(false);
-  const { permissions } = config;
-  const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
-
   const [dataset, setDataset] = useState({});
   const [datasetProgressBarSteps, setDatasetProgressBarSteps] = useState({
     steps: [
@@ -162,6 +159,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
   const isCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+  const isLeadReporter =
+    userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.LEAD_REPORTER.key
+    ]) && !isAdmin;
   const isDataflowCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.CUSTODIAN.key
   ]);
@@ -1246,7 +1247,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const renderSwitchView = () => {
     if (!isNil(webformData?.name)) {
       let viewModes;
-      if (isProvider) {
+      if (isLeadReporter) {
         viewModes = [
           ...(!hideTabularData ? [{ key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }] : []),
           { key: 'webform', label: resourcesContext.messages['webform'] }
