@@ -372,13 +372,18 @@ public class RulesControllerImpl implements RulesController {
       LOG.info("Request to update automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}",
               datasetId, datasetSchemaId, automaticQCsDefaultLevelError);
       rulesService.updateAutomaticQCsDefaultLevelError(datasetId, datasetSchemaId, automaticQCsDefaultLevelError);
+    } catch (IllegalArgumentException e) {
+      LOG.error("Field datasetSchemaId is incorrect, you have to use the field idDatasetSchema from RulesSchema at mongo document. Error updating automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}. Dataflow is not in DESIGN status thus updating an automatic QC cannot be performed.",
+              datasetId, datasetSchemaId, automaticQCsDefaultLevelError, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid datasetSchemaId. Field datasetSchemaId is incorrect, you have to use the field idDatasetSchema from RulesSchema at mongo document. ", e);
     } catch (EEAException eeaException) {
       LOG.error("Error updating automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}. Dataflow is not in DESIGN status thus updating an automatic QC cannot be performed.",
               datasetId, datasetSchemaId, automaticQCsDefaultLevelError, eeaException);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, eeaException.getMessage(), eeaException);
     } catch (Exception e) {
       LOG.error("Error updating automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}",
               datasetId, datasetSchemaId, automaticQCsDefaultLevelError, e);
-      throw e;
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred", e);
     }
   }
 
