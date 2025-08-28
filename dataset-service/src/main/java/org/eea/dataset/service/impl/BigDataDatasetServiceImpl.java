@@ -2,6 +2,9 @@ package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.compress.archivers.zip.Zip64Mode;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -87,6 +90,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -2401,12 +2405,42 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private void zipFolder(Long jobId, String localPath) throws IOException {
         File unZippedFile = new File(localPath);
         File zippedFile = new File(localPath + ".zip");
-        try {
-            ZipUtils.zipFolder(unZippedFile, zippedFile);
-            FileUtils.deleteDirectory(unZippedFile);
-        } catch (Exception e) {
-            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath, e);
-            throw e;
+
+        final int maxAttempts = 3;
+        final long[] backoffMs = {2000L, 5000L, 10000L}; // waits between retries
+
+        int attempt = 1;
+        while (attempt <= maxAttempts) {
+            try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(zippedFile)) {
+                // ZIP64 for big archives
+                zos.setUseZip64(Zip64Mode.AsNeeded);
+
+                ZipUtils.addFolderToZip(unZippedFile, unZippedFile, zos);
+
+                // success → remove source
+                FileUtils.deleteDirectory(unZippedFile);
+                return;
+
+            } catch (Exception e) {
+                FileUtils.deleteQuietly(zippedFile); // clean partial zip
+
+                if (attempt == maxAttempts) {
+                    LOG.error("Zipping failed after {} attempts for jobId {} folder {}",
+                        maxAttempts, jobId, localPath, e);
+                    if (e instanceof IOException) throw (IOException) e;
+                    throw new IOException("Failed to zip folder after retries", e);
+                }
+
+                long delay = backoffMs[Math.min(attempt - 1, backoffMs.length - 1)];
+                LOG.warn("Zipping attempt {}/{} failed for jobId {}: {}. Retrying in {} ms...",
+                    attempt, maxAttempts, jobId, e.getMessage(), delay);
+                try { Thread.sleep(delay); }
+                catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Retry interrupted while zipping folder", ie);
+                }
+            }
+            attempt++;
         }
     }
 }
