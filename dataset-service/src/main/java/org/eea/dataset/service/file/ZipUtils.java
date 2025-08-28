@@ -672,7 +672,7 @@ public class ZipUtils {
           throw ex;
         }
         // small backoff before reopening
-        try { Thread.sleep(1000L * tries); } catch (InterruptedException ie) {
+        try { Thread.sleep(5000L * tries); } catch (InterruptedException ie) {
           Thread.currentThread().interrupt();
           throw new IOException("Retry interrupted while reading file", ie);
         }

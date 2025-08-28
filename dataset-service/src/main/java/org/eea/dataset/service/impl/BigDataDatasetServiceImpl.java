@@ -2406,41 +2406,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         File unZippedFile = new File(localPath);
         File zippedFile = new File(localPath + ".zip");
 
-        final int maxAttempts = 3;
-        final long[] backoffMs = {2000L, 5000L, 10000L}; // waits between retries
-
-        int attempt = 1;
-        while (attempt <= maxAttempts) {
-            try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(zippedFile)) {
-                // ZIP64 for big archives
-                zos.setUseZip64(Zip64Mode.AsNeeded);
-
-                ZipUtils.addFolderToZip(unZippedFile, unZippedFile, zos);
-
-                // success → remove source
-                FileUtils.deleteDirectory(unZippedFile);
-                return;
-
-            } catch (Exception e) {
-                FileUtils.deleteQuietly(zippedFile); // clean partial zip
-
-                if (attempt == maxAttempts) {
-                    LOG.error("Zipping failed after {} attempts for jobId {} folder {}",
-                        maxAttempts, jobId, localPath, e);
-                    if (e instanceof IOException) throw (IOException) e;
-                    throw new IOException("Failed to zip folder after retries", e);
-                }
-
-                long delay = backoffMs[Math.min(attempt - 1, backoffMs.length - 1)];
-                LOG.warn("Zipping attempt {}/{} failed for jobId {}: {}. Retrying in {} ms...",
-                    attempt, maxAttempts, jobId, e.getMessage(), delay);
-                try { Thread.sleep(delay); }
-                catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Retry interrupted while zipping folder", ie);
-                }
-            }
-            attempt++;
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(zippedFile)) {
+            ZipUtils.addFolderToZip(unZippedFile, unZippedFile, zos);
+        } catch (Exception e) {
+            LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath, e);
+            throw e;
+        } finally {
+            FileUtils.deleteDirectory(unZippedFile);
         }
     }
 }
