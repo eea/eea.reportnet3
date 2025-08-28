@@ -3358,16 +3358,25 @@ public class DatasetControllerImpl implements DatasetController {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_ETL_EXPORTING_FILE_CITUS);
         }
       }
-      if (BooleanUtils.isTrue(exportCsv)) {
-        String processUUID = UUID.randomUUID().toString();
-        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
-      } else if (BooleanUtils.isTrue(exportParquet)) {
-        String processUUID = UUID.randomUUID().toString();
-        bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
-      } else {
-        datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
-      }
-      LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
+
+      new Thread(() -> {
+        try {
+          if (BooleanUtils.isTrue(exportCsv)) {
+            String processUUID = UUID.randomUUID().toString();
+            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+          } else if (BooleanUtils.isTrue(exportParquet)) {
+            String processUUID = UUID.randomUUID().toString();
+            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+          } else {
+            datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
+          }
+          LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
+        } catch (Exception e) {
+          LOG.error("Async ETL export failed for datasetId {} jobId {}", datasetId, jobId, e);
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+      }).start();
+
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and jobId {} Message: ", datasetId, jobId, e);
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
