@@ -28,6 +28,7 @@ import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstr
 import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.file.FileCommonUtils;
@@ -114,6 +115,9 @@ public class DatasetSchemaServiceTest {
    */
   @Mock
   private SchemasRepository schemasRepository;
+
+  @Mock
+  private RulesRepository rulesRepository;
 
   /**
    * The data flow controller zuul.
@@ -890,7 +894,13 @@ public class DatasetSchemaServiceTest {
   public void createTableSchemaRuleCreationTest() throws EEAException {
     TableSchemaVO tableSchemaVO = new TableSchemaVO();
     tableSchemaVO.setNotEmpty(true);
+    // stub DataSetMetabase
+    DataSetMetabase dataSetMetabase = new DataSetMetabase();
+    dataSetMetabase.setId(1L);
+    dataSetMetabase.setDatasetSchema(new ObjectId().toString());
 
+    Mockito.when(dataSetMetabaseRepository.findById(Mockito.any()))
+            .thenReturn(Optional.of(dataSetMetabase));
     Mockito.when(tableSchemaMapper.classToEntity(Mockito.any(TableSchemaVO.class)))
         .thenReturn(new TableSchema());
     Mockito.when(datasetMetabaseService.findDatasetSchemaIdById(Mockito.anyLong()))

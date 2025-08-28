@@ -30,7 +30,7 @@ public class RulesSchema {
 
   /** Default level error for automatic QCs. */
   @Field(value = "automaticQCsDefaultLevelError")
-  private ErrorTypeEnum automaticQCsDefaultLevelError = ErrorTypeEnum.BLOCKER;
+  private ErrorTypeEnum automaticQCsDefaultLevelError = ErrorTypeEnum.ERROR;
 
   /** The rules dataset. */
   @Field(value = "rules")
