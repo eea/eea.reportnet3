@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
+
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
 import org.eea.dataset.persistence.metabase.domain.DesignDataset;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
@@ -619,5 +622,71 @@ public class ZipUtils {
     zos.putNextEntry(zipEntry);
     Files.copy(fileToZip.toPath(), zos);
     zos.closeEntry();
+  }
+
+  public static void addFolderToZip(File rootDir, File currentFile, ZipArchiveOutputStream zos) throws IOException {
+    String entryName = rootDir.toPath().relativize(currentFile.toPath()).toString().replace("\\", "/");
+
+    if (currentFile.isDirectory()) {
+      if (!entryName.isEmpty()) {
+        if (!entryName.endsWith("/")) entryName += "/";
+        zos.putArchiveEntry(new ZipArchiveEntry(entryName));
+        zos.closeArchiveEntry();
+      }
+      File[] children = currentFile.listFiles();
+      if (children != null) {
+        for (File child : children) {
+          addFolderToZip(rootDir, child, zos);
+        }
+      }
+      return;
+    }
+
+    // Regular file: per-file retry loop
+    final int perFileMax = 3;
+    int tries = 0;
+    while (true) {
+      tries++;
+      try {
+        ZipArchiveEntry entry = new ZipArchiveEntry(currentFile, entryName);
+        zos.putArchiveEntry(entry);
+
+        // open a FRESH stream each try
+        try (InputStream in = Files.newInputStream(currentFile.toPath())) {
+          in.transferTo(zos);
+        }
+
+        zos.closeArchiveEntry();
+        return; // success
+
+      } catch (IOException ex) {
+        // If the file disappeared meanwhile, log and SKIP it
+        if (ex instanceof FileNotFoundException || ex instanceof java.nio.file.NoSuchFileException) {
+          LOG.warn("File vanished during zip, skipping: {}", currentFile);
+          try { zos.closeArchiveEntry(); } catch (Exception ignore) {}
+          return;
+        }
+        // Retry only on likely transient NFS issues
+        if (!isLikelyTransientFsError(ex) || tries >= perFileMax) {
+          try { zos.closeArchiveEntry(); } catch (Exception ignore) {}
+          LOG.warn("File issue during zip :  {}", currentFile);
+          throw ex;
+        }
+        // small backoff before reopening
+        try { Thread.sleep(5000L * tries); } catch (InterruptedException ie) {
+          Thread.currentThread().interrupt();
+          throw new IOException("Retry interrupted while reading file", ie);
+        }
+      }
+    }
+  }
+
+  private static boolean isLikelyTransientFsError(IOException ex) {
+    String m = String.valueOf(ex.getMessage()).toLowerCase();
+    // Common indicators for NFS/EFS transient issues
+    return m.contains("stale file handle") || m.contains("estale") ||
+        m.contains("resource temporarily unavailable") ||
+        m.contains("transport endpoint is not connected") ||
+        m.contains("input/output error") || m.contains("i/o error");
   }
 }
