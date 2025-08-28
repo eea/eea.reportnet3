@@ -713,6 +713,12 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_NULL);
     }
 
+    if (dataflowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
+      if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_WHITESPACES);
+      }
+    }
+
     String nameTrimmed = fieldSchemaVO.getName().trim();
     boolean isSchema = false;
     filterName(nameTrimmed, isSchema);
@@ -782,7 +788,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
                   example = "0") @PathVariable("datasetId") Long datasetId,
           @ApiParam(value = "Field schema object") @RequestBody FieldSchemaVO fieldSchemaVO) {
 
+
     if (null != fieldSchemaVO.getName()) {
+      if (dataflowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
+        if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.FIELD_NAME_WHITESPACES);
+        }
+      }
       String nameTrimmed = fieldSchemaVO.getName().trim();
       boolean isSchema = false;
       filterName(nameTrimmed, isSchema);

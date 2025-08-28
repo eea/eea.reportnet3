@@ -69,9 +69,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const resourcesContext = useContext(ResourcesContext);
   const userContext = useContext(UserContext);
   const [hideTabularData, setHideTabularData] = useState(false);
-  const { permissions } = config;
-  const isProvider = userContext.hasPermission([permissions.roles.LEAD_REPORTER.key]);
-
   const [dataset, setDataset] = useState({});
   const [datasetProgressBarSteps, setDatasetProgressBarSteps] = useState({
     steps: [
@@ -162,6 +159,10 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   const isAdmin = userContext.hasPermission([config.permissions.roles.ADMIN.key]);
   const isCustodian = userContext.hasPermission([config.permissions.roles.CUSTODIAN.key]);
+  const isLeadReporter =
+    userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
+      config.permissions.roles.LEAD_REPORTER.key
+    ]) && !isAdmin;
   const isDataflowCustodian = userContext.hasContextAccessPermission(config.permissions.prefixes.DATAFLOW, dataflowId, [
     config.permissions.roles.CUSTODIAN.key
   ]);
@@ -359,22 +360,26 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
-  useEffect(() => {
-    const conversionToParquetCompleted = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT');
-    const conversionToIcebergCompleted = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT');
-    const conversionToParquetFailed = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT');
-    const conversionToIcebergFailed = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT');
-    if (
-      conversionToParquetCompleted ||
-      conversionToIcebergCompleted ||
-      conversionToParquetFailed ||
-      conversionToIcebergFailed
-    ) {
-      setIsLoadingIceberg(false);
-    }
-  }, [notificationContext.hidden]);
+  const hasConversionNotification = list =>
+    list?.some(notification =>
+      [
+        'ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT',
+        'PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT',
+        'ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT',
+        'ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT',
+        'ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT'
+      ].includes(notification.key)
+    );
 
-  const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
+  useEffect(() => {
+    if (hasConversionNotification(notificationContext.toShow)) {
+      setIsLoadingIceberg(false);
+      onGetIcebergTables();
+      handleRefresh();
+    }
+  }, [notificationContext.toShow, notificationContext.hidden]);
 
   const getWebformConfiguration = async (webform, options) => {
     try {
@@ -1242,7 +1247,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const renderSwitchView = () => {
     if (!isNil(webformData?.name)) {
       let viewModes;
-      if (isProvider) {
+      if (isLeadReporter) {
         viewModes = [
           ...(!hideTabularData ? [{ key: 'tabularData', label: resourcesContext.messages['tabularDataView'] }] : []),
           { key: 'webform', label: resourcesContext.messages['webform'] }

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
@@ -301,7 +302,9 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       notes = "Allowed roles: CUSTODIAN, STEWARD, OBSERVER, STEWARD SUPPORT, LEAD REPORTER, REPORTER WRITE, REPORTER READ, EDITOR WRITE, EDITOR READ, NATIONAL COORDINATOR, ADMIN ")
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public List<WeblinkVO> getAllWeblinksByDataflow(
-      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Provider Id", example = "0") @RequestParam(name = "providerId",
+              required = false) final Long providerId) {
     List<WeblinkVO> weblinks = new ArrayList<>();
     try {
       weblinks = dataflowWebLinkService.getAllWeblinksByDataflowId(dataflowId);
@@ -329,8 +332,10 @@ public class DataflowWebLinkControllerImpl implements DataFlowWebLinkController 
       responseContainer = "List", hidden = true)
   @ApiResponse(code = 400, message = EEAErrorMessage.DATAFLOW_INCORRECT_ID)
   public List<WeblinkVO> getAllWeblinksByDataflowLegacy(
-      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId) {
-    return this.getAllWeblinksByDataflow(dataflowId);
+      @ApiParam(value = "Dataflow id", example = "0") @PathVariable("dataflowId") Long dataflowId,
+      @ApiParam(value = "Provider Id", example = "0") @RequestParam(name = "providerId",
+              required = false) final Long providerId) {
+    return this.getAllWeblinksByDataflow(dataflowId, providerId);
   }
 
 }

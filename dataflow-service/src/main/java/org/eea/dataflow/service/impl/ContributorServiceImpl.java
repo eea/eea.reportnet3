@@ -114,7 +114,7 @@ public class ContributorServiceImpl implements ContributorService {
 
     if (LiteralConstants.REPORTER.equals(role)) {
       Long referenceId = dataSetMetabaseControllerZuul
-          .findReportingDataSetIdByDataflowId(dataflowId).stream()
+          .findReportingDataSetIdByDataflowId(dataflowId, providerId).stream()
           .filter(reportingDatasetVO -> providerId.equals(reportingDatasetVO.getDataProviderId()))
           .map(ReportingDatasetVO::getId).findFirst().orElse(null);
       String resource = "Dataset-";
@@ -293,7 +293,7 @@ public class ContributorServiceImpl implements ContributorService {
     resourcesProviders.add(
         fillResourceAssignation(dataflowId, account, ResourceGroupEnum.DATASCHEMA_REPORTER_READ));
 
-    ids = dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+    ids = dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, dataProviderId).stream()
         .filter(reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
         .map(ReportingDatasetVO::getId).collect(Collectors.toList());
 
@@ -355,7 +355,7 @@ public class ContributorServiceImpl implements ContributorService {
             : ResourceGroupEnum.DATAFLOW_STEWARD_SUPPORT));
     // dataset
     addResources(account, resourcesProviders,
-        dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+        dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, null).stream()
             .map(ReportingDatasetVO::getId).collect(Collectors.toList()),
         isObserver ? ResourceGroupEnum.DATASET_OBSERVER
             : ResourceGroupEnum.DATASET_STEWARD_SUPPORT);
@@ -406,7 +406,7 @@ public class ContributorServiceImpl implements ContributorService {
             : ResourceGroupEnum.DATAFLOW_STEWARD));
     // dataset
     addResources(account, resourcesProviders,
-        dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+        dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, null).stream()
             .map(ReportingDatasetVO::getId).collect(Collectors.toList()),
         SecurityRoleEnum.DATA_CUSTODIAN.toString().equals(role)
             ? ResourceGroupEnum.DATASET_CUSTODIAN
@@ -611,7 +611,7 @@ public class ContributorServiceImpl implements ContributorService {
         fillResourceAssignation(dataflowId, contributorVO.getAccount(), resourceGroupEnumDataflow));
 
     for (Long reportingDatasetId : dataSetMetabaseControllerZuul
-        .findReportingDataSetIdByDataflowId(dataflowId).stream()
+        .findReportingDataSetIdByDataflowId(dataflowId, null).stream()
         .filter(reportingDatasetVO -> dataProviderId.equals(reportingDatasetVO.getDataProviderId()))
         .map(ReportingDatasetVO::getId).collect(Collectors.toList())) {
       ResourceInfoVO resourceDataSchema =
@@ -676,7 +676,7 @@ public class ContributorServiceImpl implements ContributorService {
     // dataset
     createGroupList(
         dataflowId, contributorVO, resourceAssignationVOList, resourceInfoVOs, resourceGroupDataset,
-        securityRole, dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId)
+        securityRole, dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, null)
             .stream().map(ReportingDatasetVO::getId).collect(Collectors.toList()),
         ResourceTypeEnum.DATASET);
     // DC
@@ -815,7 +815,7 @@ public class ContributorServiceImpl implements ContributorService {
         List<Long> reportings = new ArrayList<>();
         if (null != dataProviderId) {
           reportings =
-              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId).stream()
+              dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, null).stream()
                   .filter(reportingDatasetVO -> dataProviderId
                       .equals(reportingDatasetVO.getDataProviderId()))
                   .map(ReportingDatasetVO::getId).collect(Collectors.toList());

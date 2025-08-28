@@ -45,4 +45,12 @@ public interface JobProcessController {
      */
     @GetMapping(value = "/findStatusByJobId/{jobId}")
     String findStatusByJobId(@PathVariable("jobId") Long jobId);
+
+    /**
+     * Finds jobId by job id
+     * @param processId
+     * @return
+     */
+    @DeleteMapping("/private/deleteJobProcessByProcessId/{processId}")
+    void deleteJobProcessByProcessId(@PathVariable("processId") String processId);
 }

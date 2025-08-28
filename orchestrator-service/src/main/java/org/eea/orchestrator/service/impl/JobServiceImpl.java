@@ -569,6 +569,12 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public List<JobVO> findByJobTypeInAndJobStatusIn(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus){
+        List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusIn(jobType, jobStatus);
+        return jobMapper.entityListToClass(jobList);
+    }
+
+    @Override
     public void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber, Boolean updateJobHistory){
         String jobInfoStr = null;
         if(jobInfo != null) {

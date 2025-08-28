@@ -920,7 +920,7 @@ public class RepresentativeServiceImplTest {
     SnapshotVO snapshot = new SnapshotVO();
     snapshot.setId(1L);
     snapshots.add(snapshot);
-    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(reportings);
     Mockito.when(datasetSnapshotController.getSnapshotsEnabledByIdDataset(Mockito.anyLong()))
         .thenReturn(snapshots);
@@ -930,7 +930,7 @@ public class RepresentativeServiceImplTest {
   @Test(expected = EEAException.class)
   public void checkIfDataHaveBeenReleaseExceptionTest() throws EEAException {
     try {
-      Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+      Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong(), Mockito.anyLong()))
           .thenReturn(null);
       representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L);
     } catch (EEAException e) {
@@ -947,7 +947,7 @@ public class RepresentativeServiceImplTest {
     reporting.setDataProviderId(1L);
     reporting.setIsReleased(false);
     reportings.add(reporting);
-    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong()))
+    Mockito.when(datasetMetabaseController.findReportingDataSetIdByDataflowId(Mockito.anyLong(), Mockito.anyLong()))
         .thenReturn(reportings);
     assertFalse(representativeServiceImpl.checkDataHaveBeenRelease(1L, 1L));
   }

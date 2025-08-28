@@ -1,5 +1,6 @@
 package org.eea.dataset.util;
 
+import org.apache.commons.lang.StringUtils;
 import org.bson.Document;
 import org.eea.dataset.mapper.DremioRecordMapper;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -109,33 +111,41 @@ public class DataLakeDataRetrieverUtils {
      * @param fieldIdMap
      * @param dataQuery
      */
-    public static void buildFieldValueFilterQuery(String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
+    public static void buildFieldValueFilterQuery(String fieldSchemaId, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap, StringBuilder dataQuery) {
         dataQuery.append(" where (");
-        List<String> headers = fieldIdMap.values().stream().filter(d -> !spatialDataHandling.getGeoJsonEnums().contains(d.getType())).map(FieldSchemaVO::getName).collect(Collectors.toList());
-        LOG.info("headers : {}", headers);
-        dataQuery.append(UtilityClass.addQuotesToFieldNames(headers.get(0))).append(" like '%").append(fieldValue).append("%'");
-        headers.remove(headers.get(0));
-        LOG.info("headers : {}", headers);
-        headers.stream()
-            .map(UtilityClass::addQuotesToFieldNames)
-            .forEach(quotedHeader ->
-                dataQuery.append(" OR ")
-                    .append(quotedHeader)
-                    .append(" like '%")
-                    .append(fieldValue)
-                    .append("%'")
-            );
+        FieldSchemaVO filterField = null;
+        if(!StringUtils.isBlank(fieldSchemaId)) {
+            filterField = fieldIdMap.get(fieldSchemaId);
+        }
+        if(filterField != null && filterField.getName() != null){
+            //filter only for specific field
+            dataQuery.append(UtilityClass.addQuotesToFieldNames(filterField.getName())).append(" = '").append(fieldValue).append("'");
+        }
+        else{
+            List<String> headers = fieldIdMap.values().stream().filter(d -> !spatialDataHandling.getGeoJsonEnums().contains(d.getType())).map(FieldSchemaVO::getName).collect(Collectors.toList());
+            dataQuery.append(UtilityClass.addQuotesToFieldNames(headers.get(0))).append(" like '%").append(fieldValue).append("%'");
+            headers.remove(headers.get(0));
+            headers.stream()
+                    .map(UtilityClass::addQuotesToFieldNames)
+                    .forEach(quotedHeader ->
+                            dataQuery.append(" OR ")
+                                    .append(quotedHeader)
+                                    .append(" like '%")
+                                    .append(fieldValue)
+                                    .append("%'")
+                    );
+        }
         dataQuery.append(")");
     }
 
-    public static StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
+    public static StringBuilder buildFilteredQuery(DataSetMetabaseVO dataset, String fields, String fieldSchemaId, String fieldValue, Map<String, FieldSchemaVO> fieldIdMap,
                                             ErrorTypeEnum[] levelError, String[] qcCodes, String validationTablePath) {
         StringBuilder query = new StringBuilder();
         boolean levelErrorNotEmpty = levelError!=null && levelError.length>0 && levelError.length!=MAX_FILTERS;
         boolean qcCodesNotEmpty = qcCodes!=null && qcCodes.length>0;
         //filter value
         if (!fieldValue.equals("")) {
-            buildFieldValueFilterQuery(fieldValue, fieldIdMap, query);
+            buildFieldValueFilterQuery(fieldSchemaId, fieldValue, fieldIdMap, query);
         }
         //filter by levelError
         if (levelErrorNotEmpty && validationTablePath!=null) {

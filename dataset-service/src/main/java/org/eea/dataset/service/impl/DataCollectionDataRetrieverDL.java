@@ -48,7 +48,7 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
     }
 
     @Override
-    public TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldValue, ErrorTypeEnum[] levelError,
+    public TableVO getTableResult(DataSetMetabaseVO dataset, TableSchemaVO tableSchemaVO, Pageable pageable, String fields, String fieldSchemaId, String fieldValue, ErrorTypeEnum[] levelError,
                                   String[] qcCodes) throws EEAException {
         Long totalRecords = 0L;
         Long datasetId = dataset.getId();
@@ -64,7 +64,7 @@ public class DataCollectionDataRetrieverDL implements DataLakeDataRetriever {
             FieldSchemaVO fieldSchemaProviderCode = new FieldSchemaVO();
             fieldSchemaProviderCode.setName("data_provider_code");
             fieldIdMap.put("data_provider_code", fieldSchemaProviderCode);
-            StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldValue, fieldIdMap, levelError, qcCodes, null);
+            StringBuilder filteredQuery = DataLakeDataRetrieverUtils.buildFilteredQuery(dataset, fields, fieldSchemaId, fieldValue, fieldIdMap, levelError, qcCodes, null);
             StringBuilder recordsCountQuery = new StringBuilder();
             recordsCountQuery.append("select count(record_id) from " + s3Service.getTableDCAsFolderQueryPath(s3PathResolver, S3_TABLE_NAME_DC_QUERY_PATH) + " t ").append(filteredQuery);
             Long totalFilteredRecords = dremioJdbcTemplate.queryForObject(recordsCountQuery.toString(), Long.class);

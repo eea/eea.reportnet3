@@ -58,4 +58,9 @@ public class JobProcessControllerImpl implements JobProcessController {
     public String findStatusByJobId(@PathVariable("jobId") Long jobId) {
         return jobProcessService.findStatusByJobId(jobId);
     }
+
+    @Override
+    public void deleteJobProcessByProcessId(@PathVariable("processId") String processId) {
+        jobProcessService.deleteJobProcessByProcessId(processId);
+    }
 }

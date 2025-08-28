@@ -85,6 +85,15 @@ public interface ProcessController {
   @GetMapping(value = "/private/{processId}", produces = MediaType.APPLICATION_JSON_VALUE)
   ProcessVO findById(@PathVariable("processId") String processId);
 
+  /**
+   * Find by process ids.
+   *
+   * @param processIds the process id
+   * @return the process VO
+   */
+  @GetMapping(value = "/private/findByProcessIds", produces = MediaType.APPLICATION_JSON_VALUE)
+  List<ProcessVO> findByIds(@RequestParam("processIds") List<String> processIds);
+
 
   /**
    * Gets the private processes.

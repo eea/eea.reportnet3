@@ -327,7 +327,7 @@ public class UserRoleServiceImpl implements UserRoleService {
   private void getUsersWithCountry(Long dataflowId, List<UserRoleVO> userRoleList,
       HashMap<Long, String> providerIds) {
     List<ReportingDatasetVO> datasets =
-        datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
+        datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, null);
     if (null != datasets) {
       for (ReportingDatasetVO reportingDatasetVO : datasets) {
         if (providerIds.containsKey(reportingDatasetVO.getDataProviderId())) {

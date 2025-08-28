@@ -803,6 +803,20 @@ public class JobControllerImpl implements JobController {
     }
 
     /**
+     * Sends a fme import failed no file returned notification
+     *
+     * @param jobVO the job object
+     * @return
+     */
+    @Override
+    @PostMapping(value = "/private/sendFmeImportFailedNoFileReturnedNotification")
+    public void sendFmeImportFailedNoFileReturnedNotification(@RequestBody JobVO jobVO) {
+        jobUtils.sendKafkaImportNotification(jobVO, EventType.FME_IMPORT_JOB_FAILED_EVENT_NO_FILE_RETURNED, "Fme did not returned a file");
+        jobService.updateJobInfo(jobVO.getId(), JobInfoEnum.ERROR_NO_FILE_RETURNED_FROM_FME, null, true);
+        LOG.info("Sent notification FME_IMPORT_JOB_FAILED_EVENT_NO_FILE_RETURNED for jobId {} and fmeJobId {}", jobVO.getId(), jobVO.getFmeJobId());
+    }
+
+    /**
      * Finds provider id by job id
      * @param jobId
      * @return

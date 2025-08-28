@@ -406,8 +406,6 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
     <div className={styles.filterControls}>
       <InputText
         className={styles.filterInput}
-        placeholder={resourcesContext.messages['search']}
-        value={filterValue}
         onChange={e => {
           setFilterValue(e.target.value);
           if (e.target.value === '') {
@@ -419,18 +417,16 @@ export const ManageWebforms = ({ onCloseDialog, isDialogVisible }) => {
             filterData();
           }
         }}
+        placeholder={resourcesContext.messages['search']}
+        value={filterValue}
       />
+      <Button icon="search" label={resourcesContext.messages['search']} onClick={filterData} />
       <Button
-        icon="search"
-        onClick={filterData}
-        label={resourcesContext.messages['search']}
-      />
-      <Button
-        icon="refresh"
         className="p-button-secondary"
-        onClick={resetFilter}
-        label={resourcesContext.messages['reset']}
         disabled={!filterValue}
+        icon="refresh"
+        label={resourcesContext.messages['reset']}
+        onClick={resetFilter}
       />
     </div>
   );

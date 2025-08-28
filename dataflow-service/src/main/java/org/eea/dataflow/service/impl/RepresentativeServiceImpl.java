@@ -1092,7 +1092,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
       throws EEAException {
     boolean isReleased = true;
     List<ReportingDatasetVO> reportings =
-        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId);
+        datasetMetabaseController.findReportingDataSetIdByDataflowId(dataflowId, dataProviderId);
     if (null == reportings) {
       throw new EEAException(EEAErrorMessage.DATASET_NOTFOUND);
     }
@@ -1258,7 +1258,7 @@ public class RepresentativeServiceImpl implements RepresentativeService {
     boolean result = false;
     List<ResourceAccessVO> resources = userManagementControllerZull.getResourcesByUserEmail(email);
     List<ReportingDatasetVO> reportings = datasetMetabaseController
-        .findReportingDataSetIdByDataflowId(representative.getDataflow().getId());
+        .findReportingDataSetIdByDataflowId(representative.getDataflow().getId(), null);
     if (!CollectionUtils.isEmpty(resources) && !CollectionUtils.isEmpty(reportings)) {
       for (ReportingDatasetVO reportingDatasetVO : reportings) {
         if (!datasetIds.contains(reportingDatasetVO.getId())) {

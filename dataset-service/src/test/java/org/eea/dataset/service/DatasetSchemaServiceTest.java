@@ -2444,6 +2444,7 @@ public class DatasetSchemaServiceTest {
     when(datasetMetabaseService.findDatasetMetabase(Mockito.any()))
         .thenReturn(new DataSetMetabaseVO());
     when(lockService.removeLockByCriteria(Mockito.any())).thenReturn(true);
+    when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
     dataSchemaServiceImpl.importSchemas(1L, multipartFile.getInputStream(), "file.zip");
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -2557,6 +2558,7 @@ public class DatasetSchemaServiceTest {
         new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(datasetService.getDataFlowIdById(any())).thenReturn(1L);
 
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataFlow(1L);
@@ -2581,6 +2583,7 @@ public class DatasetSchemaServiceTest {
     dataflow.setId(1L);
     dataflow.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataFlowControllerZuul.getMetabaseById(Mockito.anyLong())).thenReturn(dataflow);
+    Mockito.when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
 
     List<FieldSchema> fields = new ArrayList<>();
     fields.add(fieldSchema2);
@@ -2615,6 +2618,8 @@ public class DatasetSchemaServiceTest {
         new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
+    Mockito.when(datasetService.getDataFlowIdById(any())).thenReturn(1L);
 
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataFlow(1L);
@@ -2752,6 +2757,8 @@ public class DatasetSchemaServiceTest {
         new MockMultipartFile("file", "tableSchemaName.csv", "text/csv", csv.getBytes());
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(dataFlowControllerZuul.isBigDataflow(Mockito.any())).thenReturn(false);
+    Mockito.when(datasetService.getDataFlowIdById(any())).thenReturn(1L);
 
     DataSetSchema datasetSchema = new DataSetSchema();
     datasetSchema.setIdDataFlow(1L);

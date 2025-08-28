@@ -109,7 +109,7 @@ public class UserRoleServiceImplTest {
         .thenReturn(Arrays.asList(rep));
     Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
         .thenReturn(Arrays.asList(new DataProviderVO()));
-    Mockito.when(datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(Arrays.asList(new ReportingDatasetVO()));
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(group);
     Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any())).thenReturn(users);
@@ -143,7 +143,7 @@ public class UserRoleServiceImplTest {
         .thenReturn(Arrays.asList(rep));
     Mockito.when(representativeControllerZuul.findDataProvidersByIds(Mockito.any()))
         .thenReturn(Arrays.asList(new DataProviderVO()));
-    Mockito.when(datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(Arrays.asList(new ReportingDatasetVO()));
     Mockito.when(keycloakConnectorService.getGroupsWithSearch(Mockito.any())).thenReturn(group);
     Mockito.when(keycloakConnectorService.getUsersByGroupId(Mockito.any())).thenReturn(users);

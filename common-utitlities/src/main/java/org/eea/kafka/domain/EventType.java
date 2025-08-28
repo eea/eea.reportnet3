@@ -438,6 +438,10 @@ public enum EventType {
   COPY_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_completed_event", true),
 
+  /** The copy dataset schema failed event. */
+  COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+    "copy_dataset_schema_completed_event", true),
+
   /** The copy dataset schema not found event. */
   COPY_DATASET_SCHEMA_NOT_FOUND_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "copy_dataset_schema_not_found_event", true),
@@ -513,6 +517,10 @@ public enum EventType {
   IMPORT_DATASET_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_dataset_schema_completed_event", true),
 
+  /** The import dataset schema failed due to illegal chars event. */
+  IMPORT_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+    "import_dataset_schema_completed_event", true),
+
   /** The import failed event iceberg exists. */
   IMPORT_FAILED_EVENT_ICEBERG_EXISTS(LiteralConstants.DATA_REPORTING_TOPIC,
           "import_failed_event_iceberg_exists", true),
@@ -587,6 +595,10 @@ public enum EventType {
   IMPORT_FIELD_SCHEMA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_field_schema_failed_event", true),
 
+  /** The import field schema failed due to illegal chars event. */
+  IMPORT_FIELD_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+    "import_field_schema_failed_event", true),
+
   /** The no pk reference dataflow error event. */
   NO_PK_REFERENCE_DATAFLOW_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "no_pk_reference_dataflow_error_event", true),
@@ -635,10 +647,16 @@ public enum EventType {
   CALL_FME_PROCESS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "call_fme_process_failed_event", true),
 
-  /** Validation failed event */
+  /** Validation canceled event */
   VALIDATION_CANCELED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_canceled_event", true),
+
+  /** Validation with iceberg failed event */
+  VALIDATION_FAILED_ICEBERG_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_failed_iceberg_exists_event", true),
+
+  /** Validation failure due to system error */
+  VALIDATION_FAILED_SYSTEM_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_failed_system_error_event", true),
   
-  /** Validation failed event */
+  /** Validation finished with canceled tasks event */
   FINISHED_VALIDATION_WITH_CANCELED_TASKS(LiteralConstants.DATA_REPORTING_TOPIC, "finished_validation_with_canceled_tasks_event", true),
 
   /** The release canceled event. */
@@ -658,6 +676,10 @@ public enum EventType {
   /** The fme import job failed event */
   FME_IMPORT_JOB_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "fme_import_job_failed_event", true),
+
+  /** The fme import job did not send a file to reportnet 3 event */
+  FME_IMPORT_JOB_FAILED_EVENT_NO_FILE_RETURNED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "fme_import_job_failed_event_no_file_returned", true),
 
   EXPORT_FILE_START_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
           "export_file_start_event", true),

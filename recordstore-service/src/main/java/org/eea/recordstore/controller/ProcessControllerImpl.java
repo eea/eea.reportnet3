@@ -150,6 +150,18 @@ public class ProcessControllerImpl implements ProcessController {
   }
 
   /**
+   * Find by id.
+   *
+   * @param processIds the process id
+   * @return the process VO
+   */
+  @Override
+  @GetMapping(value = "/private/findByProcessIds")
+  public List<ProcessVO> findByIds(@RequestParam("processIds") List<String> processIds) {
+    return processService.getByProcessIds(processIds);
+  }
+
+  /**
    * Gets the private processes.
    *
    * @param pageNum the page num

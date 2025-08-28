@@ -8,6 +8,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.lock.redis.LockEnum;
 import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
@@ -292,7 +293,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
       String datasetSchemaId = dataset.getDatasetSchema();
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
-      result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
+      result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getTableResult(dataset, tableSchemaVO, pageable, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
     } catch (EEAException e) {
       LOG.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
@@ -376,7 +377,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
           @ApiResponse(code = 400, message = "Error importing file"),
           @ApiResponse(code = 500, message = "Error importing file")})
-  public void importBigFileData(
+  public Map<String, Object> importBigFileData(
           @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
                   name = "datasetId") @PathVariable("datasetId") Long datasetId,
           @ApiParam(type = "Long", value = "Dataflow id",
@@ -400,7 +401,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
-
+    Map<String, Object> result = new HashMap<>();
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
     }
@@ -436,12 +437,14 @@ public class DatasetControllerImpl implements DatasetController {
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
         if (file != null) {
-          helperMultipartFileMapper.setBytes(file.getBytes());
           helperMultipartFileMapper.setInputStream(file.getInputStream());
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
+        jobId = job.getId();
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -461,7 +464,13 @@ public class DatasetControllerImpl implements DatasetController {
           job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
           if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
             LOG.info("Job {} is cancelled. Exiting import!", job.getId());
-            return;
+            String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + job.getId() + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+            if (providerId != null) {
+              pollingUrl += "&providerId=" + providerId;
+            }
+            result.put("jobId", job.getId());
+            result.put("pollingUrl", pollingUrl);
+            return result;
           }
         }
         if(job!=null){
@@ -509,6 +518,21 @@ public class DatasetControllerImpl implements DatasetController {
         throw e;
       }
     }
+
+    if(jobId != null) {
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if (providerId != null) {
+        pollingUrl += "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+    }
+    else{
+      result.put("jobId", "Error: An import job was not created.");
+    }
+
+
+    return result;
   }
 
   /**
@@ -595,12 +619,14 @@ public class DatasetControllerImpl implements DatasetController {
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
         if (file != null) {
-          helperMultipartFileMapper.setBytes(file.getBytes());
           helperMultipartFileMapper.setInputStream(file.getInputStream());
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
+        jobId = job.getId();
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when privately importing data to Dremio for datasetId {}", datasetId, e);
         throw e;

@@ -1776,7 +1776,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void removeLocksRelatedToPopulateEU(Long dataflowId) {
     List<ReportingDatasetVO> reportings =
-            dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
+            dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, null);
     Map<String, Object> populateEuDataset = new HashMap<>();
     populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
     populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);

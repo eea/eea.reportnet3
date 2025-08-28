@@ -213,7 +213,9 @@ public class DocumentControllerImpl implements DocumentController {
       @ApiParam(value = "Document id",
           example = "0") @PathVariable("documentId") final Long documentId,
       @ApiParam(value = "Dataflow id",
-          example = "0") @PathVariable("dataflowId") final Long dataflowId) {
+          example = "0") @PathVariable("dataflowId") final Long dataflowId,
+      @ApiParam(value = "Provider id",
+              example = "0") @RequestParam(value = "providerId", required = false) final Long providerId) {
     try {
       DocumentVO document = dataflowController.getDocumentInfoById(documentId);
       if (document == null) {
@@ -259,8 +261,10 @@ public class DocumentControllerImpl implements DocumentController {
       @ApiParam(value = "Document Id",
           example = "0") @PathVariable("documentId") final Long documentId,
       @ApiParam(value = "Dataflow Id",
-          example = "0") @PathVariable("dataflowId") final Long dataflowId) {
-    return this.getDocument(documentId, dataflowId);
+          example = "0") @PathVariable("dataflowId") final Long dataflowId,
+      @ApiParam(value = "Provider id",
+              example = "0") @RequestParam(value = "providerId", required = false) final Long providerId) {
+    return this.getDocument(documentId, dataflowId, providerId);
   }
 
   /**

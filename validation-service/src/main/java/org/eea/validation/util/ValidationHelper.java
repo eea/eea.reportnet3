@@ -11,6 +11,7 @@ import org.bson.types.ObjectId;
 import org.codehaus.plexus.util.StringUtils;
 import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3Helper;
+import org.eea.datalake.service.S3Service;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
@@ -25,6 +26,7 @@ import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordSto
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
+import org.eea.interfaces.vo.dataset.DatasetTableVO;
 import org.eea.interfaces.vo.dataset.ReferenceDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetRunningStatusEnum;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
@@ -204,12 +206,15 @@ public class ValidationHelper implements DisposableBean {
   @Autowired
   private RecordStoreControllerZuul recordStoreControllerZuul;
 
+  private final S3Service s3ServicePrivate;
+
   /**
    * Instantiates a new validation helper.
    */
-  public ValidationHelper() {
+  public ValidationHelper(S3Service s3ServicePrivate) {
     super();
-    processesMap = new ConcurrentHashMap<>();
+      this.s3ServicePrivate = s3ServicePrivate;
+      processesMap = new ConcurrentHashMap<>();
   }
 
   /**
@@ -353,8 +358,22 @@ public class ValidationHelper implements DisposableBean {
 
   @LockMethod(removeWhenFinish = true, isController = false)
   public void executeValidationDL(@LockCriteria(name = "datasetId") Long datasetId, String processId, boolean released, S3PathResolver s3PathResolver, boolean createParquetWithSQL) throws EEAException {
-    initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
+
     DataSetMetabaseVO dataset = datasetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+    JobVO jobVO = jobControllerZuul.findJobById(jobId);
+    String user = jobVO.getCreatorUsername();
+
+    DataSetSchema datasetSchema = schemasRepository.findByIdDataSetSchema(new ObjectId(dataset.getDatasetSchema()));
+    List<String> tableNames = datasetSchema.getTableSchemas().stream()
+        .map(TableSchema::getNameTableSchema)
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+
+    promoteDatasetTablesToDremio(tableNames, dataset, jobId, datasetId, processId, user, released, jobVO);
+
+    initializeProcess(processId, SecurityContextHolder.getContext().getAuthentication().getName());
+
     LOG.info("Obtaining dataset metabase from datasetId {} to perform validationDL. The schema from the metabase is {}",
             datasetId, dataset.getDatasetSchema());
     ProcessVO processVO = processControllerZuul.findById(processId);
@@ -430,6 +449,100 @@ public class ValidationHelper implements DisposableBean {
         addValidationTaskToProcess(processId, EventType.COMMAND_VALIDATE_EMPTY_RULE, value);
       }
     }
+  }
+
+  private void promoteDatasetTablesToDremio(List<String> tableNames, DataSetMetabaseVO dataset, Long jobId, Long datasetId, String processId, String user, boolean released, JobVO jobVO) throws EEAException {
+    List<String> failedToPromoteTables = new ArrayList<>();
+    for (String tableName : tableNames) {
+      try {
+        S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), tableName, tableName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+        tableResolver.setIsIcebergTable(false);
+
+        // Check if the table exists on dremio.
+        boolean tableExists;
+        try {
+          tableExists = s3Helper.checkFolderExist(tableResolver, LiteralConstants.S3_TABLE_NAME_FOLDER_PATH);
+        } catch (Exception e) {
+          LOG.error("Folder existence check failed for jobId {} datasetId {}, table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+          tableExists = false;
+        }
+
+        if (!tableExists) continue;
+
+        // Check if the table is promoted.
+        boolean isPromoted;
+        try {
+          isPromoted = dremioHelperService.checkFolderPromoted(tableResolver, tableName);
+        } catch (Exception e) {
+          LOG.error("Check for promotion failed for jobId {} datasetId {}, table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+          isPromoted = false;
+        }
+
+        // If not promoted, promote.
+        if (!isPromoted) {
+          String tablePath = s3ServicePrivate.getTableAsFolderQueryPath(tableResolver, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+          try {
+            LOG.info("Promoting table for jobId {} dataset {} table {} (was not promoted).", jobId, dataset.getId(), tableName);
+            dremioHelperService.refreshTableMetadataAndPromote(jobId, tablePath, tableResolver, tableName);
+          } catch (Exception e) {
+            LOG.error("Promotion attempt failed for jobId {} dataset {} table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+          }
+
+          // Re-check to verify table promotion was successful.
+          try {
+            isPromoted = dremioHelperService.checkFolderPromoted(tableResolver, tableName);
+          } catch (Exception e) {
+            LOG.error("Second check for promotion failed for jobId {} dataset {} table {}. Cause: {}", jobId, dataset.getId(), tableName, e.getMessage());
+            isPromoted = false;
+          }
+
+          if (!isPromoted) {
+            LOG.error("Table promotion unsuccessful for jobId {} dataset {} table {}", jobId, dataset.getId(), tableName);
+            failedToPromoteTables.add(tableName);
+          } else {
+            LOG.info("Table promotion successful for jobId {} dataset {} table {}", jobId, dataset.getId(), tableName);
+          }
+        }
+      } catch (Exception e) {
+        LOG.error("The table promotion processs failed for jobId {}datasetId {}, table {}.: {}", jobId, datasetId, tableName, e.getMessage());
+      }
+
+      if (!failedToPromoteTables.isEmpty()) {
+        failDueToPromotionError(dataset, datasetId, processId, jobId, user, released,  jobVO);
+      }
+    }
+  }
+
+  private void failDueToPromotionError(DataSetMetabaseVO dataset, Long datasetId, String processId, Long jobId, String user, boolean released, JobVO jobVO) throws EEAException {
+    if (jobId != null) {
+      try {
+        jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_VALIDATION_FAILURE, null);
+        jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+            ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, processId, user, getPriority(dataset), released);
+        LOG.info("Deleted job_process link for jobId {} datasetId {} and processId {}", jobId, datasetId, processId);
+      } catch (Exception e) {
+        LOG.error("Could not update process for jobId {} datasetId {} and processId {}: {}", jobId, datasetId, processId, e.getMessage());
+      }
+    }
+
+    deleteLockToReleaseProcess(datasetId);
+
+    try {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(
+          EventType.VALIDATION_FAILED_SYSTEM_ERROR_EVENT, null,
+          NotificationVO.builder()
+              .user(jobVO != null ? jobVO.getCreatorUsername() : user)
+              .datasetId(datasetId)
+              .dataflowId(dataset.getDataflowId())
+              .build()
+      );
+    } catch (Exception e) {
+      LOG.warn("Could not send VALIDATION_FAILED_SYSTEM_ERROR_EVENT for jobId {} and datasetId {}: {}", jobId, datasetId, e.getMessage());
+    }
+
+    throw new EEAException("Can not validate for jobId " + jobId + ". Error while promoting dataset tables.");
   }
 
   private List<DataSetMetabaseVO> getCombinedDatasets(DataSetMetabaseVO dataset) {

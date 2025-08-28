@@ -406,7 +406,7 @@ public class JdbcRecordStoreServiceImplTest {
     ReportingDatasetVO reportingDatasetVO = new ReportingDatasetVO();
     reportingDatasetVO.setDataProviderId(1L);
     reportings.add(reportingDatasetVO);
-    Mockito.when(datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any()))
+    Mockito.when(datasetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(Mockito.any(), Mockito.any()))
         .thenReturn(reportings);
     final Connection connection = Mockito.mock(BaseConnection.class);
 
