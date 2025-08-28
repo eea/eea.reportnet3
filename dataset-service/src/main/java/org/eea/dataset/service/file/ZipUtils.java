@@ -669,6 +669,7 @@ public class ZipUtils {
         // Retry only on likely transient NFS issues
         if (!isLikelyTransientFsError(ex) || tries >= perFileMax) {
           try { zos.closeArchiveEntry(); } catch (Exception ignore) {}
+          LOG.warn("File issue during zip :  {}", currentFile);
           throw ex;
         }
         // small backoff before reopening
