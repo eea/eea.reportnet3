@@ -956,6 +956,10 @@ public class RulesControllerImplTest {
     // simulate Mongo update result where document is matched and modified
     Mockito.when(updateResult.getMatchedCount()).thenReturn(1L);
     Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
+
     Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
             .thenReturn(updateResult);
 
@@ -977,6 +981,9 @@ public class RulesControllerImplTest {
     dataflow.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
 
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
+
     Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
             .thenReturn(updateResult);
     Mockito.when(updateResult.getMatchedCount()).thenReturn(0L);
@@ -996,6 +1003,9 @@ public class RulesControllerImplTest {
     dataflow.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
 
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
+
     Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
             .thenReturn(updateResult);
     Mockito.when(updateResult.getMatchedCount()).thenReturn(1L);
@@ -1010,11 +1020,9 @@ public class RulesControllerImplTest {
     // simulate dataflow status not being DESIGN -> should throw EEAException
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setDataflowId(1L);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(1L)).thenReturn(dataset);
 
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DRAFT);
-    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
 
     rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
   }
@@ -1029,6 +1037,9 @@ public class RulesControllerImplTest {
     DataFlowVO dataflow = new DataFlowVO();
     dataflow.setStatus(TypeStatusEnum.DESIGN);
     Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
+
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
 
     Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
             .thenThrow(new RuntimeException("Mongo failure"));
@@ -1050,10 +1061,6 @@ public class RulesControllerImplTest {
     // simulate dataflow controller throwing exception
     DataSetMetabaseVO dataset = new DataSetMetabaseVO();
     dataset.setDataflowId(1L);
-    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(1L)).thenReturn(dataset);
-
-    Mockito.when(dataflowControllerZuul.getMetabaseById(1L))
-            .thenThrow(new RuntimeException("Dataflow fetch failed"));
 
     rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
   }
