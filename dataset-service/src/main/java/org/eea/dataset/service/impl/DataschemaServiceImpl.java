@@ -2245,8 +2245,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     // retieve default level error if any
     String datasetSchemaId = getDatasetSchemaId(datasetId);
     RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
-    ErrorTypeEnum automaticQCDefaultLevelError = rulesSchema.getAutomaticQCsDefaultLevelError();
 
+    ErrorTypeEnum automaticQCDefaultLevelError =
+            rulesSchema != null && rulesSchema.getAutomaticQCsDefaultLevelError() != null
+                    ? rulesSchema.getAutomaticQCsDefaultLevelError()
+                    : ErrorTypeEnum.ERROR;
 
     RuleVO ruleVO = new RuleVO();
     ruleVO.setReferenceId(tableSchemaId);
