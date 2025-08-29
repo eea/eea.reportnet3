@@ -105,6 +105,7 @@ export const ValidationService = {
     const validationsList = {};
     validationsList.datasetSchemaId = validationsListDTO.data.idDatasetSchema;
     validationsList.rulesSchemaId = validationsListDTO.data.rulesSchemaId;
+    validationsList.automaticQCsDefaultLevelError = validationsListDTO.data.automaticQCsDefaultLevelError;
 
     if (reporting) {
       validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled === true);

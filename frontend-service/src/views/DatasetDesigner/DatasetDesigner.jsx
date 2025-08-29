@@ -102,6 +102,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const [noEditableCheck, setNoEditableCheck] = useState(false);
   const [tableImportedMetadata, setTableImportedMetadata] = useState({});
   const [isQcSeverityDialogVisible, setIsQcSeverityDialogVisible] = useState(false);
+  const [automaticQCsDefaultLevelError, setAutomaticQCsDefaultLevelError] = useState('');
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -1668,6 +1669,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setHasQCsHistory = hasQCsHistory =>
     designerDispatch({ type: 'SET_HAS_QCS_HISTORY', payload: { hasQCsHistory } });
 
+  const handleSeverityUpdate = newSeverity => {
+    setAutomaticQCsDefaultLevelError(newSeverity);
+  };
+
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
       return (
@@ -1688,6 +1693,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDataflowOpen={isDataflowOpen}
             isDatasetDesigner
             setHasQCsHistory={setHasQCsHistory}
+            setAutomaticQCsDefaultLevelError={setAutomaticQCsDefaultLevelError}
           />
         </Dialog>
       );
@@ -2263,8 +2269,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         <QcSeverityDialog
           datasetId={datasetId}
           datasetSchemaId={designerState.datasetSchemaId}
+          defaultSeverity={automaticQCsDefaultLevelError}
           isVisible={isQcSeverityDialogVisible}
           onHide={() => setIsQcSeverityDialogVisible(false)}
+          onSaveSuccess={handleSeverityUpdate}
         />
 
         {designerState.isImportDatasetDialogVisible && (
