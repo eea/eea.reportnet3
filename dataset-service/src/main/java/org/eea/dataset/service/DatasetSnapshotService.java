@@ -6,7 +6,9 @@ import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
+import org.eea.multitenancy.DatasetId;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
@@ -307,4 +309,26 @@ public interface DatasetSnapshotService {
    * @return
    */
   SnapshotVO getLatestReleaseSnapshot(Long datasetId);
+
+  /**
+   * Export historic releases CSV file.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param folderName the folder name
+   * @param fileNameWithExtension the filename
+   * @param processUUID the process id
+   * @throws Exception
+   */
+  void exportHistoricReleasesCSV(@DatasetId Long datasetId, Long dataflowId, String folderName, String fileNameWithExtension, String processUUID) throws Exception;
+
+  /**
+   * Download historic releases CSV file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  File downloadHistoricReleasesCSV(Long datasetId, String fileName) throws IOException;
 }

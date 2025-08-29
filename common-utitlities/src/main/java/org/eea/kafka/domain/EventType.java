@@ -551,6 +551,13 @@ public enum EventType {
   /** The export qc failed event. */
   EXPORT_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_failed_event", true),
 
+  /** The export historic releases completed event. */
+  EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_historic_releases_completed_event", true),
+
+
+  /** The export historic releases failed event. */
+  EXPORT_HISTORIC_RELEASES_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_historic_releases_failed_event", true),
+
   /** The validate reporters completed event. */
   VALIDATE_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "validate_reporters_completed_event", true),

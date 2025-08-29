@@ -3,6 +3,9 @@ package org.eea.dataset.controller;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import io.swagger.annotations.*;
 import lombok.SneakyThrows;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
 import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
@@ -24,6 +27,7 @@ import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataset.CreateSnapshotVO;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.ReportingDatasetVO;
+import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.lock.LockVO;
@@ -44,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -55,7 +60,13 @@ import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBo
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1006,4 +1017,104 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   public List<SnapshotVO> getSnapshotByDatasetId(Long datasetId){
     return datasetSnapshotService.getSnapshotsByIdDataset(datasetId);
   }
+
+  /**
+   * Export the historic releases for a data collection.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @return the download url
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
+  @PostMapping(value = "/exportHistoricReleases/{datasetId}")
+  public String exportHistoricReleasesCSV(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId) throws Exception {
+    LOG.info("Export historic releases from dataflowId {} and datasetId {}, with type .csv", dataflowId, datasetId);
+    UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDatasetId(datasetId);
+    notificationControllerZuul.createUserNotificationPrivate("DOWNLOAD_HISTORIC_RELEASES_START",
+            userNotificationContentVO);
+    String downloadUrl = "";
+    try {
+      String processUUID = UUID.randomUUID().toString();
+      // Sets the file name and it's root directory
+      String folderName = "dataset-" + datasetId + "-HistoricReleases";
+      String composedFileName = folderName + "-"
+              + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss"));
+      String fileNameWithExtension = composedFileName + "." + FileTypeEnum.CSV.getValue();
+      datasetSnapshotService.exportHistoricReleasesCSV(datasetId, dataflowId, folderName, fileNameWithExtension, processUUID);
+      downloadUrl = "/snapshot/downloadHistoricReleases/" + datasetId + "?dataflowId=" + dataflowId + "&fileName=" + fileNameWithExtension + "&processId=" + processUUID;
+    } catch (EEAException | IOException e) {
+      LOG.error("Error exporting historic releases from dataflowId {} and datasetId {}.  Message: {}", dataflowId, datasetId,
+              e.getMessage());
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error historic releases from dataflowId {} and datasetId {}.  Message: {}", dataflowId, datasetId,
+              e.getMessage());
+      throw e;
+    }
+    return downloadUrl;
+  }
+
+  /**
+   * Download the historic releases for a data collection.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflowId id
+   * @param fileName the file name
+   * @param processId the processId
+   * @param response the response
+   */
+  @Override
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
+  @GetMapping("/downloadHistoricReleases/{datasetId}")
+  public void downloadHistoricReleasesCSV(@PathVariable Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam String fileName,
+                            @RequestParam(required = false) String processId, HttpServletResponse response){
+
+    try {
+      LOG.info("Downloading file generated when exporting historic releases for dataflowId {} and  datasetId {} Filename {} processId {}",
+              dataflowId, datasetId, fileName, processId);
+
+      response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+      OutputStream out = response.getOutputStream();
+
+      if(StringUtils.isNotBlank(processId)) {
+        ProcessVO processVO = processControllerZuul.findById(processId);
+        if (processVO.getStatus().equals(ProcessStatusEnum.IN_PROGRESS.toString()) || processVO.getStatus().equals(ProcessStatusEnum.CANCELED.toString())){
+          String responseMessage;
+          if (processVO.getStatus().equals(ProcessStatusEnum.IN_PROGRESS.toString())){
+            responseMessage = "Export historic releases file for dataset with ID " + datasetId + " is not ready. Please try again later.";
+          }
+          else{
+            responseMessage = "Something went wrong when exporting historic releases for dataset with ID " + datasetId;
+          }
+          out.write(responseMessage.getBytes(StandardCharsets.UTF_8));
+          out.close();
+          return;
+        }
+      }
+
+      File file = datasetSnapshotService.downloadHistoricReleasesCSV(datasetId, fileName);
+
+      FileInputStream in = new FileInputStream(file);
+      // copy from in to out
+      IOUtils.copyLarge(in, out);
+      out.close();
+      in.close();
+      // delete the file after downloading it
+      FileUtils.forceDelete(file);
+    } catch (IOException | ResponseStatusException e) {
+      LOG.error("Error downloading historic releases to csv for dataflowId {} datasetId {} processId {} Message: {}", dataflowId, datasetId, processId, e.getMessage());
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format(
+              "Trying to download a file generated during the export of historic releases process but the file is not found, datasetID: %s + filename: %s.",
+              datasetId, fileName));
+    } catch (Exception e) {
+      LOG.error("Unexpected error! Error downloading historic releases to csv for dataflowId {} datasetId {} processId {} Message: {}", dataflowId, datasetId, processId, e.getMessage());
+      throw e;
+    }
+  }
+
+
+
+
 }
