@@ -406,7 +406,6 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param jobId         the job id
      * @throws EEAException the EEA exception
      */
-    @Async
     public void importFileData(Long datasetId, Long dataflowId, String tableSchemaId, MultipartFile file,
                                boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException {
 
