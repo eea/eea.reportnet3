@@ -80,14 +80,15 @@ public class ZipUtilsTest {
   public void zipSchemaTest() {
     List<DataSetSchema> schemas = new ArrayList<>();
     DataSetSchema schema = new DataSetSchema();
+    ObjectId schemaId = new ObjectId();
     schema.setIdDataFlow(1L);
-    schema.setIdDataSetSchema(new ObjectId());
+    schema.setIdDataSetSchema(schemaId);
     schemas.add(schema);
     List<DesignDataset> designs = new ArrayList<>();
     DesignDataset design = new DesignDataset();
     design.setDataSetName("test");
     design.setId(1L);
-    design.setDatasetSchema(new ObjectId().toString());
+    design.setDatasetSchema(schemaId.toString());
     designs.add(design);
 
     Map<String, String> internalParameters = new HashMap<>();
