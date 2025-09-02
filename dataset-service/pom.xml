@@ -102,6 +102,11 @@
 			<artifactId>dremio-jdbc-driver</artifactId>
 			<version>24.0.0-202302100528110223-3a169b7c</version>
 		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.16.1</version>
+		</dependency>
 	</dependencies>
 	<distributionManagement>
 		<snapshotRepository>
