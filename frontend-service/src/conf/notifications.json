@@ -436,6 +436,9 @@
           "key": "GENERATE_QC_RULES_FILE_ERROR"
         },
         {
+          "key": "GENERATE_HISTORIC_DATA_FILE_ERROR"
+        },
+        {
           "key": "GENERATE_SCHEMAS_INFO_FILE_ERROR"
         },
         {
@@ -1516,6 +1519,7 @@
         },
         { "key": "DOWNLOAD_VALIDATIONS_START" },
         { "key": "DOWNLOAD_QC_RULES_START" },
+        { "key": "DOWNLOAD_HISTORIC_DATA_START" },
         { "key": "DATASET_IMPORT_INIT" },
         { "key": "DATAFLOW_PINNED_INIT", "lifeTime": 1500 },
         { "key": "DATAFLOW_UNPINNED_INIT", "lifeTime": 1500 },
