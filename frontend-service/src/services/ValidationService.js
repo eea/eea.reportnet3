@@ -123,6 +123,8 @@ export const ValidationService = {
 
   generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
 
+  generateHistoricDataFile: async (datasetId, dataflowId) => await ValidationRepository.generateHistoricDataFile(datasetId,dataflowId),
+
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
 
   runSqlRule: async (datasetId, sqlSentence, showInternalFields) => {
