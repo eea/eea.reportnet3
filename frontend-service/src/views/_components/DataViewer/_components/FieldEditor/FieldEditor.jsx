@@ -149,17 +149,30 @@ export const FieldEditor = ({
     try {
       setIsLoadingData(true);
       const conditionalValue = RecordUtils.getCellValue(cells, colSchema.referencedField.masterConditionalFieldId);
+
+      let encodedConditionalValue;
+      if (referencedFieldInfo?.type === 'MULTISELECT_CODELIST') {
+        encodedConditionalValue = Array.isArray(conditionalValue)
+          ? conditionalValue.join('; ')
+          : conditionalValue.replace('; ', ';').replace(';', '; ');
+      } else if (
+        referencedFieldInfo?.type === 'LINK' &&
+        Array.isArray(conditionalValue) &&
+        conditionalValue?.length > 1
+      ) {
+        encodedConditionalValue = conditionalValue.join(';');
+      } else {
+        encodedConditionalValue = conditionalValue;
+      }
+
+      if (typeof encodedConditionalValue === 'string') {
+        encodedConditionalValue = encodeURIComponent(encodedConditionalValue);
+      }
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
         datasetId,
         colSchema.field,
         filter,
-        referencedFieldInfo?.type === 'MULTISELECT_CODELIST'
-          ? Array.isArray(conditionalValue)
-            ? conditionalValue.join('; ')
-            : conditionalValue.replace('; ', ';').replace(';', '; ')
-          : referencedFieldInfo?.type === 'LINK' && Array.isArray(conditionalValue) && conditionalValue?.length > 1
-          ? conditionalValue.join(';')
-          : conditionalValue,
+        encodedConditionalValue,
         datasetSchemaId,
         100
       );
