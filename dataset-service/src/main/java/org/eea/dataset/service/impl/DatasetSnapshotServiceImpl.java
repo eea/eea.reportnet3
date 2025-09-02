@@ -31,6 +31,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -88,6 +89,8 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.JOB_ID;
 
 /**
  * The Class DatasetSnapshotServiceImpl.
@@ -257,6 +260,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
 
+  @Autowired
+  private JobProcessController.JobProcessControllerZuul jobProcessControllerZuul;
+
   /**
    * Gets the by id.
    *
@@ -337,6 +343,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
 
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      if (jobId != null) {
+        snap.setJobId(jobId);
+      }
+
       //force date to UTC
       Instant utcInstant = Instant.now();
       Date dateReleaseUTC = new Date(Timestamp.from(utcInstant).getTime());
@@ -407,6 +418,8 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (processId!=null) {
         processVO = processControllerZuul.findById(processId);
         value.put(LiteralConstants.USER, processVO.getUser());
+        Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+        value.put(JOB_ID, jobId);
       }
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage(), value);
       // Release the lock manually

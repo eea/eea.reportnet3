@@ -3,6 +3,7 @@ package org.eea.orchestrator.io.notification.events;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.kafka.domain.EventType;
@@ -27,6 +28,9 @@ public class ReleaseCanceledEvent implements NotificableEventHandler {
   /** The dataflow controller zuul */
   @Autowired
   private DataFlowControllerZuul dataFlowControllerZuul;
+
+  @Autowired
+  private DatasetSnapshotController datasetSnapshotController;
 
   /**
    * Gets the event type.
@@ -62,6 +66,8 @@ public class ReleaseCanceledEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowVO.getName());
     notification.put("dataProviderName", dataProviderLabel);
     notification.put("error", notificationVO.getError());
+
+    datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId());
     return notification;
   }
 

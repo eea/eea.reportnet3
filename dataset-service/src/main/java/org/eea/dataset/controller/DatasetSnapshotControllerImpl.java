@@ -12,6 +12,7 @@ import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepositor
 import org.eea.dataset.service.DatasetSchemaService;
 import org.eea.dataset.service.DatasetSnapshotService;
 import org.eea.dataset.service.DatasetTableService;
+import org.eea.dataset.service.ResolveSnapshotTable;
 import org.eea.dataset.service.impl.DatasetSnapshotServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -118,6 +119,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
   @Autowired
   private DatasetTableService datasetTableService;
+
+  @Autowired
+  private ResolveSnapshotTable resolveSnapshotTable;
 
   @Value("${eea.authorization.key}")
   private String eeaAuthorizationKey;
@@ -1114,7 +1118,9 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
     }
   }
 
-
-
-
+  @Override
+  @PutMapping("/private/rollBackSnapshotRecord/{jobId}")
+  public void rollBackSnapshotRecord(@PathVariable Long jobId) {
+    resolveSnapshotTable.rollBackSnapshotTableValues(jobId);
+  }
 }
