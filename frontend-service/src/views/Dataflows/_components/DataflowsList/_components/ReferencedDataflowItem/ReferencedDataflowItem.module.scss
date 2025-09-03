@@ -1,5 +1,5 @@
 .container {
-  margin-top:1rem;
+  margin-top: 1rem;
   position: relative;
   border: none;
   background-color: var(--c-lilac-100);
@@ -249,19 +249,19 @@
     }
   }
 }
-.compressedList.compressedList{
-  @media screen and (min-width:1300px) {
-    height:190px;
+.compressedList.compressedList {
+  @media screen and (min-width: 1300px) {
+    height: 190px;
     .obligation p,
     .text p,
     .upperIcon,
     .icon,
-    .role{
+    .role {
       display: none;
     }
-    .text{
-      order:-1;
-      h3{
+    .text {
+      order: -1;
+      h3 {
         max-width: 250px;
       }
     }
@@ -269,26 +269,26 @@
       display: flex !important;
       flex-direction: column;
     }
-    .status{
+    .status {
       text-align: left;
     }
-    .dataflowDates{
+    .dataflowDates {
       margin-left: 0;
-      text-align: left!important;
+      text-align: left !important;
     }
   }
-  @media screen and (min-width:1600px) {
-    .text h3{
+  @media screen and (min-width: 1600px) {
+    .text h3 {
       max-width: 400px;
     }
   }
-  @media screen and (min-width:1900px) {
-    .text h3{
+  @media screen and (min-width: 1900px) {
+    .text h3 {
       max-width: 500px;
     }
   }
-  @media screen and (min-width:2200px) {
-    .text h3{
+  @media screen and (min-width: 2200px) {
+    .text h3 {
       max-width: 600px;
     }
   }
