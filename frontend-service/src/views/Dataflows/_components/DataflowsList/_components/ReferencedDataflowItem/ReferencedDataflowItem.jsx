@@ -13,9 +13,9 @@ import { UserContext } from 'views/_functions/Contexts/UserContext';
 import { getUrl } from 'repositories/_utils/UrlUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { routes } from 'conf/routes';
-import dayjs from "dayjs";
+import dayjs from 'dayjs';
 
-export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompressed= () => {} }) => {
+export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompressed = () => {} }) => {
   const userContext = useContext(UserContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -24,7 +24,9 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompresse
   const [isPinShowed, setIsPinShowed] = useState(false);
 
   const deletedAt = dataflow.deletedAt ? dayjs(dataflow.deletedAt).format(userContext.userProps.dateFormat) : null;
-  const deletedAtLabel = deletedAt ? TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt }) : null;
+  const deletedAtLabel = deletedAt
+    ? TextUtils.parseText(resourcesContext.messages['willBeDeleted'], { deletedAt })
+    : null;
 
   useEffect(() => {
     setIsPinned(dataflow.pinned === 'pinned');
@@ -64,13 +66,17 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompresse
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
         <h3 className={`${styles.title}`}>
-          {dataflow.bigData
-            ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflow.name })
-            : dataflow.name
-          }
-          {
-            deletedAtLabel && ` (${deletedAtLabel})`
-          }
+          {dataflow.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: dataflow.name
+                }).replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+              }}></p>
+          ) : (
+            dataflow.name
+          )}
+          {deletedAtLabel && ` (${deletedAtLabel})`}
         </h3>
         <p>{dataflow.description}</p>
       </div>
