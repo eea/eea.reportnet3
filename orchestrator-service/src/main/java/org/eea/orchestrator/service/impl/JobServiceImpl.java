@@ -529,7 +529,7 @@ public class JobServiceImpl implements JobService {
             LOG.info("User cancelled process {} for job {}", processId, jobId);
             if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
                 LOG.info("Removing historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
-                dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
+                dataSetSnapshotControllerZuul.rollBackSnapshotRecord(jobId, jobVO.getDataflowId(), jobVO.getProviderId());
                 LOG.info("Removed historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
             } else if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());

@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetService;
-import org.eea.dataset.service.ResolveSnapshotTable;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
@@ -71,7 +70,7 @@ public class AddDatasetSnapshotFailedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("error", notificationVO.getError());
 
-    datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId());
+    datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId(), dataflowId, notificationVO.getProviderId());
 
     return notification;
   }

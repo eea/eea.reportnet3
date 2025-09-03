@@ -318,6 +318,6 @@ public interface DatasetSnapshotController {
    * @param jobId The job id
    */
   @PutMapping("/private/rollBackSnapshotRecord/{jobId}")
-  void rollBackSnapshotRecord(@PathVariable Long jobId);
+  void rollBackSnapshotRecord(@PathVariable Long jobId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
 
 }

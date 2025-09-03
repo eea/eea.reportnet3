@@ -67,7 +67,7 @@ public class ReleaseCanceledEvent implements NotificableEventHandler {
     notification.put("dataProviderName", dataProviderLabel);
     notification.put("error", notificationVO.getError());
 
-    datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId());
+    datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId(), notificationVO.getDatasetId(), notificationVO.getProviderId());
     return notification;
   }
 

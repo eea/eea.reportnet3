@@ -1120,7 +1120,7 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
   @Override
   @PutMapping("/private/rollBackSnapshotRecord/{jobId}")
-  public void rollBackSnapshotRecord(@PathVariable Long jobId) {
-    resolveSnapshotTable.rollBackSnapshotTableValues(jobId);
+  public void rollBackSnapshotRecord(@PathVariable Long jobId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId) {
+    resolveSnapshotTable.rollBackSnapshotTableValues(jobId, dataflowId, providerId);
   }
 }

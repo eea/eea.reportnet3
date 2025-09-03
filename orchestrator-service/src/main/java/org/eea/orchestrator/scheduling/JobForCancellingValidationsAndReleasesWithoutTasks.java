@@ -104,7 +104,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                     processVO.getUser(), processVO.getPriority(), processVO.isReleased());
                             LOG.info("Updated process to status CANCELED for processId {}", processVO.getProcessId());
                             if (jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
-                                dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
+                                dataSetSnapshotControllerZuul.rollBackSnapshotRecord(jobId, jobVO.getDataflowId(), jobVO.getProviderId());
                             }
                             TokenVO tokenVo = userManagementControllerZull.generateToken(adminUser, adminPass);
                             UsernamePasswordAuthenticationToken authentication =
@@ -129,7 +129,7 @@ public class JobForCancellingValidationsAndReleasesWithoutTasks {
                                         LOG.info("Updated process to status CANCELED for processId {}", processId);
                                     }
                                     if (jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
-                                        dataSetSnapshotControllerZuul.removeHistoricRelease(process.getDatasetId());
+                                        dataSetSnapshotControllerZuul.rollBackSnapshotRecord(jobId, jobVO.getDataflowId(), jobVO.getProviderId());
                                     } else if (jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
                                         validationControllerZuul.deleteLocksToReleaseProcess(process.getDatasetId());
                                     }
