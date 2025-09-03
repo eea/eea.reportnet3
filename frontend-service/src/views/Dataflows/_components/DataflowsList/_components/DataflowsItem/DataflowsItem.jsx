@@ -161,13 +161,17 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
 
       <div className={`${styles.text}`}>
         <h3 className={`${styles.title}`} data-for={idTooltip} data-tip>
-          {itemContent.bigData
-            ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: itemContent.name })
-            : itemContent.name
-          }
-          {
-            deletedAtLabel && ` (${deletedAtLabel})`
-          }
+          {itemContent.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: itemContent.name
+                }).replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+              }}></p>
+          ) : (
+            itemContent.name
+          )}
+          {deletedAtLabel && ` (${deletedAtLabel})`}
         </h3>
         <p>{itemContent.description}</p>
         {renderTooltipDescription()}

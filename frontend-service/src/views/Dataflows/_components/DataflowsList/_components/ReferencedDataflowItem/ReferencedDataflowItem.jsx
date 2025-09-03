@@ -64,13 +64,17 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompresse
 
       <div className={`${styles.text} dataflowList-name-description-help-step`}>
         <h3 className={`${styles.title}`}>
-          {dataflow.bigData
-            ? TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], { name: dataflow.name })
-            : dataflow.name
-          }
-          {
-            deletedAtLabel && ` (${deletedAtLabel})`
-          }
+          {dataflow.bigData ? (
+            <p
+              dangerouslySetInnerHTML={{
+                __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
+                  name: dataflow.name
+                }).replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+              }}></p>
+          ) : (
+            dataflow.name
+          )}
+          {deletedAtLabel && ` (${deletedAtLabel})`}
         </h3>
         <p>{dataflow.description}</p>
       </div>
