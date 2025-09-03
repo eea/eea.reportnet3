@@ -101,7 +101,7 @@
     "back": "Back",
     "basemapLayer": "Basemap layer",
     "bigDataDataflow": "Dataflow (Big Data)",
-    "bigDataDataflowNamed": "{:name} (Big Data)",
+    "bigDataDataflowNamed": "{:name} (Big Data) (SNC Data)",
     "bigDataStorage": "Big data storage",
     "bigDataStorageMessage": "Check to choose big data storage for the new dataflow",
     "blocker": "Blocker",
