@@ -2,6 +2,9 @@ package org.eea.dataset.service.impl;
 
 import lombok.SneakyThrows;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.compress.archivers.zip.Zip64Mode;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -87,6 +90,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -2401,12 +2405,14 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private void zipFolder(Long jobId, String localPath) throws IOException {
         File unZippedFile = new File(localPath);
         File zippedFile = new File(localPath + ".zip");
-        try {
-            ZipUtils.zipFolder(unZippedFile, zippedFile);
-            FileUtils.deleteDirectory(unZippedFile);
+
+        try (ZipArchiveOutputStream zos = new ZipArchiveOutputStream(zippedFile)) {
+            ZipUtils.addFolderToZip(unZippedFile, unZippedFile, zos);
         } catch (Exception e) {
             LOG.error("There was an error when zipping the files for etl export jobId {} folderToZipPath {}", jobId, localPath, e);
             throw e;
+        } finally {
+            FileUtils.deleteDirectory(unZippedFile);
         }
     }
 }

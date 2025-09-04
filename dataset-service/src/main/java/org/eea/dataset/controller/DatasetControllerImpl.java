@@ -66,6 +66,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -79,6 +81,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
@@ -3358,16 +3361,28 @@ public class DatasetControllerImpl implements DatasetController {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_ETL_EXPORTING_FILE_CITUS);
         }
       }
-      if (BooleanUtils.isTrue(exportCsv)) {
-        String processUUID = UUID.randomUUID().toString();
-        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
-      } else if (BooleanUtils.isTrue(exportParquet)) {
-        String processUUID = UUID.randomUUID().toString();
-        bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
-      } else {
-        datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
-      }
-      LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      SecurityContext ctx = SecurityContextHolder.getContext();
+
+      Runnable work = () -> {
+        try {
+          if (BooleanUtils.isTrue(exportCsv)) {
+            String processUUID = UUID.randomUUID().toString();
+            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+          } else if (BooleanUtils.isTrue(exportParquet)) {
+            String processUUID = UUID.randomUUID().toString();
+            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+          } else {
+            datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
+          }
+          LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
+        } catch (Exception e) {
+          LOG.error("Async ETL export failed for datasetId {} jobId {}", datasetId, jobId, e);
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+      };
+
+      new Thread(new DelegatingSecurityContextRunnable(work, ctx)).start();
+
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and jobId {} Message: ", datasetId, jobId, e);
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);

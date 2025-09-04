@@ -25,6 +25,9 @@ export const ValidationRepository = {
   generateQCRulesFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateQCRulesFile, { datasetId }) }),
 
+  generateHistoricDataFile: async (datasetId, dataflowId) =>
+    await HTTPRequester.post({ url: getUrl(ValidationConfig.generateHistoricDataFile, { datasetId,dataflowId }) }),
+
   generateShowValidationsFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateShowValidationsFile, { datasetId }) }),
 

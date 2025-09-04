@@ -51,6 +51,7 @@ import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integration
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import {ValidationService} from "../../../../services/ValidationService";
 
 export const BigButtonList = ({
   dataflowState,
@@ -105,6 +106,7 @@ export const BigButtonList = ({
   const [isExportEUDatasetDialogVisible, setIsExportEUDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isImportingDataflow, setIsImportingDataflow] = useState(false);
+  const [isDownloadingHistoricData, setIsDownloadingHistoricData] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] =
     useState(false);
@@ -236,6 +238,24 @@ export const BigButtonList = ({
       )}
     </div>
   );
+
+  const onDownloadHistoricData = async () => {
+    setIsDownloadingHistoricData(true);
+    console.log(datasetId);
+    console.log(dataflowId);
+    try {
+      await ValidationService.generateHistoricDataFile(datasetId,dataflowId);
+      notificationContext.add({ type: 'DOWNLOAD_HISTORIC_DATA_START' });
+    } catch (error) {
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_HISTORIC_DATA_FILE_ERROR' }, true);
+      }
+      setIsDownloadingHistoricData(false);
+    }
+  };
+
 
   const cloneDatasetSchemas = async () => {
     onHideCloneSchemasDialog();
@@ -748,6 +768,13 @@ export const BigButtonList = ({
             dataProviderId={providerId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
+          />
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            disabled={isDownloadingHistoricData}
+            icon={isDownloadingHistoricData ? 'spinnerAnimate' : 'export'}
+            label={resourcesContext.messages['downloadHistoricDataButtonLabel']}
+            onClick={() => onDownloadHistoricData()}
           />
         </Dialog>
       )}

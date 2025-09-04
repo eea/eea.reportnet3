@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import {Fragment, useContext, useEffect, useReducer, useRef, useState} from 'react';
 
 import isNil from 'lodash/isNil';
 
@@ -20,6 +20,7 @@ import { bigButtonListRepresentativeReducer } from './_functions/Reducers/bigBut
 
 import { useBigButtonListRepresentative } from './_functions/Hooks/useBigButtonListRepresentative';
 import { useFilters } from 'views/_functions/Hooks/useFilters';
+import {ValidationService} from "../../../../services/ValidationService";
 
 export const BigButtonListRepresentative = ({
   dataflowState,
@@ -52,6 +53,8 @@ export const BigButtonListRepresentative = ({
     }
   );
 
+  const [isDownloadingHistoricData, setIsDownloadingHistoricData] = useState(false);
+
   const receiptBtnRef = useRef(null);
 
   const { resetFiltersState: resetHistoricReleasesFiltersState } = useFilters('historicReleases');
@@ -66,6 +69,21 @@ export const BigButtonListRepresentative = ({
   const downloadPdf = response => {
     if (!isNil(response)) {
       DownloadFile(response, `${dataflowState.data.name}_${Date.now()}.pdf`);
+    }
+  };
+
+  const onDownloadHistoricData = async (datasetId) => {
+    setIsDownloadingHistoricData(true);
+    try {
+      await ValidationService.generateHistoricDataFile(datasetId,dataflowState.id);
+      notificationContext.add({ type: 'DOWNLOAD_HISTORIC_DATA_START' });
+    } catch (error) {
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_HISTORIC_DATA_FILE_ERROR' }, true);
+      }
+      setIsDownloadingHistoricData(false);
     }
   };
 
@@ -169,6 +187,13 @@ export const BigButtonListRepresentative = ({
             dataProviderId={bigButtonListRepresentativeState.dataProviderId}
             datasetId={bigButtonListRepresentativeState.datasetId}
             historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
+          />
+          <Button
+            className="p-button-secondary p-button-animated-blink"
+            disabled={isDownloadingHistoricData}
+            icon={isDownloadingHistoricData ? 'spinnerAnimate' : 'export'}
+            label={resourcesContext.messages['downloadHistoricDataButtonLabel']}
+            onClick={() => onDownloadHistoricData()}
           />
         </Dialog>
       )}
