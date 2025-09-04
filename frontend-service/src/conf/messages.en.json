@@ -527,6 +527,7 @@
     "downloadFmeFileError": "Error downloading FME file",
     "downloadQcRulesFileError": "Failed downloading QC rules file",
     "downloadQcRulesStart": "Downloading QC rules file",
+    "downloadHistoricDataStart": "Downloading Historic Data Start",
     "downloadQCsButtonLabel": "Download QCs",
     "downloadHistoricDataButtonLabel": "Export data to CSV",
     "downloadHistoricReleasesStart": "The download process of the historic releases file has started.",

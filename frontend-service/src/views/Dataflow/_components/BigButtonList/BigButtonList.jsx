@@ -241,8 +241,6 @@ export const BigButtonList = ({
 
   const onDownloadHistoricData = async () => {
     setIsDownloadingHistoricData(true);
-    console.log(datasetId);
-    console.log(dataflowId);
     try {
       await ValidationService.generateHistoricDataFile(datasetId,dataflowId);
       notificationContext.add({ type: 'DOWNLOAD_HISTORIC_DATA_START' });
@@ -774,7 +772,7 @@ export const BigButtonList = ({
             disabled={isDownloadingHistoricData}
             icon={isDownloadingHistoricData ? 'spinnerAnimate' : 'export'}
             label={resourcesContext.messages['downloadHistoricDataButtonLabel']}
-            onClick={() => onDownloadHistoricData()}
+            onClick={() => onDownloadHistoricData(datasetId,dataflowId)}
           />
         </Dialog>
       )}

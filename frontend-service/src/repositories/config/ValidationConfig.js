@@ -5,7 +5,7 @@ export const ValidationConfig = {
   downloadShowValidationsFile: '/validation/downloadFile/{:datasetId}?fileName={:fileName}',
   evaluateSqlSentence: '/rules/evaluateSqlRule?datasetId={:datasetId}',
   generateQCRulesFile: '/rules/exportQC/{:datasetId}',
-  generateHistoricDataFile: '/snapshot/exportHistoricReleases/{datasetId}?dataflowId={dataflowId}',
+  generateHistoricDataFile: '/snapshot/exportHistoricReleases/{:datasetId}?dataflowId={:dataflowId}',
   generateShowValidationsFile: '/validation/export/{:datasetId}',
   getAll: '/rules/{:datasetSchemaId}/dataflow/{:dataflowId}',
   getAllQCsHistoricInfo: '/rules/historicDatasetRules?datasetId={:datasetId}',
