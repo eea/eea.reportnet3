@@ -504,14 +504,14 @@ public class AutomaticRules {
    */
   public static Rule createUniqueConstraintAutomaticRule(String referenceId,
       EntityTypeEnum typeEntityEnum, String nameRule, String shortCode,
-      AutomaticRuleTypeEnum automaticType, String description, String message, String uniqueId) {
+      AutomaticRuleTypeEnum automaticType, String description, String message, String uniqueId, ErrorTypeEnum automaticQCDefaultLevelError) {
     StringBuilder ruleString =
         new StringBuilder("isUniqueConstraint('").append(uniqueId).append("',");
 
 
     ObjectId ruleId = new ObjectId();
     Rule rule = composeRule(ruleId, referenceId, typeEntityEnum, nameRule, ruleString.toString(),
-        "Uniqueness and multiplicity constraints - " + message, ErrorTypeEnum.ERROR.getValue(),
+        "Uniqueness and multiplicity constraints - " + message, automaticQCDefaultLevelError.getValue(),
         shortCode, automaticType, description, null);
 
     StringBuilder whenCondition = new StringBuilder(rule.getWhenCondition());

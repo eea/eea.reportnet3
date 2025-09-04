@@ -40,7 +40,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
-import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -697,7 +696,11 @@ public class RulesServiceImpl implements RulesService {
 
     // retieve default level error if any
     RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
-    ErrorTypeEnum automaticQCDefaultLevelError = rulesSchema.getAutomaticQCsDefaultLevelError();
+
+    ErrorTypeEnum automaticQCDefaultLevelError =
+            rulesSchema != null && rulesSchema.getAutomaticQCsDefaultLevelError() != null
+                    ? rulesSchema.getAutomaticQCsDefaultLevelError()
+                    : ErrorTypeEnum.ERROR;
 
     if (required && typeData.equals(DataType.POINT)) {
       ruleList.add(
@@ -1222,10 +1225,19 @@ public class RulesServiceImpl implements RulesService {
         message.append("The field ").append(fieldNames).append(" is unique within table");
       }
     }
+
+    // retieve default level error if any
+    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
+
+    ErrorTypeEnum automaticQCDefaultLevelError =
+            rulesSchema != null && rulesSchema.getAutomaticQCsDefaultLevelError() != null
+                    ? rulesSchema.getAutomaticQCsDefaultLevelError()
+                    : ErrorTypeEnum.ERROR;
+
     Rule rule =
             AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId, EntityTypeEnum.TABLE,
                     "Table type uniqueConstraint", "TU" + shortcode, AutomaticRuleTypeEnum.TABLE_UNIQUENESS,
-                    description.toString(), message.toString(), uniqueId);
+                    description.toString(), message.toString(), uniqueId, automaticQCDefaultLevelError);
     rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 
