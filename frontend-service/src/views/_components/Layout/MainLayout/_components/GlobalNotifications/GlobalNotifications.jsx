@@ -21,6 +21,7 @@ export const GlobalNotifications = ({ bigData }) => {
   useEffect(() => {
     downloadAllSchemasInfoFile();
     downloadQCRulesFile();
+    downloadHistoricDataFile();
     downloadUsersListFile();
     downloadValidationsFile();
     downloadExportFMEFile();
@@ -73,7 +74,6 @@ export const GlobalNotifications = ({ bigData }) => {
 
   const downloadQCRulesFile = async () => {
     const notification = findHiddenNotification('EXPORT_QC_COMPLETED_EVENT');
-
     if (isNil(notification)) {
       return;
     }
@@ -94,6 +94,36 @@ export const GlobalNotifications = ({ bigData }) => {
         notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
       } else {
         notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
+      }
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const downloadHistoricDataFile = async () => {
+
+    const notification = findHiddenNotification('EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT');
+    if (isNil(notification)) {
+      return;
+    }
+
+    try {
+      const { data } = await ValidationService.downloadHistoricReleaseFile(
+        notification.content.datasetId,
+        11724,
+        notification.content.nameFile
+      );
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
+
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.nameFile);
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadHistoricReleasesFile.', error);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR' }, true);
       }
     } finally {
       notificationContext.clearHiddenNotifications();
@@ -224,13 +254,13 @@ export const GlobalNotifications = ({ bigData }) => {
 
         const { data } = bigData
           ? await DatasetService.downloadExportDatasetFileDL(
-              notification.content.datasetId,
-              encodeURIComponent(downloadFileName)
-            )
+            notification.content.datasetId,
+            encodeURIComponent(downloadFileName)
+          )
           : await DatasetService.downloadExportDatasetFile(
-              notification.content.datasetId,
-              encodeURIComponent(downloadFileName)
-            );
+            notification.content.datasetId,
+            encodeURIComponent(downloadFileName)
+          );
 
         if (data.size !== 0) {
           DownloadFile(data, downloadFileName);
