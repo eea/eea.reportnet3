@@ -186,6 +186,12 @@ export const BigButtonList = ({
     false
   );
 
+  useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE', 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
+    setIsDownloadingHistoricData,
+    false
+  );
+
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
 
@@ -243,12 +249,12 @@ export const BigButtonList = ({
     setIsDownloadingHistoricData(true);
     try {
       await ValidationService.generateHistoricDataFile(datasetId,dataflowId);
-      notificationContext.add({ type: 'DOWNLOAD_HISTORIC_DATA_START' });
+      notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_START' });
     } catch (error) {
       if (error.response?.status === 400) {
         notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
       } else {
-        notificationContext.add({ type: 'GENERATE_HISTORIC_DATA_FILE_ERROR' }, true);
+        notificationContext.add({ type: 'GENERATE_HISTORIC_RELEASES_FILE_ERROR' }, true);
       }
       setIsDownloadingHistoricData(false);
     }
