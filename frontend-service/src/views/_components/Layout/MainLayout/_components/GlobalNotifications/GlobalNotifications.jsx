@@ -74,6 +74,7 @@ export const GlobalNotifications = ({ bigData }) => {
 
   const downloadQCRulesFile = async () => {
     const notification = findHiddenNotification('EXPORT_QC_COMPLETED_EVENT');
+
     if (isNil(notification)) {
       return;
     }
@@ -81,23 +82,21 @@ export const GlobalNotifications = ({ bigData }) => {
     try {
       const { data } = await ValidationService.downloadQCRulesFile(
         notification.content.datasetId,
-        notification.content.dataflowId,
-        notification.content.nameFile,
-        notification.content.processId
+        notification.content.fileName
       );
 
+      console.log(data);
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
-      if (data && data.size !== 0) {
-        DownloadFile(data, notification.content.nameFile);
-        notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.fileName);
       }
-
     } catch (error) {
-      console.error('GlobalNotifications - downloadHistoricReleasesFile.', error);
+      console.error('GlobalNotifications - downloadQCRulesFile.', error);
       if (error.response?.status === 400) {
         notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
       } else {
-        notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR' }, true);
+        notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
       }
     } finally {
       notificationContext.clearHiddenNotifications();
@@ -112,6 +111,10 @@ export const GlobalNotifications = ({ bigData }) => {
     }
     console.log(notification);
     try {
+      console.log(notification.content.datasetId);
+      console.log(notification.content.dataflowId);
+      console.log(notification.content.nameFile);
+      console.log(notification.content.processId);
       const { data } = await ValidationService.downloadHistoricReleaseFile(
         notification.content.datasetId,
         notification.content.dataflowId,
@@ -119,10 +122,11 @@ export const GlobalNotifications = ({ bigData }) => {
         notification.content.processId
       );
 
-      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
+
       console.log(data);
       if (data.size !== 0) {
         DownloadFile(data, notification.content.nameFile);
+        notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadHistoricReleasesFile.', error);
