@@ -74,6 +74,7 @@ export const GlobalNotifications = ({ bigData }) => {
 
   const downloadQCRulesFile = async () => {
     const notification = findHiddenNotification('EXPORT_QC_COMPLETED_EVENT');
+
     if (isNil(notification)) {
       return;
     }
@@ -83,6 +84,8 @@ export const GlobalNotifications = ({ bigData }) => {
         notification.content.datasetId,
         notification.content.fileName
       );
+
+      console.log(data);
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
       if (data.size !== 0) {
@@ -106,18 +109,24 @@ export const GlobalNotifications = ({ bigData }) => {
     if (isNil(notification)) {
       return;
     }
-
+    console.log(notification);
     try {
+      console.log(notification.content.datasetId);
+      console.log(notification.content.dataflowId);
+      console.log(notification.content.nameFile);
+      console.log(notification.content.processId);
       const { data } = await ValidationService.downloadHistoricReleaseFile(
         notification.content.datasetId,
         notification.content.dataflowId,
         notification.content.nameFile,
         notification.content.processId
       );
-      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
 
+
+      console.log(data);
       if (data.size !== 0) {
         DownloadFile(data, notification.content.nameFile);
+        notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
       }
     } catch (error) {
       console.error('GlobalNotifications - downloadHistoricReleasesFile.', error);
