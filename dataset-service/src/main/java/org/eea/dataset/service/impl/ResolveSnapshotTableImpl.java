@@ -45,11 +45,13 @@ public class ResolveSnapshotTableImpl implements ResolveSnapshotTable {
             // Step 1: set dc_released=false and date null for record with given job_id
             int updated = snapshotRepository.markAsNotReleased(jobId, reportingDataset.getId());
             if (updated != 0) {
+              LOG.info("Last record {} updated as not released.  jobId : {}, dataflowId : {}, providerId : {}", updated ,jobId, dataflowId, providerId);
               // Step 2: find latest record for reportingDataset with date_released not null
-              Long recordId = snapshotRepository.findLatestRecordForRelease(reportingDataset.getId(), jobId);
-              if (recordId != null) {
+              Long snapshotId = snapshotRepository.findLatestRecordForRelease(reportingDataset.getId(), jobId);
+              if (snapshotId != null) {
                 // Step 3: set that record as released
-                snapshotRepository.markAsReleased(recordId);
+                snapshotRepository.markAsReleased(snapshotId);
+                LOG.info("Previous snapshot id {} updated as released.  jobId : {}, dataflowId : {}, providerId : {}", snapshotId ,jobId, dataflowId, providerId);
               }
             }
           }

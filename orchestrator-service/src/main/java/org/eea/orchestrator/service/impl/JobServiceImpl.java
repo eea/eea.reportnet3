@@ -8,6 +8,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -144,6 +145,9 @@ public class JobServiceImpl implements JobService {
      */
     @Autowired
     private JobUtils jobUtils;
+
+    @Autowired
+    private DatasetSnapshotController datasetSnapshotController;
 
     private static final String BEARER = "Bearer ";
     private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
@@ -513,6 +517,7 @@ public class JobServiceImpl implements JobService {
         LOG.info("User cancelling job {} with jobInfo {}", jobId, jobInfo);
         JobVO jobVO = findById(jobId);
         List<String> processIds = jobProcessService.findProcessesByJobId(jobId);
+        datasetSnapshotController.rollBackSnapshotRecord(jobId, jobVO.getDataflowId(), jobVO.getProviderId());
         for (String processId : processIds) {
             List<TaskVO> tasks = dataSetControllerZuul.findTasksByProcessIdAndStatusIn(processId, Arrays.asList(ProcessStatusEnum.IN_PROGRESS, ProcessStatusEnum.IN_QUEUE));
             if (tasks.size()>0) {
@@ -529,7 +534,7 @@ public class JobServiceImpl implements JobService {
             LOG.info("User cancelled process {} for job {}", processId, jobId);
             if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
                 LOG.info("Removing historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
-                dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
+                //dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
                 LOG.info("Removed historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
             } else if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());

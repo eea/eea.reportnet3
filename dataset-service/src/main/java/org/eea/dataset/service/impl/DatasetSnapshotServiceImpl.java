@@ -657,14 +657,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Map<String, Object> value = new HashMap<>();
     Boolean silentRelease = false;
     ProcessVO processVO = null;
+    Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
     if (processId!=null) {
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
+      value.put(LiteralConstants.JOB_ID, jobId);
+      value.put(LiteralConstants.DATAFLOWID, idDataflow);
+      value.put(LiteralConstants.DATAPROVIDERID, idDataProvider);
 
       silentRelease = jobControllerZuul.isSilentRelease(processId);
     }
 
-    Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
+
     if (provider != null && idDataCollection != null) {
       TenantResolver
               .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));

@@ -316,6 +316,8 @@ public interface DatasetSnapshotController {
   /***
    * Rolling back the record from snapshot table in case o a failure or cancellation
    * @param jobId The job id
+   * @param dataflowId The dataflow id
+   * @param providerId The provider id
    */
   @PutMapping("/private/rollBackSnapshotRecord/{jobId}")
   void rollBackSnapshotRecord(@PathVariable Long jobId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);

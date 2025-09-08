@@ -70,8 +70,6 @@ public class AddDatasetSnapshotFailedEvent implements NotificableEventHandler {
     notification.put("dataflowName", dataflowName);
     notification.put("error", notificationVO.getError());
 
-    datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId(), dataflowId, notificationVO.getProviderId());
-
     return notification;
   }
 }
