@@ -111,7 +111,7 @@ public class JobForCancellingJobsWithoutProcess {
                         if ((job.getJobType().equals(JobTypeEnum.VALIDATION) && job.isRelease()) || job.getJobType().equals(JobTypeEnum.RELEASE)) {
                             dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(job.getDataflowId(), job.getProviderId());
                             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
-                                    NotificationVO.builder().dataflowId(job.getDataflowId()).providerId(job.getProviderId()).user(user).error("No processes created").build());
+                                    NotificationVO.builder().dataflowId(job.getDataflowId()).providerId(job.getProviderId()).user(user).error("No processes created").jobId(id.longValue()).build());
                         } else if (job.getJobType().equals(JobTypeEnum.VALIDATION) && !job.isRelease()) {
                             validationControllerZuul.deleteLocksToReleaseProcess(job.getDatasetId());
                             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,

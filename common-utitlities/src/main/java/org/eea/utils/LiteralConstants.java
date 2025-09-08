@@ -128,6 +128,8 @@ public final class LiteralConstants {
   /** The Constant USER: {@value}. */
   public static final String USER = "user";
 
+  public static final String JOB_ID = "jobId";
+
   /** The Constant ID: {@value}. */
   public static final String ID = "_id";
 

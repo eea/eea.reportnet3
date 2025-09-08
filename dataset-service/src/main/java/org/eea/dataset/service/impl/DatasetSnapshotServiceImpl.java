@@ -10,8 +10,21 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.metabase.domain.*;
-import org.eea.dataset.persistence.metabase.repository.*;
+import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.EUDataset;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.domain.Snapshot;
+import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
@@ -31,6 +44,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -81,13 +95,26 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class DatasetSnapshotServiceImpl.
@@ -257,6 +284,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
 
+  @Autowired
+  private JobProcessController.JobProcessControllerZuul jobProcessControllerZuul;
+
   /**
    * Gets the by id.
    *
@@ -331,11 +361,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO,
                           Long partitionIdDestination, String dateRelease, boolean prefillingReference, String processId) {
 
-
+    Long dataflowId = null;
+    Long dataProviderId = null;
     try {
 
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
+
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      if (jobId != null) {
+        snap.setJobId(jobId);
+      }
 
       //force date to UTC
       Instant utcInstant = Instant.now();
@@ -353,6 +389,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           snap.setDataCollectionId(dataCollection.getId());
         }
       }
+      dataProviderId = dataset.getDataProviderId();
       snap.setReportingDataset(dataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       if (Boolean.TRUE.equals(createSnapshotVO.getReleased()) && Boolean.FALSE.equals(jobControllerZuul.isSilentRelease(processId))) {
@@ -363,7 +400,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setEnabled(true);
       snap.setEuReleased(false);
 
-      Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
+      dataflowId = metabaseRepository.findDataflowIdById(idDataset);
       if (snap.getReportingDataset() != null
               && snap.getReportingDataset().getDataProviderId() != null) {
         List<RepresentativeVO> representatives =
@@ -407,6 +444,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (processId!=null) {
         processVO = processControllerZuul.findById(processId);
         value.put(LiteralConstants.USER, processVO.getUser());
+        Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+        value.put(JOB_ID, jobId);
+        value.put(DATAFLOWID, dataflowId);
+        value.put(DATAPROVIDERID, dataProviderId);
       }
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage(), value);
       // Release the lock manually
@@ -429,16 +470,28 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   private void releaseEvent(EventType eventType, Long datasetId, String error, Map<String, Object> value) {
     try {
       String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
+      Long jobId = value!=null ? (Long) value.get(JOB_ID) : null;
+      Long dataflowId = value!=null ? (Long) value.get(DATAFLOWID) : null;
+      Long dataProviderId = value!=null ? (Long) value.get(DATAPROVIDERID) : null;
       if (error == null) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
                 NotificationVO.builder()
-                        .user(user)
-                        .datasetId(datasetId).build());
+                    .user(user)
+                    .datasetId(datasetId)
+                    .jobId(jobId)
+                    .dataflowId(dataflowId)
+                    .providerId(dataProviderId)
+                    .build());
       } else {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
                 NotificationVO.builder()
-                        .user(user)
-                        .datasetId(datasetId).error(error).build());
+                    .user(user)
+                    .datasetId(datasetId)
+                    .jobId(jobId)
+                    .dataflowId(dataflowId)
+                    .providerId(dataProviderId)
+                    .error(error)
+                    .build());
       }
     } catch (EEAException e) {
       LOG.error("Error releasing notification", e);
@@ -604,14 +657,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Map<String, Object> value = new HashMap<>();
     Boolean silentRelease = false;
     ProcessVO processVO = null;
+    Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
     if (processId!=null) {
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
+      value.put(LiteralConstants.JOB_ID, jobId);
+      value.put(LiteralConstants.DATAFLOWID, idDataflow);
+      value.put(LiteralConstants.DATAPROVIDERID, idDataProvider);
 
       silentRelease = jobControllerZuul.isSilentRelease(processId);
     }
 
-    Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
+
     if (provider != null && idDataCollection != null) {
       TenantResolver
               .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));

@@ -65,6 +65,12 @@ public class Snapshot extends DataSetMetabase {
   private Boolean enabled;
 
   /**
+   * The job id
+   */
+  @Column(name = "JOB_ID")
+  private Long jobId;
+
+  /**
    * Equals.
    *
    * @param o the o

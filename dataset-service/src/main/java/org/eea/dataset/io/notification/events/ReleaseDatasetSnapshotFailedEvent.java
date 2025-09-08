@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.notification.event.NotificableEventHandler;
@@ -20,6 +21,9 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
   /** The dataset metabase controller zuul. */
   @Autowired
   private DataSetMetabaseControllerZuul datasetMetabaseController;
+
+  @Autowired
+  private DatasetSnapshotController datasetSnapshotController;
 
 
   /**
@@ -50,6 +54,8 @@ public class ReleaseDatasetSnapshotFailedEvent implements NotificableEventHandle
     notification.put("snapshotId", snapshotId);
     notification.put("snapshotName", datasetName);
     notification.put("error", notificationVO.getError());
+
+    datasetSnapshotController.rollBackSnapshotRecord(notificationVO.getJobId(), notificationVO.getDataflowId(), notificationVO.getProviderId());
     return notification;
   }
 

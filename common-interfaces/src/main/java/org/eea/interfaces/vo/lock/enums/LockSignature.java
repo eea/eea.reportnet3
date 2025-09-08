@@ -35,6 +35,8 @@ public enum LockSignature {
 
   NATIONAL_COORDINATOR_CREATE("UserManagementControllerImpl.createNationalCoordinator(..)"),
 
+  ROLLBACK_SNAPSHOT("ResolveSnapshotTableImpl.rollBackSnapshotTableValues(..)"),
+
   NATIONAL_COORDINATOR_DELETE("UserManagementControllerImpl.deleteNationalCoordinator(..)"),
 
   /** DataCollectionControllerImpl.createEmptyDataCollection(..) */

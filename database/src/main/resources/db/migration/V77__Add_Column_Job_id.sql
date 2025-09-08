@@ -1,0 +1,2 @@
+ALTER TABLE public.snapshot
+ADD COLUMN IF NOT EXISTS job_id BIGINT NULL;
