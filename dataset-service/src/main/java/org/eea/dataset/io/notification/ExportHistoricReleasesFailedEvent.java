@@ -32,13 +32,17 @@ public class ExportHistoricReleasesFailedEvent implements NotificableEventHandle
     @Override
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
         Long datasetId = notificationVO.getDatasetId();
+        Long dataflowId = notificationVO.getDataflowId();
+        String processId = notificationVO.getProcessId();
         String nameFile = notificationVO.getFileName();
 
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", notificationVO.getUser());
         notification.put("datasetId", datasetId);
+        notification.put("dataflowId", dataflowId);
         notification.put("nameFile", nameFile);
+        notification.put("processId", processId);
         notification.put("error", notificationVO.getError());
         return notification;
     }
