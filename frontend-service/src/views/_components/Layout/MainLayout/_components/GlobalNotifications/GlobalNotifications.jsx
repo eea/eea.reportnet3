@@ -110,7 +110,7 @@ export const GlobalNotifications = ({ bigData }) => {
     try {
       const { data } = await ValidationService.downloadHistoricReleaseFile(
         notification.content.datasetId,
-        11724,
+        notification.content.dataflowId,
         notification.content.nameFile
       );
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });

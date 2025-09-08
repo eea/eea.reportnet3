@@ -2,7 +2,7 @@ export const ValidationConfig = {
   create: '/rules/createNewRule?datasetId={:datasetId}',
   delete: '/rules/deleteRule?datasetId={:datasetSchemaId}&ruleId={:ruleId}',
   downloadQCRulesFile: '/rules/downloadQC/{:datasetId}?fileName={:fileName}',
-  downloadHistoricReleaseFile: '/snapshot/downloadHistoricReleases/{:datasetId}?dataflowId={:dataflowId}?fileName={:nameFile}',
+  downloadHistoricReleaseFile: '/snapshot/downloadHistoricReleases/{:datasetId}?dataflowId={:dataflowId}&fileName={:nameFile}',
   downloadShowValidationsFile: '/validation/downloadFile/{:datasetId}?fileName={:fileName}',
   evaluateSqlSentence: '/rules/evaluateSqlRule?datasetId={:datasetId}',
   generateQCRulesFile: '/rules/exportQC/{:datasetId}',

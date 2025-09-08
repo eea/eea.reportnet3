@@ -1568,7 +1568,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
 
     // Creates notification VO and passes the datasetID and the filename
     NotificationVO notificationVO = NotificationVO.builder()
-            .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId)
+            .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).dataflowId(dataflowId)
             .fileName(fileNameWithExtension).error(creatingFileError).build();
 
     File outputFile = new File(fileFolder, fileNameWithExtension);

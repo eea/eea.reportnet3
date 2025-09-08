@@ -17,9 +17,9 @@ export const ValidationRepository = {
       url: getUrl(ValidationConfig.downloadQCRulesFile, { datasetId, fileName })
     }),
 
-  downloadHistoricReleaseFile: async (datasetId, dataflowId,nameFile) =>
+  downloadHistoricReleaseFile: async (datasetId,dataflowId,nameFile) =>
     await HTTPRequester.download({
-      url: getUrl(ValidationConfig.downloadHistoricReleaseFile, { datasetId,dataflowId, nameFile })
+      url: getUrl(ValidationConfig.downloadHistoricReleaseFile, { datasetId, dataflowId, nameFile })
     }),
 
   downloadShowValidationsFile: async (datasetId, fileName) =>
