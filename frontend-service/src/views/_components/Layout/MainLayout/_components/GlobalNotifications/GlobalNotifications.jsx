@@ -81,19 +81,23 @@ export const GlobalNotifications = ({ bigData }) => {
     try {
       const { data } = await ValidationService.downloadQCRulesFile(
         notification.content.datasetId,
-        notification.content.fileName
+        notification.content.dataflowId,
+        notification.content.nameFile,
+        notification.content.processId
       );
-      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
-      if (data.size !== 0) {
-        DownloadFile(data, notification.content.fileName);
+
+      if (data && data.size !== 0) {
+        DownloadFile(data, notification.content.nameFile);
+        notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
       }
+
     } catch (error) {
-      console.error('GlobalNotifications - downloadQCRulesFile.', error);
+      console.error('GlobalNotifications - downloadHistoricReleasesFile.', error);
       if (error.response?.status === 400) {
         notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
       } else {
-        notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
+        notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR' }, true);
       }
     } finally {
       notificationContext.clearHiddenNotifications();
@@ -106,7 +110,7 @@ export const GlobalNotifications = ({ bigData }) => {
     if (isNil(notification)) {
       return;
     }
-
+    console.log(notification);
     try {
       const { data } = await ValidationService.downloadHistoricReleaseFile(
         notification.content.datasetId,
@@ -114,8 +118,9 @@ export const GlobalNotifications = ({ bigData }) => {
         notification.content.nameFile,
         notification.content.processId
       );
-      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
 
+      notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
+      console.log(data);
       if (data.size !== 0) {
         DownloadFile(data, notification.content.nameFile);
       }
