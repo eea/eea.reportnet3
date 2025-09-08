@@ -1550,6 +1550,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    * @param processUUID the process id
    * @throws Exception
    */
+  @Async
   @Override
   public void exportHistoricReleasesCSV(@DatasetId Long datasetId, Long dataflowId, String folderName, String fileNameWithExtension, String processUUID) throws Exception{
     Boolean processUpdated = processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.EXPORT_HISTORIC_RELEASES, processUUID,
@@ -1569,7 +1570,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     // Creates notification VO and passes the datasetID and the filename
     NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).dataflowId(dataflowId)
-            .fileName(fileNameWithExtension).error(creatingFileError).build();
+            .fileName(fileNameWithExtension).processId(processUUID).error(creatingFileError).build();
 
     File outputFile = new File(fileFolder, fileNameWithExtension);
 
@@ -1601,10 +1602,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       }
       return;
     }
-    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT, null,
-            notificationVO);
     processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.EXPORT_HISTORIC_RELEASES, processUUID,
             SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT, null,
+            notificationVO);
 
   }
 
