@@ -1072,8 +1072,8 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASET_REPORTER_READ','DATASET_NATIONAL_COORDINATOR','DATASET_CUSTODIAN','DATASET_STEWARD','DATASET_OBSERVER','DATASET_STEWARD_SUPPORT','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','EUDATASET_OBSERVER','EUDATASET_STEWARD_SUPPORT','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD','DATACOLLECTION_OBSERVER','DATACOLLECTION_STEWARD_SUPPORT') OR checkApiKey(#dataflowId,null,#datasetId,'DATASET_STEWARD','DATASET_CUSTODIAN','EUDATASET_CUSTODIAN','EUDATASET_STEWARD','DATACOLLECTION_CUSTODIAN','DATACOLLECTION_STEWARD')")
   @GetMapping("/downloadHistoricReleases/{datasetId}")
-  public void downloadHistoricReleasesCSV(@PathVariable Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam String fileName,
-                            @RequestParam(required = false) String processId, HttpServletResponse response){
+  public void downloadHistoricReleasesCSV(@PathVariable Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("fileName") String fileName,
+                            @RequestParam(value = "processId", required = false) String processId, HttpServletResponse response){
 
     try {
       LOG.info("Downloading file generated when exporting historic releases for dataflowId {} and  datasetId {} Filename {} processId {}",

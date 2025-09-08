@@ -102,4 +102,6 @@ public class NotificationVO implements Serializable {
   private String fieldName;
 
   private Long jobId;
+
+  private String processId;
 }

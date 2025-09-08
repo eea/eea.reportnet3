@@ -93,8 +93,8 @@ export const ValidationService = {
   downloadQCRulesFile: async (datasetId, fileName) =>
     await ValidationRepository.downloadQCRulesFile(datasetId, fileName),
 
-  downloadHistoricReleaseFile: async (datasetId,dataflowId, nameFile) => {
-    await ValidationRepository.downloadHistoricReleaseFile(datasetId,dataflowId, nameFile)
+  downloadHistoricReleaseFile: async (datasetId,dataflowId, nameFile, processId) => {
+    await ValidationRepository.downloadHistoricReleaseFile(datasetId,dataflowId, nameFile,processId)
       },
 
   downloadShowValidationsFile: async (datasetId, fileName) =>

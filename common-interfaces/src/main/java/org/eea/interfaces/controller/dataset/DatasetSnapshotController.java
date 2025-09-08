@@ -311,7 +311,8 @@ public interface DatasetSnapshotController {
    * @param response the response
    */
   @GetMapping("/downloadHistoricReleases/{datasetId}")
-  void downloadHistoricReleasesCSV(@PathVariable Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam String fileName, @RequestParam(required = false) String processId, HttpServletResponse response);
+  void downloadHistoricReleasesCSV(@PathVariable Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("fileName") String fileName,
+                                   @RequestParam(value = "processId", required = false) String processId, HttpServletResponse response);
 
   /***
    * Rolling back the record from snapshot table in case o a failure or cancellation
