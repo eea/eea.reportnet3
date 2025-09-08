@@ -33,6 +33,7 @@ public class ExportHistoricReleasesCompletedEvent implements NotificableEventHan
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
         Long datasetId = notificationVO.getDatasetId();
         Long dataflowId = notificationVO.getDataflowId();
+        String processId = notificationVO.getProcessId();
         String nameFile = notificationVO.getFileName();
 
 
@@ -41,6 +42,7 @@ public class ExportHistoricReleasesCompletedEvent implements NotificableEventHan
         notification.put("datasetId", datasetId);
         notification.put("dataflowId", dataflowId);
         notification.put("nameFile", nameFile);
+        notification.put("processId", processId);
         return notification;
     }
 
