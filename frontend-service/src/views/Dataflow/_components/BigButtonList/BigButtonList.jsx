@@ -106,7 +106,6 @@ export const BigButtonList = ({
   const [isExportEUDatasetDialogVisible, setIsExportEUDatasetDialogVisible] = useState(false);
   const [isHistoricReleasesDialogVisible, setIsHistoricReleasesDialogVisible] = useState(false);
   const [isImportingDataflow, setIsImportingDataflow] = useState(false);
-  const [isDownloadingHistoricData, setIsDownloadingHistoricData] = useState(false);
   const [isIntegrationManageDialogVisible, setIsIntegrationManageDialogVisible] = useState(false);
   const [isManageManualAcceptanceDatasetDialogVisible, setIsManageManualAcceptanceDatasetDialogVisible] =
     useState(false);
@@ -186,11 +185,6 @@ export const BigButtonList = ({
     false
   );
 
-  useCheckNotifications(
-    ['AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE', 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
-    setIsDownloadingHistoricData,
-    false
-  );
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -244,21 +238,6 @@ export const BigButtonList = ({
       )}
     </div>
   );
-
-  const onDownloadHistoricData = async () => {
-    setIsDownloadingHistoricData(true);
-    try {
-      await ValidationService.generateHistoricDataFile(datasetId,dataflowId);
-      notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_START' });
-    } catch (error) {
-      if (error.response?.status === 400) {
-        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
-      } else {
-        notificationContext.add({ type: 'GENERATE_HISTORIC_RELEASES_FILE_ERROR' }, true);
-      }
-      setIsDownloadingHistoricData(false);
-    }
-  };
 
 
   const cloneDatasetSchemas = async () => {
@@ -772,13 +751,6 @@ export const BigButtonList = ({
             dataProviderId={providerId}
             datasetId={datasetId}
             historicReleasesView={historicReleasesView}
-          />
-          <Button
-            className="p-button-secondary p-button-animated-blink"
-            disabled={isDownloadingHistoricData}
-            icon={isDownloadingHistoricData ? 'spinnerAnimate' : 'export'}
-            label={resourcesContext.messages['downloadHistoricDataButtonLabel']}
-            onClick={() => onDownloadHistoricData(datasetId,dataflowId)}
           />
         </Dialog>
       )}
