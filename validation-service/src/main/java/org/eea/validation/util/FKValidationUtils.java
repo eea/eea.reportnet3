@@ -11,6 +11,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 import org.bson.types.ObjectId;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
@@ -579,7 +582,7 @@ public class FKValidationUtils {
     List<Object[]> fkList = fieldRepository.queryPKExecution(queryFks);
     for (int i = 0; i < fkList.size(); i++) {
       if (null != pkMap.get(fkList.get(i)[2])) {
-        List<String> pksByOptionalValue = Arrays.asList(pkMap.get(fkList.get(i)[2]).split(","));
+        List<String> pksByOptionalValue = splitCommasRespectingQuotes(pkMap.get(fkList.get(i)[2]));
         List<String> fksByOptionalValue = Arrays.asList(fkList.get(i)[1].toString().split(";"));
         pksByOptionalValue.replaceAll(String::trim);
         fksByOptionalValue.replaceAll(String::trim);
@@ -937,4 +940,21 @@ public class FKValidationUtils {
     return pkField;
   }
 
+  private static List<String> splitCommasRespectingQuotes(String input) {
+    if (input == null || input.isEmpty()) {
+      return new ArrayList<>();
+    }
+
+    if (input.contains("\"")) {
+      // split quoted values
+      return Pattern.compile("\"([^\"]*)\"")
+              .matcher(input)
+              .results()
+              .map(m -> "\"" + m.group(1) + "\"")
+              .collect(Collectors.toCollection(ArrayList::new));
+    } else {
+      // fallback split without quotes(",")
+      return Arrays.asList(input.split(","));
+    }
+  }
 }
