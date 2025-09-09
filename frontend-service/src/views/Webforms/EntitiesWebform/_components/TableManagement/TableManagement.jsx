@@ -117,7 +117,7 @@ export const TableManagement = ({
   ]);
 
   useEffect(() => {
-    if (!isEmpty(parentTablesWithData) && !didInitialParentFetch.current.hasLoaded) {
+    if (!isEmpty(parentTablesWithData)) {
       initialLoad();
     }
   }, [parentTablesWithData]);
@@ -245,26 +245,13 @@ export const TableManagement = ({
       );
     });
 
-    const tablesToFetch = didInitialParentFetch.current.hasLoaded
-      ? parentTables.filter(t => t.tableSchemaId === rootTableId)
-      : parentTables;
-
-    const parentTablesDataPromises = tablesToFetch.map(async parentTable => {
-      // const sortFieldSchemaId = getFieldSchemaColumnIdByHeader(tableSchemaColumns);
+    const parentTablesDataPromises = parentTables.map(async parentTable => {
       const sortFieldSchemaId = sort.sortField
         ? getFieldSchemaColumnIdByHeader(tableSchemaColumns, sort.sortField)
         : undefined;
       const sortField = sortFieldSchemaId;
 
       const sortOrder = sort.sortOrder === 1 ? '1' : '-1';
-      // let referencedFieldSchemaId;
-
-      // /*Gets the fieldSchemaId of the field that has a referencedField with idPk equal to sortFieldSchemaId*/
-      // if (bigData) {
-      //   referencedFieldSchemaId = parentTable?.records[0]?.fields.find(
-      //     field => field?.referencedField?.idPk === getFieldSchemaColumnIdByHeader(tableSchemaColumns)
-      //   )?.fieldSchema;
-      // }
 
       let data;
       let fields;
