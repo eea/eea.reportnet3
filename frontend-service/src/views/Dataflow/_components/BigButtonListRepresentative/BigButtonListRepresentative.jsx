@@ -72,21 +72,6 @@ export const BigButtonListRepresentative = ({
     }
   };
 
-  const onDownloadHistoricData = async (datasetId) => {
-    setIsDownloadingHistoricData(true);
-    try {
-      await ValidationService.generateHistoricDataFile(datasetId,dataflowState.id);
-      notificationContext.add({ type: 'DOWNLOAD_HISTORIC_DATA_START' });
-    } catch (error) {
-      if (error.response?.status === 400) {
-        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
-      } else {
-        notificationContext.add({ type: 'GENERATE_HISTORIC_DATA_FILE_ERROR' }, true);
-      }
-      setIsDownloadingHistoricData(false);
-    }
-  };
-
   const getDataHistoricReleases = (datasetId, value, dataProviderId) => {
     bigButtonListRepresentativeDispatch({
       type: 'GET_HISTORIC_RELEASE_DATASET_DATA',
@@ -186,14 +171,8 @@ export const BigButtonListRepresentative = ({
           <HistoricReleases
             dataProviderId={bigButtonListRepresentativeState.dataProviderId}
             datasetId={bigButtonListRepresentativeState.datasetId}
+            dataflowId={dataflowState.id}
             historicReleasesView={bigButtonListRepresentativeState.historicReleasesView}
-          />
-          <Button
-            className="p-button-secondary p-button-animated-blink"
-            disabled={isDownloadingHistoricData}
-            icon={isDownloadingHistoricData ? 'spinnerAnimate' : 'export'}
-            label={resourcesContext.messages['downloadHistoricDataButtonLabel']}
-            onClick={() => onDownloadHistoricData()}
           />
         </Dialog>
       )}

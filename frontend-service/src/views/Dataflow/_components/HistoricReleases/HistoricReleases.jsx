@@ -1,4 +1,4 @@
-import { useContext, useEffect, useReducer } from 'react';
+import { useContext, useEffect, useReducer, useState} from 'react';
 
 import { AwesomeIcons } from 'conf/AwesomeIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -32,6 +32,9 @@ import { useFilters } from 'views/_functions/Hooks/useFilters';
 import { ColumnTemplateUtils } from 'views/_functions/Utils/ColumnTemplateUtils';
 import { PaginatorRecordsCount } from 'views/_components/DataTable/_functions/Utils/PaginatorRecordsCount';
 import { TextByDataflowTypeUtils } from 'views/_functions/Utils/TextByDataflowTypeUtils';
+import {Button} from "../../../_components/Button";
+import {ValidationService} from "../../../../services/ValidationService";
+import {useCheckNotifications} from "../../../_functions/Hooks/useCheckNotifications";
 
 export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, datasetId, historicReleasesView }) => {
   const notificationContext = useContext(NotificationContext);
@@ -46,10 +49,17 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
   });
 
   const { filteredData, isFiltered } = useFilters('historicReleases');
+  const [isDownloadingHistoricData, setIsDownloadingHistoricData] = useState(false);
 
   useEffect(() => {
     onLoadHistoricReleases();
   }, []);
+
+  useCheckNotifications(
+    ['AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE', 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR', 'DOWNLOAD_FILE_BAD_REQUEST_ERROR'],
+    setIsDownloadingHistoricData,
+    false
+  );
 
   const getDataProviderCode = historicReleases => {
     const dataProviderCodes = uniq(historicReleases.map(historicRelease => historicRelease.dataProviderCode));
@@ -161,6 +171,27 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       isLoading(false);
     }
   };
+
+  const onDownloadHistoricData = async () => {
+    let firstDatasetId = datasetId
+    if (isNil(datasetId)) {
+      const data = await HistoricReleaseService.getAllRepresentative(dataflowId, dataProviderId);
+      firstDatasetId = data[0]?.datasetId; // assign here
+    }
+    setIsDownloadingHistoricData(true);
+    try {
+      await ValidationService.generateHistoricDataFile(firstDatasetId,dataflowId);
+      notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_START' });
+    } catch (error) {
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'GENERATE_HISTORIC_RELEASES_FILE_ERROR' }, true);
+      }
+      setIsDownloadingHistoricData(false);
+    }
+  };
+
 
   const renderReleaseDateTemplate = rowData => {
     return <div className={styles.checkedValueColumn}>{getDateTimeFormatByUserPreferences(rowData.releaseDate)}</div>;
@@ -320,6 +351,13 @@ export const HistoricReleases = ({ dataflowId, dataflowType, dataProviderId, dat
       <div className={styles.historicReleases}>
         {renderFilters()}
         {renderHistoricReleasesTable()}
+        <Button
+          className="p-button-secondary p-button-animated-blink historic-release-button"
+          disabled={isDownloadingHistoricData}
+          icon={isDownloadingHistoricData ? 'spinnerAnimate' : 'export'}
+          label={resourcesContext.messages['downloadHistoricDataButtonLabel']}
+          onClick={() => onDownloadHistoricData(datasetId,dataflowId)}
+        />
       </div>
     );
   };

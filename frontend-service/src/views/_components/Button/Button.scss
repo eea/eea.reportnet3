@@ -320,6 +320,10 @@ body .p-button.p-button-animated-delete span:first-child:hover {
   animation: delete 1s linear infinite;
 }
 
+.historic-release-button.historic-release-button{
+  margin-top:2rem;
+}
+
 @keyframes spin {
   0% {
     -webkit-transform: rotate(0deg);
