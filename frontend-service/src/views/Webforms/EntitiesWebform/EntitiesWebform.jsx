@@ -169,14 +169,14 @@ export const EntitiesWebform = ({
         data = await DatasetService.getTableDataDL({
           datasetId,
           tableSchemaId: tableSchemaId[0],
-          pageSize: 300,
+          // pageSize: 300,
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
         });
       } else {
         data = await DatasetService.getTableData({
           datasetId,
           tableSchemaId: tableSchemaId[0],
-          pageSize: 300,
+          // pageSize: 300,
           levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
         });
       }
@@ -286,14 +286,14 @@ export const EntitiesWebform = ({
           data = await DatasetService.getTableDataDL({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            pageSize: 300,
+            // pageSize: 300,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         } else {
           data = await DatasetService.getTableData({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            pageSize: 300,
+            // pageSize: 300,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         }
