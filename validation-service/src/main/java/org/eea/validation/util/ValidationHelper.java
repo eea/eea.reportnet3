@@ -588,10 +588,13 @@ public class ValidationHelper implements DisposableBean {
           today)
         .toDays();
       if (daysTo > periodDays.get(0) || daysPast > periodDays.get(0)) {
-          priority = 50;
+          priority = 60;
       } else if ((daysTo <= periodDays.get(0) && daysTo > periodDays.get(1))
         || (daysPast <= periodDays.get(0) && daysPast > periodDays.get(1))) {
-          priority = 40;
+          priority = 50;
+      } else if ((daysTo <= periodDays.get(1) && daysTo > periodDays.get(2))
+        || (daysPast <= periodDays.get(1) && daysPast > periodDays.get(2))) {
+        priority = 40;
       } else if ((daysTo <= periodDays.get(2) && daysTo > periodDays.get(3))
         || (daysPast <= periodDays.get(2) && daysPast > periodDays.get(3))) {
           priority = 30;
