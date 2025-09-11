@@ -2046,15 +2046,15 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
 
+        String safeColumn = StringEscapeUtils.escapeSql(fieldSchemaPK.getName());
         for(String recordId: recordIds) {
-
-            String safeColumn = StringEscapeUtils.escapeSql(fieldSchemaPK.getName());
+            String safeRecordId = StringEscapeUtils.escapeSql(recordId);
 
             String sql = "SELECT " + safeColumn +
                 " FROM " + icebergTablePath +
                 " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = ?";
 
-            String fieldValue = dremioJdbcTemplate.queryForObject(sql, new Object[]{recordId}, String.class);
+            String fieldValue = dremioJdbcTemplate.queryForObject(sql, new Object[]{safeRecordId}, String.class);
 
             //get field references from pkCatalogue
             PkCatalogueSchema pkCatalogueSchema = pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaPK.getId()));
