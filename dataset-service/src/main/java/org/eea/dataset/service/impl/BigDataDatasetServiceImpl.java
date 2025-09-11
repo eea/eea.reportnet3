@@ -8,6 +8,7 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.bson.Document;
@@ -1421,11 +1422,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                     String fieldValue = "";
                     if(BooleanUtils.isTrue(field.getAutoIncrement())){
                         //set up autoincrement value
-                        String escapedFieldName = UtilityClass.addQuotesToFieldNames(field.getName());
-                        String getPreviousMaxFieldValueQuery =  "SELECT CAST( " + escapedFieldName + "  AS BIGINT) AS numeric_value FROM " + icebergTablePath
-                                + " WHERE " + escapedFieldName + " IS NOT NULL AND TRIM(" + escapedFieldName + ") <> '' ORDER BY numeric_value DESC LIMIT 1";
+                        String escapedSql = StringEscapeUtils.escapeSql(field.getName());
+                        String quotedSql = UtilityClass.addQuotesToFieldNames(escapedSql);
+                        String getPreviousMaxFieldValueQuery =  "SELECT CAST( " + quotedSql + "  AS BIGINT) AS numeric_value FROM " + icebergTablePath
+                            + " WHERE " + quotedSql + " IS NOT NULL AND TRIM(" + quotedSql + ") <> '' ORDER BY numeric_value DESC LIMIT 1";
 
-                        String previousMaxFieldValue = dremioJdbcTemplate.query(getPreviousMaxFieldValueQuery, (rs, rowNum) -> rs.getString(1)).stream().findFirst().orElse(null);
+                        String previousMaxFieldValue = dremioJdbcTemplate.query(
+                            con -> con.prepareStatement(getPreviousMaxFieldValueQuery),
+                            (rs, rowNum) -> rs.getString(1)
+                        ).stream().findFirst().orElse(null);
+
                         Long autoIncrementValue = (StringUtils.isNotBlank(previousMaxFieldValue)) ? Long.valueOf(previousMaxFieldValue) + 1 : 1L;
                         fieldValue = String.valueOf(autoIncrementValue);
                         insertQueryValuesBuilder.append(", '").append(fieldValue).append("'");
@@ -2042,8 +2048,13 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
         for(String recordId: recordIds) {
 
-            String getFieldValue =  "SELECT " + fieldSchemaPK.getName() + " FROM " + icebergTablePath + " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = '" + recordId + "'";
-            String fieldValue = dremioJdbcTemplate.queryForObject(getFieldValue, String.class);
+            String safeColumn = StringEscapeUtils.escapeSql(fieldSchemaPK.getName());
+
+            String sql = "SELECT " + safeColumn +
+                " FROM " + icebergTablePath +
+                " WHERE " + PARQUET_RECORD_ID_COLUMN_HEADER + " = ?";
+
+            String fieldValue = dremioJdbcTemplate.queryForObject(sql, new Object[]{recordId}, String.class);
 
             //get field references from pkCatalogue
             PkCatalogueSchema pkCatalogueSchema = pkCatalogueRepository.findByIdPk(new ObjectId(fieldSchemaPK.getId()));
