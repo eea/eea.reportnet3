@@ -13,21 +13,21 @@
     <packaging>pom</packaging>
     <version>3.0.0</version>
     <properties>
-        <api-gateway.version>v3.4-SANDBOX</api-gateway.version>
-        <communication.version>v3.4-SANDBOX</communication.version>
-        <collaboration.version>v3.4-SANDBOX</collaboration.version>
-        <dataflow.version>v3.4-SANDBOX</dataflow.version>
-        <dataset.version>v3.4-SANDBOX</dataset.version>
-        <document.version>v3.4-SANDBOX</document.version>
-        <frontend.version>v3.4-SANDBOX</frontend.version>
-        <indexsearch.version>v3.4-SANDBOX</indexsearch.version>
-        <inspire.version>v3.4-SANDBOX</inspire.version>
-        <recordstore.version>v3.4-SANDBOX</recordstore.version>
-        <ums.version>v3.4-SANDBOX</ums.version>
-        <validation.version>v3.4-SANDBOX</validation.version>
-        <common-interfaces.version>v3.4-SANDBOX</common-interfaces.version>
-        <common-utitlities.version>v3.4-SANDBOX</common-utitlities.version>
-        <rod.version>v3.4-SANDBOX</rod.version>
-        <orchestrator.version>v3.4-SANDBOX</orchestrator.version>
+        <api-gateway.version>v3.4-SANDBOX-SonarQube</api-gateway.version>
+        <communication.version>v3.4-SANDBOX-SonarQube</communication.version>
+        <collaboration.version>v3.4-SANDBOX-SonarQube</collaboration.version>
+        <dataflow.version>v3.4-SANDBOX-SonarQube</dataflow.version>
+        <dataset.version>v3.4-SANDBOX-SonarQube</dataset.version>
+        <document.version>v3.4-SANDBOX-SonarQube</document.version>
+        <frontend.version>v3.4-SANDBOX-SonarQube</frontend.version>
+        <indexsearch.version>v3.4-SANDBOX-SonarQube</indexsearch.version>
+        <inspire.version>v3.4-SANDBOX-SonarQube</inspire.version>
+        <recordstore.version>v3.4-SANDBOX-SonarQube</recordstore.version>
+        <ums.version>v3.4-SANDBOX-SonarQube</ums.version>
+        <validation.version>v3.4-SANDBOX-SonarQube</validation.version>
+        <common-interfaces.version>v3.4-SANDBOX-SonarQube</common-interfaces.version>
+        <common-utitlities.version>v3.4-SANDBOX-SonarQube</common-utitlities.version>
+        <rod.version>v3.4-SANDBOX-SonarQube</rod.version>
+        <orchestrator.version>v3.4-SANDBOX-SonarQube</orchestrator.version>
     </properties>
 </project>
