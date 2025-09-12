@@ -182,7 +182,10 @@ public class SpatialDataHandlingImpl implements SpatialDataHandling {
 
   @Override
   public StringBuilder fixQueryForUpdateSpatialData(String inputQuery, boolean isGeoJsonHeaders, TableSchemaVO tableSchemaVO, long lineNumber) {
-    String regex = "(\"[^\"]+\"|[a-zA-Z0-9_]+)\\s*(=|!=|>|<|>=|<=|LIKE|IN|IS|BETWEEN)\\s*('[^']*')";
+    final String regex =
+        "((?:\"[^\"]++\"|[A-Za-z0-9_]++))\\s++" +                  // column (quoted or bare), no backtracking
+            "((?:BETWEEN|LIKE|IN|IS|>=|<=|!=|=|>|<))\\s++" +           // operator (longest first)
+            "('(?:[^']*+)')";
     Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
     Matcher matcher = pattern.matcher(inputQuery);
 
