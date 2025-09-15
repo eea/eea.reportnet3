@@ -87,6 +87,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const { resetFilterState } = useApplyFilters('uniqueConstraints');
 
   const [allSqlValidationRunning, setAllSqlValidationRunning] = useState(false);
+  const [failedImport, setFailedImport] = useState(false);
   const [needsRefreshUnique, setNeedsRefreshUnique] = useState(true);
   const [selectedCustomImportIntegration, setSelectedCustomImportIntegration] = useState({
     id: null,
@@ -318,6 +319,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
+    if (designerState.isImportDatasetDialogVisible) setFailedImport(false);
   }, [designerState.datasetSchemaId, designerState.isImportDatasetDialogVisible, designerState.isDataUpdated]);
 
   useEffect(() => {
@@ -902,13 +904,25 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       ].includes(notification.key)
     );
 
+  const hasFailedImportNotification = list =>
+    list?.some(notification =>
+      ['IMPORT_REPORTING_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
+    );
+
   useEffect(() => {
     if (hasConversionNotification(notificationContext.toShow)) {
       setIsLoadingIceberg(false);
       onGetIcebergTables();
       handleRefresh();
     }
-  }, [notificationContext.toShow, notificationContext.hidden]);
+
+    if (hasFailedImportNotification(notificationContext.toShow)) {
+      setFailedImport(true);
+    }
+
+    console.log('use effect');
+    console.log(notificationContext.toShow);
+  }, [notificationContext.toShow]);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
@@ -1123,22 +1137,26 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
-      notificationContext.add(
-        {
-          type: 'DATASET_DATA_LOADING_INIT',
-          content: {
-            customContent: {
-              datasetLoading: resourcesContext.messages['datasetLoading'],
-              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-            },
-            dataflowName,
-            datasetName,
-            fileName
-          }
-        },
-        true
-      );
+      if (!failedImport) {
+        notificationContext.add(
+          {
+            type: 'DATASET_DATA_LOADING_INIT',
+            content: {
+              customContent: {
+                datasetLoading: resourcesContext.messages['datasetLoading'],
+                datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+                title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+              },
+              dataflowName,
+              datasetName,
+              fileName
+            }
+          },
+          true
+        );
+      }
+
+      setFailedImport(false);
       designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
@@ -1149,6 +1167,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+
+      setFailedImport(false);
     }
   };
 

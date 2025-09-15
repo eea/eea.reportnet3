@@ -113,6 +113,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   });
   const [dataflowType, setDataflowType] = useState('');
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
+  const [failedImport, setFailedImport] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [isIcebergCreated, setIsIcebergCreated] = useState(false);
@@ -348,6 +349,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (metadata?.dataset.datasetSchemaId) getFileExtensions();
+    if (isImportDatasetDialogVisible) setFailedImport(false);
   }, [metadata?.dataset.datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
@@ -373,16 +375,24 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       ].includes(notification.key)
     );
 
+  const hasFailedImportNotification = list =>
+    list?.some(notification =>
+      ['IMPORT_REPORTING_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
+    );
+
   useEffect(() => {
     if (hasConversionNotification(notificationContext.toShow)) {
       setIsLoadingIceberg(false);
       onGetIcebergTables();
       handleRefresh();
     }
+
+    if (hasFailedImportNotification(notificationContext.toShow)) {
+      setFailedImport(true);
+    }
     console.log('use effect');
     console.log(notificationContext.toShow);
-    console.log(notificationContext.hidden);
-  }, [notificationContext.toShow, notificationContext.hidden]);
+  }, [notificationContext.toShow]);
 
   const getWebformConfiguration = async (webform, options) => {
     try {
@@ -1213,22 +1223,25 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
     console.log('on upload');
 
-    notificationContext.add(
-      {
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          customContent: {
-            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-            datasetLoading: resourcesContext.messages['datasetLoading']
-          },
-          dataflowName,
-          datasetName,
-          fileName
-        }
-      },
-      true
-    );
+    if (!failedImport) {
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            customContent: {
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+              datasetLoading: resourcesContext.messages['datasetLoading']
+            },
+            dataflowName,
+            datasetName,
+            fileName
+          }
+        },
+        true
+      );
+    }
+    setFailedImport(false);
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
