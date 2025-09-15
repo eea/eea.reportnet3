@@ -318,6 +318,9 @@ export const CustomFileUpload = ({
     });
 
     xhr.onreadystatechange = () => {
+      console.log('onreadystatechange');
+      console.log(xhr.readyState);
+      console.log(xhr.status);
       if (xhr.readyState === 4) {
         if (!(bigData && s3)) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -327,9 +330,7 @@ export const CustomFileUpload = ({
             onUpload({ xhr: xhr, files: _files.current });
           }
         } else {
-          console.log('onreadystatechange else');
           if (onError) {
-            console.log('on error');
             onError({ xhr: xhr, files: _files.current });
           }
 
@@ -356,6 +357,7 @@ export const CustomFileUpload = ({
 
       xhr.send(formData);
     } else {
+      console.log('send');
       xhr.send(state.files[0]);
     }
 
