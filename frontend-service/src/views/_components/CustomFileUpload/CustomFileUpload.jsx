@@ -122,6 +122,7 @@ export const CustomFileUpload = ({
     if (state.progress === 100 && timeoutBeforeClose) {
       if (bigData) {
         const timer = setTimeout(() => {
+          console.log('on upload');
           onUpload({ files: state.files });
         }, 5000);
         return () => clearTimeout(timer);
@@ -326,7 +327,9 @@ export const CustomFileUpload = ({
             onUpload({ xhr: xhr, files: _files.current });
           }
         } else {
+          console.log('onreadystatechange else');
           if (onError) {
+            console.log('on error');
             onError({ xhr: xhr, files: _files.current });
           }
 
