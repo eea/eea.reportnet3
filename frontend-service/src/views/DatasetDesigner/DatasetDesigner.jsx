@@ -319,7 +319,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
-    if (designerState.isImportDatasetDialogVisible) setFailedImport(false);
+    if (designerState.isImportDatasetDialogVisible) {
+      console.log('setFailedImport 1');
+
+      setFailedImport(false);
+    }
   }, [designerState.datasetSchemaId, designerState.isImportDatasetDialogVisible, designerState.isDataUpdated]);
 
   useEffect(() => {
@@ -915,8 +919,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       onGetIcebergTables();
       handleRefresh();
     }
-
+    console.log('useEffect');
+    console.log(notificationContext.toShow);
+    console.log(hasFailedImportNotification(notificationContext.toShow));
     if (hasFailedImportNotification(notificationContext.toShow)) {
+      console.log('setFailedImport 2');
       setFailedImport(true);
     }
 
@@ -1155,6 +1162,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           true
         );
       }
+      console.log('setFailedImport 3');
 
       setFailedImport(false);
       designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
@@ -1167,7 +1175,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
-
+      console.log('setFailedImport 4');
       setFailedImport(false);
     }
   };
