@@ -122,6 +122,9 @@ export const CustomFileUpload = ({
     if (state.progress === 100 && timeoutBeforeClose) {
       if (bigData) {
         console.log('on upload');
+        console.log(
+          notificationContext.toShow.find(notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT')
+        );
         const timer = setTimeout(() => {
           onUpload({ files: state.files });
         }, 5000);
@@ -363,6 +366,9 @@ export const CustomFileUpload = ({
   const importS3ToDlh = async () => {
     console.log('importS3ToDlh');
     try {
+      console.log(
+        notificationContext.toShow.find(notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT')
+      );
       await DatasetService.importTableFileWithS3({
         datasetId,
         dataflowId,
@@ -374,9 +380,10 @@ export const CustomFileUpload = ({
         jobId
       });
       console.log('call successful');
+      console.log(
+        notificationContext.toShow.find(notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT')
+      );
     } catch (error) {
-      console.log('error');
-      console.log(error.response);
       if (error.response.status !== 504) {
         console.error('CustomFileUpload - importS3ToDlh.', error);
         notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
