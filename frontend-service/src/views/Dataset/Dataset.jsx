@@ -379,6 +379,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       onGetIcebergTables();
       handleRefresh();
     }
+    console.log('use effect');
+    console.log(notificationContext.toShow);
+    console.log(notificationContext.hidden);
   }, [notificationContext.toShow, notificationContext.hidden]);
 
   const getWebformConfiguration = async (webform, options) => {
@@ -1209,7 +1212,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     } = metadata;
 
     console.log('on upload');
-    console.log(notificationContext.toShow.find(notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'));
 
     notificationContext.add(
       {
