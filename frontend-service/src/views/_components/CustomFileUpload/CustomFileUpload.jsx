@@ -121,8 +121,8 @@ export const CustomFileUpload = ({
   useEffect(() => {
     if (state.progress === 100 && timeoutBeforeClose) {
       if (bigData) {
+        console.log('on upload');
         const timer = setTimeout(() => {
-          console.log('on upload');
           onUpload({ files: state.files });
         }, 5000);
         return () => clearTimeout(timer);
@@ -318,9 +318,6 @@ export const CustomFileUpload = ({
     });
 
     xhr.onreadystatechange = () => {
-      console.log('onreadystatechange');
-      console.log(xhr.readyState);
-      console.log(xhr.status);
       if (xhr.readyState === 4) {
         if (!(bigData && s3)) dispatch({ type: 'UPLOAD_PROPERTY', payload: { progress: 0 } });
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -357,7 +354,6 @@ export const CustomFileUpload = ({
 
       xhr.send(formData);
     } else {
-      console.log('send');
       xhr.send(state.files[0]);
     }
 
@@ -365,6 +361,7 @@ export const CustomFileUpload = ({
   };
 
   const importS3ToDlh = async () => {
+    console.log('importS3ToDlh');
     try {
       await DatasetService.importTableFileWithS3({
         datasetId,
@@ -376,7 +373,10 @@ export const CustomFileUpload = ({
         delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
         jobId
       });
+      console.log('call successful');
     } catch (error) {
+      console.log('error');
+      console.log(error.response);
       if (error.response.status !== 504) {
         console.error('CustomFileUpload - importS3ToDlh.', error);
         notificationContext.add({ type: 'IMPORT_S3_TO_DLH_ERROR' }, true);
