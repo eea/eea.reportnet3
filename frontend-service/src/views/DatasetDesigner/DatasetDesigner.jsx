@@ -926,9 +926,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       console.log('setFailedImport 2');
       setFailedImport(true);
     }
-
-    console.log('use effect');
-    console.log(notificationContext.toShow);
   }, [notificationContext.toShow]);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
@@ -1144,7 +1141,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         dataset: { name: datasetName }
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
+      console.log('onUpload, failedImport: ' + failedImport);
+
       if (!failedImport) {
+        console.log('inside upload if');
         notificationContext.add(
           {
             type: 'DATASET_DATA_LOADING_INIT',
