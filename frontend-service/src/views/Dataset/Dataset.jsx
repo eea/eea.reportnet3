@@ -1196,7 +1196,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const onUpload = async (e) => {
+  const onUpload = async e => {
     const action = 'DATASET_IMPORT';
     const fileName = e?.files?.[0]?.name || ' ';
 
@@ -1207,6 +1207,9 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       dataflow: { name: dataflowName },
       dataset: { name: datasetName }
     } = metadata;
+
+    console.log('on upload');
+    console.log(notificationContext.toShow.find(notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'));
 
     notificationContext.add(
       {
