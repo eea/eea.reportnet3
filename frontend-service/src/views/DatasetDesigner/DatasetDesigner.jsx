@@ -236,6 +236,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   ]);
   const exportMenuRef = useRef();
   const importMenuRef = useRef();
+  const failedImportRef = useRef(false);
 
   const {
     isLoadingSnapshotListData,
@@ -321,6 +322,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     if (designerState.datasetSchemaId) getFileExtensions();
     if (designerState.isImportDatasetDialogVisible) {
       console.log('setFailedImport 1');
+      failedImportRef.current = false;
 
       setFailedImport(false);
     }
@@ -924,6 +926,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     console.log(hasFailedImportNotification(notificationContext.toShow));
     if (hasFailedImportNotification(notificationContext.toShow)) {
       console.log('setFailedImport 2');
+      failedImportRef.current = true;
       setFailedImport(true);
     }
   }, [notificationContext.toShow]);
@@ -1142,8 +1145,9 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
 
       console.log('onUpload, failedImport: ' + failedImport);
+      console.log('onUpload, failedImport: ' + failedImportRef.current);
 
-      if (!failedImport) {
+      if (!failedImportRef.current) {
         console.log('inside upload if');
         notificationContext.add(
           {
@@ -1163,6 +1167,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         );
       }
       console.log('setFailedImport 3');
+      failedImportRef.current = false;
 
       setFailedImport(false);
       designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
@@ -1175,6 +1180,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
+      failedImportRef.current = false;
       console.log('setFailedImport 4');
       setFailedImport(false);
     }
