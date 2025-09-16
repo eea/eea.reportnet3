@@ -16,6 +16,7 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobTypeEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.validation.TaskVO;
 import org.eea.kafka.domain.EventType;
@@ -119,6 +120,28 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                 for (String processId : processIds) {
                     ProcessVO process = processControllerZuul.findById(processId);
 
+                    List<TaskVO> tasks = processControllerZuul.findTasksByProcessId(processId);
+                    boolean everyTaskFinished =
+                            tasks.stream().allMatch(taskVO -> taskVO.getStatus() == ProcessStatusEnum.FINISHED);
+
+                    if (everyTaskFinished
+                            && !ProcessStatusEnum.FINISHED.toString().equals(process.getStatus())
+                            && !ProcessStatusEnum.CANCELED.toString().equals(process.getStatus())) {
+                        LOG.info("All tasks finished for processId={}, updating process to FINISHED", processId);
+                        processControllerZuul.updateProcess(
+                                process.getDatasetId(),
+                                process.getDataflowId(),
+                                ProcessStatusEnum.FINISHED,
+                                ProcessTypeEnum.valueOf(process.getProcessType()),
+                                process.getProcessId(),
+                                process.getUser(),
+                                process.getPriority(),
+                                process.isReleased()
+                        );
+                        process.setStatus(ProcessStatusEnum.FINISHED.toString());
+                        process.setProcessFinishingDate(new Date());
+                    }
+
                     if (!ProcessStatusEnum.FINISHED.toString().equals(process.getStatus())) {
                         allFinished = false;
                         break;
@@ -132,10 +155,6 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                             break;
                         }
                     }
-
-                    List<TaskVO> tasks = processControllerZuul.findTasksByProcessId(processId);
-                    boolean everyTaskFinished =
-                            tasks.stream().allMatch(taskVO -> taskVO.getStatus() == ProcessStatusEnum.FINISHED);
 
                     if (!everyTaskFinished) {
                         allFinished = false;
