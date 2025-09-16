@@ -1121,12 +1121,13 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   const onUpload = async e => {
     try {
+      manageDialogs('isImportDatasetDialogVisible', false);
+      setSelectedCustomImportIntegration({ id: null, name: null });
+
       if (!failedImportRef.current) {
         const action = 'DATASET_IMPORT';
         const fileName = e?.files?.[0]?.name || ' ';
         actionsContext.testProcess(datasetId, action);
-        manageDialogs('isImportDatasetDialogVisible', false);
-        setSelectedCustomImportIntegration({ id: null, name: null });
 
         const {
           dataflow: { name: dataflowName },
