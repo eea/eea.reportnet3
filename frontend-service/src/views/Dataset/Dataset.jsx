@@ -113,7 +113,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   });
   const [dataflowType, setDataflowType] = useState('');
   const [datasetStatisticsInState, setDatasetStatisticsInState] = useState(undefined);
-  const [failedImport, setFailedImport] = useState(false);
   const [hasWritePermissions, setHasWritePermissions] = useState(false);
   const [importButtonsList, setImportButtonsList] = useState([]);
   const [isIcebergCreated, setIsIcebergCreated] = useState(false);
@@ -171,6 +170,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
   let bigDataRef = useRef();
+  let failedImportRef = useRef(false);
 
   bigDataRef.current = metadata?.dataflow.bigData;
 
@@ -349,7 +349,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (metadata?.dataset.datasetSchemaId) getFileExtensions();
-    if (isImportDatasetDialogVisible) setFailedImport(false);
+    if (isImportDatasetDialogVisible) failedImportRef.current = false;
   }, [metadata?.dataset.datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
@@ -387,11 +387,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       handleRefresh();
     }
 
-    if (hasFailedImportNotification(notificationContext.toShow)) {
-      setFailedImport(true);
-    }
-    console.log('use effect');
-    console.log(notificationContext.toShow);
+    if (hasFailedImportNotification(notificationContext.toShow)) failedImportRef.current = true;
   }, [notificationContext.toShow]);
 
   const getWebformConfiguration = async (webform, options) => {
@@ -1221,9 +1217,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       dataset: { name: datasetName }
     } = metadata;
 
-    console.log('on upload');
-
-    if (!failedImport) {
+    if (!failedImportRef.current) {
       notificationContext.add(
         {
           type: 'DATASET_DATA_LOADING_INIT',
@@ -1241,7 +1235,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         true
       );
     }
-    setFailedImport(false);
+    failedImportRef.current = false;
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
