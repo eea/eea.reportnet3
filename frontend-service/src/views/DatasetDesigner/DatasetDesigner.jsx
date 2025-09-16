@@ -1120,18 +1120,19 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
   const onUpload = async e => {
-    const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
-    actionsContext.testProcess(datasetId, action);
-    manageDialogs('isImportDatasetDialogVisible', false);
-    setSelectedCustomImportIntegration({ id: null, name: null });
     try {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-
       if (!failedImportRef.current) {
+        const action = 'DATASET_IMPORT';
+        const fileName = e?.files?.[0]?.name || ' ';
+        actionsContext.testProcess(datasetId, action);
+        manageDialogs('isImportDatasetDialogVisible', false);
+        setSelectedCustomImportIntegration({ id: null, name: null });
+
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+
         notificationContext.add(
           {
             type: 'DATASET_DATA_LOADING_INIT',

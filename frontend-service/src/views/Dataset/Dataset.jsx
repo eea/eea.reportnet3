@@ -1206,18 +1206,19 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   };
 
   const onUpload = async e => {
-    const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
-
-    actionsContext.testProcess(datasetId, action);
-    setIsImportDatasetDialogVisible(false);
-    setSelectedCustomImportIntegration({ id: null, name: null });
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = metadata;
-
     if (!failedImportRef.current) {
+      const action = 'DATASET_IMPORT';
+      const fileName = e?.files?.[0]?.name || ' ';
+
+      actionsContext.testProcess(datasetId, action);
+      setIsImportDatasetDialogVisible(false);
+      setSelectedCustomImportIntegration({ id: null, name: null });
+
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = metadata;
+
       notificationContext.add(
         {
           type: 'DATASET_DATA_LOADING_INIT',
