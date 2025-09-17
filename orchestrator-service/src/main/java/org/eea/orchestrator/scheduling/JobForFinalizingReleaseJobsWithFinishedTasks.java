@@ -124,7 +124,7 @@ public class JobForFinalizingReleaseJobsWithFinishedTasks {
                     boolean everyTaskFinished =
                             tasks.stream().allMatch(taskVO -> taskVO.getStatus() == ProcessStatusEnum.FINISHED);
 
-                    if (everyTaskFinished
+                    if (!tasks.isEmpty() && everyTaskFinished
                             && !ProcessStatusEnum.FINISHED.toString().equals(process.getStatus())
                             && !ProcessStatusEnum.CANCELED.toString().equals(process.getStatus())) {
                         LOG.info("All tasks finished for processId={}, updating process to FINISHED", processId);
