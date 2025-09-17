@@ -455,7 +455,8 @@ public class ValidationHelper implements DisposableBean {
     List<String> failedToPromoteTables = new ArrayList<>();
     for (String tableName : tableNames) {
       try {
-        S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), tableName, tableName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+        Long providerId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
+        S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), providerId, dataset.getId(), tableName, tableName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
         tableResolver.setIsIcebergTable(false);
 
         // Check if the table exists on dremio.
