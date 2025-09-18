@@ -844,7 +844,7 @@
     "importDesignBadRequestError": "Failed importing data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Zip doesn't contain correct files ",
     "importDesignCompletedEvent": "Loaded data completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importRestartCompletedEvent": "Import restart completed at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>, {:error}",
-    "importDesignFailedEvent": "Failed loading schema",
+    "importDesignFailedEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "importDesignFailedNamefileEvent": "Failed loading data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Table and file names are different.",
     "importDesignFailedNoHeadersMatchingEvent": "Failed loading data for <strong title='{:tableSchemaName}'>{:shortTableSchemaName}</strong> at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. Field names or delimiter don't match.",
     "importedData": "Imported data",
