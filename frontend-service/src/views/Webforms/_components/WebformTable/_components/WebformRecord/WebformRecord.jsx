@@ -57,31 +57,32 @@ const checkShowRequired = (element, elements) => {
 };
 
 export const WebformRecord = ({
-                                addingOnTableSchemaId,
-                                bigData,
-                                columnsSchema,
-                                dataflowId,
-                                dataProviderId,
-                                datasetId,
-                                datasetSchemaId,
-                                hasFields,
-                                isAddingMultiple,
-                                isFixedNumber = true,
-                                isOptional,
-                                isReporting,
-                                multipleRecords,
-                                onAddMultipleWebform,
-                                onRefresh,
-                                onTabChange,
-                                record,
-                                referencedTableSchemaId,
-                                rootPkFieldId,
-                                rootTableName,
-                                selectedTableId,
-                                tableId,
-                                tableName,
-                                webformType
-                              }) => {
+  addingOnTableSchemaId,
+  bigData,
+  columnsSchema,
+  dataflowId,
+  dataProviderId,
+  datasetId,
+  datasetSchemaId,
+  hasFields,
+  isAddingMultiple,
+  isFixedNumber = true,
+  isOptional,
+  isReporting,
+  multipleRecords,
+  onAddMultipleWebform,
+  onLoadTableData,
+  onRefresh,
+  onTabChange,
+  record,
+  referencedTableSchemaId,
+  rootPkFieldId,
+  rootTableName,
+  selectedTableId,
+  tableId,
+  tableName,
+  webformType
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -179,6 +180,9 @@ export const WebformRecord = ({
       await DatasetService.createRecord(datasetId, tableId, [parseMultiselect(webformRecordState.newRecord)]);
     } catch (error) {
       console.error('WebformRecord - onSaveField.', error);
+    } finally {
+      onLoadTableData();
+      onRefresh();
     }
   };
 
@@ -207,13 +211,35 @@ export const WebformRecord = ({
           ? onToggleFieldVisibility(element.referenceParentField, elements)
           : true;
         const isSubTable = () => element.elementsRecords.length > 1;
+
+        const addValues = (blockElements, blockRecord) => {
+          const valueMap = new Map();
+          blockRecord?.fields?.forEach(f => {
+            const key = f.fieldSchemaId || f.fieldSchema;
+            if (key) valueMap.set(key, f.value);
+          });
+
+          return blockElements.map(be => {
+            const key = be.fieldSchema || be.fieldSchemaId;
+            const fromFields = valueMap.get(key);
+            const mergedValue = fromFields !== undefined ? fromFields : be.value;
+
+            return {
+              ...be,
+              value: mergedValue,
+              fieldSchemaId: key,
+              recordId: blockRecord?.recordId
+            };
+          });
+        };
+
         if (isSubTable()) {
           return (
             isBlockVisible && (
               <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
                 {element.elementsRecords
                   .filter(elementsRecord => elementsRecord.recordId === record.recordId)
-                  .map(record => renderElements(record.elements))}
+                  .map(blockRecord => renderElements(addValues(blockRecord.elements, blockRecord)))}
               </div>
             )
           );
@@ -222,7 +248,7 @@ export const WebformRecord = ({
         return (
           isBlockVisible && (
             <div className={styles.fieldsBlock} key={`BLOCK_${i}`}>
-              {element.elementsRecords.map(record => renderElements(record.elements))}
+              {element.elementsRecords.map(blockRecord => renderElements(addValues(blockRecord.elements, blockRecord)))}
             </div>
           )
         );
@@ -395,7 +421,10 @@ export const WebformRecord = ({
                       }
                       label={resourcesContext.messages['addRecord']}
                       onClick={() => {
-                        onAddMultipleWebform(element.tableSchemaId, referencePkValue, false, fkFields);
+                        onAddMultipleWebform(element.tableSchemaId, referencePkValue, false, fkFields).then(() => {
+                          onLoadTableData();
+                          onRefresh();
+                        });
                       }}
                     />
                   )}

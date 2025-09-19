@@ -165,9 +165,49 @@ export const WebformField = ({
         }
       }
 
-      const conditionalField = record.elements.find(
+      let conditionalField = record.elements.find(
         el => el.fieldSchemaId === element.referencedField.masterConditionalFieldId
       );
+
+      if (!conditionalField) {
+        for (const el of record.elements) {
+          if (el.type === 'BLOCK') {
+            // Find the master field structure in the BLOCK definition
+            const masterFieldStructure = el.elements.find(
+              blockElement =>
+                (blockElement.fieldSchema || blockElement.fieldSchemaId) ===
+                element.referencedField.masterConditionalFieldId
+            );
+
+            if (masterFieldStructure) {
+              // Get the specific row that contains the current element
+              const currentRow = el.elementsRecords?.find(er => er.recordId === element.recordId);
+
+              if (currentRow) {
+                // Priority 1: Check current row's elements array (most up-to-date)
+                const masterElementValue = currentRow.elements?.find(
+                  be => (be.fieldSchema || be.fieldSchemaId) === element.referencedField.masterConditionalFieldId
+                )?.value;
+
+                // Priority 2: Check current row's fields array (from backend)
+                const masterFieldValue = currentRow.fields?.find(
+                  f => (f.fieldSchemaId || f.fieldSchema) === element.referencedField.masterConditionalFieldId
+                )?.value;
+
+                // Use the most reliable value
+                const resolvedValue = masterElementValue !== undefined ? masterElementValue : masterFieldValue;
+
+                conditionalField = {
+                  ...masterFieldStructure,
+                  value: resolvedValue,
+                  fieldSchemaId: masterFieldStructure.fieldSchema || masterFieldStructure.fieldSchemaId
+                };
+                break;
+              }
+            }
+          }
+        }
+      }
       queryClient
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],

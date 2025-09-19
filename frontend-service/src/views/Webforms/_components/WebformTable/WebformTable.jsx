@@ -352,6 +352,7 @@ export const WebformTable = ({
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
+      onLoadTableData={onLoadTableData}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
       record={record}
