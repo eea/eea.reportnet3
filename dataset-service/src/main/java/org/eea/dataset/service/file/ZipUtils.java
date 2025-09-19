@@ -166,7 +166,12 @@ public class ZipUtils {
         // Put the datasetSchemaId and the dataset name into a map to store later in the zip file
         DesignDataset design = designs.stream()
                 .filter(d -> d.getDatasetSchema().equals(schema.getIdDataSetSchema().toString()))
-                .findFirst().orElse(new DesignDataset());
+                .findFirst().orElse(null);
+
+        // Skip if dataset name is missing/blank (prevents bad ZIP entry names)
+        if (design == null) {
+          continue;
+        }
         schemaNames.put(schema.getIdDataSetSchema().toString(), design.getDataSetName());
         schemaDatasetsId.put(schema.getIdDataSetSchema().toString(), design.getId());
 
