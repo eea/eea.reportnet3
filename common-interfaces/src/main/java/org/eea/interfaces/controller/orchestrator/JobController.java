@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /** The Interface JobController. */
 public interface JobController {
@@ -291,6 +292,15 @@ public interface JobController {
     void sendFmeImportFailedNotification(@RequestBody JobVO jobVO);
 
     /**
+     * Sends a fme import failed no file returned notification
+     *
+     * @param jobVO the job object
+     * @return
+     */
+    @PostMapping(value = "/private/sendFmeImportFailedNoFileReturnedNotification")
+    void sendFmeImportFailedNoFileReturnedNotification(@RequestBody JobVO jobVO);
+
+    /**
      * Finds provider id by job id
      * @param jobId
      * @return
@@ -342,6 +352,18 @@ public interface JobController {
      */
     @PostMapping(value = "/restartImportJob/{jobId}")
     void restartImportJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "sendRestartNotification", defaultValue = "true", required = false) Boolean sendRestartNotification);
+
+
+    /**
+     * Get jobs statistics
+     *
+     * @return a dto with jobs statistics
+     */
+    @GetMapping(value = "/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
+    String getJobsStatistics();
+
+    @GetMapping(value = "/private/findActiveJobsRelatedToADatasetId/{datasetId}")
+    List<JobVO> findActiveJobsRelatedToADatasetId(@PathVariable("datasetId") Long datasetId, @RequestParam(value = "dataflowId", required = false) Long dataflowId, @RequestParam(value = "providerId", required = false) Long providerId);
 }
 
 

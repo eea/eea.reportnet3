@@ -4,6 +4,7 @@ import cdjd.org.apache.commons.lang3.BooleanUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mongodb.client.result.UpdateResult;
 import com.opencsv.CSVWriter;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
@@ -28,6 +29,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
@@ -38,7 +40,6 @@ import org.eea.interfaces.vo.dataset.schemas.rule.IntegrityVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RuleVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.RulesSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.rule.enums.AutomaticRuleTypeEnum;
-import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
@@ -76,6 +77,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -195,6 +200,8 @@ public class RulesServiceImpl implements RulesService {
   @Autowired
   private S3Helper s3Helper;
 
+  @Autowired
+  private MongoTemplate mongoTemplate;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(RulesServiceImpl.class);
@@ -687,40 +694,48 @@ public class RulesServiceImpl implements RulesService {
     // number etc)
     Long shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
 
+    // retieve default level error if any
+    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
+
+    ErrorTypeEnum automaticQCDefaultLevelError =
+            rulesSchema != null && rulesSchema.getAutomaticQCsDefaultLevelError() != null
+                    ? rulesSchema.getAutomaticQCsDefaultLevelError()
+                    : ErrorTypeEnum.ERROR;
+
     if (required && typeData.equals(DataType.POINT)) {
       ruleList.add(
               AutomaticRules.createRequiredRulePoint(referenceId, typeEntityEnum, "Field cardinality",
-                      "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
+                      "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION, automaticQCDefaultLevelError));
     } else if (required) {
       ruleList
               .add(AutomaticRules.createRequiredRule(referenceId, typeEntityEnum, "Field cardinality",
-                      "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION));
+                      "FC" + shortcode, AutomaticRuleTypeEnum.FIELD_CARDINALITY, FC_DESCRIPTION, automaticQCDefaultLevelError));
     } else {
       switch (typeData) {
         case NUMBER_INTEGER:
           ruleList.add(AutomaticRules.createNumberIntegerAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + "NUMBER - INTEGER", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + "NUMBER - INTEGER"));
+                  FT_DESCRIPTION + "NUMBER - INTEGER", automaticQCDefaultLevelError));
           break;
         case NUMBER_DECIMAL:
           ruleList.add(AutomaticRules.createNumberDecimalAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + "NUMBER - DECIMAL", "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + "NUMBER - DECIMAL"));
+                  FT_DESCRIPTION + "NUMBER - DECIMAL", automaticQCDefaultLevelError));
           break;
         case DATE:
           ruleList.add(AutomaticRules.createDateAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + typeData));
+                  FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           break;
         case DATETIME:
           ruleList.add(AutomaticRules.createDateTimeAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + typeData));
+                  FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           break;
         case BOOLEAN:
           ruleList.add(AutomaticRules.createBooleanAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + typeData));
+                  FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           break;
         case EXTERNAL_LINK:
         case LINK:
@@ -734,7 +749,7 @@ public class RulesServiceImpl implements RulesService {
 
           ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
                   FIELD_TYPE + typeData, "TC" + shortcode, AutomaticRuleTypeEnum.FIELD_LINK,
-                  TC_DESCRIPTION + typeData, tableSchemaId, false));
+                  TC_DESCRIPTION + typeData, tableSchemaId, false, automaticQCDefaultLevelError));
 
           if (null != fieldSchemaPK && Boolean.TRUE.equals(fieldSchemaPK.getPkMustBeUsed())) {
 
@@ -743,7 +758,7 @@ public class RulesServiceImpl implements RulesService {
 
             ruleList.add(AutomaticRules.createFKAutomaticRule(referenceId, EntityTypeEnum.TABLE,
                     "Table Completeness", "TO" + shortcodeAux, AutomaticRuleTypeEnum.TABLE_COMPLETNESS,
-                    TO_DESCRIPTION, tableSchemaId, true));
+                    TO_DESCRIPTION, tableSchemaId, true, automaticQCDefaultLevelError));
           }
 
           break;
@@ -754,7 +769,7 @@ public class RulesServiceImpl implements RulesService {
           List<String> singleCodeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createCodelistAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + typeData, singleCodeListItems, "FT" + shortcode,
-                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + "SINGLESELECT_CODELIST"));
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + "SINGLESELECT_CODELIST", automaticQCDefaultLevelError));
           break;
         case MULTISELECT_CODELIST:
           // we find values available to create this validation for a codelist, same value with
@@ -763,22 +778,22 @@ public class RulesServiceImpl implements RulesService {
           List<String> codeListItems = (ArrayList) document.get("codelistItems");
           ruleList.addAll(AutomaticRules.createMultiSelectCodelistAutomaticRule(referenceId,
                   typeEntityEnum, FIELD_TYPE + typeData, codeListItems, "FT" + shortcode,
-                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           break;
         case URL:
           ruleList.add(AutomaticRules.createUrlAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + typeData));
+                  FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           break;
         case EMAIL:
           ruleList.add(AutomaticRules.createEmailAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + typeData));
+                  FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           break;
         case PHONE:
           ruleList.add(AutomaticRules.createPhoneAutomaticRule(referenceId, typeEntityEnum,
                   FIELD_TYPE + typeData, "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_TYPE,
-                  FT_DESCRIPTION + typeData));
+                  FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           break;
         case MULTIPOLYGON:
         case POINT:
@@ -789,12 +804,12 @@ public class RulesServiceImpl implements RulesService {
         case GEOMETRYCOLLECTION:
           ruleList.add(AutomaticRules.createGeometryAutomaticRule(typeData, referenceId,
                   typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
-                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           // add additional rule for the EPSG SRID check
           shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
           ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckEPSGSRID(typeData,
                   referenceId, typeEntityEnum, FIELD_TYPE + typeData, "FT" + shortcode,
-                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData));
+                  AutomaticRuleTypeEnum.FIELD_TYPE, FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
           // add SQL check for Geometries.
           if (rulesRepository.findGeometrySQLRulesByreferenceId(new ObjectId(datasetSchemaId),
                   new ObjectId(referenceId)) == null) {
@@ -813,7 +828,7 @@ public class RulesServiceImpl implements RulesService {
             // Validate Geometry
             ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckGeometries(datasetId,
                     document, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                    "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, isBigDataflow, tableName));
+                    "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, isBigDataflow, tableName, automaticQCDefaultLevelError));
             // ST_Transform
             shortcode = rulesSequenceRepository.updateSequence(new ObjectId(datasetSchemaId));
 
@@ -822,7 +837,7 @@ public class RulesServiceImpl implements RulesService {
             if (!isBigDataflow) {
               ruleList.add(AutomaticRules.createGeometryAutomaticRuleCheckSTtransform(datasetId,
                       document, typeData, referenceId, typeEntityEnum, FIELD_TYPE + typeData,
-                      "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData));
+                      "FT" + shortcode, AutomaticRuleTypeEnum.FIELD_SQL_TYPE, FT_DESCRIPTION + typeData, automaticQCDefaultLevelError));
             }
           }
           break;
@@ -832,6 +847,9 @@ public class RulesServiceImpl implements RulesService {
       }
     }
     if (!ruleList.isEmpty()) {
+      // to be deleted
+      LOG.info("Creating automatic rules for datasetSchemaId {}\n referenceId {}\n typeData {}\n typeEntityEnum {}\n datasetId {}\n required {}\n automaticQCDefaultLevelError {}\n",
+              datasetSchemaId, referenceId, typeData, typeEntityEnum, datasetId, required, automaticQCDefaultLevelError);
       ruleList.stream()
               .forEach(rule -> rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule));
     }
@@ -979,6 +997,53 @@ public class RulesServiceImpl implements RulesService {
 
     if (TypeStatusEnum.DRAFT.equals(dataflowStatus)) {
       addHistoricRuleInfo(rule, ruleOriginal, datasetId, originalIntegrityVO);
+    }
+  }
+
+  /**
+   * Update the automatic QC default level error
+   *
+   * @param datasetSchemaId the dataset schema id
+   * @param automaticQCDefaultLevelError the new automatic QC default level error
+   */
+  @Override
+  public void updateAutomaticQCsDefaultLevelError(long datasetId, String datasetSchemaId, ErrorTypeEnum automaticQCDefaultLevelError) throws EEAException {
+    // check that datasetSchemaId is a valid ObjectId at mongo database
+    ObjectId schemaObjectId;
+    try {
+      schemaObjectId = new ObjectId(datasetSchemaId);
+    } catch (IllegalArgumentException e) {
+      throw new EEAException("Invalid datasetSchemaId: " + datasetSchemaId);
+    }
+
+    // check if schema exists with this id
+    Query existsQuery = new Query(Criteria.where("idDatasetSchema").is(schemaObjectId));
+    boolean schemaExists = mongoTemplate.exists(existsQuery, RulesSchema.class);
+    if (!schemaExists) {
+      throw new EEAException("Dataset schema not found for id: " + datasetSchemaId);
+    }
+
+    DataSetMetabaseVO dataset = dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
+    DataFlowVO dataflow = dataflowControllerZuul.getMetabaseById(dataset.getDataflowId());
+    if (!dataflow.getStatus().equals(TypeStatusEnum.DESIGN)) {
+      // if the status of the dataflow is not DESIGN block the request
+      throw new EEAException(EEAErrorMessage.NOT_DESIGN_DATAFLOW);
+    }
+
+    Query query = new Query(Criteria.where("idDatasetSchema").is(new ObjectId(datasetSchemaId)));
+    // mutate the automaticQCsDefaultLevelError field
+    Update update = new Update().set("automaticQCsDefaultLevelError", automaticQCDefaultLevelError);
+    // partial update
+    UpdateResult result = mongoTemplate.updateFirst(query, update, RulesSchema.class);
+
+    if (result.getMatchedCount() == 0) {
+      // no document matched the query
+      LOG.warn("No RulesSchema document found for dataset schema id: {}", datasetSchemaId);
+    } else if (result.getModifiedCount() == 0) {
+      // existing value is the same as given value
+      LOG.info("Automatic QC default level error for dataset schema id: {} was already set to {}", datasetSchemaId, automaticQCDefaultLevelError);
+    } else {
+      LOG.info("Updated automatic QC default level error for dataset schema id: {} to {}", datasetSchemaId, automaticQCDefaultLevelError);
     }
   }
 
@@ -1160,10 +1225,19 @@ public class RulesServiceImpl implements RulesService {
         message.append("The field ").append(fieldNames).append(" is unique within table");
       }
     }
+
+    // retieve default level error if any
+    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
+
+    ErrorTypeEnum automaticQCDefaultLevelError =
+            rulesSchema != null && rulesSchema.getAutomaticQCsDefaultLevelError() != null
+                    ? rulesSchema.getAutomaticQCsDefaultLevelError()
+                    : ErrorTypeEnum.ERROR;
+
     Rule rule =
             AutomaticRules.createUniqueConstraintAutomaticRule(tableSchemaId, EntityTypeEnum.TABLE,
                     "Table type uniqueConstraint", "TU" + shortcode, AutomaticRuleTypeEnum.TABLE_UNIQUENESS,
-                    description.toString(), message.toString(), uniqueId);
+                    description.toString(), message.toString(), uniqueId, automaticQCDefaultLevelError);
     rulesRepository.createNewRule(new ObjectId(datasetSchemaId), rule);
   }
 

@@ -8,6 +8,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eea.dataset.service.model.ImportFileInDremioInfo;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.utils.UtilityClass;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
@@ -63,6 +66,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.concurrent.DelegatingSecurityContextRunnable;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -76,6 +81,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import static org.eea.interfaces.vo.dataset.enums.FileTypeEnum.CSV;
 import static org.eea.utils.LiteralConstants.EXPORT_CSV;
@@ -162,6 +169,11 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Autowired
   public RepresentativeControllerZuul representativeControllerZuul;
+
+  @Autowired
+  private RedisLockService redisLockService;
+
+  private static final long conversionLockExpirationInMillis = 900000L;
 
   /**
    * Gets the data tables values.
@@ -284,7 +296,7 @@ public class DatasetControllerImpl implements DatasetController {
       DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
       String datasetSchemaId = dataset.getDatasetSchema();
       TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(idTableSchema, datasetSchemaId);
-      result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getTableResult(dataset, tableSchemaVO, pageable, fields, fieldValue, levelError, qcCodes);
+      result = dataLakeDataRetrieverFactory.getRetriever(datasetId).getTableResult(dataset, tableSchemaVO, pageable, fields, fieldSchemaId, fieldValue, levelError, qcCodes);
     } catch (EEAException e) {
       LOG.error(e.getMessage());
       if (e.getMessage().equals(EEAErrorMessage.DATASET_NOTFOUND)) {
@@ -368,7 +380,7 @@ public class DatasetControllerImpl implements DatasetController {
   @ApiResponses(value = {@ApiResponse(code = 200, message = "Successfully imported file"),
           @ApiResponse(code = 400, message = "Error importing file"),
           @ApiResponse(code = 500, message = "Error importing file")})
-  public void importBigFileData(
+  public Map<String, Object> importBigFileData(
           @ApiParam(type = "Long", value = "Dataset id", example = "0") @LockCriteria(
                   name = "datasetId") @PathVariable("datasetId") Long datasetId,
           @ApiParam(type = "Long", value = "Dataflow id",
@@ -392,7 +404,7 @@ public class DatasetControllerImpl implements DatasetController {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
-
+    Map<String, Object> result = new HashMap<>();
     if (dataflowId == null){
       dataflowId = datasetService.getDataFlowIdById(datasetId);
     }
@@ -428,12 +440,14 @@ public class DatasetControllerImpl implements DatasetController {
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
         if (file != null) {
-          helperMultipartFileMapper.setBytes(file.getBytes());
           helperMultipartFileMapper.setInputStream(file.getInputStream());
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
+        jobId = job.getId();
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -453,7 +467,13 @@ public class DatasetControllerImpl implements DatasetController {
           job = jobControllerZuul.findJobByFmeJobId(fmeJobId);
           if (job!=null && (job.getJobStatus().equals(JobStatusEnum.CANCELED) || job.getJobStatus().equals(JobStatusEnum.CANCELED_BY_ADMIN))) {
             LOG.info("Job {} is cancelled. Exiting import!", job.getId());
-            return;
+            String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + job.getId() + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+            if (providerId != null) {
+              pollingUrl += "&providerId=" + providerId;
+            }
+            result.put("jobId", job.getId());
+            result.put("pollingUrl", pollingUrl);
+            return result;
           }
         }
         if(job!=null){
@@ -501,6 +521,21 @@ public class DatasetControllerImpl implements DatasetController {
         throw e;
       }
     }
+
+    if(jobId != null) {
+      String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      if (providerId != null) {
+        pollingUrl += "&providerId=" + providerId;
+      }
+      result.put("jobId", jobId);
+      result.put("pollingUrl", pollingUrl);
+    }
+    else{
+      result.put("jobId", "Error: An import job was not created.");
+    }
+
+
+    return result;
   }
 
   /**
@@ -587,12 +622,14 @@ public class DatasetControllerImpl implements DatasetController {
 
         HelperMultipartFileMapper helperMultipartFileMapper = new HelperMultipartFileMapper();
         if (file != null) {
-          helperMultipartFileMapper.setBytes(file.getBytes());
           helperMultipartFileMapper.setInputStream(file.getInputStream());
           helperMultipartFileMapper.setOriginalFilename(file.getOriginalFilename());
           helperMultipartFileMapper.setFileNull(false);
         }
-        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper);
+        ImportFileInDremioInfo importFileInDremioInfo = new ImportFileInDremioInfo(jobId, datasetId, dataflowId, providerId, tableSchemaId, helperMultipartFileMapper.getOriginalFilename(), replace, delimiter, integrationId, null);
+        JobVO job = bigDataDatasetService.retrieveOrAddImportJob(importFileInDremioInfo, fmeJobId, jobId);
+        jobId = job.getId();
+        bigDataDatasetService.importBigData(datasetId, dataflowId, providerId, tableSchemaId, replace, integrationId, delimiter, jobId, fmeJobId, dataFlowVO, helperMultipartFileMapper, job, importFileInDremioInfo);
       } catch (Exception e) {
         LOG.error("Error when privately importing data to Dremio for datasetId {}", datasetId, e);
         throw e;
@@ -2692,7 +2729,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "mime type (extension file)",
                   example = "csv") @RequestParam("mimeType") String mimeType) {
     LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
             userNotificationContentVO);
@@ -2733,7 +2772,9 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "String", value = "mime type (extension file)", example = "csv")
           @RequestParam("mimeType") String mimeType) {
     LOG.info("Exporting dataset data for datasetId {}, with type {}", datasetId, mimeType);
+    Long dataflowId = datasetService.getDataFlowIdById(datasetId);
     UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+    userNotificationContentVO.setDataflowId(dataflowId);
     userNotificationContentVO.setDatasetId(datasetId);
     notificationControllerZuul.createUserNotificationPrivate("EXPORT_DATASET_DATA",
             userNotificationContentVO);
@@ -3320,16 +3361,28 @@ public class DatasetControllerImpl implements DatasetController {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, EEAErrorMessage.ERROR_ETL_EXPORTING_FILE_CITUS);
         }
       }
-      if (BooleanUtils.isTrue(exportCsv)) {
-        String processUUID = UUID.randomUUID().toString();
-        bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
-      } else if (BooleanUtils.isTrue(exportParquet)) {
-        String processUUID = UUID.randomUUID().toString();
-        bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
-      } else {
-        datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
-      }
-      LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
+      SecurityContext ctx = SecurityContextHolder.getContext();
+
+      Runnable work = () -> {
+        try {
+          if (BooleanUtils.isTrue(exportCsv)) {
+            String processUUID = UUID.randomUUID().toString();
+            bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+          } else if (BooleanUtils.isTrue(exportParquet)) {
+            String processUUID = UUID.randomUUID().toString();
+            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+          } else {
+            datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
+          }
+          LOG.info("Successfully called method for creating etlExport file for dataflowId {} and datasetId {}", dataflowId, datasetId);
+        } catch (Exception e) {
+          LOG.error("Async ETL export failed for datasetId {} jobId {}", datasetId, jobId, e);
+          jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+        }
+      };
+
+      new Thread(new DelegatingSecurityContextRunnable(work, ctx)).start();
+
     } catch (Exception e) {
       LOG.error("Unexpected error! Error in createFileForEtlExport for datasetId {} and jobId {} Message: ", datasetId, jobId, e);
       jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
@@ -3418,57 +3471,48 @@ public class DatasetControllerImpl implements DatasetController {
 
   @Override
   @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
-  @PostMapping("/convertParquetToIcebergTable/{datasetId}")
-  public void convertParquetToIcebergTable(@PathVariable("datasetId") Long datasetId,
-                                           @RequestParam(value = "dataflowId") Long dataflowId,
-                                           @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
-
-    try{
-      LOG.info("Converting parquet table to iceberg for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
-      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-      bigDataDatasetService.convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId);
-    }
-    catch (Exception e){
-      LOG.error("Could not convert parquet table to iceberg for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
-              providerId, datasetId, tableSchemaId, e.getMessage());
-      throw e;
-    }
-  }
-
-  @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
-  @PostMapping("/convertIcebergToParquetTable/{datasetId}")
-  public void convertIcebergToParquetTable(@PathVariable("datasetId") Long datasetId,
-                                           @RequestParam(value = "dataflowId") Long dataflowId,
-                                           @RequestParam(value = "providerId", required = false) Long providerId,
-                                           @RequestParam(value = "tableSchemaId") String tableSchemaId) throws Exception {
-    try{
-      LOG.info("Converting iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {}", dataflowId, providerId, datasetId, tableSchemaId);
-      String datasetSchemaId = datasetSchemaService.getDatasetSchemaId(datasetId);
-      TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
-      bigDataDatasetService.convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId);
-    }
-    catch (Exception e){
-      LOG.error("Could not convert iceberg table to parquet for dataflowId {}, provider {}, datasetId {}, tableSchemaId {}. Error message: {}", dataflowId,
-              providerId, datasetId, tableSchemaId, e.getMessage());
-      throw e;
-    }
-  }
-
-  @Override
-  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASET_LEAD_REPORTER','DATASET_REPORTER_WRITE','DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE','DATASCHEMA_EDITOR_READ','EUDATASET_CUSTODIAN','DATASET_NATIONAL_COORDINATOR','TESTDATASET_CUSTODIAN','TESTDATASET_STEWARD_SUPPORT','TESTDATASET_STEWARD','REFERENCEDATASET_CUSTODIAN','REFERENCEDATASET_LEAD_REPORTER','REFERENCEDATASET_STEWARD')")
   @PostMapping("/convertParquetToIcebergTables/{datasetId}")
   public void convertParquetToIcebergTables(@PathVariable("datasetId") Long datasetId,
                                            @RequestParam(value = "dataflowId") Long dataflowId,
                                            @RequestParam(value = "providerId", required = false) Long providerId,
                                            @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+    String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String datasetName = dataSetMetabaseVO.getDataSetName();
+
+    if(providerId == null){
+      providerId = dataSetMetabaseVO.getDataProviderId();
+    }
+
+    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+    if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
+      List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
+      LOG.info("Can not convert tables from parquet to iceberg for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT, null,
+              NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+      return;
+    }
+
     try {
-      bigDataDatasetService.initiateParquetToIcebergConversion(datasetId, dataflowId, providerId, tableSchemaIds);
+      if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)){
+        LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}", username, dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+        bigDataDatasetService.initiateParquetToIcebergConversion(datasetId, dataflowId, providerId, tableSchemaIds, lockValue);
+      }
+      else {
+        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+        LOG.info("User {} has triggered the parquet to iceberg conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another parquet to iceberg conversion for the same dataset is in progress {}",
+                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
+                NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+
+      }
     } catch (Exception e) {
-      LOG.error("Failed to initiate Parquet to Iceberg conversion: {}", e.getMessage());
+      LOG.error("Failed to initiate Parquet to Iceberg conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",
+              dataflowId, datasetId, providerId, tableSchemaIds, username, e.getMessage(), lockValue);
+      redisLockService.releaseLock(lockKey, lockValue);
       throw e;
     }
   }
@@ -3481,10 +3525,43 @@ public class DatasetControllerImpl implements DatasetController {
                                            @RequestParam(value = "providerId", required = false) Long providerId,
                                            @RequestParam(value = "tableSchemaIds", required = false) List<String> tableSchemaIds) throws Exception {
 
+    String username = SecurityContextHolder.getContext().getAuthentication().getName();
+    String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+    String lockValue = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId + "_" + username + "_" + UUID.randomUUID();
+
+    DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+    String datasetName = dataSetMetabaseVO.getDataSetName();
+    if(providerId == null){
+      providerId = dataSetMetabaseVO.getDataProviderId();
+
+    }
+
+    List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataflowId, providerId);
+    if(activeJobsForDatasetId != null && !activeJobsForDatasetId.isEmpty()){
+      List<Long> jobIds = activeJobsForDatasetId.stream().map(JobVO::getId).collect(Collectors.toList());
+      LOG.info("Can not convert tables from iceberg to parquet for dataflowId {} datasetId {} providerId {} and user {} because there are active jobs related to the same dataset id. Job ids: {}", dataflowId, datasetId, providerId, username, jobIds);
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT, null,
+              NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+      return;
+    }
+
     try {
-      bigDataDatasetService.initiateIcebergToParquetConversion(datasetId, dataflowId, providerId, tableSchemaIds);
+      if (redisLockService.checkAndAcquireLock(lockKey, lockValue, conversionLockExpirationInMillis)){
+        LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} LockValue {}", username, dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+        bigDataDatasetService.initiateIcebergToParquetConversion(datasetId, dataflowId, providerId, tableSchemaIds, lockValue);
+      }
+      else {
+        Map<String, String> activeLocks = redisLockService.listActiveLocks(lockKey);
+        LOG.info("User {} has triggered the iceberg to parquet conversion for dataflowId {} datasetId {} providerId {} and tableSchemaIds {} but another iceberg to parquet conversion for the same dataset is in progress {}",
+                username, dataflowId, datasetId, providerId, tableSchemaIds, activeLocks);
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT, null,
+                NotificationVO.builder().user(username).dataflowId(dataflowId).datasetId(datasetId).datasetName(datasetName).build());
+      }
     } catch (Exception e) {
-      LOG.error("Failed to initiate Iceberg to Parquet conversion: {}", e.getMessage());
+      LOG.error("Failed to initiate Iceberg to Parquet conversion for dataflowId {} datasetId {} providerId {} tableSchemaIds {} and username {} : {} - Releasing lock with value {}",
+              dataflowId, datasetId, providerId, tableSchemaIds, username, e.getMessage(), lockValue);
+      redisLockService.releaseLock(lockKey, lockValue);
+      throw e;
     }
   }
 

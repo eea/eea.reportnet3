@@ -25,6 +25,15 @@ public interface ProcessRepository
   EEAProcess findOneByProcessId(@Param("processId") String processId);
 
   /**
+   * Find one by process id.
+   *
+   * @param processIds the process id
+   * @return the optional
+   */
+  @Query(nativeQuery = true, value = "select * from process where process_id in (:processIds)")
+  List<EEAProcess> findOneByProcessIds(@Param("processIds") List<String> processIds);
+
+  /**
    * Count processes.
    *
    * @return the long

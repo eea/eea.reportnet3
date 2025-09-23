@@ -284,13 +284,21 @@ export const DataFormFieldEditor = ({
           : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]?.replace('; ', ';').replace(';', '; ')
         : conditionalField.fieldData[conditionalField.fieldData.fieldSchemaId]
       : '';
+
+    let encodedConditionalFieldValue;
+    if (typeof conditionalFieldValue === 'string') {
+      encodedConditionalFieldValue = encodeURIComponent(conditionalFieldValue);
+    } else {
+      encodedConditionalFieldValue = conditionalFieldValue;
+    }
+
     try {
       setIsLoadingData(true);
       const referencedFieldValues = await DatasetService.getReferencedFieldValues(
         datasetId,
         field,
         filter,
-        conditionalFieldValue,
+        encodedConditionalFieldValue,
         datasetSchemaId,
         100
       );

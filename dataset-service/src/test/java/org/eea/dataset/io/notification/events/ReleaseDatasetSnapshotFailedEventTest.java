@@ -2,6 +2,7 @@ package org.eea.dataset.io.notification.events;
 
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
@@ -24,6 +25,9 @@ public class ReleaseDatasetSnapshotFailedEventTest {
 
   @Mock
   private DataSetMetabaseVO datasetVO;
+
+  @Mock
+  private DatasetSnapshotController datasetSnapshotController;
 
 
 

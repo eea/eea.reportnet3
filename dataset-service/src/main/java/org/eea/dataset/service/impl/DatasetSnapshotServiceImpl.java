@@ -3,14 +3,28 @@ package org.eea.dataset.service.impl;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVWriter;
 import feign.FeignException;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.eea.dataset.mapper.ReleaseMapper;
 import org.eea.dataset.mapper.SnapshotMapper;
 import org.eea.dataset.mapper.SnapshotSchemaMapper;
-import org.eea.dataset.persistence.metabase.domain.*;
-import org.eea.dataset.persistence.metabase.repository.*;
+import org.eea.dataset.persistence.metabase.domain.DataCollection;
+import org.eea.dataset.persistence.metabase.domain.DataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.DesignDataset;
+import org.eea.dataset.persistence.metabase.domain.EUDataset;
+import org.eea.dataset.persistence.metabase.domain.PartitionDataSetMetabase;
+import org.eea.dataset.persistence.metabase.domain.ReportingDataset;
+import org.eea.dataset.persistence.metabase.domain.Snapshot;
+import org.eea.dataset.persistence.metabase.domain.SnapshotSchema;
+import org.eea.dataset.persistence.metabase.repository.DataCollectionRepository;
+import org.eea.dataset.persistence.metabase.repository.DataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.EUDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.PartitionDataSetMetabaseRepository;
+import org.eea.dataset.persistence.metabase.repository.ReportingDatasetRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotRepository;
+import org.eea.dataset.persistence.metabase.repository.SnapshotSchemaRepository;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
@@ -30,6 +44,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
 import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
@@ -56,6 +71,8 @@ import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
+import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
+import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.ums.TokenVO;
 import org.eea.interfaces.vo.ums.UserRepresentationVO;
 import org.eea.interfaces.vo.ums.enums.SecurityRoleEnum;
@@ -63,6 +80,7 @@ import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.service.LockService;
+import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.security.authorization.AdminUserAuthorization;
 import org.eea.utils.LiteralConstants;
@@ -71,19 +89,32 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.*;
-import java.util.*;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.eea.utils.LiteralConstants.*;
 
 /**
  * The Class DatasetSnapshotServiceImpl.
@@ -102,6 +133,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
    */
   @Value("${eea.keycloak.admin.password}")
   private String adminPass;
+
+  /**
+   * The delimiter.
+   */
+  @Value("${exportDataDelimiter}")
+  private char delimiter;
+
+  @Value("${importPath}")
+  private String importPath;
+
+  private static final int defaultProcessPriority = 20;
 
   /** The Constant LOG. */
   private static final Logger LOG = LoggerFactory.getLogger(DatasetSnapshotServiceImpl.class);
@@ -242,6 +284,9 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   @Autowired
   private AdminUserAuthorization adminUserAuthorization;
 
+  @Autowired
+  private JobProcessController.JobProcessControllerZuul jobProcessControllerZuul;
+
   /**
    * Gets the by id.
    *
@@ -316,11 +361,17 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public void addSnapshot(Long idDataset, CreateSnapshotVO createSnapshotVO,
                           Long partitionIdDestination, String dateRelease, boolean prefillingReference, String processId) {
 
-
+    Long dataflowId = null;
+    Long dataProviderId = null;
     try {
 
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
+
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+      if (jobId != null) {
+        snap.setJobId(jobId);
+      }
 
       //force date to UTC
       Instant utcInstant = Instant.now();
@@ -338,6 +389,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
           snap.setDataCollectionId(dataCollection.getId());
         }
       }
+      dataProviderId = dataset.getDataProviderId();
       snap.setReportingDataset(dataset);
       snap.setDataSetName("snapshot from dataset_" + idDataset);
       if (Boolean.TRUE.equals(createSnapshotVO.getReleased()) && Boolean.FALSE.equals(jobControllerZuul.isSilentRelease(processId))) {
@@ -348,7 +400,7 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       snap.setEnabled(true);
       snap.setEuReleased(false);
 
-      Long dataflowId = metabaseRepository.findDataflowIdById(idDataset);
+      dataflowId = metabaseRepository.findDataflowIdById(idDataset);
       if (snap.getReportingDataset() != null
               && snap.getReportingDataset().getDataProviderId() != null) {
         List<RepresentativeVO> representatives =
@@ -392,6 +444,10 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       if (processId!=null) {
         processVO = processControllerZuul.findById(processId);
         value.put(LiteralConstants.USER, processVO.getUser());
+        Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+        value.put(JOB_ID, jobId);
+        value.put(DATAFLOWID, dataflowId);
+        value.put(DATAPROVIDERID, dataProviderId);
       }
       releaseEvent(EventType.ADD_DATASET_SNAPSHOT_FAILED_EVENT, idDataset, e.getMessage(), value);
       // Release the lock manually
@@ -414,16 +470,28 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   private void releaseEvent(EventType eventType, Long datasetId, String error, Map<String, Object> value) {
     try {
       String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
+      Long jobId = value!=null ? (Long) value.get(JOB_ID) : null;
+      Long dataflowId = value!=null ? (Long) value.get(DATAFLOWID) : null;
+      Long dataProviderId = value!=null ? (Long) value.get(DATAPROVIDERID) : null;
       if (error == null) {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
                 NotificationVO.builder()
-                        .user(user)
-                        .datasetId(datasetId).build());
+                    .user(user)
+                    .datasetId(datasetId)
+                    .jobId(jobId)
+                    .dataflowId(dataflowId)
+                    .providerId(dataProviderId)
+                    .build());
       } else {
         kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, value,
                 NotificationVO.builder()
-                        .user(user)
-                        .datasetId(datasetId).error(error).build());
+                    .user(user)
+                    .datasetId(datasetId)
+                    .jobId(jobId)
+                    .dataflowId(dataflowId)
+                    .providerId(dataProviderId)
+                    .error(error)
+                    .build());
       }
     } catch (EEAException e) {
       LOG.error("Error releasing notification", e);
@@ -589,14 +657,19 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
     Map<String, Object> value = new HashMap<>();
     Boolean silentRelease = false;
     ProcessVO processVO = null;
+    Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
     if (processId!=null) {
+      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
       processVO = processControllerZuul.findById(processId);
       value.put(LiteralConstants.USER, processVO.getUser());
+      value.put(LiteralConstants.JOB_ID, jobId);
+      value.put(LiteralConstants.DATAFLOWID, idDataflow);
+      value.put(LiteralConstants.DATAPROVIDERID, idDataProvider);
 
       silentRelease = jobControllerZuul.isSilentRelease(processId);
     }
 
-    Long idDataflow = datasetMetabaseService.findDatasetMetabase(idDataset).getDataflowId();
+
     if (provider != null && idDataCollection != null) {
       TenantResolver
               .setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataCollection));
@@ -1523,5 +1596,126 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
   public SnapshotVO getLatestReleaseSnapshot(Long datasetId) {
     Snapshot snapshot = snapshotRepository.findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByCreationDateDesc(datasetId);
     return snapshotMapper.entityToClass(snapshot);
+  }
+
+  /**
+   * Export historic releases CSV file.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @param folderName the folder name
+   * @param fileNameWithExtension the filename
+   * @param processUUID the process id
+   * @throws Exception
+   */
+  @Async
+  @Override
+  public void exportHistoricReleasesCSV(@DatasetId Long datasetId, Long dataflowId, String folderName, String fileNameWithExtension, String processUUID) throws Exception{
+    Boolean processUpdated = processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.EXPORT_HISTORIC_RELEASES, processUUID,
+            SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+    if(!processUpdated){
+      throw new Exception("Could not update EXPORT_HISTORIC_RELEASES process to status IN_PROGRESS for processId=" + processUUID + " and datasetId "+ datasetId);
+    }
+
+    File fileFolder = new File(importPath, folderName);
+
+    String creatingFileError =
+            String.format("Failed generating CSV file with name %s using datasetID %s",
+                    fileNameWithExtension, datasetId);
+
+    fileFolder.mkdirs();
+
+    // Creates notification VO and passes the datasetID and the filename
+    NotificationVO notificationVO = NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(datasetId).dataflowId(dataflowId)
+            .fileName(fileNameWithExtension).processId(processUUID).error(creatingFileError).build();
+
+    File outputFile = new File(fileFolder, fileNameWithExtension);
+
+    try (CSVWriter csvWriter =
+                 new CSVWriter(new FileWriter(outputFile), delimiter, CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                         CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
+
+      // Creates an array list containing all the column names from the CSV defined as constants
+      List<String> headers = new ArrayList<>(Arrays.asList(LiteralConstants.COUNTRY_CODE_HEADER, LiteralConstants.DATA_COLLECTION_HEADER,
+              LiteralConstants.EU_DATASET_HEADER, LiteralConstants.RELEASE_DATE_HEADER, LiteralConstants.PUBLIC_HEADER));
+
+      // Writes the column names into the CSV Writer and sets the array String to headers size so it
+      // only writes at most the number of columns as variables per row
+      csvWriter.writeNext(headers.stream().toArray(String[]::new), false);
+      int nHeaders = 5;
+
+      fillHistoricReleasesExportData(csvWriter, datasetId, nHeaders);
+
+    }
+    catch (Exception e) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_HISTORIC_RELEASES_FAILED_EVENT, null,
+              notificationVO);
+      LOG.error(String.format(EEAErrorMessage.FILE_NOT_FOUND + ". DatasetId: %s, with error: %s",
+              datasetId, e.getMessage(), e));
+      processUpdated = processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.CANCELED, ProcessTypeEnum.EXPORT_HISTORIC_RELEASES, processUUID,
+              SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+      if(!processUpdated){
+        throw new Exception("Could not update EXPORT_HISTORIC_RELEASES process to status CANCELED for processId=" + processUUID + " and datasetId "+ datasetId);
+      }
+      return;
+    }
+    processControllerZuul.updateProcess(datasetId, dataflowId, ProcessStatusEnum.FINISHED, ProcessTypeEnum.EXPORT_HISTORIC_RELEASES, processUUID,
+            SecurityContextHolder.getContext().getAuthentication().getName(), defaultProcessPriority, null);
+    kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT, null,
+            notificationVO);
+
+  }
+
+  /**
+   * Fill historic releases export data.
+   *
+   * @param csvWriter the csv writer
+   * @param datasetId the dataset id
+   * @param nHeaders the n headers
+   */
+  private void fillHistoricReleasesExportData(CSVWriter csvWriter, Long datasetId, int nHeaders) throws EEAException {
+    List<ReleaseVO> historicReleases = getReleases(datasetId);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+    for (ReleaseVO release : historicReleases) {
+      String[] row = new String[nHeaders];
+
+      row[0] = release.getDataProviderCode();
+      row[1] = String.valueOf(release.getDcrelease());
+      row[2] = String.valueOf(release.getEurelease());
+
+      if (release.getDateReleased() != null) {
+        row[3] = sdf.format(release.getDateReleased());
+      } else {
+        row[3] = "";
+      }
+
+      row[4] = String.valueOf(!release.getRestrictFromPublic());
+      csvWriter.writeNext(row, false);
+    }
+  }
+
+  /**
+   * Download historic releases CSV file.
+   *
+   * @param datasetId the dataset id
+   * @param fileName the file name
+   * @return the file
+   * @throws IOException Signals that an I/O exception has occurred.
+   */
+  @Override
+  public File downloadHistoricReleasesCSV(Long datasetId, String fileName) throws IOException{
+    String folderName = "dataset-" + datasetId + "-HistoricReleases";
+    // we compound the route and create the file
+    File file = new File(new File(importPath, folderName), fileName);
+    if (!file.exists()) {
+
+      LOG.error("When downloading historic releases file {} for datasetId {} the file was not found", file.getAbsolutePath(), datasetId);
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+              String.format("Could not download historic releases for datasetId %s and filePath %s", datasetId, fileName));
+    }
+
+    return file;
   }
 }

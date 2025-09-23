@@ -146,6 +146,9 @@ public final class EEAErrorMessage {
   /** The Constant FIELD_NAME_NULL: {@value}. */
   public static final String FIELD_NAME_NULL = "The name of fieldSchema should be filled";
 
+  /** The Constant FIELD_NAME_WHITESPACES: {@value}. */
+  public static final String FIELD_NAME_WHITESPACES = "The name of fieldSchema should not contain whitespaces";
+
   /** The Constant FORBIDDEN: {@value}. */
   public static final String FORBIDDEN = "The user has no permissions";
 

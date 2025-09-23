@@ -128,6 +128,8 @@ public final class LiteralConstants {
   /** The Constant USER: {@value}. */
   public static final String USER = "user";
 
+  public static final String JOB_ID = "jobId";
+
   /** The Constant ID: {@value}. */
   public static final String ID = "_id";
 
@@ -522,6 +524,16 @@ public final class LiteralConstants {
   public static final String EXPORT_PARQUET = "exportParquet";
 
   public static final String EXPORT_CSV = "exportCsv";
+
+  public static final String COUNTRY_CODE_HEADER = "Country Code";
+
+  public static final String DATA_COLLECTION_HEADER = "Data Collection";
+
+  public static final String EU_DATASET_HEADER = "EU dataset";
+
+  public static final String RELEASE_DATE_HEADER = "Release date";
+
+  public static final String PUBLIC_HEADER = "Public";
 
   /**
    * Instantiates a new literal constants.

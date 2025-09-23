@@ -21,6 +21,7 @@ export const GlobalNotifications = ({ bigData }) => {
   useEffect(() => {
     downloadAllSchemasInfoFile();
     downloadQCRulesFile();
+    downloadHistoricDataFile();
     downloadUsersListFile();
     downloadValidationsFile();
     downloadExportFMEFile();
@@ -83,6 +84,8 @@ export const GlobalNotifications = ({ bigData }) => {
         notification.content.datasetId,
         notification.content.fileName
       );
+
+      console.log(data);
       notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_QC_RULES_FILE' });
 
       if (data.size !== 0) {
@@ -94,6 +97,43 @@ export const GlobalNotifications = ({ bigData }) => {
         notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
       } else {
         notificationContext.add({ type: 'DOWNLOAD_QC_RULES_FILE_ERROR' }, true);
+      }
+    } finally {
+      notificationContext.clearHiddenNotifications();
+    }
+  };
+
+  const downloadHistoricDataFile = async () => {
+
+    const notification = findHiddenNotification('EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT');
+    if (isNil(notification)) {
+      return;
+    }
+    console.log(notification);
+    try {
+      console.log(notification.content.datasetId);
+      console.log(notification.content.dataflowId);
+      console.log(notification.content.nameFile);
+      console.log(notification.content.processId);
+      const { data } = await ValidationService.downloadHistoricReleaseFile(
+        notification.content.datasetId,
+        notification.content.dataflowId,
+        notification.content.nameFile,
+        notification.content.processId
+      );
+
+
+      console.log(data);
+      if (data.size !== 0) {
+        DownloadFile(data, notification.content.nameFile);
+        notificationContext.add({ type: 'AUTOMATICALLY_DOWNLOAD_HISTORIC_RELEASES_FILE' });
+      }
+    } catch (error) {
+      console.error('GlobalNotifications - downloadHistoricReleasesFile.', error);
+      if (error.response?.status === 400) {
+        notificationContext.add({ type: 'DOWNLOAD_FILE_BAD_REQUEST_ERROR' }, true);
+      } else {
+        notificationContext.add({ type: 'DOWNLOAD_HISTORIC_RELEASES_FILE_ERROR' }, true);
       }
     } finally {
       notificationContext.clearHiddenNotifications();
@@ -224,13 +264,13 @@ export const GlobalNotifications = ({ bigData }) => {
 
         const { data } = bigData
           ? await DatasetService.downloadExportDatasetFileDL(
-              notification.content.datasetId,
-              encodeURIComponent(downloadFileName)
-            )
+            notification.content.datasetId,
+            encodeURIComponent(downloadFileName)
+          )
           : await DatasetService.downloadExportDatasetFile(
-              notification.content.datasetId,
-              encodeURIComponent(downloadFileName)
-            );
+            notification.content.datasetId,
+            encodeURIComponent(downloadFileName)
+          );
 
         if (data.size !== 0) {
           DownloadFile(data, downloadFileName);

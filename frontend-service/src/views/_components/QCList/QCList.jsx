@@ -50,7 +50,8 @@ export const QCList = ({
   isDataflowOpen = false,
   isDatasetDesigner = false,
   setHasQCsHistory = () => {},
-  setHasValidations = () => {}
+  setHasValidations = () => {},
+  setAutomaticQCsDefaultLevelError = () => {}
 }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
@@ -59,6 +60,7 @@ export const QCList = ({
   const { filteredData, isFiltered } = useFilters(`qcList_${dataset.datasetId}`);
 
   const [tabsValidationsState, tabsValidationsDispatch] = useReducer(qcListReducer, {
+    automaticQCsDefaultLevelError: null,
     deletedRuleId: null,
     editingRows: [],
     hasEmptyFields: false,
@@ -164,6 +166,9 @@ export const QCList = ({
     validationContext.onFetchingData(isFetchingData, updatedRuleId);
     try {
       const validationsServiceList = await ValidationService.getAll(dataflowId, datasetSchemaId, !isDatasetDesigner);
+
+      setAutomaticQCsDefaultLevelError(validationsServiceList?.automaticQCsDefaultLevelError);
+
       if (!isNil(validationsServiceList) && !isNil(validationsServiceList.validations)) {
         validationsServiceList.validations.forEach(validation => {
           const additionalInfo = getAdditionalValidationInfo(

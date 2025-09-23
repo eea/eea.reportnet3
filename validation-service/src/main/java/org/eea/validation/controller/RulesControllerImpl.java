@@ -25,6 +25,7 @@ import org.eea.interfaces.vo.dataset.DesignDatasetVO;
 import org.eea.interfaces.vo.dataset.ValueVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.FileTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.ImportSchemaVO;
@@ -334,6 +335,55 @@ public class RulesControllerImpl implements RulesController {
       String ruleId = (ruleVO != null) ? ruleVO.getRuleId() : null;
       LOG.error("Unexpected error! Error creating new rule with id {} for datasetId {} Message: {}", ruleId, datasetId, e.getMessage());
       throw e;
+    }
+  }
+
+  /**
+   * Updates the automatic QC default level error for a dataset schema.
+   *
+   * @param datasetId the dataset ID used for authorization
+   * @param datasetSchemaId the dataset schema id
+   * @param automaticQCsDefaultLevelError the new automatic QC default level error
+   */
+  @Override
+  @HystrixCommand
+  @PreAuthorize("secondLevelAuthorize(#datasetId,'DATASCHEMA_STEWARD','DATASCHEMA_CUSTODIAN','DATASCHEMA_EDITOR_WRITE')")
+  @PutMapping("/updateAutomaticQCsDefaultLevelError")
+  @ApiOperation(value = "Updates the field for automatic QCs default level error.", hidden = true)
+  @ApiResponse(code = 400, message = "Couldn't update the automatic QCs default level error.")
+  public void updateAutomaticQCsDefaultLevelError(
+          @ApiParam(
+                  value = "Dataset id used to authorize the user for this process",
+                  example = "5")
+          @RequestParam("datasetId") long datasetId,
+          @ApiParam(
+                  value = "Dataset schema id used in the creation process",
+                  example = "5cf0e9b3b793310e9ceca190")
+          @RequestParam("idDatasetSchema") String datasetSchemaId,
+          @ApiParam(
+                  value = "The automatic QC default level error",
+                  example = "INFO")
+          @RequestParam("automaticQCsDefaultLevelError") ErrorTypeEnum automaticQCsDefaultLevelError
+  ) {
+    try {
+      String user = SecurityContextHolder.getContext().getAuthentication().getName();
+      ThreadPropertiesManager.setVariable("user", user);
+
+      LOG.info("Request to update automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}",
+              datasetId, datasetSchemaId, automaticQCsDefaultLevelError);
+      rulesService.updateAutomaticQCsDefaultLevelError(datasetId, datasetSchemaId, automaticQCsDefaultLevelError);
+    } catch (IllegalArgumentException e) {
+      LOG.error("Field datasetSchemaId is incorrect, you have to use the field idDatasetSchema from RulesSchema at mongo document. Error updating automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}. Dataflow is not in DESIGN status thus updating an automatic QC cannot be performed.",
+              datasetId, datasetSchemaId, automaticQCsDefaultLevelError, e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid datasetSchemaId. Field datasetSchemaId is incorrect, you have to use the field idDatasetSchema from RulesSchema at mongo document. ", e);
+    } catch (EEAException eeaException) {
+      LOG.error("Error updating automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}. Dataflow is not in DESIGN status thus updating an automatic QC cannot be performed.",
+              datasetId, datasetSchemaId, automaticQCsDefaultLevelError, eeaException);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, eeaException.getMessage(), eeaException);
+    } catch (Exception e) {
+      LOG.error("Error updating automatic QC default level error for dataset id: {}, datasetSchema id: {}, new level: {}",
+              datasetId, datasetSchemaId, automaticQCsDefaultLevelError, e);
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred", e);
     }
   }
 

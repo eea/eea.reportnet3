@@ -191,6 +191,10 @@ public interface JobRepository extends PagingAndSortingRepository<Job, Long>, Jo
      */
     Integer countByDataflowIdAndProviderIdAndJobStatusAndRelease(
         Long dataflowId, Long providerId, JobStatusEnum jobStatus, boolean release);
+
+    List<Job> findAllByDatasetIdAndJobStatusIn(Long datasetId, List<JobStatusEnum> jobStatus);
+
+    List<Job> findAllByDataflowIdAndProviderIdAndJobStatusIn(Long dataflowId, Long providerId, List<JobStatusEnum> jobStatus);
 }
 
 

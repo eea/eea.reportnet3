@@ -11,9 +11,21 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+
+import org.bson.types.ObjectId;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.communication.NotificationController.NotificationControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetMetabaseController;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
+import org.eea.validation.persistence.schemas.rule.RulesSchema;
+import org.eea.validation.service.impl.RulesServiceImpl;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
+import org.eea.interfaces.vo.dataflow.DataFlowVO;
+import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
+import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
 import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.CopySchemaVO;
@@ -39,12 +51,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.server.ResponseStatusException;
+import com.mongodb.client.result.UpdateResult;
+
 
 /**
  * The Class RulesControllerImplTest.
@@ -56,7 +71,13 @@ public class RulesControllerImplTest {
   @InjectMocks
   private RulesControllerImpl rulesControllerImpl;
 
-  /** The rules service. */
+  /** The rules service Implementation class. */
+  @InjectMocks
+  private RulesServiceImpl rulesServiceImpl;
+
+  @Mock
+  private MongoTemplate mongoTemplate;
+  /** The rules service interface. */
   @Mock
   private RulesService rulesService;
 
@@ -73,6 +94,15 @@ public class RulesControllerImplTest {
   /** The http servlet response. */
   @Mock
   private HttpServletResponse httpServletResponse;
+
+  @Mock
+  private DatasetMetabaseController.DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul;
+
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
+
+  @Mock
+  private UpdateResult updateResult;
 
   /** The security context. */
   SecurityContext securityContext;
@@ -909,5 +939,129 @@ public class RulesControllerImplTest {
 
     rulesControllerImpl.downloadQCCSV(1L, "FILENAME", null, httpServletResponse);
     Mockito.verify(outputStream, times(1)).close();
+  }
+
+  @Test
+  public void testUpdateAutomaticQCsDefaultLevelError_successfulUpdate() throws EEAException {
+    // set up dataset with a valid dataflowId
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(1L)).thenReturn(dataset);
+
+    // set up dataflow in DESIGN status
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
+
+    // simulate Mongo update result where document is matched and modified
+    Mockito.when(updateResult.getMatchedCount()).thenReturn(1L);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(1L);
+
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(updateResult);
+
+    rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
+
+    // verify mongo update was called exactly one time
+    Mockito.verify(mongoTemplate, times(1))
+            .updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class));
+  }
+
+  @Test
+  public void testUpdateAutomaticQCsDefaultLevelError_noDocumentMatched() throws EEAException {
+    // simulate a case where no document matches the mongo query
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(1L)).thenReturn(dataset);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
+
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(updateResult);
+    Mockito.when(updateResult.getMatchedCount()).thenReturn(0L);
+
+    rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
+    Mockito.verify(updateResult, times(1)).getMatchedCount();
+  }
+
+  @Test
+  public void testUpdateAutomaticQCsDefaultLevelError_noModification() throws EEAException {
+    // simulate document matched but value was already the same
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(1L)).thenReturn(dataset);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
+
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(updateResult);
+    Mockito.when(updateResult.getMatchedCount()).thenReturn(1L);
+    Mockito.when(updateResult.getModifiedCount()).thenReturn(0L);
+
+    rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
+    Mockito.verify(updateResult, times(1)).getModifiedCount();
+  }
+
+  @Test(expected = EEAException.class)
+  public void testUpdateAutomaticQCsDefaultLevelError_notInDesignStatus() throws EEAException {
+    // simulate dataflow status not being DESIGN -> should throw EEAException
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DRAFT);
+
+    rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void testUpdateAutomaticQCsDefaultLevelError_mongoFails() throws EEAException {
+    // simulate MongoDB throwing an unexpected RuntimeException
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(1L)).thenReturn(dataset);
+
+    DataFlowVO dataflow = new DataFlowVO();
+    dataflow.setStatus(TypeStatusEnum.DESIGN);
+    Mockito.when(dataflowControllerZuul.getMetabaseById(1L)).thenReturn(dataflow);
+
+    Mockito.when(mongoTemplate.exists(Mockito.any(Query.class), Mockito.eq(RulesSchema.class)))
+            .thenReturn(true);
+
+    Mockito.when(mongoTemplate.updateFirst(Mockito.any(Query.class), Mockito.any(Update.class), Mockito.eq(RulesSchema.class)))
+            .thenThrow(new RuntimeException("Mongo failure"));
+
+    rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
+  }
+
+  @Test(expected = Exception.class)
+  public void testUpdateAutomaticQCsDefaultLevelError_datasetMetabaseThrows() throws EEAException {
+    // simulate dataset metabase controller throwing exception
+    Mockito.when(dataSetMetabaseControllerZuul.findDatasetMetabaseById(1L))
+            .thenThrow(new Exception("Dataset fetch failed"));
+
+    rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
+  }
+
+  @Test(expected = Exception.class)
+  public void testUpdateAutomaticQCsDefaultLevelError_dataflowRetrievalThrows() throws EEAException {
+    // simulate dataflow controller throwing exception
+    DataSetMetabaseVO dataset = new DataSetMetabaseVO();
+    dataset.setDataflowId(1L);
+
+    rulesServiceImpl.updateAutomaticQCsDefaultLevelError(1L, new ObjectId().toString(), ErrorTypeEnum.INFO);
   }
 }

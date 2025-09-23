@@ -67,7 +67,8 @@ public interface DocumentController {
    */
   @GetMapping(value = "/v1/{documentId}/dataflow/{dataflowId}")
   Resource getDocument(@PathVariable("documentId") Long documentId,
-      @PathVariable("dataflowId") final Long dataflowId);
+      @PathVariable("dataflowId") final Long dataflowId,
+                       @RequestParam("providerId") final Long providerId);
 
   /**
    * Gets the document legacy.
@@ -78,7 +79,8 @@ public interface DocumentController {
    */
   @GetMapping(value = "/{documentId}/dataflow/{dataflowId}")
   Resource getDocumentLegacy(@PathVariable("documentId") Long documentId,
-      @PathVariable("dataflowId") final Long dataflowId);
+      @PathVariable("dataflowId") final Long dataflowId,
+                             @RequestParam("providerId") final Long providerId);
 
   /**
    * Delete document. You can delete metabase if you want , the boolean is to delete metabase by

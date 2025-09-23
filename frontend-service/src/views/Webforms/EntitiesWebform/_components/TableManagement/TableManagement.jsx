@@ -377,7 +377,7 @@ export const TableManagement = ({
     const entitiesFieldSchemaValue =
       rowData && rowData.dataRow ? RecordUtils.getCellValue({ rowData }, entitiesIdFieldSchemaId) : undefined;
 
-    let tableName = rootTableName;
+    let tableName;
 
     if (rowData && rowData.dataRow) {
       rowData.dataRow.forEach(row =>

@@ -37,6 +37,9 @@ import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.interfaces.vo.validation.TaskVO;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -128,6 +131,10 @@ public class ValidationControllerImpl implements ValidationController {
   @Autowired
   private DataSetControllerZuul dataSetControllerZuul;
 
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
   /**
    * Executes the validation job
    *
@@ -189,6 +196,7 @@ public class ValidationControllerImpl implements ValidationController {
       if (jobId!=null) {
         JobProcessVO jobProcessVO = new JobProcessVO(null, jobId, uuid);
         jobProcessControllerZuul.save(jobProcessVO);
+
       }
 
     } else {
@@ -230,11 +238,21 @@ public class ValidationControllerImpl implements ValidationController {
           TableSchemaVO tableSchemaVO = datasetSchemaController.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
           if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                   && BooleanUtils.isTrue(dataSetControllerZuul.isIcebergTableCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-            if(jobId != null) {
-              jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
-              jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            if (jobId != null) {
+                jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+                jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+                processControllerZuul.updateProcess(datasetId, dataset.getDataflowId(),
+                        ProcessStatusEnum.CANCELED, ProcessTypeEnum.VALIDATION, uuid, user, priority, released);
             }
+
             validationHelper.deleteLockToReleaseProcess(datasetId);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_FAILED_ICEBERG_EXISTS_EVENT, null,
+                    NotificationVO.builder()
+                            .user(jobVO.getCreatorUsername())
+                            .datasetId(datasetId)
+                            .dataflowId(dataset.getDataflowId())
+                            .build());
+
             throw new Exception("Can not validate for jobId " + jobId + " because there is an iceberg table");
           }
         }

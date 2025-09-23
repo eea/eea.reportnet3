@@ -1,6 +1,7 @@
 package org.eea.dataset.service;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import org.eea.dataset.service.impl.DesignDatasetServiceImpl;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
+import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
@@ -112,6 +114,9 @@ public class DesignDatasetServiceTest {
 
   @Mock
   private WebFormMapper webformMapper;
+
+  @Mock
+  private DataFlowControllerZuul dataflowControllerZuul;
 
   private SecurityContext securityContext;
 
@@ -226,6 +231,8 @@ public class DesignDatasetServiceTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
+    Mockito.when(dataflowControllerZuul.isBigDataflow(any()))
+      .thenReturn(false);
     designDatasetService.copyDesignDatasets(1L, 2L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -245,6 +252,8 @@ public class DesignDatasetServiceTest {
         .thenReturn(Arrays.asList(new DesignDatasetVO()));
     Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong()))
         .thenThrow(EEAException.class);
+    Mockito.when(dataflowControllerZuul.isBigDataflow(any()))
+      .thenReturn(false);
     try {
       designDatasetService.copyDesignDatasets(1L, 2L);
     } catch (EEAException e) {

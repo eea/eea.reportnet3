@@ -28,7 +28,9 @@ public enum ProcessTypeEnum {
 
   FILE_EXPORT("FILE_EXPORT"),
 
-  EXPORT_QC("EXPORT_QC");
+  EXPORT_QC("EXPORT_QC"),
+
+  EXPORT_HISTORIC_RELEASES("EXPORT_HISTORIC_RELEASES");
 
   /** The value. */
   private final String value;

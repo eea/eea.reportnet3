@@ -17,6 +17,11 @@ export const ValidationRepository = {
       url: getUrl(ValidationConfig.downloadQCRulesFile, { datasetId, fileName })
     }),
 
+  downloadHistoricReleaseFile: async (datasetId,dataflowId,nameFile,processId) =>
+    await HTTPRequester.download({
+      url: getUrl(ValidationConfig.downloadHistoricReleaseFile, { datasetId, dataflowId, nameFile,processId })
+    }),
+
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await HTTPRequester.download({
       url: getUrl(ValidationConfig.downloadShowValidationsFile, { datasetId, fileName })
@@ -24,6 +29,10 @@ export const ValidationRepository = {
 
   generateQCRulesFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateQCRulesFile, { datasetId }) }),
+
+  generateHistoricDataFile: async (datasetId, dataflowId) =>
+    await HTTPRequester.post({ url: getUrl(ValidationConfig.generateHistoricDataFile, { datasetId,dataflowId }),
+    headers: {'Authorization':'ApiKey f75147fd-da38-454b-a54b-1e09f8d2163a' }}),
 
   generateShowValidationsFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateShowValidationsFile, { datasetId }) }),
@@ -59,5 +68,14 @@ export const ValidationRepository = {
       data: { sqlRule: sqlSentence }
     }),
 
-  viewUpdated: async datasetId => await HTTPRequester.get({ url: getUrl(ValidationConfig.viewUpdated, { datasetId }) })
+  viewUpdated: async datasetId => await HTTPRequester.get({ url: getUrl(ValidationConfig.viewUpdated, { datasetId }) }),
+
+  setDefaultSeverity: async (datasetId, datasetSchema, severity) =>
+    await HTTPRequester.update({
+      url: getUrl(ValidationConfig.setDefaultSeverity, {
+        datasetId,
+        datasetSchema,
+        automaticQCsDefaultLevelError: severity
+      })
+    })
 };

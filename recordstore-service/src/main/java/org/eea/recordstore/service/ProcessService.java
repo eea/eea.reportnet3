@@ -62,6 +62,14 @@ public interface ProcessService {
   ProcessVO getByProcessId(String processId);
 
   /**
+   * Gets the by process id.
+   *
+   * @param processId the process id
+   * @return the by process id
+   */
+  List<ProcessVO> getByProcessIds(List<String> processId);
+
+  /**
    * Checks if is process finished.
    *
    * @param processId the process id

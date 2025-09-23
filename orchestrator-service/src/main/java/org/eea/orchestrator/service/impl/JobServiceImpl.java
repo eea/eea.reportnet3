@@ -8,6 +8,7 @@ import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
+import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController.DataSetSnapshotControllerZuul;
 import org.eea.interfaces.controller.dataset.EUDatasetController.EUDatasetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController.ProcessControllerZuul;
@@ -145,6 +146,9 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private JobUtils jobUtils;
 
+    @Autowired
+    private DatasetSnapshotController datasetSnapshotController;
+
     private static final String BEARER = "Bearer ";
     private static final String CANCELED_BY_ADMIN_ERROR = "cancelled by admin";
 
@@ -196,7 +200,7 @@ public class JobServiceImpl implements JobService {
     public Long addJob(Long dataflowId, Long dataProviderId, Long datasetId, Map<String, Object> parameters, JobTypeEnum jobType, JobStatusEnum jobStatus, boolean release, String fmeJobId, String dataflowName, String datasetName) {
         Timestamp ts = new Timestamp(System.currentTimeMillis());
         Job job = new Job(null, jobType, jobStatus, ts, ts, parameters, SecurityContextHolder.getContext().getAuthentication().getName(), release, dataflowId, dataProviderId, datasetId, fmeJobId, dataflowName, datasetName, null, null);
-        job = jobRepository.save(job);
+        job = jobRepository.saveAndFlushJobManually(job);
         jobHistoryService.saveJobHistory(job);
         return job.getId();
     }
@@ -377,7 +381,7 @@ public class JobServiceImpl implements JobService {
         if (job.isPresent()) {
             job.get().setJobStatus(status);
             job.get().setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
-            jobRepository.save(job.get());
+            jobRepository.saveAndFlushJobManually(job.get());
             jobHistoryService.saveJobHistory(job.get());
         } else {
             LOG.info("Could not update status for jobId {} because the id does not exist", jobId);
@@ -400,7 +404,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobVO save(JobVO jobVO) {
         Job job = jobMapper.classToEntity(jobVO);
-        return jobMapper.entityToClass(jobRepository.save(job));
+        return jobMapper.entityToClass(jobRepository.saveAndFlushJobManually(job));
     }
 
     @Override
@@ -435,7 +439,7 @@ public class JobServiceImpl implements JobService {
         Optional<Job> job = jobRepository.findById(jobId);
         if (job.isPresent()) {
             job.get().setFmeJobId(fmeJobId);
-            jobRepository.save(job.get());
+            jobRepository.saveAndFlushJobManually(job.get());
             jobHistoryService.saveJobHistory(job.get());
         } else {
             LOG.info("Could not update fmeJobId for jobId {} because the id does not exist", jobId);
@@ -513,6 +517,7 @@ public class JobServiceImpl implements JobService {
         LOG.info("User cancelling job {} with jobInfo {}", jobId, jobInfo);
         JobVO jobVO = findById(jobId);
         List<String> processIds = jobProcessService.findProcessesByJobId(jobId);
+        datasetSnapshotController.rollBackSnapshotRecord(jobId, jobVO.getDataflowId(), jobVO.getProviderId());
         for (String processId : processIds) {
             List<TaskVO> tasks = dataSetControllerZuul.findTasksByProcessIdAndStatusIn(processId, Arrays.asList(ProcessStatusEnum.IN_PROGRESS, ProcessStatusEnum.IN_QUEUE));
             if (tasks.size()>0) {
@@ -529,7 +534,7 @@ public class JobServiceImpl implements JobService {
             LOG.info("User cancelled process {} for job {}", processId, jobId);
             if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
                 LOG.info("Removing historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
-                dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
+                //dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
                 LOG.info("Removed historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
             } else if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
@@ -569,6 +574,12 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public List<JobVO> findByJobTypeInAndJobStatusIn(List<JobTypeEnum> jobType, List<JobStatusEnum> jobStatus){
+        List<Job> jobList = jobRepository.findByJobTypeInAndJobStatusIn(jobType, jobStatus);
+        return jobMapper.entityListToClass(jobList);
+    }
+
+    @Override
     public void updateJobInfo(Long jobId, JobInfoEnum jobInfo, Integer lineNumber, Boolean updateJobHistory){
         String jobInfoStr = null;
         if(jobInfo != null) {
@@ -591,7 +602,7 @@ public class JobServiceImpl implements JobService {
                 if (jobVO.isRelease()) {
                     dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
-                            NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
+                            NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).jobId(jobVO.getId()).build());
                 } else {
                     validationControllerZuul.deleteLocksToReleaseProcess(jobVO.getDatasetId());
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.VALIDATION_CANCELED_EVENT, value,
@@ -601,7 +612,7 @@ public class JobServiceImpl implements JobService {
             case RELEASE:
                 dataSetSnapshotControllerZuul.releaseLocksFromReleaseDatasets(jobVO.getDataflowId(), jobVO.getProviderId());
                 kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_CANCELED_EVENT, value,
-                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).build());
+                        NotificationVO.builder().dataflowId(jobVO.getDataflowId()).providerId(jobVO.getProviderId()).user(user).error(CANCELED_BY_ADMIN_ERROR).jobId(jobVO.getId()).build());
                 break;
             case COPY_TO_EU_DATASET:
                 euDatasetControllerZuul.removeLocksRelatedToPopulateEU(jobVO.getDataflowId());
@@ -618,7 +629,7 @@ public class JobServiceImpl implements JobService {
         if(job.isPresent()){
             Map<String, Object> insertedParameters = job.get().getParameters();
             insertedParameters.put("fmeCallback", fmeCallback);
-            jobRepository.save(job.get());
+            jobRepository.saveAndFlushJobManually(job.get());
         }
     }
 
@@ -633,7 +644,7 @@ public class JobServiceImpl implements JobService {
                 numOfRestarts = (Integer) insertedParameters.get("numOfRestarts");
             }
             insertedParameters.put("numOfRestarts", numOfRestarts + 1);
-            jobRepository.save(job.get());
+            jobRepository.saveAndFlushJobManually(job.get());
         }
     }
 
@@ -738,5 +749,16 @@ public class JobServiceImpl implements JobService {
             }
         }
 
+    }
+
+    @Override
+    public List<JobVO> findActiveJobsRelatedToADatasetId(Long datasetId, Long dataflowId, Long providerId){
+        List<Job> jobs = jobRepository.findAllByDatasetIdAndJobStatusIn(datasetId, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+
+        if(dataflowId != null && providerId != null && providerId != 0L){
+            List<Job> jobsByDataflowAndProvider = jobRepository.findAllByDataflowIdAndProviderIdAndJobStatusIn(dataflowId, providerId, Arrays.asList(JobStatusEnum.QUEUED, JobStatusEnum.IN_PROGRESS));
+            jobs.addAll(jobsByDataflowAndProvider);
+        }
+        return jobMapper.entityListToClass(jobs);
     }
 }

@@ -291,4 +291,36 @@ public interface DatasetSnapshotController {
   @GetMapping(value = "/private/getSnapshotByDatasetId")
   List<SnapshotVO> getSnapshotByDatasetId(@RequestParam("datasetId") Long datasetId);
 
+  /**
+   * Export the historic releases for a data collection.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflow id
+   * @return the download url
+   */
+  @PostMapping(value = "/exportHistoricReleases/{datasetId}")
+  String exportHistoricReleasesCSV(@PathVariable("datasetId") Long datasetId, @RequestParam("dataflowId") Long dataflowId) throws Exception;
+
+  /**
+   * Download the historic releases for a data collection.
+   *
+   * @param datasetId the dataset id
+   * @param dataflowId the dataflowId id
+   * @param fileName the file name
+   * @param processId the processId
+   * @param response the response
+   */
+  @GetMapping("/downloadHistoricReleases/{datasetId}")
+  void downloadHistoricReleasesCSV(@PathVariable Long datasetId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("fileName") String fileName,
+                                   @RequestParam(value = "processId", required = false) String processId, HttpServletResponse response);
+
+  /***
+   * Rolling back the record from snapshot table in case o a failure or cancellation
+   * @param jobId The job id
+   * @param dataflowId The dataflow id
+   * @param providerId The provider id
+   */
+  @PutMapping("/private/rollBackSnapshotRecord/{jobId}")
+  void rollBackSnapshotRecord(@PathVariable Long jobId, @RequestParam("dataflowId") Long dataflowId, @RequestParam("providerId") Long providerId);
+
 }

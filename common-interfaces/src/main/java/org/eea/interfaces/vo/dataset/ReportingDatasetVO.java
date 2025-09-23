@@ -54,4 +54,6 @@ public class ReportingDatasetVO implements Serializable {
 
   private Boolean hasUpdatesAfterRelease;
 
+  private Date dateStatusChanged;
+
 }

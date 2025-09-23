@@ -45,7 +45,8 @@ public interface DatasetMetabaseController {
    */
   @GetMapping(value = "/dataflow/{dataflowId}", produces = MediaType.APPLICATION_JSON_VALUE)
   List<ReportingDatasetVO> findReportingDataSetIdByDataflowId(
-      @PathVariable("dataflowId") Long dataflowId);
+      @PathVariable("dataflowId") Long dataflowId,
+      @RequestParam(value = "providerId", required = false) Long providerId);
 
   /**
    * Creates the empty data set.

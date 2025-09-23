@@ -170,6 +170,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
   let bigDataRef = useRef();
+  let failedImportRef = useRef(false);
 
   bigDataRef.current = metadata?.dataflow.bigData;
 
@@ -348,6 +349,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (metadata?.dataset.datasetSchemaId) getFileExtensions();
+    if (isImportDatasetDialogVisible) failedImportRef.current = false;
   }, [metadata?.dataset.datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
@@ -360,22 +362,33 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     }
   }, [dataViewerOptions.tableSchemaId, selectedView]);
 
-  useEffect(() => {
-    const conversionToParquetCompleted = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT');
-    const conversionToIcebergCompleted = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT');
-    const conversionToParquetFailed = findHiddenNotification('ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT');
-    const conversionToIcebergFailed = findHiddenNotification('PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT');
-    if (
-      conversionToParquetCompleted ||
-      conversionToIcebergCompleted ||
-      conversionToParquetFailed ||
-      conversionToIcebergFailed
-    ) {
-      setIsLoadingIceberg(false);
-    }
-  }, [notificationContext.hidden]);
+  const hasConversionNotification = list =>
+    list?.some(notification =>
+      [
+        'ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT',
+        'PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT',
+        'ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT',
+        'PARQUET_TO_ICEBERG_FAILED_ACTIVE_JOBS_EVENT',
+        'ICEBERG_TO_PARQUET_FAILED_ACTIVE_JOBS_EVENT',
+        'ANOTHER_CONVERSION_IS_RUNNING_FAILED_EVENT'
+      ].includes(notification.key)
+    );
 
-  const findHiddenNotification = key => notificationContext.hidden.find(notification => notification.key === key);
+  const hasFailedImportNotification = list =>
+    list?.some(notification =>
+      ['IMPORT_REPORTING_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
+    );
+
+  useEffect(() => {
+    if (hasConversionNotification(notificationContext.toShow)) {
+      setIsLoadingIceberg(false);
+      onGetIcebergTables();
+      handleRefresh();
+    }
+
+    if (hasFailedImportNotification(notificationContext.toShow)) failedImportRef.current = true;
+  }, [notificationContext.toShow]);
 
   const getWebformConfiguration = async (webform, options) => {
     try {
@@ -1192,31 +1205,39 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const onUpload = async () => {
-    const action = 'DATASET_IMPORT';
-    actionsContext.testProcess(datasetId, action);
+  const onUpload = async e => {
     setIsImportDatasetDialogVisible(false);
     setSelectedCustomImportIntegration({ id: null, name: null });
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = metadata;
 
-    notificationContext.add(
-      {
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          customContent: {
-            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-            datasetLoading: resourcesContext.messages['datasetLoading']
-          },
-          dataflowName,
-          datasetName
-        }
-      },
-      true
-    );
+    if (!failedImportRef.current) {
+      const action = 'DATASET_IMPORT';
+      const fileName = e?.files?.[0]?.name || ' ';
+
+      actionsContext.testProcess(datasetId, action);
+
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = metadata;
+
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            customContent: {
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+              datasetLoading: resourcesContext.messages['datasetLoading']
+            },
+            dataflowName,
+            datasetName,
+            fileName
+          }
+        },
+        true
+      );
+    }
+    failedImportRef.current = false;
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 

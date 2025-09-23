@@ -2,6 +2,7 @@ package org.eea.dataset.service;
 
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
+import org.eea.dataset.service.model.ImportFileInDremioInfo;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.DataProviderVO;
 import org.eea.interfaces.vo.dataset.*;
@@ -9,6 +10,7 @@ import org.eea.interfaces.vo.dataset.enums.DatasetTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaIdNameVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.orchestrator.JobPresignedUrlInfo;
+import org.eea.interfaces.vo.orchestrator.JobVO;
 import org.eea.multitenancy.DatasetId;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,10 +32,13 @@ public interface BigDataDatasetService {
      * @param jobId the jobId
      * @param fmeJobId the fmeJobId
      * @param dataflowVO the dataflowVO
+     * @param helperMultipartFileMapper the helperMultipartFileMapper
+     * @param job the job
+     * @param importFileInDremioInfo the importFileInDremioInfo
      * @return
      */
     void importBigData(Long datasetId, Long dataflowId, Long providerId, String tableSchemaId,
-                       Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper) throws Exception;
+                       Boolean replace, Long integrationId, String delimiter, Long jobId, String fmeJobId, DataFlowVO dataflowVO, HelperMultipartFileMapper helperMultipartFileMapper, JobVO job, ImportFileInDremioInfo importFileInDremioInfo) throws Exception;
 
     /**
      * Generate s3 presigned Url for import
@@ -125,9 +130,10 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
      * @param datasetSchemaId the datasetSchemaId
-     *
+     * @param lockValue the lock value
+     * @return true if table can be converted
      */
-    void convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception;
+    Boolean convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -137,9 +143,10 @@ public interface BigDataDatasetService {
      * @param providerId the provider id
      * @param tableSchemaVO the tableSchemaVO
      * @param datasetSchemaId the datasetSchemaId
-     *
+     * @param lockValue the lock value
+     * @return true if table can be converted
      */
-    void convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId) throws Exception;
+    Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -148,9 +155,9 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaIds the tableSchema Ids
-     *
+     * @param lockValue the lock value
      */
-    void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds) throws Exception;
+    void initiateParquetToIcebergConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
@@ -159,9 +166,9 @@ public interface BigDataDatasetService {
      * @param dataflowId the dataflow id
      * @param providerId the provider id
      * @param tableSchemaIds the tableSchema Ids
-     *
+     * @param lockValue the lock value
      */
-    void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds) throws Exception;
+    void initiateIcebergToParquetConversion(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue) throws Exception;
 
     /**
      * Insert records manually
@@ -276,4 +283,15 @@ public interface BigDataDatasetService {
      * @throws EEAException The exception
      */
     void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
+
+    /**
+     * If an import job is added in the db retrieve it, else create a new one
+     *
+     * @param importFileInDremioInfo The importFileInDremioInfo object
+     * @param fmeJobId The fme job id
+     * @param jobId The job id
+     * @return a job object
+     * @throws Exception The exception
+     */
+    JobVO retrieveOrAddImportJob(ImportFileInDremioInfo importFileInDremioInfo, String fmeJobId, Long jobId) throws Exception;
 }

@@ -1776,7 +1776,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
    */
   private void removeLocksRelatedToPopulateEU(Long dataflowId) {
     List<ReportingDatasetVO> reportings =
-            dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId);
+            dataSetMetabaseControllerZuul.findReportingDataSetIdByDataflowId(dataflowId, null);
     Map<String, Object> populateEuDataset = new HashMap<>();
     populateEuDataset.put(LiteralConstants.SIGNATURE, LockSignature.POPULATE_EU_DATASET.getValue());
     populateEuDataset.put(LiteralConstants.DATAFLOWID, dataflowId);
@@ -1920,6 +1920,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put(LiteralConstants.USER, user);
+    value.put(LiteralConstants.JOB_ID, jobId);
     ConnectionDataVO conexion =
             getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
     // We get the datasetId from the snapshot
@@ -2072,6 +2073,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     Map<String, Object> value = new HashMap<>();
     value.put(LiteralConstants.DATASET_ID, datasetId);
     value.put(LiteralConstants.USER, user);
+    value.put(LiteralConstants.JOB_ID, jobId);
     ConnectionDataVO conexion =
             getConnectionDataForDataset(LiteralConstants.DATASET_PREFIX + datasetId);
     // We get the datasetId from the snapshot
@@ -2746,6 +2748,7 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                                     String error) {
 
     String user = value!=null && value.get(LiteralConstants.USER)!=null ? (String) value.get(LiteralConstants.USER) : SecurityContextHolder.getContext().getAuthentication().getName();
+    Long jobId = value!=null ? (Long) value.get(JOB_ID) : null;
     if (!RELEASE_COMPLETED_EVENT.equals(event)) {
       try {
         NotificationVO notificationVO = NotificationVO.builder()
@@ -2755,6 +2758,8 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
                 dataSetMetabaseControllerZuul.findDatasetMetabaseById(datasetId);
         notificationVO.setDatasetName(datasetMetabaseVO.getDataSetName());
         notificationVO.setDataflowId(datasetMetabaseVO.getDataflowId());
+        notificationVO.setProviderId(datasetMetabaseVO.getDataProviderId());
+        notificationVO.setJobId(jobId);
         notificationVO.setDataflowName(
                 dataflowControllerZuul.getMetabaseById(datasetMetabaseVO.getDataflowId()).getName());
         kafkaSenderUtils.releaseNotificableKafkaEvent(event, value, notificationVO);

@@ -178,6 +178,10 @@ public class FMEControllerImpl implements FMEController {
         if(insertedParameters.get("fmeCallback") == null || (Boolean) insertedParameters.get("fmeCallback") == true){
           LOG.info("Fme job with jobId {} and fmeJobId {} is successful and a callback has been made with a file", jobVO.getId(), fmeJobId);
           return;
+        } else {
+          // notification: import failed because FME failed to send a file for import
+          LOG.info("Import failed because FME did not returned a file. jobId {} and fmeJobId {}", jobVO.getId(), fmeJobId);
+          jobControllerZuul.sendFmeImportFailedNoFileReturnedNotification(jobVO);
         }
       }
       if(jobVO.getJobStatus().getValue().equals(JobStatusEnum.IN_PROGRESS.getValue())) {

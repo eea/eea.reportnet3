@@ -57,31 +57,31 @@ const checkShowRequired = (element, elements) => {
 };
 
 export const WebformRecord = ({
-  addingOnTableSchemaId,
-  bigData,
-  columnsSchema,
-  dataflowId,
-  dataProviderId,
-  datasetId,
-  datasetSchemaId,
-  hasFields,
-  isAddingMultiple,
-  isFixedNumber = true,
-  isOptional,
-  isReporting,
-  multipleRecords,
-  onAddMultipleWebform,
-  onRefresh,
-  onTabChange,
-  record,
-  referencedTableSchemaId,
-  rootPkFieldId,
-  rootTableName,
-  selectedTableId,
-  tableId,
-  tableName,
-  webformType
-}) => {
+                                addingOnTableSchemaId,
+                                bigData,
+                                columnsSchema,
+                                dataflowId,
+                                dataProviderId,
+                                datasetId,
+                                datasetSchemaId,
+                                hasFields,
+                                isAddingMultiple,
+                                isFixedNumber = true,
+                                isOptional,
+                                isReporting,
+                                multipleRecords,
+                                onAddMultipleWebform,
+                                onRefresh,
+                                onTabChange,
+                                record,
+                                referencedTableSchemaId,
+                                rootPkFieldId,
+                                rootTableName,
+                                selectedTableId,
+                                tableId,
+                                tableName,
+                                webformType
+                              }) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 

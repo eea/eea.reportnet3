@@ -23,10 +23,12 @@ import org.eea.dataset.persistence.metabase.repository.WebformRepository;
 import org.eea.dataset.persistence.schemas.domain.*;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.DataflowReferencedSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
+import org.eea.dataset.persistence.schemas.domain.rule.RulesSchema;
 import org.eea.dataset.persistence.schemas.domain.uniqueconstraints.UniqueConstraintSchema;
 import org.eea.dataset.persistence.schemas.domain.webform.Webform;
 import org.eea.dataset.persistence.schemas.repository.DataflowReferencedRepository;
 import org.eea.dataset.persistence.schemas.repository.PkCatalogueRepository;
+import org.eea.dataset.persistence.schemas.repository.RulesRepository;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.persistence.schemas.repository.UniqueConstraintRepository;
 import org.eea.dataset.service.DatasetMetabaseService;
@@ -41,7 +43,6 @@ import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataflow.ContributorController.ContributorControllerZuul;
 import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControllerZuul;
 import org.eea.interfaces.controller.dataflow.IntegrationController.IntegrationControllerZuul;
-import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.ResourceManagementController.ResourceManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -119,6 +120,12 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    */
   @Autowired
   private SchemasRepository schemasRepository;
+
+  /**
+   * The rules repository.
+   */
+  @Autowired
+  private RulesRepository rulesRepository;
 
   /**
    * The resource management controller zull.
@@ -277,7 +284,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   /** The webform repository. */
   @Autowired
   WebformRepository webformRepository;
-
 
 
   /**
@@ -506,7 +512,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @return the table schema VO
    */
   @Override
-  public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) {
+  public TableSchemaVO createTableSchema(String id, TableSchemaVO tableSchemaVO, Long datasetId) throws EEAException {
 
     ObjectId tableSchemaId = new ObjectId();
     ObjectId recordSchemaId = new ObjectId();
@@ -2235,7 +2241,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param tableSchemaId the table schema id
    * @param datasetId the dataset id
    */
-  private void createNotEmptyRule(String tableSchemaId, Long datasetId) {
+  private void createNotEmptyRule(String tableSchemaId, Long datasetId) throws EEAException {
+    // retieve default level error if any
+    String datasetSchemaId = getDatasetSchemaId(datasetId);
+    RulesSchema rulesSchema = rulesRepository.findByIdDatasetSchema(new ObjectId(datasetSchemaId));
+
+    ErrorTypeEnum automaticQCDefaultLevelError =
+            rulesSchema != null && rulesSchema.getAutomaticQCsDefaultLevelError() != null
+                    ? rulesSchema.getAutomaticQCsDefaultLevelError()
+                    : ErrorTypeEnum.ERROR;
+
     RuleVO ruleVO = new RuleVO();
     ruleVO.setReferenceId(tableSchemaId);
     ruleVO.setRuleName(LiteralConstants.RULE_TABLE_MANDATORY);
@@ -2243,7 +2258,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     ruleVO.setType(EntityTypeEnum.TABLE);
     ruleVO.setAutomatic(true);
     ruleVO.setThenCondition(
-            Arrays.asList("Mandatory table has no records", ErrorTypeEnum.BLOCKER.getValue()));
+            Arrays.asList("Mandatory table has no records", automaticQCDefaultLevelError.getValue()));
     ruleVO
             .setDescription("When a table is marked as mandatory, checks at least one record is added");
 
@@ -2276,7 +2291,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
    * @param datasetId the dataset id
    */
   private void updateNotEmptyRule(Boolean oldValue, Boolean newValue, String tableSchemaId,
-                                  Long datasetId) {
+                                  Long datasetId) throws EEAException {
     if (Boolean.TRUE.equals(oldValue)) {
       if (Boolean.FALSE.equals(newValue)) {
         deleteNotEmptyRule(tableSchemaId, datasetId);
@@ -2415,6 +2430,15 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       for (DataSetSchema schema : importClasses.getSchemas()) {
         // Create the empty new dataset schema
+        if (dataFlowControllerZuul.isBigDataflow(dataflowId)) {
+          for (TableSchema tableSchema : schema.getTableSchemas()) {
+            for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+              if (fieldSchema.getHeaderName().chars().anyMatch(Character::isWhitespace)) {
+                throw new EEAException(EEAErrorMessage.FIELD_NAME_WHITESPACES);
+              }
+            }
+          }
+        }
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
         DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
         dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
@@ -2517,11 +2541,19 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       if (e instanceof InterruptedException) {
         Thread.currentThread().interrupt();
       }
-      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
-              null,
-              NotificationVO.builder()
-                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                      .dataflowId(dataflowId).error("Error importing the schemas").build());
+      if (e instanceof EEAException && e.getMessage() != null && e.getMessage().equals(EEAErrorMessage.FIELD_NAME_WHITESPACES)) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT,
+          null,
+          NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .dataflowId(dataflowId).error("Error importing the schemas - " + EEAErrorMessage.FIELD_NAME_WHITESPACES).build());
+      } else {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_DATASET_SCHEMA_FAILED_EVENT,
+          null,
+          NotificationVO.builder()
+            .user(SecurityContextHolder.getContext().getAuthentication().getName())
+            .dataflowId(dataflowId).error("Error importing the schemas").build());
+      }
     } finally {
       Map<String, Object> importDatasetData = new HashMap<>();
       importDatasetData.put(LiteralConstants.SIGNATURE, LockSignature.IMPORT_SCHEMAS.getValue());
@@ -2674,16 +2706,30 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
       }
     } catch (EEAException e) {
       LOG.error("Error importing field schemas on datasetId {}", datasetId, e);
-      try {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
-                null,
-                NotificationVO.builder()
-                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                        .datasetId(datasetId).error("Error importing fieldSchemas").build());
-      } catch (EEAException e1) {
-        LOG.error(
-                "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
-                datasetId, e);
+      if (e instanceof EEAException && e.getMessage() != null && e.getMessage().equals(EEAErrorMessage.FIELD_NAME_WHITESPACES)) {
+        try {
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT,
+            null,
+            NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetId(datasetId).error("Error importing schemas - " + EEAErrorMessage.FIELD_NAME_WHITESPACES).build());
+        } catch (EEAException e1) {
+          LOG.error(
+            "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
+            datasetId, e);
+        }
+      } else {
+        try {
+          kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_FIELD_SCHEMA_FAILED_EVENT,
+            null,
+            NotificationVO.builder()
+              .user(SecurityContextHolder.getContext().getAuthentication().getName())
+              .datasetId(datasetId).error("Error importing fieldSchemas").build());
+        } catch (EEAException e1) {
+          LOG.error(
+            "Importing fieldSchemas from file failed and also failed sending the kafka notification. DatasetId {}",
+            datasetId, e);
+        }
       }
     }
   }
@@ -2736,12 +2782,39 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
   private void readFieldLines(final InputStream inputStream, final String tableSchemaId,
                               Long datasetId, boolean replace, DataSetSchema datasetSchema)
           throws EEAException, IOException {
-    LOG.info("Processing entries at method readFieldLines for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
+    LOG.info("Processing entries at method readFieldLines for datasetId {} and tableSchemaId {}", datasetId,
+      tableSchemaId);
     // Init variables
     String[] line;
+    byte[] fileBytes = inputStream.readAllBytes();
 
     try (Reader buf =
-                 new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+           new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileBytes), StandardCharsets.UTF_8))) {
+
+      // Init the library of reader file
+      final CSVParser csvParser = new CSVParserBuilder().withSeparator(delimiter).build();
+      final CSVReader reader = new CSVReaderBuilder(buf).withCSVParser(csvParser).build();
+
+      String recordSchemaId = fileCommon.findIdRecord(tableSchemaId, datasetSchema);
+
+      List<String> firstLine = Arrays.asList(reader.readNext());
+
+      // if first line is empty throw an error
+      checklineEmpty(firstLine);
+
+      while ((line = reader.readNext()) != null) {
+        final List<String> values = Arrays.asList(line);
+        FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
+        // if there's not a pk present, continue inserting/updating the field
+        if (dataFlowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
+          if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
+            throw new EEAException(EEAErrorMessage.FIELD_NAME_WHITESPACES);
+          }
+        }
+      }
+    }
+    try (Reader buf =
+           new BufferedReader(new InputStreamReader(new ByteArrayInputStream(fileBytes), StandardCharsets.UTF_8))) {
 
       // Init the library of reader file
       final CSVParser csvParser = new CSVParserBuilder().withSeparator(delimiter).build();

@@ -69,4 +69,13 @@ public class UserNotificationContentVO {
 
   /** The error */
   private String error;
+
+  /**
+   * The record lines
+   */
+  private String recordLines;
+
+  private String tableName;
+
+  private String fieldName;
 }

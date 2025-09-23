@@ -5,6 +5,7 @@ import java.util.Objects;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 
 
 /**
@@ -24,6 +25,8 @@ public class RulesSchemaVO {
   /** The rules. */
   private List<RuleVO> rules;
 
+  /** Default level error for automatic QCs. */
+  private ErrorTypeEnum automaticQCsDefaultLevelError;
 
   /**
    * Hash code.
