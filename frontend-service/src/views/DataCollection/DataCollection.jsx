@@ -445,10 +445,12 @@ export const DataCollection = () => {
             name="tableRepresentativeDropdown"
             onChange={e => setSelectedRepresentatives(e.target.value)}
             options={
-              representatives?.map(representative => ({
-                label: representative.dataSetName,
-                value: representative.dataProviderId
-              })) ?? []
+              representatives
+                ?.map(representative => ({
+                  label: representative.dataSetName,
+                  value: representative.dataProviderId
+                }))
+                .sort((a, b) => a.label.localeCompare(b.label)) ?? []
             }
             value={selectedRepresentatives}
           />
