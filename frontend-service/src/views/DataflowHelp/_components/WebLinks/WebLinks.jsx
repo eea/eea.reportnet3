@@ -142,21 +142,25 @@ export const WebLinks = ({
   );
 
   const getValidUrl = (url = '') => {
-    let newUrl = window.decodeURIComponent(url);
-    newUrl = newUrl.trim().replace(/\s/g, '');
+    let newUrl = decodeURIComponent(url);
+    newUrl = newUrl.trim();
 
-    if (/^(:\/\/)/.test(newUrl)) return `http${newUrl}`;
+    if (/^(:\/\/)/.test(newUrl)) return encodeURI(`http${newUrl}`);
 
-    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return `//${newUrl}`;
+    if (!/^(f|ht)tps?:\/\//i.test(newUrl)) return encodeURI(`//${newUrl}`);
 
-    return newUrl;
+    return encodeURI(newUrl);
   };
 
-  const linkTemplate = rowData => (
-    <a href={getValidUrl(rowData.url)} rel="noopener noreferrer" target="_blank">
-      {rowData.url}
-    </a>
-  );
+  const linkTemplate = rowData => {
+    const validUrl = getValidUrl(rowData.url);
+
+    return (
+      <a href={validUrl} rel="noopener noreferrer" target="_blank">
+        {rowData.url}
+      </a>
+    );
+  };
 
   const setErrors = (inputName, error) => {
     webLinksDispatch({ type: 'SET_ERRORS', payload: { inputName, error } });
