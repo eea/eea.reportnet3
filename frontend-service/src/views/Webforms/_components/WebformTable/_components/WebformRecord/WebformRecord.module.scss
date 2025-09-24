@@ -101,8 +101,11 @@
   .fieldsBlock {
     display: flex;
     justify-content: space-between;
-    max-width: 90%;
+    max-width:100%;
     align-items: flex-end;
+    > div:not([class]){
+      max-width:250px;
+    }
     > div:has(.label3){
       align-self: flex-start;
     }
@@ -179,10 +182,15 @@
     color: var(--general-text-color);
     :global .p-multiselect {
       width: 100%;
-      padding: 0.2rem 0;
+      padding:0;
+      line-height: 0;
+      .p-multiselect-label{
+        min-height:51px;
+      }
     }
     :global .p-dropdown {
       width: 100%;
+      line-height: 0;
     }
     :global .p-inputtext:not(.p-column-filter) {
       padding: 1rem 0.5rem;
@@ -207,7 +215,7 @@
     }
 
     .template {
-      width: 90%;
+      width: 100%;
 
       .nonExistField {
         color: var(--errors);
