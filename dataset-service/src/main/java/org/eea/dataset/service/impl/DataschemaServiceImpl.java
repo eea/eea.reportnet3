@@ -2428,17 +2428,11 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       validateNames(importClasses);
 
+      if (dataFlowControllerZuul.isBigDataflow(dataflowId)) {
+        validateTableFieldNamesHaveNoWhitespace(dataflowId, importClasses);
+      }
+
       for (DataSetSchema schema : importClasses.getSchemas()) {
-        // Create the empty new dataset schema
-        if (dataFlowControllerZuul.isBigDataflow(dataflowId)) {
-          for (TableSchema tableSchema : schema.getTableSchemas()) {
-            for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
-              if (fieldSchema.getHeaderName().chars().anyMatch(Character::isWhitespace)) {
-                throw new EEAException(EEAErrorMessage.FIELD_NAME_WHITESPACES);
-              }
-            }
-          }
-        }
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
         DataSetSchemaVO targetDatasetSchema = getDataSchemaById(newIdDatasetSchema);
         dictionaryOriginTargetObjectId.put(schema.getIdDataSetSchema().toString(),
@@ -2807,9 +2801,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
         // if there's not a pk present, continue inserting/updating the field
         if (dataFlowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
-          if (fieldSchemaVO.getName().chars().anyMatch(Character::isWhitespace)) {
-            throw new EEAException(EEAErrorMessage.FIELD_NAME_WHITESPACES);
-          }
+          validateTableFieldNameHasNoWhitespace(fieldSchemaVO.getName());
         }
       }
     }
@@ -3660,6 +3652,35 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         tableSchemaVO.setDataAreManuallyEditable(manuallyEditable);
         updateTableSchema(datasetId, tableSchemaVO, false);
       }
+    }
+  }
+
+  @Override
+  public void validateTableFieldNamesHaveNoWhitespace(long dataflowId, ImportSchemas importClasses) throws EEAException {
+    for (DataSetSchema schema : importClasses.getSchemas()) {
+      for (TableSchema tableSchema : schema.getTableSchemas()) {
+        for (FieldSchema fieldSchema : tableSchema.getRecordSchema().getFieldSchema()) {
+          validateTableFieldNameHasNoWhitespace(fieldSchema.getHeaderName());
+        }
+      }
+    }
+  }
+
+  @Override
+  public void validateTableFieldNamesHaveNoWhitespace(long dataflowId, List<DataSetSchemaVO> schemas) throws EEAException {
+    for (DataSetSchemaVO schemaVO : schemas) {
+      for (TableSchemaVO tableSchemaVO : schemaVO.getTableSchemas()) {
+        for (FieldSchemaVO fieldSchemaVO : tableSchemaVO.getRecordSchema().getFieldSchema()) {
+          validateTableFieldNameHasNoWhitespace(fieldSchemaVO.getName());
+        }
+      }
+    }
+  }
+
+  @Override
+  public void validateTableFieldNameHasNoWhitespace(String fieldName) throws EEAException {
+    if (fieldName != null && fieldName.chars().anyMatch(Character::isWhitespace)) {
+      throw new EEAException(EEAErrorMessage.FIELD_NAME_WHITESPACES);
     }
   }
 
