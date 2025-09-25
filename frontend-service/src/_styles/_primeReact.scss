@@ -259,12 +259,8 @@ body .p-multiselect:not(.p-disabled).p-focus {
   outline: 0 none;
   outline-offset: 0;
 }
-
-body .p-multiselect .p-multiselect-label-container {
-  padding:0!important;
-}
 body .p-multiselect .p-multiselect-label {
-  padding: 1rem 2em 1rem 0.429em;
+  padding: 0.429em;
   padding-right: 2em;
   font-weight: 400;
   color: var(--multiselect-label-color);
@@ -3274,6 +3270,4 @@ body .p-fluid .p-inplace.p-inplace-closable .p-inplace-content > :first-child {
 .p-multiselect-label.p-multiselect-label.p-multiselect-label,
 .p-dropdown-label.p-dropdown-label.p-dropdown-label{
   margin-bottom:0;
-  min-height:51px;
-  line-height:1.3;
 }
