@@ -874,7 +874,6 @@ export const FieldDesigner = ({
   };
 
   const parseReferenceField = completeReferencedField => {
-    console.log('completeReferencedField', completeReferencedField);
 
     // Get the original field data to preserve missing properties
     const originalField = fields?.find(f => f.fieldId === fieldId);
