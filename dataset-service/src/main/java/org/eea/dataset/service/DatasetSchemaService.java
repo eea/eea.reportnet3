@@ -4,6 +4,7 @@ import org.bson.types.ObjectId;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.ReferencedFieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
+import org.eea.dataset.service.model.ImportSchemas;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataflow.enums.TypeDataflowEnum;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -616,4 +617,24 @@ public interface DatasetSchemaService {
    * @param manuallyEditable the value
    */
   void updateManuallyEditableByDatasetId(Long datasetId, Boolean manuallyEditable) throws EEAException;
+
+  /**
+   * @param dataflowId
+   * @param importClasses
+   * @throws EEAException
+   */
+  void validateTableFieldNamesHaveNoWhitespace(long dataflowId, ImportSchemas importClasses) throws EEAException;
+
+  /**
+   * @param dataflowId
+   * @param schemas
+   * @throws EEAException
+   */
+  void validateTableFieldNamesHaveNoWhitespace(long dataflowId, List<DataSetSchemaVO> schemas) throws EEAException;
+
+  /**
+   * @param fieldName
+   * @throws EEAException
+   */
+  void validateTableFieldNameHasNoWhitespace(String fieldName) throws EEAException;
 }
