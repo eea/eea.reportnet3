@@ -103,8 +103,11 @@
     justify-content: space-between;
     max-width:100%;
     align-items: flex-end;
-    > div:not([class]){
-      max-width:250px;
+    > div:not([class]):first-child{
+      flex:0 0 330px;
+      @media screen and (max-width:1500px){
+        flex:0 0 230px;
+      }
     }
     > div:has(.label3){
       align-self: flex-start;
