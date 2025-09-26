@@ -86,12 +86,13 @@ export const JobsStatusesRepository = {
       })
     }),
 
-  cancelJob: async (jobId, dataflowId, datasetId) =>
-    await HTTPRequester.update({
-      url: getUrl(JobsStatusesConfig.cancelJob, {
-        jobId,
-        dataflowId,
-        datasetId
-      })
-    })
+  cancelJob: async (jobId, dataflowId, datasetId) => {
+
+    if (datasetId == null) {
+      const url = getUrl(JobsStatusesConfig.cancelJobNoDataset, { jobId, dataflowId });
+      return await HTTPRequester.update({ url });
+    }
+    const url = getUrl(JobsStatusesConfig.cancelJob, { jobId, dataflowId, datasetId });
+    return await HTTPRequester.update({ url });
+  }
 };
