@@ -169,9 +169,21 @@ export const PaMsWebformField = ({
         }
       }
 
-      const conditionalField = record.elements.find(
-        el => el.fieldSchemaId === element.referencedField.masterConditionalFieldId
-      );
+      const masterConditionalFieldId = element.referencedField.masterConditionalFieldId;
+
+      const fieldMatch = el => [el.fieldSchemaId, el.fieldId, el.fieldSchema].includes(masterConditionalFieldId);
+
+      const conditionalField =
+        // 1. Try to find a matching field directly in the top-level elements
+        record.elements.find(el => fieldMatch(el)) ||
+        // 2. Otherwise, look inside BLOCKs:
+        //    - pick the block records matching the current recordId
+        //    - search their elements for the matching field
+        record.elements
+          .filter(el => el.type === 'BLOCK')
+          .flatMap(block => block.elementsRecords?.filter(er => er.recordId === record.recordId) || [])
+          .flatMap(elementRecord => elementRecord.elements || [])
+          .find(recordElement => fieldMatch(recordElement));
 
       queryClient
         .fetchQuery(
