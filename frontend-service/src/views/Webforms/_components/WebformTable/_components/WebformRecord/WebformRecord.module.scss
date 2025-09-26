@@ -110,7 +110,7 @@
       }
     }
     > div:has(.label3){
-      align-self: flex-start;
+      align-self: center;
     }
     > * {
       margin-left: 0.5rem;
@@ -118,16 +118,18 @@
       min-width:0;
       flex:1 0 0;
       align-items: flex-end;
+      position:relative;
       &.field:not(:has( > label)){
         margin-top:31px;
-        padding-bottom:21px;
+        //padding-bottom:21px;
       }
       &.field:not(:has( > label)){
         margin-top:31px;
-        padding-bottom:21px;
+        //padding-bottom:21px;
       }
       &.field:not(:has(p)){
-        padding-bottom:21px;
+  /*      padding-bottom:21px;
+        height:95.33px;*/
       }
       &:first-of-type {
         margin-left: 0;
@@ -504,5 +506,13 @@
 
    .p-multiselect .p-multiselect-label {
     padding: 1rem 2em 1rem 0.429em;
+  }
+}
+
+.content :global  {
+  .webformCharacterCount {
+    position: absolute;
+    bottom: -21px;
+    right: 0;
   }
 }
