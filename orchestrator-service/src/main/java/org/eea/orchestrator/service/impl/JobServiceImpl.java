@@ -517,7 +517,6 @@ public class JobServiceImpl implements JobService {
         LOG.info("User cancelling job {} with jobInfo {}", jobId, jobInfo);
         JobVO jobVO = findById(jobId);
         List<String> processIds = jobProcessService.findProcessesByJobId(jobId);
-        datasetSnapshotController.rollBackSnapshotRecord(jobId, jobVO.getDataflowId(), jobVO.getProviderId());
         for (String processId : processIds) {
             List<TaskVO> tasks = dataSetControllerZuul.findTasksByProcessIdAndStatusIn(processId, Arrays.asList(ProcessStatusEnum.IN_PROGRESS, ProcessStatusEnum.IN_QUEUE));
             if (tasks.size()>0) {
@@ -534,7 +533,7 @@ public class JobServiceImpl implements JobService {
             LOG.info("User cancelled process {} for job {}", processId, jobId);
             if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.RELEASE)) {
                 LOG.info("Removing historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
-                //dataSetSnapshotControllerZuul.removeHistoricRelease(processVO.getDatasetId());
+                datasetSnapshotController.rollBackSnapshotRecord(jobId, jobVO.getDataflowId(), jobVO.getProviderId());
                 LOG.info("Removed historic releases for job {} and datasetId {}", jobId, processVO.getDatasetId());
             } else if (jobVO.isRelease() && jobVO.getJobType().equals(JobTypeEnum.VALIDATION)) {
                 validationControllerZuul.deleteLocksToReleaseProcess(processVO.getDatasetId());
