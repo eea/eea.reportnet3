@@ -322,7 +322,6 @@ public class DatasetSnapshotServiceTest {
     PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     partition.setId(1L);
     Mockito.when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(anyLong(), anyString())).thenReturn(Optional.of(partition));
-    Mockito.when(jobProcessControllerZuul.findJobIdByProcessId(any())).thenReturn(1L);
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
@@ -343,7 +342,6 @@ public class DatasetSnapshotServiceTest {
         Mockito.anyString())).thenReturn(Optional.of(new PartitionDataSetMetabase()));
     doNothing().when(recordStoreControllerZuul).createSnapshotData(Mockito.any(), Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(jobProcessControllerZuul.findJobIdByProcessId(any())).thenReturn(1L);
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
@@ -363,7 +361,6 @@ public class DatasetSnapshotServiceTest {
     PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     partition.setId(1L);
     Mockito.when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(anyLong(), anyString())).thenReturn(Optional.of(partition));
-    Mockito.when(jobProcessControllerZuul.findJobIdByProcessId(any())).thenReturn(1L);
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), 1L, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
@@ -1144,7 +1141,6 @@ public class DatasetSnapshotServiceTest {
     PartitionDataSetMetabase partition = new PartitionDataSetMetabase();
     partition.setId(1L);
     Mockito.when(partitionDataSetMetabaseRepository.findFirstByIdDataSet_idAndUsername(anyLong(), anyString())).thenReturn(Optional.of(partition));
-    Mockito.when(jobProcessControllerZuul.findJobIdByProcessId(any())).thenReturn(1L);
     datasetSnapshotService.addSnapshot(1L, new CreateSnapshotVO(), null, new Date().toString(),
         false, null);
     Mockito.verify(snapshotRepository, times(1)).save(Mockito.any());
