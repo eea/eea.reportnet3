@@ -1073,6 +1073,7 @@ export const FieldDesigner = ({
               disabled={
                 isDataflowOpen ||
                 isDesignDatasetEditorRead ||
+                isIcebergCreated ||
                 (!isNil(fieldDesignerState.fieldLinkValue) &&
                   !isEmpty(fieldDesignerState.fieldLinkValue) &&
                   isNil(fieldDesignerState.fieldLinkValue.name))
