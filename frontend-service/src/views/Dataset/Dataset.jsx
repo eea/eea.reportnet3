@@ -376,9 +376,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
 
   const hasFailedImportNotification = list =>
-    list?.some(notification =>
-      ['IMPORT_REPORTING_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
-    );
+    list?.some(notification => ['IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT'].includes(notification.key));
 
   useEffect(() => {
     if (hasConversionNotification(notificationContext.toShow)) {
@@ -772,8 +770,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: false });
     }
 
-    const validationFinishedWithError = notificationContext.toShow.find(
-      notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'
+    const validationFinishedWithError = notificationContext.toShow.find(notification =>
+      ['IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT', 'IMPORT_REPORTING_FAILED_EVENT'].includes(notification.key)
     );
     if (
       validationFinishedWithError &&

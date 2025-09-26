@@ -847,8 +847,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       });
     }
 
-    const validationFinishedWithError = notificationContext.toShow.find(
-      notification => notification.key === 'IMPORT_DESIGN_FAILED_EVENT'
+    const validationFinishedWithError = notificationContext.toShow.find(notification =>
+      ['IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
     );
 
     if (
@@ -905,9 +905,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
     );
 
   const hasFailedImportNotification = list =>
-    list?.some(notification =>
-      ['IMPORT_REPORTING_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
-    );
+    list?.some(notification => ['IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT'].includes(notification.key));
 
   useEffect(() => {
     if (hasConversionNotification(notificationContext.toShow)) {
