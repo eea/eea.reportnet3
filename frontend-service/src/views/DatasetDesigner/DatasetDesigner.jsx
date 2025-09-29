@@ -1709,8 +1709,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDataflowCustodian={isDataflowCustodian}
             isDataflowOpen={isDataflowOpen}
             isDatasetDesigner
-            setHasQCsHistory={setHasQCsHistory}
             setAutomaticQCsDefaultLevelError={setAutomaticQCsDefaultLevelError}
+            setHasQCsHistory={setHasQCsHistory}
           />
         </Dialog>
       );
