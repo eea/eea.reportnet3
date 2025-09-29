@@ -319,6 +319,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
+    console.log('false effect');
     if (designerState.isImportDatasetDialogVisible) failedImportRef.current = false;
   }, [designerState.datasetSchemaId, designerState.isImportDatasetDialogVisible, designerState.isDataUpdated]);
 
@@ -913,6 +914,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       onGetIcebergTables();
       handleRefresh();
     }
+    console.log(notificationContext.toShow);
+    console.log(hasFailedImportNotification(notificationContext.toShow));
     if (hasFailedImportNotification(notificationContext.toShow)) failedImportRef.current = true;
   }, [notificationContext.toShow]);
 
