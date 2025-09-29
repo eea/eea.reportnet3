@@ -874,7 +874,6 @@ export const FieldDesigner = ({
   };
 
   const parseReferenceField = completeReferencedField => {
-
     // Get the original field data to preserve missing properties
     const originalField = fields?.find(f => f.fieldId === fieldId);
     const originalRef = originalField?.referencedField || {};
@@ -1071,12 +1070,9 @@ export const FieldDesigner = ({
                 isDragging ? styles.dragAndDropActive : styles.dragAndDropInactive
               }`}
               disabled={
-                isDataflowOpen ||
-                isDesignDatasetEditorRead ||
-                isIcebergCreated ||
-                (!isNil(fieldDesignerState.fieldLinkValue) &&
-                  !isEmpty(fieldDesignerState.fieldLinkValue) &&
-                  isNil(fieldDesignerState.fieldLinkValue.name))
+                !isNil(fieldDesignerState.fieldLinkValue) &&
+                !isEmpty(fieldDesignerState.fieldLinkValue) &&
+                isNil(fieldDesignerState.fieldLinkValue.name)
               }
               icon={
                 isNil(fieldDesignerState.fieldLinkValue) || isEmpty(fieldDesignerState.fieldLinkValue)
@@ -1454,7 +1450,10 @@ export const FieldDesigner = ({
               fieldId={fieldId}
               fields={fields}
               hasMultipleValues={fieldDesignerState.fieldPkHasMultipleValues}
+              isDataflowOpen={isDataflowOpen}
+              isDesignDatasetEditorRead={isDesignDatasetEditorRead}
               isExternalLink={areEquals(fieldDesignerState.fieldTypeValue.fieldType, 'external_link') ? true : false}
+              isIcebergCreated={isIcebergCreated}
               isLinkSelectorVisible={fieldDesignerState.isLinkSelectorVisible}
               isReferenceDataset={isReferenceDataset}
               linkedTableConditional={fieldLinkedTableConditional}
