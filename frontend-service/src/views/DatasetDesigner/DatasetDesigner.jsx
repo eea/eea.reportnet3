@@ -914,10 +914,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       onGetIcebergTables();
       handleRefresh();
     }
+    console.log('use effect');
+    console.log(notificationContext.hidden);
     console.log(notificationContext.toShow);
     console.log(hasFailedImportNotification(notificationContext.toShow));
     if (hasFailedImportNotification(notificationContext.toShow)) failedImportRef.current = true;
-  }, [notificationContext.toShow]);
+  }, [notificationContext.toShow, notificationContext.hidden]);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
