@@ -41,6 +41,7 @@ export const CustomFileUpload = ({
   chooseLabel = 'Choose',
   className = null,
   dataflowId,
+  dataflowName,
   datasetId,
   datasetName,
   dialogClassName = null,
@@ -360,6 +361,24 @@ export const CustomFileUpload = ({
   };
 
   const importS3ToDlh = async () => {
+    const fileName = state?.files[0]?.name || ' ';
+
+    notificationContext.add(
+      {
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          customContent: {
+            datasetLoading: resourcesContext.messages['datasetLoading'],
+            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+          },
+          dataflowName,
+          datasetName,
+          fileName
+        }
+      },
+      true
+    );
     try {
       await DatasetService.importTableFileWithS3({
         datasetId,
@@ -524,7 +543,7 @@ export const CustomFileUpload = ({
   };
 
   const onGetPresignedUrl = async () => {
-    const fileName = state?.files[0].name;
+    const fileName = state?.files[0]?.name;
     try {
       const data = await DatasetService.getPresignedUrl({
         datasetId,

@@ -235,7 +235,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   ]);
   const exportMenuRef = useRef();
   const importMenuRef = useRef();
-  const failedImportRef = useRef(false);
 
   const {
     isLoadingSnapshotListData,
@@ -319,7 +318,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
-    if (designerState.isImportDatasetDialogVisible) failedImportRef.current = false;
   }, [designerState.datasetSchemaId, designerState.isImportDatasetDialogVisible, designerState.isDataUpdated]);
 
   useEffect(() => {
@@ -847,8 +845,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       });
     }
 
-    const validationFinishedWithError = notificationContext.toShow.find(
-      notification => notification.key === 'IMPORT_DESIGN_FAILED_EVENT'
+    const validationFinishedWithError = notificationContext.toShow.find(notification =>
+      ['IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
     );
 
     if (
@@ -904,18 +902,12 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       ].includes(notification.key)
     );
 
-  const hasFailedImportNotification = list =>
-    list?.some(notification =>
-      ['IMPORT_REPORTING_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
-    );
-
   useEffect(() => {
     if (hasConversionNotification(notificationContext.toShow)) {
       setIsLoadingIceberg(false);
       onGetIcebergTables();
       handleRefresh();
     }
-    if (hasFailedImportNotification(notificationContext.toShow)) failedImportRef.current = true;
   }, [notificationContext.toShow]);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
@@ -1124,11 +1116,11 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       manageDialogs('isImportDatasetDialogVisible', false);
       setSelectedCustomImportIntegration({ id: null, name: null });
 
-      if (!failedImportRef.current) {
-        const action = 'DATASET_IMPORT';
-        const fileName = e?.files?.[0]?.name || ' ';
-        actionsContext.testProcess(datasetId, action);
+      const action = 'DATASET_IMPORT';
+      const fileName = e?.files?.[0]?.name || ' ';
+      actionsContext.testProcess(datasetId, action);
 
+      if (!designerState.bigData) {
         const {
           dataflow: { name: dataflowName },
           dataset: { name: datasetName }
@@ -1151,7 +1143,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
           true
         );
       }
-      failedImportRef.current = false;
       designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
@@ -1162,7 +1153,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         },
         true
       );
-      failedImportRef.current = false;
     }
   };
 
@@ -2296,6 +2286,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dataflowId={dataflowId}
+            dataflowName={designerState.dataflowName}
             datasetId={datasetId}
             datasetName={designerState.datasetSchemaName}
             dialogHeader={selectedCustomImportIntegration.name}
