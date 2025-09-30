@@ -319,7 +319,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
 
   useEffect(() => {
     if (designerState.datasetSchemaId) getFileExtensions();
-    console.log('false effect');
     if (designerState.isImportDatasetDialogVisible) failedImportRef.current = false;
   }, [designerState.datasetSchemaId, designerState.isImportDatasetDialogVisible, designerState.isDataUpdated]);
 
@@ -914,12 +913,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       onGetIcebergTables();
       handleRefresh();
     }
-    console.log('use effect');
-    console.log(notificationContext.hidden);
-    console.log(notificationContext.toShow);
-    console.log(hasFailedImportNotification(notificationContext.toShow));
     if (hasFailedImportNotification(notificationContext.toShow)) failedImportRef.current = true;
-  }, [notificationContext.toShow, notificationContext.hidden]);
+  }, [notificationContext.toShow]);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
@@ -1123,6 +1118,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
   const onUpload = async e => {
+    console.log('onUpload called');
     try {
       manageDialogs('isImportDatasetDialogVisible', false);
       setSelectedCustomImportIntegration({ id: null, name: null });
@@ -1709,8 +1705,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDataflowCustodian={isDataflowCustodian}
             isDataflowOpen={isDataflowOpen}
             isDatasetDesigner
-            setAutomaticQCsDefaultLevelError={setAutomaticQCsDefaultLevelError}
             setHasQCsHistory={setHasQCsHistory}
+            setAutomaticQCsDefaultLevelError={setAutomaticQCsDefaultLevelError}
           />
         </Dialog>
       );
