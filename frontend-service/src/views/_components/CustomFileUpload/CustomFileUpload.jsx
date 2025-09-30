@@ -41,6 +41,7 @@ export const CustomFileUpload = ({
   chooseLabel = 'Choose',
   className = null,
   dataflowId,
+  dataflowName,
   datasetId,
   datasetName,
   dialogClassName = null,
@@ -120,6 +121,7 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (state.progress === 100 && timeoutBeforeClose) {
+      console.log('Progress 100%');
       if (bigData) {
         const timer = setTimeout(() => {
           onUpload({ files: state.files });
@@ -360,6 +362,25 @@ export const CustomFileUpload = ({
   };
 
   const importS3ToDlh = async () => {
+    console.log('Import s3 to DL has started');
+    const fileName = state?.files[0].name || ' ';
+
+    notificationContext.add(
+      {
+        type: 'DATASET_DATA_LOADING_INIT',
+        content: {
+          customContent: {
+            datasetLoading: resourcesContext.messages['datasetLoading'],
+            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+          },
+          dataflowName,
+          datasetName,
+          fileName
+        }
+      },
+      true
+    );
     try {
       await DatasetService.importTableFileWithS3({
         datasetId,
@@ -371,6 +392,7 @@ export const CustomFileUpload = ({
         delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
         jobId
       });
+      console.log('Import s3 to DL finished');
     } catch (error) {
       if (error.response.status !== 504) {
         console.error('CustomFileUpload - importS3ToDlh.', error);
