@@ -121,7 +121,6 @@ export const CustomFileUpload = ({
 
   useEffect(() => {
     if (state.progress === 100 && timeoutBeforeClose) {
-      console.log('Progress 100%');
       if (bigData) {
         const timer = setTimeout(() => {
           onUpload({ files: state.files });
@@ -362,7 +361,6 @@ export const CustomFileUpload = ({
   };
 
   const importS3ToDlh = async () => {
-    console.log('Import s3 to DL has started');
     const fileName = state?.files[0].name || ' ';
 
     notificationContext.add(
@@ -392,7 +390,6 @@ export const CustomFileUpload = ({
         delimiter: encodeURIComponent(config.IMPORT_FILE_DELIMITER),
         jobId
       });
-      console.log('Import s3 to DL finished');
     } catch (error) {
       if (error.response.status !== 504) {
         console.error('CustomFileUpload - importS3ToDlh.', error);
