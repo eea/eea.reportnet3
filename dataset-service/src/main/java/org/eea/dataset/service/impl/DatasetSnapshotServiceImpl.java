@@ -368,9 +368,11 @@ public class DatasetSnapshotServiceImpl implements DatasetSnapshotService {
       // 1. Create the snapshot in the metabase
       Snapshot snap = new Snapshot();
 
-      Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
-      if (jobId != null) {
-        snap.setJobId(jobId);
+      if (processId != null) {
+        Long jobId = jobProcessControllerZuul.findJobIdByProcessId(processId);
+        if (jobId != null) {
+          snap.setJobId(jobId);
+        }
       }
 
       //force date to UTC
