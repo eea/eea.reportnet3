@@ -902,9 +902,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       ].includes(notification.key)
     );
 
-  const hasFailedImportNotification = list =>
-    list?.some(notification => ['IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT'].includes(notification.key));
-
   useEffect(() => {
     if (hasConversionNotification(notificationContext.toShow)) {
       setIsLoadingIceberg(false);

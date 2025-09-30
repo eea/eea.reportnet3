@@ -361,7 +361,7 @@ export const CustomFileUpload = ({
   };
 
   const importS3ToDlh = async () => {
-    const fileName = state?.files[0].name || ' ';
+    const fileName = state?.files[0]?.name || ' ';
 
     notificationContext.add(
       {
@@ -543,7 +543,7 @@ export const CustomFileUpload = ({
   };
 
   const onGetPresignedUrl = async () => {
-    const fileName = state?.files[0].name;
+    const fileName = state?.files[0]?.name;
     try {
       const data = await DatasetService.getPresignedUrl({
         datasetId,
