@@ -258,7 +258,7 @@ public interface JobController {
      * @param jobId
      */
     @PutMapping(value = "/cancelJob/{jobId}")
-    void cancelJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "dataflowId") Long dataflowId, @RequestParam(value = "datasetId") Long datasetId,
+    void cancelJob(@PathVariable("jobId") Long jobId, @RequestParam(value = "dataflowId") Long dataflowId, @RequestParam(value = "datasetId", required = false) Long datasetId,
                    @RequestParam(value="jobInfo", required = false) JobInfoEnum jobInfo, @RequestParam(value="jobShouldFail", required = false) Boolean jobShouldFail) throws Exception;
 
     /**
