@@ -613,7 +613,7 @@ public class ValidationControllerImpl implements ValidationController {
    */
   @Override
   @DeleteMapping(value = "/deleteLocksToReleaseProcess/{datasetId}")
-  @PreAuthorize("hasAnyRole('ADMIN')")
+  @PreAuthorize("isAuthenticated()")
   @ApiOperation(value = "Deletes the locks related to release", hidden = true)
   public void deleteLocksToReleaseProcess(@ApiParam(value = "Dataset id from which locks should be removed",
           example = "15") @PathVariable("datasetId") Long datasetId) {
