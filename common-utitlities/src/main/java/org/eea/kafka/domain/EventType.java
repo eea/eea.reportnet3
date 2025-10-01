@@ -670,7 +670,10 @@ public enum EventType {
 
   /** Validation failure due to system error */
   VALIDATION_FAILED_SYSTEM_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_failed_system_error_event", true),
-  
+
+  /** Validation failure due to an illegal character in field header error */
+  VALIDATION_FAILED_ILLEGAL_CHARACTER_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "validation_failed_illegal_character_event", true),
+
   /** Validation finished with canceled tasks event */
   FINISHED_VALIDATION_WITH_CANCELED_TASKS(LiteralConstants.DATA_REPORTING_TOPIC, "finished_validation_with_canceled_tasks_event", true),
 

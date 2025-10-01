@@ -1010,6 +1010,14 @@
           }
         },
         {
+          "key": "VALIDATION_FAILED_ILLEGAL_CHARACTER_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "VALIDATION_FAILED_SYSTEM_ERROR_EVENT",
           "navigateTo": {
             "section": "DATASET",
