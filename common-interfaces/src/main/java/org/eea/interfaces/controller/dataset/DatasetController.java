@@ -1061,7 +1061,7 @@ public interface DatasetController {
    * @throws Exception The exception
    */
   @PostMapping("/private/{tableSchemaId}/createEmptyTablesV2")
-  void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable("tableSchemaId") String tableSchemaId) throws Exception;
+  void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable("tableSchemaId") String tableSchemaId);
 
   /**
    * Get released dataset data info
