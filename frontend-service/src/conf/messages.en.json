@@ -1805,6 +1805,7 @@
     "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks",
     "emptyTableEvent": "One or more tables in the design dataset(s) are empty",
     "exportFileStartEvent": "Exporting file {:fileName}",
+    "exportDefinitionCompletedEvent": "Exported definition completed",
     "addingNationalCoordinatorFinishedEvent": "National coordinator has been added successfully",
     "deletingNationalCoordinatorFinishedEvent": "National coordinator has been deleted successfully",
     "addingNationalCoordinatorFailedEvent": "National coordinator has not been added",
