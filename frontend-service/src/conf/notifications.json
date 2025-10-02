@@ -14,6 +14,13 @@
           }
         },
         {
+          "key": "IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET",
+            "parameters": ["dataflowId", "datasetId"]
+          }
+        },
+        {
           "key": "IMPORT_REPORTING_FAILED_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -130,6 +137,13 @@
           "navigateTo": {
             "section": "DOCUMENTS",
             "parameters": ["dataflowId"]
+          }
+        },
+        {
+          "key": "IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId"]
           }
         },
         {
