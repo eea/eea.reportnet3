@@ -251,10 +251,10 @@ public class DremioSQLValidationUtils {
                 while (rs.next()) {
                     if(result.get(rs.getString(optionalPk)) != null){
                         String hashmapValues = result.get(rs.getString(optionalPk)) + "," + "\"" +  rs.getString(primaryKey) + "\"" ;
-                        result.put(rs.getString(optionalPk), (hashmapValues));
+                        result.put(rs.getString(optionalPk), hashmapValues);
                     }
                     else{
-                        result.put(rs.getString(optionalPk),"\"" + rs.getString(primaryKey)+"\"" );
+                        result.put(rs.getString(optionalPk), "\"" + rs.getString(primaryKey) + "\"" );
                     }
 
                 }
