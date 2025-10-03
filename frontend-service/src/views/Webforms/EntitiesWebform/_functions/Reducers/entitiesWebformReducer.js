@@ -55,6 +55,9 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
     case 'SET_IS_ADD_ENTITY_ID_DIALOG_VISIBLE':
       return { ...state, isAddEntityIdDialogVisible: payload.value };
 
+    case 'SET_IS_VIEW_MODE':
+      return { ...state, isViewMode: payload.value };
+
     case 'ON_REFRESH':
       return { ...state, isRefresh: payload.value };
 
