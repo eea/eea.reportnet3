@@ -75,7 +75,7 @@ public enum JobInfoEnum {
 
     ERROR_VALIDATION_FAILURE("Validation failed due to system error. Please contact the Service Desk for support."),
 
-    ERROR_ILLEGAL_HEADER_CHARACTER("Validation failed due to an illegal character found in a table field header.");
+    ERROR_ILLEGAL_HEADER_CHARACTER("Validation failed due to an illegal character found in a field name of the table.");
 
 
     /** The value. */
