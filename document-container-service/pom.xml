@@ -24,7 +24,7 @@
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>oak-jcr</artifactId>
-      <version>1.10.2</version>
+      <version>1.82.0</version>
     </dependency>
     <dependency>
       <groupId>javax.jcr</groupId>
@@ -34,7 +34,7 @@
     <dependency>
       <groupId>org.apache.jackrabbit</groupId>
       <artifactId>oak-store-document</artifactId>
-      <version>1.12.0</version>
+      <version>1.82.0</version>
       <exclusions>
         <exclusion>
           <groupId>com.google.guava</groupId>
@@ -51,7 +51,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>20.0</version>
+      <version>32.0.0-jre</version>
     </dependency>
     <dependency>
       <groupId>org.apache.sling</groupId>
