@@ -46,6 +46,7 @@ export const WebformField = ({
   isConditional,
   isConditionalChanged,
   isSubTableCreated,
+  isViewMode,
   newRecord,
   onFillField,
   onSaveField,
@@ -358,13 +359,17 @@ export const WebformField = ({
   };
 
   const renderTemplate = (field, option, type) => {
+    if (isViewMode) {
+      field.readOnly = true;
+    }
+
     switch (type) {
       case 'DATE':
         return (
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly}
+            disabled={field?.readOnly || isViewMode}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={event => {
@@ -627,6 +632,7 @@ export const WebformField = ({
             {
               <Button
                 className="p-button-animated-blink p-button-primary-transparent"
+                disabled={isViewMode}
                 icon="import"
                 label={
                   !isNil(field.value) && field.value !== ''
@@ -649,6 +655,7 @@ export const WebformField = ({
 
             <Button
               className="p-button-animated-blink p-button-primary-transparent"
+              disabled={isViewMode}
               icon="trash"
               onClick={() => onFileDeleteVisible(field.value, field.fieldId, field.fieldSchemaId)}
             />
