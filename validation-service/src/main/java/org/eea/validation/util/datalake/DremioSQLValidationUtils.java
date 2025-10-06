@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.eea.utils.LiteralConstants.*;
+import static org.eea.validation.util.FKValidationUtils.splitCommasRespectingQuotes;
 
 @Import(DremioConfiguration.class)
 @Component
@@ -249,11 +250,11 @@ public class DremioSQLValidationUtils {
                 HashMap<String,String> result = new HashMap<>();
                 while (rs.next()) {
                     if(result.get(rs.getString(optionalPk)) != null){
-                        String hashmapValues = result.get(rs.getString(optionalPk)) + "," + rs.getString(primaryKey);
+                        String hashmapValues = result.get(rs.getString(optionalPk)) + "," + "\"" +  rs.getString(primaryKey) + "\"" ;
                         result.put(rs.getString(optionalPk), hashmapValues);
                     }
                     else{
-                        result.put(rs.getString(optionalPk), rs.getString(primaryKey));
+                        result.put(rs.getString(optionalPk), "\"" + rs.getString(primaryKey) + "\"" );
                     }
 
                 }
@@ -262,11 +263,15 @@ public class DremioSQLValidationUtils {
             Map<String, String> pkMapAux = pkWithOptionalMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             List<String> pkValueListForPkMustBeUsed;
             if (BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())) {
-                pkValueListForPkMustBeUsed = pkMapAux.values().stream().flatMap(value -> Stream.of(value.split(",")))
-                        .map(String::toLowerCase).collect(Collectors.toList());
+                pkValueListForPkMustBeUsed = pkMapAux.values().stream()
+                        .flatMap(value -> splitCommasRespectingQuotes(value).stream())
+                        .map(String::toLowerCase)
+                        .collect(Collectors.toList());
             }
             else{
-                pkValueListForPkMustBeUsed = pkMapAux.values().stream().flatMap(value -> Stream.of(value.split(","))).collect(Collectors.toList());
+                pkValueListForPkMustBeUsed = pkMapAux.values().stream()
+                        .flatMap(value -> splitCommasRespectingQuotes(value).stream())
+                        .collect(Collectors.toList());
             }
 
             //FK_QUERY_VALUES
@@ -276,7 +281,7 @@ public class DremioSQLValidationUtils {
             SqlRowSet fkWithOptionalRS = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkWithOptionalRS.next()) {
                 if (pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk))!=null) {
-                    List<String> pksByOptionalValue = Arrays.asList(pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk)).split(","));
+                    List<String> pksByOptionalValue = splitCommasRespectingQuotes(pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk)));
                     List<String> fksByOptionalValue = Arrays.asList(fkWithOptionalRS.getString(foreignKey).split(";"));
 
                     if(BooleanUtils.isTrue(fkFieldSchema.getIgnoreCaseInLinks())) {

@@ -170,7 +170,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   let exportMenuRef = useRef();
   let importMenuRef = useRef();
   let bigDataRef = useRef();
-  let failedImportRef = useRef(false);
 
   bigDataRef.current = metadata?.dataflow.bigData;
 
@@ -349,7 +348,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
 
   useEffect(() => {
     if (metadata?.dataset.datasetSchemaId) getFileExtensions();
-    if (isImportDatasetDialogVisible) failedImportRef.current = false;
   }, [metadata?.dataset.datasetSchemaId, isImportDatasetDialogVisible]);
 
   useEffect(() => {
@@ -375,17 +373,12 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       ].includes(notification.key)
     );
 
-  const hasFailedImportNotification = list =>
-    list?.some(notification => ['IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT'].includes(notification.key));
-
   useEffect(() => {
     if (hasConversionNotification(notificationContext.toShow)) {
       setIsLoadingIceberg(false);
       onGetIcebergTables();
       handleRefresh();
     }
-
-    if (hasFailedImportNotification(notificationContext.toShow)) failedImportRef.current = true;
   }, [notificationContext.toShow]);
 
   const getWebformConfiguration = async (webform, options) => {
@@ -1207,12 +1200,11 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     setIsImportDatasetDialogVisible(false);
     setSelectedCustomImportIntegration({ id: null, name: null });
 
-    if (!failedImportRef.current) {
-      const action = 'DATASET_IMPORT';
-      const fileName = e?.files?.[0]?.name || ' ';
+    const action = 'DATASET_IMPORT';
+    const fileName = e?.files?.[0]?.name || ' ';
+    actionsContext.testProcess(datasetId, action);
 
-      actionsContext.testProcess(datasetId, action);
-
+    if (!metadata?.dataflow.bigData) {
       const {
         dataflow: { name: dataflowName },
         dataset: { name: datasetName }
@@ -1235,7 +1227,6 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
         true
       );
     }
-    failedImportRef.current = false;
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
@@ -1654,6 +1645,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dataflowId={dataflowId}
+          dataflowName={metadata?.dataflow?.name}
           datasetId={datasetId}
           datasetName={datasetName}
           dialogHeader={selectedCustomImportIntegration.name}

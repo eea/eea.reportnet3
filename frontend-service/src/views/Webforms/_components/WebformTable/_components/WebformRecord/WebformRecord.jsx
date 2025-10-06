@@ -69,6 +69,7 @@ export const WebformRecord = ({
                                 isFixedNumber = true,
                                 isOptional,
                                 isReporting,
+                                isViewMode,
                                 multipleRecords,
                                 onAddMultipleWebform,
                                 onRefresh,
@@ -290,6 +291,7 @@ export const WebformRecord = ({
                       }
                       isConditionalChanged={isConditionalChanged}
                       isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
+                      isViewMode={isViewMode}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       record={record}
@@ -388,7 +390,8 @@ export const WebformRecord = ({
                       disabled={
                         fkHasEmptyValues ||
                         isEmpty(referencePkValue) ||
-                        (addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple)
+                        (addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple) ||
+                        isViewMode
                       }
                       icon={
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
@@ -435,6 +438,7 @@ export const WebformRecord = ({
                     datasetId={datasetId}
                     datasetSchemaId={datasetSchemaId}
                     isAddingMultiple={isAddingMultiple}
+                    isViewMode={isViewMode}
                     key={i}
                     multipleRecords={element.multipleRecords}
                     newRecord={webformRecordState.newRecord}
@@ -481,7 +485,6 @@ export const WebformRecord = ({
             {validationsTemplate(parseRecordValidations(webformRecordState.record))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
-              disabled={webformRecordState.isDeleting}
               icon={webformRecordState.isDeleting ? 'spinnerAnimate' : 'trash'}
               onClick={() => {
                 handleDialogs('deleteRow', true);

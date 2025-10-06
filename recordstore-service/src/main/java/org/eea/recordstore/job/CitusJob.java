@@ -37,10 +37,13 @@ public class CitusJob {
   @PostConstruct
   private void init() {
     if (!enableTableDistributionJob.isBlank()) {
-      ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
-      scheduler.initialize();
-      scheduler.schedule(() -> executeTableDistribution(),
-          new CronTrigger(enableTableDistributionJob));
+      LOG.info("Cronjob for CitusJob scheduler is disabled");
+      /**
+        * ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        * scheduler.initialize();
+        * scheduler.schedule(() -> executeTableDistribution(),
+        * new CronTrigger(enableTableDistributionJob));
+       **/
     }
   }
 

@@ -66,6 +66,7 @@ export const EntitiesWebform = ({
     isDuplicatePkDialogVisible: false,
     isLoading: true,
     isRefresh: false,
+    isViewMode: false,
     entitiesRecords: [],
     selectedTable: { fieldSchemaId: null, rootTableId: null, recordId: null, tableName: null },
     rootPkInput: '',
@@ -322,13 +323,18 @@ export const EntitiesWebform = ({
     }
   };
 
-  const onSelectEditTable = (entityNumberId, tableName, recordId) => {
+  const onSelectEditTable = (entityNumberId, tableName, recordId, isViewMode = false) => {
     const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
 
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, entityNumberId);
     onSelectTableName(tableName);
     onToggleView('details');
+    entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: isViewMode } });
+  };
+
+  const onSelectViewTable = (entityNumberId, tableName, recordId) => {
+    onSelectEditTable(entityNumberId, tableName, recordId, true);
   };
 
   const onSelectFieldSchemaId = fieldSchemaId => {
@@ -341,7 +347,12 @@ export const EntitiesWebform = ({
 
   const onSelectTableName = name => entitiesWebformDispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
 
-  const onToggleView = view => entitiesWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
+  const onToggleView = view => {
+    entitiesWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
+    if (view === 'overview') {
+      entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: false } });
+    }
+  };
 
   const onUpdateData = () => entitiesWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
 
@@ -385,6 +396,7 @@ export const EntitiesWebform = ({
           isIcebergCreated={isIcebergCreated}
           isRefresh={entitiesWebformState.isRefresh}
           isReporting={isReporting}
+          isViewMode={entitiesWebformState.isViewMode}
           rootPkFieldId={rootPkFieldId}
           rootTableName={rootTableName}
           selectedTable={selectedTable}
@@ -408,6 +420,7 @@ export const EntitiesWebform = ({
         onAddTableRecord={onAddTableRecord}
         onRefresh={onUpdateData}
         onSelectEditTable={onSelectEditTable}
+        onSelectViewTable={onSelectViewTable}
         overview={overview}
         records={entitiesRecords}
         refreshTrigger={refreshTableTrigger}
@@ -550,6 +563,20 @@ export const EntitiesWebform = ({
                         });
                         onSelectRecord(items.recordId, items.id);
                         onToggleView('details');
+                      } else if (bigData && !isIcebergCreated) {
+                        console.log(
+                          'View mode:',
+                          entitiesWebformState.isViewMode,
+                          'Iceberg created:',
+                          isIcebergCreated
+                        );
+                        entitiesWebformDispatch({
+                          type: 'ON_REFRESH',
+                          payload: { value: !entitiesWebformState.isRefresh }
+                        });
+                        onSelectRecord(items.recordId, items.id);
+                        onToggleView('details');
+                        entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: true } });
                       }
                     }}>
                     {items.id || '-'}
