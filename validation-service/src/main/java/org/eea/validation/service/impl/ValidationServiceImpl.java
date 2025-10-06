@@ -1024,7 +1024,7 @@ public class ValidationServiceImpl implements ValidationService {
     fieldsToWrite[5] = ruleDescription;
     fieldsToWrite[6] = error.getLevelError().toString();
     fieldsToWrite[7] = error.getMessage().startsWith("=") ? " " + error.getMessage() : error.getMessage();
-    fieldsToWrite[8] = error.getNumberOfRecords().toString();
+    fieldsToWrite[8] = error.getNumberOfRecords();
 
     return fieldsToWrite;
   }

@@ -12,6 +12,7 @@ import org.hibernate.jdbc.ReturningWork;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -37,6 +38,11 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
 
   private static final String TABLE = "table";
   private static final String FIELD = "field";
+
+
+  /** The max errors. */
+  @Value(value = "${validation.maximumErrors}")
+  private int maxErrors;
 
   @Autowired
   ValidationHelper validationHelper;
@@ -138,7 +144,7 @@ public class ValidationRepositoryPaginatedImpl implements ValidationRepositoryPa
             validation.setIdRule(rs.getString("idRule"));
             validation.setLevelError(ErrorTypeEnum.valueOf(rs.getString("levelError")));
             validation.setTypeEntity(EntityTypeEnum.valueOf(rs.getString("typeEntity")));
-            validation.setNumberOfRecords(rs.getInt("numberOfRecords"));
+            validation.setNumberOfRecords(rs.getString("numberOfRecords").equals(String.valueOf(maxErrors)) ? maxErrors + "+" : rs.getString("numberOfRecords"));
             validation.setNameTableSchema(rs.getString("tableName"));
             validation.setShortCode(rs.getString("shortCode"));
             validation.setNameFieldSchema(rs.getString("fieldName"));
