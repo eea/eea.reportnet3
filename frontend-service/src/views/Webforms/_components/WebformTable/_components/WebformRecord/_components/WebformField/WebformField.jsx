@@ -452,17 +452,21 @@ export const WebformField = ({
               isLoadingData={isLoadingData}
               onChange={event => {
                 const value =
-                  typeof event.target.value === 'object' && !Array.isArray(event.target.value)
-                    ? event.target.value.value
-                    : event.target.value;
-                onFillField(field, option, value, isConditional);
-                webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
-                if (isNil(field.recordId)) onSaveField(option, value);
-                else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+                  typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
+                    ? event.target?.value?.value
+                    : event.target?.value;
+
+                if (value !== field.value) {
+                  onFillField(field, option, value, isConditional);
+                  webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+                  if (isNil(field.recordId)) onSaveField(option, value);
+                  else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+                }
               }}
               onFilterInputChangeBackend={filter => onFilter(filter, field)}
               optionLabel="itemType"
               options={linkItemsOptions}
+              showClear={true}
               showFilterClear={true}
               style={hasErrors ? { border: '2px solid #b90202' } : null}
               value={RecordUtils.getLinkValue(linkItemsOptions, field.value)}
@@ -508,17 +512,20 @@ export const WebformField = ({
             isLoadingData={isLoadingData}
             onChange={event => {
               const value =
-                typeof event.target.value === 'object' && !Array.isArray(event.target.value)
-                  ? event.target.value.value
-                  : event.target.value;
-              onFillField(field, option, value, isConditional);
-              webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
-              if (isNil(field.recordId)) onSaveField(option, value);
-              else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+                typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
+                  ? event.target?.value?.value
+                  : event.target?.value;
+              if (value !== field.value) {
+                onFillField(field, option, value, isConditional);
+                webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
+                if (isNil(field.recordId)) onSaveField(option, value);
+                else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
+              }
             }}
             onFilterInputChangeBackend={filter => onFilter(filter, field)}
             optionLabel="itemType"
             options={codelistOptions}
+            showClear={true}
             showFilterClear={true}
             singleCodelist={true}
             style={hasErrors ? { border: '2px solid #b90202' } : null}
