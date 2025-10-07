@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Class ExportSchemaInformationFailedEvent.
+ * The Class ExportDefinitionCompletedEvent.
  */
 @Component
 public class ExportDefinitionCompletedEvent implements NotificableEventHandler {
@@ -34,13 +34,14 @@ public class ExportDefinitionCompletedEvent implements NotificableEventHandler {
    */
   @Override
   public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-    Long dataflowId = notificationVO.getDataflowId();
-    String nameFile = notificationVO.getFileName();
-
+    Long datasetId = notificationVO.getDatasetId();
+    String tableSchemaId = notificationVO.getTableSchemaId();
+    String user = notificationVO.getUser();
 
     Map<String, Object> notification = new HashMap<>();
-    notification.put("datasetId", notificationVO.getDatasetId());
-    notification.put("fileName", notificationVO.getFileName());
+    notification.put("datasetId", datasetId);
+    notification.put("tableSchemaId", tableSchemaId);
+    notification.put("user", user);
     return notification;
   }
 
