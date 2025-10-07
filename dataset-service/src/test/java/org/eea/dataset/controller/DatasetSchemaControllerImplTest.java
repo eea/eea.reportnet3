@@ -45,7 +45,6 @@ import org.eea.interfaces.vo.dataset.schemas.FieldSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.WebformVO;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
-import org.eea.kafka.utils.KafkaSenderUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -163,11 +162,6 @@ public class DatasetSchemaControllerImplTest {
    * The authentication.
    */
   private Authentication authentication;
-
-  /** The kafka sender utils. */
-  @Mock
-  private KafkaSenderUtils kafkaSenderUtils;
-
   /**
    * Inits the mocks.
    */
@@ -2265,10 +2259,6 @@ public class DatasetSchemaControllerImplTest {
 
   @Test
   public void testExportFieldSchemas() throws EEAException, IOException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
-
     dataSchemaControllerImpl.exportFieldSchemas(new ObjectId().toString(), 1L,
         new ObjectId().toString());
     Mockito.verify(dataschemaService, times(1)).exportFieldsSchema(Mockito.any(), Mockito.any(),
@@ -2283,10 +2273,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void exportFieldSchemasLegacyTest() throws EEAException, IOException {
-    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
-    Mockito.when(authentication.getName()).thenReturn("user");
-    Mockito.doNothing().when(kafkaSenderUtils).releaseKafkaEvent(Mockito.any(), Mockito.any());
-
     dataSchemaControllerImpl.exportFieldSchemasLegacy(new ObjectId().toString(), 1L,
         new ObjectId().toString());
     Mockito.verify(dataschemaService, times(1)).exportFieldsSchema(Mockito.any(), Mockito.any(),

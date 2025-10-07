@@ -2544,6 +2544,8 @@ public class DatasetSchemaServiceTest {
 
   @Test
   public void testExportFieldSchemas() throws IOException, EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     FieldSchemaVO fieldVO = new FieldSchemaVO();
     fieldVO.setDescription("");
@@ -2821,6 +2823,8 @@ public class DatasetSchemaServiceTest {
 
   @Test
   public void testExportZipFieldSchemas() throws IOException, EEAException {
+    Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getName()).thenReturn("user");
 
     DesignDataset design = new DesignDataset();
     design.setId(1L);
