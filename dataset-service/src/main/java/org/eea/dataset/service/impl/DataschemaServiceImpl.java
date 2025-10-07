@@ -2635,12 +2635,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     setFieldLines(tableSchemaId, datasetSchema, csvWriter);
 
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
-    String tableName = datasetSchema.getTableSchemas()
-            .stream()
-            .filter(tableSchemaVO -> tableSchemaVO.getIdTableSchema().equals(tableSchemaId))
-            .map(TableSchemaVO::getNameTableSchema)
-            .findFirst()
-            .orElse(null);
 
     EventType eventType = EventType.EXPORT_DEFINITION_COMPLETED_EVENT;
     NotificationVO notificationVO = NotificationVO.builder()
@@ -2649,7 +2643,6 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
             .datasetId(datasetId)
             .datasetName(datasetSchema.getNameDatasetSchema())
             .tableSchemaId(tableSchemaId)
-            .tableSchemaName(tableName)
             .build();
     kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
 
