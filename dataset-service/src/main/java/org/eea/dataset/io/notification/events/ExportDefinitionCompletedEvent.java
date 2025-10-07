@@ -34,14 +34,20 @@ public class ExportDefinitionCompletedEvent implements NotificableEventHandler {
      */
     @Override
     public Map<String, Object> getMap(NotificationVO notificationVO) throws EEAException {
-        Long datasetId = notificationVO.getDatasetId();
-        String tableSchemaId = notificationVO.getTableSchemaId();
         String user = notificationVO.getUser();
+        Long dataflowId = notificationVO.getDataflowId();
+        Long datasetId = notificationVO.getDatasetId();
+        String datasetName = notificationVO.getDatasetName();
+        String tableSchemaId = notificationVO.getTableSchemaId();
+        String tableSchemaName = notificationVO.getTableSchemaName();
 
         Map<String, Object> notification = new HashMap<>();
-        notification.put("datasetId", datasetId);
-        notification.put("tableSchemaId", tableSchemaId);
         notification.put("user", user);
+        notification.put("dataflowId", dataflowId);
+        notification.put("datasetId", datasetId);
+        notification.put("datasetName", datasetName);
+        notification.put("tableSchemaId", tableSchemaId);
+        notification.put("tableSchemaName", tableSchemaName);
         return notification;
     }
 

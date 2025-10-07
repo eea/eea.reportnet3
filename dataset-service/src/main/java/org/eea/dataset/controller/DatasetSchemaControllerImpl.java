@@ -1614,14 +1614,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
 
-      EventType eventType = EventType.EXPORT_DEFINITION_COMPLETED_EVENT;
-      NotificationVO notificationVO = NotificationVO.builder()
-              .user(SecurityContextHolder.getContext().getAuthentication().getName())
-              .datasetId(datasetId)
-              .tableSchemaId(tableSchemaId)
-              .build();
-      kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
-
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG.error("Error exporting field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId, e);
