@@ -127,7 +127,7 @@ public class ExcelReaderStrategy implements ReaderStrategy {
 
       LOG.info("RN3-Import: Finishing reading Excel file {}, dataflowId {}, datasetId {} and tableSchemaId {}", fileName, dataflowId, datasetId, idTableSchema);
       createDataSet(schema, tables, idTableSchema, fileName, replace, schema, connectionDataVO);
-    } catch (EncryptedDocumentException | InvalidFormatException | IOException | SQLException
+    } catch (EncryptedDocumentException | IOException | SQLException
         | IllegalArgumentException e) {
       LOG.error("RN3-Import: Error when reading Excel file {}, dataflowId {}, datasetId {} and tableSchemaId {}. Message: ", fileName, dataflowId, datasetId, idTableSchema, e.getMessage());
       throw new InvalidFileException(InvalidFileException.ERROR_MESSAGE, e);
