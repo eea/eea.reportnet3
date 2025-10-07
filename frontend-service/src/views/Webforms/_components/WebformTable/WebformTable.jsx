@@ -174,14 +174,22 @@ export const WebformTable = ({
           .find(datasetTable => datasetTable.tableSchemaName === webformData.name)
           ?.records?.[0]?.fields?.find(tableField => tableField?.referencedField?.idPk === rootPkFieldId);
 
+        const webformFieldElements = webformData.elements.filter(el => el.type === 'FIELD');
+
+        // Include field elements nested inside blocks so they are part of the record sent to the backend.
+        // This ensures all table fields are included and created in the database if any columns are missing.
+        const blockFieldElements = webformData.elements
+          .filter(el => el.type === 'BLOCK' && Array.isArray(el.elements))
+          .flatMap(block => block.elements.filter(blockElement => blockElement.type === 'FIELD'));
+
+        const allFieldElements = [...webformFieldElements, ...blockFieldElements];
+
         webformDataWithFkRootField = fkRootField
           ? {
               ...webformData,
               elements: [
-                ...webformData.elements.filter(
-                  el => el.type === 'FIELD' && el?.fieldSchema !== fkRootField?.fieldSchema
-                ),
-                ((fkRootField.type = 'FIELD'), fkRootField)
+                ...allFieldElements.filter(fieldElement => fieldElement?.fieldSchema !== fkRootField?.fieldSchema),
+                fkRootField
               ]
             }
           : undefined;
