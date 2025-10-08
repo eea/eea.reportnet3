@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useContext } from 'react';
 
 import isNil from 'lodash/isNil';
 import keys from 'lodash/keys';
@@ -15,6 +15,7 @@ import { WebformTable } from 'views/Webforms/_components/WebformTable';
 import { webformViewReducer } from './_functions/Reducers/webformViewReducer';
 
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
+import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const WebformView = ({
   bigData,
@@ -29,6 +30,7 @@ export const WebformView = ({
   isIcebergCreated,
   isRefresh,
   isReporting,
+  isViewMode,
   rootPkFieldId,
   rootTableName,
   selectedTable,
@@ -39,6 +41,7 @@ export const WebformView = ({
 }) => {
   const tableSchemaNames = state.schemaTables.map(table => table.name);
   const { getWebformTabs } = WebformsUtils;
+  const resourcesContext = useContext(ResourcesContext);
 
   const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
     isLoading: false,
@@ -116,6 +119,7 @@ export const WebformView = ({
         isIcebergCreated={isIcebergCreated}
         isRefresh={isRefresh}
         isReporting={isReporting}
+        isViewMode={isViewMode}
         onTabChange={isVisible}
         rootPkFieldId={rootPkFieldId}
         rootTableName={rootTableName}
@@ -131,11 +135,32 @@ export const WebformView = ({
     return <Spinner style={{ top: 0, marginBottom: '2rem' }} />;
   }
 
+  const renderViewModeMessage = () => {
+    console.log('isViewMode:', isViewMode, 'isIcebergCreated:', isIcebergCreated); //--- IGNORE ---
+    if (isViewMode && isIcebergCreated) {
+      return (
+        <div className={styles.viewModeWarning} role="alert">
+          <i className={`pi pi-info-circle ${styles.infoIcon}`} />
+          {resourcesContext.messages['viewModeMessage']}
+        </div>
+      );
+    } else if (isViewMode && !isIcebergCreated) {
+      return (
+        <div className={styles.viewModeWarning} role="alert">
+          <i className={`pi pi-info-circle ${styles.infoIcon}`} />
+          {resourcesContext.messages['viewModeMessageIceberg']}
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className={styles.webform}>
       <Toolbar className={styles.toolbar}>
         <div className="p-toolbar-group-left">{renderWebFormHeaders()}</div>
       </Toolbar>
+      {renderViewModeMessage()}
       {renderWebFormContent()}
     </div>
   );

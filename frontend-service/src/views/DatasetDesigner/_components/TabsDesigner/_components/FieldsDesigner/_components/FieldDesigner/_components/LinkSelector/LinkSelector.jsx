@@ -32,7 +32,10 @@ export const LinkSelector = ({
   fields,
   hasMultipleValues = false,
   doesIgnoreCaseInLinks = false,
+  isDataflowOpen,
+  isDesignDatasetEditorRead,
   isExternalLink,
+  isIcebergCreated,
   isLinkSelectorVisible,
   isReferenceDataset,
   linkedTableConditional,
@@ -424,6 +427,7 @@ export const LinkSelector = ({
               datasetSchemas.map(datasetSchema => {
                 return (
                   <ListBox
+                    disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated}
                     key={uniqueId('datasetSchema_')}
                     onChange={e => {
                       if (!isNil(e.value)) {
@@ -445,6 +449,7 @@ export const LinkSelector = ({
               appendTo={document.body}
               ariaLabel="linkedTableLabel"
               className={styles.fieldSelector}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated}
               inputId="linkedTableLabel"
               name={resourcesContext.messages['linkedTableLabel']}
               onChange={e =>
@@ -465,6 +470,7 @@ export const LinkSelector = ({
               appendTo={document.body}
               ariaLabel="masterTableConditional"
               className={styles.fieldSelector}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated}
               inputId="masterTableConditional"
               name={resourcesContext.messages['masterTableConditional']}
               onChange={e =>
@@ -483,6 +489,7 @@ export const LinkSelector = ({
               appendTo={document.body}
               ariaLabel="linkedTableConditional"
               className={styles.fieldSelector}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated}
               inputId="linkedTableConditional"
               name={resourcesContext.messages['linkedTableConditional']}
               onChange={e =>
@@ -503,6 +510,7 @@ export const LinkSelector = ({
             </span>
             <Checkbox
               checked={pkMustBeUsed}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated}
               id="pkMustBeUsed_check"
               inputId="pkMustBeUsed_check"
               label="Default"
@@ -514,6 +522,7 @@ export const LinkSelector = ({
             </span>
             <Checkbox
               checked={pkHasMultipleValues}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated}
               id="pkHasMultipleValues_check"
               inputId="pkHasMultipleValues_check"
               label="Default"
@@ -525,6 +534,7 @@ export const LinkSelector = ({
             </span>
             <Checkbox
               checked={ignoreCaseInLinks}
+              disabled={isDataflowOpen || isDesignDatasetEditorRead || isIcebergCreated}
               id="ignoreCaseInLinks_check"
               inputId="ignoreCaseInLinks_check"
               label="Default"

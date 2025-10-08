@@ -101,10 +101,16 @@
   .fieldsBlock {
     display: flex;
     justify-content: space-between;
-    max-width: 90%;
+    max-width:100%;
     align-items: flex-end;
+    > div:not([class]):first-child{
+      flex:0 0 330px;
+      @media screen and (max-width:1500px){
+        flex:0 0 230px;
+      }
+    }
     > div:has(.label3){
-      align-self: flex-start;
+      align-self: center;
     }
     > * {
       margin-left: 0.5rem;
@@ -114,14 +120,9 @@
       align-items: flex-end;
       &.field:not(:has( > label)){
         margin-top:31px;
-        padding-bottom:21px;
       }
       &.field:not(:has( > label)){
         margin-top:31px;
-        padding-bottom:21px;
-      }
-      &.field:not(:has(p)){
-        padding-bottom:21px;
       }
       &:first-of-type {
         margin-left: 0;
@@ -179,10 +180,15 @@
     color: var(--general-text-color);
     :global .p-multiselect {
       width: 100%;
-      padding: 0.2rem 0;
+      padding:0;
+      line-height: 0;
+      .p-multiselect-label{
+        min-height:51px;
+      }
     }
     :global .p-dropdown {
       width: 100%;
+      line-height: 0;
     }
     :global .p-inputtext:not(.p-column-filter) {
       padding: 1rem 0.5rem;
@@ -207,7 +213,7 @@
     }
 
     .template {
-      width: 90%;
+      width: 100%;
 
       .nonExistField {
         color: var(--errors);
@@ -476,4 +482,31 @@
 .fieldWrapper {
   display: flex;
   line-height:1;
+  position:relative;
+}
+
+
+.content :global{
+  .p-multiselect-label.p-multiselect-label.p-multiselect-label,
+  .p-dropdown-label.p-dropdown-label.p-dropdown-label{
+    margin-bottom:0;
+    min-height:51px;
+    line-height:1.3;
+  }
+
+   .p-multiselect .p-multiselect-label-container {
+    padding:0!important;
+  }
+
+   .p-multiselect .p-multiselect-label {
+    padding: 1rem 2em 1rem 0.429em;
+  }
+}
+
+.content :global  {
+  .webformCharacterCount {
+    position: absolute;
+    bottom: -21px;
+    right: 0;
+  }
 }

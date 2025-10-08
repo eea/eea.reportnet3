@@ -17,6 +17,7 @@ import org.eea.dataset.persistence.schemas.domain.FieldSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.repository.SchemasRepository;
 import org.eea.dataset.service.CreateEmptyTables;
+import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.enums.DataType;
@@ -43,6 +44,8 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
   private final SchemasRepository schemasRepository;
 
   private static final Logger LOG = LoggerFactory.getLogger(CreateEmptyTablesImpl.class);
+
+  final String ILLEGAL_CHAR_MARKER = "Illegal character in";
 
   @Value("${parquet.file.path}")
   private String parquetFilePath;
@@ -96,27 +99,34 @@ public class CreateEmptyTablesImpl implements CreateEmptyTables {
         fieldSchemas.add(0, providerCodeSchema);
         fieldSchemas.add(0, recordIdSchema);
 
+        String currentField = "";
         try {
           List<Schema.Field> fields = new ArrayList<>();
-          fieldSchemas.forEach(field -> {
+          for (FieldSchema field : fieldSchemas) {
+            currentField = field.getHeaderName();
             if (spatialDataHandling.getGeoJsonEnums().contains(field.getType())) {
               fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.BYTES)));
             } else {
               fields.add(new Schema.Field(field.getHeaderName(), Schema.create(Schema.Type.STRING)));
             }
-          });
+          }
 
           regenerateTables(dataset, tableSchema, fields);
         } catch (Exception e) {
-          throw new EEAException(e.getMessage());
+          String msg = e.getMessage();
+          if (msg != null && msg.contains(ILLEGAL_CHAR_MARKER)) {
+            throw new EEAException(EEAErrorMessage.ERROR_ILLEGAL_HEADER_CHARACTER + currentField);
+          }
+          throw e;
         }
       }
+    } catch (EEAException eea) {
+      throw eea;
     } catch (Exception e) {
       LOG.error("Something went wrong, trying to create empty tables for dataflowId {} and datasetId {} , with exception message: {}", dataset.getDataflowId(), dataset.getId(), e.getMessage());
       throw new EEAException("Something went wrong, trying to create empty tables with message: " + e.getMessage());
     }
   }
-
 
   private void regenerateTables(DataSetMetabaseVO dataset, TableSchema tableSchema, List<Schema.Field> fields) throws Exception {
     Schema schema1 = Schema.createRecord("Data", null, null, false, fields);

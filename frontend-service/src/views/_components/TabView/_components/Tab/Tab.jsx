@@ -101,26 +101,30 @@ export const Tab = ({
   const tabRef = useRef();
 
   useEffect(() => {
-    setMenu([
-      {
-        label: resourcesContext.messages['edit'],
-        icon: config.icons['edit'],
-        command: () => {
-          setEditingHeader(true);
-        }
-      },
-      {
-        label: resourcesContext.messages['delete'],
-        icon: config.icons['trash'],
-        command: () => {
-          if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
-            onTabDeleteClick(tableSchemaId);
+    if (!isIcebergCreated) {
+      setMenu([
+        {
+          label: resourcesContext.messages['edit'],
+          icon: config.icons['edit'],
+          command: () => {
+            setEditingHeader(true);
           }
         },
-        disabled: hasPKReferenced
-      }
-    ]);
-  }, [tableSchemaId, hasPKReferenced]);
+        {
+          label: resourcesContext.messages['delete'],
+          icon: config.icons['trash'],
+          command: () => {
+            if (!isUndefined(onTabDeleteClick) && !addTab && !hasPKReferenced) {
+              onTabDeleteClick(tableSchemaId);
+            }
+          },
+          disabled: hasPKReferenced
+        }
+      ]);
+    } else {
+      setMenu(undefined);
+    }
+  }, [tableSchemaId, hasPKReferenced, isIcebergCreated]);
 
   useEffect(() => {
     if (!editingHeader) {
@@ -471,7 +475,6 @@ export const Tab = ({
       );
     }
   };
-
 
   const renderTableInfo = () => {
     if (isTableInfoVisible) {

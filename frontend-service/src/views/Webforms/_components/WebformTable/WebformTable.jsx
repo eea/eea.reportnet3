@@ -33,6 +33,7 @@ export const WebformTable = ({
   isLoadingIceberg,
   isRefresh,
   isReporting,
+  isViewMode,
   onTabChange,
   rootPkFieldId,
   rootTableName,
@@ -357,6 +358,7 @@ export const WebformTable = ({
       isFixedNumber={webformData.fixedNumber || webformData.tableSchemaFixedNumber || null}
       isOptional={webformData.isOptional}
       isReporting={isReporting}
+      isViewMode={isViewMode}
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
@@ -416,6 +418,7 @@ export const WebformTable = ({
           <h3 className={styles.title}>
             <Button
               className={styles.addRecordButton}
+              disabled={isViewMode}
               icon={webformTableState.isAddingMultiple ? 'spinnerAnimate' : 'add'}
               label={resourcesContext.messages['addRecord']}
               onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}

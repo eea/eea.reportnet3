@@ -3699,8 +3699,12 @@ public class DatasetControllerImpl implements DatasetController {
   @HystrixCommand(commandProperties = {
       @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "650000")})
   @Override
-  public void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable String tableSchemaId) throws Exception {
-    createEmptyTables.runCreationForSpecificTableSchema(datasetMetabaseVO, tableSchemaId);
+  public void createEmptyTablesV2(@RequestBody DataSetMetabaseVO datasetMetabaseVO, @PathVariable String tableSchemaId) {
+    try {
+      createEmptyTables.runCreationForSpecificTableSchema(datasetMetabaseVO, tableSchemaId);
+    } catch (EEAException e) {
+      throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage(), e);
+    }
   }
 
   /**

@@ -1639,8 +1639,9 @@ public class FileTreatmentHelper implements DisposableBean {
                 prepareFmeFileProcess(datasetId, files.get(0), integrationVO, mimeType, tableSchemaId,
                         replace,jobId);
             } else {
-                List<File> validatedList = validateFileHeaders(tableSchemaId, schema,originalFileName, files, delimiter, processId, datasetId, jobId);
-                List<File> finalFiles = validatedList;
+                List<File> validatedNamesList = validateFileNames(tableSchemaId, schema, files, processId, datasetId, jobId, originalFileName);
+                List<File> validatedHeadersList = validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId);
+                List<File> finalFiles = validatedHeadersList;
                 importExecutorService.submit(() -> {
                     try {
                         if(this.enableTaskBasedAsynchronousImport){
@@ -1764,6 +1765,82 @@ public class FileTreatmentHelper implements DisposableBean {
 
     }
 
+  /**
+   * Validates files by checking that their filename maps to a tableSchemaId.
+   * Removes any invalid files from the list and emits notifications.
+   *
+   * @param tableSchemaId the table schema id
+   * @param schema the dataset schema
+   * @param originalFileName the original file name
+   * @param files the list of files to validate; invalid files will be removed from this list
+   * @param processId the process id
+   * @param datasetId the dataset id
+   * @param jobId the job id
+   * @return The filtered list with only files whose name matches a table
+   * @throws EEAException If all files are invalid
+   */
+  private List<File> validateFileNames(String tableSchemaId, DataSetSchema schema, List<File> files, String processId, Long datasetId, Long jobId, String originalFileName) throws EEAException {
+
+    String error = null;
+    List<String> warningList = new ArrayList<>();
+    int filesCount = files.size();
+
+    Iterator<File> fileIterator = files.iterator();
+    while (fileIterator.hasNext()) {
+      File file = fileIterator.next();
+      String fileName = file.getName();
+      boolean remove = false;
+      String fileType = datasetService.getMimetype(fileName);
+
+      if (!fileType.equalsIgnoreCase("csv")) {
+        continue;
+      }
+
+      try {
+        String findTableSchemaId = tableSchemaId == null ? getTableSchemaIdFromFileName(schema, fileName, true) : tableSchemaId;
+        if (StringUtils.isBlank(findTableSchemaId)) {
+          // Remove file if name doesn't match any table.
+          remove = true;
+          if (filesCount > 1) {
+            warningList.add(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
+          } else {
+            error = EEAErrorMessage.ERROR_FILE_NAME_MATCHING;
+          }
+          LOG.info("Wrong file name for Job ID:{} Dataset ID:{} File:{} - no table name was found that matches the file name.",
+              jobId, datasetId, fileName);
+        }
+      } catch (Exception ex) {
+        remove = true;
+        if (filesCount > 1) {
+          warningList.add(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null));
+        } else {
+          error = EEAErrorMessage.ERROR_FILE_NAME_MATCHING;
+        }
+        LOG.error("Error inferring table from file name {}. Job ID:{} Dataset ID:{} Msg:{}",
+            fileName, jobId, datasetId, ex.getMessage(), ex);
+      }
+
+      if (remove) {
+        fileIterator.remove();
+      }
+    }
+
+    if (filesCount == warningList.size()) {
+      error = EEAErrorMessage.ERROR_FILE_NAME_MATCHING;
+      warningList.clear();
+    }
+
+    if (error != null || !warningList.isEmpty()) {
+      assignJobNotifications(tableSchemaId, originalFileName, processId, datasetId, jobId, error, warningList);
+    }
+
+    if (files.isEmpty()) {
+      throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
+    }
+
+    return files;
+  }
+
     private void assignJobNotifications(String tableSchemaId,String originalFileName, String processId, Long datasetId, Long jobId, String error, List<String> warningList) {
         try {
             Long dataflowId = datasetService.getDataFlowIdById(datasetId);
@@ -1784,6 +1861,11 @@ public class FileTreatmentHelper implements DisposableBean {
                 if (EEAErrorMessage.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS.equals(error)) {
                     jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS, null);
                     eventType = EventType.IMPORT_WRONG_HEADERS_ERROR_EVENT;
+                } else if (EEAErrorMessage.ERROR_FILE_NAME_MATCHING.equals(error)) {
+                  jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_WRONG_FILE_NAME, null);
+                  eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
+                      ? EventType.IMPORT_REPORTING_FAILED_NAMEFILE_EVENT
+                      : EventType.IMPORT_DESIGN_FAILED_NAMEFILE_EVENT;
                 } else {
                     eventType = REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
                             ? EventType.IMPORT_REPORTING_FAILED_EVENT
@@ -1810,6 +1892,14 @@ public class FileTreatmentHelper implements DisposableBean {
                             .datasetId(datasetId).fileName(originalFileName).build();
                     kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_WRONG_HEADERS_WARNING_EVENT,
                             value, notificationWarning);
+                }
+                if(warningList.contains(JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES.getValue(null))) {
+                  jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_SOME_FILENAMES_DO_NOT_MATCH_TABLES, null);
+                  NotificationVO notificationWarning = NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                      .datasetId(datasetId).fileName(originalFileName).build();
+                  kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.IMPORT_NAMEFILE_WARNING_EVENT,
+                      value, notificationWarning);
                 }
             }
 

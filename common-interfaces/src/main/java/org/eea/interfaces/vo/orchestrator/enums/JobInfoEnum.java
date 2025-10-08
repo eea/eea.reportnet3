@@ -73,7 +73,9 @@ public enum JobInfoEnum {
 
     ERROR_NO_FILE_RETURNED_FROM_FME("The import job failed because no file returned from FME."),
 
-    ERROR_VALIDATION_FAILURE("Validation failed due to system error. Please contact the Service Desk for support.");
+    ERROR_VALIDATION_FAILURE("Validation failed due to system error. Please contact the Service Desk for support."),
+
+    ERROR_ILLEGAL_HEADER_CHARACTER("Validation failed due to an illegal character found in a field name of the table.");
 
 
     /** The value. */

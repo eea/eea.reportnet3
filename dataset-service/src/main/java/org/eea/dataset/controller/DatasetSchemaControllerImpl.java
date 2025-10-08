@@ -1605,6 +1605,13 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.info("Successfully exported field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
+
+      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
+      userNotificationContentVO.setDatasetId(datasetId);
+      userNotificationContentVO.setFileName(fileName);
+      notificationControllerZuul.createUserNotificationPrivate("EXPORT_DEFINITION_COMPLETED_EVENT",
+              userNotificationContentVO);
+
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {
       LOG.error("Error exporting field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId, e);

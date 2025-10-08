@@ -941,7 +941,7 @@ public class FKValidationUtils {
     return pkField;
   }
 
-  private static List<String> splitCommasRespectingQuotes(String input) {
+  public static List<String> splitCommasRespectingQuotes(String input) {
     List<String> result = new ArrayList<>();
     if (input == null || input.isEmpty()) return result;
 

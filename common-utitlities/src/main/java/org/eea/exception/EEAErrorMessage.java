@@ -868,6 +868,9 @@ public final class EEAErrorMessage {
   /** The Constant ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS */
   public static final String ERROR_IMPORT_FILES_CONTAIN_WRONG_HEADERS = "Import files contain wrong headers.";
 
+  /** The Constant ERROR_ILLEGAL_HEADER_CHARACTER */
+  public static final String ERROR_ILLEGAL_HEADER_CHARACTER = "There's an Illegal character in field header ";
+
   /**
    * Instantiates a new EEA error message.
    */

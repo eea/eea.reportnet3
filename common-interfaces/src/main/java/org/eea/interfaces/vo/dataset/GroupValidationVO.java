@@ -34,7 +34,7 @@ public class GroupValidationVO implements Serializable {
   private EntityTypeEnum typeEntity;
 
   /** The number of records. */
-  private Integer numberOfRecords;
+  private String numberOfRecords;
 
   /** The name table schema. */
   private String nameTableSchema;

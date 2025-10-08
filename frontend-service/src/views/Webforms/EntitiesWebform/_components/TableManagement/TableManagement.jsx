@@ -42,6 +42,7 @@ export const TableManagement = ({
   loading,
   onRefresh,
   onSelectEditTable,
+  onSelectViewTable,
   overview,
   refreshTrigger,
   rootPkFieldId,
@@ -408,6 +409,10 @@ export const TableManagement = ({
         onEditClick={() => {
           tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
           onSelectEditTable(entitiesFieldSchemaValue, tableName, rowData.recordId);
+        }}
+        onViewClick={() => {
+          tableManagementDispatch({ type: 'SET_SELECTED_RECORD', payload: rowData });
+          onSelectViewTable(entitiesFieldSchemaValue, tableName, rowData.recordId, true);
         }}
       />
     );
