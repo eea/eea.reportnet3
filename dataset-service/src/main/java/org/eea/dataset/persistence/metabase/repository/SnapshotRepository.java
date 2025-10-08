@@ -131,4 +131,34 @@ public interface SnapshotRepository extends CrudRepository<Snapshot, Long> {
 
   Snapshot findFirstByReportingDatasetIdAndDateReleasedIsNotNullOrderByDateReleasedAsc(
           @Param("idReportingDataset") Long idDataset);
+
+  @Modifying
+  @Transactional
+  @Query(value = "UPDATE snapshot " +
+      "SET dc_released = false, " +
+      "    date_released = null " +
+      "WHERE job_id = :jobId " +
+      "AND reporting_dataset_id = :datasetId",
+      nativeQuery = true)
+  int markAsNotReleased(@Param("jobId") Long jobId,
+                        @Param("datasetId") Long datasetId);
+
+  @Query(
+      value = "SELECT id " +
+          "FROM snapshot " +
+          "WHERE reporting_dataset_id = :datasetId " +
+          "AND dc_released = false " +
+          "AND date_released IS NOT NULL " +
+          "AND job_id <> :jobId " +
+          "ORDER BY date_released DESC " +
+          "LIMIT 1",
+      nativeQuery = true
+  )
+  Long findLatestRecordForRelease(@Param("datasetId") Long datasetId,
+                                  @Param("jobId") Long jobId);
+
+  @Modifying
+  @Transactional
+  @Query(value = "UPDATE snapshot SET dc_released = true WHERE id = :id", nativeQuery = true)
+  int markAsReleased(@Param("id") Long id);
 }

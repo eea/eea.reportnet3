@@ -707,8 +707,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
             else {
                 eventType = DatasetTypeEnum.REPORTING.equals(type) || DatasetTypeEnum.TEST.equals(type)
-                        ? EventType.IMPORT_REPORTING_FAILED_EVENT
-                        : EventType.IMPORT_DESIGN_FAILED_EVENT;
+                        ? EventType.IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT
+                        : EventType.IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT;
             }
             datasetMetabaseService.updateDatasetRunningStatus(importFileInDremioInfo.getDatasetId(),
                     DatasetRunningStatusEnum.ERROR_IN_IMPORT);

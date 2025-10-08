@@ -208,29 +208,27 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
 
       throw new EEAException(String.format(EEAErrorMessage.NO_DESIGNS_TO_COPY, idDataflowOrigin));
     }
+
     if (dataflowControllerZuul.isBigDataflow(idDataflowDestination)) {
-      for (DesignDatasetVO design : designs) {
+      try {
+        List<DataSetSchemaVO> schemaVOs = new ArrayList<>();
+        for (DesignDatasetVO design : designs) {
+          schemaVOs.add(dataschemaService.getDataSchemaById(design.getDatasetSchema()));
+        }
 
-        DataSetSchemaVO schemaVO = dataschemaService.getDataSchemaById(design.getDatasetSchema());
-
-        // adding to the dictionary mapping schema id's the mapping among tables
-        for (TableSchemaVO tableSchemaVO : schemaVO.getTableSchemas()) {
-          for (FieldSchemaVO field : tableSchemaVO.getRecordSchema().getFieldSchema()) {
-            if (field.getName().chars().anyMatch(Character::isWhitespace)) {
-              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT,
+        dataschemaService.validateTableFieldNamesHaveNoWhitespace(idDataflowDestination, schemaVOs);
+      } catch (EEAException ex) {
+        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT,
                 null,
                 NotificationVO.builder()
-                  .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                  .dataflowId(idDataflowDestination).error("Error copying the schemas - " + EEAErrorMessage.FIELD_NAME_WHITESPACES).build());
-              Map<String, Object> copyDatasetSchema = new HashMap<>();
-              copyDatasetSchema.put(LiteralConstants.SIGNATURE,
+                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                        .dataflowId(idDataflowDestination).error("Error copying the schemas - " + EEAErrorMessage.FIELD_NAME_WHITESPACES).build());
+        Map<String, Object> copyDatasetSchema = new HashMap<>();
+        copyDatasetSchema.put(LiteralConstants.SIGNATURE,
                 LockSignature.COPY_DATASET_SCHEMA.getValue());
-              copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
-              lockService.removeLockByCriteria(copyDatasetSchema);
-              throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_WHITESPACES, idDataflowOrigin));
-            }
-          }
-        }
+        copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
+        lockService.removeLockByCriteria(copyDatasetSchema);
+        throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_WHITESPACES, idDataflowOrigin), ex);
       }
     }
 

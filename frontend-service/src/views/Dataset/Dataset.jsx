@@ -379,7 +379,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       onGetIcebergTables();
       handleRefresh();
     }
-  }, [notificationContext.toShow, notificationContext.hidden]);
+  }, [notificationContext.toShow]);
 
   const getWebformConfiguration = async (webform, options) => {
     try {
@@ -763,8 +763,8 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
       changeProgressStepBar({ step: 1, currentStep: 2, isRunning: false, completed: false, withError: false });
     }
 
-    const validationFinishedWithError = notificationContext.toShow.find(
-      notification => notification.key === 'IMPORT_REPORTING_FAILED_EVENT'
+    const validationFinishedWithError = notificationContext.toShow.find(notification =>
+      ['IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT', 'IMPORT_REPORTING_FAILED_EVENT'].includes(notification.key)
     );
     if (
       validationFinishedWithError &&
@@ -1196,34 +1196,37 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
     );
   };
 
-  const onUpload = async (e) => {
-    const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
-
-    actionsContext.testProcess(datasetId, action);
+  const onUpload = async e => {
     setIsImportDatasetDialogVisible(false);
     setSelectedCustomImportIntegration({ id: null, name: null });
-    const {
-      dataflow: { name: dataflowName },
-      dataset: { name: datasetName }
-    } = metadata;
 
-    notificationContext.add(
-      {
-        type: 'DATASET_DATA_LOADING_INIT',
-        content: {
-          customContent: {
-            datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-            title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
-            datasetLoading: resourcesContext.messages['datasetLoading']
-          },
-          dataflowName,
-          datasetName,
-          fileName
-        }
-      },
-      true
-    );
+    const action = 'DATASET_IMPORT';
+    const fileName = e?.files?.[0]?.name || ' ';
+    actionsContext.testProcess(datasetId, action);
+
+    if (!metadata?.dataflow.bigData) {
+      const {
+        dataflow: { name: dataflowName },
+        dataset: { name: datasetName }
+      } = metadata;
+
+      notificationContext.add(
+        {
+          type: 'DATASET_DATA_LOADING_INIT',
+          content: {
+            customContent: {
+              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX),
+              datasetLoading: resourcesContext.messages['datasetLoading']
+            },
+            dataflowName,
+            datasetName,
+            fileName
+          }
+        },
+        true
+      );
+    }
     changeProgressStepBar({ step: 0, currentStep: 1, isRunning: true });
   };
 
@@ -1642,6 +1645,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
           chooseLabel={resourcesContext.messages['selectFile']}
           className={styles.FileUpload}
           dataflowId={dataflowId}
+          dataflowName={metadata?.dataflow?.name}
           datasetId={datasetId}
           datasetName={datasetName}
           dialogHeader={selectedCustomImportIntegration.name}

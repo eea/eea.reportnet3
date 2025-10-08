@@ -93,6 +93,9 @@ export const ValidationService = {
   downloadQCRulesFile: async (datasetId, fileName) =>
     await ValidationRepository.downloadQCRulesFile(datasetId, fileName),
 
+  downloadHistoricReleaseFile: async (datasetId,dataflowId, nameFile, processId) =>
+    await ValidationRepository.downloadHistoricReleaseFile(datasetId,dataflowId, nameFile,processId),
+
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await ValidationRepository.downloadShowValidationsFile(datasetId, fileName),
 
@@ -105,6 +108,7 @@ export const ValidationService = {
     const validationsList = {};
     validationsList.datasetSchemaId = validationsListDTO.data.idDatasetSchema;
     validationsList.rulesSchemaId = validationsListDTO.data.rulesSchemaId;
+    validationsList.automaticQCsDefaultLevelError = validationsListDTO.data.automaticQCsDefaultLevelError;
 
     if (reporting) {
       validationsListDTO.data.rules = validationsListDTO.data.rules.filter(rule => rule.enabled === true);
@@ -121,6 +125,8 @@ export const ValidationService = {
   getQcHistoricInfo: async (datasetId, ruleId) => await ValidationRepository.getQcHistoricInfo(datasetId, ruleId),
 
   generateQCRulesFile: async datasetId => await ValidationRepository.generateQCRulesFile(datasetId),
+
+  generateHistoricDataFile: async (datasetId, dataflowId) => await ValidationRepository.generateHistoricDataFile(datasetId,dataflowId),
 
   generateShowValidationsFile: async datasetId => await ValidationRepository.generateShowValidationsFile(datasetId),
 

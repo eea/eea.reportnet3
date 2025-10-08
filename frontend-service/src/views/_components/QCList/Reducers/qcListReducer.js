@@ -17,7 +17,11 @@ export const qcListReducer = (state, { type, payload }) => {
       return { ...state, validationId: payload };
 
     case 'ON_LOAD_VALIDATION_LIST':
-      return { ...state, validationList: payload.validationsServiceList };
+      return {
+        ...state,
+        validationList: payload.validationsServiceList,
+        automaticQCsDefaultLevelError: payload.validationsServiceList?.automaticQCsDefaultLevelError
+      };
 
     case 'RESET_FILTERED_DATA':
       return {

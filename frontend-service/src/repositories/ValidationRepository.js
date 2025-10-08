@@ -17,6 +17,11 @@ export const ValidationRepository = {
       url: getUrl(ValidationConfig.downloadQCRulesFile, { datasetId, fileName })
     }),
 
+  downloadHistoricReleaseFile: async (datasetId,dataflowId,nameFile,processId) =>
+    await HTTPRequester.download({
+      url: getUrl(ValidationConfig.downloadHistoricReleaseFile, { datasetId, dataflowId, nameFile,processId })
+    }),
+
   downloadShowValidationsFile: async (datasetId, fileName) =>
     await HTTPRequester.download({
       url: getUrl(ValidationConfig.downloadShowValidationsFile, { datasetId, fileName })
@@ -24,6 +29,10 @@ export const ValidationRepository = {
 
   generateQCRulesFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateQCRulesFile, { datasetId }) }),
+
+  generateHistoricDataFile: async (datasetId, dataflowId) =>
+    await HTTPRequester.post({ url: getUrl(ValidationConfig.generateHistoricDataFile, { datasetId,dataflowId }),
+    headers: {'Authorization':'ApiKey f75147fd-da38-454b-a54b-1e09f8d2163a' }}),
 
   generateShowValidationsFile: async datasetId =>
     await HTTPRequester.post({ url: getUrl(ValidationConfig.generateShowValidationsFile, { datasetId }) }),

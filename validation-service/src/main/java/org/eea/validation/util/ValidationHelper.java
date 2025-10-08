@@ -455,7 +455,8 @@ public class ValidationHelper implements DisposableBean {
     List<String> failedToPromoteTables = new ArrayList<>();
     for (String tableName : tableNames) {
       try {
-        S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), tableName, tableName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
+        Long providerId = dataset.getDataProviderId() != null ? dataset.getDataProviderId() : 0L;
+        S3PathResolver tableResolver = new S3PathResolver(dataset.getDataflowId(), providerId, dataset.getId(), tableName, tableName, LiteralConstants.S3_TABLE_AS_FOLDER_QUERY_PATH);
         tableResolver.setIsIcebergTable(false);
 
         // Check if the table exists on dremio.
@@ -581,17 +582,25 @@ public class ValidationHelper implements DisposableBean {
       priority = 70;
     } else {
       final LocalDateTime today = LocalDateTime.now();
-      Long days = Duration.between(today,
+      Long daysTo = Duration.between(today,
           LocalDateTime.ofInstant(dataflow.getDeadlineDate().toInstant(), ZoneId.systemDefault()))
           .toDays();
-      if (days > periodDays.get(0)) {
-        priority = 50;
-      } else if (days <= periodDays.get(0) && days > periodDays.get(1)) {
+      Long daysPast = Duration.between(LocalDateTime.ofInstant(dataflow.getDeadlineDate().toInstant(), ZoneId.systemDefault()),
+          today)
+        .toDays();
+      if (daysTo > periodDays.get(0) || daysPast > periodDays.get(0)) {
+          priority = 60;
+      } else if ((daysTo <= periodDays.get(0) && daysTo > periodDays.get(1))
+        || (daysPast <= periodDays.get(0) && daysPast > periodDays.get(1))) {
+          priority = 50;
+      } else if ((daysTo <= periodDays.get(1) && daysTo > periodDays.get(2))
+        || (daysPast <= periodDays.get(1) && daysPast > periodDays.get(2))) {
         priority = 40;
-      } else if (days <= periodDays.get(2) && days > periodDays.get(3)) {
-        priority = 30;
+      } else if ((daysTo <= periodDays.get(2) && daysTo > periodDays.get(3))
+        || (daysPast <= periodDays.get(2) && daysPast > periodDays.get(3))) {
+          priority = 30;
       } else {
-        priority = 20;
+          priority = 20;
       }
     }
     return priority;

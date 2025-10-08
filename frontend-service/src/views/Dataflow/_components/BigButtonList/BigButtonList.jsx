@@ -51,6 +51,7 @@ import { IntegrationsUtils } from 'views/DatasetDesigner/_components/Integration
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { MetadataUtils } from 'views/_functions/Utils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import {ValidationService} from "../../../../services/ValidationService";
 
 export const BigButtonList = ({
   dataflowState,
@@ -173,16 +174,17 @@ export const BigButtonList = ({
     false
   );
   useCheckNotifications(
-    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_FAILED_EVENT', 'COPY_DATASET_SCHEMA_NOT_FOUND_EVENT'],
+    ['COPY_DATASET_SCHEMA_COMPLETED_EVENT', 'COPY_DATASET_SCHEMA_FAILED_EVENT', 'COPY_DATASET_SCHEMA_NOT_FOUND_EVENT', 'COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT'],
     setIsCloningDataflow,
     false
   );
 
   useCheckNotifications(
-    ['IMPORT_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_FAILED_EVENT'],
+    ['IMPORT_DATASET_SCHEMA_COMPLETED_EVENT', 'IMPORT_DATASET_SCHEMA_FAILED_EVENT', 'IMPORT_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT'],
     setIsImportingDataflow,
     false
   );
+
 
   useEffect(() => {
     const response = notificationContext.toShow.find(notification => notification.key === 'LOAD_RECEIPT_DATA_ERROR');
@@ -236,6 +238,7 @@ export const BigButtonList = ({
       )}
     </div>
   );
+
 
   const cloneDatasetSchemas = async () => {
     onHideCloneSchemasDialog();

@@ -38,6 +38,10 @@ public enum EventType {
   /** The copyToEuDataset refused event. */
   COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
+  /** The import reporting dataset data failed event. */
+  IMPORT_REPORTING_DATASET_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+          "import_reporting_dataset_data_failed_event", true),
+
   /** The import reporting failed event. */
   IMPORT_REPORTING_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_reporting_failed_event", true),
@@ -105,6 +109,10 @@ public enum EventType {
   /** The import design completed event. */
   IMPORT_DESIGN_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "import_design_completed_event", true),
+
+  /** The import design dataset data failed event. */
+  IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "import_design_dataset_data_failed_event",
+          true),
 
   /** The import design failed event. */
   IMPORT_DESIGN_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "import_design_failed_event",
@@ -550,6 +558,13 @@ public enum EventType {
 
   /** The export qc failed event. */
   EXPORT_QC_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_failed_event", true),
+
+  /** The export historic releases completed event. */
+  EXPORT_HISTORIC_RELEASES_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_historic_releases_completed_event", true),
+
+
+  /** The export historic releases failed event. */
+  EXPORT_HISTORIC_RELEASES_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_historic_releases_failed_event", true),
 
   /** The validate reporters completed event. */
   VALIDATE_REPORTERS_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,

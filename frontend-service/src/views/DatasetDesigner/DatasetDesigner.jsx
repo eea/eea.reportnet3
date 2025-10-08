@@ -102,6 +102,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const [noEditableCheck, setNoEditableCheck] = useState(false);
   const [tableImportedMetadata, setTableImportedMetadata] = useState({});
   const [isQcSeverityDialogVisible, setIsQcSeverityDialogVisible] = useState(false);
+  const [automaticQCsDefaultLevelError, setAutomaticQCsDefaultLevelError] = useState('');
 
   const [designerState, designerDispatch] = useReducer(designerReducer, {
     areLoadedSchemas: false,
@@ -844,8 +845,8 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       });
     }
 
-    const validationFinishedWithError = notificationContext.toShow.find(
-      notification => notification.key === 'IMPORT_DESIGN_FAILED_EVENT'
+    const validationFinishedWithError = notificationContext.toShow.find(notification =>
+      ['IMPORT_DESIGN_DATASET_DATA_FAILED_EVENT', 'IMPORT_DESIGN_FAILED_EVENT'].includes(notification.key)
     );
 
     if (
@@ -907,7 +908,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
       onGetIcebergTables();
       handleRefresh();
     }
-  }, [notificationContext.toShow, notificationContext.hidden]);
+  }, [notificationContext.toShow]);
 
   const onHighlightRefresh = value => designerDispatch({ type: 'HIGHLIGHT_REFRESH', payload: { value } });
 
@@ -1111,33 +1112,37 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const onUpdateSchema = schema => designerDispatch({ type: 'ON_UPDATE_SCHEMA', payload: { schema } });
 
   const onUpload = async e => {
-    const action = 'DATASET_IMPORT';
-    const fileName = e?.files?.[0]?.name || ' ';
-    actionsContext.testProcess(datasetId, action);
-    manageDialogs('isImportDatasetDialogVisible', false);
-    setSelectedCustomImportIntegration({ id: null, name: null });
     try {
-      const {
-        dataflow: { name: dataflowName },
-        dataset: { name: datasetName }
-      } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+      manageDialogs('isImportDatasetDialogVisible', false);
+      setSelectedCustomImportIntegration({ id: null, name: null });
 
-      notificationContext.add(
-        {
-          type: 'DATASET_DATA_LOADING_INIT',
-          content: {
-            customContent: {
-              datasetLoading: resourcesContext.messages['datasetLoading'],
-              datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
-              title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
-            },
-            dataflowName,
-            datasetName,
-            fileName
-          }
-        },
-        true
-      );
+      const action = 'DATASET_IMPORT';
+      const fileName = e?.files?.[0]?.name || ' ';
+      actionsContext.testProcess(datasetId, action);
+
+      if (!designerState.bigData) {
+        const {
+          dataflow: { name: dataflowName },
+          dataset: { name: datasetName }
+        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
+
+        notificationContext.add(
+          {
+            type: 'DATASET_DATA_LOADING_INIT',
+            content: {
+              customContent: {
+                datasetLoading: resourcesContext.messages['datasetLoading'],
+                datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
+                title: TextUtils.ellipsis(datasetName, config.notifications.STRING_LENGTH_MAX)
+              },
+              dataflowName,
+              datasetName,
+              fileName
+            }
+          },
+          true
+        );
+      }
       designerDispatch({ type: 'SET_PROGRESS_STEP_BAR', payload: { step: 0, currentStep: 1, isRunning: true } });
     } catch (error) {
       console.error('DatasetDesigner - onUpload.', error);
@@ -1668,6 +1673,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
   const setHasQCsHistory = hasQCsHistory =>
     designerDispatch({ type: 'SET_HAS_QCS_HISTORY', payload: { hasQCsHistory } });
 
+  const handleSeverityUpdate = newSeverity => {
+    setAutomaticQCsDefaultLevelError(newSeverity);
+  };
+
   const validationsListDialog = () => {
     if (designerState.validationListDialogVisible) {
       return (
@@ -1688,6 +1697,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             isDataflowOpen={isDataflowOpen}
             isDatasetDesigner
             setHasQCsHistory={setHasQCsHistory}
+            setAutomaticQCsDefaultLevelError={setAutomaticQCsDefaultLevelError}
           />
         </Dialog>
       );
@@ -2263,8 +2273,10 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
         <QcSeverityDialog
           datasetId={datasetId}
           datasetSchemaId={designerState.datasetSchemaId}
+          defaultSeverity={automaticQCsDefaultLevelError}
           isVisible={isQcSeverityDialogVisible}
           onHide={() => setIsQcSeverityDialogVisible(false)}
+          onSaveSuccess={handleSeverityUpdate}
         />
 
         {designerState.isImportDatasetDialogVisible && (
@@ -2274,6 +2286,7 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             chooseLabel={resourcesContext.messages['selectFile']}
             className={styles.FileUpload}
             dataflowId={dataflowId}
+            dataflowName={designerState.dataflowName}
             datasetId={datasetId}
             datasetName={designerState.datasetSchemaName}
             dialogHeader={selectedCustomImportIntegration.name}

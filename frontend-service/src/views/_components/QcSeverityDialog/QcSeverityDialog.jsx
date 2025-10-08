@@ -1,4 +1,4 @@
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useState, useEffect } from 'react';
 import { Button } from 'views/_components/Button';
 import { Dialog } from 'views/_components/Dialog';
 import { Dropdown } from 'views/_components/Dropdown';
@@ -10,8 +10,8 @@ import { ValidationService } from 'services/ValidationService';
 
 import styles from './QcSeverityDialog.module.scss';
 
-export const QcSeverityDialog = ({ datasetId, datasetSchemaId, isVisible, onHide }) => {
-  const [severity, setSeverity] = useState('ERROR');
+export const QcSeverityDialog = ({ datasetId, datasetSchemaId, isVisible, onHide, defaultSeverity, onSaveSuccess }) => {
+  const [severity, setSeverity] = useState('');
   const [saving, setSaving] = useState(false);
 
   const notificationContext = useContext(NotificationContext);
@@ -24,11 +24,20 @@ export const QcSeverityDialog = ({ datasetId, datasetSchemaId, isVisible, onHide
     { label: 'BLOCKER', value: 'BLOCKER' }
   ];
 
+  useEffect(() => {
+    if (isVisible) {
+      setSeverity(defaultSeverity);
+    }
+  }, [isVisible, defaultSeverity]);
+
   const onSave = async () => {
     try {
       setSaving(true);
       await ValidationService.setDefaultSeverity(datasetId, datasetSchemaId, severity);
       notificationContext.add({ type: 'SET_DEFAULT_SEVERITY_SUCCESS', content: { severity: severity } }, true);
+      if (onSaveSuccess) {
+        onSaveSuccess(severity);
+      }
       onHide();
     } catch (error) {
       console.error('QcSeverityDialog - onSave', error);

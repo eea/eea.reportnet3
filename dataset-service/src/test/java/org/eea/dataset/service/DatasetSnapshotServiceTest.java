@@ -54,6 +54,7 @@ import org.eea.interfaces.controller.dataflow.DataFlowController.DataFlowControl
 import org.eea.interfaces.controller.dataflow.RepresentativeController.RepresentativeControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSnapshotController;
 import org.eea.interfaces.controller.document.DocumentController.DocumentControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobProcessController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.ums.UserManagementController.UserManagementControllerZull;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
@@ -231,6 +232,9 @@ public class DatasetSnapshotServiceTest {
   /** The reporting dataset service. */
   @Mock
   private ReportingDatasetService reportingDatasetService;
+
+  @Mock
+  private JobProcessController.JobProcessControllerZuul jobProcessControllerZuul;
 
   /** The collaboration controller zuul. */
   @Mock
