@@ -369,7 +369,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    */
-  @SneakyThrows
+  //@SneakyThrows
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
           name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
@@ -400,7 +400,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);

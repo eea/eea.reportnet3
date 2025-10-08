@@ -666,7 +666,7 @@ public interface DatasetController {
       @RequestParam(value = "integrationId", required = false) Long integrationId,
       @RequestParam(value = "delimiter", required = false) String delimiter,
       @RequestParam(value = "jobId", required = false) Long jobId,
-      @RequestParam(value = "fmeJobId", required = false) String fmeJobId);
+      @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception;
 
   /**
    * Import big file data private.
