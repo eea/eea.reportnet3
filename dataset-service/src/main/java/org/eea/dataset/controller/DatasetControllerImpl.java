@@ -754,7 +754,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
 
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
             integrationId, delimiter, jobId, fmeJobId);
@@ -804,7 +804,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
             integrationId, delimiter, jobId, fmeJobId);
   }
