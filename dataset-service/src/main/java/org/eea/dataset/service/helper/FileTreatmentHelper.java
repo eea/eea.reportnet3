@@ -407,7 +407,7 @@ public class FileTreatmentHelper implements DisposableBean {
      * @throws EEAException the EEA exception
      */
     public void importFileData(Long datasetId, Long dataflowId, String tableSchemaId, MultipartFile file,
-                               boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException {
+                               boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException, Exception {
 
         if (delimiter != null && delimiter.length() > 1) {
             LOG.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
@@ -1429,7 +1429,7 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     private void fileManagement(Long datasetId, Long dataflowId, String processId, Boolean released, String tableSchemaId, DataSetSchema schema,
                                 MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter,Long jobId)
-            throws EEAException {
+            throws EEAException, Exception {
         if (processControllerZuul.updateProcess(datasetId, dataflowId,
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.IMPORT, processId,
                 SecurityContextHolder.getContext().getAuthentication().getName(), 0, released)) {
@@ -1454,31 +1454,34 @@ public class FileTreatmentHelper implements DisposableBean {
                 }
             }
 
-            try (InputStream input = multipartFile.getInputStream()) {
-
+            try {
                 // Prepare the folder where files will be stored
                 File root = new File(importPath);
                 File folder = new File(root, datasetId.toString());
                 String saveLocationPath = folder.getCanonicalPath();
 
-                if(!folder.exists()) {
+                if (!folder.exists()) {
                     folder.mkdir();
                 }
 
                 List<File> files = new ArrayList<>();
                 if (null == integrationVO && "zip".equalsIgnoreCase(multipartFileMimeType)) {
-
-                    try (ZipInputStream zip = new ZipInputStream(input)) {
-                        files = unzipAndStore(folder, saveLocationPath, zip);
+                    try (InputStream input = multipartFile.getInputStream()) {
+                        try (ZipInputStream zip = new ZipInputStream(input)) {
+                            files = unzipAndStore(folder, saveLocationPath, zip);
+                        } catch (Exception e) {
+                            LOG.error("Unexpected error! Error in unzipAndStore for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+                            throw e;
+                        }
                     } catch (Exception e) {
-                        LOG.error("Unexpected error! Error in unzipAndStore for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+                        LOG.error("Unexpected error! Error in copyLarge for input for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
                         throw e;
                     }
 
                     // Queue import tasks for stored files
                     if (!files.isEmpty()) {
-                        queueImportProcess(datasetId,processId, null, schema, files, originalFileName, integrationVO,
-                                replace, delimiter, multipartFileMimeType,jobId);
+                        queueImportProcess(datasetId, processId, null, schema, files, originalFileName, integrationVO,
+                                replace, delimiter, multipartFileMimeType, jobId);
                     } else {
                         releaseLockAndDeleteImportFileDirectory(datasetId);
                         datasetMetabaseService.updateDatasetRunningStatus(datasetId,
@@ -1494,12 +1497,17 @@ public class FileTreatmentHelper implements DisposableBean {
                     File file = new File(folder, originalFileName);
 
                     // Store the file in the persistence volume
-                    try (FileOutputStream output = new FileOutputStream(file)) {
-                        IOUtils.copyLarge(input, output);
-                        files.add(file);
-                        LOG.info("Stored file {} in fileManagement. For datasetId {} and tableSchemaId {}", file.getPath(), datasetId, tableSchemaId);
+                    try (InputStream input = multipartFile.getInputStream()) {
+                        try (FileOutputStream output = new FileOutputStream(file)) {
+                            IOUtils.copyLarge(input, output);
+                            files.add(file);
+                            LOG.info("Stored file {} in fileManagement. For datasetId {} and tableSchemaId {}", file.getPath(), datasetId, tableSchemaId);
+                        } catch (Exception e) {
+                            LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
+                            throw e;
+                        }
                     } catch (Exception e) {
-                        LOG.error("Unexpected error! Error in copyLarge for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
+                        LOG.error("Unexpected error! Error in copyLarge for input for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
                         throw e;
                     }
 
@@ -1522,27 +1530,29 @@ public class FileTreatmentHelper implements DisposableBean {
                     }
 
                     // Queue import task for the stored file
-                    queueImportProcess(datasetId,processId, tableSchemaId, schema, files, originalFileName, integrationVO,
-                            replace, delimiter, multipartFileMimeType,jobId);
+                    queueImportProcess(datasetId, processId, tableSchemaId, schema, files, originalFileName, integrationVO,
+                            replace, delimiter, multipartFileMimeType, jobId);
 
                     LOG.info("Queued import process for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
                 }
-
-            } catch (EEAException | FeignException | IOException e) {
+            }
+            catch (EEAException | FeignException | IOException e) {
                 LOG.error(
-                        "Unexpected exception importing file data: datasetId={}, file={}. Message: {}", datasetId,
+                        "Unexpected exception importing file data in fileManagement: datasetId={}, file={}. Message: {}", datasetId,
                         multipartFile.getName(), e.getMessage(), e);
                 releaseLockAndDeleteImportFileDirectory(datasetId);
                 datasetMetabaseService.updateDatasetRunningStatus(datasetId,
                         DatasetRunningStatusEnum.ERROR_IN_IMPORT);
                 throw new EEAException(e);
-            } catch (Exception e) {
-                LOG.error("Unexpected error! Error in fileManagement for datasetId {} and tableSchemaId {}. Message: {}", datasetId, tableSchemaId, e.getMessage());
+            }
+            catch (Exception e){
+                LOG.error("Unexpected error! Error in fileManagement for fileName {} datasetId {} and tableSchemaId {}. Message: {}", originalFileName, datasetId, tableSchemaId, e.getMessage());
                 throw e;
             }
-        }
 
+        }
     }
+
 
         /**
          * Unzip and store.
