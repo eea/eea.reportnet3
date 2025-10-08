@@ -2635,14 +2635,16 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
     setFieldLines(tableSchemaId, datasetSchema, csvWriter);
 
     Long dataflowId = datasetService.getDataFlowIdById(datasetId);
+    TableSchemaVO tableSchemaVO = getTableSchemaVO(tableSchemaId, datasetSchemaId);
+    String tableSchemaName = tableSchemaVO.getNameTableSchema();
 
     EventType eventType = EventType.EXPORT_DEFINITION_COMPLETED_EVENT;
     NotificationVO notificationVO = NotificationVO.builder()
             .user(SecurityContextHolder.getContext().getAuthentication().getName())
             .dataflowId(dataflowId)
             .datasetId(datasetId)
-            .datasetName(datasetSchema.getNameDatasetSchema())
             .tableSchemaId(tableSchemaId)
+            .tableSchemaName(tableSchemaName)
             .build();
     kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
 

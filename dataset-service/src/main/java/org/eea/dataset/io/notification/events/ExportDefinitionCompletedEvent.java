@@ -39,6 +39,7 @@ public class ExportDefinitionCompletedEvent implements NotificableEventHandler {
         Long datasetId = notificationVO.getDatasetId();
         String datasetName = notificationVO.getDatasetName();
         String tableSchemaId = notificationVO.getTableSchemaId();
+        String tableSchemaName = notificationVO.getTableSchemaName();
 
         Map<String, Object> notification = new HashMap<>();
         notification.put("user", user);
@@ -46,6 +47,7 @@ public class ExportDefinitionCompletedEvent implements NotificableEventHandler {
         notification.put("datasetId", datasetId);
         notification.put("datasetName", datasetName);
         notification.put("tableSchemaId", tableSchemaId);
+        notification.put("tableSchemaName", tableSchemaName);
         return notification;
     }
 
