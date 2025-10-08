@@ -407,7 +407,7 @@ public class FileTreatmentHelper implements DisposableBean {
      * @throws EEAException the EEA exception
      */
     public void importFileData(Long datasetId, Long dataflowId, String tableSchemaId, MultipartFile file,
-                               boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException, Exception {
+                               boolean replace, Long integrationId, String delimiter, Long jobId) throws EEAException {
 
         if (delimiter != null && delimiter.length() > 1) {
             LOG.error("Error when importing file data for datasetId {} and tableSchemaId {}. ReplaceData is {}. The size of the delimiter cannot be greater than 1", datasetId, tableSchemaId, replace);
@@ -1429,7 +1429,7 @@ public class FileTreatmentHelper implements DisposableBean {
      */
     private void fileManagement(Long datasetId, Long dataflowId, String processId, Boolean released, String tableSchemaId, DataSetSchema schema,
                                 MultipartFile multipartFile, boolean replace, Long integrationId, String delimiter,Long jobId)
-            throws EEAException, Exception {
+            throws EEAException {
         if (processControllerZuul.updateProcess(datasetId, dataflowId,
                 ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.IMPORT, processId,
                 SecurityContextHolder.getContext().getAuthentication().getName(), 0, released)) {
