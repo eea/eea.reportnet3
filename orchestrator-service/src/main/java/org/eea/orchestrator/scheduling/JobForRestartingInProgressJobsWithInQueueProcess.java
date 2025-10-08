@@ -120,6 +120,16 @@ public class JobForRestartingInProgressJobsWithInQueueProcess {
         List<ProcessVO> processes = Optional.ofNullable(processControllerZuul.findByIds(processIds))
                 .orElse(Collections.emptyList());
 
+        List<ProcessVO> inProgressProcesses = processes.stream()
+                .filter(p -> ProcessStatusEnum.IN_PROGRESS.name().equalsIgnoreCase(
+                        Optional.ofNullable(p.getStatus()).orElse("")))
+                .collect(Collectors.toList());
+
+        //has active in progress process exit
+        if (!inProgressProcesses.isEmpty()) {
+            return;
+        }
+
         List<ProcessVO> stuckProcesses = processes.stream()
                 .filter(p -> ProcessStatusEnum.IN_QUEUE.name().equalsIgnoreCase(
                         Optional.ofNullable(p.getStatus()).orElse("")))
