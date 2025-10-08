@@ -521,20 +521,29 @@ public class DatasetControllerImpl implements DatasetController {
         throw e;
       }
     }
-
+    LOG.info("----------NTA Before checking job id for result");
+    LOG.info("----------NTA Before checking job id for result jobId {}, dataflowId {} datasetId {}", jobId, dataflowId, datasetId);
     if(jobId != null) {
+      LOG.info("----------NTA Inside checking job id for result jobId {}, dataflowId {} datasetId {}", jobId, dataflowId, datasetId);
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
+      LOG.info("----------NTA After pollingUrl {}", pollingUrl);
       if (providerId != null) {
+        LOG.info("----------NTA Inside providerId {}", providerId);
         pollingUrl += "&providerId=" + providerId;
       }
+      LOG.info("----------NTA After providerId");
       result.put("jobId", jobId);
+      LOG.info("----------NTA After put jobId in result");
       result.put("pollingUrl", pollingUrl);
+      LOG.info("----------NTA After put pollingUrl in result");
     }
     else{
+      LOG.info("----------NTA Inside else");
       result.put("jobId", "Error: An import job was not created.");
     }
 
-
+    LOG.info("----------NTA Before returning result");
+    LOG.info("----------NTA Before returning result with value {}", result);
     return result;
   }
 
