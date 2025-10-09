@@ -1650,7 +1650,7 @@ public class FileTreatmentHelper implements DisposableBean {
                         replace,jobId);
             } else {
                 List<File> validatedNamesList = validateFileNames(tableSchemaId, schema, files, processId, datasetId, jobId, originalFileName);
-                List<File> validatedHeadersList = validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId);
+                List<File> validatedHeadersList = !validatedNamesList.isEmpty() ? validateFileHeaders(tableSchemaId, schema,originalFileName, validatedNamesList, delimiter, processId, datasetId, jobId) : new ArrayList<>();
                 List<File> finalFiles = validatedHeadersList;
                 importExecutorService.submit(() -> {
                     try {
@@ -1842,10 +1842,6 @@ public class FileTreatmentHelper implements DisposableBean {
 
     if (error != null || !warningList.isEmpty()) {
       assignJobNotifications(tableSchemaId, originalFileName, processId, datasetId, jobId, error, warningList);
-    }
-
-    if (files.isEmpty()) {
-      throw new EEAException(EEAErrorMessage.ERROR_FILE_NAME_MATCHING);
     }
 
     return files;
