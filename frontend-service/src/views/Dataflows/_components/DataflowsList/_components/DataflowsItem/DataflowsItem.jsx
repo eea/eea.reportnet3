@@ -170,7 +170,7 @@ export const DataflowsItem = ({ isAdmin, isCustodian, itemContent, reorderDatafl
               dangerouslySetInnerHTML={{
                 __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
                   name: itemContent.name
-                }).replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+                })?.replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
               }}></p>
           ) : (
             itemContent.name
