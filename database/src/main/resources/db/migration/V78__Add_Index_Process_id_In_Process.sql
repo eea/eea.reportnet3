@@ -1,0 +1,1 @@
+CREATE INDEX process_process_id_idx ON public.process (process_id);
