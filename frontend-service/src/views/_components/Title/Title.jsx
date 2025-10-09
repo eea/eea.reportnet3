@@ -24,7 +24,7 @@ export const Title = memo(({ icon, iconSize, insideTitle, subtitle, title }) => 
         {
           <p
             dangerouslySetInnerHTML={{
-              __html: subtitle.replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+              __html: subtitle?.replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
             }}></p>
         }
       </h3>

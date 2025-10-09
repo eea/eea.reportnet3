@@ -71,7 +71,7 @@ export const ReferencedDataflowItem = ({ dataflow, reorderDataflows, isCompresse
               dangerouslySetInnerHTML={{
                 __html: TextUtils.parseText(resourcesContext.messages['bigDataDataflowNamed'], {
                   name: dataflow.name
-                }).replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
+                })?.replace(/\(SNC Data\)/g, `<span class="${styles.sncData}">$&</span>`)
               }}></p>
           ) : (
             dataflow.name
