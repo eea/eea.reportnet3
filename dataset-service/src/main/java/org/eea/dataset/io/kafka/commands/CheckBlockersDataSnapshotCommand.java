@@ -284,9 +284,9 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
 
         LOG.info("Creating release process for dataflowId {}, dataProviderId {}, jobId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId());
         String processId = UUID.randomUUID().toString();
-        processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
-                ProcessStatusEnum.IN_QUEUE, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
-        LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
+        Boolean isProcessCreated = processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
+                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
+        LOG.info("Created release process for dataflowId {}, dataProviderId {}, jobId {} and processId {} dataset id {} success: {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId, datasetId, isProcessCreated);
 
         CreateSnapshotVO createSnapshotVO = new CreateSnapshotVO();
         createSnapshotVO.setReleased(true);
@@ -303,11 +303,6 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
         JobProcessVO jobProcessVO = new JobProcessVO(null, releaseJob.getId(), processId);
         jobProcessControllerZuul.save(jobProcessVO);
         LOG.info("Created jobProcess for dataflowId {}, dataProviderId {}, jobId {} and release processId {}", dataset.getDataflowId(), dataset.getDataProviderId(), releaseJob.getId(), processId);
-
-        LOG.info("Updating release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
-        processControllerZuul.updateProcess(datasets.get(0), dataset.getDataflowId(),
-                ProcessStatusEnum.IN_PROGRESS, ProcessTypeEnum.RELEASE, processId, user, defaultReleaseProcessPriority, true);
-        LOG.info("Updated release process for dataflowId {}, dataProviderId {}, dataset {}, jobId {} and release processId {} to status IN_PROGRESS", dataset.getDataflowId(), dataset.getDataProviderId(), dataset.getId(), releaseJob.getId(), processId);
 
         datasetSnapshotService.addSnapshot(datasets.get(0), createSnapshotVO, null,
                 dateFormatter.format(dateRelease), false, processId);
