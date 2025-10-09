@@ -349,14 +349,13 @@ export const WebformField = ({
     if (isViewMode) {
       field.readOnly = true;
     }
-
     switch (type) {
       case 'DATE':
         return (
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly || isViewMode}
+            disabled={field?.readOnly}
             id={field.fieldId || field.fieldSchemaId}
             monthNavigator={true}
             onBlur={event => {
