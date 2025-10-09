@@ -1456,8 +1456,17 @@ public class ValidationHelper implements DisposableBean {
               } else if (processControllerZuul.isProcessFinished(processId)) {
                 if (jobId != null) {
                   jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FINISHED);
+                  // allow job update on time for VALIDATION_RELEASE_FINISHED_EVENT to avoid refused events
+                  try {
+                    Thread.sleep(2000);
+                  } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    LOG.warn("Sleep interrupted while delaying VALIDATION_RELEASE_FINISHED_EVENT event", e);
+                  }
                 }
+
                 kafkaSenderUtils.releaseKafkaEvent(EventType.VALIDATION_RELEASE_FINISHED_EVENT, value);
+
                 if (taskRepository.hasProcessCanceledTasks(processId)) {
                   jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.WARNING_HAS_CANCELED_VALIDATION_TASKS, null);
                   kafkaSenderUtils.releaseKafkaEvent(EventType.FINISHED_VALIDATION_WITH_CANCELED_TASKS, value);
