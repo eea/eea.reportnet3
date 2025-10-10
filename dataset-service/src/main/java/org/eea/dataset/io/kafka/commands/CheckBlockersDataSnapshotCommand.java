@@ -208,6 +208,8 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
       }
       JobVO releaseJob = new JobVO(null, JobTypeEnum.RELEASE, JobStatusEnum.IN_PROGRESS, ts, ts, parameters, user,true, dataset.getDataflowId(), dataset.getDataProviderId(), null,null, dataflowName,null, null, null);
 
+      waitForValidationJobIfInProgress(validationJobId, 2000);
+
       JobStatusEnum statusToInsert = jobControllerZuul.checkEligibilityOfJob(JobTypeEnum.RELEASE.toString(), true, dataset.getDataflowId(), dataset.getDataProviderId(), datasets);
       if (statusToInsert == JobStatusEnum.REFUSED) {
         releaseJob.setJobStatus(JobStatusEnum.REFUSED);
@@ -347,5 +349,33 @@ public class CheckBlockersDataSnapshotCommand extends AbstractEEAEventHandlerCom
   private void setTenant(Long idDataset) {
     TenantResolver.setTenantName(String.format(LiteralConstants.DATASET_FORMAT_NAME, idDataset));
   }
+
+  /**
+   * Waits briefly if the given validation job is still in progress,
+   * to avoid race conditions when triggering the release process.
+   *
+   * @param validationJobId the ID of the validation job to check
+   * @param waitMillis the time to wait in milliseconds if the job is still running
+   */
+  private void waitForValidationJobIfInProgress(Long validationJobId, long waitMillis) {
+    if (validationJobId == null) {
+      return;
+    }
+
+    try {
+      JobVO validationJob = jobControllerZuul.findJobById(validationJobId);
+      if (validationJob != null && JobStatusEnum.IN_PROGRESS.equals(validationJob.getJobStatus())) {
+        LOG.info("Validation job {} still in progress. Sleeping {} ms before release eligibility check.",
+                validationJobId, waitMillis);
+        Thread.sleep(waitMillis);
+      }
+    } catch (InterruptedException ie) {
+      Thread.currentThread().interrupt();
+      LOG.warn("Sleep interrupted while waiting for validation job {} to finish", validationJobId);
+    } catch (Exception e) {
+      LOG.warn("Error checking validation job {} status before release: {}", validationJobId, e.getMessage());
+    }
+  }
+
 
 }
