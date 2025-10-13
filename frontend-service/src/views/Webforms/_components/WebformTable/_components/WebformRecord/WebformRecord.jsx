@@ -485,6 +485,7 @@ export const WebformRecord = ({
             {validationsTemplate(parseRecordValidations(webformRecordState.record))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
+              disabled={webformRecordState.isDeleting || isViewMode}
               icon={webformRecordState.isDeleting ? 'spinnerAnimate' : 'trash'}
               onClick={() => {
                 handleDialogs('deleteRow', true);

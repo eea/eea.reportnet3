@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.*;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+
+import lombok.SneakyThrows;
 import org.eea.dataset.persistence.data.domain.AttachmentValue;
 import org.eea.dataset.service.DatasetMetabaseService;
 import org.eea.dataset.service.DatasetSchemaService;
@@ -1509,6 +1511,7 @@ public class DatasetControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
+  @SneakyThrows
   @Test
   public void importFileDataTest() throws EEAException {
 
@@ -1532,6 +1535,7 @@ public class DatasetControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
+  @SneakyThrows
   @Test
   public void importFileDataLegacyTest() throws EEAException {
     DataFlowVO mockDataflow = new DataFlowVO();
@@ -1551,6 +1555,7 @@ public class DatasetControllerImplTest {
    *
    * @throws EEAException the EEA exception
    */
+  @SneakyThrows
   @Test(expected = ResponseStatusException.class)
   public void importFileDataExceptionTest() throws EEAException {
     DataFlowVO mockDataflow = new DataFlowVO();

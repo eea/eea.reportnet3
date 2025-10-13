@@ -1412,7 +1412,11 @@
           "key": "EXPORT_DATASET_FILE_DOWNLOAD"
         },
         {
-          "key": "EXPORT_DEFINITION_COMPLETED_EVENT"
+          "key": "EXPORT_DEFINITION_COMPLETED_EVENT",
+          "navigateTo": {
+            "section": "DATASET_SCHEMA",
+            "parameters": ["dataflowId", "datasetId", "datasetName"]
+          }
         },
         {
           "key": "VALIDATE_RULES_COMPLETED_EVENT",

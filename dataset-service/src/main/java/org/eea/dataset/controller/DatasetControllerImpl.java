@@ -369,7 +369,7 @@ public class DatasetControllerImpl implements DatasetController {
    * @param jobId the jobId
    * @param fmeJobId the fmeJobId
    */
-  @SneakyThrows
+  //@SneakyThrows
   @Override
   @HystrixCommand(commandProperties = {@HystrixProperty(
           name = "execution.isolation.thread.timeoutInMilliseconds", value = "7200000")})
@@ -400,7 +400,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = "9706378") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
 
     String originalFilename = (file != null) ? file.getOriginalFilename() : null;
     LOG.info("Import endpoint was called for datasetId {} dataflowId {} providerId {} integrationId {} delimiter {} replace {} jobId {} fmeJobId {} and file {}", datasetId, dataflowId, providerId, integrationId, delimiter, replace, jobId, fmeJobId, originalFilename);
@@ -521,7 +521,6 @@ public class DatasetControllerImpl implements DatasetController {
         throw e;
       }
     }
-
     if(jobId != null) {
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if (providerId != null) {
@@ -534,7 +533,7 @@ public class DatasetControllerImpl implements DatasetController {
       result.put("jobId", "Error: An import job was not created.");
     }
 
-
+    LOG.info("In importBigFileData returning result with value {}", result);
     return result;
   }
 
@@ -745,7 +744,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
 
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
             integrationId, delimiter, jobId, fmeJobId);
@@ -795,7 +794,7 @@ public class DatasetControllerImpl implements DatasetController {
           @ApiParam(type = "Long", value = "Job Id",
                   example = "9706378") @RequestParam(value = "jobId", required = false) Long jobId,
           @ApiParam(type = "String", value = "Fme Job Id",
-                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) {
+                  example = ",") @RequestParam(value = "fmeJobId", required = false) String fmeJobId) throws Exception {
     this.importBigFileData(datasetId, dataflowId, providerId, tableSchemaId, file, replace,
             integrationId, delimiter, jobId, fmeJobId);
   }

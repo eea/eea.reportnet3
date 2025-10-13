@@ -488,6 +488,7 @@ export const EntitiesWebform = ({
           <InputText
             autoFocus={true}
             className={styles.inputText}
+            disabled={entitiesWebformState.isViewMode}
             id={'addEntity'}
             maxLength={config.INPUT_MAX_LENGTH}
             onChange={event => onAddEntityInputChange(event.target.value)}
@@ -525,7 +526,11 @@ export const EntitiesWebform = ({
         <div className={styles.hiddenEntitiesAddButton}>
           <Button
             className={styles.addButton}
-            disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
+            disabled={
+              (bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord ||
+              isReleasing ||
+              entitiesWebformState.isViewMode
+            }
             icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
             label={resourcesContext.messages['addEntity']}
             onClick={() => {
@@ -564,12 +569,6 @@ export const EntitiesWebform = ({
                         onSelectRecord(items.recordId, items.id);
                         onToggleView('details');
                       } else if (bigData && !isIcebergCreated) {
-                        console.log(
-                          'View mode:',
-                          entitiesWebformState.isViewMode,
-                          'Iceberg created:',
-                          isIcebergCreated
-                        );
                         entitiesWebformDispatch({
                           type: 'ON_REFRESH',
                           payload: { value: !entitiesWebformState.isRefresh }
@@ -586,7 +585,11 @@ export const EntitiesWebform = ({
               <div className={styles.addButtonWrapper}>
                 <Button
                   className={styles.addButton}
-                  disabled={(bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord || isReleasing}
+                  disabled={
+                    (bigData && !isIcebergCreated) + entitiesWebformState.isAddingEntityRecord ||
+                    isReleasing ||
+                    entitiesWebformState.isViewMode
+                  }
                   icon={entitiesWebformState.isAddingEntityRecord ? 'spinnerAnimate' : 'add'}
                   label={resourcesContext.messages['addEntity']}
                   onClick={() => {

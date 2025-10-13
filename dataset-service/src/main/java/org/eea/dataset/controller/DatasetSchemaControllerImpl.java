@@ -16,6 +16,7 @@ import org.eea.interfaces.controller.dataset.DatasetSchemaController;
 import org.eea.interfaces.controller.recordstore.RecordStoreController.RecordStoreControllerZuul;
 import org.eea.interfaces.controller.validation.RulesController.RulesControllerZuul;
 import org.eea.interfaces.vo.communication.UserNotificationContentVO;
+import org.eea.interfaces.vo.communication.UserNotificationVO;
 import org.eea.interfaces.vo.dataflow.DataFlowVO;
 import org.eea.interfaces.vo.dataflow.enums.TypeStatusEnum;
 import org.eea.interfaces.vo.dataset.DesignDatasetVO;
@@ -26,6 +27,9 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.*;
 import org.eea.interfaces.vo.dataset.schemas.uniqueContraintVO.UniqueConstraintVO;
 import org.eea.interfaces.vo.ums.enums.ResourceTypeEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.thread.ThreadPropertiesManager;
@@ -46,6 +50,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -114,6 +119,9 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
   @Autowired
   private NotificationControllerZuul notificationControllerZuul;
 
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
 
   /**
    * Creates the empty dataset schema.
@@ -1605,12 +1613,6 @@ public class DatasetSchemaControllerImpl implements DatasetSchemaController {
       LOG.info("Successfully exported field schemas for datasetId {} and tableSchemaId {}", datasetId, tableSchemaId);
       HttpHeaders httpHeaders = new HttpHeaders();
       httpHeaders.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName);
-
-      UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-      userNotificationContentVO.setDatasetId(datasetId);
-      userNotificationContentVO.setFileName(fileName);
-      notificationControllerZuul.createUserNotificationPrivate("EXPORT_DEFINITION_COMPLETED_EVENT",
-              userNotificationContentVO);
 
       return new ResponseEntity<>(file, httpHeaders, HttpStatus.OK);
     } catch (EEAException e) {

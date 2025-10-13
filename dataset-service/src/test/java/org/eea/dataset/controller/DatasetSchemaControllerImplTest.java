@@ -56,6 +56,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
@@ -161,7 +162,6 @@ public class DatasetSchemaControllerImplTest {
    * The authentication.
    */
   private Authentication authentication;
-
   /**
    * Inits the mocks.
    */
@@ -2259,7 +2259,6 @@ public class DatasetSchemaControllerImplTest {
 
   @Test
   public void testExportFieldSchemas() throws EEAException, IOException {
-
     dataSchemaControllerImpl.exportFieldSchemas(new ObjectId().toString(), 1L,
         new ObjectId().toString());
     Mockito.verify(dataschemaService, times(1)).exportFieldsSchema(Mockito.any(), Mockito.any(),
@@ -2274,7 +2273,6 @@ public class DatasetSchemaControllerImplTest {
    */
   @Test
   public void exportFieldSchemasLegacyTest() throws EEAException, IOException {
-
     dataSchemaControllerImpl.exportFieldSchemasLegacy(new ObjectId().toString(), 1L,
         new ObjectId().toString());
     Mockito.verify(dataschemaService, times(1)).exportFieldsSchema(Mockito.any(), Mockito.any(),

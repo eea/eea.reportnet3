@@ -136,8 +136,7 @@ export const WebformView = ({
   }
 
   const renderViewModeMessage = () => {
-    console.log('isViewMode:', isViewMode, 'isIcebergCreated:', isIcebergCreated); //--- IGNORE ---
-    if (isViewMode && isIcebergCreated) {
+    if ((isViewMode && isIcebergCreated) || (isViewMode && !bigData)) {
       return (
         <div className={styles.viewModeWarning} role="alert">
           <i className={`pi pi-info-circle ${styles.infoIcon}`} />

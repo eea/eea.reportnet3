@@ -130,6 +130,21 @@ export const TableManagement = ({
     tableManagementDispatch({ type: 'RESET_SELECTED_RECORD', payload: { records: inmRecords } });
   };
 
+  useEffect(() => {
+    const checkBodyScrollInterval = setInterval(() => {
+      const bodySelector = document.querySelector('body');
+      const openDialogs = document.querySelectorAll('.p-dialog:not([style*="display: none"])');
+      const openOverlays = document.querySelectorAll('.p-component-overlay:not([style*="display: none"])');
+
+      // If no visible dialogs/overlays but body scroll is disabled, restore it
+      if (openDialogs.length === 0 && openOverlays.length === 0 && bodySelector.style.overflow === 'hidden') {
+        bodySelector.style.overflow = 'hidden auto';
+      }
+    }, 1000);
+
+    return () => clearInterval(checkBodyScrollInterval);
+  }, []);
+
   const editRowDialogFooter = (
     <div className="ui-dialog-buttonpane p-clearfix">
       <Button

@@ -173,9 +173,9 @@ public class ParquetConverterServiceImpl implements ParquetConverterService {
     if(importFileInDremioInfo.getReplaceData()) {
       deleteAllDataBeforeImport(importFileInDremioInfo, String.valueOf(dataSetSchema.getIdDataSetSchema()));
     }
-    List<String> warningMessages = new ArrayList<>();
-    //initialize warning message
-    importFileInDremioInfo.setWarningMessages(warningMessages);
+    if (importFileInDremioInfo.getWarningMessages() == null) {
+      importFileInDremioInfo.setWarningMessages(new ArrayList<>());
+    }
     for (File csvFile : csvFiles) {
       TableSchemaVO tableSchemaVO = null;
       if (StringUtils.isNotBlank(importFileInDremioInfo.getTableSchemaId())) {
