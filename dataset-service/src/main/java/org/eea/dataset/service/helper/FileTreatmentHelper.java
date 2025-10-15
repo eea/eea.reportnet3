@@ -771,8 +771,8 @@ public class FileTreatmentHelper implements DisposableBean {
                         }
                     }
                 }
+                csvWriter.writeNext(columns, false);
             }
-            csvWriter.writeNext(columns, false);
         } catch (ParseException e) {
             LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
         }
