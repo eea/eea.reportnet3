@@ -125,7 +125,7 @@ public class SQLValidationUtils {
 
     //For junit tests purposes
     if (maxErrors == 0) maxErrors = 1000;
-    int batchSize = 3;
+    int batchSize = 100000L / nHeaders < 30000 ? (int) (100000L / nHeaders) : 30000;
 
     for (int i = 0; i < maxErrors; i += batchSize) {
 

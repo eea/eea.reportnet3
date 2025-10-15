@@ -65,6 +65,10 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
     private Integer validationParquetMaxFileSize;
     @Value("${validation.split.parquet}")
     private boolean validationSplitParquet;
+
+    /** The max errors. */
+    @Value(value = "${validation.maximumErrors}")
+    private int maxErrors;
     private JdbcTemplate dremioJdbcTemplate;
     private S3Service s3Service;
     private RulesService rulesService;
@@ -355,6 +359,7 @@ public class DremioSqlRulesExecuteServiceImpl implements DremioRulesExecuteServi
                 sqlCode = sqlCode.replace("{%R3_COUNTRY_CODE%}", providerCode);
                 sqlCode = sqlCode.replace("{%R3_COMPANY_CODE%}", providerCode);
                 sqlCode = sqlCode.replace("{%R3_ORGANIZATION_CODE%}", providerCode);
+                sqlCode = sqlCode.concat(" limit " + maxErrors);
                 recordIds = (List<String>) method.invoke(object, sqlCode);    //isSQLSentenceWithCode
                 break;
             case 2:
