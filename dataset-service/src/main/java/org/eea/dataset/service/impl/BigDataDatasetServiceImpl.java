@@ -1208,8 +1208,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         }
 
+        String numberOfRecordsInParquetTableQuery = "SELECT COUNT (*) FROM " + parquetTablePath;
+
         //if table does not exist or has 0 records do not do anything
-        if (!parquetFolderExists  || dremioHelperService.getRowCount(parquetTablePath) == 0) {
+        if (!parquetFolderExists  || dremioJdbcTemplate.queryForObject(numberOfRecordsInParquetTableQuery, Long.class) == 0) {
             //parquet table does not exist and no iceberg table should be created
             LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} parquet table does not exist or has 0 records so no iceberg table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
             return true;
@@ -1281,8 +1283,10 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             s3HelperPrivate.deleteFolder(s3TablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
         }
 
+        String numberOfRecordsInIcebergTableQuery = "SELECT COUNT (*) FROM " + icebergTablePath;
+
         //if table does not exist or has 0 records do not do anything
-        if (!icebergFolderExists  || dremioHelperService.getRowCount(icebergTablePath) == 0) {
+        if (!icebergFolderExists  || dremioJdbcTemplate.queryForObject(numberOfRecordsInIcebergTableQuery, Long.class) == 0) {
             //iceberg table does not exist and no parquet table should be created
             LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so no parquet table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
             return true;
