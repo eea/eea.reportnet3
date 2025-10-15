@@ -36,10 +36,14 @@ import org.eea.interfaces.vo.lock.enums.LockSignature;
 import org.eea.interfaces.vo.metabase.ReleaseVO;
 import org.eea.interfaces.vo.metabase.SnapshotVO;
 import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.interfaces.vo.orchestrator.enums.JobInfoEnum;
 import org.eea.interfaces.vo.orchestrator.enums.JobStatusEnum;
 import org.eea.interfaces.vo.recordstore.ProcessVO;
 import org.eea.interfaces.vo.recordstore.enums.ProcessStatusEnum;
 import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
+import org.eea.kafka.domain.EventType;
+import org.eea.kafka.domain.NotificationVO;
+import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.lock.annotation.LockCriteria;
 import org.eea.lock.annotation.LockMethod;
 import org.eea.lock.service.LockService;
@@ -122,6 +126,11 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
 
   @Autowired
   private ResolveSnapshotTable resolveSnapshotTable;
+
+  /** The kafka sender utils. */
+  @Autowired
+  private KafkaSenderUtils kafkaSenderUtils;
+
 
   @Value("${eea.authorization.key}")
   private String eeaAuthorizationKey;
@@ -882,6 +891,21 @@ public class DatasetSnapshotControllerImpl implements DatasetSnapshotController 
         TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(table.getIdTableSchema(), datasetSchemaId);
         if(tableSchemaVO != null && BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable())
                 && BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(dataset.getId(), tableSchemaVO.getIdTableSchema()))) {
+          if(jobId != null) {
+            LOG.info("Can not release for jobId {} because an iceberg table exists", jobId);
+            jobControllerZuul.updateJobInfo(jobId, JobInfoEnum.ERROR_ICEBERG_TABLE_EXISTS, null);
+            jobControllerZuul.updateJobStatus(jobId, JobStatusEnum.FAILED);
+            datasetSnapshotService.releaseLocksRelatedToRelease(dataflowId, dataProviderId);
+            if(!silentRelease) {
+              //send failed notification
+              Map<String, Object> value = new HashMap<>();
+              value.put(LiteralConstants.USER, user);
+              value.put("release_job_id", jobId);
+              kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.RELEASE_FAILED_ICEBERG_EXISTS_EVENT, value,
+                      NotificationVO.builder().user(user).dataflowId(dataflowId).providerId(dataset.getDataProviderId())
+                              .error("There is an iceberg table for dataflowId " + dataflowId + " and providerId " + dataset.getDataProviderId()).build());
+            }
+          }
           throw new Exception("Can not release for jobId " + jobId + " because there is an iceberg table");
         }
       }

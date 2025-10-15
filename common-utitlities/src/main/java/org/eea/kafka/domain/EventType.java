@@ -35,6 +35,9 @@ public enum EventType {
   /** The release refused event. */
   RELEASE_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "dataset_released_refused_key", true),
 
+  /** The release failed iceberg exists event. */
+  RELEASE_FAILED_ICEBERG_EXISTS_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "release_failed_iceberg_exists_key", true),
+
   /** The copyToEuDataset refused event. */
   COPY_DATA_TO_EUDATASET_REFUSED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "copy_to_eu_dataset_refused_key", true),
 
