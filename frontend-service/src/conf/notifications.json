@@ -1034,6 +1034,14 @@
           }
         },
         {
+          "key": "RELEASE_FAILED_ICEBERG_EXISTS_EVENT",
+          "navigateTo": {
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId", "dataProvider"],
+            "hasQueryString": true
+          }
+        },
+        {
           "key": "COPY_DATA_TO_EUDATASET_REFUSED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",

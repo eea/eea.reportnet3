@@ -719,6 +719,7 @@
     "importReportingRefusedEvent": "Failed importing data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataset",
     "validationRefusedEvent": "Failed validating data in <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataset",
     "releaseRefusedEvent": "Failed releasing data for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataflow",
+    "releaseFailedIcebergExistsEvent": "Failed releasing data for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> because editing is currently enabled for a dataset of the provider. Editing needs to be disabled before releasing.",
     "copyDataToEudatasetRefusedEvent": "Failed during copy to eu dataset process for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a> because there is another job with status QUEUED or IN_PROGRESS for this dataflow",
     "externalImportDesignFailedEvent": "Failed importing data at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "externalImportDesignFromOtherSystemCompletedEvent": "External processes ended at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
