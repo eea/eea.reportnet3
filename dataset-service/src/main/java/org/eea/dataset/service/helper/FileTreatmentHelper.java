@@ -17,6 +17,7 @@ import org.eea.datalake.service.DremioHelperService;
 import org.eea.datalake.service.S3ConvertService;
 import org.eea.datalake.service.S3Helper;
 import org.eea.datalake.service.S3Service;
+import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.impl.S3HelperImpl;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.exception.InvalidFileException;
@@ -91,6 +92,7 @@ import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.EEADelegatingSecurityContextExecutorService;
 import org.eea.utils.LiteralConstants;
+import org.locationtech.jts.io.ParseException;
 import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -369,6 +371,10 @@ public class FileTreatmentHelper implements DisposableBean {
 
     @Autowired
     private ReleaseFieldLimitWarningComponent releaseFieldLimitWarningComponent;
+
+    @Autowired
+    private SpatialDataHandling spatialDataHandling;
+
 
     /**
      * Initialize the executor service.
@@ -744,7 +750,7 @@ public class FileTreatmentHelper implements DisposableBean {
      * @param rs
      * @throws IOException
      */
-    private static void createCsvWithFiltersDL(List<String> headers, File csvFile, SqlRowSet rs, String includeCountryCode) throws IOException {
+    private void createCsvWithFiltersDL(List<String> headers, File csvFile, SqlRowSet rs, String includeCountryCode) throws IOException {
         try (CSVWriter csvWriter = new CSVWriter(new FileWriter(csvFile),
                 CSVWriter.DEFAULT_SEPARATOR, CSVWriter.DEFAULT_QUOTE_CHARACTER,
                 CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END)) {
@@ -755,11 +761,20 @@ public class FileTreatmentHelper implements DisposableBean {
                     if (headers.get(j).equals(includeCountryCode)) {
                         columns[headers.size()-1] = rs.getString(PARQUET_PROVIDER_CODE_COLUMN_HEADER);
                     } else {
-                        columns[j] = rs.getString(headers.get(j));
+                        Object fieldValue = rs.getObject(headers.get(j));
+                        if (fieldValue instanceof byte[]) {
+                            byte[] buffer = (byte[]) fieldValue;
+                            String modifiedJson = spatialDataHandling.decodeSpatialData(buffer);
+                            columns[j] = modifiedJson;
+                        }else {
+                            columns[j] = rs.getString(headers.get(j));
+                        }
                     }
                 }
                 csvWriter.writeNext(columns, false);
             }
+        } catch (ParseException e) {
+            LOG.error("Invalid GeoJson!! Tried to decode from binary but failed", e);
         }
     }
 
