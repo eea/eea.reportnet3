@@ -334,6 +334,10 @@ public class DremioHelperServiceImpl implements DremioHelperService {
             LOG.error("Failed to execute SQL statement: {}", sqlStatement, e);
             throw new EEAException("Failed to execute SQL statement");
         }
+        catch (Exception e){
+            LOG.error("Unexpected error! Failed to execute SQL statement: {}", sqlStatement, e);
+            throw new EEAException("Failed to execute SQL statement");
+        }
     }
 
     private LinkedHashMap<String, Object> getResults(String dremioJobId) throws InterruptedException, EEAException {
