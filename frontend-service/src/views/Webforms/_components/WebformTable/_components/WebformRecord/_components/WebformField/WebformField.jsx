@@ -27,7 +27,6 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 import { webformFieldReducer } from './_functions/Reducers/webformFieldReducer';
 
 import { getUrl } from 'repositories/_utils/UrlUtils';
-import { PaMsUtils } from './_functions/Utils/PaMsUtils';
 import { RecordUtils } from 'views/_functions/Utils';
 import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_components/WebformRecord/_functions/Utils/WebformRecordUtils';
 
@@ -36,15 +35,19 @@ import { isEmpty } from 'lodash';
 
 export const WebformField = ({
   bigData = false,
+  changedConditionalFieldData,
   columnsSchema,
+  conditionalFieldChange,
   dataProviderId,
   dataflowId,
   datasetId,
   datasetSchemaId,
+  dependantConditionalFieldId,
   element,
   hasErrors,
   isConditional,
   isConditionalChanged,
+  isDependantConditionalField,
   isSubTableCreated,
   isViewMode,
   newRecord,
@@ -73,7 +76,6 @@ export const WebformField = ({
     isSubmiting: false,
     linkItemsOptions: [],
     record: record,
-    sectorAffectedValue: null,
     selectedFieldId: '',
     selectedFieldSchemaId: '',
     selectedMaxSize: '',
@@ -89,7 +91,6 @@ export const WebformField = ({
     isLoadingData,
     isSubmiting,
     linkItemsOptions,
-    sectorAffectedValue,
     selectedFieldId,
     selectedFieldSchemaId,
     selectedRecordId,
@@ -99,11 +100,9 @@ export const WebformField = ({
 
   const { formatDate, formatDateTime, getMultiselectValues } = WebformRecordUtils;
 
-  const { getObjectiveOptions } = PaMsUtils;
-
   useEffect(() => {
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
-  }, [newRecord, isConditionalChanged]);
+  }, [newRecord, conditionalFieldChange]);
 
   const onAttach = async value => {
     onFillField(record, selectedFieldSchemaId, `${value.files[0].name}`);
@@ -182,6 +181,22 @@ export const WebformField = ({
           .flatMap(elementRecord => elementRecord.elements || [])
           .find(recordElement => fieldMatch(recordElement));
 
+      const conditionalValue = (() => {
+        if (isNil(conditionalField)) return encodeURIComponent(element.value);
+
+        const { type, fieldType, value } = conditionalField;
+
+        if (type === 'MULTISELECT_CODELIST') {
+          return value?.replaceAll('; ', ';').replaceAll(';', '; ');
+        }
+
+        if ((type === 'LINK' || fieldType === 'LINK') && Array.isArray(value) && value.length > 1) {
+          return value.join(';');
+        }
+
+        return value;
+      })();
+
       queryClient
         .fetchQuery(
           ['referencedFieldValues', datasetSchemaId, conditionalField, element, filter],
@@ -190,11 +205,7 @@ export const WebformField = ({
               datasetId,
               element.fieldSchemaId,
               filter,
-              !isNil(conditionalField)
-                ? conditionalField.type === 'MULTISELECT_CODELIST'
-                  ? conditionalField.value?.replace('; ', ';').replace(';', '; ')
-                  : conditionalField.value
-                : encodeURIComponent(element.value),
+              conditionalValue,
               localDatasetSchemaId,
               400
             );
@@ -249,20 +260,44 @@ export const WebformField = ({
     let conditionalFields;
     let parsedValues;
 
-    if (isConditional && field.fieldType === 'LINK') {
-      conditionalFields = record.elements.map(element =>
-        !(element.fieldSchema === option || element.fieldSchemaId === option)
-          ? { ...element, value: '' }
-          : { ...element, value: value }
-      );
+    if (isConditional && ['LINK', 'CODELIST'].includes(field.fieldType)) {
+      const changedElementIndex = record.elements.indexOf(field);
 
-      parsedValues = conditionalFields.map(conditionalField =>
-        conditionalField.fieldType === 'MULTISELECT_CODELIST' ||
-        ((conditionalField.fieldType === 'LINK' || conditionalField.fieldType === 'EXTERNAL_LINK') &&
-          Array.isArray(conditionalField.value))
-          ? conditionalField.value.join(';')
-          : conditionalField.value
-      );
+      /**
+       * Helper to determine if a field's value should be reset
+       * - If the field has a referenceParentField, reset if its masterConditionalFieldId matches the changed field
+       * - Otherwise, reset if the element comes after the changed field and has the matching masterConditionalFieldId
+       */
+      const shouldResetValue = (element, index) => {
+        const masterId = element?.referencedField?.masterConditionalFieldId;
+        if (!isEmpty(field?.referenceParentField)) {
+          return masterId === field.fieldSchema || masterId === field.fieldSchemaId;
+        }
+        return index > changedElementIndex && (masterId === field.fieldSchema || masterId === field.fieldSchemaId);
+      };
+
+      conditionalFields = record.elements
+        .map((element, index) => {
+          // If this is the changed field, update its value
+          if (element.fieldSchema === option || element.fieldSchemaId === option) {
+            return { ...element, value };
+          }
+          // Otherwise, reset value if needed, otherwise keep existing
+          return { ...element, value: shouldResetValue(element, index) ? '' : element.value };
+        })
+        .filter(el => el.type === 'FIELD' && el.pk !== true);
+
+      //Parse values for specific field types
+      parsedValues = conditionalFields.map(conditionalField => {
+        const { fieldType, value } = conditionalField;
+        if (
+          fieldType === 'MULTISELECT_CODELIST' ||
+          (['LINK', 'EXTERNAL_LINK'].includes(fieldType) && Array.isArray(value))
+        ) {
+          return { ...conditionalField, value: value.join(';') };
+        }
+        return { ...conditionalField };
+      });
     }
 
     const parsedValue =
@@ -358,6 +393,31 @@ export const WebformField = ({
     }
   };
 
+  const resetFieldValue = (field, option, multipleValues, isInputText) => {
+    if (
+      isConditionalChanged &&
+      !isEmpty(field.value) &&
+      (!isEmpty(field?.referenceParentField) || !isEmpty(field.referencedField?.masterConditionalFieldId))
+    ) {
+      const emptyValue = multipleValues ? [] : '';
+      if (
+        (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
+        !isEmpty(field.referencedField?.masterConditionalFieldId)
+      ) {
+        field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+          (record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData) &&
+            record.elements.indexOf(field) > 0 &&
+            record.elements.indexOf(changedConditionalFieldData) > 0 &&
+            onFillField(field, option, emptyValue, isConditional));
+      } else {
+        isInputText
+          ? changedConditionalFieldData?.name === field?.referenceParentField?.field &&
+            onFillField(field, option, emptyValue, isConditional)
+          : onFillField(field, option, emptyValue, isConditional);
+      }
+    }
+  };
+
   const renderTemplate = (field, option, type) => {
     if (isViewMode) {
       field.readOnly = true;
@@ -419,6 +479,7 @@ export const WebformField = ({
       case 'EXTERNAL_LINK':
       case 'LINK':
         if (field.pkHasMultipleValues) {
+          resetFieldValue(field, option, field.pkHasMultipleValues);
           return (
             <MultiSelectWebform
               appendTo={document.body}
@@ -446,6 +507,9 @@ export const WebformField = ({
           );
         } else {
           const selectedValue = RecordUtils.getLinkValue(linkItemsOptions, field.value);
+
+          resetFieldValue(field, option, field?.pkHasMultipleValues);
+
           return (
             <DropdownWebform
               appendTo={document.body}
@@ -462,7 +526,6 @@ export const WebformField = ({
 
                 if (value !== field.value) {
                   onFillField(field, option, value, isConditional);
-                  webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                   if (isNil(field.recordId)) onSaveField(option, value);
                   else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
                 }
@@ -482,7 +545,9 @@ export const WebformField = ({
           <MultiSelectWebform
             appendTo={document.body}
             disabled={field?.readOnly}
-            id={field.fieldId}
+            filter={true}
+            filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
+            id={field.fieldId || field.fieldSchemaId}
             maxSelectedLabels={10}
             onChange={() => {
               if (isNil(field.recordId)) onSaveField(option, field.value);
@@ -491,11 +556,7 @@ export const WebformField = ({
             onUpdate={event => {
               onFillField(field, option, event.target.value);
             }}
-            options={
-              field.name === 'Objective'
-                ? getObjectiveOptions(sectorAffectedValue)
-                : field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))
-            }
+            options={field.codelistItems.map(codelist => ({ label: codelist, value: codelist }))}
             style={hasErrors ? { border: '2px solid #b90202' } : null}
             value={getMultiselectValues(
               field.codelistItems.map(codelist => ({ label: codelist, value: codelist })),
@@ -521,7 +582,6 @@ export const WebformField = ({
                   : event.target?.value;
               if (value !== field.value) {
                 onFillField(field, option, value, isConditional);
-                webformFieldDispatch({ type: 'SET_SECTOR_AFFECTED', payload: { value } });
                 if (isNil(field.recordId)) onSaveField(option, value);
                 else if (!(event.target.action === 'arrowKeys')) onEditorSubmitValue(field, option, value);
               }
@@ -543,6 +603,7 @@ export const WebformField = ({
       case 'PHONE':
       case 'NUMBER_INTEGER':
       case 'NUMBER_DECIMAL':
+        resetFieldValue(field, option, field?.pkHasMultipleValues, true);
         return (
           <InputText
             characterCounterStyles={{ marginBottom: 0 }}
@@ -561,7 +622,10 @@ export const WebformField = ({
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
               else onEditorSubmitValue(field, option, event.target.value, field.isPrimary || false);
             }}
-            onChange={event => onFillField(field, option, event.target.value)}
+            onChange={event => {
+              const editedField = { ...field, value: event.target.value };
+              onFillField(editedField, option, event.target.value);
+            }}
             onFocus={event => onFocusField(event.target.value)}
             onKeyDown={event => onEditorKeyChange(event, field, option)}
             ref={inputRef}
@@ -632,7 +696,9 @@ export const WebformField = ({
                 icon="export"
                 iconPos="right"
                 label={field.value}
-                onClick={() => onFileDownload(field.value, field.fieldId, field.recordId, field.name)}
+                onClick={() =>
+                  onFileDownload(field.value, field.fieldId || field.fieldSchemaId, field.recordId, field.name)
+                }
               />
             )}
             {

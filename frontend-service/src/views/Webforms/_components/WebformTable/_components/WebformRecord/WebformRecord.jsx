@@ -57,37 +57,41 @@ const checkShowRequired = (element, elements) => {
 };
 
 export const WebformRecord = ({
-                                addingOnTableSchemaId,
-                                bigData,
-                                columnsSchema,
-                                dataflowId,
-                                dataProviderId,
-                                datasetId,
-                                datasetSchemaId,
-                                hasFields,
-                                isAddingMultiple,
-                                isFixedNumber = true,
-                                isOptional,
-                                isReporting,
-                                isViewMode,
-                                multipleRecords,
-                                onAddMultipleWebform,
-                                onRefresh,
-                                onTabChange,
-                                record,
-                                referencedTableSchemaId,
-                                rootPkFieldId,
-                                rootTableName,
-                                selectedTableId,
-                                tableId,
-                                tableName,
-                                webformType
-                              }) => {
+  addingOnTableSchemaId,
+  bigData,
+  columnsSchema,
+  dataflowId,
+  dataProviderId,
+  datasetId,
+  datasetSchemaId,
+  hasFields,
+  isAddingMultiple,
+  isFixedNumber = true,
+  isOptional,
+  isReporting,
+  isViewMode,
+  multipleRecords,
+  onAddMultipleWebform,
+  onRefresh,
+  onTabChange,
+  record,
+  referencedTableSchemaId,
+  rootPkFieldId,
+  rootTableName,
+  selectedTableId,
+  tableId,
+  tableName,
+  webformType
+}) => {
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
   const [webformRecordState, webformRecordDispatch] = useReducer(webformRecordReducer, {
+    changedConditionalFieldData: null,
+    conditionalFieldChange: false,
+    dependantConditionalFieldId: '',
     isConditionalChanged: false,
+    isDependantConditionalField: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     newRecord: {},
     record,
@@ -95,7 +99,15 @@ export const WebformRecord = ({
     selectedRecordId: null
   });
 
-  const { isConditionalChanged, isDialogVisible, selectedRecordId } = webformRecordState;
+  const {
+    changedConditionalFieldData,
+    conditionalFieldChange,
+    dependantConditionalFieldId,
+    isConditionalChanged,
+    isDependantConditionalField,
+    isDialogVisible,
+    selectedRecordId
+  } = webformRecordState;
 
   const { parseMultiselect, parseNewRecordData } = WebformRecordUtils;
   const { parseRecordValidations } = WebformsUtils;
@@ -274,22 +286,27 @@ export const WebformRecord = ({
                   {
                     <WebformField
                       bigData={bigData}
+                      changedConditionalFieldData={changedConditionalFieldData}
                       columnsSchema={columnsSchema}
+                      conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
                       dataProviderId={dataProviderId}
                       datasetId={datasetId}
                       datasetSchemaId={datasetSchemaId}
+                      dependantConditionalFieldId={dependantConditionalFieldId}
                       element={element}
                       hasErrors={!isNil(element.validations)}
                       isConditional={
                         !isNil(webformRecordState.record) &&
                         webformRecordState.record.elements.filter(
                           col =>
-                            !isNil(col.referencedField) &&
-                            col.referencedField.masterConditionalFieldId === element.fieldSchemaId
+                            (!isNil(col.referencedField) &&
+                              col.referencedField.masterConditionalFieldId === element.fieldSchemaId) ||
+                            (!isEmpty(col?.referenceParentField) && col.referenceParentField.field === element.name)
                         ).length > 0
                       }
                       isConditionalChanged={isConditionalChanged}
+                      isDependantConditionalField={isDependantConditionalField}
                       isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       isViewMode={isViewMode}
                       onFillField={onFillField}
@@ -337,34 +354,39 @@ export const WebformRecord = ({
       } else {
         let fkHasEmptyValues = false;
 
-        const referencePkFieldId = element.records[0].fields.filter(
+        // Find reference PK field ID
+        const referencePkFieldId = element.records[0]?.fields.find(
           field => !isNil(field?.referencedField?.idPk) && field?.referencedField?.idPk !== rootPkFieldId
-        )[0]?.referencedField?.idPk;
+        )?.referencedField?.idPk;
 
-        let referencePkValue = record.elements.find(
-          elementField =>
-            elementField.fieldSchema === referencePkFieldId || elementField.fieldSchemaId === referencePkFieldId
+        // Find the PK value for that field ID
+        let referencePkValue = record.elements.find(el =>
+          [el.fieldSchema, el.fieldSchemaId].includes(referencePkFieldId)
         )?.value;
 
+        // Fallback to root PK if needed
         if (isEmpty(referencePkValue) && !isNil(referencePkFieldId)) {
-          referencePkValue = record.elements.find(
-            elementField => elementField.fieldSchema === rootPkFieldId || elementField.fieldSchemaId === rootPkFieldId
+          referencePkValue = record.elements.find(el =>
+            [el.fieldSchema, el.fieldSchemaId].includes(rootPkFieldId)
           )?.value;
         }
 
-        const fkFields = element?.elements
-          .filter(element => !isNil(element.referenceParentField))
-          .map(
-            field =>
-              (field = {
+        // Build FK fields list
+        const fkFields =
+          element?.elements
+            ?.filter(el => !isNil(el.referenceParentField))
+            ?.map(field => {
+              const referencedElement = record.elements.find(recordElement =>
+                TextUtils.areEquals(field?.referenceParentField, recordElement.name)
+              );
+              return {
                 fieldName: field.name,
                 referenceFieldName: field?.referenceParentField,
-                value: record.elements.filter(element =>
-                  TextUtils.areEquals(field?.referenceParentField, element.name)
-                )[0].value
-              })
-          );
+                value: referencedElement?.value
+              };
+            }) ?? [];
 
+        // Determine if any FK has an empty value
         if (!isEmpty(fkFields)) {
           fkHasEmptyValues = fkFields.some(field => isEmpty(field.value));
         }
