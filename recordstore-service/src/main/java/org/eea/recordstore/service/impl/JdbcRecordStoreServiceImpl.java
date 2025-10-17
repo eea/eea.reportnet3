@@ -1843,6 +1843,18 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
     switch (type) {
       case SNAPSHOT:
         SnapshotVO snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
+        if(snapshot == null){
+          LOG.info("Snapshot with id {} and processId {} is null. Waiting and retrying", idSnapshot, processId);
+          try {
+            Thread.sleep(5000);
+          } catch (Exception e) {
+            LOG.error("Snapshot with id {} and processId {} is null. Can not wait for 5 seconds", idSnapshot, processId);
+          }
+          snapshot = dataSetSnapshotControllerZuul.getById(idSnapshot);
+          if(snapshot == null){
+            LOG.error("Snapshot with id {} and processId {} is null. Will not retry again", idSnapshot, processId);
+          }
+        }
         if (Boolean.TRUE.equals(snapshot.getRelease()) || (Boolean.FALSE.equals(snapshot.getRelease()) && StringUtils.isNotBlank(processId)  && Boolean.TRUE.equals(jobControllerZuul.isSilentRelease(processId)))) {
           dataSetSnapshotControllerZuul.releaseSnapshot(idDataset, idSnapshot, dateRelease, processId);
         } else {
