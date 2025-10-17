@@ -211,6 +211,15 @@ export const WebformRecord = ({
     webformRecordDispatch({ type: 'HANDLE_DIALOGS', payload: { dialog, value } });
   };
 
+  const checkIfElementIsConditional = element => {
+    const matchesCondition = el =>
+      el?.referencedField?.masterConditionalFieldId === element.fieldSchemaId ||
+      (!isEmpty(el?.referenceParentField) && el.referenceParentField.field === element.name) ||
+      (el?.type === 'BLOCK' && el.elements?.some(matchesCondition));
+
+    return webformRecordState.record?.elements?.some(matchesCondition) ?? false;
+  };
+
   const renderElements = (elements = [], isLabelFieldBlock = false) => {
     return elements.map((element, i) => {
       const isFieldVisible = element.fieldType === 'EMPTY' && isReporting;
@@ -296,15 +305,7 @@ export const WebformRecord = ({
                       dependantConditionalFieldId={dependantConditionalFieldId}
                       element={element}
                       hasErrors={!isNil(element.validations)}
-                      isConditional={
-                        !isNil(webformRecordState.record) &&
-                        webformRecordState.record.elements.filter(
-                          col =>
-                            (!isNil(col.referencedField) &&
-                              col.referencedField.masterConditionalFieldId === element.fieldSchemaId) ||
-                            (!isEmpty(col?.referenceParentField) && col.referenceParentField.field === element.name)
-                        ).length > 0
-                      }
+                      isConditional={checkIfElementIsConditional(element)}
                       isConditionalChanged={isConditionalChanged}
                       isDependantConditionalField={isDependantConditionalField}
                       isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}

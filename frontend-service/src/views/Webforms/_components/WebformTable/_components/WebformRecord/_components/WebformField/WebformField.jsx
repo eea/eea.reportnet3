@@ -276,7 +276,12 @@ export const WebformField = ({
         return index > changedElementIndex && (masterId === field.fieldSchema || masterId === field.fieldSchemaId);
       };
 
-      conditionalFields = record.elements
+      //Flatten BLOCK elements before mapping
+      const allFieldElements = record.elements.flatMap(el =>
+        el?.type === 'BLOCK' && Array.isArray(el.elements) ? el.elements : el
+      );
+
+      conditionalFields = allFieldElements
         .map((element, index) => {
           // If this is the changed field, update its value
           if (element.fieldSchema === option || element.fieldSchemaId === option) {
@@ -404,11 +409,25 @@ export const WebformField = ({
         (isDependantConditionalField && !isEmpty(dependantConditionalFieldId)) ||
         !isEmpty(field.referencedField?.masterConditionalFieldId)
       ) {
-        field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
-          (record.elements.indexOf(field) > record.elements.indexOf(changedConditionalFieldData) &&
-            record.elements.indexOf(field) > 0 &&
-            record.elements.indexOf(changedConditionalFieldData) > 0 &&
-            onFillField(field, option, emptyValue, isConditional));
+        const allFieldElements = record.elements.flatMap(el =>
+          el?.type === 'BLOCK' && Array.isArray(el.elements) ? el.elements : el
+        );
+
+        const fieldIndex = allFieldElements.findIndex(
+          el => el.fieldSchema === field.fieldSchema || el.fieldId === field.fieldSchemaId
+        );
+        const changedIndex = allFieldElements.findIndex(
+          el =>
+            el.fieldSchema === changedConditionalFieldData.fieldSchema ||
+            el.fieldId === changedConditionalFieldData.fieldSchemaId
+        );
+
+        if (
+          field.referencedField?.masterConditionalFieldId === dependantConditionalFieldId ||
+          (fieldIndex > changedIndex && fieldIndex > 0 && changedIndex > 0)
+        ) {
+          onFillField(field, option, emptyValue, isConditional);
+        }
       } else {
         isInputText
           ? changedConditionalFieldData?.name === field?.referenceParentField?.field &&
