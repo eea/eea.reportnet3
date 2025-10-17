@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useReducer, useRef } from 'react';
+import { Fragment, useContext, useEffect, useReducer } from 'react';
 
 import isArray from 'lodash/isArray';
 import isEmpty from 'lodash/isEmpty';
@@ -48,16 +48,13 @@ export const TableManagement = ({
   rootTableId,
   rootTableName,
   schemaTables,
-  tables
+  tables,
+  view
 }) => {
   const { getFieldSchemaColumnIdByHeader, parseEntitiesRecordsWithParentData, parseTableSchemaColumns } =
     TableManagementUtils;
 
   const { getWebformTabs } = WebformsUtils;
-  const didInitialParentFetch = useRef({
-    hasLoaded: false,
-    initialTableName: null
-  });
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
 
@@ -245,7 +242,15 @@ export const TableManagement = ({
       );
     });
 
-    const parentTablesDataPromises = parentTables.map(async parentTable => {
+    let tablesToLoad;
+    // If overview, load only root table
+    if (view === 'overview') {
+      tablesToLoad = parentTables.filter(t => t.tableSchemaId === rootTableId);
+    } else {
+      tablesToLoad = parentTables;
+    }
+
+    const parentTablesDataPromises = tablesToLoad.map(async parentTable => {
       const sortFieldSchemaId = sort.sortField
         ? getFieldSchemaColumnIdByHeader(tableSchemaColumns, sort.sortField)
         : undefined;
@@ -303,7 +308,6 @@ export const TableManagement = ({
         }
       })
       .finally(() => {
-        didInitialParentFetch.current.hasLoaded = true;
         setIsLoading(false);
       });
   };
@@ -377,24 +381,7 @@ export const TableManagement = ({
     const entitiesFieldSchemaValue =
       rowData && rowData.dataRow ? RecordUtils.getCellValue({ rowData }, entitiesIdFieldSchemaId) : undefined;
 
-    let tableName;
-
-    if (rowData && rowData.dataRow) {
-      rowData.dataRow.forEach(row =>
-        row.fieldData.tableSchemas?.forEach((tableSchema, index) => {
-          if (index === 0) {
-            tableName = tableSchema.tableSchemaName;
-            if (!didInitialParentFetch.current.hasLoaded) {
-              didInitialParentFetch.current.initialTableName = tableSchema.tableSchemaName;
-            }
-          }
-        })
-      );
-    }
-
-    if (isUndefined(tableName)) {
-      tableName = didInitialParentFetch.current.initialTableName || rootTableName;
-    }
+    const tableName = rootTableName;
 
     return (
       <ActionsColumn
