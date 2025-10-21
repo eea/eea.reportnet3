@@ -324,7 +324,6 @@ export const EntitiesWebform = ({
         webformTable => webformTable.name === table.name && webformTable.isVisible && !webformTable.isRootTable
       )
     );
-    console.log('visibleTables', visibleTables);
     return visibleTables[0] || null;
   };
 
