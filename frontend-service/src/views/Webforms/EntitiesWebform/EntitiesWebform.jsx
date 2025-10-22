@@ -49,12 +49,12 @@ export const EntitiesWebform = ({
 }) => {
   const { checkErrors, getFieldSchemaId, getTypeList, hasErrors } = EntitiesWebformUtils;
   const { datasetSchema, datasetStatistics } = state;
-  const { onParseWebformData, onParseWebformRecords, parseNewEntitiesTableRecord, parseEntitiesRecords } =
-    WebformsUtils;
+  const { onParseWebformData, onParseWebformRecords, parseNewEntitiesTableRecord } = WebformsUtils;
 
   const notificationContext = useContext(NotificationContext);
   const resourcesContext = useContext(ResourcesContext);
   const [refreshTableTrigger, setRefreshTableTrigger] = useState(0);
+  const [hasLoadedEntities, setHasLoadedEntities] = useState(false);
 
   const [entitiesWebformState, entitiesWebformDispatch] = useReducer(entitiesWebformReducer, {
     data: [],
@@ -83,14 +83,17 @@ export const EntitiesWebform = ({
   useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
-    if (!isEmpty(entitiesWebformState.data)) {
-      onLoadEntitiesData();
+    if (!isEmpty(entitiesWebformState.data) && !hasLoadedEntities) {
+      if (!hideEntities) {
+        onLoadEntitiesData();
+        setHasLoadedEntities(true);
+      }
       entitiesWebformDispatch({
         type: 'HAS_ERRORS',
         payload: { value: hasErrors(entitiesWebformState.data, rootPkFieldId) }
       });
     }
-  }, [entitiesWebformState.data, isDataUpdated]);
+  }, [entitiesWebformState.data, isDataUpdated, hasLoadedEntities]);
 
   useEffect(() => {
     setIsAddingEntityRecord(false);
@@ -149,53 +152,47 @@ export const EntitiesWebform = ({
 
   const setIsLoading = value => entitiesWebformDispatch({ type: 'IS_LOADING', payload: { value } });
 
-  const generateEntityId = entitiesTableRecords => {
-    if (isEmpty(entitiesTableRecords)) return 1;
-
-    const recordIds = parseEntitiesRecords(entitiesTableRecords)
-      .map(record => parseInt(record.Id) || parseInt(record.id))
-      .filter(id => !Number.isNaN(id));
-
-    return Math.max(...recordIds) + 1;
-  };
-
   const setTableSchemaId = tableSchemaId => {
     entitiesWebformDispatch({ type: 'GET_TABLE_SCHEMA_ID', payload: { tableSchemaId } });
-  };
-
-  const getEntitiesTableRecords = async tableSchemaId => {
-    let data;
-    if (!isNil(tableSchemaId[0])) {
-      if (bigData) {
-        data = await DatasetService.getTableDataDL({
-          datasetId,
-          tableSchemaId: tableSchemaId[0],
-          // pageSize: 300,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-        });
-      } else {
-        data = await DatasetService.getTableData({
-          datasetId,
-          tableSchemaId: tableSchemaId[0],
-          // pageSize: 300,
-          levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
-        });
-      }
-      return onParseWebformRecords(data.records, entitiesWebformState.data[0], {}, data.totalRecords) || [];
-    }
-
-    return [];
   };
 
   const onAddEntitiesRecord = async manualRootPk => {
     setIsAddingEntityRecord(true);
 
-    const autoIncrementFields = tables
-      .map(table => table.elements.filter(element => element.autoIncrement).map(element => element.name))
-      .filter(table => !isEmpty(table))
-      .flat();
-
     /*Filters the webform main tables that are not optional and leaves out the subtables*/
+    const autoIncrementFields = [];
+
+    // Add fields from table elements that have autoIncrement = true
+    tables.forEach(table => {
+      if (table.elements) {
+        const incrementFields = table.elements.filter(element => element.autoIncrement).map(element => element.name);
+        autoIncrementFields.push(...incrementFields);
+      }
+
+      // Add root table primary key
+      if (table.isRootTable) {
+        autoIncrementFields.push('Id');
+      }
+    });
+
+    // Add foreign key fields that reference the root table
+    const rootTableFKFields = [];
+
+    // Find FK fields in datasetSchema that reference the root table
+    datasetSchema.tables.forEach(table => {
+      if (table.records && table.records[0] && table.records[0].fields) {
+        table.records[0].fields.forEach(field => {
+          // Check if this field references the root table's primary key
+          if (field.referencedField && field.referencedField.idPk === rootPkFieldId) {
+            rootTableFKFields.push(field.name);
+          }
+        });
+      }
+    });
+    // Add FK field names to autoIncrementFields
+    autoIncrementFields.push(...rootTableFKFields);
+    // Remove duplicates
+    const uniqueAutoIncrementFields = [...new Set(autoIncrementFields)];
 
     const filteredMainTables = datasetSchema.tables.filter(
       table =>
@@ -203,16 +200,15 @@ export const EntitiesWebform = ({
         tables.some(webformTable => webformTable?.name === table?.tableSchemaName && !webformTable?.isOptional)
     );
 
-    const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
+    // const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
 
     try {
-      const entitiesTableRecords = await getEntitiesTableRecords(tableSchemaId);
       await WebformService.addEntityRecord(
         datasetId,
         filteredMainTables,
-        manualRootPk ? entitiesWebformState.rootPkInput : generateEntityId(entitiesTableRecords),
+        manualRootPk ? entitiesWebformState.rootPkInput : undefined,
         rootPkFieldId,
-        !isEmpty(autoIncrementFields) ? autoIncrementFields : undefined
+        !isEmpty(uniqueAutoIncrementFields) ? uniqueAutoIncrementFields : undefined
       );
 
       onUpdateData();
@@ -287,14 +283,14 @@ export const EntitiesWebform = ({
           data = await DatasetService.getTableDataDL({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            // pageSize: 300,
+            pageSize: 350,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         } else {
           data = await DatasetService.getTableData({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            // pageSize: 300,
+            pageSize: 350,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         }
@@ -323,12 +319,27 @@ export const EntitiesWebform = ({
     }
   };
 
-  const onSelectEditTable = (entityNumberId, tableName, recordId, isViewMode = false) => {
-    const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
+  const getFirstVisibleTable = () => {
+    const visibleTables = entitiesWebformState.data.filter(table =>
+      tables.some(
+        webformTable => webformTable.name === table.name && webformTable.isVisible && !webformTable.isRootTable
+      )
+    );
+    return visibleTables[0] || null;
+  };
 
+  const onSelectEditTable = (entityNumberId, tableName, recordId, isViewMode = false) => {
+    // const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
+
+    const filteredTable = getFirstVisibleTable();
+
+    if (!filteredTable) {
+      console.error('No visible tables found for editing');
+      return;
+    }
     setTableSchemaId(filteredTable.tableSchemaId);
     onSelectRecord(recordId, entityNumberId);
-    onSelectTableName(tableName);
+    onSelectTableName(filteredTable.name);
     onToggleView('details');
     entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: isViewMode } });
   };
@@ -347,15 +358,12 @@ export const EntitiesWebform = ({
 
   const onSelectTableName = name => entitiesWebformDispatch({ type: 'ON_SELECT_TABLE', payload: { name } });
 
-  const onToggleView = view => {
-    entitiesWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
-    if (view === 'overview') {
-      entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: false } });
-    }
+  const onToggleView = view => entitiesWebformDispatch({ type: 'ON_TOGGLE_VIEW', payload: { view } });
+
+  const onUpdateData = () => {
+    setHasLoadedEntities(false);
+    entitiesWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
   };
-
-  const onUpdateData = () => entitiesWebformDispatch({ type: 'ON_UPDATE_DATA', payload: { value: !isDataUpdated } });
-
   const setIsAddingEntityRecord = value =>
     entitiesWebformDispatch({ type: 'SET_IS_ADDING_ENTITY_RECORD', payload: { value } });
 
@@ -429,6 +437,7 @@ export const EntitiesWebform = ({
         rootTableName={rootTableName}
         schemaTables={datasetSchema.tables}
         tables={tables}
+        view={view}
       />
     );
   };
