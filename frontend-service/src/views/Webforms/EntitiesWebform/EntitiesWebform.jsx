@@ -283,14 +283,14 @@ export const EntitiesWebform = ({
           data = await DatasetService.getTableDataDL({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            pageSize: 350,
+            pageSize: 300,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         } else {
           data = await DatasetService.getTableData({
             datasetId,
             tableSchemaId: tableSchemaId[0],
-            pageSize: 350,
+            pageSize: 300,
             levelError: ['CORRECT', 'INFO', 'WARNING', 'ERROR', 'BLOCKER']
           });
         }
@@ -382,6 +382,7 @@ export const EntitiesWebform = ({
           onClick={() => {
             onToggleView('overview');
             onSelectRecord(null, null);
+            entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: false } });
           }}
         />
       </div>
