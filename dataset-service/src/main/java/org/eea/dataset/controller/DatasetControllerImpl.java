@@ -305,7 +305,7 @@ public class DatasetControllerImpl implements DatasetController {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               EEAErrorMessage.OBTAINING_TABLE_DATA);
     } catch (Exception e) {
-      LOG.error("Unexpected error! Error retrieving datalake table values for datasetId {} and tableSchemaId {} Message: {}", datasetId, idTableSchema, e.getMessage());
+      LOG.error("Unexpected error! Error retrieving big data table values for datasetId {} and tableSchemaId {} Message: {}", datasetId, idTableSchema, e.getMessage());
       throw e;
     }
 
