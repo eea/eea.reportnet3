@@ -115,9 +115,6 @@ public class DesignDatasetServiceTest {
   @Mock
   private WebFormMapper webformMapper;
 
-  @Mock
-  private DataFlowControllerZuul dataflowControllerZuul;
-
   private SecurityContext securityContext;
 
   private Authentication authentication;
@@ -231,8 +228,6 @@ public class DesignDatasetServiceTest {
 
     Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
     Mockito.when(authentication.getName()).thenReturn("name");
-    Mockito.when(dataflowControllerZuul.isBigDataflow(any()))
-      .thenReturn(false);
     designDatasetService.copyDesignDatasets(1L, 2L);
     Mockito.verify(datasetMetabaseService, times(1)).createEmptyDataset(Mockito.any(),
         Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
@@ -252,8 +247,6 @@ public class DesignDatasetServiceTest {
         .thenReturn(Arrays.asList(new DesignDatasetVO()));
     Mockito.when(dataschemaService.createEmptyDataSetSchema(Mockito.anyLong()))
         .thenThrow(EEAException.class);
-    Mockito.when(dataflowControllerZuul.isBigDataflow(any()))
-      .thenReturn(false);
     try {
       designDatasetService.copyDesignDatasets(1L, 2L);
     } catch (EEAException e) {
