@@ -64,6 +64,7 @@ export const PaMsWebformField = ({
   const queryClient = useQueryClient();
 
   const inputRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   const [pamsWebformFieldState, pamsWebformFieldDispatch] = useReducer(pamsWebformFieldReducer, {
     initialFieldValue: '',
@@ -103,6 +104,12 @@ export const PaMsWebformField = ({
   const { formatDate, formatDateTime, getMultiselectValues } = PaMsWebformRecordUtils;
 
   const { getObjectiveOptions } = PaMsUtils;
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
@@ -220,7 +227,9 @@ export const PaMsWebformField = ({
           }
         )
         .then(linkItems => {
-          pamsWebformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
+          if (isMountedRef.current) {
+            pamsWebformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
+          }
         })
         .catch(error => {
           console.error('PaMsWebformField - onFilter.', error);

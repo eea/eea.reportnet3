@@ -209,27 +209,25 @@ public class DesignDatasetServiceImpl implements DesignDatasetService {
       throw new EEAException(String.format(EEAErrorMessage.NO_DESIGNS_TO_COPY, idDataflowOrigin));
     }
 
-    if (dataflowControllerZuul.isBigDataflow(idDataflowDestination)) {
-      try {
-        List<DataSetSchemaVO> schemaVOs = new ArrayList<>();
-        for (DesignDatasetVO design : designs) {
-          schemaVOs.add(dataschemaService.getDataSchemaById(design.getDatasetSchema()));
-        }
-
-        dataschemaService.validateTableFieldNamesHaveNoWhitespace(idDataflowDestination, schemaVOs);
-      } catch (EEAException ex) {
-        kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT,
-                null,
-                NotificationVO.builder()
-                        .user(SecurityContextHolder.getContext().getAuthentication().getName())
-                        .dataflowId(idDataflowDestination).error("Error copying the schemas - " + EEAErrorMessage.FIELD_NAME_WHITESPACES).build());
-        Map<String, Object> copyDatasetSchema = new HashMap<>();
-        copyDatasetSchema.put(LiteralConstants.SIGNATURE,
-                LockSignature.COPY_DATASET_SCHEMA.getValue());
-        copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
-        lockService.removeLockByCriteria(copyDatasetSchema);
-        throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_WHITESPACES, idDataflowOrigin), ex);
+    try {
+      List<DataSetSchemaVO> schemaVOs = new ArrayList<>();
+      for (DesignDatasetVO design : designs) {
+        schemaVOs.add(dataschemaService.getDataSchemaById(design.getDatasetSchema()));
       }
+
+      dataschemaService.validateTableFieldNamesHaveNoWhitespace(idDataflowDestination, schemaVOs);
+    } catch (EEAException ex) {
+      kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.COPY_DATASET_SCHEMA_FAILED_ILLEGAL_CHARS_EVENT,
+              null,
+              NotificationVO.builder()
+                      .user(SecurityContextHolder.getContext().getAuthentication().getName())
+                      .dataflowId(idDataflowDestination).error("Error copying the schemas - " + EEAErrorMessage.FIELD_NAME_WHITESPACES).build());
+      Map<String, Object> copyDatasetSchema = new HashMap<>();
+      copyDatasetSchema.put(LiteralConstants.SIGNATURE,
+              LockSignature.COPY_DATASET_SCHEMA.getValue());
+      copyDatasetSchema.put(LiteralConstants.DATAFLOWIDDESTINATION, idDataflowDestination);
+      lockService.removeLockByCriteria(copyDatasetSchema);
+      throw new EEAException(String.format(EEAErrorMessage.FIELD_NAME_WHITESPACES, idDataflowOrigin), ex);
     }
 
     try {
