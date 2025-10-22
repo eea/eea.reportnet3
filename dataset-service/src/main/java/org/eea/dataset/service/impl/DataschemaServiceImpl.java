@@ -2429,9 +2429,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
 
       validateNames(importClasses);
 
-      if (dataFlowControllerZuul.isBigDataflow(dataflowId)) {
-        validateTableFieldNamesHaveNoWhitespace(dataflowId, importClasses);
-      }
+      validateTableFieldNamesHaveNoWhitespace(dataflowId, importClasses);
 
       for (DataSetSchema schema : importClasses.getSchemas()) {
         String newIdDatasetSchema = createEmptyDataSetSchema(dataflowId).toString();
@@ -2815,9 +2813,7 @@ public class DataschemaServiceImpl implements DatasetSchemaService {
         final List<String> values = Arrays.asList(line);
         FieldSchemaVO fieldSchemaVO = sanitizeAndFillFieldSchema(values, recordSchemaId);
         // if there's not a pk present, continue inserting/updating the field
-        if (dataFlowControllerZuul.isBigDataflow(datasetService.getDataFlowIdById(datasetId))) {
-          validateTableFieldNameHasNoWhitespace(fieldSchemaVO.getName());
-        }
+        validateTableFieldNameHasNoWhitespace(fieldSchemaVO.getName());
       }
     }
     try (Reader buf =
