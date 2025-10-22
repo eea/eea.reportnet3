@@ -64,6 +64,7 @@ export const WebformField = ({
   const queryClient = useQueryClient();
 
   const inputRef = useRef(null);
+  const isMountedRef = useRef(true);
 
   const [webformFieldState, webformFieldDispatch] = useReducer(webformFieldReducer, {
     initialFieldValue: '',
@@ -99,6 +100,12 @@ export const WebformField = ({
   } = webformFieldState;
 
   const { formatDate, formatDateTime, getMultiselectValues } = WebformRecordUtils;
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (element.fieldType === 'LINK' || element.fieldType === 'EXTERNAL_LINK') onFilter('', element);
@@ -224,7 +231,9 @@ export const WebformField = ({
           }
         )
         .then(linkItems => {
-          webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
+          if (isMountedRef.current) {
+            webformFieldDispatch({ type: 'SET_LINK_ITEMS', payload: linkItems });
+          }
         })
         .catch(error => {
           console.error('WebformField - onFilter.', error);

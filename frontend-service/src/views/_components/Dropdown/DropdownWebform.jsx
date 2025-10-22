@@ -682,12 +682,13 @@ const DropdownWebform = props => {
     }
 
     if (items) {
-      return items.map(option => {
+      return items.map((option, index) => {
+        const key = `${getOptionKey(option)}-${index}`;
         let optionLabel = getOptionLabel(option);
         return (
           <DropdownItem
             disabled={option.disabled}
-            key={getOptionKey(option)}
+            key={key}
             label={optionLabel}
             onClick={onOptionClick}
             option={option}
