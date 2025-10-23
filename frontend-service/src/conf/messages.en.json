@@ -1806,7 +1806,7 @@
     "fmeImportJobFailedEvent": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>",
     "fmeImportJobFailedEventNoFileReturned": "Fme import failed for <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName}</a>. FME did not returned a file.",
     "copyDataToEudatasetCanceledEvent": "Copy to EU dataset canceled for dataflow <a href='{:navigateTo}' title='{:dataflowName}'>{:dataflowName}</a>, {:error}",
-    "disableRulesErrorEvent": "SQL rules containing errors were found in the Data Collection creation process",
+    "disableRulesErrorEvent": "The Data Collection creation process found SQL rules with errors or rules marked as disabled",
     "canceled_by_admin": "Canceled by admin",
     "finishedValidationWithCanceledTasks": "Validation finished at <a href='{:navigateTo}' title='{:datasetName}'>{:shortDatasetName} ({:dataProviderName})</a>. Validation contains canceled tasks",
     "emptyTableEvent": "One or more tables in the design dataset(s) are empty",
