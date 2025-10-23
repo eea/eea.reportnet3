@@ -83,7 +83,6 @@ public class DatasetDataRetrieverDL implements DataLakeDataRetriever {
             }
             result.setTotalRecords(totalRecords);
 
-            LOG.info("For datasetId {} totalRecords : {}", datasetId, totalRecords);
             Map<String, FieldSchemaVO> fieldIdMap = tableSchemaVO.getRecordSchema().getFieldSchema().stream().collect(Collectors.toMap(FieldSchemaVO::getId, Function.identity()));
             s3PathResolver.setTableName(S3_VALIDATION);
             //validations only exist in the parquet bucket
