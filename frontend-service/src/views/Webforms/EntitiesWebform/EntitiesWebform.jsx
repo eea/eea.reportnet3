@@ -30,6 +30,7 @@ import { EntitiesWebformUtils } from './_functions/Utils/EntitiesWebformUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
+import { clearConfig } from 'dompurify';
 
 export const EntitiesWebform = ({
   bigData,
@@ -66,6 +67,7 @@ export const EntitiesWebform = ({
     isDuplicatePkDialogVisible: false,
     isLoading: true,
     isRefresh: false,
+    updatingField: { fieldId: null, isUpdating: false },
     isViewMode: false,
     entitiesRecords: [],
     selectedTable: { fieldSchemaId: null, rootTableId: null, recordId: null, tableName: null },
@@ -328,6 +330,22 @@ export const EntitiesWebform = ({
     return visibleTables[0] || null;
   };
 
+  const changeViewMode = isViewMode => {
+    entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: isViewMode } });
+  };
+
+  const onFieldUpdate = (isFieldUpdating, field) => {
+    const fieldId = field?.fieldSchemaId ?? field?.fieldSchema ?? field?.fieldId;
+
+    entitiesWebformDispatch({
+      type: 'SET_IS_UPDATING_FIELD',
+      payload: {
+        value: isFieldUpdating,
+        fieldId
+      }
+    });
+  };
+
   const onSelectEditTable = (entityNumberId, tableName, recordId, isViewMode = false) => {
     // const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
 
@@ -341,7 +359,7 @@ export const EntitiesWebform = ({
     onSelectRecord(recordId, entityNumberId);
     onSelectTableName(filteredTable.name);
     onToggleView('details');
-    entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: isViewMode } });
+    changeViewMode(isViewMode);
   };
 
   const onSelectViewTable = (entityNumberId, tableName, recordId) => {
@@ -382,7 +400,7 @@ export const EntitiesWebform = ({
           onClick={() => {
             onToggleView('overview');
             onSelectRecord(null, null);
-            entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: false } });
+            changeViewMode(false);
           }}
         />
       </div>
@@ -394,6 +412,7 @@ export const EntitiesWebform = ({
       return (
         <WebformView
           bigData={bigData}
+          onFieldUpdate={onFieldUpdate}
           data={entitiesWebformState.data}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
@@ -405,6 +424,7 @@ export const EntitiesWebform = ({
           isIcebergCreated={isIcebergCreated}
           isRefresh={entitiesWebformState.isRefresh}
           isReporting={isReporting}
+          updatingField={entitiesWebformState.updatingField}
           isViewMode={entitiesWebformState.isViewMode}
           rootPkFieldId={rootPkFieldId}
           rootTableName={rootTableName}
@@ -585,7 +605,7 @@ export const EntitiesWebform = ({
                         });
                         onSelectRecord(items.recordId, items.id);
                         onToggleView('details');
-                        entitiesWebformDispatch({ type: 'SET_IS_VIEW_MODE', payload: { value: true } });
+                        changeViewMode(true);
                       }
                     }}>
                     {items.id || '-'}
