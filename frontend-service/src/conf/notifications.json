@@ -1029,7 +1029,7 @@
           "key": "RELEASE_REFUSED_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
-            "parameters": ["dataflowId", "dataProvider"],
+            "parameters": ["dataflowId", "providerId"],
             "hasQueryString": true
           }
         },
@@ -1037,7 +1037,7 @@
           "key": "RELEASE_FAILED_ICEBERG_EXISTS_EVENT",
           "navigateTo": {
             "section": "DATAFLOW",
-            "parameters": ["dataflowId", "dataProvider"],
+            "parameters": ["dataflowId", "providerId"],
             "hasQueryString": true
           }
         },
