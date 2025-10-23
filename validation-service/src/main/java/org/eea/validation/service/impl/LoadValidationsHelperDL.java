@@ -7,6 +7,8 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.exception.EEAException;
 import org.eea.interfaces.controller.dataset.DatasetMetabaseController.DataSetMetabaseControllerZuul;
 import org.eea.interfaces.controller.dataset.DatasetSchemaController.DatasetSchemaControllerZuul;
+import org.eea.interfaces.controller.orchestrator.JobController.JobControllerZuul;
+import org.eea.interfaces.controller.orchestrator.RedisLockController.RedisLockControllerZuul;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import org.eea.interfaces.vo.dataset.FailedValidationsDatasetVO;
 import org.eea.interfaces.vo.dataset.GroupValidationVO;
@@ -14,6 +16,8 @@ import org.eea.interfaces.vo.dataset.enums.EntityTypeEnum;
 import org.eea.interfaces.vo.dataset.enums.ErrorTypeEnum;
 import org.eea.interfaces.vo.dataset.schemas.DataSetSchemaVO;
 import org.eea.interfaces.vo.dataset.schemas.TableSchemaVO;
+import org.eea.interfaces.vo.orchestrator.JobVO;
+import org.eea.lock.redis.LockEnum;
 import org.eea.validation.service.DataLakeValidationService;
 import org.eea.validation.service.ValidationService;
 import org.slf4j.Logger;
@@ -26,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -43,9 +48,14 @@ public class LoadValidationsHelperDL {
     private final DremioHelperService dremioHelperService;
     private final ValidationService validationService;
 
+    private final JobControllerZuul jobControllerZuul;
+
+    private final RedisLockControllerZuul redisLockControllerZuul;
+
     @Autowired
     public LoadValidationsHelperDL(DataLakeValidationService dataLakeValidationService, DataSetMetabaseControllerZuul dataSetMetabaseControllerZuul, S3Helper s3Helper, @Qualifier("dremioJdbcTemplate") JdbcTemplate dremioJdbcTemplate,
-                                   DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioHelperService dremioHelperService, @Qualifier("proxyValidationService") ValidationService validationService) {
+                                   DatasetSchemaControllerZuul datasetSchemaControllerZuul, DremioHelperService dremioHelperService,
+                                   @Qualifier("proxyValidationService") ValidationService validationService, JobControllerZuul jobControllerZuul, RedisLockControllerZuul redisLockControllerZuul) {
         this.dataLakeValidationService = dataLakeValidationService;
         this.dataSetMetabaseControllerZuul = dataSetMetabaseControllerZuul;
         this.s3Helper = s3Helper;
@@ -53,6 +63,8 @@ public class LoadValidationsHelperDL {
         this.datasetSchemaControllerZuul = datasetSchemaControllerZuul;
         this.dremioHelperService = dremioHelperService;
         this.validationService = validationService;
+        this.jobControllerZuul = jobControllerZuul;
+        this.redisLockControllerZuul = redisLockControllerZuul;
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(LoadValidationsHelperDL.class);
@@ -79,13 +91,28 @@ public class LoadValidationsHelperDL {
                 typeEntitiesFilter, tableFilter, fieldValueFilter, shortCode, pageable, headerField, asc, false).size()));
             List<String> tableNames = schema.getTableSchemas().stream().map(TableSchemaVO::getNameTableSchema).collect(Collectors.toList());
             AtomicReference<Long> totalRecords = new AtomicReference<>(0L);
-            tableNames.forEach(name -> {
-                s3PathResolver.setTableName(name);
-                if (s3Helper.checkFolderExist(s3PathResolver, S3_TABLE_NAME_FOLDER_PATH)) {
+            S3PathResolver s3PathResolverTable = s3PathResolver;
+            s3PathResolverTable.setPath(S3_PROVIDER_PATH);
+            for(String tableName: tableNames){
+                s3PathResolverTable.setTableName(tableName);
+                s3PathResolver.setTableName(tableName);
+                if (s3Helper.checkFolderExist(s3PathResolverTable, S3_TABLE_NAME_FOLDER_PATH)) {
+                    if(!dremioHelperService.checkFolderPromoted(s3PathResolverTable, s3PathResolverTable.getTableName())){
+                        List<JobVO> activeJobsForDatasetId = jobControllerZuul.findActiveJobsRelatedToADatasetId(datasetId, dataset.getDataflowId(), dataset.getDataProviderId());
+                        Map<String, String> activeConversionLocks = redisLockControllerZuul.getActiveRedisLocksByKey(LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId);
+                        if(activeJobsForDatasetId.size() > 0 || activeConversionLocks.size() > 0){
+                            LOG.error("Can not promote demoted table {} for datasetId {} in show validations", tableName, datasetId);
+                            throw new EEAException("Found demoted tables during show validation");
+                        }
+                        else{
+                            dremioHelperService.promoteFolderOrFile(s3PathResolverTable, tableName);
+                            LOG.info("Promoted demoted table {} for datasetId {} in show validations", tableName, datasetId);
+                        }
+                    }
                     Long tableRecords = dremioJdbcTemplate.queryForObject(s3Helper.buildRecordsCountQuery(s3PathResolver), Long.class);
-                    totalRecords.set(Long.sum(totalRecords.get(),tableRecords));
+                    totalRecords.set(Long.sum(totalRecords.get(), tableRecords));
                 }
-            });
+            }
             validation.setTotalRecords(totalRecords.get());
         }
         LOG.info(
