@@ -327,8 +327,7 @@ export const EntitiesWebform = ({
     );
     return visibleTables[0] || null;
   };
-
-  const onSelectEditTable = (entityNumberId, tableName, recordId) => {
+  const onSelectEditTable = (entityNumberId, tableName, recordId, isViewMode = false) => {
     // const filteredTable = entitiesWebformState.data.filter(table => TextUtils.areEquals(table.name, tableName))[0];
 
     const filteredTable = getFirstVisibleTable();
