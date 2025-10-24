@@ -28,6 +28,9 @@
           }
         },
         {
+          "key": "INSERT_RECORDS_MULTI_TABLES_FAILED"
+        },
+        {
           "key": "IMPORT_REPORTING_FAILED_NO_HEADERS_MATCHING_EVENT",
           "navigateTo": {
             "section": "DATASET",
@@ -1305,6 +1308,9 @@
           }
         },
         {
+          "key": "INSERT_RECORDS_MULTI_TABLES_COMPLETED"
+        },
+        {
           "key": "IMPORT_RESTART_COMPLETED_EVENT",
           "navigateTo": {
             "section": "DATASET_SCHEMA",
@@ -1578,6 +1584,7 @@
         { "key": "RESTORE_DATASET_SNAPSHOT_INIT_INFO" },
         { "key": "DATAFLOW_LOADING_LEAD_REPORTERS_INIT" },
         { "key": "DELETE_TABLE_DATA_INIT" },
+        { "key": "INSERT_RECORDS_MULTI_TABLES_INIT" },
         { "key": "RELEASE_START_EVENT" },
         { "key": "IMPORT_TABLE_SCHEMA_INIT" },
         { "key": "DOWNLOAD_USERS_BY_COUNTRY_START" },
