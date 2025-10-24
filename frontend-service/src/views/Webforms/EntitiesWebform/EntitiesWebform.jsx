@@ -84,6 +84,27 @@ export const EntitiesWebform = ({
   useEffect(() => initialLoad(), [tables]);
 
   useEffect(() => {
+    const notificationKey = notificationContext.toShow.find(
+      ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
+    )?.key;
+
+    if (!notificationKey) return;
+
+    const resetAddEntityState = () => {
+      setIsAddingEntityRecord(false);
+      manageDialogs('isAddEntityIdDialogVisible', false);
+      setRefreshTableTrigger(prev => prev + 1);
+    };
+
+    if (notificationKey === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
+      onUpdateData();
+      resetAddEntityState();
+    } else if (notificationKey === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
+      resetAddEntityState();
+    }
+  }, [notificationContext.toShow]);
+
+  useEffect(() => {
     if (!isEmpty(entitiesWebformState.data) && !hasLoadedEntities) {
       if (!hideEntities) {
         onLoadEntitiesData();
@@ -201,42 +222,17 @@ export const EntitiesWebform = ({
         tables.some(webformTable => webformTable?.name === table?.tableSchemaName && !webformTable?.isOptional)
     );
 
-    // const tableSchemaId = entitiesWebformState.data.map(table => table.tableSchemaId).filter(table => !isNil(table));
+    notificationContext.add({
+      type: 'INSERT_RECORDS_MULTI_TABLES_INIT'
+    });
 
-    try {
-      await WebformService.addEntityRecord(
-        datasetId,
-        filteredMainTables,
-        manualRootPk ? entitiesWebformState.rootPkInput : undefined,
-        rootPkFieldId,
-        !isEmpty(uniqueAutoIncrementFields) ? uniqueAutoIncrementFields : undefined
-      );
-
-      onUpdateData();
-      setIsAddingEntityRecord(false);
-      setIsAddEntityIdDialogVisible(false);
-      setRefreshTableTrigger(prev => prev + 1);
-    } catch (error) {
-      if (error?.response?.status === 423) {
-        notificationContext.add({ type: 'GENERIC_BLOCKED_ERROR' }, true);
-      } else {
-        console.error('EntitiesWebform - onAddEntitiesRecord.', error);
-        const {
-          dataflow: { name: dataflowName },
-          dataset: { name: datasetName }
-        } = await MetadataUtils.getMetadata({ dataflowId, datasetId });
-        notificationContext.add(
-          {
-            type: 'ADD_RECORDS_ERROR',
-            content: { dataflowId, dataflowName, datasetId, datasetName, customContent: { tableName: '' } }
-          },
-          true
-        );
-      }
-      setIsAddingEntityRecord(false);
-      setIsAddEntityIdDialogVisible(false);
-      setRefreshTableTrigger(prev => prev + 1);
-    }
+    await WebformService.addEntityRecord(
+      datasetId,
+      filteredMainTables,
+      manualRootPk ? entitiesWebformState.rootPkInput : undefined,
+      rootPkFieldId,
+      !isEmpty(uniqueAutoIncrementFields) ? uniqueAutoIncrementFields : undefined
+    );
   };
 
   const onAddTableRecord = async (table, entityNumber) => {
@@ -383,9 +379,6 @@ export const EntitiesWebform = ({
   };
   const setIsAddingEntityRecord = value =>
     entitiesWebformDispatch({ type: 'SET_IS_ADDING_ENTITY_RECORD', payload: { value } });
-
-  const setIsAddEntityIdDialogVisible = value =>
-    entitiesWebformDispatch({ type: 'SET_IS_ADD_ENTITY_ID_DIALOG_VISIBLE', payload: { value } });
 
   const renderOverviewButton = () => {
     if (view !== 'details') {
