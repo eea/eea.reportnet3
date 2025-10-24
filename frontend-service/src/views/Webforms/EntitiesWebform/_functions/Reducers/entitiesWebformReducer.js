@@ -58,6 +58,15 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
     case 'SET_IS_VIEW_MODE':
       return { ...state, isViewMode: payload.value };
 
+    case 'SET_IS_UPDATING_FIELD':
+      return {
+        ...state,
+        updatingField: {
+          fieldId: payload.fieldId,
+          isUpdating: payload.value
+        }
+      };
+
     case 'ON_REFRESH':
       return { ...state, isRefresh: payload.value };
 

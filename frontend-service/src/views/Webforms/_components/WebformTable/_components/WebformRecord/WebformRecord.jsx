@@ -59,6 +59,7 @@ const checkShowRequired = (element, elements) => {
 export const WebformRecord = ({
   addingOnTableSchemaId,
   bigData,
+  onFieldUpdate,
   columnsSchema,
   dataflowId,
   dataProviderId,
@@ -69,6 +70,7 @@ export const WebformRecord = ({
   isFixedNumber = true,
   isOptional,
   isReporting,
+  updatingField,
   isViewMode,
   multipleRecords,
   onAddMultipleWebform,
@@ -296,6 +298,7 @@ export const WebformRecord = ({
                     <WebformField
                       bigData={bigData}
                       changedConditionalFieldData={changedConditionalFieldData}
+                      onFieldUpdate={onFieldUpdate}
                       columnsSchema={columnsSchema}
                       conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
@@ -316,6 +319,7 @@ export const WebformRecord = ({
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
+                      updatingField={updatingField}
                       webformType={webformType}
                     />
                   }
@@ -414,7 +418,8 @@ export const WebformRecord = ({
                         fkHasEmptyValues ||
                         isEmpty(referencePkValue) ||
                         (addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple) ||
-                        isViewMode
+                        isViewMode ||
+                        updatingField.isUpdating
                       }
                       icon={
                         addingOnTableSchemaId === element.tableSchemaId && isAddingMultiple ? 'spinnerAnimate' : 'plus'
@@ -455,6 +460,7 @@ export const WebformRecord = ({
                   <WebformRecord
                     addingOnTableSchemaId={addingOnTableSchemaId}
                     bigData={bigData}
+                    onFieldUpdate={onFieldUpdate}
                     columnsSchema={columnsSchema}
                     dataflowId={dataflowId}
                     dataProviderId={dataProviderId}
@@ -475,6 +481,7 @@ export const WebformRecord = ({
                     selectedTableId={element.tableSchemaId}
                     tableId={tableId}
                     tableName={element.title}
+                    updatingField={updatingField}
                   />
                 );
               })}
@@ -508,7 +515,7 @@ export const WebformRecord = ({
             {validationsTemplate(parseRecordValidations(webformRecordState.record))}
             <Button
               className={`${styles.delete} p-button-rounded p-button-secondary p-button-animated-blink`}
-              disabled={webformRecordState.isDeleting || isViewMode}
+              disabled={webformRecordState.isDeleting || isViewMode || updatingField.isUpdating}
               icon={webformRecordState.isDeleting ? 'spinnerAnimate' : 'trash'}
               onClick={() => {
                 handleDialogs('deleteRow', true);

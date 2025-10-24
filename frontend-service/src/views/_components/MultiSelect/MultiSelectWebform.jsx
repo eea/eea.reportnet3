@@ -506,20 +506,30 @@ const MultiSelectWebform = props => {
     });
 
     return hasSelectedItemsLabel ? (
-      isLoadingData ? (
-        <Spinner className={styles.spinner} />
-      ) : (
-        <div
-          className="p-multiselect-label-container"
-          style={{
-            position: isFilter ? 'absolute' : 'relative',
-            top: '0',
-            paddingTop: '0.1rem',
-            width: '100%'
-          }}>
-          <label className={className}>{content || placeholder || 'empty'}</label>
-        </div>
-      )
+      <div
+        className="p-multiselect-label-container"
+        style={{
+          position: isFilter ? 'absolute' : 'relative',
+          top: 0,
+          paddingTop: '0.1rem',
+          width: '100%'
+        }}>
+        <label className={className}>{content || placeholder || 'empty'}</label>
+
+        {isLoadingData && (
+          <Spinner
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '25px',
+              height: '25px',
+              pointerEvents: 'none'
+            }}
+          />
+        )}
+      </div>
     ) : null;
   };
 

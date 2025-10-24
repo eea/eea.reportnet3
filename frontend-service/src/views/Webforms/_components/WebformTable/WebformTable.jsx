@@ -23,6 +23,7 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformTable = ({
   bigData,
+  onFieldUpdate,
   dataProviderId,
   dataflowId,
   datasetId,
@@ -34,6 +35,7 @@ export const WebformTable = ({
   isRefresh,
   isReporting,
   isViewMode,
+  updatingField,
   onTabChange,
   rootPkFieldId,
   rootTableName,
@@ -348,6 +350,7 @@ export const WebformTable = ({
     <WebformRecord
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
       bigData={bigData}
+      onFieldUpdate={onFieldUpdate}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
       dataflowId={dataflowId}
       dataProviderId={dataProviderId}
@@ -369,6 +372,7 @@ export const WebformTable = ({
       rootTableName={rootTableName}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
+      updatingField={updatingField}
       webformType={webformType}
     />
   );
@@ -418,7 +422,7 @@ export const WebformTable = ({
           <h3 className={styles.title}>
             <Button
               className={styles.addRecordButton}
-              disabled={isViewMode}
+              disabled={isViewMode || updatingField.isUpdating}
               icon={webformTableState.isAddingMultiple ? 'spinnerAnimate' : 'add'}
               label={resourcesContext.messages['addRecord']}
               onClick={() => onAddMultipleWebform(webformData.tableSchemaId, null, true)}
@@ -453,7 +457,7 @@ export const WebformTable = ({
           style={
             bigData && (isLoadingIceberg || !allManualCheck)
               ? { opacity: 0.5, pointerEvents: 'none' }
-              : !bigData || isIcebergCreated || isViewMode
+              : !bigData || isIcebergCreated || isViewMode || updatingField.isUpdating
               ? { opacity: 1 }
               : { opacity: 0.5, pointerEvents: 'none' }
           }>

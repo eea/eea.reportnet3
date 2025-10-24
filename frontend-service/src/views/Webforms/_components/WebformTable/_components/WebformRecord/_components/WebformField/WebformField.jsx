@@ -36,6 +36,7 @@ import { isEmpty } from 'lodash';
 export const WebformField = ({
   bigData = false,
   changedConditionalFieldData,
+  onFieldUpdate,
   columnsSchema,
   conditionalFieldChange,
   dataProviderId,
@@ -50,6 +51,7 @@ export const WebformField = ({
   isDependantConditionalField,
   isSubTableCreated,
   isViewMode,
+  updatingField,
   newRecord,
   onFillField,
   onSaveField,
@@ -322,6 +324,7 @@ export const WebformField = ({
 
     try {
       if ((!isSubmiting && initialFieldValue !== parsedValue) || parsedValue === '') {
+        bigData && onFieldUpdate(true, field);
         if (!isNil(conditionalFields) && !isNil(parsedValues)) {
           await DatasetService.updateConditionalFieldsWebform(
             datasetId,
@@ -352,6 +355,7 @@ export const WebformField = ({
         }
       }
     } finally {
+      bigData && onFieldUpdate(false);
       webformFieldDispatch({ type: 'SET_IS_SUBMITING', payload: false });
     }
   };
@@ -447,21 +451,22 @@ export const WebformField = ({
   };
 
   const renderTemplate = (field, option, type) => {
-    if (isViewMode) {
-      field.readOnly = true;
-    }
     switch (type) {
       case 'DATE':
         return (
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly}
+            disabled={field?.readOnly || isViewMode || (updatingField.isUpdating && !isEmpty(field.value))}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={
+              updatingField.isUpdating &&
+              !isEmpty(field.value) &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+            }
             monthNavigator={true}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
-              else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
             onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
             onFocus={event => {
@@ -483,8 +488,13 @@ export const WebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly}
+            disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={
+              updatingField.isUpdating &&
+              !isEmpty(field.value) &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+            }
             monthNavigator={true}
             onBlur={e => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
@@ -513,10 +523,14 @@ export const WebformField = ({
               appendTo={document.body}
               clearButton={false}
               currentValue={field.value}
-              disabled={field?.readOnly || isLoadingData}
+              disabled={isViewMode || field?.readOnly || isLoadingData || updatingField.isUpdating}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
-              isLoadingData={isLoadingData}
+              isLoadingData={
+                isLoadingData ||
+                (updatingField.isUpdating &&
+                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+              }
               maxSelectedLabels={10}
               onChange={() => {
                 if (isNil(field.recordId)) onSaveField(option, field.value);
@@ -542,10 +556,14 @@ export const WebformField = ({
             <DropdownWebform
               appendTo={document.body}
               currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-              disabled={field?.readOnly || isLoadingData}
+              disabled={isViewMode || field?.readOnly || isLoadingData || updatingField.isUpdating}
               filter={true}
               filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
-              isLoadingData={isLoadingData}
+              isLoadingData={
+                isLoadingData ||
+                (updatingField.isUpdating &&
+                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+              }
               onChange={event => {
                 const value =
                   typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
@@ -572,10 +590,15 @@ export const WebformField = ({
         return (
           <MultiSelectWebform
             appendTo={document.body}
-            disabled={field?.readOnly}
+            disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
             filter={true}
             filterPlaceholder={resourcesContext.messages['linkFilterPlaceholder']}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={
+              isLoadingData ||
+              (updatingField.isUpdating &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+            }
             maxSelectedLabels={10}
             onChange={() => {
               if (isNil(field.recordId)) onSaveField(option, field.value);
@@ -600,9 +623,13 @@ export const WebformField = ({
           <DropdownWebform
             appendTo={document.body}
             currentValue={!isNil(selectedValue) ? selectedValue.value : ''}
-            disabled={field?.readOnly || isLoadingData}
+            disabled={field?.readOnly || isLoadingData || isViewMode || updatingField.isUpdating}
             id={field.fieldId}
-            isLoadingData={isLoadingData}
+            isLoadingData={
+              isLoadingData ||
+              (updatingField.isUpdating &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+            }
             onChange={event => {
               const value =
                 typeof event.target?.value === 'object' && !Array.isArray(event.target.value)
@@ -640,11 +667,17 @@ export const WebformField = ({
               isSubTableCreated ||
               field.fieldSchema === rootPkFieldId ||
               field.fieldSchemaId === rootPkFieldId ||
-              field.autoIncrement
+              field.autoIncrement ||
+              isViewMode ||
+              updatingField.isUpdating
             }
             hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={
+              updatingField.isUpdating &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+            }
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -669,11 +702,15 @@ export const WebformField = ({
                 webformType === 'ENTITIES' ? `resizable` : ''
               }`}
               collapsedHeight={150}
-              disabled={field?.readOnly}
+              disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
               displayedHeight={1200}
               expandableOnDoubleClick={true}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
+              isLoadingData={
+                updatingField.isUpdating &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              }
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
@@ -732,7 +769,7 @@ export const WebformField = ({
             {
               <Button
                 className="p-button-animated-blink p-button-primary-transparent"
-                disabled={isViewMode}
+                disabled={isViewMode || updatingField.isUpdating}
                 icon="import"
                 label={
                   !isNil(field.value) && field.value !== ''
@@ -755,7 +792,7 @@ export const WebformField = ({
 
             <Button
               className="p-button-animated-blink p-button-primary-transparent"
-              disabled={isViewMode}
+              disabled={isViewMode || updatingField.isUpdating}
               icon="trash"
               onClick={() => onFileDeleteVisible(field.value, field.fieldId, field.fieldSchemaId)}
             />

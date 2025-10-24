@@ -19,6 +19,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const WebformView = ({
   bigData,
+  onFieldUpdate,
   data,
   dataProviderId,
   dataflowId,
@@ -30,6 +31,7 @@ export const WebformView = ({
   isIcebergCreated,
   isRefresh,
   isReporting,
+  updatingField,
   isViewMode,
   rootPkFieldId,
   rootTableName,
@@ -110,6 +112,7 @@ export const WebformView = ({
     return (
       <WebformTable
         bigData={bigData}
+        onFieldUpdate={onFieldUpdate}
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}
         datasetId={datasetId}
@@ -125,6 +128,7 @@ export const WebformView = ({
         rootTableName={rootTableName}
         selectedTable={selectedTable}
         setIsLoading={setIsLoading}
+        updatingField={updatingField}
         webform={visibleContent}
         webformType={'ENTITIES'}
       />
