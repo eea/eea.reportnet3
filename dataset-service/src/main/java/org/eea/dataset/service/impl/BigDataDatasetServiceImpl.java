@@ -2026,7 +2026,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_COMPLETED,
                     null,
                     NotificationVO.builder()
-                            .user(String.valueOf(ThreadPropertiesManager.getVariable("user"))).datasetId(dataSetMetabaseVO.getId())
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(dataSetMetabaseVO.getId())
                             .dataflowId(dataSetMetabaseVO.getDataflowId()).build());
         }
         catch (Exception e){
@@ -2035,7 +2035,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_FAILED,
                     null,
                     NotificationVO.builder()
-                            .user(String.valueOf(ThreadPropertiesManager.getVariable("user"))).datasetId(dataSetMetabaseVO.getId())
+                            .user(SecurityContextHolder.getContext().getAuthentication().getName()).datasetId(dataSetMetabaseVO.getId())
                             .dataflowId(dataSetMetabaseVO.getDataflowId()).error("Failed inserting records in multiple tables").build());
             throw e;
         }
