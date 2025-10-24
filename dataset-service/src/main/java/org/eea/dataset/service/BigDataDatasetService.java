@@ -149,6 +149,32 @@ public interface BigDataDatasetService {
     Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception;
 
     /**
+     * Convert Parquet To Iceberg Tables
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the list of table ids
+     * @param user the user
+     * @param lockValue the lock value
+     * @return
+     */
+    void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue, String user) throws Exception;
+
+    /**
+     * Convert Iceberg to Parquet Tables
+     *
+     * @param datasetId the dataset id
+     * @param dataflowId the dataflow id
+     * @param providerId the provider id
+     * @param tableSchemaIds the list of table ids
+     * @param user the user
+     * @param lockValue the lock value
+     * @return
+     */
+    void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue, String user) throws Exception;
+
+    /**
      * Convert Iceberg To Parquet Table
      *
      * @param datasetId the dataset id
