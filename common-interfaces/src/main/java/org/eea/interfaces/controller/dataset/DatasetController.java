@@ -32,6 +32,16 @@ public interface DatasetController {
   interface DataSetControllerZuul extends DatasetController {
   }
 
+  @GetMapping("/list-imported-files")
+  List<ImportedFilesDirectoriesVO> listImportedFiles(
+          @RequestParam("datasetId") Long datasetId);
+
+  @GetMapping("/download-imported-file")
+  ResponseEntity<?> downloadImportedFile(
+          @RequestParam("dataflowId") Long dataflowId,
+          @RequestParam("datasetId") Long datasetId,
+          @RequestParam("fileName") String fileName);
+
   /**
    * Gets the data tables values.
    *
@@ -139,7 +149,7 @@ public interface DatasetController {
       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId);
 
   /**
-   * Delete import data.
+   * Delete dataset data.
    *
    * @param datasetId the dataset id
    * @param dataflowId the dataflow id
@@ -181,7 +191,7 @@ public interface DatasetController {
           required = false) Boolean deletePrefilledTables);
 
   /**
-   * Delete import table.
+   * Delete table data.
    *
    * @param datasetId the dataset id
    * @param tableSchemaId the table schema id

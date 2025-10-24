@@ -555,6 +555,18 @@ public enum EventType {
   DOWNLOAD_VALIDATIONS_FAILED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "download_validations_failed_event", true),
 
+  /** The download imported file started event. */
+  DOWNLOAD_IMPORTED_FILE_STARTED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_started_event", true),
+
+  /** The download imported file finished event. */
+  DOWNLOAD_IMPORTED_FILE_FINISHED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_finished_event", true),
+
+  /** The download imported file error event. */
+  DOWNLOAD_IMPORTED_FILE_ERROR_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
+      "download_imported_file_error_event", true),
+
   /** The export qc completed event. */
   EXPORT_QC_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC, "export_qc_completed_event",
       true),
