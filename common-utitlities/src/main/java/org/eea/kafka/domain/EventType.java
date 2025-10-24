@@ -211,6 +211,14 @@ public enum EventType {
   RECORD_DELETED_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "created_record_completed_key", true),
 
+  /** The record in multi tables created completed event. */
+  INSERT_RECORDS_MULTI_TABLES_COMPLETED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "insert_records_multi_tables_completed_key", true),
+
+  /** The record in multi tables created failed event. */
+  INSERT_RECORDS_MULTI_TABLES_FAILED(LiteralConstants.DATA_REPORTING_TOPIC,
+          "insert_records_multi_tables_failed_key", true),
+
   /** The delete table completed event. */
   DELETE_TABLE_COMPLETED_EVENT(LiteralConstants.DATA_REPORTING_TOPIC,
       "delete_table_completed_event", true),

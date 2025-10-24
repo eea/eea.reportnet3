@@ -63,6 +63,7 @@ import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
+import org.eea.thread.ThreadPropertiesManager;
 import org.eea.utils.LiteralConstants;
 import org.eea.utils.UtilityClass;
 import org.slf4j.Logger;
@@ -2015,8 +2016,6 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     @Async
     @Override
     public void insertRecordsInMultipleTables(DataSetMetabaseVO dataSetMetabaseVO, List<TableVO> tableRecords) throws Exception {
-        UserNotificationContentVO userNotificationContentVO = new UserNotificationContentVO();
-        userNotificationContentVO.setDatasetId(dataSetMetabaseVO.getId());
         try{
             for (TableVO tableVO : tableRecords) {
                 TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableVO.getIdTableSchema(), dataSetMetabaseVO.getDatasetSchema());
@@ -2024,12 +2023,20 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                         tableSchemaVO.getNameTableSchema(), tableVO.getRecords());
             }
             //sent completed event
-            notificationControllerZuul.createUserNotificationPrivate("INSERT_RECORDS_MULTI_TABLES_COMPLETED", userNotificationContentVO);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_COMPLETED,
+                    null,
+                    NotificationVO.builder()
+                            .user(String.valueOf(ThreadPropertiesManager.getVariable("user"))).datasetId(dataSetMetabaseVO.getId())
+                            .dataflowId(dataSetMetabaseVO.getDataflowId()).build());
         }
         catch (Exception e){
             LOG.error("Could not insert records in multiple tables for datasetId {} Error {}", dataSetMetabaseVO.getId(), e.getMessage());
             //send failed event
-            notificationControllerZuul.createUserNotificationPrivate("INSERT_RECORDS_MULTI_TABLES_FAILED", userNotificationContentVO);
+            kafkaSenderUtils.releaseNotificableKafkaEvent(EventType.INSERT_RECORDS_MULTI_TABLES_FAILED,
+                    null,
+                    NotificationVO.builder()
+                            .user(String.valueOf(ThreadPropertiesManager.getVariable("user"))).datasetId(dataSetMetabaseVO.getId())
+                            .dataflowId(dataSetMetabaseVO.getDataflowId()).error("Failed inserting records in multiple tables").build());
             throw e;
         }
     }
