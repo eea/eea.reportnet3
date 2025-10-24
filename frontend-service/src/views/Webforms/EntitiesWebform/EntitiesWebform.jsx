@@ -30,7 +30,6 @@ import { EntitiesWebformUtils } from './_functions/Utils/EntitiesWebformUtils';
 import { WebformsUtils } from 'views/Webforms/_functions/Utils/WebformsUtils';
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
-import { clearConfig } from 'dompurify';
 
 export const EntitiesWebform = ({
   bigData,

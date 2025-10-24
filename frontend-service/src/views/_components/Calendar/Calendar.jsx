@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useState } from 'react';
 
 import isNil from 'lodash/isNil';
 import { Calendar as PrimeCalendar } from 'primereact/calendar';
+import { Spinner } from '../Spinner';
 
 export const Calendar = forwardRef((props, _) => {
   const {
@@ -16,6 +17,7 @@ export const Calendar = forwardRef((props, _) => {
     inputClassName,
     inputId,
     inputRef,
+    isLoadingData,
     keepInvalid,
     maxDate,
     minDate,
@@ -83,43 +85,59 @@ export const Calendar = forwardRef((props, _) => {
       : yearRange;
 
   return (
-    <PrimeCalendar
-      appendTo={appendTo}
-      autoZIndex={autoZIndex}
-      baseZIndex={baseZIndex}
-      className={className}
-      dateFormat={dateFormat}
-      disabled={disabled}
-      disabledDates={disabledDates}
-      inline={inline}
-      inputClassName={inputClassName}
-      inputId={inputId}
-      keepInvalid={keepInvalid}
-      locale={locale}
-      maxDate={maxDate}
-      minDate={minDate}
-      monthNavigator={monthNavigator}
-      onBlur={onBlur}
-      onChange={onChange}
-      onFocus={onFocus}
-      onSelect={onSelect}
-      onTodayButtonClick={onTodayButtonClick}
-      onViewDateChange={event => setViewDateState(event.value)}
-      panelClassName={panelClassName}
-      placeholder={placeholder}
-      readOnlyInput={readOnlyInput}
-      ref={inputRef}
-      selectionMode={selectionMode}
-      showButtonBar={showButtonBar}
-      showSeconds={showSeconds}
-      showTime={showTime}
-      showWeek={showWeek}
-      style={style}
-      todayButtonClassName={todayButtonClassName}
-      value={value}
-      viewDate={viewDateState || new Date()}
-      yearNavigator={yearNavigator}
-      yearRange={yearRangeValue}
-    />
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <PrimeCalendar
+        appendTo={appendTo}
+        autoZIndex={autoZIndex}
+        baseZIndex={baseZIndex}
+        className={className}
+        dateFormat={dateFormat}
+        disabled={disabled}
+        disabledDates={disabledDates}
+        inline={inline}
+        inputClassName={inputClassName}
+        inputId={inputId}
+        keepInvalid={keepInvalid}
+        locale={locale}
+        maxDate={maxDate}
+        minDate={minDate}
+        monthNavigator={monthNavigator}
+        onBlur={onBlur}
+        onChange={onChange}
+        onFocus={onFocus}
+        onSelect={onSelect}
+        onTodayButtonClick={onTodayButtonClick}
+        onViewDateChange={event => setViewDateState(event.value)}
+        panelClassName={panelClassName}
+        placeholder={placeholder}
+        readOnlyInput={readOnlyInput}
+        ref={inputRef}
+        selectionMode={selectionMode}
+        showButtonBar={showButtonBar}
+        showSeconds={showSeconds}
+        showTime={showTime}
+        showWeek={showWeek}
+        style={style}
+        todayButtonClassName={todayButtonClassName}
+        value={value}
+        viewDate={viewDateState || new Date()}
+        yearNavigator={yearNavigator}
+        yearRange={yearRangeValue}
+      />
+
+      {isLoadingData && (
+        <Spinner
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '25px',
+            height: '25px',
+            pointerEvents: 'none'
+          }}
+        />
+      )}
+    </div>
   );
 });

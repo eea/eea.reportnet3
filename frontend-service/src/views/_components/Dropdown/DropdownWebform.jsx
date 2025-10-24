@@ -811,10 +811,24 @@ const DropdownWebform = props => {
 
   let hiddenSelect = renderHiddenSelect(selectedOption);
   let keyboardHelper = renderKeyboardHelper(labelProp);
-  let labelElement = isLoadingData ? (
-    <Spinner style={{ top: 0, width: '25px', height: '25px' }} />
-  ) : (
-    renderLabel(label, selectedOption)
+
+  let labelElement = (
+    <span>
+      {renderLabel(label, selectedOption)}
+      {isLoadingData && (
+        <Spinner
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '25px',
+            height: '25px',
+            pointerEvents: 'none'
+          }}
+        />
+      )}
+    </span>
   );
   let dropdownIcon = renderDropdownIcon();
   let items = renderItems(selectedOption);

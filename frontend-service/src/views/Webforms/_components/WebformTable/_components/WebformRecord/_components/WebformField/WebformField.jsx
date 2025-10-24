@@ -32,7 +32,6 @@ import { WebformRecordUtils } from 'views/Webforms/_components/WebformTable/_com
 
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import { isEmpty } from 'lodash';
-import { clearConfig } from 'dompurify';
 
 export const WebformField = ({
   bigData = false,
@@ -458,12 +457,16 @@ export const WebformField = ({
           <Calendar
             appendTo={document.body}
             dateFormat="yy-mm-dd"
-            disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
+            disabled={field?.readOnly || isViewMode || (updatingField.isUpdating && !isEmpty(field.value))}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={
+              updatingField.isUpdating &&
+              !isEmpty(field.value) &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+            }
             monthNavigator={true}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(event.target.value, isNil(event.target.value)));
-              else onEditorSubmitValue(field, option, formatDate(event.target.value, isNil(event.target.value)));
             }}
             onChange={event => onFillField(field, option, formatDate(event.target.value, isNil(event.target.value)))}
             onFocus={event => {
@@ -487,6 +490,11 @@ export const WebformField = ({
             dateFormat="yy-mm-dd"
             disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={
+              updatingField.isUpdating &&
+              !isEmpty(field.value) &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+            }
             monthNavigator={true}
             onBlur={e => {
               if (isNil(field.recordId)) onSaveField(option, formatDate(e.value, isNil(e.value)));
@@ -666,6 +674,10 @@ export const WebformField = ({
             hasErrors={hasErrors}
             hasMaxCharCounter
             id={field.fieldId || field.fieldSchemaId}
+            isLoadingData={
+              updatingField.isUpdating &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+            }
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
               if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -695,6 +707,10 @@ export const WebformField = ({
               expandableOnDoubleClick={true}
               hasErrors={hasErrors}
               id={field.fieldId || field.fieldSchemaId}
+              isLoadingData={
+                updatingField.isUpdating &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              }
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
                 else onEditorSubmitValue(field, option, event.target.value);
