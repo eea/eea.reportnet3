@@ -79,15 +79,7 @@ const DropdownWebform = props => {
   const nativeSelectRef = useRef(null);
   const itemsWrapperRef = useRef(null);
 
-  let currentSearchChar,
-    documentClickListener,
-    editableInputClick,
-    expeditableInputClick,
-    hideTimeout,
-    overlayClick,
-    searchValue,
-    selectedOptionUpdated,
-    selfClick;
+  let currentSearchChar, documentClickListener, editableInputClick, hideTimeout, overlayClick, searchValue, selfClick;
 
   useEffect(() => {
     if (initialValue === null || value === null) {
@@ -130,10 +122,6 @@ const DropdownWebform = props => {
           }, 200);
         }
       }
-    }
-
-    if (editableInputClick) {
-      expeditableInputClick = false;
     }
   };
 
@@ -255,7 +243,6 @@ const DropdownWebform = props => {
         originalEvent: event,
         option: newOption
       });
-      selectedOptionUpdated = true;
     }
 
     setSearchTimeout(
@@ -835,10 +822,7 @@ const DropdownWebform = props => {
   let filterElement = renderFilter();
   let clearIcon = renderClearIcon();
 
-  if (editable && editableInputRef.current) {
-    let value = labelProp || value || '';
-    editableInputRef.value = value;
-  }
+  if (editable && editableInputRef.current) editableInputRef.current.value = labelProp ?? value ?? '';
 
   return (
     <div

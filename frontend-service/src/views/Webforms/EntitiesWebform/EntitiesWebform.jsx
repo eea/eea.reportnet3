@@ -85,11 +85,17 @@ export const EntitiesWebform = ({
 
   useEffect(() => {
     if (bigData) {
-      const notificationKey = notificationContext.hidden.find(
+      const matchedNotifications = notificationContext.hidden.filter(
         ({ key }) => key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED' || key === 'INSERT_RECORDS_MULTI_TABLES_FAILED'
-      )?.key;
+      );
 
-      if (!notificationKey) return;
+      if (isEmpty(matchedNotifications)) return;
+
+      const matchedWithDatasetId = matchedNotifications.find(
+        matchedNotification => String(matchedNotification.content?.datasetId) === String(datasetId)
+      );
+
+      if (!matchedWithDatasetId) return;
 
       const resetAddEntityState = () => {
         setIsAddingEntityRecord(false);
@@ -97,10 +103,10 @@ export const EntitiesWebform = ({
         setRefreshTableTrigger(prev => prev + 1);
       };
 
-      if (notificationKey === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
+      if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_COMPLETED') {
         onUpdateData();
         resetAddEntityState();
-      } else if (notificationKey === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
+      } else if (matchedWithDatasetId?.key === 'INSERT_RECORDS_MULTI_TABLES_FAILED') {
         resetAddEntityState();
       }
     }
@@ -439,7 +445,6 @@ export const EntitiesWebform = ({
       return (
         <WebformView
           bigData={bigData}
-          onFieldUpdate={onFieldUpdate}
           data={entitiesWebformState.data}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
@@ -451,8 +456,8 @@ export const EntitiesWebform = ({
           isIcebergCreated={isIcebergCreated}
           isRefresh={entitiesWebformState.isRefresh}
           isReporting={isReporting}
-          updatingField={entitiesWebformState.updatingField}
           isViewMode={entitiesWebformState.isViewMode}
+          onFieldUpdate={onFieldUpdate}
           rootPkFieldId={rootPkFieldId}
           rootTableName={rootTableName}
           selectedTable={selectedTable}
@@ -460,6 +465,7 @@ export const EntitiesWebform = ({
           setTableSchemaId={setTableSchemaId}
           state={state}
           tables={tables.filter(table => table.isVisible)}
+          updatingField={entitiesWebformState.updatingField}
         />
       );
     }
