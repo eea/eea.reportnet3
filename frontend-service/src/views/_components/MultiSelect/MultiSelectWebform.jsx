@@ -2,8 +2,6 @@ import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import classNames from 'classnames';
 
-import styles from './MultiSelect.module.scss';
-
 import { MultiSelectHeader } from './_components/MultiSelectHeader';
 import { MultiSelectItem } from './_components/MultiSelectItem';
 import { MultiSelectPanel } from './_components/MultiSelectPanel';
@@ -65,12 +63,11 @@ const MultiSelectWebform = props => {
 
   const [filterState, setFilterState] = useState('');
   const [isPanelVisible, setIsPanelVisible] = useState(false);
-  const [dropdownState, setDropDownState] = useState(null);
   const panelRef = useRef(null);
   const containerRef = useRef(null);
   const focusInputRef = useRef(null);
 
-  let documentClickListener, selfClick, hideTimeout, panelClick;
+  let documentClickListener, hideTimeout, panelClick;
 
   const onOptionClick = event => {
     event.originalEvent.preventDefault();
@@ -140,9 +137,6 @@ const MultiSelectWebform = props => {
       return;
     }
 
-    if (documentClickListener) {
-      selfClick = true;
-    }
     if (!panelClick) {
       if (panelRef && panelRef.current.element && panelRef.current.element.offsetParent) {
         hide();
@@ -172,17 +166,6 @@ const MultiSelectWebform = props => {
   };
 
   const updateModel = (event, value) => {
-    setDropDownState({
-      originalEvent: event,
-      value: value,
-      stopPropagation: () => {},
-      preventDefault: () => {},
-      target: {
-        name: name,
-        id: id,
-        value: value
-      }
-    });
     onUpdate({
       originalEvent: event,
       value: value,
@@ -368,7 +351,6 @@ const MultiSelectWebform = props => {
   }, []);
 
   const clearClickState = () => {
-    selfClick = false;
     panelClick = false;
   };
 

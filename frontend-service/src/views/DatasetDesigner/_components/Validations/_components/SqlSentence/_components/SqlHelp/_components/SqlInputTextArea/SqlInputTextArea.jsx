@@ -13,7 +13,6 @@ export class SqlInputTextArea extends Component {
     collapsedHeight: 30,
     displayedHeight: 100,
     moveCaretToEnd: false,
-    onInput: null,
     tooltip: null,
     tooltipOptions: null,
     value: ''
@@ -22,7 +21,6 @@ export class SqlInputTextArea extends Component {
   static propTypes = {
     autoResize: PropTypes.bool,
     moveCaretToEnd: PropTypes.bool,
-    onInput: PropTypes.func,
     tooltip: PropTypes.string,
     tooltipOptions: PropTypes.object,
     value: PropTypes.string,

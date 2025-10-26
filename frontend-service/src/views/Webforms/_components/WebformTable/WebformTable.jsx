@@ -350,7 +350,6 @@ export const WebformTable = ({
     <WebformRecord
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
       bigData={bigData}
-      onFieldUpdate={onFieldUpdate}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
       dataflowId={dataflowId}
       dataProviderId={dataProviderId}
@@ -365,6 +364,7 @@ export const WebformTable = ({
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
+      onFieldUpdate={onFieldUpdate}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
       record={record}

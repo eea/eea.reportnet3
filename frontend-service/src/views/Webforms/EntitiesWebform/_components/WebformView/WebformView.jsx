@@ -112,7 +112,6 @@ export const WebformView = ({
     return (
       <WebformTable
         bigData={bigData}
-        onFieldUpdate={onFieldUpdate}
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}
         datasetId={datasetId}
@@ -123,6 +122,7 @@ export const WebformView = ({
         isRefresh={isRefresh}
         isReporting={isReporting}
         isViewMode={isViewMode}
+        onFieldUpdate={onFieldUpdate}
         onTabChange={isVisible}
         rootPkFieldId={rootPkFieldId}
         rootTableName={rootTableName}
