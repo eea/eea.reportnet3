@@ -1,4 +1,4 @@
-FROM adoptopenjdk/openjdk11:jdk-11.0.11_9-alpine
+FROM adoptopenjdk/openjdk11:jdk-11.0.23_9-alpine
 VOLUME /tmp
 ARG JAR_FILE
 ARG MS_PORT
