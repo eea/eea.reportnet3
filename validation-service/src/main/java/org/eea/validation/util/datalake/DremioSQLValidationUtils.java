@@ -4,6 +4,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.eea.utils.UtilityClass;
 import org.eea.validation.configuration.DremioConfiguration;
 import org.eea.validation.persistence.schemas.FieldSchema;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -24,6 +25,9 @@ public class DremioSQLValidationUtils {
     private JdbcTemplate dremioJdbcTemplate;
     private static DremioSQLValidationUtils instance;
 
+    @Value(value = "${validation.maximumErrors}")
+    private int maxErrors;
+
     public static synchronized DremioSQLValidationUtils getInstance() {
         if (instance == null) {
             instance = new DremioSQLValidationUtils();
@@ -33,12 +37,14 @@ public class DremioSQLValidationUtils {
 
     public List<String> isSQLSentenceWithCode(String sql) {
         StringBuilder query = new StringBuilder();
+        sql = sql.concat(" limit " + maxErrors);
         query.append("select record_id from(").append(sql).append(")");
         return dremioJdbcTemplate.queryForList(query.toString(), String.class);
     }
 
     public List<Map<String, Object>> isSQLSentenceWithCodeMap(String sql) {
         StringBuilder query = new StringBuilder();
+        sql = sql.concat(" limit " + maxErrors);
         query.append("select * from(").append(sql).append(")");
         return dremioJdbcTemplate.queryForList(query.toString());
     }
@@ -53,7 +59,8 @@ public class DremioSQLValidationUtils {
         query.append("with tableAux as (select ").append(fieldName).append(", count(*) from ")
                 .append(tablePath).append(" group by ").append(fieldName).append(" having count(*)>1)")
                 .append(" select t.record_id from ").append(tablePath).append(" t where (")
-                .append(tFieldNames).append(") in (select ").append(tabFieldNames).append(" from tableAux tab)");
+                .append(tFieldNames).append(") in (select ").append(tabFieldNames).append(" from tableAux tab)")
+                .append(" limit " + maxErrors);
         return dremioJdbcTemplate.queryForList(query.toString(), String.class);
     }
 
@@ -86,6 +93,7 @@ public class DremioSQLValidationUtils {
             //PK_QUERY_VALUES
             StringBuilder pkQuery = new StringBuilder();
             pkQuery.append("select ").append(quotedPrimaryKey).append(" from ").append(pkTablePath);
+            pkQuery.append(" limit " + maxErrors);
             List<String> pkValueList = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                 List<String> result = new ArrayList<>();
                 while (rs.next()) {
@@ -107,6 +115,7 @@ public class DremioSQLValidationUtils {
             StringBuilder fkQuery = new StringBuilder();
             fkQuery.append("select ").append("record_id").append(",").append(quotedForeignKey).append(" from ").append(fkTablePath)
                     .append(" where ").append(quotedForeignKey).append(" is not NULL and ").append(quotedForeignKey).append(" != ''");
+            fkQuery.append(" limit " + maxErrors);
             SqlRowSet fkValues = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkValues.next()) {
                 List<String> recordValues = new ArrayList<>(Arrays.asList(fkValues.getString(foreignKey).split(";")))
@@ -155,6 +164,7 @@ public class DremioSQLValidationUtils {
                     //PK_MUST_BE_USED
                     query.append("select count(").append("pk.").append(quotedPrimaryKey).append(") from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
                             .append(" pk on LOWER(fk.").append(quotedForeignKey).append(") = LOWER(pk.").append(quotedPrimaryKey).append(") where fk.").append(quotedForeignKey).append(" is null");
+                    query.append(" limit " + maxErrors);
                     Long pkNotUsed = dremioJdbcTemplate.queryForObject(query.toString(), Long.class);
                     if (pkNotUsed > 0) {
                         recordIds.add(PK_NOT_USED);
@@ -164,6 +174,7 @@ public class DremioSQLValidationUtils {
                     query.append("select fk.record_id from ").append(fkTablePath).append(" fk where fk.").append(quotedForeignKey).append(" is not NULL and fk.")
                             .append(quotedForeignKey).append(" != '' and LOWER(fk.").append(quotedForeignKey).append(") not in (select LOWER(pk.").append(quotedPrimaryKey)
                             .append(") from ").append(pkTablePath).append(" pk)");
+                    query.append(" limit " + maxErrors);
                     recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 }
             }
@@ -172,6 +183,7 @@ public class DremioSQLValidationUtils {
                     //PK_MUST_BE_USED
                     query.append("select count(").append("pk.").append(quotedPrimaryKey).append(") from ").append(fkTablePath).append(" fk right join ").append(pkTablePath)
                             .append(" pk on fk.").append(quotedForeignKey).append("=pk.").append(quotedPrimaryKey).append(" where fk.").append(quotedForeignKey).append(" is null");
+                    query.append(" limit " + maxErrors);
                     Long pkNotUsed = dremioJdbcTemplate.queryForObject(query.toString(), Long.class);
                     if (pkNotUsed > 0) {
                         recordIds.add(PK_NOT_USED);
@@ -189,7 +201,8 @@ public class DremioSQLValidationUtils {
                         .append(fieldName)
                         .append(" not in (select pk.").append(quotedPrimaryKey)
                         .append(" from ")
-                        .append(pkTablePath).append(" pk)");
+                        .append(pkTablePath).append(" pk)")
+                        .append(" limit " + maxErrors);
                     recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 }
             }
@@ -223,6 +236,7 @@ public class DremioSQLValidationUtils {
                 }
                 query.append(" and fk.").append(quotedOptionalFk)
                         .append("=").append(quotedOptionalPk).append(" where fk.").append(quotedForeignKey).append(" is null or fk.").append(quotedOptionalFk).append(" is null");
+                query.append(" limit " + maxErrors);
                 List<String> res = dremioJdbcTemplate.queryForList(query.toString(), String.class);
                 if (res.size()>0) {
                     recordIds.add(PK_NOT_USED);
@@ -240,12 +254,14 @@ public class DremioSQLValidationUtils {
                 query.append(" and ").append("fk.").append(quotedOptionalFk).append("=").append("pk.").append(quotedOptionalPk)
                         .append(" where (pk.").append(quotedPrimaryKey).append(" is null or pk.").append(quotedOptionalPk).append(" is null)")
                         .append("and fk.").append(quotedForeignKey).append(" is not NULL and fk.").append(quotedForeignKey).append(" != ''");
+                query.append(" limit " + maxErrors);
                 recordIds = dremioJdbcTemplate.queryForList(query.toString(), String.class);
             }
         } else {
             //PK_QUERY_VALUES
             StringBuilder pkQuery = new StringBuilder();
             pkQuery.append("select ").append(quotedOptionalPk).append(",").append(quotedPrimaryKey).append(" from ").append(pkTablePath);
+            pkQuery.append(" limit " + maxErrors);
             Map<String, String> pkWithOptionalMap = dremioJdbcTemplate.query(pkQuery.toString(), (ResultSet rs) -> {
                 HashMap<String,String> result = new HashMap<>();
                 while (rs.next()) {
@@ -278,6 +294,7 @@ public class DremioSQLValidationUtils {
             StringBuilder fkQuery = new StringBuilder();
             fkQuery.append("select ").append("record_id").append(",").append(quotedOptionalFk).append(",").append(quotedForeignKey).append(" from ").append(fkTablePath)
                     .append(" where ").append(quotedForeignKey).append(" is not NULL and ").append(quotedForeignKey).append(" != ''");
+            fkQuery.append(" limit " + maxErrors);
             SqlRowSet fkWithOptionalRS = dremioJdbcTemplate.queryForRowSet(fkQuery.toString());
             while (fkWithOptionalRS.next()) {
                 if (pkWithOptionalMap.get(fkWithOptionalRS.getString(optionalFk))!=null) {
@@ -353,6 +370,7 @@ public class DremioSQLValidationUtils {
             query.append("pk.").append(referFields.get(i)).append("=").append("fk.").append(originFields.get(i));
         }
         query.append(" where fk.").append(originFields.get(0)).append(" is null and pk.").append(referFields.get(0)).append(" is not null");
+        query.append(" limit " + maxErrors);
         List<String> res = dremioJdbcTemplate.queryForList(query.toString(), String.class);
         if (res.size()>0) {
             recordIds.add(OMISSION);
@@ -367,6 +385,7 @@ public class DremioSQLValidationUtils {
                 isDoubleReferQuery.append("fk.").append(originFields.get(i)).append("=").append("pk.").append(referFields.get(i));
             }
             isDoubleReferQuery.append(" where pk.").append(referFields.get(0)).append(" is null and fk.").append(originFields.get(0)).append(" is not null");
+            query.append(" limit " + maxErrors);
             List<String> rs = dremioJdbcTemplate.queryForList(isDoubleReferQuery.toString(), String.class);
             if (rs.size()>0) {
                 recordIds.add(COMISSION);
