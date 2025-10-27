@@ -1015,6 +1015,10 @@ export const Dataflow = () => {
     false
   );
 
+  useCheckNotifications(['RELEASE_FAILED_ICEBERG_EXISTS_EVENT'], () => {
+    setIsReleaseable(false);
+  });
+
   const onLoadSchemasValidations = async () => {
     const validationResult = await DataflowService.getSchemasValidation(dataflowId);
     dataflowDispatch({ type: 'SET_IS_DATA_SCHEMA_CORRECT', payload: { validationResult: validationResult.data } });

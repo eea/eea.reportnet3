@@ -1461,8 +1461,8 @@
         {
           "key": "RELEASE_PROVIDER_COMPLETED_EVENT",
           "navigateTo": {
-            "section": "DATAFLOW_REPRESENTATIVE",
-            "parameters": ["dataflowId", "dataProvider", "representativeId"]
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
           }
         },
         { "key": "EXPORT_DATASET_FILE_AUTOMATICALLY_DOWNLOAD" },
