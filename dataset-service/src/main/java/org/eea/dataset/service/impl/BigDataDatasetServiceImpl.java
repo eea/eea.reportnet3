@@ -1162,7 +1162,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception{
         String datasetName = null;
         try {
-            LOG.info("Converting iceberg to parquet  tables for dataflowId {}, datasetId {} providerId {} and tableSchemaIds {} LockValue {}", dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+            LOG.info("Converting parquet to iceberg tables for dataflowId {}, datasetId {} providerId {} and tableSchemaIds {} LockValue {}", dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
             datasetName = dataSetMetabaseVO.getDataSetName();
             String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
@@ -1237,7 +1237,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         providerId = providerId != null ? providerId : 0L;
 
         if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-            LOG.info("Can not convert iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
+            LOG.info("Can not convert parquet to iceberg table for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
                     "because table data are not manually editable or the parquet table has not been created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), lockValue);
             return false;
         }
@@ -1310,7 +1310,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     public void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue, String user) throws Exception{
         String datasetName = null;
         try {
-            LOG.info("Converting iceberg to parquet  tables for dataflowId {}, datasetId {} providerId {} and tableSchemaIds {} LockValue {}", dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+            LOG.info("Converting iceberg to parquet tables for dataflowId {}, datasetId {} providerId {} and tableSchemaIds {} LockValue {}", dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
             datasetName = dataSetMetabaseVO.getDataSetName();
             String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
