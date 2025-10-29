@@ -2563,6 +2563,19 @@ public class JdbcRecordStoreServiceImpl implements RecordStoreService {
           try {
             TaskVO task = taskService.findReleaseTaskBySplitFileNameAndProcessId(splitFileName, processId);
 
+            if (task == null) {
+              LOG.warn("Task not found for splitFileName '{}' and processId '{}'. Waiting 2 seconds and retrying once",
+                      splitFileName, processId);
+              try {
+                Thread.sleep(2000);
+              } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                LOG.error("Interrupted while waiting to retry task lookup for processId {}", processId, ie);
+              }
+
+              // retry once
+              task = taskService.findReleaseTaskBySplitFileNameAndProcessId(splitFileName, processId);
+            }
             LOG.info("Updating task status of task with id {} for file {} with idSnapshot {} and processId {} to IN_PROGRESS", task.getId(), splitFileName, idSnapshot, processId);
             task.setStartingDate(new Date());
             task.setStatus(ProcessStatusEnum.IN_PROGRESS);
