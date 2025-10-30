@@ -62,7 +62,7 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
       return {
         ...state,
         updatingField: {
-          fieldId: payload.fieldId,
+          field: payload.field,
           isUpdating: payload.value
         }
       };

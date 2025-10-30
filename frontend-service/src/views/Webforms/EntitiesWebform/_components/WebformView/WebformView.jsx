@@ -19,6 +19,7 @@ import { ResourcesContext } from 'views/_functions/Contexts/ResourcesContext';
 
 export const WebformView = ({
   bigData,
+  changeViewMode,
   onFieldUpdate,
   data,
   dataProviderId,
@@ -112,6 +113,7 @@ export const WebformView = ({
     return (
       <WebformTable
         bigData={bigData}
+        changeViewMode={changeViewMode}
         dataflowId={dataflowId}
         dataProviderId={dataProviderId}
         datasetId={datasetId}

@@ -460,9 +460,12 @@ export const WebformField = ({
             disabled={field?.readOnly || isViewMode || (updatingField.isUpdating && !isEmpty(field.value))}
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={
-              updatingField.isUpdating &&
               !isEmpty(field.value) &&
-              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              updatingField.isUpdating &&
+              field.recordId === updatingField.field?.recordId &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+              )
             }
             monthNavigator={true}
             onBlur={event => {
@@ -491,9 +494,12 @@ export const WebformField = ({
             disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={
-              updatingField.isUpdating &&
               !isEmpty(field.value) &&
-              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              updatingField.isUpdating &&
+              field.recordId === updatingField.field?.recordId &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+              )
             }
             monthNavigator={true}
             onBlur={e => {
@@ -529,7 +535,11 @@ export const WebformField = ({
               isLoadingData={
                 isLoadingData ||
                 (updatingField.isUpdating &&
-                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                    updatingField.field?.fieldSchemaId ??
+                      updatingField.field?.fieldSchema ??
+                      updatingField.field?.fieldId
+                  ))
               }
               maxSelectedLabels={10}
               onChange={() => {
@@ -562,7 +572,12 @@ export const WebformField = ({
               isLoadingData={
                 isLoadingData ||
                 (updatingField.isUpdating &&
-                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                  field.recordId === updatingField.field?.recordId &&
+                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                    updatingField.field?.fieldSchemaId ??
+                      updatingField.field?.fieldSchema ??
+                      updatingField.field?.fieldId
+                  ))
               }
               onChange={event => {
                 const value =
@@ -597,7 +612,10 @@ export const WebformField = ({
             isLoadingData={
               isLoadingData ||
               (updatingField.isUpdating &&
-                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                field.recordId === updatingField.field?.recordId &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                  updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+                ))
             }
             maxSelectedLabels={10}
             onChange={() => {
@@ -628,7 +646,10 @@ export const WebformField = ({
             isLoadingData={
               isLoadingData ||
               (updatingField.isUpdating &&
-                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                field.recordId === updatingField.field?.recordId &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                  updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+                ))
             }
             onChange={event => {
               const value =
@@ -676,7 +697,10 @@ export const WebformField = ({
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={
               updatingField.isUpdating &&
-              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              field.recordId === updatingField.field?.recordId &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+              )
             }
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
@@ -709,7 +733,10 @@ export const WebformField = ({
               id={field.fieldId || field.fieldSchemaId}
               isLoadingData={
                 updatingField.isUpdating &&
-                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+                field.recordId === updatingField.field?.recordId &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                  updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+                )
               }
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
