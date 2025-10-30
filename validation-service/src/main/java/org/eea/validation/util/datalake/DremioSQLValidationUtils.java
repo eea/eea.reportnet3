@@ -1,5 +1,6 @@
 package org.eea.validation.util.datalake;
 
+import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.BooleanUtils;
 import org.eea.utils.UtilityClass;
 import org.eea.validation.configuration.DremioConfiguration;
@@ -33,6 +34,11 @@ public class DremioSQLValidationUtils {
             instance = new DremioSQLValidationUtils();
         }
         return instance;
+    }
+
+    @PostConstruct
+    public void init() {
+        instance = this; // 🔹 Spring will inject this instance (with @Value loaded)
     }
 
     public List<String> isSQLSentenceWithCode(String sql) {
