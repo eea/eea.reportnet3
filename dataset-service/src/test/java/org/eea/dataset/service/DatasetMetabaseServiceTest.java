@@ -671,7 +671,7 @@ public class DatasetMetabaseServiceTest {
    */
   @Test
   public void getDatasetIdByDatasetSchemaIdAndDataProviderIdNullTest() {
-    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
+    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderIdOrderById(Mockito.any(),
         Mockito.anyLong())).thenReturn(Optional.empty());
     Assert
         .assertNull(datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId("1", 1L));
@@ -684,7 +684,7 @@ public class DatasetMetabaseServiceTest {
    */
   @Test
   public void getDatasetIdByDatasetSchemaIdAndDataProviderIdTest() {
-    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(Mockito.any(),
+    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderIdOrderById(Mockito.any(),
         Mockito.anyLong())).thenReturn(Optional.of(dataSetMetabase));
     Assert.assertEquals((Long) 1L,
         datasetMetabaseService.getDatasetIdByDatasetSchemaIdAndDataProviderId("1", 1L));

@@ -78,7 +78,7 @@ public interface DataSetMetabaseRepository extends CrudRepository<DataSetMetabas
    * @param dataProviderId the data provider id
    * @return the data set metabase
    */
-  Optional<DataSetMetabase> findFirstByDatasetSchemaAndDataProviderId(
+  Optional<DataSetMetabase> findFirstByDatasetSchemaAndDataProviderIdOrderById(
       @Param("datasetSchema") String datasetSchema, @Param("dataProviderId") Long dataProviderId);
 
 
