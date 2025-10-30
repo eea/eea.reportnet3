@@ -34,6 +34,10 @@ public class DremioConfiguration {
     @Value("${dremio.driver-class-name}")
     private String driver;
 
+    /** The max errors. */
+    @Value(value = "${validation.maximumErrors}")
+    private int maxErrors;
+
     @Bean
     public DataSource dremioDatasource() {
         DriverManagerDataSource dremioDataSource = new DriverManagerDataSource();
