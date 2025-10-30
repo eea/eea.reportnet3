@@ -378,6 +378,15 @@ public class JobServiceImpl implements JobService {
     @Override
     public void updateJobStatus(Long jobId, JobStatusEnum status) {
         Optional<Job> job = jobRepository.findById(jobId);
+        if(job.isEmpty()){
+            LOG.info("Job with id {} is not present in the db. Waiting to retry", jobId);
+            try {
+                Thread.sleep(3000);
+            } catch (Exception e) {
+                LOG.error("Could not execute thread sleep");
+            }
+            job = jobRepository.findById(jobId);
+        }
         if (job.isPresent()) {
             job.get().setJobStatus(status);
             job.get().setDateStatusChanged(new Timestamp(System.currentTimeMillis()));
