@@ -3,6 +3,9 @@ export const webformFieldReducer = (state, { type, payload }) => {
     case 'SET_IS_SUBMITING':
       return { ...state, isSubmiting: payload };
 
+    case 'SET_IS_DELETING_ATTACHMENT':
+      return { ...state, isDeletingAttachment: payload };
+
     case 'ON_FILE_DELETE_OPENED':
       return {
         ...state,

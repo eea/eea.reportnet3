@@ -376,6 +376,7 @@ export const WebformTable = ({
       rootTableName={rootTableName}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
+      tableSchemaName={webformData.name}
       updatingField={updatingField}
       webformType={webformType}
     />

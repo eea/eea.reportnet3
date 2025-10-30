@@ -83,6 +83,7 @@ export const WebformRecord = ({
   selectedTableId,
   tableId,
   tableName,
+  tableSchemaName,
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -319,6 +320,7 @@ export const WebformRecord = ({
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
+                      tableSchemaName={tableSchemaName}
                       updatingField={updatingField}
                       webformType={webformType}
                     />
