@@ -23,7 +23,6 @@ import { TextUtils } from 'repositories/_utils/TextUtils';
 
 export const WebformTable = ({
   bigData,
-  changeViewMode,
   onFieldUpdate,
   dataProviderId,
   dataflowId,
@@ -210,7 +209,7 @@ export const WebformTable = ({
 
     if (!isEmpty(newEmptyRecord)) {
       try {
-        bigData && changeViewMode(true);
+        bigData && onFieldUpdate(true);
         await DatasetService.createWebformTableRecord(datasetId, tableSchemaId, [newEmptyRecord]);
         onUpdateData();
       } catch (error) {
@@ -241,7 +240,7 @@ export const WebformTable = ({
           payload: { addingOnTableSchemaId: null, isAddingMultiple: false }
         });
       } finally {
-        bigData && changeViewMode(false);
+        bigData && onFieldUpdate(false);
       }
     }
   };

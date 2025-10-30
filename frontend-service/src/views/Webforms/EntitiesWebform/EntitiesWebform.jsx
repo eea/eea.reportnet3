@@ -443,7 +443,6 @@ export const EntitiesWebform = ({
       return (
         <WebformView
           bigData={bigData}
-          changeViewMode={changeViewMode}
           data={entitiesWebformState.data}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
