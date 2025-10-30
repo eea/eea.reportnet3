@@ -66,7 +66,7 @@ export const EntitiesWebform = ({
     isDuplicatePkDialogVisible: false,
     isLoading: true,
     isRefresh: false,
-    updatingField: { fieldId: null, isUpdating: false },
+    updatingField: { field: null, isUpdating: false },
     isViewMode: false,
     entitiesRecords: [],
     selectedTable: { fieldSchemaId: null, rootTableId: null, recordId: null, tableName: null },
@@ -371,13 +371,11 @@ export const EntitiesWebform = ({
   };
 
   const onFieldUpdate = (isFieldUpdating, field) => {
-    const fieldId = field?.fieldSchemaId ?? field?.fieldSchema ?? field?.fieldId;
-
     entitiesWebformDispatch({
       type: 'SET_IS_UPDATING_FIELD',
       payload: {
         value: isFieldUpdating,
-        fieldId
+        field
       }
     });
   };
@@ -445,6 +443,7 @@ export const EntitiesWebform = ({
       return (
         <WebformView
           bigData={bigData}
+          changeViewMode={changeViewMode}
           data={entitiesWebformState.data}
           dataflowId={dataflowId}
           dataProviderId={dataProviderId}
