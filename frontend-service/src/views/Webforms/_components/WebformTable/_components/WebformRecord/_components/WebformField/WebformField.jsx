@@ -59,6 +59,7 @@ export const WebformField = ({
   referencedTableSchemaId,
   rootPkFieldId,
   tableSchemaId,
+  tableSchemaName,
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -72,6 +73,7 @@ export const WebformField = ({
     initialFieldValue: '',
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
+    isDeletingAttachment: false,
     isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
@@ -90,6 +92,7 @@ export const WebformField = ({
   const {
     initialFieldValue,
     isDeleteAttachmentVisible,
+    isDeletingAttachment,
     isFileDialogVisible,
     isLoadingData,
     isSubmiting,
@@ -119,13 +122,14 @@ export const WebformField = ({
   };
 
   const onConfirmDeleteAttachment = async () => {
+    webformFieldDispatch({ type: 'SET_IS_DELETING_ATTACHMENT', payload: true });
     try {
       await DatasetService.deleteAttachment({
         dataflowId,
         datasetId,
         fieldId: selectedFieldId,
         dataProviderId,
-        tableSchemaName: undefined,
+        tableSchemaName,
         fieldName: selectedFieldName,
         fileName: selectedFileName,
         recordId: selectedRecordId
@@ -134,6 +138,8 @@ export const WebformField = ({
       onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
       console.error('WebformField - onConfirmDeleteAttachment.', error);
+    } finally {
+      webformFieldDispatch({ type: 'SET_IS_DELETING_ATTACHMENT', payload: false });
     }
   };
 
@@ -146,7 +152,7 @@ export const WebformField = ({
         providerId: dataProviderId,
         fileName,
         recordId,
-        tableSchemaName: undefined,
+        tableSchemaName,
         fieldName
       });
       DownloadFile(data, fileName);
@@ -859,7 +865,7 @@ export const WebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
-                  tableSchemaName: undefined,
+                  tableSchemaName,
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
                   previousFileName: undefined
@@ -868,7 +874,7 @@ export const WebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
-                  tableSchemaName: undefined,
+                  tableSchemaName,
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
                   previousFileName: undefined,
@@ -880,7 +886,9 @@ export const WebformField = ({
       {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isDeletingAttachment}
           header={`${resourcesContext.messages['deleteAttachmentHeader']}`}
+          iconConfirm={isDeletingAttachment ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}
