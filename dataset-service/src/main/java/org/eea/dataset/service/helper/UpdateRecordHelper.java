@@ -108,7 +108,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
         .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
 
-    fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
+    // HOTFIX: 293415 Geometry update creates multiple database queries
+    // fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
 
     // after the records have been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.RECORD_CREATED_COMPLETED_EVENT, datasetId);
@@ -177,7 +178,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
     DataSetSchema datasetSchema = schemasRepository.findById(new ObjectId(datasetSchemaId))
         .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
 
-    fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
+    // HOTFIX: 293415 Geometry update creates multiple database queries
+    // fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
 
     // after the field has been saved, an event is sent to notify it
     releaseDatasetKafkaEvent(EventType.FIELD_UPDATED_COMPLETED_EVENT, datasetId);
@@ -253,7 +255,8 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
         .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
 
     LOG.info("Geometry fields will be updated for datasetSchema {}", datasetId, datasetSchema);
-    fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
+    // HOTFIX: 293415 Geometry update creates multiple database queries
+    // fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
   }
 
   /**
@@ -269,6 +272,7 @@ public class UpdateRecordHelper extends KafkaSenderUtils {
             .orElseThrow(() -> new EEAException(EEAErrorMessage.SCHEMA_NOT_FOUND));
 
     LOG.info("Geometry fields will be updated for datasetSchema {}", datasetId, datasetSchema);
-    fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
+    // HOTFIX: 293415 Geometry update creates multiple database queries
+    // fileTreatmentHelper.updateGeometryV2(datasetId, datasetSchema);
   }
 }

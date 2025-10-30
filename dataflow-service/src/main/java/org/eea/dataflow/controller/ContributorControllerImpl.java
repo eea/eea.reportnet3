@@ -258,7 +258,7 @@ public class ContributorControllerImpl implements ContributorController {
    * @return the response entity
    */
   @Override
-  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "120000")})
+  @HystrixCommand(commandProperties = {@HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "300000")})
   @PreAuthorize("secondLevelAuthorize(#dataflowId,'DATAFLOW_STEWARD','DATAFLOW_CUSTODIAN') || hasRole('ADMIN')")
   @PutMapping(value = "/requester/dataflow/{dataflowId}",
       produces = MediaType.APPLICATION_JSON_VALUE)
