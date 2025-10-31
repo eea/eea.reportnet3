@@ -16,6 +16,7 @@ import org.eea.datalake.service.SpatialDataHandling;
 import org.eea.datalake.service.annotation.ImportDataLakeCommons;
 import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.dataset.mapper.HelperMultipartFileMapper;
+import org.eea.dataset.persistence.metabase.domain.DatasetTable;
 import org.eea.dataset.persistence.schemas.domain.DataSetSchema;
 import org.eea.dataset.persistence.schemas.domain.TableSchema;
 import org.eea.dataset.persistence.schemas.domain.pkcatalogue.PkCatalogueSchema;
@@ -61,6 +62,8 @@ import org.eea.interfaces.vo.recordstore.enums.ProcessTypeEnum;
 import org.eea.kafka.domain.EventType;
 import org.eea.kafka.domain.NotificationVO;
 import org.eea.kafka.utils.KafkaSenderUtils;
+import org.eea.lock.redis.LockEnum;
+import org.eea.lock.redis.RedisLockService;
 import org.eea.multitenancy.DatasetId;
 import org.eea.multitenancy.TenantResolver;
 import org.eea.thread.ThreadPropertiesManager;
@@ -162,6 +165,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     private NotificationControllerZuul notificationControllerZuul;
 
+    private RedisLockService redisLockService;
+
     private static final String HEADER_NAME = "headerName";
     private static final String TYPE_DATA = "typeData";
     private static final String ID_RECORD = "idRecord";
@@ -177,7 +182,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                                      ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
                                      JobProcessControllerZuul jobProcessControllerZuul, DatasetMetabaseService datasetMetabaseService, ProcessControllerZuul processControllerZuul, KafkaSenderUtils kafkaSenderUtils, RepresentativeControllerZuul representativeControllerZuul,
                                      FileCommonUtils fileCommonUtils, @Lazy DatasetSchemaService datasetSchemaService, SpatialDataHandling  spatialDataHandling, DatasetTableService datasetTableService, DataFlowControllerZuul dataFlowControllerZuul, CreateEmptyTables createEmptyTables,
-                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever, EtlExportV5Service etlExportV5Service, NotificationControllerZuul notificationControllerZuul) {
+                                     PkCatalogueRepository pkCatalogueRepository, TableDataRetriever tableDataRetriever, EtlExportV5Service etlExportV5Service, NotificationControllerZuul notificationControllerZuul, RedisLockService redisLockService) {
         this.jobControllerZuul =  jobControllerZuul;
         this.jobProcessControllerZuul = jobProcessControllerZuul;
         this.datasetMetabaseService = datasetMetabaseService;
@@ -205,6 +210,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         this.datasetService = datasetService;
         this.etlExportV5Service = etlExportV5Service;
         this.notificationControllerZuul = notificationControllerZuul;
+        this.redisLockService = redisLockService;
     }
 
     @Override
