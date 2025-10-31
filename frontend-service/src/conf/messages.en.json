@@ -305,7 +305,7 @@
     "datasetDataFailedToDeleteContent": " data failed to delete.",
     "datasetDataDeletedSuccessfullyHeader": "Data deleted",
     "datasetDataFailedToDeleteHeader": "Delete failed",
-    "datasetDataLoadingInit": "{:datasetLoadingMessage} <strong>{:title}</strong> {:datasetLoading}",
+    "datasetDataLoadingInit": "{:datasetLoadingMessage} <strong>{:title}</strong> {:datasetLoading} (<strong>{:fileName}</strong>)",
     "datasetDesigner": "Dataset designer",
     "datasetDesignerAddTable": "Create a table to start editing the dataset schema",
     "datasetDesignerNoFields": "There are no fields created for the table schema",

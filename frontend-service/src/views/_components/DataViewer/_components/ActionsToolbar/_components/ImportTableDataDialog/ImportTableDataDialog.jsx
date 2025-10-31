@@ -60,8 +60,9 @@ export const ImportTableDataDialog = ({
     }
   };
 
-  const onUpload = async () => {
+  const onUpload = async e => {
     const action = 'TABLE_IMPORT';
+    const fileName = e?.files?.[0]?.name || ' ';
     actionsContext.testProcess(datasetId, action);
     setImportTableDialogVisible(false);
     const {
@@ -78,7 +79,8 @@ export const ImportTableDataDialog = ({
             datasetLoadingMessage: resourcesContext.messages['datasetLoadingMessage'],
             title: TextUtils.ellipsis(tableName, config.notifications.STRING_LENGTH_MAX),
             datasetLoading: resourcesContext.messages['datasetLoading']
-          }
+          },
+          fileName
         }
       },
       true
