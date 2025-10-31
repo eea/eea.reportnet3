@@ -1307,7 +1307,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     @Async
     @Override
-    public void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue, String user) throws Exception{
+    public void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception{
         String datasetName = null;
         try {
             LOG.info("Converting iceberg to parquet tables for dataflowId {}, datasetId {} providerId {} and tableSchemaIds {} LockValue {}", dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
@@ -1420,7 +1420,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             try {
                 LOG.info("Iceberg table {} is not promoted. Will try to promote it. LockValue: {}", icebergTablePath, lockValue);
                 dremioHelperService.refreshTableMetadataAndPromote(null, icebergTablePath, s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
-                icebergFolderIsPromoted = dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                icebergFolderIsPromoted = dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
                 if(!icebergFolderIsPromoted){
                     throw new Exception("Promoting table failed");
                 }
@@ -1442,7 +1442,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String numberOfRecordsInIcebergTableQuery = "SELECT COUNT (*) FROM " + icebergTablePath;
 
         //if table does not exist or has 0 records do not do anything
-        if (!icebergFolderExists  || dremioJdbcTemplate.queryForObject(numberOfRecordsInIcebergTableQuery, Long.class) == 0) {
+        if (!icebergFolderExists || dremioJdbcTemplate.queryForObject(numberOfRecordsInIcebergTableQuery, Long.class) == 0) {
             //iceberg table does not exist and no parquet table should be created
             LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so no parquet table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
             return true;

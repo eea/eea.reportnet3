@@ -159,7 +159,7 @@ public interface BigDataDatasetService {
      * @param lockValue the lock value
      * @return
      */
-    void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue, String user) throws Exception;
+    void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg to Parquet Tables
@@ -172,7 +172,7 @@ public interface BigDataDatasetService {
      * @param lockValue the lock value
      * @return
      */
-    void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String lockValue, String user) throws Exception;
+    void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception;
 
     /**
      * Convert Iceberg To Parquet Table
