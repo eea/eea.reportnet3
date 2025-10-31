@@ -203,6 +203,14 @@ public interface DataFlowController {
   @GetMapping(value = "/v1/{dataflowId}/getmetabase", produces = MediaType.APPLICATION_JSON_VALUE)
   DataFlowVO getMetabaseById(@PathVariable("dataflowId") Long dataflowId);
 
+  /**
+   * Checks if the dataflow is Bigdata or not
+   *
+   * @param dataflowId The dataflow id
+   * @return True if is bigdata , false if it is not big data
+   */
+  @GetMapping(value = "/private/v1/{dataflowId}/isBigDataflow", produces = MediaType.APPLICATION_JSON_VALUE)
+  Boolean isBigDataflow(@PathVariable("dataflowId") Long dataflowId);
 
   /**
    * Gets the metabase by id legacy.
