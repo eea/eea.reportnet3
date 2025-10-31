@@ -1,5 +1,6 @@
 package org.eea.orchestrator.scheduling;
 
+import org.eea.interfaces.controller.dataflow.DataFlowController;
 import org.eea.interfaces.controller.dataset.DatasetController.DataSetControllerZuul;
 import org.eea.interfaces.controller.recordstore.ProcessController;
 import org.eea.interfaces.controller.ums.UserManagementController;
@@ -79,6 +80,9 @@ public class JobForCancellingImportJobsWithoutTasks {
     private UserManagementController.UserManagementControllerZull userManagementControllerZull;
 
     @Autowired
+    private DataFlowController.DataFlowControllerZuul dataFlowControllerZuul;
+
+    @Autowired
     JobUtils jobUtils;
 
     @PostConstruct
@@ -98,6 +102,12 @@ public class JobForCancellingImportJobsWithoutTasks {
             LOG.info("Running scheduled job cancelInProgressImportJobsWithoutTasks");
             List<JobVO> longRunningJobs = jobService.getJobsByStatusAndTypeAndMaxDuration(JobTypeEnum.IMPORT, JobStatusEnum.IN_PROGRESS, maxTimeInMsForInProgressImportJobsWithoutTasks, maxTimeInMsForInProgressFMEImportJobsWithoutTasks);
             for (JobVO job: longRunningJobs){
+
+                //if job is for big data, ignore because tasks don't exist
+                if(dataFlowControllerZuul.isBigDataflow(job.getDataflowId())){
+                    continue;
+                }
+
                 //get job processes
                 List<String> processIds = jobProcessService.findProcessesByJobId(job.getId());
                 Boolean longRunningProcessWithoutTasks = false;
