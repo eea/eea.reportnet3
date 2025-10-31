@@ -23,6 +23,10 @@ public interface S3ConvertService {
 
     File createEmptyCSVFile(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId);
 
+    File createCSVFileWithProviders(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum, List<String> headers, Boolean etlExportV4, Long jobId, String outputRoot);
+
+    File createEmptyCSVFileWithProviders(String tableName, Long datasetId, List<String> headers, Boolean etlExportV4, Long jobId, String outputRoot);
+
     void createJsonFile(List<S3Object> exportFilenames, String tableName, Long datasetId, DatasetTypeEnum datasetTypeEnum);
 
     boolean containsPath(String tableName, String key, DatasetTypeEnum datasetTypeEnum);
