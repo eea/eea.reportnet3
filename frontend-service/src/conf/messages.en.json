@@ -129,6 +129,7 @@
     "citizenScienceDataflowsCrumbLabel": "Citizen science dataflow",
     "citizenScienceDataflowsListTab": "Citizen science dataflows",
     "clearFilter": "Clear filter",
+    "checkingDuplicate": "Checking for duplicates...",
     "clone": "Clone",
     "cloneDatasetSchemasInit": "Cloning dataset schemas from <strong>{:sourceDataflowName}</strong> to <strong>{:targetDataflowName}</strong>",
     "cloneNewSchemaError": "Failed cloning the schemas",
