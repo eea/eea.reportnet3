@@ -2350,7 +2350,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             DatasetTypeEnum datasetType = datasetService.getDatasetType(datasetId);
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
-          // Spil the codes by "," and prevent duplicates.
+          // Split the codes by "," and prevent duplicates.
           Set<String> codes = StringUtils.isBlank(dataProviderCodes) ? Collections.emptySet() : Arrays.stream(dataProviderCodes.split(","))
                   .map(String::trim)
                   .filter(s -> !s.isEmpty())
@@ -2416,9 +2416,9 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
           } else {
             List<TableSchemaIdNameVO> tables;
-            String tableName = null;
             if (StringUtils.isNotBlank(tableSchemaId)) {
-              tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
+              String tableName = datasetSchemaService.getTableSchemaName(
+                  dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
               tables = new ArrayList<>();
               TableSchemaIdNameVO singleTable = new TableSchemaIdNameVO();
               singleTable.setIdTableSchema(tableSchemaId);
@@ -2429,32 +2429,36 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             }
 
             for (DataProviderVO provider : providers) {
-              Long pid = provider.getId() != null ? provider.getId() : 0L;
-              // Create directory for each provider.
+              Long pid = (provider.getId() != null) ? provider.getId() : 0L;
+
+              // Create directory for current provider.
               String providerFolderPath = Paths.get(folderToZipPath, "provider_" + pid).toString();
               new File(providerFolderPath).mkdirs();
 
+              // Convert tables for current provider.
               for (TableSchemaIdNameVO t : tables) {
-                // Convert tables to Parquet.
-                fileTreatmentHelper.convertParquetFileForProvider(datasetId, pid, t.getIdTableSchema(), t.getNameTableSchema(),datasetType, true, jobId, providerFolderPath);
+                fileTreatmentHelper.convertParquetFileForProvider(
+                    datasetId, pid, t.getIdTableSchema(), t.getNameTableSchema(),
+                    datasetType, true, jobId, providerFolderPath);
               }
 
+              // Provider-scoped attachments (per table)
               if (Boolean.TRUE.equals(includeAttachments)) {
-                // Get attachments if they exist.
-                String path;
-                if (datasetType.equals(DatasetTypeEnum.COLLECTION)) {
-                  path = (StringUtils.isNotBlank(tableSchemaId)) ? S3_ATTACHMENTS_DC_TABLE_PATH : S3_ATTACHMENTS_DC_FOLDER_PATH;
-                } else if (datasetType.equals(DatasetTypeEnum.EUDATASET)) {
-                  path = (StringUtils.isNotBlank(tableSchemaId)) ? S3_ATTACHMENTS_EU_TABLE_PATH : S3_ATTACHMENTS_PARENT_FOLDER_EU_PATH;
-                } else {
-                  throw new EEAException("Parameter 'dataProviderCodes' was provided but no S3 path could be created.");
-                }
+                final String tableAttachmentsConst = (datasetType == DatasetTypeEnum.COLLECTION) ? S3_ATTACHMENTS_DC_TABLE_PATH : S3_ATTACHMENTS_EU_TABLE_PATH;
 
-                S3PathResolver s3TablePathResolver = new S3PathResolver(dataflowId, pid, datasetId, tableName, tableName, path);
+                for (TableSchemaIdNameVO t : tables) {
+                  // Build resolver with dataflowId, providerId, datasetId, and current table.
+                  S3PathResolver resolver = new S3PathResolver(dataflowId, pid, datasetId, t.getNameTableSchema(), null, tableAttachmentsConst);
 
-                if (s3HelperPrivate.checkFolderExist(s3TablePathResolver, path)) {
-                  String attachmentsPathInS3 = s3ServicePrivate.getTableAsFolderQueryPath(s3TablePathResolver, path);
-                  s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPathInS3, providerFolderPath);
+                  // Base prefix up to the table folder
+                  String tablePrefix = s3ServicePrivate.getTableAsFolderQueryPath(resolver, tableAttachmentsConst);
+                  // Format provider folder name.
+                  String dpFolder = s3ServicePrivate.formatFolderName(pid, S3_DATA_PROVIDER_PATTERN);
+                  // Final prefix for provider-scoped attachments under this table.
+                  String attachmentsPrefix = tablePrefix + "/" + dpFolder + "/";
+
+                  LOG.info("Downloading attachments for provider {} table {} from prefix: {}", pid, t.getNameTableSchema(), attachmentsPrefix);
+                  s3HelperPrivate.getAttachmentsFromS3Locally(attachmentsPrefix, providerFolderPath);
                 }
               }
             }
