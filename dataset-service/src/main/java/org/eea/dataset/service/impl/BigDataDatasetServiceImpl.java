@@ -1152,6 +1152,78 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         LOG.info("Updated dl attachment for datasetId {}, table {} and field {}", datasetId, tableSchemaName, fieldName);
     }
 
+    @Async
+    @Override
+    public void convertParquetToIcebergTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception{
+        String datasetName = null;
+        try {
+            LOG.info("Converting parquet to iceberg tables for dataflowId {}, datasetId {} providerId {} and tableSchemaIds {} LockValue {}", dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            datasetName = dataSetMetabaseVO.getDataSetName();
+            String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
+
+            List<TableSchemaVO> availableForConversionTables = new ArrayList<>();
+
+            for (String tableSchemaId : tableSchemaIds) {
+                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+
+                if (tableSchemaVO != null) {
+                    Boolean availableForConversion = convertParquetToIcebergTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId, lockValue);
+                    if(BooleanUtils.isTrue(availableForConversion)){
+                        availableForConversionTables.add(tableSchemaVO);
+                    }
+                } else {
+                    LOG.error("TableSchemaVO not found for tableSchemaId: {}", tableSchemaId);
+                }
+            }
+
+            //iceberg enabled should be updated to true at the end of the conversion to ensure that all available tables were converted.
+            for (TableSchemaVO table : availableForConversionTables) {
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), true);
+                datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
+            }
+
+            String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+            redisLockService.releaseLock(lockKey, lockValue);
+            LOG.info("Released lock {} with value {}", lockKey, lockValue);
+
+            // Notify completion event
+            kafkaSenderUtils.releaseNotificableKafkaEvent(
+                    EventType.PARQUET_TO_ICEBERG_CONVERSION_COMPLETED_EVENT,
+                    null,
+                    NotificationVO.builder()
+                            .user(user)
+                            .dataflowId(dataflowId)
+                            .datasetId(datasetId)
+                            .providerId(providerId)
+                            .datasetName(datasetName)
+                            .build()
+            );
+
+            LOG.info("Successfully completed Parquet to Iceberg conversion for datasetId: {} and user {}", datasetId, user);
+
+        } catch (Exception e) {
+            LOG.error("Error processing Kafka event for converting Parquet to Iceberg for datasetId: {} and user {} : {}", datasetId, user, e.getMessage());
+
+            String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+            redisLockService.releaseLock(lockKey, lockValue);
+            LOG.info("Released lock {} with value {}", lockKey, lockValue);
+
+            // Notify failure event
+            kafkaSenderUtils.releaseNotificableKafkaEvent(
+                    EventType.PARQUET_TO_ICEBERG_CONVERSION_FAILED_EVENT,
+                    null,
+                    NotificationVO.builder()
+                            .user(user)
+                            .dataflowId(dataflowId)
+                            .datasetId(datasetId)
+                            .datasetName(datasetName)
+                            .build()
+            );
+            throw new EEAException(e.getMessage());
+        }
+    }
+
     @Override
     public Boolean convertParquetToIcebergTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception {
         if(providerId == null) {
@@ -1160,8 +1232,8 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         providerId = providerId != null ? providerId : 0L;
 
         if(tableSchemaVO == null || !BooleanUtils.isTrue(tableSchemaVO.getDataAreManuallyEditable()) || BooleanUtils.isTrue(datasetTableService.icebergTableIsCreated(datasetId, tableSchemaVO.getIdTableSchema()))) {
-            LOG.info("Can not convert iceberg table to parquet for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
-                    "because table data are not manually editable or the iceberg table has not been created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), lockValue);
+            LOG.info("Can not convert parquet to iceberg table for dataflowId {}, providerId {}, datasetId {} and tableSchemaId {} " +
+                    "because table data are not manually editable or the parquet table has not been created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getIdTableSchema(), lockValue);
             return false;
         }
 
@@ -1228,6 +1300,90 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         return true;
     }
 
+    @Async
+    @Override
+    public void convertIcebergToParquetTables(Long datasetId, Long dataflowId, Long providerId, List<String> tableSchemaIds, String user, String lockValue) throws Exception{
+        String datasetName = null;
+        try {
+            LOG.info("Converting iceberg to parquet tables for dataflowId {}, datasetId {} providerId {} and tableSchemaIds {} LockValue {}", dataflowId, datasetId, providerId, tableSchemaIds, lockValue);
+            DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
+            datasetName = dataSetMetabaseVO.getDataSetName();
+            String datasetSchemaId = dataSetMetabaseVO.getDatasetSchema();
+
+            List<TableSchemaVO> availableForConversionTables = new ArrayList<>();
+
+            for (String tableSchemaId : tableSchemaIds) {
+                TableSchemaVO tableSchemaVO = datasetSchemaService.getTableSchemaVO(tableSchemaId, datasetSchemaId);
+
+                if (tableSchemaVO != null) {
+                    Boolean availableForConversion = convertIcebergToParquetTable(datasetId, dataflowId, providerId, tableSchemaVO, datasetSchemaId, lockValue);
+                    if(BooleanUtils.isTrue(availableForConversion)){
+                        availableForConversionTables.add(tableSchemaVO);
+                    }
+                } else {
+                    LOG.error("TableSchemaVO not found for tableSchemaId: {}", tableSchemaId);
+                }
+            }
+
+            //iceberg enabled should be updated to false at the end iceberg files should be deleted also at the end of the conversion to ensure that all available tables were converted.
+            for (TableSchemaVO table : availableForConversionTables) {
+                Long usedProviderId = (providerId != null) ? providerId : 0L;
+                S3PathResolver s3IcebergTablePathResolver = new S3PathResolver(dataflowId, usedProviderId, datasetId, table.getNameTableSchema(), table.getNameTableSchema(), S3_TABLE_AS_FOLDER_QUERY_PATH);
+                s3IcebergTablePathResolver.setIsIcebergTable(true);
+                String icebergTablePath = s3ServicePrivate.getTableAsFolderQueryPath(s3IcebergTablePathResolver, S3_TABLE_AS_FOLDER_QUERY_PATH);
+
+                //remove iceberg table
+                LOG.info("Removing iceberg files for table in path {}", icebergTablePath);
+                if (s3HelperPrivate.checkFolderExist(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX)){
+                    dremioHelperService.demoteFolderOrFile(s3IcebergTablePathResolver, table.getNameTableSchema());
+                    s3HelperPrivate.deleteFolder(s3IcebergTablePathResolver, S3_TABLE_NAME_FOLDER_PATH_FOR_VALID_PREFIX);
+                }
+
+                DatasetTable datasetTableEntry = new DatasetTable(datasetId, datasetSchemaId, table.getIdTableSchema(), false);
+                datasetTableService.saveOrUpdateDatasetTableEntry(datasetTableEntry);
+            }
+
+            String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+            redisLockService.releaseLock(lockKey, lockValue);
+            LOG.info("Released lock {} with value {}", lockKey, lockValue);
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(
+                    EventType.ICEBERG_TO_PARQUET_CONVERSION_COMPLETED_EVENT,
+                    null,
+                    NotificationVO.builder()
+                            .user(user)
+                            .dataflowId(dataflowId)
+                            .datasetId(datasetId)
+                            .providerId(providerId)
+                            .datasetName(datasetName)
+                            .build()
+            );
+
+            LOG.info("Successfully completed Iceberg to Parquet conversion for datasetId: {} and user {}", datasetId, user);
+
+
+        } catch (Exception e) {
+            LOG.error("Error processing Kafka event for converting Iceberg to Parquet for datasetId: {} and user {} : {}", datasetId, user, e.getMessage());
+
+            String lockKey = LockEnum.PARQUET_CONVERSION.getValue() + "_" + datasetId;
+            redisLockService.releaseLock(lockKey, lockValue);
+            LOG.info("Released lock {} with value {}", lockKey, lockValue);
+
+            kafkaSenderUtils.releaseNotificableKafkaEvent(
+                    EventType.ICEBERG_TO_PARQUET_CONVERSION_FAILED_EVENT,
+                    null,
+                    NotificationVO.builder()
+                            .user(user)
+                            .dataflowId(dataflowId)
+                            .datasetId(datasetId)
+                            .datasetName(datasetName)
+                            .build()
+            );
+
+            throw new EEAException(e.getMessage());
+        }
+    }
+
     @Override
     public Boolean convertIcebergToParquetTable(Long datasetId, Long dataflowId, Long providerId, TableSchemaVO tableSchemaVO, String datasetSchemaId, String lockValue) throws Exception {
         if(providerId == null) {
@@ -1259,7 +1415,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             try {
                 LOG.info("Iceberg table {} is not promoted. Will try to promote it. LockValue: {}", icebergTablePath, lockValue);
                 dremioHelperService.refreshTableMetadataAndPromote(null, icebergTablePath, s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
-                icebergFolderIsPromoted = dremioHelperService.checkFolderPromoted(s3TablePathResolver, tableSchemaVO.getNameTableSchema());
+                icebergFolderIsPromoted = dremioHelperService.checkFolderPromoted(s3IcebergTablePathResolver, tableSchemaVO.getNameTableSchema());
                 if(!icebergFolderIsPromoted){
                     throw new Exception("Promoting table failed");
                 }
@@ -1281,7 +1437,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
         String numberOfRecordsInIcebergTableQuery = "SELECT COUNT (*) FROM " + icebergTablePath;
 
         //if table does not exist or has 0 records do not do anything
-        if (!icebergFolderExists  || dremioJdbcTemplate.queryForObject(numberOfRecordsInIcebergTableQuery, Long.class) == 0) {
+        if (!icebergFolderExists || dremioJdbcTemplate.queryForObject(numberOfRecordsInIcebergTableQuery, Long.class) == 0) {
             //iceberg table does not exist and no parquet table should be created
             LOG.info("For dataflowId {}, providerId {}, datasetId {} and table {} iceberg table does not exist or has 0 records so no parquet table will be created. LockValue: {}", dataflowId, providerId, datasetId, tableSchemaVO.getNameTableSchema(), lockValue);
             return true;
