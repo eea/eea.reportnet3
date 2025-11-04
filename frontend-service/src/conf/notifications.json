@@ -1272,8 +1272,8 @@
         {
           "key": "DOWNLOAD_IMPORTED_FILE_FINISHED_EVENT",
           "navigateTo": {
-            "section": "DATASET",
-            "parameters": ["dataflowId", "datasetId", "filename"]
+            "section": "DATAFLOW",
+            "parameters": ["dataflowId"]
           }
         },
         {
