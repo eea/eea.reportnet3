@@ -71,13 +71,11 @@ export const EntitiesWebform = ({
     entitiesRecords: [],
     selectedTable: { fieldSchemaId: null, rootTableId: null, recordId: null, tableName: null },
     rootPkInput: '',
-    selectedTableName: null,
     selectedTableSchemaId: null,
     entitiesList: [],
     view: 'overview'
   });
-  const { isDataUpdated, isLoading, entitiesRecords, selectedTable, selectedTableName, entitiesList, view } =
-    entitiesWebformState;
+  const { isDataUpdated, isLoading, entitiesRecords, selectedTable, entitiesList, view } = entitiesWebformState;
 
   const addEntityInputRef = useRef(null);
 
@@ -359,9 +357,7 @@ export const EntitiesWebform = ({
 
   const getFirstVisibleTable = () => {
     const visibleTables = entitiesWebformState.data.filter(table =>
-      tables.some(
-        webformTable => webformTable.name === table.name && webformTable.isVisible && !webformTable.isRootTable
-      )
+      tables.some(webformTable => webformTable.name === table.name && webformTable.isVisible)
     );
     return visibleTables[0] || null;
   };
@@ -459,7 +455,6 @@ export const EntitiesWebform = ({
           rootPkFieldId={rootPkFieldId}
           rootTableName={rootTableName}
           selectedTable={selectedTable}
-          selectedTableName={selectedTableName}
           setTableSchemaId={setTableSchemaId}
           state={state}
           tables={tables.filter(table => table.isVisible)}

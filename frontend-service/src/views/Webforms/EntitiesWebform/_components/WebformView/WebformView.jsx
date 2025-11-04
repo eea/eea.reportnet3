@@ -36,7 +36,6 @@ export const WebformView = ({
   rootPkFieldId,
   rootTableName,
   selectedTable,
-  selectedTableName,
   setTableSchemaId,
   state,
   tables
@@ -45,41 +44,39 @@ export const WebformView = ({
   const { getWebformTabs } = WebformsUtils;
   const resourcesContext = useContext(ResourcesContext);
 
-  const [webformViewState, webformViewDispatch] = useReducer(webformViewReducer, {
-    isLoading: false,
-    isVisible: getWebformTabs(
-      tables.map(table => table.name),
-      state.schemaTables,
-      tables,
-      selectedTableName
-    ),
-    singlesCalculatedData: []
-  });
+  const [webformViewState, webformViewDispatch] = useReducer(
+    webformViewReducer,
+    {
+      isLoading: false
+    },
+    initialState => ({
+      ...initialState,
+      isVisible: getWebformTabs(
+        tables.map(table => table.label),
+        state.schemaTables,
+        tables
+      )
+    })
+  );
 
   const { isLoading, isVisible } = webformViewState;
 
   useEffect(() => {
     const visibleTable = Object.keys(isVisible).filter(key => isVisible[key])[0];
-    const visibleTableId = data.filter(table => table.name === visibleTable)[0].tableSchemaId;
+    const visibleTableId = data.filter(table => table.label === visibleTable)[0].tableSchemaId;
 
     setTableSchemaId(visibleTableId);
-  }, [webformViewState.isVisible]);
-
-  useEffect(() => {
-    if (!isNil(selectedTableName)) {
-      onChangeWebformTab(selectedTableName);
-    }
-  }, [selectedTableName]);
+  }, [isVisible]);
 
   const setIsLoading = value => webformViewDispatch({ type: 'SET_IS_LOADING', payload: { value } });
 
   const onChangeWebformTab = name => {
-    Object.keys(isVisible).forEach(tab => {
-      isVisible[tab] = false;
-      isVisible[name] = true;
-    });
+    const newIsVisible = Object.fromEntries(Object.keys(isVisible).map(tab => [tab, tab === name]));
 
-    webformViewDispatch({ type: 'ON_CHANGE_TAB', payload: { isVisible } });
+    webformViewDispatch({
+      type: 'ON_CHANGE_TAB',
+      payload: { isVisible: newIsVisible }
+    });
   };
 
   const renderWebFormHeaders = () => {
@@ -91,14 +88,14 @@ export const WebformView = ({
         const isCreated = headers.includes(webform.name);
         return (
           <Button
-            className={`${styles.headerButton} ${isVisible[webform.name] ? 'p-button-primary' : 'p-button-secondary'}`}
+            className={`${styles.headerButton} ${isVisible[webform.label] ? 'p-button-primary' : 'p-button-secondary'}`}
             disabled={isLoading}
             icon={!isCreated ? 'info' : 'table'}
             iconClasses={!isVisible[webform.title] ? 'info' : ''}
             iconPos={!isCreated ? 'right' : 'left'}
             key={uniqueId()}
             label={webform.label}
-            onClick={() => onChangeWebformTab(webform.name)}
+            onClick={() => onChangeWebformTab(webform.label)}
             style={{ display: isReporting && !isCreated ? 'none' : '' }}
           />
         );
@@ -107,7 +104,7 @@ export const WebformView = ({
 
   const renderWebFormContent = () => {
     const visibleTitle = keys(pickBy(isVisible))[0];
-    const visibleContent = data.filter(table => table.name === visibleTitle && table.isVisible)[0];
+    const visibleContent = data.filter(table => table.label === visibleTitle && table.isVisible)[0];
 
     return (
       <WebformTable
