@@ -198,9 +198,9 @@ public class DatasetControllerImplTest {
     Mockito.when(fileTreatmentHelper.listImportedFiles(datasetId))
             .thenThrow(new EEAException("Service failure"));
 
+    List<ImportedFilesDirectoriesVO> result = new ArrayList<>();
     try {
-      datasetControllerImpl.listImportedFiles(datasetId);
-      Assert.fail("Expected ResponseStatusException was not thrown");
+      assertEquals(result, datasetControllerImpl.listImportedFiles(datasetId));
     } catch (ResponseStatusException e) {
       assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, e.getStatus());
       assertEquals("Service failure", e.getReason());
@@ -245,7 +245,7 @@ public class DatasetControllerImplTest {
     ResponseEntity<Resource> mockResponse =
             ResponseEntity.ok(resource);
 
-    Mockito.<ResponseEntity<?>>when(fileTreatmentHelper.downloadImportedFile(datasetId, fileName))
+    Mockito.<ResponseEntity<?>>when(fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName))
             .thenReturn(mockResponse);
 
     // Mock Kafka event sender
@@ -262,7 +262,7 @@ public class DatasetControllerImplTest {
     assertEquals(mockResponse, result);
 
     Mockito.verify(fileTreatmentHelper, times(1))
-            .downloadImportedFile(datasetId, fileName);
+            .downloadImportedFile(dataflowId, datasetId, fileName);
     Mockito.verify(kafkaSenderUtils, times(1))
             .releaseNotificableKafkaEvent(any(), isNull(), any());
   }
@@ -278,7 +278,7 @@ public class DatasetControllerImplTest {
 
     Mockito.doNothing().when(kafkaSenderUtils)
             .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(fileTreatmentHelper.downloadImportedFile(datasetId, fileName))
+    Mockito.when(fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName))
             .thenThrow(new EEAException("File cannot be downloaded"));
 
     try {
@@ -289,7 +289,7 @@ public class DatasetControllerImplTest {
       org.junit.Assert.assertEquals("File cannot be downloaded", e.getReason());
     }
 
-    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).downloadImportedFile(datasetId, fileName);
+    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).downloadImportedFile(dataflowId, datasetId, fileName);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1))
             .releaseNotificableKafkaEvent(Mockito.any(), Mockito.isNull(), Mockito.any());
   }
@@ -304,7 +304,7 @@ public class DatasetControllerImplTest {
 
     Mockito.doNothing().when(kafkaSenderUtils)
             .releaseNotificableKafkaEvent(Mockito.any(), Mockito.any(), Mockito.any());
-    Mockito.when(fileTreatmentHelper.downloadImportedFile(datasetId, fileName))
+    Mockito.when(fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName))
             .thenThrow(new RuntimeException("Unexpected failure"));
 
     try {
@@ -318,7 +318,7 @@ public class DatasetControllerImplTest {
       );
     }
 
-    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).downloadImportedFile(datasetId, fileName);
+    Mockito.verify(fileTreatmentHelper, Mockito.times(1)).downloadImportedFile(dataflowId, datasetId, fileName);
     Mockito.verify(kafkaSenderUtils, Mockito.times(1))
             .releaseNotificableKafkaEvent(Mockito.any(), Mockito.isNull(), Mockito.any());
   }

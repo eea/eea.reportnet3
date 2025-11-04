@@ -486,9 +486,10 @@ public class FileTreatmentHelper implements DisposableBean {
         return dateFormat.format(new Date(timestamp));
     }
 
-    public ResponseEntity<?> downloadImportedFile(Long datasetId, String fileName) throws EEAException {
+    public ResponseEntity<?> downloadImportedFile(Long dataflowId, Long datasetId, String fileName) throws EEAException {
         LOG.info("Downloading file for datasetId: {} and fileName: {}", datasetId, fileName);
         NotificationVO notificationVO = new NotificationVO();
+        notificationVO.setDataflowId(dataflowId);
         notificationVO.setDatasetId(datasetId);
         notificationVO.setUser(SecurityContextHolder.getContext().getAuthentication().getName());
         notificationVO.setFileName(fileName);

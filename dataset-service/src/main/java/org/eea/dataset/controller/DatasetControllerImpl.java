@@ -191,8 +191,8 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       return fileTreatmentHelper.listImportedFiles(datasetId);
     } catch (EEAException e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
-              e.getMessage());
+      // return new ArrayList so the front-end doesn't show an error message if there was no import at this dataset
+      return new ArrayList<>();
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               "Unable to complete request of listing files for dataset Id " + datasetId);
@@ -222,7 +222,7 @@ public class DatasetControllerImpl implements DatasetController {
     try {
       kafkaSenderUtils.releaseNotificableKafkaEvent(eventType, null, notificationVO);
 
-      return fileTreatmentHelper.downloadImportedFile(datasetId, fileName);
+      return fileTreatmentHelper.downloadImportedFile(dataflowId, datasetId, fileName);
     } catch (EEAException e) {
       throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     } catch (Exception e) {

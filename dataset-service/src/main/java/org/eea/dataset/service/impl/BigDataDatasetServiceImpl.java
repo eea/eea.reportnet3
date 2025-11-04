@@ -84,9 +84,13 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -168,9 +172,37 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private static final String NAME_TABLE_SCHEMA = "nameTableSchema";
     private static final String VALUE = "refValue";
     private static final String LABEL = "refLabel";
+    private static final Pattern CSV_WITH_UUID_PATTERN = Pattern.compile(
+            "^[\\w\\-. ]+_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.csv$"
+    );
 
+    private void deleteCsvFilesWithUuidSuffix(String datasetId) {
+        // this method is matching and deleting all csv files that have an ending of a UUID and then `.csv` like:
+        // data_550e8400-e29b-41d4-a716-446655440000.csv
+        // table1_7d9f45d3-2e68-4b9e-bfe3-3a472ef4234b.csv
+        // Those files have 2 columns added and therefore should be deleted, those are temporary
+        File root = new File(importPath);
+        File folder = new File(root, datasetId);
+        if (!folder.exists() || !folder.isDirectory()) {
+            LOG.warn("Import path does not exist or is not a directory: {}", importPath);
+            return;
+        }
 
-
+        try (Stream<Path> paths = Files.walk(folder.toPath())) {
+            paths.filter(Files::isRegularFile)
+                    .filter(p -> CSV_WITH_UUID_PATTERN.matcher(p.getFileName().toString()).matches())
+                    .forEach(p -> {
+                        try {
+                            Files.deleteIfExists(p);
+                            LOG.info("Deleted CSV with UUID suffix: {}", p);
+                        } catch (IOException e) {
+                            LOG.error("Failed to delete CSV file: {}", p, e);
+                        }
+                    });
+        } catch (IOException e) {
+            LOG.error("Error walking import path for CSV cleanup: {}", importPath, e);
+        }
+    }
 
     public BigDataDatasetServiceImpl(@Qualifier("publicS3Helper") S3Helper s3HelperPublic, S3Helper s3HelperPrivate, DremioHelperService dremioHelperService,
                                      ParquetConverterService parquetConverterService, JdbcTemplate dremioJdbcTemplate, SchemasRepository schemasRepository, @Lazy DatasetSnapshotService datasetSnapshotService, @Lazy DatasetService datasetService, JobControllerZuul jobControllerZuul,
@@ -729,8 +761,11 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
             jobStatus = JobStatusEnum.FINISHED;
 
-            // Delete the csv files.
-            deleteFilesFromDirectoryWithExtension(new String[]{".csv", ".parquet"}, importFileInDremioInfo.getDatasetId().toString());
+            // Delete the parquet files.
+            deleteFilesFromDirectoryWithExtension(new String[]{".parquet"}, importFileInDremioInfo.getDatasetId().toString());
+
+            // Delete the process generated csv files ending with a uuid
+            deleteCsvFilesWithUuidSuffix(importFileInDremioInfo.getDatasetId().toString());
         }
 
         if (jobId!=null) {
