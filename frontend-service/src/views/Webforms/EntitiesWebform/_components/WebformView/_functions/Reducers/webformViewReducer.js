@@ -9,9 +9,6 @@ export const webformViewReducer = (state, { type, payload }) => {
     case 'SET_IS_LOADING':
       return { ...state, isLoading: payload.value };
 
-    case 'SET_SINGLE_CALCULATED_DATA':
-      return { ...state, singlesCalculatedData: payload };
-
     default:
       return state;
   }

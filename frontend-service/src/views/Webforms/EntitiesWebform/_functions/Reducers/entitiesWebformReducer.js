@@ -30,7 +30,6 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
     case 'ON_SELECT_RECORD':
       return {
         ...state,
-        selectedTableName: null,
         selectedTable: {
           ...state.selectedTable,
           rootTableId: payload.rootTableId,
@@ -42,7 +41,6 @@ export const entitiesWebformReducer = (state, { type, payload }) => {
     case 'ON_SELECT_TABLE':
       return {
         ...state,
-        selectedTableName: payload.name,
         selectedTable: { ...state.selectedTable, tableName: payload.name }
       };
 
