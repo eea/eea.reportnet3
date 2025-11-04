@@ -119,6 +119,10 @@
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
+:global .p-datatable-scrollable-body td{
+  vertical-align: top;
+}
+
 :global .p-datatable-scrollable-body::-webkit-scrollbar-button:single-button {
   background-color: transparent;
   display: block;
