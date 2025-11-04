@@ -1402,12 +1402,14 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
             label={resourcesContext.messages['createTableValidationBtn']}
             onClick={() => validationContext.onOpenModalFromOpener('dataset', 'validationsListDialog')}
           />
-          <Button
-            className="p-button-animated-blink"
-            icon="bars"
-            label={resourcesContext.messages['setSeverityBtn']}
-            onClick={() => setIsQcSeverityDialogVisible(true)}
-          />
+          {!isDataflowOpen && (
+            <Button
+              className="p-button-animated-blink"
+              icon="bars"
+              label={resourcesContext.messages['setSeverityBtn']}
+              onClick={() => setIsQcSeverityDialogVisible(true)}
+            />
+          )}
           <Button
             className={`p-button-secondary p-button-animated-blink ${styles.buttonAlignRight}`}
             disabled={allSqlValidationRunning}
