@@ -1,6 +1,8 @@
 package org.eea.ums.service.impl;
 
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.eea.exception.EEAErrorMessage;
 import org.eea.exception.EEAException;
@@ -569,6 +571,9 @@ public class KeycloakSecurityProviderInterfaceService implements SecurityProvide
    * @throws EEAException the EEA exception
    */
   @Override
+  @HystrixCommand(commandProperties = {
+          @HystrixProperty(name = "execution.isolation.thread.timeoutInMilliseconds", value = "600000") // 10 minutes
+  })
   public void addContributorsToUserGroup(List<ResourceAssignationVO> resources)
           throws EEAException {
 

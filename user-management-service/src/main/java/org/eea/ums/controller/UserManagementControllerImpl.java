@@ -607,6 +607,8 @@ public class UserManagementControllerImpl implements UserManagementController {
    * @param resources the resources
    */
   @Override
+  @HystrixCommand(commandProperties = {@HystrixProperty(
+          name = "execution.isolation.thread.timeoutInMilliseconds", value = "600000")})
   @PreAuthorize("isAuthenticated()")
   @PutMapping("/add_contributors_to_resources")
   @ApiResponse(code = 500, message = EEAErrorMessage.PERMISSION_NOT_CREATED)

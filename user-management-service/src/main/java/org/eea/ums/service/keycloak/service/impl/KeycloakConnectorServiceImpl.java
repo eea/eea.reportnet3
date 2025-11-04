@@ -1,5 +1,6 @@
 package org.eea.ums.service.keycloak.service.impl;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -268,6 +270,10 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
    */
   @Autowired
   private TokenMonitor tokenMonitor;
+
+
+    @Autowired
+    private RestTemplateBuilder restTemplateBuilder;
 
   /**
    * Inits the keycloak context.
@@ -717,6 +723,7 @@ public class KeycloakConnectorServiceImpl implements KeycloakConnectorService {
     HttpEntity<Void> request = createHttpRequest(null, uriParams);
     UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.newInstance();
     try {
+      this.restTemplate = restTemplateBuilder.setReadTimeout(Duration.ofSeconds(300)).build();
       this.restTemplate.exchange(
           uriComponentsBuilder.scheme(keycloakScheme).host(keycloakHost)
               .path(ALTER_USER_TO_USER_GROUP_URL).buildAndExpand(uriParams).toString(),
