@@ -2561,7 +2561,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
   }
 
     @Override
-    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) {
+    public void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) {
         try {
             String folderPathStr =  exportDLPath + DATASET_PREFIX_FOR_EXPORT + datasetId;
             File folderPath = new File(folderPathStr);
@@ -2572,14 +2572,55 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
             updateJobProcess(datasetId, dataflowId, jobId, user, processUUID);
 
             DataSetMetabaseVO dataSetMetabaseVO = datasetMetabaseService.findDatasetMetabase(datasetId);
-
             String s3Path = etlExportV5Service.getS3KeyPath(dataSetMetabaseVO, s3ServicePrivate);
+            DatasetTypeEnum datasetType = dataSetMetabaseVO.getDatasetTypeEnum();
 
             String tableName = null;
             if (StringUtils.isNotBlank(tableSchemaId)) {
                 tableName = datasetSchemaService.getTableSchemaName(dataSetMetabaseVO.getDatasetSchema(), tableSchemaId);
             }
-            DownloadFilter filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName);
+
+            // Split the codes by "," and prevent duplicates.
+            Set<String> codes = StringUtils.isBlank(dataProviderCodes) ? Collections.emptySet() : Arrays.stream(dataProviderCodes.split(","))
+                  .map(String::trim)
+                  .filter(s -> !s.isEmpty())
+                  .map(String::toUpperCase)
+                  .collect(Collectors.toCollection(LinkedHashSet::new));
+
+            DownloadFilter filter;
+
+            if (codes.isEmpty()){
+              filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName, null, s3ServicePrivate);
+            } else {
+              // Only valid for Data Collections or EU-Datasets.
+              if (!(DatasetTypeEnum.COLLECTION.equals(datasetType) ||
+                  DatasetTypeEnum.EUDATASET.equals(datasetType))) {
+                throw new IllegalArgumentException("Parameter 'dataProviderCodes' was provided but Dataset is not a Data Collection or EU Dataset.");
+              }
+
+              // Providers list from codes.
+              List<DataProviderVO> providers = resolveProvidersByCodes(dataflowId, codes);
+
+              // If it passes resolveProvidersByCodes method exception.
+              if (providers == null || providers.isEmpty()) {
+                LOG.warn("No providers matched codes {} for dataflowId {}. Producing empty ZIP.", codes, dataflowId);
+                File emptyZip = new File(localPath + ".zip");
+                try (FileOutputStream fos = new FileOutputStream(emptyZip);
+                     ZipOutputStream zos = new ZipOutputStream(fos)) {}
+                finishJob(datasetId, dataflowId, jobId, user, processUUID);
+                return;
+              }
+
+              List<Long> providerIds = providers.stream()
+                  .map(DataProviderVO::getId)
+                  .filter(java.util.Objects::nonNull)
+                  .collect(Collectors.toList());
+
+              filter = etlExportV5Service.buildParquetFilters(s3Path, includeAttachments, tableName, providerIds, s3ServicePrivate);
+            }
+
+
+            // Download path based on filtering result.
             File filePath = s3HelperPrivate.downloadFileFromS3Locally(s3Path, localPath, filter);
 
             if (filePath.exists()) {
@@ -2589,8 +2630,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
                 // Create an empty ZIP file
                 File emptyZip = new File(localPath + ".zip");
                 try (FileOutputStream fos = new FileOutputStream(emptyZip);
-                     ZipOutputStream zos = new ZipOutputStream(fos)) {
-                }
+                     ZipOutputStream zos = new ZipOutputStream(fos)) {}
             }
             finishJob(datasetId, dataflowId, jobId, user, processUUID);
         }

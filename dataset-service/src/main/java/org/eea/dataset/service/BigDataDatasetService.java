@@ -308,7 +308,7 @@ public interface BigDataDatasetService {
      * @param includeAttachments include attachments boolean
      * @throws EEAException The exception
      */
-    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments) throws EEAException;
+    void etlExportParquet(Long datasetId, Long dataflowId, String tableSchemaId, Long jobId, String user, String processUUID, Boolean includeAttachments, String dataProviderCodes) throws EEAException;
 
     /**
      * If an import job is added in the db retrieve it, else create a new one
