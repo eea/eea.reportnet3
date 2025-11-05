@@ -2118,6 +2118,8 @@ public class DatasetControllerImpl implements DatasetController {
                                                  @ApiParam(type = "String", value = "Table schema id",
                                                      example = "5cf0e9b3b793310e9ceca190") @RequestParam(value = "tableSchemaId",
                                                      required = false) String tableSchemaId,
+                                                 @ApiParam(type = "String", value = "Data provider codes", example = "BE,DK") @RequestParam(
+                                                     value = "dataProviderCodes", required = false) String dataProviderCodes,
                                                  @ApiParam(type = "Boolean", value = "includeAttachments", example = "0") @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments) {
     if (!dataflowId.equals(datasetService.getDataFlowIdById(datasetId))) {
       String errorMessage =
@@ -2127,7 +2129,7 @@ public class DatasetControllerImpl implements DatasetController {
           String.format(EEAErrorMessage.DATASET_NOT_BELONG_DATAFLOW, datasetId, dataflowId));
     }
     try {
-      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, null, false, true ,includeAttachments);
+      Long jobId = jobControllerZuul.addFileExportJob(datasetId, dataflowId, providerId, tableSchemaId, null, null, null, null, dataProviderCodes, false, true ,includeAttachments);
       Map<String, Object> result = new HashMap<>();
       String pollingUrl = "/orchestrator/jobs/pollForJobStatus/" + jobId + "?datasetId=" + datasetId + "&dataflowId=" + dataflowId;
       if(providerId != null){
@@ -3431,7 +3433,7 @@ public class DatasetControllerImpl implements DatasetController {
             bigDataDatasetService.etlExportCsv(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
           } else if (BooleanUtils.isTrue(exportParquet)) {
             String processUUID = UUID.randomUUID().toString();
-            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments);
+            bigDataDatasetService.etlExportParquet(datasetId, dataflowId, tableSchemaId, jobId, user, processUUID, includeAttachments, dataProviderCodes);
           } else {
             datasetService.createFileForEtlExport(datasetId, tableSchemaId, limit, offset, filterValue, columnName, dataProviderCodes, jobId, dataflowId, user, exportCsv, includeAttachments);
           }
