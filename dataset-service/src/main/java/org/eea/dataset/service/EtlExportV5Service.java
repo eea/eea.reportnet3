@@ -5,6 +5,8 @@ import org.eea.datalake.service.model.S3PathResolver;
 import org.eea.interfaces.vo.dataset.DataSetMetabaseVO;
 import software.amazon.awssdk.transfer.s3.config.DownloadFilter;
 
+import java.util.Collection;
+
 public interface EtlExportV5Service {
   /**
    * Build the parquet filtering
@@ -14,7 +16,7 @@ public interface EtlExportV5Service {
    * @param tableName          Filter the table name
    * @return The object filtering
    */
-  DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName);
+  DownloadFilter buildParquetFilters(String s3Path, boolean includeAttachments, String tableName, Collection<Long> providerIds, S3Service s3Service);
 
   /**
    * Calculate the S3 path for each case
