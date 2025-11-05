@@ -173,7 +173,7 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
     private static final String VALUE = "refValue";
     private static final String LABEL = "refLabel";
     private static final Pattern CSV_WITH_UUID_PATTERN = Pattern.compile(
-            "^[\\w\\-. ]+_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\.csv$"
+            "^.+_[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\\\.csv$\n"
     );
 
     private void deleteCsvFilesWithUuidSuffix(String datasetId) {
