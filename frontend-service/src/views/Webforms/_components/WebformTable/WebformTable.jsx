@@ -209,6 +209,7 @@ export const WebformTable = ({
 
     if (!isEmpty(newEmptyRecord)) {
       try {
+        bigData && onFieldUpdate(true);
         await DatasetService.createWebformTableRecord(datasetId, tableSchemaId, [newEmptyRecord]);
         onUpdateData();
       } catch (error) {
@@ -238,6 +239,8 @@ export const WebformTable = ({
           type: 'SET_IS_ADDING_MULTIPLE',
           payload: { addingOnTableSchemaId: null, isAddingMultiple: false }
         });
+      } finally {
+        bigData && onFieldUpdate(false);
       }
     }
   };
@@ -350,7 +353,6 @@ export const WebformTable = ({
     <WebformRecord
       addingOnTableSchemaId={webformTableState.addingOnTableSchemaId}
       bigData={bigData}
-      onFieldUpdate={onFieldUpdate}
       columnsSchema={webformData.elementsRecords[0] ? webformData.elementsRecords[0].elements : []}
       dataflowId={dataflowId}
       dataProviderId={dataProviderId}
@@ -365,6 +367,7 @@ export const WebformTable = ({
       key={index}
       multipleRecords={webformData.multipleRecords}
       onAddMultipleWebform={onAddMultipleWebform}
+      onFieldUpdate={onFieldUpdate}
       onRefresh={onUpdateData}
       onTabChange={onTabChange}
       record={record}
@@ -372,6 +375,7 @@ export const WebformTable = ({
       rootTableName={rootTableName}
       tableId={webformData.tableSchemaId}
       tableName={webformData.title}
+      tableSchemaName={webformData.name}
       updatingField={updatingField}
       webformType={webformType}
     />

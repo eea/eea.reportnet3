@@ -83,6 +83,7 @@ export const WebformRecord = ({
   selectedTableId,
   tableId,
   tableName,
+  tableSchemaName,
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -298,7 +299,6 @@ export const WebformRecord = ({
                     <WebformField
                       bigData={bigData}
                       changedConditionalFieldData={changedConditionalFieldData}
-                      onFieldUpdate={onFieldUpdate}
                       columnsSchema={columnsSchema}
                       conditionalFieldChange={conditionalFieldChange}
                       dataflowId={dataflowId}
@@ -313,12 +313,14 @@ export const WebformRecord = ({
                       isDependantConditionalField={isDependantConditionalField}
                       isSubTableCreated={getCreatedSubTable(webformRecordState.record, element)}
                       isViewMode={isViewMode}
+                      onFieldUpdate={onFieldUpdate}
                       onFillField={onFillField}
                       onSaveField={onSaveField}
                       record={record}
                       referencedTableSchemaId={referencedTableSchemaId}
                       rootPkFieldId={rootPkFieldId}
                       tableSchemaId={tableId}
+                      tableSchemaName={tableSchemaName}
                       updatingField={updatingField}
                       webformType={webformType}
                     />
@@ -460,7 +462,6 @@ export const WebformRecord = ({
                   <WebformRecord
                     addingOnTableSchemaId={addingOnTableSchemaId}
                     bigData={bigData}
-                    onFieldUpdate={onFieldUpdate}
                     columnsSchema={columnsSchema}
                     dataflowId={dataflowId}
                     dataProviderId={dataProviderId}
@@ -472,6 +473,7 @@ export const WebformRecord = ({
                     multipleRecords={element.multipleRecords}
                     newRecord={webformRecordState.newRecord}
                     onAddMultipleWebform={onAddMultipleWebform}
+                    onFieldUpdate={onFieldUpdate}
                     onRefresh={onRefresh}
                     onTabChange={onTabChange}
                     record={record}

@@ -453,6 +453,7 @@ public interface DatasetController {
                                               @RequestParam("dataflowId") Long dataflowId,
                                               @RequestParam(value = "providerId", required = false) Long providerId,
                                               @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                              @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
                                               @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
 
   @GetMapping("/v5/etlExport/{datasetId}")
@@ -460,6 +461,7 @@ public interface DatasetController {
                                       @RequestParam("dataflowId") Long dataflowId,
                                       @RequestParam(value = "providerId", required = false) Long providerId,
                                       @RequestParam(value = "tableSchemaId", required = false) String tableSchemaId,
+                                      @RequestParam(value = "dataProviderCodes", required = false) String dataProviderCodes,
                                       @RequestParam(value = "includeAttachments", required = false) Boolean includeAttachments);
 
   /**

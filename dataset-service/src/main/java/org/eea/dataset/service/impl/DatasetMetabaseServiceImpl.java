@@ -961,7 +961,7 @@ public class DatasetMetabaseServiceImpl implements DatasetMetabaseService {
   public Long getDatasetIdByDatasetSchemaIdAndDataProviderId(String referencedDatasetSchemaId,
       Long dataProviderId) {
     DataSetMetabase datasetMetabase = dataSetMetabaseRepository
-        .findFirstByDatasetSchemaAndDataProviderId(referencedDatasetSchemaId, dataProviderId)
+        .findFirstByDatasetSchemaAndDataProviderIdOrderById(referencedDatasetSchemaId, dataProviderId)
         .orElse(null);
     return datasetMetabase != null ? datasetMetabase.getId() : null;
   }

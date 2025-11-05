@@ -59,6 +59,7 @@ export const WebformField = ({
   referencedTableSchemaId,
   rootPkFieldId,
   tableSchemaId,
+  tableSchemaName,
   webformType
 }) => {
   const notificationContext = useContext(NotificationContext);
@@ -72,6 +73,7 @@ export const WebformField = ({
     initialFieldValue: '',
     isDeleteAttachmentVisible: false,
     isDeleteRowVisible: false,
+    isDeletingAttachment: false,
     isDeletingRow: false,
     isDialogVisible: { deleteRow: false, uploadFile: false },
     isFileDialogVisible: false,
@@ -90,6 +92,7 @@ export const WebformField = ({
   const {
     initialFieldValue,
     isDeleteAttachmentVisible,
+    isDeletingAttachment,
     isFileDialogVisible,
     isLoadingData,
     isSubmiting,
@@ -119,13 +122,14 @@ export const WebformField = ({
   };
 
   const onConfirmDeleteAttachment = async () => {
+    webformFieldDispatch({ type: 'SET_IS_DELETING_ATTACHMENT', payload: true });
     try {
       await DatasetService.deleteAttachment({
         dataflowId,
         datasetId,
         fieldId: selectedFieldId,
         dataProviderId,
-        tableSchemaName: undefined,
+        tableSchemaName,
         fieldName: selectedFieldName,
         fileName: selectedFileName,
         recordId: selectedRecordId
@@ -134,6 +138,8 @@ export const WebformField = ({
       onToggleDeleteAttachmentDialogVisible(false);
     } catch (error) {
       console.error('WebformField - onConfirmDeleteAttachment.', error);
+    } finally {
+      webformFieldDispatch({ type: 'SET_IS_DELETING_ATTACHMENT', payload: false });
     }
   };
 
@@ -146,7 +152,7 @@ export const WebformField = ({
         providerId: dataProviderId,
         fileName,
         recordId,
-        tableSchemaName: undefined,
+        tableSchemaName,
         fieldName
       });
       DownloadFile(data, fileName);
@@ -460,9 +466,12 @@ export const WebformField = ({
             disabled={field?.readOnly || isViewMode || (updatingField.isUpdating && !isEmpty(field.value))}
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={
-              updatingField.isUpdating &&
               !isEmpty(field.value) &&
-              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              updatingField.isUpdating &&
+              field.recordId === updatingField.field?.recordId &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+              )
             }
             monthNavigator={true}
             onBlur={event => {
@@ -491,9 +500,12 @@ export const WebformField = ({
             disabled={field?.readOnly || isViewMode || updatingField.isUpdating}
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={
-              updatingField.isUpdating &&
               !isEmpty(field.value) &&
-              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              updatingField.isUpdating &&
+              field.recordId === updatingField.field?.recordId &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+              )
             }
             monthNavigator={true}
             onBlur={e => {
@@ -529,7 +541,11 @@ export const WebformField = ({
               isLoadingData={
                 isLoadingData ||
                 (updatingField.isUpdating &&
-                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                    updatingField.field?.fieldSchemaId ??
+                      updatingField.field?.fieldSchema ??
+                      updatingField.field?.fieldId
+                  ))
               }
               maxSelectedLabels={10}
               onChange={() => {
@@ -562,7 +578,12 @@ export const WebformField = ({
               isLoadingData={
                 isLoadingData ||
                 (updatingField.isUpdating &&
-                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                  field.recordId === updatingField.field?.recordId &&
+                  [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                    updatingField.field?.fieldSchemaId ??
+                      updatingField.field?.fieldSchema ??
+                      updatingField.field?.fieldId
+                  ))
               }
               onChange={event => {
                 const value =
@@ -597,7 +618,10 @@ export const WebformField = ({
             isLoadingData={
               isLoadingData ||
               (updatingField.isUpdating &&
-                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                field.recordId === updatingField.field?.recordId &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                  updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+                ))
             }
             maxSelectedLabels={10}
             onChange={() => {
@@ -628,7 +652,10 @@ export const WebformField = ({
             isLoadingData={
               isLoadingData ||
               (updatingField.isUpdating &&
-                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId))
+                field.recordId === updatingField.field?.recordId &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                  updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+                ))
             }
             onChange={event => {
               const value =
@@ -676,7 +703,10 @@ export const WebformField = ({
             id={field.fieldId || field.fieldSchemaId}
             isLoadingData={
               updatingField.isUpdating &&
-              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+              field.recordId === updatingField.field?.recordId &&
+              [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+              )
             }
             keyfilter={RecordUtils.getFilter(type)}
             onBlur={event => {
@@ -709,7 +739,10 @@ export const WebformField = ({
               id={field.fieldId || field.fieldSchemaId}
               isLoadingData={
                 updatingField.isUpdating &&
-                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(updatingField.fieldId)
+                field.recordId === updatingField.field?.recordId &&
+                [field.fieldSchemaId, field.fieldSchema, field.fieldId].includes(
+                  updatingField.field?.fieldSchemaId ?? updatingField.field?.fieldSchema ?? updatingField.field?.fieldId
+                )
               }
               onBlur={event => {
                 if (isNil(field.recordId)) onSaveField(option, event.target.value);
@@ -832,7 +865,7 @@ export const WebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
-                  tableSchemaName: undefined,
+                  tableSchemaName,
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
                   previousFileName: undefined
@@ -841,7 +874,7 @@ export const WebformField = ({
                   dataflowId,
                   datasetId,
                   fieldId: selectedFieldId,
-                  tableSchemaName: undefined,
+                  tableSchemaName,
                   fieldName: selectedFieldName,
                   recordId: selectedRecordId,
                   previousFileName: undefined,
@@ -853,7 +886,9 @@ export const WebformField = ({
       {isDeleteAttachmentVisible && (
         <ConfirmDialog
           classNameConfirm={'p-button-danger'}
+          disabledConfirm={isDeletingAttachment}
           header={`${resourcesContext.messages['deleteAttachmentHeader']}`}
+          iconConfirm={isDeletingAttachment ? 'spinnerAnimate' : 'check'}
           labelCancel={resourcesContext.messages['no']}
           labelConfirm={resourcesContext.messages['yes']}
           onConfirm={onConfirmDeleteAttachment}

@@ -183,3 +183,16 @@
 .closeButton {
   margin-left: 6px !important;
 }
+
+.ButtonsBar :global(.p-toolbar-group-right) {
+  padding: 0.1rem;
+
+  :global(.p-button) {
+    font-size: 0.82rem;
+    margin-top: 0.25rem;
+
+    :global(.p-button-icon) {
+      font-size: 0.82rem;
+    }
+  }
+}

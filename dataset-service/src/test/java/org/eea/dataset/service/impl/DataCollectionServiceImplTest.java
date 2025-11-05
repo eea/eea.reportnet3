@@ -425,7 +425,7 @@ public class DataCollectionServiceImplTest {
         .thenReturn(DatasetTypeEnum.EUDATASET).thenReturn(DatasetTypeEnum.TEST);
     DataSetMetabase datasetmetabase = new DataSetMetabase();
     datasetmetabase.setId(1L);
-    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(any(),
+    Mockito.when(dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderIdOrderById(any(),
         any())).thenReturn(Optional.of(datasetmetabase));
     Mockito.when(euDatasetRepository.findFirstByDatasetSchema(any()))
         .thenReturn(Optional.of(new EUDataset()));

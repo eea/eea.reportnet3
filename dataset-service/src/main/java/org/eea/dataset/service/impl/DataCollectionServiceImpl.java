@@ -1133,7 +1133,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
           datasetMetabaseService.getDatasetType(integrityDataCollection.getIdDatasetOrigin());
       if (DatasetTypeEnum.REPORTING.equals(typeDataset)) {
         Optional<DataSetMetabase> datasetMetabase =
-            dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderId(
+            dataSetMetabaseRepository.findFirstByDatasetSchemaAndDataProviderIdOrderById(
                 integrityDataCollection.getIdDatasetSchemaReferenced(),
                 integrityDataCollection.getDataProviderId());
         if (datasetMetabase.isPresent()) {

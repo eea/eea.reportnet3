@@ -3453,6 +3453,47 @@ public class FileTreatmentHelper implements DisposableBean {
             return isProcessStarted;
         }
 
+    public void convertParquetFileForProvider(Long datasetId, Long providerId, String tableSchemaId, String tableName, DatasetTypeEnum datasetType, Boolean etlExportV4, Long jobId, String providerOutDir) throws EEAException {
+
+      DataSetMetabaseVO dataset = datasetMetabaseService.findDatasetMetabase(datasetId);
+
+      try {
+        S3PathResolver s3PathResolver = new S3PathResolver(dataset.getDataflowId(), providerId, datasetId, tableName);
+        List<S3Object> exportFilenames;
+
+        if (DatasetTypeEnum.COLLECTION.equals(datasetType)) {
+          s3PathResolver.setPath(S3_TABLE_NAME_DC_PROVIDER_FOLDER_PATH);
+          exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+        } else if (DatasetTypeEnum.EUDATASET.equals(datasetType)) {
+          s3PathResolver.setPath(S3_EU_SNAPSHOT_TABLE_PATH);
+          exportFilenames = s3Helper.getFilenamesFromTableNames(s3PathResolver);
+
+          String dpFolder = s3Service.formatFolderName(providerId, S3_DATA_PROVIDER_PATTERN);
+
+          exportFilenames = exportFilenames.stream()
+              .filter(o -> {String k = o.key();
+                return k != null && (k.contains("/" + dpFolder + "/"));
+              }).collect(Collectors.toList());
+        } else {
+          throw new EEAException("Data provider codes are not supported by any Data Collection or EU datasets");
+        }
+
+        // No files for this provider then skip.
+        if (exportFilenames == null || exportFilenames.isEmpty()) {
+          return;
+        }
+
+        // Convert to CSV under the provider's folder.
+        new File(providerOutDir).mkdirs();
+        List<String> headers = getFieldsFromSchema(datasetId, tableSchemaId);
+        s3ConvertService.createCSVFileWithProviders(exportFilenames, tableName, datasetId, datasetType, headers, etlExportV4, jobId, providerOutDir);
+
+      } catch (Exception e) {
+        LOG.error("Error exporting table {} for dataset {} and provider {}", tableName, datasetId, providerId, e);
+        throw new EEAException(e);
+      }
+    }
+
         private void convertParquetToCSVinZIP(List<S3Object> exportFilenames, String tableName, Long datasetId, String tableSchemaId, ZipOutputStream out, DatasetTypeEnum datasetTypeEnum, Boolean etlExportV4) {
             try {
                 File csvFile;

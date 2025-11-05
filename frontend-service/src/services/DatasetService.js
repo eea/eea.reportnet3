@@ -508,6 +508,11 @@ export const DatasetService = {
 
   getAddUserText: async dataflowId => await DatasetRepository.getAddUserText(dataflowId),
 
+  getImportedFiles: async datasetId => await DatasetRepository.getImportedFiles(datasetId),
+
+  downloadImportedFile: async (fileName, datasetId, dataflowId) =>
+    await DatasetRepository.downloadImportedFile(fileName, datasetId, dataflowId),
+
   getSchema: async (dataflowId, datasetId) => {
     const datasetSchemaDTO = await DatasetRepository.getSchema(datasetId);
     const rulesDTO = await ValidationRepository.getAll(dataflowId, datasetSchemaDTO.data.idDataSetSchema);

@@ -81,6 +81,7 @@ export const DataViewer = ({
   isReferenceDataset,
   isReportingWebform,
   isTableDataRestorationInProgress,
+  isTableTop = false,
   onHideSelectGroupedValidation,
   onIsTableDataLoading,
   onLoadTableData,
@@ -1338,6 +1339,7 @@ export const DataViewer = ({
       <div className={styles.Table}>
         <DataTable
           contextMenuSelection={records.selectedRecord}
+          className={(isTableTop && 'dataviewer')}
           editable={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
           first={records.firstPageRecord}
           footer={
