@@ -58,6 +58,7 @@ import { getUrl } from 'repositories/_utils/UrlUtils';
 import { LocalUserStorageUtils } from 'services/_utils/LocalUserStorageUtils';
 import { TextUtils } from 'repositories/_utils/TextUtils';
 import dayjs from 'dayjs';
+import { ImportedFilesDialog } from 'views/DatasetDesigner/_components/ImportedFilesDialog';
 
 export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const navigate = useNavigate();
@@ -153,6 +154,7 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
   const [webformOptions, setWebformOptions] = useState([]);
   const [editedTables, setEditedTables] = useState({});
   const [tableImportedMetadata, setTableImportedMetadata] = useState({});
+  const [isImportedFilesDialogVisible, setIsImportedFilesDialogVisible] = useState(false);
 
   const { resetFiltersState: resetDatasetInfoFiltersState } = useFilters('datasetInfo');
   const { resetFiltersState: resetUserListFiltersState } = useFilters('userList');
@@ -1519,6 +1521,21 @@ export const Dataset = ({ isReferenceDatasetReferenceDataflow }) => {
             />
           </div>
           <div className="p-toolbar-group-right">
+            <Button
+              className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
+              icon="openFolder"
+              iconClasses={datasetHasErrors ? 'warning' : ''}
+              label={resourcesContext.messages['importedFiles']}
+              onClick={() => setIsImportedFilesDialogVisible(true)}
+            />
+            {isImportedFilesDialogVisible && (
+              <ImportedFilesDialog
+                dataflowId={dataflowId}
+                datasetId={datasetId}
+                isDialogVisible={isImportedFilesDialogVisible}
+                onCloseDialog={() => setIsImportedFilesDialogVisible(false)}
+              />
+            )}
             <DatasetValidateDialog
               disabled={
                 isIcebergCreated ||
