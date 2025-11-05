@@ -83,6 +83,7 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   bigData={bigData}
+                  isTableTop={true}
                   dataAreManuallyEditable={table.dataAreManuallyEditable}
                   dataflowType={dataflowType}
                   dataProviderId={dataProviderId}
