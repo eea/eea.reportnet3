@@ -1338,8 +1338,8 @@ export const DataViewer = ({
       {!bigData && <ContextMenu model={menu} ref={contextMenuRef} />}
       <div className={styles.Table}>
         <DataTable
-          contextMenuSelection={records.selectedRecord}
           className={(isTableTop && 'dataviewer')}
+          contextMenuSelection={records.selectedRecord}
           editable={(hasWritePermissions && !tableReadOnly) || (hasWritePermissions && isReferenceDataset)}
           first={records.firstPageRecord}
           footer={
