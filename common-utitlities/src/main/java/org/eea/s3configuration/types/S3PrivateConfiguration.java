@@ -47,7 +47,7 @@ public class S3PrivateConfiguration implements S3Configuration {
 
   private AwsBasicCredentials awsCredentials;
 
-  private static final Region s3Region = Region.US_EAST_1;
+  private static final Region s3Region = Region.EU_CENTRAL_1;
 
   @PostConstruct
   public void getCredentials() {
