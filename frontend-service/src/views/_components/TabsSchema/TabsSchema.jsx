@@ -83,7 +83,6 @@ export const TabsSchema = ({
               <div className={styles.tabsSchema}>
                 <DataViewer
                   bigData={bigData}
-                  isTableTop={true}
                   dataAreManuallyEditable={table.dataAreManuallyEditable}
                   dataflowType={dataflowType}
                   dataProviderId={dataProviderId}
@@ -99,6 +98,7 @@ export const TabsSchema = ({
                   isReferenceDataset={isReferenceDataset}
                   isReportingWebform={isReportingWebform}
                   isTableDataRestorationInProgress={isTableDataRestorationInProgress}
+                  isTableTop={true}
                   key={table.id}
                   levelErrorTypes={levelErrorTypes}
                   onHideSelectGroupedValidation={onHideSelectGroupedValidation}
