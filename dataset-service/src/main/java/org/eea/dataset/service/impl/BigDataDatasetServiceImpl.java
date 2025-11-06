@@ -2513,18 +2513,16 @@ public class BigDataDatasetServiceImpl implements BigDataDatasetService {
 
     List<DataProviderVO> givenProviders = new ArrayList<>();
     List<Long> providerIds = new ArrayList<>();
-
+    Long dataProviderGroupId = dataFlowControllerZuul.findDataProviderGroupIdById(dataflowId);
     // Get the providers that belong to the given codes.
     for (String code : codes) {
-      List<DataProviderVO> dataProviders = representativeControllerZuul.findDataProvidersByCode(code);
-
-      if (dataProviders.isEmpty()) {
+      DataProviderVO providerVO = representativeControllerZuul.findDataProviderByCodeAndGroupId(code, dataProviderGroupId);
+      if (providerVO == null) {
         LOG.error("The data provider {} does not exist", code);
         continue;
       }
-      DataProviderVO dataProviderVO = dataProviders.get(0);
-      givenProviders.add(dataProviderVO);
-      providerIds.add(dataProviderVO.getId());
+      givenProviders.add(providerVO);
+      providerIds.add(providerVO.getId());
     }
 
     if (givenProviders.isEmpty()) {
