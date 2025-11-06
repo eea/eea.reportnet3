@@ -13,21 +13,21 @@
     <packaging>pom</packaging>
     <version>3.0.0</version>
     <properties>
-        <api-gateway.version>v3.4-SANDBOX</api-gateway.version>
-        <communication.version>v3.4-SANDBOX</communication.version>
-        <collaboration.version>v3.4-SANDBOX</collaboration.version>
-        <dataflow.version>v3.4-SANDBOX</dataflow.version>
-        <dataset.version>v3.4-SANDBOX</dataset.version>
-        <document.version>v3.4-SANDBOX</document.version>
-        <frontend.version>v3.4-SANDBOX</frontend.version>
-        <indexsearch.version>v3.4-SANDBOX</indexsearch.version>
-        <inspire.version>v3.4-SANDBOX</inspire.version>
-        <recordstore.version>v3.4-SANDBOX</recordstore.version>
-        <ums.version>v3.4-SANDBOX</ums.version>
-        <validation.version>v3.4-SANDBOX</validation.version>
-        <common-interfaces.version>v3.4-SANDBOX</common-interfaces.version>
-        <common-utitlities.version>v3.4-SANDBOX</common-utitlities.version>
-        <rod.version>v3.4-SANDBOX</rod.version>
-        <orchestrator.version>v3.4-SANDBOX</orchestrator.version>
+        <api-gateway.version>v3.4-AWSNKP</api-gateway.version>
+        <communication.version>v3.4-AWSNKP</communication.version>
+        <collaboration.version>v3.4-AWSNKP</collaboration.version>
+        <dataflow.version>v3.4-AWSNKP</dataflow.version>
+        <dataset.version>v3.4-AWSNKP</dataset.version>
+        <document.version>v3.4-AWSNKP</document.version>
+        <frontend.version>v3.4-AWSNKP</frontend.version>
+        <indexsearch.version>v3.4-AWSNKP</indexsearch.version>
+        <inspire.version>v3.4-AWSNKP</inspire.version>
+        <recordstore.version>v3.4-AWSNKP</recordstore.version>
+        <ums.version>v3.4-AWSNKP</ums.version>
+        <validation.version>v3.4-AWSNKP</validation.version>
+        <common-interfaces.version>v3.4-AWSNKP</common-interfaces.version>
+        <common-utitlities.version>v3.4-AWSNKP</common-utitlities.version>
+        <rod.version>v3.4-AWSNKP</rod.version>
+        <orchestrator.version>v3.4-AWSNKP</orchestrator.version>
     </properties>
 </project>
