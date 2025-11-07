@@ -197,6 +197,12 @@ export const ImportedFilesDialog = ({ datasetId, dataflowId, onCloseDialog, isDi
     </div>
   );
 
+  const renderInfoMessage = () => {
+    return (
+      <span className={styles.infoMessage}>{resourcesContext.messages['importedFilesInfoMessage']}</span>
+    );
+  };
+
   const dialogFooter = (
     <Button
       className="p-button-secondary p-button-animated-blink"
@@ -261,6 +267,7 @@ export const ImportedFilesDialog = ({ datasetId, dataflowId, onCloseDialog, isDi
       modal
       onHide={onCloseDialog}
       visible={isDialogVisible}>
+      {renderInfoMessage()}
       {renderDialogContent()}
     </Dialog>
   );
