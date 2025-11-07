@@ -867,6 +867,7 @@
     "importInProgress": "Import in progress",
     "importLeadReporters": "Import lead reporters",
     "importedFiles": "Imported files",
+    "importedFilesInfoMessage": "The list displays the import files that were used to add data to this dataset. These files are not part of the reporting delivery.",
     "importLeadReportersTooltip": "Import lead reporters from a CSV file (result file is downloaded afterwards)",
     "importAndReplaceLeadReporters": "Import and replace lead reporters",
     "importAndReplaceLeadReportersTooltip": "Import and replace lead reporters from a CSV file (result file is downloaded afterwards)",
