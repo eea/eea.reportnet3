@@ -2005,7 +2005,6 @@ export const DatasetDesigner = ({ isReferenceDataset = false }) => {
               <Button
                 className="p-button-rounded p-button-secondary-transparent p-button-animated-blink"
                 icon="openFolder"
-                iconClasses={designerState.datasetStatistics.datasetErrors ? 'warning' : ''}
                 label={resourcesContext.messages['importedFiles']}
                 onClick={() => designerDispatch({ type: 'TOGGLE_IMPORTED_FILES_VIEW', payload: true })}
               />
